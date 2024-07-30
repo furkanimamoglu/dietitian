@@ -1,0 +1,21 @@
+{
+  "database_connection": {
+    "host": "localhost",
+    "database": "dietitian_db",
+    "user" : "postgres",
+    "password" : "12345678"
+  },
+
+  "database_options": {
+    "logging": false
+  },
+
+  "server": {
+    "port": 3000
+  },
+
+  "ddl": "create-drop",
+
+  "secretkey": "furkantopsecret"
+
+}
