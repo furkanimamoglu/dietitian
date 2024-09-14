@@ -12,8 +12,7 @@ import Footer from './Components/Footer/Footer'
 import Sidebar from './Components/Sidebar/Sidebar'
 
 // Routes
-import Dashboard from "./Routes/Dashboard/Dashboard"
-import Clients from "./Routes/Clients/Clients"
+import Routing from './routes/Routing'
 
 export default function App() {
     return (
@@ -23,11 +22,7 @@ export default function App() {
                 <Header />
                 <Sidebar />
                 <Box flex="1">
-                        <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/clients" element={<Clients />} />
-                        </Routes>
+                    <Routing />
                 </Box>
                 <Footer />
             </Box>
