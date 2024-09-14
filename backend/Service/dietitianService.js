@@ -32,33 +32,36 @@ const DietitianService = {
         } catch (error) {
             throw new Exception(error.message,400)
         }
-
     },
 
     register: async (username, password, email, ipAddress) => {
 
         if(username === undefined || password === undefined || email === undefined)
         {
-            throw new Exception('Tüm alanlar doldurulmalıdır.', 400, true)
+            throw new Exception('Tüm alanlar doldurulmalıdır.', 400, true);
         }
         else {
             try {
-                let token = jwt.sign({username: username, role: DIETITIAN}, config.secretkey);
-                return await Dietitian.create({
+                const result = await Dietitian.create({
                     username: username,
                     password: password,
                     email: email,
                     role: DIETITIAN,
-                    ipAddress: ipAddress,
-                    token: token
+                    ipAddress: ipAddress
+                }).then(dietitian => {
+                    const token = jwt.sign({id: dietitian.id, username: dietitian.username, role: DIETITIAN}, config.secretkey);
                 });
+                return {
+                    result: result,
+                    token: this.token
+                }
             } catch (error) {
-                throw new Exception(error.message,400)
+                throw new Exception(error.message, 400);
             }
         }
     },
 
-    delete: async (id) =>{
+    delete: async (id) => {
         try {
             await Dietitian.findByPk(id)
                 .then(dietitian =>
@@ -83,10 +86,9 @@ const DietitianService = {
         }
     },
 
-    // Dietitian Functionalities
     registerClient: async (username, password, email, phoneNumber) => {
         try {
-            if(username === undefined || password === undefined || email === undefined || phoneNumber === undefined) {
+            if(!username || !password || !email || !phoneNumber) {
                 throw new Exception('Tüm alanlar doldurulmalıdır.', 400, true);
             }
             let token = jwt.sign({username: username, role: DIETITIAN}, config.secretkey);
@@ -94,6 +96,7 @@ const DietitianService = {
                 username: username,
                 password: password,
                 email: email,
+                phoneNumber: phoneNumber,
                 role: DIETITIAN,
                 token: token
             });
@@ -108,7 +111,7 @@ const DietitianService = {
                 where: {
                     username: clientUsername
                 }
-            })
+            });
         } catch (error) {
             throw new Exception(error.message, 400);
         }

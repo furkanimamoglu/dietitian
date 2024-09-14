@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
-import './Register.css'
-import config from "../config.js";
+import './Login.css'
+import config from "../../config.js";
 
-function Register() {
+function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        fetch(  config.apiUrl+"dietitian/register", {
+        fetch(  config.apiUrl+"dietitian/login", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -20,13 +18,11 @@ function Register() {
             body: JSON.stringify({
                 username: username,
                 password: password,
-                email: email,
-                phone: phone
             }),
         })
             .then(data => {
-                if (data) {
-                    setMessage('Kayıt olma işlemi başarılı.');
+                if (data.status) {
+                    setMessage('Giriş başarılı!'+data.status);
                 } else {
                     setMessage('Kullanıcı adı veya şifre yanlış.');
                 }
@@ -38,9 +34,9 @@ function Register() {
     };
 
     return (
-        <div className="register-container">
-            <form onSubmit={handleSubmit} className="register-form">
-                <h2>Kayıt Ol</h2>
+        <div className="login-container">
+            <form onSubmit={handleSubmit} className="login-form">
+                <h2>Login</h2>
                 {message && <p>{message}</p>}
                 <div>
                     <label>Kullanıcı Adı:</label>
@@ -51,22 +47,6 @@ function Register() {
                     />
                 </div>
                 <div>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Telefon Numarası:</label>
-                    <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                    />
-                </div>
-                <div>
                     <label>Şifre:</label>
                     <input
                         type="password"
@@ -74,10 +54,10 @@ function Register() {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
-                <button type="submit">Kayıt Ol</button>
+                <button type="submit">Giriş Yap</button>
             </form>
         </div>
     );
 }
 
-export default Register;
+export default Login;

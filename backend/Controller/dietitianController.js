@@ -57,9 +57,10 @@ exports.register = async (req,res) => {
     }
 };
 
+// Dietitian's Client Operations
 exports.registerClient = async (req,res) => {
     try {
-        const { username, password, email, phoneNumber } = req.body;
+        const { username, password, email, phoneNumber, name, surname } = req.body;
 
         if(!username || !password || !email || !phoneNumber){
             return res.status(400).json({
@@ -68,7 +69,29 @@ exports.registerClient = async (req,res) => {
             });
         }
 
-        const result = await DietitianService.registerClient(username, password, email, phoneNumber);
+        const result = await DietitianService.registerClient(username, password, email, phoneNumber, name, surname);
+
+        res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.status || 500).json({
+            showOnScreen: error.showOnScreen,
+            message: error.message
+        });
+    }
+}
+
+exports.getMyClients = async (req,res) => {
+    try {
+        const { username, password, email, phoneNumber, name, surname } = req.body;
+
+        if(!username || !password || !email || !phoneNumber){
+            return res.status(400).json({
+                showOnScreen: true,
+                message: 'All parameters must be filled.'
+            });
+        }
+
+        const result = await DietitianService.registerClient(username, password, email, phoneNumber, name, surname);
 
         res.status(200).json(result);
     } catch (error) {
