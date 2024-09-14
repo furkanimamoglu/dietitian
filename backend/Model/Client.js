@@ -12,7 +12,10 @@ const Client = sequelize.define('Client', {
             allowNull: false,
             primaryKey: true
         },
-        dietitian_id: DataTypes.INTEGER,
+        dietitian_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         username: {
             type: DataTypes.STRING,
             allowNull: false,
