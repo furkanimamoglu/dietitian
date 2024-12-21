@@ -4,20 +4,18 @@ import {
     createTheme,
     responsiveFontSizes,
 } from '@mui/material/styles';
-import { useSelector } from 'react-redux';
-import { selectMode } from '../features/user/userSlice';
 
 function AppThemeProvider({ children }) {
-    const mode = useSelector(selectMode);
+    const mode = 'light';
     const theme = responsiveFontSizes(
         createTheme({
             palette: {
                 mode,
                 primary: {
-                    main: '#1c9c7c',
+                    main: '#3d8a3d',
                 },
                 secondary: {
-                    main: '#9DF3C4',
+                    main: '#e8f5e9',
                 },
                 Ink: {
                     Darkest: '#000000',
@@ -51,6 +49,7 @@ function AppThemeProvider({ children }) {
                     Lighter: '#7FF77F',
                     Lightest: '#E5FFE5',
                 },
+
                 background: {
                     default: mode === 'dark' ? '#000000' : '#FCFBFA',
                     opposite: mode === 'dark' ? '#FCFBFA' : '#000000',

@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
-import './Login.css'
+import { useNavigate } from 'react-router-dom';
+import './Login.css';
 import config from "../../config.js";
+import { Box, Paper, Avatar, Typography, Button, Link, TextField } from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { green } from "@mui/material/colors";
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        fetch(  config.apiUrl+"dietitian/login", {
+        fetch(config[config.environment].apiUrl + "/dietitian/login", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -20,43 +25,97 @@ function Login() {
                 password: password,
             }),
         })
-            .then(data => {
-                if (data.status) {
-                    setMessage('Giriş başarılı!'+data.status);
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
                 } else {
-                    setMessage('Kullanıcı adı veya şifre yanlış.');
+                    throw new Error('Kullanıcı adı veya şifre yanlış.');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                setMessage('Hata: Bir sorun oluştu, teknik ekip ile görüşün.');
+            .then((data) => {
+                const token = data.token;
+                localStorage.setItem('token', 'Bearer ' + token);
+                setMessage('Giriş başarılı! Yönlendiriliyor...');
+                setTimeout(() => navigate('/dashboard'), 2000);
+            })
+            .catch((error) => {
+                console.error('Exception:', error);
+                setMessage(error.message || 'Bir sorun oluştu, teknik ekip ile görüşün.');
             });
     };
 
     return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit} className="login-form">
-                <h2>Login</h2>
-                {message && <p>{message}</p>}
-                <div>
-                    <label>Kullanıcı Adı:</label>
-                    <input
-                        type="text"
+        <Box
+            sx={{
+                height: "94vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: green[50],
+            }}
+        >
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: 4,
+                    width: 300,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                }}
+            >
+                <Avatar sx={{ bgcolor: green[500], mb: 2 }}>
+                    <LockOutlinedIcon />
+                </Avatar>
+                <Typography variant="h5" gutterBottom>
+                    Diyetisyen Girişi
+                </Typography>
+                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                    <TextField
+                        label="Kullanıcı adı"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ mb: 2 }}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
-                </div>
-                <div>
-                    <label>Şifre:</label>
-                    <input
+                    <TextField
+                        label="Şifre"
                         type="password"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ mb: 2 }}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                </div>
-                <button type="submit">Giriş Yap</button>
-            </form>
-        </div>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        sx={{
+                            backgroundColor: green[500],
+                            "&:hover": { backgroundColor: green[700] },
+                        }}
+                    >
+                        Giriş Yap
+                    </Button>
+                </form>
+                {message && (
+                    <Typography
+                        variant="body2"
+                        color={message.includes('başarılı') ? 'green' : 'red'}
+                        sx={{ mt: 2 }}
+                    >
+                        {message}
+                    </Typography>
+                )}
+                <Typography variant="body2" sx={{ mt: 2 }}>
+                    <Link href="/forgotpassword">
+                        Şifrenizi mi unuttunuz?
+                    </Link>
+                </Typography>
+            </Paper>
+        </Box>
     );
 }
 

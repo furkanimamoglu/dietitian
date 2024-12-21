@@ -3,13 +3,13 @@ const config = {
     environment: "dev",
 
     dev: {
-        apiUrl: 'http://localhost:3000/',
-        websiteName: "WebsiteName",
-        footerText: "2024 Development Website"
+        apiUrl: 'http://localhost:3000',
+        websiteName: "Diyetisyenim",
+        footerText: "2024 Diyetisyenim"
     },
 
     prod: {
-        apiUrl: '',
+        apiUrl: 'http://localhost:3000',
         websiteName: "Diyetisyenim",
         footerText: "2024 Diyetisyen Uygulaması"
     }

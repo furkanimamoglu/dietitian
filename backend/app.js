@@ -17,12 +17,11 @@ require('./Model/Appointment');
 const app = express();
 
 // Routes
-const dietitianRoute = require('./Routes/dietitianRoutes');
-const systemRoute = require('./Routes/systemRoutes');
+const dietitianRoutes = require('./Routes/dietitianRoutes');
+const clientRoutes = require('./Routes/clientRoutes');
+const systemRoutes = require('./Routes/systemRoutes');
 
-// UrlEncoded header belirliyor. www-form-urlencoded
-// app.use(bodyParser.urlencoded());
-app.use(bodyParser.json()); // application/json
+app.use(bodyParser.json());
 
 app.use((req,res,next) => {
     res.setHeader('Access-Control-Allow-Origin','*');
@@ -32,8 +31,9 @@ app.use((req,res,next) => {
 });
 
 // Routers
-app.use('/dietitian', dietitianRoute);
-app.use('/system', systemRoute);
+app.use('/dietitian', dietitianRoutes);
+app.use('/client', clientRoutes);
+app.use('/system', systemRoutes);
 
 // Working Directory
 try {
