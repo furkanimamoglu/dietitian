@@ -2,23 +2,120 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import Header from "../../components/Header/Header.jsx";
 import Navbar from "../../components/Navbar/Navbar.jsx";
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid2 as Grid,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField
-} from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2 as Grid, TextField } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import {Cancel, CheckCircle, Delete, Edit, GroupAdd} from '@mui/icons-material';
+import MaleIcon from "@mui/icons-material/Male";
+import FemaleIcon from "@mui/icons-material/Female";
+import {green, red, blue, pink} from "@mui/material/colors";
+
+const handleEdit = (id) => {
+    console.log('Edit item with ID:', id);
+    // Burada düzenleme işlemi yapılabilir.
+};
+
+const handleDelete = (id) => {
+    setRows(rows.filter((row) => row.id !== id));
+    console.log('Delete item with ID:', id);
+    // Burada silme işlemi yapılabilir.
+};
+
+const rows = [
+    {
+        id: 1,
+        name: "furkimClient",
+        surname: "furkimClient",
+        email: "furkimClient@gmail.com",
+        phoneNumber: "05075280653",
+        status: "aktif",
+        gender: "K"
+    },
+    {
+        id: 2,
+        name: "tester31",
+        surname: "furkimClient",
+        email: "tester31@gmail.com",
+        phoneNumber: "05075280653",
+        status: "aktif",
+        gender: "E",
+    },
+    {
+        id: 3,
+        name: "tester31",
+        surname: "furkimClient",
+        email: "tester31@gmail.com",
+        phoneNumber: "05075280653",
+        status: "inaktif",
+        gender: "E",
+    },
+];
+
+
+const columns = [
+    { field: "id", headerName: "ID", width: 70 },
+    { field: "name", headerName: "İsim", width: 150, editable: true},
+    { field: "surname", headerName: "Soyad", width: 150, editable: true },
+    { field: "email", headerName: "Email", width: 200, editable: true },
+    { field: "phoneNumber", headerName: "Telefon No", width: 150, editable: true  },
+    {
+        field: "status",
+        headerName: "Durum",
+        width: 150,
+        editable: true,
+        type: 'singleSelect',
+        valueOptions: ["aktif", "inaktif"],
+        renderCell: (params) => (
+            params.value === "aktif" ? (
+                <Box sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                }}>
+                    <CheckCircle sx={{}} style={{ color: green[500] }} />
+                </Box>
+            ) : params.value === "inaktif" ? (
+                <Box sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                }}>
+                    <Cancel style={{ color: red[500] }} />
+                </Box>
+            ) : null
+        ),
+    },
+    {
+        field: "gender",
+        headerName: "Cinsiyet",
+        width: 150,
+        type: 'singleSelect',
+        valueOptions: ['Erkek', 'Kadın', 'Attack Helicopter'],
+        editable: true,
+        renderCell: (params) => (
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                }}
+            >
+                {
+                    params.value === "E" ? (
+                        <MaleIcon style={{ color: blue[500] }} />
+                    ) : params.value === "K" ? (
+                        <FemaleIcon style={{ color: pink[500] }} />
+                    ) : null
+                }
+            </Box>
+        ),
+    },
+];
 
 
 export default function Danisan() {
@@ -26,7 +123,7 @@ export default function Danisan() {
 
     const [open, setOpen] = useState(false);
 
-    // Yeni Danışan
+    // Yeni Danışan Oluştur Popup
     const openCreatePopup = () => {
         setOpen(true);
     };
@@ -40,6 +137,7 @@ export default function Danisan() {
         console.log("Form submitted");
         closeCreatePopup();
     };
+
 
     // API'den veri çekme
     useEffect(() => {
@@ -67,95 +165,7 @@ export default function Danisan() {
                     >
                         Danışan Ekle
                     </Button>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f5f5f5',
-                                        color: '#000'
-                                    }}>İsim</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f5f5f5',
-                                        color: '#000'
-                                    }}>Soyad</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f5f5f5',
-                                        color: '#000'
-                                    }}>Yaş</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f5f5f5',
-                                        color: '#000'
-                                    }}>Mail</TableCell>
-                                    <TableCell sx={{fontWeight: 'bold', backgroundColor: '#f5f5f5', color: '#000'}}>Telefon
-                                        Numarası</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f5f5f5',
-                                        color: '#000'
-                                    }}>Durum</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 'bold',
-                                        backgroundColor: '#f5f5f5',
-                                        color: '#000'
-                                    }}>İşlemler</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {
-                                    clients.map(client =>
-                                        (
-                                            <TableRow key={client.id}>
-                                                <TableCell>-</TableCell>
-                                                <TableCell>-</TableCell>
-                                                <TableCell>-</TableCell>
-                                                <TableCell>{client.email}</TableCell>
-                                                <TableCell>{client.phoneNumber}</TableCell>
-                                                <TableCell>
-                                                    {
-                                                        client.status === "true" ? (
-                                                            <CheckCircle style={{color: 'green'}}/>
-                                                        ) : (
-                                                            <Cancel style={{color: 'red'}}/>
-                                                        )
-                                                    }
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        sx={{marginRight: 1}}
-                                                        variant="outlined"
-                                                        color="primary"
-                                                        startIcon={<Edit/>}
-                                                    >
-                                                        Düzenle
-                                                    </Button>
-                                                    <Button
-                                                        sx={{marginRight: 1}}
-                                                        variant="outlined"
-                                                        color="warning"
-                                                        startIcon={<Cancel/>}
-                                                    >
-                                                        Inaktif Yap
-                                                    </Button>
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="error"
-                                                        startIcon={<Delete/>}
-                                                    >
-                                                        Sil
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    )
-                                }
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <DataGrid rows={rows} columns={columns} pageSize={5} editable: true />
                 </Grid>
             </Grid>
 
