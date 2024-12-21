@@ -1,9 +1,9 @@
 const ClientService = require("../Service/clientService");
 
 class ClientController {
-    async login(req,res) {
+    async login(req, res) {
         try {
-            const { username, password } = req.body;
+            const {username, password} = req.body;
 
             const client = await ClientService.login(username, password);
 

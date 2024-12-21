@@ -1,5 +1,5 @@
 // Libraries
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
 const Client = require('./Client');
@@ -78,7 +78,7 @@ const Dietitian = sequelize.define('Dietitian', {
 );
 
 Dietitian.hasMany(Client, {
-     foreignKey: "dietitian_id"
+    foreignKey: "dietitian_id"
 });
 
 Dietitian.hasMany(Exercise, {
@@ -89,11 +89,11 @@ Dietitian.hasMany(Recipe, {
     foreignKey: "dietitian_id"
 });
 
-Dietitian.hasMany(Appointment,{
+Dietitian.hasMany(Appointment, {
     foreignKey: "dietitian_id"
 });
 
-Dietitian.hasMany(AnamnesQuestion,{
+Dietitian.hasMany(AnamnesQuestion, {
     foreignKey: "dietitian_id"
 });
 

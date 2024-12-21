@@ -6,7 +6,7 @@ class DietitianController {
 
     async login(req, res) {
         try {
-            const { username, password } = req.body;
+            const {username, password} = req.body;
 
             if (!username || !password) {
                 return res.status(400).json({
@@ -32,7 +32,7 @@ class DietitianController {
 
     async register(req, res) {
         try {
-            const { username, password, email } = req.body;
+            const {username, password, email} = req.body;
             const ipAddress = req.ip;
 
             if (!username || !password || !email || !ipAddress) {
@@ -59,7 +59,7 @@ class DietitianController {
 
     async registerClient(req, res) {
         try {
-            const { username, password, email, phoneNumber, name, surname } = req.body;
+            const {username, password, email, phoneNumber, name, surname} = req.body;
 
             if (!username || !password || !email || !phoneNumber) {
                 return res.status(400).json({
@@ -81,7 +81,7 @@ class DietitianController {
 
     async deleteClient(req, res) {
         try {
-            const { clientUsername } = req.body;
+            const {clientUsername} = req.body;
 
             if (!clientUsername) {
                 return res.status(400).json({

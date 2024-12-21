@@ -1,5 +1,5 @@
 // Libraries
-const { Op } = require("sequelize");
+const {Op} = require("sequelize");
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 
@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const Exception = require('../Exception/Exception');
 
 // Enums
-const { DIETITIAN } = require("../Enum/Role");
+const {DIETITIAN} = require("../Enum/Role");
 
 // Models
 const Dietitian = require('../Model/Dietitian');
@@ -29,12 +29,12 @@ class DietitianService {
             }
 
             const token = jwt.sign(
-                { username: dietitianInfo.username, role: dietitianInfo.role },
+                {username: dietitianInfo.username, role: dietitianInfo.role},
                 config.secretkey,
-                { expiresIn: '24h' }
+                {expiresIn: '24h'}
             );
 
-            return { ...dietitianInfo.dataValues, token: token };
+            return {...dietitianInfo.dataValues, token: token};
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -55,7 +55,7 @@ class DietitianService {
             });
 
             const token = jwt.sign(
-                { id: dietitian.id, username: dietitian.username, role: DIETITIAN },
+                {id: dietitian.id, username: dietitian.username, role: DIETITIAN},
                 config.secretkey
             );
 
@@ -90,7 +90,7 @@ class DietitianService {
 
         try {
             const token = jwt.sign(
-                { username: username, role: DIETITIAN },
+                {username: username, role: DIETITIAN},
                 config.secretkey
             );
 
@@ -131,7 +131,7 @@ class DietitianService {
     async getMyAllClients(dietitianId) {
         try {
             const dietitian = await Dietitian.findOne({
-                where: { id: dietitianId },
+                where: {id: dietitianId},
                 include: [{
                     model: Client,
                     as: 'Clients',

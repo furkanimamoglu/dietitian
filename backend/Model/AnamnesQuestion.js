@@ -1,5 +1,5 @@
 // Libraries
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
 const Anamnes = require('./Anamnes');
@@ -22,7 +22,7 @@ const AnamnesQuestion = sequelize.define('AnamnesQuestion', {
     }
 );
 
-AnamnesQuestion.hasMany(Anamnes,{
+AnamnesQuestion.hasMany(Anamnes, {
     foreignKey: "anamnes_question_id"
 });
 
