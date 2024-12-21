@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import {Route, Routes} from 'react-router-dom';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
@@ -11,21 +11,21 @@ export default function Routing() {
     return (
         <Routes>
             {/* Diyetisyen Routes */}
-            <Route path="/dashboard/*" element={<Dashboard />} />
-            <Route path="/danisan/*" element={<Danisan />} />
-            <Route path="/login/*" element={<Login />} />
-            <Route path="/register/*" element={<Register />} />
-            <Route path="/forgotpassword/*" element={<ForgotPassword />} />
+            <Route path="/dashboard/*" element={<Dashboard/>}/>
+            <Route path="/danisan/*" element={<Danisan/>}/>
+            <Route path="/login/*" element={<Login/>}/>
+            <Route path="/register/*" element={<Register/>}/>
+            <Route path="/forgotpassword/*" element={<ForgotPassword/>}/>
 
             {/* Error Routes */}
-            <Route path="/*" element={ExceptionPage(404)} />
-            <Route path="/400" element={ExceptionPage(400)} />
-            <Route path="/401" element={ExceptionPage(401)} />
-            <Route path="/403" element={ExceptionPage(403)} />
-            <Route path="/500" element={ExceptionPage(500)} />
-            <Route path="/502" element={ExceptionPage(502)} />
-            <Route path="/503" element={ExceptionPage(503)} />
-            <Route path="/504" element={ExceptionPage(504)} />
+            <Route path="/*" element={ExceptionPage(404)}/>
+            <Route path="/400" element={ExceptionPage(400)}/>
+            <Route path="/401" element={ExceptionPage(401)}/>
+            <Route path="/403" element={ExceptionPage(403)}/>
+            <Route path="/500" element={ExceptionPage(500)}/>
+            <Route path="/502" element={ExceptionPage(502)}/>
+            <Route path="/503" element={ExceptionPage(503)}/>
+            <Route path="/504" element={ExceptionPage(504)}/>
         </Routes>
     );
 }

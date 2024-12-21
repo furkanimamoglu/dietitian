@@ -7,7 +7,7 @@ import './main.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <AppThemeProvider>
-            <App />
+            <App/>
         </AppThemeProvider>
     </React.StrictMode>,
 );

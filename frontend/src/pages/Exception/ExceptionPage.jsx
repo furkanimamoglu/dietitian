@@ -10,8 +10,8 @@ export default function ExceptionPage(statusCode) {
         case 400:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "90vh",
@@ -40,8 +40,8 @@ export default function ExceptionPage(statusCode) {
         case 401:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -70,8 +70,8 @@ export default function ExceptionPage(statusCode) {
         case 403:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -100,7 +100,7 @@ export default function ExceptionPage(statusCode) {
         case 404:
             return (
                 <>
-                    <Navbar />
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100%",
@@ -129,8 +129,8 @@ export default function ExceptionPage(statusCode) {
         case 500:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -159,8 +159,8 @@ export default function ExceptionPage(statusCode) {
         case 502:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -189,8 +189,8 @@ export default function ExceptionPage(statusCode) {
         case 503:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -210,8 +210,8 @@ export default function ExceptionPage(statusCode) {
                                 alignItems: "center",
                             }}
                         >
-                    <h1>503 Service Unavailable</h1>
-                    <p>The server is currently unavailable (overloaded or down). Please try again later.</p>
+                            <h1>503 Service Unavailable</h1>
+                            <p>The server is currently unavailable (overloaded or down). Please try again later.</p>
                         </Paper>
                     </Box>
                 </>
@@ -219,8 +219,8 @@ export default function ExceptionPage(statusCode) {
         case 504:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -240,8 +240,8 @@ export default function ExceptionPage(statusCode) {
                                 alignItems: "center",
                             }}
                         >
-                    <h1>504 Gateway Timeout</h1>
-                    <p>The server did not respond in time. Please try again later.</p>
+                            <h1>504 Gateway Timeout</h1>
+                            <p>The server did not respond in time. Please try again later.</p>
                         </Paper>
                     </Box>
                 </>
@@ -249,8 +249,8 @@ export default function ExceptionPage(statusCode) {
         default:
             return (
                 <>
-                    <Header />
-                    <Navbar />
+                    <Header/>
+                    <Navbar/>
                     <Box
                         sx={{
                             height: "100vh",
@@ -270,8 +270,8 @@ export default function ExceptionPage(statusCode) {
                                 alignItems: "center",
                             }}
                         >
-                    <h1>{statusCode} Error</h1>
-                    <p>An unexpected error occurred. Please try again later.</p>
+                            <h1>{statusCode} Error</h1>
+                            <p>An unexpected error occurred. Please try again later.</p>
                         </Paper>
                     </Box>
                 </>

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import './Login.css';
 import config from "../../config.js";
-import { Box, Paper, Avatar, Typography, Button, Link, TextField } from "@mui/material";
+import {Avatar, Box, Button, Link, Paper, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { green } from "@mui/material/colors";
+import {green} from "@mui/material/colors";
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -64,18 +64,18 @@ function Login() {
                     alignItems: "center",
                 }}
             >
-                <Avatar sx={{ bgcolor: green[500], mb: 2 }}>
-                    <LockOutlinedIcon />
+                <Avatar sx={{bgcolor: green[500], mb: 2}}>
+                    <LockOutlinedIcon/>
                 </Avatar>
                 <Typography variant="h5" gutterBottom>
                     Diyetisyen Girişi
                 </Typography>
-                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                <form onSubmit={handleSubmit} style={{width: '100%'}}>
                     <TextField
                         label="Kullanıcı adı"
                         variant="outlined"
                         fullWidth
-                        sx={{ mb: 2 }}
+                        sx={{mb: 2}}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
@@ -84,7 +84,7 @@ function Login() {
                         type="password"
                         variant="outlined"
                         fullWidth
-                        sx={{ mb: 2 }}
+                        sx={{mb: 2}}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
@@ -94,7 +94,7 @@ function Login() {
                         fullWidth
                         sx={{
                             backgroundColor: green[500],
-                            "&:hover": { backgroundColor: green[700] },
+                            "&:hover": {backgroundColor: green[700]},
                         }}
                     >
                         Giriş Yap
@@ -104,12 +104,12 @@ function Login() {
                     <Typography
                         variant="body2"
                         color={message.includes('başarılı') ? 'green' : 'red'}
-                        sx={{ mt: 2 }}
+                        sx={{mt: 2}}
                     >
                         {message}
                     </Typography>
                 )}
-                <Typography variant="body2" sx={{ mt: 2 }}>
+                <Typography variant="body2" sx={{mt: 2}}>
                     <Link href="/forgotpassword">
                         Şifrenizi mi unuttunuz?
                     </Link>

@@ -5,7 +5,7 @@ import Header from "../Header/Header.jsx";
 export default function Default(props) {
     return (
         <>
-            <Header />
+            <Header/>
             {props.children}
         </>
     );

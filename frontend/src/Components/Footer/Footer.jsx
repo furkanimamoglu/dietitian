@@ -8,7 +8,7 @@ import config from '../../config.js'
 
 export default function Footer() {
     return (
-        <footer style={{ marginTop: 'auto', padding: '1rem', backgroundColor: '#f5f5f5' }}>
+        <footer style={{marginTop: 'auto', padding: '1rem', backgroundColor: '#f5f5f5'}}>
             <Container>
                 <Typography variant="body2" color="textSecondary" align="center">
                     &copy; {config[config.environment].footerText}
