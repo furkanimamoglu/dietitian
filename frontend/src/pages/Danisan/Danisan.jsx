@@ -93,7 +93,7 @@ const columns = [
         headerName: "Cinsiyet",
         width: 150,
         type: 'singleSelect',
-        valueOptions: ['Erkek', 'Kadın', 'Attack Helicopter'],
+        valueOptions: ['Erkek', 'Kadın'],
         editable: true,
         renderCell: (params) => (
             <Box
