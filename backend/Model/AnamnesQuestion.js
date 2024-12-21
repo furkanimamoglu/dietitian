@@ -22,8 +22,4 @@ const AnamnesQuestion = sequelize.define('AnamnesQuestion', {
     }
 );
 
-AnamnesQuestion.hasMany(Anamnes,{
-    foreignKey: "anamnes_question_id"
-});
-
 module.exports = AnamnesQuestion;
