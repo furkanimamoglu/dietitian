@@ -77,28 +77,4 @@ const Dietitian = sequelize.define('Dietitian', {
     }
 );
 
-Dietitian.hasMany(Client, {
-     foreignKey: "dietitian_id"
-});
-
-Dietitian.hasMany(Exercise, {
-    foreignKey: "dietitian_id"
-});
-
-Dietitian.hasMany(Recipe, {
-    foreignKey: "dietitian_id"
-});
-
-Dietitian.hasMany(Appointment,{
-    foreignKey: "dietitian_id"
-});
-
-Dietitian.hasMany(AnamnesQuestion,{
-    foreignKey: "dietitian_id"
-});
-
-Dietitian.hasOne(DietitianOption, {
-    foreignKey: "dietitian_id"
-});
-
 module.exports = Dietitian;

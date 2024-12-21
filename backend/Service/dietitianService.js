@@ -10,8 +10,7 @@ const Exception = require('../Exception/Exception');
 const { DIETITIAN } = require("../Enum/Role");
 
 // Models
-const Dietitian = require('../Model/Dietitian');
-const Client = require('../Model/Client');
+const {Dietitian, Client} = require('../Model/MainModel')
 
 class DietitianService {
 
