@@ -119,8 +119,6 @@ const columns = [
 
 
 export default function Danisan() {
-    const [clients, setClients] = useState([]);
-
     const [open, setOpen] = useState(false);
 
     // Yeni Danışan Oluştur Popup
