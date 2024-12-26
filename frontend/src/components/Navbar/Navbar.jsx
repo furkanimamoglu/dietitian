@@ -20,8 +20,7 @@ export default function Navbar() {
     return (
         <AppBar sx={{backgroundColor: 'rgb(238,255,238)', boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static">
             <Toolbar disableGutters>
-                <Container maxWidth="xl">
-                    <Box sx={{flexGrow: 1, gap: 2, display: {xs: 'flex', md: 'flex'}}}>
+                    <Box sx={{flexGrow: 1, ml:5, mr: 5, pd: 5, gap: 2, display: {xs: 'flex', md: 'flex'}}}>
                         {/* PC Version */}
                         {
                             pages.map((page) => (
@@ -50,7 +49,6 @@ export default function Navbar() {
                             ))
                         }
                     </Box>
-                </Container>
             </Toolbar>
         </AppBar>
     );

@@ -75,9 +75,8 @@ function Header() {
     };
 
     return (
-        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static">
-            <Container maxWidth="xl">
-                <Toolbar disableGutters>
+        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static" >
+                <Toolbar sx={{ ml:5, mr: 5, pd: 5 }} disableGutters>
                     <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: 1}}/>
                     <Typography
                         variant="h6"
@@ -170,7 +169,6 @@ function Header() {
                     </Box>
                     {/* Profile Button End */}
                 </Toolbar>
-            </Container>
         </AppBar>
     );
 }
