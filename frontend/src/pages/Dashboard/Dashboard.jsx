@@ -1,5 +1,6 @@
 import React from 'react';
 import {Gauge, gaugeClasses} from '@mui/x-charts/Gauge';
+import './Dashboard.css';
 import Default from "../../components/Layouts/Default.jsx";
 
 const settings = {

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
+import './Danisan.css';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2 as Grid, TextField } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import {Cancel, CheckCircle, Delete, Edit, GroupAdd} from '@mui/icons-material';
