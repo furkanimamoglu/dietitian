@@ -75,7 +75,7 @@ function Header() {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: 1}}/>
@@ -116,7 +116,7 @@ function Header() {
                     </Typography>
 
                     {/* Search Bar Start */}
-                    <Box sx={{ justifyContent: 'flex-end', ml: "65%", pr: 2, display: {xs: 'flex', md: 'flex'}}}>
+                    <Box sx={{ justifyContent: 'flex-end', pr: 2, display: {xs: 'flex', md: 'flex'}}}>
                         <Search>
                             <SearchIconWrapper>
                                 <SearchIcon />
@@ -159,11 +159,13 @@ function Header() {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography sx={{textAlign: 'center'}}>{setting}</Typography>
-                                </MenuItem>
-                            ))}
+                            <div>
+                                {settings.map((setting) => (
+                                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                                        <Typography sx={{textAlign: 'center'}}>{setting}</Typography>
+                                    </MenuItem>
+                                ))}
+                            </div>
                         </Menu>
                     </Box>
                     {/* Profile Button End */}
