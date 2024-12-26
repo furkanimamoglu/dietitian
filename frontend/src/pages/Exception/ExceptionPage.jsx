@@ -21,9 +21,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -49,9 +50,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -77,9 +79,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -99,15 +102,16 @@ export default function ExceptionPage(statusCode) {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: "white",
+                            flexDirection: "column"
                         }}
                     >
                         <Paper
                             elevation={3}
                             sx={{
-                                padding: 4,
+                                mt: 30,
+                                mb: 30,
                                 width: 600,
-                                display: "flex",
+                                padding: 4,
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -133,9 +137,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -161,9 +166,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -189,9 +195,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -217,9 +224,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}
@@ -245,9 +253,10 @@ export default function ExceptionPage(statusCode) {
                         <Paper
                             elevation={3}
                             sx={{
+                                mt: 30,
+                                mb: 30,
+                                width: 600,
                                 padding: 4,
-                                width: 300,
-                                display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                             }}

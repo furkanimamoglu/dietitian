@@ -10,7 +10,7 @@ export default function Navbar() {
 
     const pages = [
         {name: 'Danışanlarım', route: '/danisan'},
-        {name: 'Randevularım', route: '/anamnez'},
+        {name: 'Randevularım', route: '/randevularim'},
         {name: 'Beslenme', route: '/beslenme'},
         {name: 'Tarifler', route: '/tarif'},
         {name: 'Egzersizler', route: '/egzersiz'},
