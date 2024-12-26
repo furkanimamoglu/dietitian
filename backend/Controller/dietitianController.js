@@ -6,19 +6,19 @@ class DietitianController {
 
     async login(req, res) {
         try {
-            const {username, password} = req.body;
+            const {email, password} = req.body;
 
-            if (!username || !password) {
+            if (!email || !password) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'All parameters must be filled.'
                 });
             }
 
-            const dietitian = await DietitianService.login(username, password);
+            const dietitian = await DietitianService.login(email, password);
 
             res.status(200).json({
-                username: dietitian.username,
+                email: dietitian.email,
                 token: dietitian.token,
                 role: dietitian.role
             });

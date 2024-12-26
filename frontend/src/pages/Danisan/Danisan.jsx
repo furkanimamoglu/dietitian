@@ -55,7 +55,7 @@ const rows = [
 const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "name", headerName: "İsim", width: 150, editable: true},
-    { field: "surname", headerName: "Soyad", width: 150, editable: true },
+    { field: "surname", headerName: "Soyisim", width: 150, editable: true },
     { field: "email", headerName: "Email", width: 200, editable: true },
     { field: "phoneNumber", headerName: "Telefon No", width: 150, editable: true  },
     {

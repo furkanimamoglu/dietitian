@@ -5,21 +5,65 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import SpaIcon from '@mui/icons-material/Spa';
 import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
-import Navbar from "../Navbar/Navbar.jsx";
+import {Search} from "@mui/icons-material";
+import SearchIcon from '@mui/icons-material/Search';
+import {alpha, InputBase, styled} from "@mui/material";
 
 const settings = ['Profil', 'Hesap', 'Ayarlar', 'Çıkış Yap'];
 
 function Header() {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+    if (!localStorage.getItem('token')) {
+        window.location.href = '/login';
+    }
+
+    const Search = styled('div')(({ theme }) => ({
+        position: 'relative',
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: alpha(theme.palette.common.white, 0.15),
+        '&:hover': {
+            backgroundColor: alpha(theme.palette.common.white, 0.25),
+        },
+        marginRight: theme.spacing(2),
+        marginLeft: 0,
+        width: '100%',
+        [theme.breakpoints.up('sm')]: {
+            marginLeft: theme.spacing(3),
+            width: 'auto',
+        },
+    }));
+
+    const SearchIconWrapper = styled('div')(({ theme }) => ({
+        padding: theme.spacing(0, 2),
+        height: '100%',
+        position: 'absolute',
+        pointerEvents: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    }));
+
+    const StyledInputBase = styled(InputBase)(({ theme }) => ({
+        color: 'inherit',
+        '& .MuiInputBase-input': {
+            padding: theme.spacing(1, 1, 1, 0),
+            // vertical padding + font size from searchIcon
+            paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+            transition: theme.transitions.create('width'),
+            width: '100%',
+            [theme.breakpoints.up('md')]: {
+                width: '20ch',
+            },
+        },
+    }));
 
 
     const handleOpenUserMenu = (event) => {
@@ -70,6 +114,21 @@ function Header() {
                     >
                         Diyet
                     </Typography>
+
+                    {/* Search Bar Start */}
+                    <Box sx={{ justifyContent: 'flex-end', ml: "65%", pr: 2, display: {xs: 'flex', md: 'flex'}}}>
+                        <Search>
+                            <SearchIconWrapper>
+                                <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                                placeholder="Arama yap…"
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
+                        </Search>
+                    </Box>
+                    {/* Search Bar End */}
+
                     {/* Notification Button Start */}
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}, justifyContent: 'flex-end', pr: 2}}>
                         <Badge badgeContent={4} color="secondary">
@@ -88,7 +147,6 @@ function Header() {
                         <Menu
                             sx={{mt: '45px'}}
                             id="menu-appbar"
-                            anchorEl={anchorElUser}
                             anchorOrigin={{
                                 vertical: 'top',
                                 horizontal: 'right',

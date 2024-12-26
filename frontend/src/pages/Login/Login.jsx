@@ -8,7 +8,7 @@ import {green} from "@mui/material/colors";
 import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
 
 function Login() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ function Login() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                username: username,
+                email: email,
                 password: password,
             }),
         })
@@ -30,7 +30,7 @@ function Login() {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Kullanıcı adı veya şifre yanlış.');
+                    throw new Error('Email veya şifre yanlış.');
                 }
             })
             .then((data) => {
@@ -74,12 +74,12 @@ function Login() {
                     </Typography>
                     <form onSubmit={handleSubmit} style={{width: '100%'}}>
                         <TextField
-                            label="Kullanıcı adı"
+                            label="Email"
                             variant="outlined"
                             fullWidth
                             sx={{mb: 2}}
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                         <TextField
                             label="Şifre"

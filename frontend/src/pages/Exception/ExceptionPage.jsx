@@ -99,14 +99,14 @@ export default function ExceptionPage(statusCode) {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: green[50],
+                            backgroundColor: "white",
                         }}
                     >
                         <Paper
                             elevation={3}
                             sx={{
                                 padding: 4,
-                                width: 300,
+                                width: 600,
                                 display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
