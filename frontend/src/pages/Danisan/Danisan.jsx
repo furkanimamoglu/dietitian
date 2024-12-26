@@ -8,6 +8,7 @@ import {Cancel, CheckCircle, Delete, Edit, GroupAdd} from '@mui/icons-material';
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import {green, red, blue, pink} from "@mui/material/colors";
+import Default from "../../components/Layouts/Default.jsx";
 
 const handleEdit = (id) => {
     console.log('Edit item with ID:', id);
@@ -149,9 +150,7 @@ export default function Danisan() {
     }, []);
 
     return (
-        <>
-            <Header/>
-            <Navbar/>
+        <Default>
             <Grid container spacing={2}>
                 <Grid size={12}>
                     <Button
@@ -199,6 +198,6 @@ export default function Danisan() {
                     </DialogActions>
                 </form>
             </Dialog>
-        </>
+        </Default>
     );
 }

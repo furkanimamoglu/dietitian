@@ -14,32 +14,16 @@ import MenuItem from '@mui/material/MenuItem';
 import SpaIcon from '@mui/icons-material/Spa';
 import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
-
-const pages = [
-    {name: 'Danışanlarım', route: '/danisan'},
-    {name: 'Randevularım', route: '/anamnez'},
-    {name: 'Anamnez', route: '/randevu'},
-    {name: 'Beslenme', route: '/egzersiz'},
-    {name: 'Tarifler', route: '/tarif'},
-    {name: 'Sonuçlar', route: '/sonuc'},
-    {name: 'Muhasebe', route: '/muhasebe'}
-];
+import Navbar from "../Navbar/Navbar.jsx";
 
 const settings = ['Profil', 'Hesap', 'Ayarlar', 'Çıkış Yap'];
 
 function Header() {
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-    const handleOpenNavMenu = (event) => {
-        setAnchorElNav(event.currentTarget);
-    };
+
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
-    };
-
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
     };
 
     const handleCloseUserMenu = () => {
@@ -50,7 +34,7 @@ function Header() {
         <AppBar position="static">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <SpaIcon sx={{display: {xs: 'none', md: 'flex'}, mr: 1}}/>
+                    <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: 1}}/>
                     <Typography
                         variant="h6"
                         noWrap
@@ -68,44 +52,6 @@ function Header() {
                     >
                         Diyet
                     </Typography>
-
-                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}>
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={handleOpenNavMenu}
-                            color="inherit"
-                        >
-                            <MenuIcon/>
-                        </IconButton>
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'left',
-                            }}
-                            open={Boolean(anchorElNav)}
-                            onClose={handleCloseNavMenu}
-                            sx={{display: {xs: 'block', md: 'none'}}}
-                        >
-                            {pages.map((page) => (
-                                <MenuItem key={page.route} onClick={handleCloseNavMenu}>
-                                    <Typography sx={{textAlign: 'center'}}>
-                                        {page.name}
-                                    </Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    </Box>
-                    <SpaIcon sx={{display: {xs: 'flex', md: 'none'}, mr: 1}}/>
                     <Typography
                         variant="h5"
                         noWrap
@@ -122,25 +68,17 @@ function Header() {
                             textDecoration: 'none',
                         }}
                     >
-                        LOGO
+                        Diyet
                     </Typography>
-                    <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        {pages.map((page) => (
-                            <Button
-                                href={page.route}
-                                key={page.name}
-                                onClick={handleCloseNavMenu}
-                                sx={{my: 2, color: 'white', display: 'block'}}
-                            >
-                                {page.name}
-                            </Button>
-                        ))}
-                    </Box>
+                    {/* Notification Button Start */}
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}, justifyContent: 'flex-end', pr: 2}}>
                         <Badge badgeContent={4} color="secondary">
                             <MailIcon color="action" sx={{color: 'white'}}/>
                         </Badge>
                     </Box>
+                    {/* Notification Button End */}
+
+                    {/* Profile Button Start */}
                     <Box sx={{flexGrow: 0}}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
@@ -170,6 +108,7 @@ function Header() {
                             ))}
                         </Menu>
                     </Box>
+                    {/* Profile Button End */}
                 </Toolbar>
             </Container>
         </AppBar>

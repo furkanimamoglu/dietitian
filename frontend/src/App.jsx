@@ -18,7 +18,6 @@ export default function App() {
             <Box display="flex" flexDirection="column" minHeight="100vh">
                 <CssBaseline/>
                 <Routing/>
-                <Footer/>
             </Box>
         </Router>
     );

@@ -1,17 +1,14 @@
 import React from 'react';
 import './ExceptionPage.css';
-import Header from "../../components/Header/Header.jsx";
-import Navbar from "../../components/Navbar/Navbar.jsx";
 import {green} from "@mui/material/colors";
 import {Box, Paper} from "@mui/material";
+import Default from "../../components/Layouts/Default.jsx";
 
 export default function ExceptionPage(statusCode) {
     switch (statusCode) {
         case 400:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "90vh",
@@ -35,13 +32,11 @@ export default function ExceptionPage(statusCode) {
                             <p>The request could not be understood or was missing required parameters.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         case 401:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -65,13 +60,11 @@ export default function ExceptionPage(statusCode) {
                             <p>You are not authorized to access this resource. Please log in.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         case 403:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -95,12 +88,11 @@ export default function ExceptionPage(statusCode) {
                             <p>You do not have permission to access this resource.</p>
                         </Paper>
                     </Box>
-                </>
+                    </Default>
             );
         case 404:
             return (
-                <>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100%",
@@ -124,13 +116,11 @@ export default function ExceptionPage(statusCode) {
                             <p>The page you are looking for could not be found.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         case 500:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -154,13 +144,11 @@ export default function ExceptionPage(statusCode) {
                             <p>An unexpected error occurred on the server. Please try again later.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         case 502:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -184,13 +172,11 @@ export default function ExceptionPage(statusCode) {
                             <p>The server received an invalid response from the upstream server.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         case 503:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -214,13 +200,11 @@ export default function ExceptionPage(statusCode) {
                             <p>The server is currently unavailable (overloaded or down). Please try again later.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         case 504:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -244,13 +228,11 @@ export default function ExceptionPage(statusCode) {
                             <p>The server did not respond in time. Please try again later.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
         default:
             return (
-                <>
-                    <Header/>
-                    <Navbar/>
+                <Default>
                     <Box
                         sx={{
                             height: "100vh",
@@ -274,7 +256,7 @@ export default function ExceptionPage(statusCode) {
                             <p>An unexpected error occurred. Please try again later.</p>
                         </Paper>
                     </Box>
-                </>
+                </Default>
             );
     }
 }
