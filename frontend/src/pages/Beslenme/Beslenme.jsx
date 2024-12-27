@@ -105,21 +105,23 @@ export default function Beslenme() {
                                         variant="outlined"
                                     />
                                 </Grid2>
-                                <Grid2>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                    >
-                                        <Add />
-                                    </Button>
-                                </Grid2>
-                                <Grid2>
-                                    <Button
-                                        variant="contained"
-                                        sx={{ backgroundColor: '#a50000' }}
-                                    >
-                                        <DeleteIcon />
-                                    </Button>
+                                <Grid2 container sx={{ ml: 'auto', mr: '1rem' }}>
+                                    <Grid2>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                        >
+                                            <Add />
+                                        </Button>
+                                    </Grid2>
+                                    <Grid2>
+                                        <Button
+                                            variant="contained"
+                                            sx={{ backgroundColor: '#a50000' }}
+                                        >
+                                            <DeleteIcon />
+                                        </Button>
+                                    </Grid2>
                                 </Grid2>
                             </Grid2>
 
@@ -128,11 +130,9 @@ export default function Beslenme() {
                                 {beslenmePlanlari.map((item) => (
                                     <ListItem
                                         key={item.id}
-                                        disablePadding
                                         sx={{
                                             '&:hover': { backgroundColor: '#f5f5f5' },
-                                            position: 'relative',
-                                            '&:hover .delete-button': { visibility: 'visible' }, // Hover'da delete ikonunu göster
+                                            '&:hover .delete-button': { visibility: 'visible' },
                                         }}
                                     >
                                         <ListItemIcon>
@@ -140,7 +140,6 @@ export default function Beslenme() {
                                         </ListItemIcon>
                                         <ListItemText primary={item.label} />
 
-                                        {/* Hover'da delete ikonunu göster */}
                                         <Box
                                             className="delete-button"
                                             sx={{
@@ -149,7 +148,7 @@ export default function Beslenme() {
                                                 top: '50%',
                                                 mr: "1rem",
                                                 transform: 'translateY(-50%)',
-                                                visibility: 'hidden', // Başlangıçta gizle
+                                                visibility: 'hidden',
                                             }}
                                         >
                                             <IconButton
