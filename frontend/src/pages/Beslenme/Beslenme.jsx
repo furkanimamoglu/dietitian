@@ -7,21 +7,27 @@ import {
     Card,
     CardActionArea,
     CardContent,
-    CardMedia, Checkbox,
+    CardMedia,
+    Checkbox,
     Grid2,
-    List, ListItem,
-    ListItemIcon, ListItemText,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
     Paper,
     TextField,
+    Tooltip,
     Typography
 } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import {Add} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import PrintIcon from '@mui/icons-material/Print';
+import EditIcon from '@mui/icons-material/Edit';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 // Örnek veri
 const beslenmeData = [
-    {id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/placeholder.png"},
+    {id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png"},
     {id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png"},
     {id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png"},
     {id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png"},
@@ -105,40 +111,40 @@ export default function Beslenme() {
                                         variant="outlined"
                                     />
                                 </Grid2>
-                                <Grid2 container sx={{ ml: 'auto', mr: '1rem' }}>
+                                <Grid2 container sx={{ml: 'auto', mr: '1rem'}}>
                                     <Grid2>
                                         <Button
                                             variant="contained"
                                             color="primary"
                                         >
-                                            <Add />
+                                            <Add/>
                                         </Button>
                                     </Grid2>
                                     <Grid2>
                                         <Button
                                             variant="contained"
-                                            sx={{ backgroundColor: '#a50000' }}
+                                            sx={{backgroundColor: '#a50000'}}
                                         >
-                                            <DeleteIcon />
+                                            <DeleteIcon/>
                                         </Button>
                                     </Grid2>
                                 </Grid2>
                             </Grid2>
 
                             {/* Selectable List */}
-                            <List sx={{ maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden' }}>
+                            <List sx={{maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden'}}>
                                 {beslenmePlanlari.map((item) => (
                                     <ListItem
                                         key={item.id}
                                         sx={{
-                                            '&:hover': { backgroundColor: '#f5f5f5' },
-                                            '&:hover .delete-button': { visibility: 'visible' },
+                                            '&:hover': {backgroundColor: '#f5f5f5'},
+                                            '&:hover .delete-button': {visibility: 'visible'},
                                         }}
                                     >
                                         <ListItemIcon>
-                                            <Checkbox edge="start" />
+                                            <Checkbox edge="start"/>
                                         </ListItemIcon>
-                                        <ListItemText primary={item.label} />
+                                        <ListItemText primary={item.label}/>
 
                                         <Box
                                             className="delete-button"
@@ -154,44 +160,104 @@ export default function Beslenme() {
                                             <IconButton
                                                 edge="end"
                                                 aria-label="delete"
-                                                sx={{ color: 'red' }}
+                                                sx={{color: 'red'}}
                                             >
-                                                <DeleteIcon />
+                                                <DeleteIcon/>
                                             </IconButton>
                                         </Box>
                                     </ListItem>
                                 ))}
                             </List>
                             {/* Selectable List - End */}
-
                         </Paper>
                     </Grid2>
                 </Grid2>
 
                 {/* Sağ Panel */}
                 {/* Beslenme Plan Kartlar - Start */}
-                <Grid2 container spacing={2} sx={{ maxHeight: '80vh', width: "74vw", ml: "1rem", overflowY: 'auto' }}>
+                <Grid2 container spacing={2} sx={{maxHeight: '80vh', width: "74vw", ml: "1rem", overflowY: 'auto'}}>
                     {groupedData.map((group, groupIndex) => (
                         <React.Fragment key={groupIndex}>
                             {group.map((item) => (
                                 <Grid2 item xs={12} sm={4} md={4} key={item.id}>
-                                    <Card sx={{ minWidth: 410}}>
+                                    <Card sx={{minWidth: 410, boxShadow: 3}}>
                                         <CardActionArea>
                                             <CardMedia
                                                 component="img"
-                                                height="250"
-                                                image={item.image}
+                                                image={item.image || "/placeholder.png"}
                                                 alt={item.title}
+                                                sx={{
+                                                    height: 250,
+                                                    width: 410,
+                                                    objectFit: 'cover',
+                                                }}
                                             />
-                                            <CardContent>
-                                                <Typography gutterBottom variant="h5" component="div">
-                                                    {item.title}
-                                                </Typography>
-                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                    {item.description}
-                                                </Typography>
-                                            </CardContent>
                                         </CardActionArea>
+                                        <CardContent>
+                                            <Typography gutterBottom variant="h5" component="div">
+                                                {item.title}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                                {item.description}
+                                            </Typography>
+
+                                            {/* Card Buttons */}
+                                            <Box sx={{
+                                                mt: 2,
+                                                gap: "0.5rem",
+                                                display: 'flex',
+                                                justifyContent: 'flex-end'
+                                            }}>
+                                                <Tooltip title={"Danışana Ekle"} arrow>
+                                                    <IconButton aria-label="danisana-ekle"
+                                                                sx={{
+                                                                    backgroundColor: '#3d8a3d',
+                                                                    color: 'white',
+                                                                    '&:hover': {
+                                                                        backgroundColor: '#53c153', // Hover'da arka plan değişmesin
+                                                                    },
+                                                                }}>
+                                                        <PersonAddIcon/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title={"Yazdır"} arrow>
+                                                    <IconButton aria-label="print"
+                                                                sx={{
+                                                                    backgroundColor: '#003095',
+                                                                    color: 'white',
+                                                                    '&:hover': {
+                                                                        backgroundColor: '#0052ff', // Hover'da arka plan değişmesin
+                                                                    },
+                                                                }}>
+                                                        <PrintIcon/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title={"Düzenle"} arrow>
+                                                    <IconButton aria-label="duzenle"
+                                                                sx={{
+                                                                    backgroundColor: '#ff9e25',
+                                                                    color: 'white',
+                                                                    '&:hover': {
+                                                                        backgroundColor: '#ffaf4b', // Hover'da arka plan değişmesin
+                                                                    },
+                                                                }}>
+                                                        <EditIcon/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title={"Sil"} arrow>
+                                                    <IconButton aria-label="sil"
+                                                                sx={{
+                                                                    backgroundColor: '#a50000',
+                                                                    color: 'white',
+                                                                    '&:hover': {
+                                                                        backgroundColor: '#ff0000', // Hover'da arka plan değişmesin
+                                                                    },
+                                                                }}>
+                                                        <DeleteIcon/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </CardContent>
                                     </Card>
                                 </Grid2>
                             ))}
