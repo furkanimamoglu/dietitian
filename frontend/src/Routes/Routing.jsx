@@ -7,6 +7,7 @@ import ForgotPassword from "../pages/ForgotPassword/ForgotPassword.jsx";
 import Danisan from "../pages/Danisan/Danisan.jsx";
 import ExceptionPage from "../pages/Exception/ExceptionPage.jsx";
 import Randevularim from "../pages/Randevularim/Randevularim.jsx";
+import Beslenme from "../pages/Beslenme/Beslenme.jsx";
 
 export default function Routing() {
     return (
@@ -14,6 +15,7 @@ export default function Routing() {
             {/* Diyetisyen Routes */}
                 <Route path="/dashboard/*" element={<Dashboard/>}/>
                 <Route path="/danisan/*" element={<Danisan/>}/>
+                <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
                 <Route path="/login/*" element={<Login/>}/>
                 <Route path="/register/*" element={<Register/>}/>

@@ -18,9 +18,9 @@ export default function Navbar() {
     ];
 
     return (
-        <AppBar sx={{backgroundColor: 'rgb(238,255,238)', boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static">
+        <AppBar sx={{backgroundColor: 'rgb(238,255,238)', display: {xs: 'none', md: 'flex'}, boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static">
             <Toolbar disableGutters>
-                    <Box sx={{flexGrow: 1, ml:5, mr: 5, pd: 5, gap: 2, display: {xs: 'flex', md: 'flex'}}}>
+                    <Box sx={{flexGrow: 1, ml:"2.5rem", mr: "2.5rem", pd: "2.5rem", gap: "2rem", display: {xs: 'none', md: 'flex'}}}>
                         {/* PC Version */}
                         {
                             pages.map((page) => (
@@ -39,7 +39,7 @@ export default function Navbar() {
                                         boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                         transition: "box-shadow 0.3s ease",
                                         borderRight: "3px solid rgba(71,145,64,0.39)",
-                                        borderRadius: 5,
+                                        borderRadius: "2.5rem",
                                     }}
                                 >
                                     {

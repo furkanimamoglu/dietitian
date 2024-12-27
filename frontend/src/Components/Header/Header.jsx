@@ -32,13 +32,8 @@ function Header() {
         '&:hover': {
             backgroundColor: alpha(theme.palette.common.white, 0.25),
         },
-        marginRight: theme.spacing(2),
         marginLeft: 0,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-            marginLeft: theme.spacing(3),
-            width: 'auto',
-        },
+        width: '100%'
     }));
 
     const SearchIconWrapper = styled('div')(({ theme }) => ({
@@ -48,20 +43,15 @@ function Header() {
         pointerEvents: 'none',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
     }));
 
     const StyledInputBase = styled(InputBase)(({ theme }) => ({
         color: 'inherit',
         '& .MuiInputBase-input': {
             padding: theme.spacing(1, 1, 1, 0),
-            // vertical padding + font size from searchIcon
             paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-            transition: theme.transitions.create('width'),
             width: '100%',
-            [theme.breakpoints.up('md')]: {
-                width: '20ch',
-            },
         },
     }));
 
@@ -76,7 +66,7 @@ function Header() {
 
     return (
         <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static" >
-                <Toolbar sx={{ ml:5, mr: 5, pd: 5 }} disableGutters>
+                <Toolbar sx={{ ml:"2.5rem", mr: "2.5rem", pd: "2.5rem" }} disableGutters>
                     <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: 1}}/>
                     <Typography
                         variant="h6"
@@ -115,7 +105,7 @@ function Header() {
                     </Typography>
 
                     {/* Search Bar Start */}
-                    <Box sx={{ justifyContent: 'flex-end', pr: 2, display: {xs: 'flex', md: 'flex'}}}>
+                    <Box sx={{ pr: "1rem", display: {xs: 'flex', md: 'flex'}}}>
                         <Search>
                             <SearchIconWrapper>
                                 <SearchIcon />
@@ -129,7 +119,7 @@ function Header() {
                     {/* Search Bar End */}
 
                     {/* Notification Button Start */}
-                    <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}, justifyContent: 'flex-end', pr: 2}}>
+                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'flex'}, justifyContent: 'flex-end', pr: "1rem"}}>
                         <Badge badgeContent={4} color="secondary">
                             <MailIcon color="action" sx={{color: 'white'}}/>
                         </Badge>
@@ -139,12 +129,12 @@ function Header() {
                     {/* Profile Button Start */}
                     <Box sx={{flexGrow: 0}}>
                         <Tooltip title="Open settings">
-                            <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg"/>
+                            <IconButton onClick={handleOpenUserMenu}>
+                                <Avatar alt="Furkan" src="/static/images/avatar/2.jpg"/>
                             </IconButton>
                         </Tooltip>
                         <Menu
-                            sx={{mt: '45px'}}
+                            sx={{mt: "3.5rem"}}
                             id="menu-appbar"
                             anchorOrigin={{
                                 vertical: 'top',
