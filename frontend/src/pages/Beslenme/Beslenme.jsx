@@ -57,29 +57,36 @@ const beslenmeData = [
 ];
 
 const beslenmePlanlari = [
-    {id: 1, label: "Kilo Aldırma"},
-    {id: 2, label: "Kilo Verme"},
-    {id: 3, label: "Kas Yapımı"},
-    {id: 4, label: "Dengeli Beslenme"},
-    {id: 5, label: "Sağlıklı Atıştırma"},
-    {id: 6, label: "Protein Ağırlıklı"},
-    {id: 7, label: "Diyabet"},
-    {id: 8, label: "Glutensiz Diyet"},
-    {id: 9, label: "Enerji Diyeti"},
-    {id: 10, label: "Karbonhidrat Dengesi"},
-    {id: 11, label: "Çölyak Hastalığı"},
-    {id: 12, label: "Şekersiz"},
-    {id: 13, label: "Option 13"},
-    {id: 14, label: "Option 14"},
-    {id: 15, label: "Option 15"},
-    {id: 16, label: "Option 16"},
-    {id: 17, label: "Option 17"},
-    {id: 18, label: "Option 18"},
-    {id: 19, label: "Option 19"},
-    {id: 20, label: "Option 20"},
-    {id: 21, label: "Option 21"},
-    {id: 22, label: "Option 22"},
-    {id: 23, label: "Option 23"},
+    {id: 1, label: "Kilo Aldırma", category: "Diyet"},
+    {id: 2, label: "Kilo Verme", category: "Diyet"},
+    {id: 3, label: "Kas Yapımı", category: "Diyet"},
+    {id: 4, label: "Dengeli Beslenme", category: "Sağlık"},
+    {id: 5, label: "Sağlıklı Atıştırma", category: "Sağlık"},
+    {id: 6, label: "Protein Ağırlıklı", category: "Diyet"},
+    {id: 7, label: "Diyabet", category: "Hastalık"},
+    {id: 8, label: "Glutensiz Diyet", category: "Diyet"},
+    {id: 9, label: "Enerji Diyeti", category: "Diyet"},
+    {id: 10, label: "Karbonhidrat Dengesi", category: "Diyet"},
+    {id: 11, label: "Çölyak Hastalığı", category: "Hastalık"},
+    {id: 12, label: "Şekersiz", category: "Diyet"},
+    {id: 13, label: "Option 13", category: "Diğer"},
+    {id: 14, label: "Option 14", category: "Diğer"},
+    {id: 15, label: "Option 15", category: "Diğer"},
+    {id: 16, label: "Option 16", category: "Diğer"},
+    {id: 17, label: "Option 17", category: "Diğer"},
+    {id: 18, label: "Option 18", category: "Diğer"},
+    {id: 19, label: "Option 19", category: "Diğer"},
+    {id: 20, label: "Option 20", category: "Diğer"},
+    {id: 21, label: "Option 21", category: "Diğer"},
+    {id: 22, label: "Option 22", category: "Diğer"},
+    {id: 23, label: "Option 23", category: "Diğer"},
+];
+
+const beslenmeKategorileri = [
+    "Diyet",
+    "Sağlık",
+    "Hastalık",
+    "Diğer"
 ];
 
 // Verileri her 3 elemanda bir gruplara ayıran yardımcı fonksiyon
@@ -100,7 +107,7 @@ export default function Beslenme() {
                 {/* Sol Panel */}
                 <Grid2 container sx={{height: '80vh', flex: 1, display: { xs: 'none', sm: 'flex' } }} direction="column" spacing={2}>
                     <Grid2 item>
-                        <Paper elevation={3} sx={{p: "0.5rem"}}>
+                        <Paper elevation={3} sx={{ minHeight:"80vh" , p: "0.5rem"}}>
                             {/* Search and Add */}
                             <Grid2 container alignItems="center" spacing={2}>
                                 <Grid2 xs>
@@ -136,9 +143,9 @@ export default function Beslenme() {
 
                             {/* Selectable List */}
                             <List sx={{maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden'}}>
-                                {beslenmePlanlari.map((item) => (
+                                {beslenmeKategorileri.map((item) => (
                                     <ListItem
-                                        key={item.id}
+                                        key={item}
                                         sx={{
                                             '&:hover': {backgroundColor: '#f5f5f5'},
                                             '&:hover .delete-button': {visibility: 'visible'},
@@ -147,7 +154,7 @@ export default function Beslenme() {
                                         <ListItemIcon>
                                             <Checkbox edge="start"/>
                                         </ListItemIcon>
-                                        <ListItemText primary={item.label}/>
+                                        <ListItemText primary={item}/>
 
                                         <Box
                                             className="delete-button"
