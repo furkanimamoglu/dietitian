@@ -113,6 +113,40 @@
     background-color: rgba(76, 175, 80, 0.1);
 }
 
+.fc-daygrid-event-dot {
+    border: #1b5e20 solid
+}
+
+/* Hover efekti */
+.fc-scrollgrid-sync-inner:hover {
+    background-color: #c8e6c9; /* Daha açık yeşil ton */
+    cursor: pointer;
+    color: #1b5e20; /* Daha koyu yeşil yazı rengi */
+}
+
+/* Sol şeritteki saat hücrelerinin çerçevesi */
+.fc-timegrid-slot-label-frame {
+    background-color: #228326 !important; /* Yeşil arka plan */
+    color: #fff; /* Beyaz yazı rengi */
+    font-weight: bold; /* Kalın yazı */
+    border: 1px solid #45a049; /* Yeşil çerçeve */
+    border-radius: 4px; /* Köşeleri yuvarlat */
+    text-align: center; /* Ortalanmış yazı */
+    padding: 5px; /* İçerik boşluğu */
+}
+
+/* Sol şeritteki saat hücreleri için hover efekti */
+.fc-timegrid-slot-label-frame:hover {
+    background-color: #45a049; /* Daha açık yeşil ton */
+    cursor: pointer;
+}
+
+/* Sol şeritteki saat çerçevesinin genel görünümü */
+.fc-scrollgrid-shrink-frame {
+    border-right: 1px solid #ddd; /* Hafif çerçeve çizgisi */
+    background-color: #f8f9fa; /* Hafif gri arka plan */
+}
+
 /* Mobil görünüm iyileştirmesi */
 @media (max-width: 768px) {
     .fc {
@@ -137,3 +171,4 @@
         font-size: 0.7rem;
     }
 }
+

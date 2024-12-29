@@ -52,6 +52,12 @@ export default function Randevularim() {
                             startTime: "09:00",
                             endTime: "18:00",
                         }}
+                        views={{
+                            timeGridDay: { buttonText: "Günlük" },
+                            timeGridWeek: { buttonText: "Haftalık" },
+                            dayGridMonth: { buttonText: "Aylık" },
+                            dayGridYear: { buttonText: "Yıllık" }
+                        }}
                         now={new Date()}
                         nowIndicator={true}
                         firstDay={1}
