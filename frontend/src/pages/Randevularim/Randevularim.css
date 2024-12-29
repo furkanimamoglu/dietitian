@@ -119,7 +119,7 @@
 
 /* Hover efekti */
 .fc-scrollgrid-sync-inner:hover {
-    background-color: #c8e6c9; /* Daha açık yeşil ton */
+    background-color: rgba(131, 241, 139, 0.57); /* Daha açık yeşil ton */
     cursor: pointer;
     color: #1b5e20; /* Daha koyu yeşil yazı rengi */
 }

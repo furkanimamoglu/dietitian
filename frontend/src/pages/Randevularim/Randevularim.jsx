@@ -27,15 +27,6 @@ export default function Randevularim() {
         },
     ]);
 
-    const handleDateClick = (arg) => {
-        // Tıklanan tarih bilgisi
-        console.log("Tıklanan tarih: ", arg.dateStr);
-
-        // 'timeGridDay' görünümüne geçiş yapma
-        const calendarApi = arg.view.calendar;
-        calendarApi.changeView("timeGridDay", arg.dateStr);  // timeGridDay görünümünü aç
-    };
-
     return (
         <Default>
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
@@ -78,7 +69,6 @@ export default function Randevularim() {
                             minute: "2-digit",
                             meridiem: "short",
                         }}
-                        dateClick={handleDateClick}
                     />
                 </Box>
             </Grid2>
