@@ -1,5 +1,5 @@
 // Libraries
-const { Op } = require("sequelize");
+const {Op} = require("sequelize");
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 
@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const Exception = require('../Exception/Exception');
 
 // Enums
-const { DIETITIAN } = require("../Enum/Role");
+const {DIETITIAN} = require("../Enum/Role");
 
 // Models
 const Dietitian = require('../Model/Dietitian');
@@ -15,11 +15,11 @@ const Client = require('../Model/Client');
 
 class DietitianService {
 
-    async login(username, password) {
+    async login(email, password) {
         try {
             const dietitianInfo = await Dietitian.findOne({
                 where: {
-                    username: username,
+                    email: email,
                     password: password
                 }
             });
@@ -29,38 +29,37 @@ class DietitianService {
             }
 
             const token = jwt.sign(
-                { username: dietitianInfo.username, role: dietitianInfo.role },
+                {email: dietitianInfo.email, role: dietitianInfo.role},
                 config.secretkey,
-                { expiresIn: '24h' }
+                {expiresIn: '24h'}
             );
 
-            return { ...dietitianInfo.dataValues, token: token };
+            return {...dietitianInfo.dataValues, token: token};
         } catch (error) {
             throw new Exception(error.message, 400);
         }
     }
 
-    async register(username, password, email, ipAddress) {
-        if (!username || !password || !email) {
+    async register(email, password, ipAddress) {
+        if (!email || !password) {
             throw new Exception('All fields must be filled.', 400, true);
         }
 
         try {
             const dietitian = await Dietitian.create({
-                username: username,
-                password: password,
                 email: email,
+                password: password,
                 role: DIETITIAN,
                 ipAddress: ipAddress
             });
 
             const token = jwt.sign(
-                { id: dietitian.id, username: dietitian.username, role: DIETITIAN },
+                {id: dietitian.id, email: dietitian.email, role: DIETITIAN},
                 config.secretkey
             );
 
             return {
-                username: dietitian.username,
+                email: dietitian.email,
                 role: dietitian.role,
                 token: token
             };
@@ -83,22 +82,21 @@ class DietitianService {
         }
     }
 
-    async registerClient(username, password, email, phoneNumber) {
-        if (!username || !password || !email || !phoneNumber) {
+    async registerClient(email, password, phoneNumber) {
+        if (!email || !password || !phoneNumber) {
             throw new Exception('All fields must be filled.', 400, true);
         }
 
         try {
             const token = jwt.sign(
-                { username: username, role: DIETITIAN },
+                {email: email, role: DIETITIAN},
                 config.secretkey
             );
 
             return await Client.create({
                 dietitian_id: 1,
-                username: username,
-                password: password,
                 email: email,
+                password: password,
                 phoneNumber: phoneNumber,
                 role: DIETITIAN,
                 token: token
@@ -131,7 +129,7 @@ class DietitianService {
     async getMyAllClients(dietitianId) {
         try {
             const dietitian = await Dietitian.findOne({
-                where: { id: dietitianId },
+                where: {id: dietitianId},
                 include: [{
                     model: Client,
                     as: 'Clients',

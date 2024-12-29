@@ -6,19 +6,19 @@ class DietitianController {
 
     async login(req, res) {
         try {
-            const { username, password } = req.body;
+            const {email, password} = req.body;
 
-            if (!username || !password) {
+            if (!email || !password) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'All parameters must be filled.'
                 });
             }
 
-            const dietitian = await DietitianService.login(username, password);
+            const dietitian = await DietitianService.login(email, password);
 
             res.status(200).json({
-                username: dietitian.username,
+                email: dietitian.email,
                 token: dietitian.token,
                 role: dietitian.role
             });
@@ -32,17 +32,17 @@ class DietitianController {
 
     async register(req, res) {
         try {
-            const { username, password, email } = req.body;
+            const {email, password} = req.body;
             const ipAddress = req.ip;
 
-            if (!username || !password || !email || !ipAddress) {
+            if (!email || !password || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'All parameters must be filled.'
                 });
             }
 
-            const result = await DietitianService.register(username, password, email, ipAddress);
+            const result = await DietitianService.register(email, password, ipAddress);
 
             res.status(200).json({
                 username: result.username,
@@ -59,16 +59,16 @@ class DietitianController {
 
     async registerClient(req, res) {
         try {
-            const { username, password, email, phoneNumber, name, surname } = req.body;
+            const {email, password, phoneNumber, name, surname} = req.body;
 
-            if (!username || !password || !email || !phoneNumber) {
+            if (!email || !password || !phoneNumber) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'All parameters must be filled.'
                 });
             }
 
-            const result = await DietitianService.registerClient(username, password, email, phoneNumber, name, surname);
+            const result = await DietitianService.registerClient(email, password, phoneNumber, name, surname);
 
             res.status(200).json(result);
         } catch (err) {
@@ -81,7 +81,7 @@ class DietitianController {
 
     async deleteClient(req, res) {
         try {
-            const { clientUsername } = req.body;
+            const {clientUsername} = req.body;
 
             if (!clientUsername) {
                 return res.status(400).json({

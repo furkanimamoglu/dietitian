@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import './Register.css'
 import config from "../../config.js";
-import {Button, TextField, Typography, Paper, Box, Avatar} from "@mui/material";
+import {Avatar, Box, Button, Paper, TextField, Typography} from "@mui/material";
 import {green} from "@mui/material/colors";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
 
 function Register() {
     const [username, setUsername] = useState('');
@@ -20,7 +21,7 @@ function Register() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        fetch(  config[config.environment].apiUrl+"dietitian/register", {
+        fetch(config[config.environment].apiUrl + "dietitian/register", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -46,7 +47,7 @@ function Register() {
     };
 
     return (
-        <>
+        <DefaultWithFooter>
             <Box
                 sx={{
                     height: "100vh",
@@ -66,8 +67,8 @@ function Register() {
                         alignItems: "center",
                     }}
                 >
-                    <Avatar sx={{ bgcolor: green[500], justifyContent: "center", mb: 2 }}>
-                        <LockOutlinedIcon />
+                    <Avatar sx={{bgcolor: green[500], justifyContent: "center", mb: 2}}>
+                        <LockOutlinedIcon/>
                     </Avatar>
                     <Typography variant="h5" gutterBottom>
                         Kayıt Ol
@@ -87,7 +88,7 @@ function Register() {
                             label="Kullanıcı adı"
                             variant="outlined"
                             fullWidth
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
@@ -95,7 +96,7 @@ function Register() {
                             label="E-Mail"
                             variant="outlined"
                             fullWidth
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                             value={username}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -103,7 +104,7 @@ function Register() {
                             label="Telefon:"
                             variant="outlined"
                             fullWidth
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                             value={username}
                             onChange={(e) => setPhone(e.target.value)}
                         />
@@ -111,7 +112,7 @@ function Register() {
                             label="Şifre"
                             variant="outlined"
                             fullWidth
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                             value={username}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -121,7 +122,7 @@ function Register() {
                             fullWidth
                             sx={{
                                 backgroundColor: green[500],
-                                "&:hover": { backgroundColor: green[700] },
+                                "&:hover": {backgroundColor: green[700]},
                             }}
                         >
                             Kayıt Ol
@@ -129,7 +130,7 @@ function Register() {
                     </form>
                 </Paper>
             </Box>
-        </>
+        </DefaultWithFooter>
     );
 }
 

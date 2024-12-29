@@ -1,5 +1,5 @@
 // Libraries
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
 const Client = require('./Client');
@@ -16,16 +16,15 @@ const Dietitian = sequelize.define('Dietitian', {
             allowNull: false,
             primaryKey: true
         },
-        username: {
+        email: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: {
-                msg: 'This username is already taken.'
+                msg: 'This email is already taken.'
             },
             validate: {
-                len: {
-                    args: [4, 21],
-                    msg: 'Your username may be 4 to 21 characters only.'
+                isEmail: {
+                    msg: 'Email address must be valid.'
                 }
             }
         },
@@ -36,18 +35,6 @@ const Dietitian = sequelize.define('Dietitian', {
                 len: {
                     args: [4, 21],
                     msg: 'Your password may be 4 to 21 characters only.'
-                }
-            }
-        },
-        email: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: {
-                msg: 'This email is already taken.'
-            },
-            validate: {
-                isEmail: {
-                    msg: 'Email address must be valid.'
                 }
             }
         },
@@ -78,7 +65,7 @@ const Dietitian = sequelize.define('Dietitian', {
 );
 
 Dietitian.hasMany(Client, {
-     foreignKey: "dietitian_id"
+    foreignKey: "dietitian_id"
 });
 
 Dietitian.hasMany(Exercise, {
@@ -89,11 +76,11 @@ Dietitian.hasMany(Recipe, {
     foreignKey: "dietitian_id"
 });
 
-Dietitian.hasMany(Appointment,{
+Dietitian.hasMany(Appointment, {
     foreignKey: "dietitian_id"
 });
 
-Dietitian.hasMany(AnamnesQuestion,{
+Dietitian.hasMany(AnamnesQuestion, {
     foreignKey: "dietitian_id"
 });
 

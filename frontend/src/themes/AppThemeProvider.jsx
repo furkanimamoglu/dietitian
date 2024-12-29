@@ -1,11 +1,7 @@
 import React from 'react';
-import {
-    ThemeProvider,
-    createTheme,
-    responsiveFontSizes,
-} from '@mui/material/styles';
+import {createTheme, responsiveFontSizes, ThemeProvider,} from '@mui/material/styles';
 
-function AppThemeProvider({ children }) {
+function AppThemeProvider({children}) {
     const mode = 'light';
     const theme = responsiveFontSizes(
         createTheme({

@@ -1,7 +1,6 @@
 import React from 'react';
-import Header from "../../components/Header/Header.jsx";
-import Navbar from "../../components/Navbar/Navbar.jsx";
-import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
+import {Gauge, gaugeClasses} from '@mui/x-charts/Gauge';
+import './Dashboard.css';
 import Default from "../../components/Layouts/Default.jsx";
 
 const settings = {
@@ -12,16 +11,9 @@ const settings = {
 
 export default function Dashboard() {
 
-    const myDiv = (<div style={{padding: '1rem', background: 'red'}}> my div </div>)
 
     return (
-        <>
-            <Default
-                myDiv={myDiv}
-            >
-
-
-            <Navbar />
+        <Default>
             <h1>Ana sayfa içeriği buraya gelecek</h1>
             <Gauge
                 {...settings}
@@ -38,7 +30,6 @@ export default function Dashboard() {
                     },
                 })}
             />
-            </Default>
-        </>
+        </Default>
     );
 };

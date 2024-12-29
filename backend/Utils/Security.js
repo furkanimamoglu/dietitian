@@ -13,16 +13,13 @@ class Security {
      * @params token - Token which starts with "Bearer ".
      * @author Furkan İmamoğlu
      */
-    getPermissionFromToken(token)
-    {
-        token = token.replace('Bearer ','');
+    getPermissionFromToken(token) {
+        token = token.replace('Bearer ', '');
         let user = jwt.verify(token, config.secretkey);
 
-        if(!token){
+        if (!token) {
             return null;
-        }
-        else
-        {
+        } else {
             return user.role;
         }
     }
@@ -33,28 +30,22 @@ class Security {
      * @returns boolean
      * @author Furkan İmamoğlu
      */
-    checkUserPermission(token,checkRole)
-    {
+    checkUserPermission(token, checkRole) {
         let userRole = this.getPermissionFromToken(token);
-        if(!userRole || !checkRole) {
+        if (!userRole || !checkRole) {
             return false;
-        }
-        else
-        {
+        } else {
             return true;
         }
     }
 
-    getUserIdFromToken(token)
-    {
-        token = token.replace('Bearer ','');
+    getUserIdFromToken(token) {
+        token = token.replace('Bearer ', '');
         let user = jwt.verify(token, config.secretkey);
 
-        if(!token){
+        if (!token) {
             return null;
-        }
-        else
-        {
+        } else {
             return user.id;
         }
     }

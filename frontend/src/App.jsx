@@ -4,7 +4,7 @@ import React from 'react';
 import {Box, CssBaseline} from "@mui/material";
 
 // Router
-import { BrowserRouter as Router} from 'react-router-dom'
+import {BrowserRouter as Router} from 'react-router-dom'
 
 // Components
 import Footer from './Components/Footer/Footer'
@@ -16,9 +16,8 @@ export default function App() {
     return (
         <Router>
             <Box display="flex" flexDirection="column" minHeight="100vh">
-                <CssBaseline />
-                    <Routing />
-                <Footer />
+                <CssBaseline/>
+                <Routing/>
             </Box>
         </Router>
     );

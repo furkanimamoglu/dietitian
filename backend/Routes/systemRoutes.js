@@ -7,7 +7,7 @@ const router = express.Router();
 const systemController = require('../Controller/systemController');
 
 //Routes
-router.get('/settings' , systemController.settings);
-router.post('/backup' , systemController.backup);
+router.get('/settings', systemController.settings);
+router.post('/backup', systemController.backup);
 
 module.exports = router;

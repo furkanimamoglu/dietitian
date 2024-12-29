@@ -1,12 +1,13 @@
 import React from 'react';
 import './ForgotPassword.css'
-import {Box, Paper, Avatar, Typography, Button, Link, TextField} from "@mui/material";
+import {Avatar, Box, Button, Paper, TextField, Typography} from "@mui/material";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import { green } from "@mui/material/colors";
+import {green} from "@mui/material/colors";
+import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
 
 function ForgotPassword() {
     return (
-        <>
+        <DefaultWithFooter>
             <Box
                 sx={{
                     height: "100vh",
@@ -26,8 +27,8 @@ function ForgotPassword() {
                         alignItems: "center",
                     }}
                 >
-                    <Avatar sx={{ bgcolor: green[500], mb: 2 }}>
-                        <QuestionMarkIcon />
+                    <Avatar sx={{bgcolor: green[500], mb: 2}}>
+                        <QuestionMarkIcon/>
                     </Avatar>
                     <Typography variant="h5" gutterBottom>
                         Şifremi Unuttum?
@@ -36,21 +37,21 @@ function ForgotPassword() {
                         label="E-posta"
                         variant="outlined"
                         fullWidth
-                        sx={{ mb: 2 }}
+                        sx={{mb: 2}}
                     />
                     <Button
                         variant="contained"
                         fullWidth
                         sx={{
                             backgroundColor: green[500],
-                            "&:hover": { backgroundColor: green[700] },
+                            "&:hover": {backgroundColor: green[700]},
                         }}
                     >
                         Parolamı Sıfırla
                     </Button>
                 </Paper>
             </Box>
-        </>
+        </DefaultWithFooter>
     );
 }
 

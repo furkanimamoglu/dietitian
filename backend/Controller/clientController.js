@@ -1,15 +1,15 @@
 const ClientService = require("../Service/clientService");
 
 class ClientController {
-    async login(req,res) {
+    async login(req, res) {
         try {
-            const { username, password } = req.body;
+            const {email, password} = req.body;
 
-            const client = await ClientService.login(username, password);
+            const client = await ClientService.login(email, password);
 
             res.status(200).json(
                 {
-                    username: client.username,
+                    email: client.email,
                     token: client.token,
                     role: client.role
                 }
