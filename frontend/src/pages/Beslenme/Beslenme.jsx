@@ -98,7 +98,7 @@ export default function Beslenme() {
         <Default>
             <Grid2 container sx={{height: '100%'}}>
                 {/* Sol Panel */}
-                <Grid2 container sx={{height: '80vh', flex: 1}} direction="column" spacing={2}>
+                <Grid2 container sx={{height: '80vh', flex: 1, display: { xs: 'none', sm: 'flex' } }} direction="column" spacing={2}>
                     <Grid2 item>
                         <Paper elevation={3} sx={{p: "0.5rem"}}>
                             {/* Search and Add */}
@@ -123,7 +123,10 @@ export default function Beslenme() {
                                     <Grid2>
                                         <Button
                                             variant="contained"
-                                            sx={{backgroundColor: '#a50000'}}
+                                            sx={{
+                                                backgroundColor: '#a50000',
+                                                '&:hover': {backgroundColor: '#ff0000'},
+                                        }}
                                         >
                                             <DeleteIcon/>
                                         </Button>
@@ -160,7 +163,7 @@ export default function Beslenme() {
                                             <IconButton
                                                 edge="end"
                                                 aria-label="delete"
-                                                sx={{color: 'red'}}
+                                                sx={{ '&:hover': {backgroundColor: '#ff0000'}, backgroundColor: "#a50000", color: 'white'}}
                                             >
                                                 <DeleteIcon/>
                                             </IconButton>
