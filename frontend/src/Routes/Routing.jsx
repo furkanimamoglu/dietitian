@@ -4,16 +4,18 @@ import Dashboard from '../pages/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword.jsx";
-import Danisan from "../pages/Danisan/Danisan.jsx";
+import Danisanlarim from "../pages/Danisanlarim/Danisanlarim.jsx";
 import ExceptionPage from "../pages/Exception/ExceptionPage.jsx";
 import Randevularim from "../pages/Randevularim/Randevularim.jsx";
 import Beslenme from "../pages/Beslenme/Beslenme.jsx";
+import Danisan from "../pages/Danisan/Danisan.jsx";
 
 export default function Routing() {
     return (
         <Routes>
             {/* Diyetisyen Routes */}
                 <Route path="/dashboard/*" element={<Dashboard/>}/>
+                <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
                 <Route path="/danisan/*" element={<Danisan/>}/>
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>

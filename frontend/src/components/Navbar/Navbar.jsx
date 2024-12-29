@@ -1,7 +1,6 @@
 import React from 'react';
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
-import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
@@ -9,7 +8,8 @@ import Box from "@mui/material/Box";
 export default function Navbar() {
 
     const pages = [
-        {name: 'Danışanlarım', route: '/danisan'},
+        {name: 'Danışan', route: '/danisan'},
+        {name: 'Danışanlarım', route: '/danisanlarim'},
         {name: 'Randevularım', route: '/randevularim'},
         {name: 'Beslenme', route: '/beslenme'},
         {name: 'Tarifler', route: '/tarif'},
