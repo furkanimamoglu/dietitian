@@ -110,7 +110,7 @@ export default function Beslenme() {
                         <Paper elevation={3} sx={{ minHeight:"80vh" , p: "0.5rem"}}>
                             {/* Search and Add */}
                             <Grid2 container alignItems="center" spacing={2}>
-                                <Grid2 xs>
+                                <Grid2 xs={12}>
                                     <TextField
                                         fullWidth
                                         size="small"
@@ -143,7 +143,7 @@ export default function Beslenme() {
 
                             {/* Selectable List */}
                             <List sx={{maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden'}}>
-                                {beslenmeKategorileri.map((item) => (
+                                {beslenmeKategorileri.map((item) => ( //TODO: Uyarı var burada, düzeltilecek
                                     <ListItem
                                         key={item}
                                         sx={{
