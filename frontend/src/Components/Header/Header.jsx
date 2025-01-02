@@ -16,7 +16,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import HelpIcon from '@mui/icons-material/Help';
 import {alpha, InputBase, styled} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
-import MessageIcon from '@mui/icons-material/Message';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const settings = ['Profil', 'Çıkış Yap'];
