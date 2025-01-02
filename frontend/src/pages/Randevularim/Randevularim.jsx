@@ -87,20 +87,18 @@ export default function Randevularim() {
             end: eventData.end,
         };
 
-        //TODO: Title hala güncellenemiyor
-        setRandevu(prevRandevular =>
-            prevRandevular.map(randevu =>
-                randevu.id === Number(updatedEventWithDates.id)
+        setRandevu(prevRandevular => {
+            const updatedRandevular = prevRandevular.map(randevu =>
+                String(randevu.id) === String(updatedEventWithDates.id)
                     ? { ...randevu, ...updatedEventWithDates }
                     : randevu
-            )
-        );
-
-        console.log("Before Update:", randevular);
-        console.log("Updated Event Data:", updatedEventWithDates);
+            );
+            return updatedRandevular;
+        });
 
         setRandevuDuzenlePopup(false);
     };
+
 
     const handleDialogClose = () => {
         setRandevuDuzenlePopup(false);
@@ -159,6 +157,10 @@ export default function Randevularim() {
                                 dayHeaderFormat: { weekday: 'long' }
                             }
                         }}
+                        weekNumberFormat={{
+                            week: "numeric"
+                        }}
+                        weekNumbers={true}
                         now={new Date()}
                         nowIndicator={true}
                         firstDay={1}
