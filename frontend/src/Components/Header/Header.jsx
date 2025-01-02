@@ -5,7 +5,6 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
-import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
@@ -14,9 +13,13 @@ import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
 import {Search} from "@mui/icons-material";
 import SearchIcon from '@mui/icons-material/Search';
+import HelpIcon from '@mui/icons-material/Help';
 import {alpha, InputBase, styled} from "@mui/material";
+import SettingsIcon from '@mui/icons-material/Settings';
+import MessageIcon from '@mui/icons-material/Message';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
-const settings = ['Profil', 'Hesap', 'Ayarlar', 'Çıkış Yap'];
+const settings = ['Profil', 'Çıkış Yap'];
 
 function Header() {
     const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -119,16 +122,40 @@ function Header() {
                     {/* Search Bar End */}
 
                     {/* Notification Button Start */}
-                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'flex'}, justifyContent: 'flex-end', pr: "1rem"}}>
-                        <Badge badgeContent={4} color="secondary">
-                            <MailIcon color="action" sx={{color: 'white'}}/>
-                        </Badge>
+                    <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "flex" }, gap: "1rem", justifyContent: "flex-end", pr: "1rem" }}>
+                        <Tooltip title="Mesajlar" arrow>
+                            <IconButton color="inherit">
+                                <Badge badgeContent={1} color="secondary">
+                                    <MailIcon sx={{ color: "white" }} />
+                                </Badge>
+                            </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Bildirimler" arrow>
+                            <IconButton color="inherit">
+                                <Badge badgeContent={4} color="secondary">
+                                    <NotificationsIcon sx={{ color: "white" }} />
+                                </Badge>
+                            </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Yardım" arrow>
+                            <IconButton color="inherit">
+                                <HelpIcon sx={{ color: "white" }} />
+                            </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Ayarlar" arrow>
+                            <IconButton color="inherit">
+                                <SettingsIcon sx={{ color: "white" }} />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                     {/* Notification Button End */}
 
                     {/* Profile Button Start */}
                     <Box sx={{flexGrow: 0}}>
-                        <Tooltip title="Open settings">
+                        <Tooltip title="Profilim">
                             <IconButton onClick={handleOpenUserMenu}>
                                 <Avatar alt="Furkan" src="/static/images/avatar/2.jpg"/>
                             </IconButton>
