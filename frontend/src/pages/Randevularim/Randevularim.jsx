@@ -14,14 +14,16 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, G
 export default function Randevularim() {
     const [randevular, setRandevu] = useState([
         {
+            id: 1,
             title: "Randevu 1",
-            start: "2024-12-30T10:00:00",
-            end: "2024-12-30T11:00:00",
+            start: "2025-01-01T10:00:00",
+            end: "2025-01-02T11:00:00",
         },
         {
+            id: 2,
             title: "Randevu 2",
-            start: "2024-12-31T14:00:00",
-            end: "2024-12-31T15:00:00",
+            start: "2025-01-05T14:00:00",
+            end: "2025-01-05T15:00:00",
         },
     ]);
 
@@ -36,14 +38,8 @@ export default function Randevularim() {
     const handleDateClick = (arg) => {
         const currentView = arg.view.type;
 
-        if (currentView === "dayGridMonth") {
+        if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
-        } else if (currentView === "timeGridDay") {
-            setEventData({
-                title: "",
-                start: arg.dateStr,
-                end: arg.dateStr,
-            });
         }
     };
 
@@ -51,7 +47,11 @@ export default function Randevularim() {
         const event = arg.event;
         console.log("Start:", event.start.toISOString().slice(0, 16))
         console.log("End:", event.end.toISOString().slice(0, 16))
+
+        console.log("Clicked Event ID:", event.id);
+
         setEventData({
+            id: event.id,
             title: event.title,
             start: event.start.toISOString().slice(0, 16),
             end: event.end.toISOString().slice(0, 16),
@@ -59,6 +59,18 @@ export default function Randevularim() {
 
         setRandevuDuzenlePopup(true);
     };
+
+    const handleEventResize = (arg) => {
+        console.log('Event Title:', arg.event.title);
+        console.log('Start Date:', arg.event.start.toISOString());
+        console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
+    }
+
+    const handleEventDrop = (arg) => {
+        console.log('Event Title:', arg.event.title);
+        console.log('Start Date:', arg.event.start.toISOString());
+        console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
+    }
 
     const handleEventChange = (updatedEvent) => {
         setEventData(updatedEvent); // eventData'yı güncelliyoruz
@@ -71,11 +83,19 @@ export default function Randevularim() {
             end: eventData.end,
         };
 
-        setRandevu(randevular.map(event =>
-            event.title === updatedEventWithDates.title ? updatedEventWithDates : event
-        ));
 
-        setRandevuDuzenlePopup(false); // Popup'ı kapat
+        setRandevu(prevRandevular =>
+            prevRandevular.map(randevu =>
+                randevu.id === Number(updatedEventWithDates.id)
+                    ? { ...randevu, ...updatedEventWithDates } // ID'yi eşleştirip güncelle
+                    : randevu // Diğerlerini olduğu gibi bırak
+            )
+        );
+
+        console.log("Before Update:", randevular);
+        console.log("Updated Event Data:", updatedEventWithDates);
+
+        setRandevuDuzenlePopup(false);
     };
 
     const handleDialogClose = () => {
@@ -103,9 +123,12 @@ export default function Randevularim() {
                         }}
                         navLinks={true}
                         businessHours={{
-                            daysOfWeek: [1, 2, 3, 4, 5],
+                            daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
                             startTime: "09:00",
                             endTime: "18:00",
+                        }}
+                        buttonText={{
+                            today: "Bugün"
                         }}
                         views={{
                             timeGridDay: {
@@ -139,6 +162,10 @@ export default function Randevularim() {
                         }}
                         dateClick={handleDateClick}
                         eventClick={handleEventClick}
+                        eventResize={handleEventResize}
+                        eventDrop={handleEventDrop}
+                        eventResizableFromStart={true}
+                        eventOverlap={false}
                     />
                 </Box>
             </Grid2>
