@@ -87,7 +87,7 @@ export default function Randevularim() {
             end: eventData.end,
         };
 
-
+        //TODO: Title hala güncellenemiyor
         setRandevu(prevRandevular =>
             prevRandevular.map(randevu =>
                 randevu.id === Number(updatedEventWithDates.id)
