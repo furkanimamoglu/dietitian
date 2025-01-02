@@ -72,6 +72,10 @@ export default function Randevularim() {
         console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
     }
 
+    const handleRandevuEkleButton = (arg) => {
+        alert('Randevu ekleme butonuna tıkladınız!');
+    }
+
     const handleEventChange = (updatedEvent) => {
         setEventData(updatedEvent); // eventData'yı güncelliyoruz
     };
@@ -117,9 +121,15 @@ export default function Randevularim() {
                         locale="tr"
                         contentHeight="68vh"
                         headerToolbar={{
-                            left: "prev,next today",
+                            left: "prev,next today randevuEkle",
                             center: "title",
                             right: "timeGridDay timeGridWeek dayGridMonth dayGridYear"
+                        }}
+                        customButtons={{
+                            randevuEkle: {
+                                text: 'Randevu Ekle',
+                                click: handleRandevuEkleButton
+                            }
                         }}
                         navLinks={true}
                         businessHours={{
