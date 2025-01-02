@@ -91,8 +91,8 @@ export default function Randevularim() {
         setRandevu(prevRandevular =>
             prevRandevular.map(randevu =>
                 randevu.id === Number(updatedEventWithDates.id)
-                    ? { ...randevu, ...updatedEventWithDates } // ID'yi eşleştirip güncelle
-                    : randevu // Diğerlerini olduğu gibi bırak
+                    ? { ...randevu, ...updatedEventWithDates }
+                    : randevu
             )
         );
 
