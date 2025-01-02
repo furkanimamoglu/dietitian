@@ -40,6 +40,8 @@ export default function Randevularim() {
 
         if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
+        } else {
+            alert("test")
         }
     };
 
@@ -184,10 +186,10 @@ export default function Randevularim() {
 
             {/* Event Düzenle Popup */}
             <Dialog open={randevuDuzenlePopup} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Event Details</DialogTitle>
+                <DialogTitle>Randevu Düzenle</DialogTitle>
                 <DialogContent>
                     <TextField
-                        label="Event Title"
+                        label="Randevu Başlığı"
                         name="title"
                         value={eventData.title}
                         onChange={(e) => handleEventChange({ ...eventData, title: e.target.value })}
@@ -195,7 +197,7 @@ export default function Randevularim() {
                         margin="normal"
                     />
                     <TextField
-                        label="Start"
+                        label="Başlangıç Tarihi:"
                         name="start"
                         value={eventData.start}
                         onChange={(e) => handleEventChange({ ...eventData, start: e.target.value })}
@@ -205,7 +207,7 @@ export default function Randevularim() {
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
                     <TextField
-                        label="End"
+                        label="Bitiş Tarihi:"
                         name="end"
                         value={eventData.end}
                         onChange={(e) => handleEventChange({ ...eventData, end: e.target.value })}
@@ -217,10 +219,10 @@ export default function Randevularim() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
-                        Cancel
+                        Vazgeç
                     </Button>
                     <Button onClick={handleEventSave} color="primary">
-                        Save
+                        Kaydet
                     </Button>
                 </DialogActions>
             </Dialog>
