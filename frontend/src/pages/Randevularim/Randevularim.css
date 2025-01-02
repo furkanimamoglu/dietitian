@@ -66,6 +66,11 @@
     background-color: #fff;
 }
 
+/* Günlük Saat Seçimi */
+.fc-timegrid-slot-lane:hover {
+    background-color: rgba(255, 172, 0, 0.25);
+}
+
 /* Etkinlikler */
 .fc-event {
     background-color: #4CAF50;
@@ -79,8 +84,14 @@
 }
 
 .fc-event:hover {
-    transform: scale(1.05);
+    transform: scale(1.003);
     background-color: #45a049;
+}
+
+.fc-daygrid-day:hover {
+    background-color: #ffab00; /* Açık mavi ton */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 /* Tüm gün etkinlik alanı */

@@ -7,76 +7,113 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 
-import Grid2 from "@mui/material/Grid2";
-import Box from "@mui/material/Box";
 import Default from "../../components/Layouts/Default.jsx";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from "@mui/material";
+
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Grid2, Box } from '@mui/material';
 
 export default function Randevularim() {
     const [randevular, setRandevu] = useState([
         {
+            id: 1,
             title: "Randevu 1",
-            start: "2024-12-30T10:00:00",
-            end: "2024-12-30T11:00:00",
+            start: "2025-01-01T10:00:00",
+            end: "2025-01-02T11:00:00",
         },
         {
+            id: 2,
             title: "Randevu 2",
-            start: "2024-12-31T14:00:00",
-            end: "2024-12-31T15:00:00",
+            start: "2025-01-05T14:00:00",
+            end: "2025-01-05T15:00:00",
         },
     ]);
 
-    const [openDialog, setOpenDialog] = useState(false);
-    const [randevuData, setRandevuData] = useState({
+    const [eventData, setEventData] = useState({
         title: "",
         start: "",
         end: "",
     });
 
-    const handleDateClick = (arg) => {
-        const currentView = arg.view.type; // Takvim görünümünü alıyoruz
+    const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
 
-        if (currentView === "dayGridMonth") {
+    const handleDateClick = (arg) => {
+        const currentView = arg.view.type;
+
+        if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
-        } else if (currentView === "timeGridDay") {
-            console.log("Günlük görünümde tıklandı, randevu ekle");
-            setRandevuData({
-                ...randevuData,
-                start: arg.dateStr, // Tıklanan günün başlangıç tarihi
-                end: arg.dateStr,   // Başlangıç ve bitişi aynı tutuyoruz
-            });
-            setOpenDialog(true); // Randevu ekleme popup'ını açıyoruz
         }
     };
 
-    const handleDialogClose = () => {
-        setOpenDialog(false);
-        setRandevuData({
-            title: "",
-            start: "",
-            end: "",
+    const handleEventClick = (arg) => {
+        const event = arg.event;
+        console.log("Start:", event.start.toISOString().slice(0, 16))
+        console.log("End:", event.end.toISOString().slice(0, 16))
+
+        console.log("Clicked Event ID:", event.id);
+
+        setEventData({
+            id: event.id,
+            title: event.title,
+            start: event.start.toISOString().slice(0, 16),
+            end: event.end.toISOString().slice(0, 16),
         });
+
+        setRandevuDuzenlePopup(true);
     };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setRandevuData({ ...randevuData, [name]: value });
+    const handleEventResize = (arg) => {
+        console.log('Event Title:', arg.event.title);
+        console.log('Start Date:', arg.event.start.toISOString());
+        console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
+    }
+
+    const handleEventDrop = (arg) => {
+        console.log('Event Title:', arg.event.title);
+        console.log('Start Date:', arg.event.start.toISOString());
+        console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
+    }
+
+    const handleRandevuEkleButton = (arg) => {
+        alert('Randevu ekleme butonuna tıkladınız!');
+    }
+
+    const handleEventChange = (updatedEvent) => {
+        setEventData(updatedEvent); // eventData'yı güncelliyoruz
     };
 
-    const handleSaveRandevu = () => {
-        // Burada randevu kaydını gerçekleştirebilirsiniz (API çağrısı veya state güncellemesi)
-        setRandevu([...randevular, randevuData]); // Yeni randevuyu ekliyoruz
-        handleDialogClose(); // Dialogu kapatıyoruz
+    const handleEventSave = () => {
+        const updatedEventWithDates = {
+            ...eventData,
+            start: eventData.start,
+            end: eventData.end,
+        };
+
+        //TODO: Title hala güncellenemiyor
+        setRandevu(prevRandevular =>
+            prevRandevular.map(randevu =>
+                randevu.id === Number(updatedEventWithDates.id)
+                    ? { ...randevu, ...updatedEventWithDates }
+                    : randevu
+            )
+        );
+
+        console.log("Before Update:", randevular);
+        console.log("Updated Event Data:", updatedEventWithDates);
+
+        setRandevuDuzenlePopup(false);
+    };
+
+    const handleDialogClose = () => {
+        setRandevuDuzenlePopup(false);
     };
 
     return (
         <Default>
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
-                {/* Takvim Box */}
                 <Box sx={{ width: "100%", height: "100%" }}>
                     <FullCalendar
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
+                        timeZone={'UTC'}
                         themeSystem={'bootstrap5'}
                         events={randevular}
                         editable={true}
@@ -84,15 +121,24 @@ export default function Randevularim() {
                         locale="tr"
                         contentHeight="68vh"
                         headerToolbar={{
-                            left: "prev,next today",
+                            left: "prev,next today randevuEkle",
                             center: "title",
                             right: "timeGridDay timeGridWeek dayGridMonth dayGridYear"
                         }}
+                        customButtons={{
+                            randevuEkle: {
+                                text: 'Randevu Ekle',
+                                click: handleRandevuEkleButton
+                            }
+                        }}
                         navLinks={true}
                         businessHours={{
-                            daysOfWeek: [1, 2, 3, 4, 5],
+                            daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
                             startTime: "09:00",
                             endTime: "18:00",
+                        }}
+                        buttonText={{
+                            today: "Bugün"
                         }}
                         views={{
                             timeGridDay: {
@@ -125,47 +171,54 @@ export default function Randevularim() {
                             meridiem: "short",
                         }}
                         dateClick={handleDateClick}
+                        eventClick={handleEventClick}
+                        eventResize={handleEventResize}
+                        eventDrop={handleEventDrop}
+                        eventResizableFromStart={true}
+                        eventOverlap={false}
                     />
                 </Box>
             </Grid2>
 
-            {/* Randevu ekleme popup'ı */}
-            <Dialog open={openDialog} onClose={handleDialogClose}>
-                <DialogTitle>Randevu Ekle</DialogTitle>
+            {/* Event Düzenle Popup */}
+            <Dialog open={randevuDuzenlePopup} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Event Details</DialogTitle>
                 <DialogContent>
                     <TextField
-                        label="Başlık"
+                        label="Event Title"
                         name="title"
-                        value={randevuData.title}
-                        onChange={handleInputChange}
+                        value={eventData.title}
+                        onChange={(e) => handleEventChange({ ...eventData, title: e.target.value })}
                         fullWidth
                         margin="normal"
                     />
                     <TextField
-                        label="Başlangıç"
+                        label="Start"
                         name="start"
-                        value={randevuData.start}
-                        onChange={handleInputChange}
+                        value={eventData.start}
+                        onChange={(e) => handleEventChange({ ...eventData, start: e.target.value })}
                         fullWidth
                         margin="normal"
-                        disabled
+                        type="datetime-local"
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
                     <TextField
-                        label="Bitiş"
+                        label="End"
                         name="end"
-                        value={randevuData.end}
-                        onChange={handleInputChange}
+                        value={eventData.end}
+                        onChange={(e) => handleEventChange({ ...eventData, end: e.target.value })}
                         fullWidth
                         margin="normal"
-                        disabled
+                        type="datetime-local"
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDialogClose} color="primary">
-                        İptal
+                    <Button onClick={handleDialogClose} color="secondary">
+                        Cancel
                     </Button>
-                    <Button onClick={handleSaveRandevu} color="primary">
-                        Kaydet
+                    <Button onClick={handleEventSave} color="primary">
+                        Save
                     </Button>
                 </DialogActions>
             </Dialog>
