@@ -94,14 +94,14 @@ export default function Randevularim() {
         console.log('Event Title:', arg.event.title);
         console.log('Start Date:', arg.event.start.toISOString());
         console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
-        randevuDuzenle(arg);
+        //randevuDuzenle(arg);
     }
 
     const handleEventDrop = (arg) => {
         console.log('Event Title:', arg.event.title);
         console.log('Start Date:', arg.event.start.toISOString());
         console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
-        randevuDuzenle(arg);
+        //randevuDuzenle(arg);
     }
 
     const handleRandevuEkleButton = (arg) => {
