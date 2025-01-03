@@ -9,6 +9,8 @@ import ExceptionPage from "../pages/Exception/ExceptionPage.jsx";
 import Randevularim from "../pages/Randevularim/Randevularim.jsx";
 import Beslenme from "../pages/Beslenme/Beslenme.jsx";
 import Danisan from "../pages/Danisan/Danisan.jsx";
+import Tarifler from "../pages/Tarifler/Tarifler.jsx";
+import Egzersizler from "../pages/Egzersizler/Egzersizler.jsx";
 
 export default function Routing() {
     return (
@@ -19,6 +21,8 @@ export default function Routing() {
                 <Route path="/danisan/*" element={<Danisan/>}/>
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
+                <Route path="/egzersiz/*" element={<Egzersizler/>}/>
+                <Route path="/tarif/*" element={<Tarifler/>}/>
                 <Route path="/login/*" element={<Login/>}/>
                 <Route path="/register/*" element={<Register/>}/>
                 <Route path="/forgotpassword/*" element={<ForgotPassword/>}/>
