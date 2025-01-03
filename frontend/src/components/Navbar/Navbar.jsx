@@ -14,7 +14,7 @@ export default function Navbar() {
         {name: 'Beslenme', route: '/beslenme'},
         {name: 'Tarifler', route: '/tarif'},
         {name: 'Egzersizler', route: '/egzersiz'},
-        {name: 'Muhasebe', route: '/muhasebe'}
+        {name: 'Ödemeler', route: '/odeme'}
     ];
 
     return (

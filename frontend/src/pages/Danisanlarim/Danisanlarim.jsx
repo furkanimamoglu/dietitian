@@ -9,17 +9,6 @@ import FemaleIcon from "@mui/icons-material/Female";
 import {green, red, blue, pink} from "@mui/material/colors";
 import Default from "../../components/Layouts/Default.jsx";
 
-const handleEdit = (id) => {
-    console.log('Edit item with ID:', id);
-    // Burada düzenleme işlemi yapılabilir.
-};
-
-const handleDelete = (id) => {
-    setRows(rows.filter((row) => row.id !== id));
-    console.log('Delete item with ID:', id);
-    // Burada silme işlemi yapılabilir.
-};
-
 const rows = [
     {
         id: 1,
@@ -121,7 +110,6 @@ const columns = [
 export default function Danisanlarim() {
     const [open, setOpen] = useState(false);
 
-    // Yeni Danışan Oluştur Popup
     const openCreatePopup = () => {
         setOpen(true);
     };
@@ -137,7 +125,6 @@ export default function Danisanlarim() {
     };
 
 
-    // API'den veri çekme
     useEffect(() => {
         axios.get('http://localhost:3000/dietitian/getAllMyClients')
             .then(response => {
