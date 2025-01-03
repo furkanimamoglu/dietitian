@@ -12,7 +12,8 @@ import Default from "../../components/Layouts/Default.jsx";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Grid2, Box } from '@mui/material';
 
 export default function Randevularim() {
-    const [randevular, setRandevu] = useState([
+
+    const [randevular, setRandevular] = useState([
         {
             id: 1,
             title: "Randevu 1",
@@ -33,6 +34,7 @@ export default function Randevularim() {
         end: "",
     });
 
+    const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
 
     const handleDateClick = (arg) => {
@@ -41,16 +43,22 @@ export default function Randevularim() {
         if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
-            alert("test")
+            const startDate = new Date( arg.dateStr);
+            const endDate = new Date(arg.dateStr);
+            endDate.setHours(endDate.getHours() + 1);
+
+            setEventData({
+                title: "",
+                start: startDate.toISOString().slice(0, 16),
+                end: endDate.toISOString().slice(0, 16),
+            });
+
+            setRandevuEklePopup(true);
         }
     };
 
-    const handleEventClick = (arg) => {
+    const randevuDuzenle = (arg) => {
         const event = arg.event;
-        console.log("Start:", event.start.toISOString().slice(0, 16))
-        console.log("End:", event.end.toISOString().slice(0, 16))
-
-        console.log("Clicked Event ID:", event.id);
 
         setEventData({
             id: event.id,
@@ -60,22 +68,50 @@ export default function Randevularim() {
         });
 
         setRandevuDuzenlePopup(true);
+    }
+
+    const randevuEkle = () => {
+        const newEvent = {
+            ...eventData,
+            id: randevular.length + 1, // Yeni bir id ataması yapılabilir
+            start: eventData.start,
+            end: eventData.end,
+        };
+
+        // Yeni randevuyu mevcut randevulara ekle
+        setRandevular(prevRandevular => {
+            const updatedRandevular = [...prevRandevular, newEvent];
+            return updatedRandevular; // Yeni listeyi döndür
+        });
+        setRandevuEklePopup(false);
+    };
+
+    const handleEventClick = (arg) => {
+        randevuDuzenle(arg);
     };
 
     const handleEventResize = (arg) => {
         console.log('Event Title:', arg.event.title);
         console.log('Start Date:', arg.event.start.toISOString());
         console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
+        randevuDuzenle(arg);
     }
 
     const handleEventDrop = (arg) => {
         console.log('Event Title:', arg.event.title);
         console.log('Start Date:', arg.event.start.toISOString());
         console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
+        randevuDuzenle(arg);
     }
 
     const handleRandevuEkleButton = (arg) => {
-        alert('Randevu ekleme butonuna tıkladınız!');
+        setEventData({
+            title: "",
+            start: "",
+            end: "",
+        });
+
+        setRandevuEklePopup(true);
     }
 
     const handleEventChange = (updatedEvent) => {
@@ -89,7 +125,7 @@ export default function Randevularim() {
             end: eventData.end,
         };
 
-        setRandevu(prevRandevular => {
+        setRandevular(prevRandevular => {
             const updatedRandevular = prevRandevular.map(randevu =>
                 String(randevu.id) === String(updatedEventWithDates.id)
                     ? { ...randevu, ...updatedEventWithDates }
@@ -97,19 +133,20 @@ export default function Randevularim() {
             );
             return updatedRandevular;
         });
-
-        setRandevuDuzenlePopup(false);
+        handleDialogClose();
     };
 
 
     const handleDialogClose = () => {
         setRandevuDuzenlePopup(false);
+        setRandevuEklePopup(false);
     };
 
     return (
         <Default>
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
                 <Box sx={{ width: "100%", height: "100%" }}>
+                    {/* TODO: Resize Event sırasında eğer kullanıcı kaydetmezse, event eski boyutuna geri dönmeli */}
                     <FullCalendar
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
@@ -183,6 +220,49 @@ export default function Randevularim() {
                     />
                 </Box>
             </Grid2>
+
+            {/* Yeni Randevu Ekle Popup */}
+            <Dialog open={randevuEklePopup} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Yeni Randevu Ekle</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Randevu Başlığı"
+                        name="title"
+                        value={eventData.title}
+                        onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Başlangıç Tarihi:"
+                        name="start"
+                        value={eventData.start}
+                        onChange={(e) => setEventData({ ...eventData, start: e.target.value })}
+                        fullWidth
+                        margin="normal"
+                        type="datetime-local"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                    <TextField
+                        label="Bitiş Tarihi:"
+                        name="end"
+                        value={eventData.end}
+                        onChange={(e) => setEventData({ ...eventData, end: e.target.value })}
+                        fullWidth
+                        margin="normal"
+                        type="datetime-local"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="secondary">
+                        Vazgeç
+                    </Button>
+                    <Button onClick={randevuEkle} color="primary">
+                        Kaydet
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Event Düzenle Popup */}
             <Dialog open={randevuDuzenlePopup} onClose={handleDialogClose} maxWidth="sm" fullWidth>
