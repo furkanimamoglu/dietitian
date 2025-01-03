@@ -105,7 +105,13 @@ export default function Randevularim() {
     }
 
     const handleRandevuEkleButton = (arg) => {
-        alert('Randevu ekleme butonuna tıkladınız!');
+        setEventData({
+            title: "",
+            start: "",
+            end: "",
+        });
+
+        setRandevuEklePopup(true);
     }
 
     const handleEventChange = (updatedEvent) => {
