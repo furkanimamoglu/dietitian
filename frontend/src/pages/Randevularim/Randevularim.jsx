@@ -146,6 +146,7 @@ export default function Randevularim() {
         <Default>
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
                 <Box sx={{ width: "100%", height: "100%" }}>
+                    {/* TODO: Resize Event sırasında eğer kullanıcı kaydetmezse, event eski boyutuna geri dönmeli */}
                     <FullCalendar
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
