@@ -3,10 +3,11 @@ import './ForgotPassword.css'
 import {Avatar, Box, Button, Paper, TextField, Typography} from "@mui/material";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import {green} from "@mui/material/colors";
+import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
 
 function ForgotPassword() {
     return (
-        <>
+        <DefaultWithFooter>
             <Box
                 sx={{
                     height: "100vh",
@@ -50,7 +51,7 @@ function ForgotPassword() {
                     </Button>
                 </Paper>
             </Box>
-        </>
+        </DefaultWithFooter>
     );
 }
 

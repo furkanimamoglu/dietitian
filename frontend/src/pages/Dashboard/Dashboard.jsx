@@ -1,43 +1,41 @@
 import React from 'react';
-import Navbar from "../../components/Navbar/Navbar.jsx";
-import {Gauge, gaugeClasses} from '@mui/x-charts/Gauge';
+import './Dashboard.css';
 import Default from "../../components/Layouts/Default.jsx";
-
-const settings = {
-    width: 200,
-    height: 200,
-    value: 60,
-};
+import { Grid2, Paper, Typography } from '@mui/material';
 
 export default function Dashboard() {
 
-    const myDiv = (<div style={{padding: '1rem', background: 'red'}}> my div </div>)
-
     return (
-        <>
-            <Default
-                myDiv={myDiv}
-            >
+        <Default>
+            <Grid2 container spacing={3}>
+                <Grid2 item xs={12} sm={6} md={3}>
+                    <Paper elevation={3} sx={{ padding: 2 }}>
+                        <Typography variant="h6">Yaklaşan Randevular</Typography>
+                        <Typography>Buraya yaklasan randevular gelecek.</Typography>
+                    </Paper>
+                </Grid2>
 
+                <Grid2 item xs={12} sm={6} md={3}>
+                    <Paper elevation={3} sx={{ padding: 2 }}>
+                        <Typography variant="h6">Randevu İstekleri</Typography>
+                        <Typography>Buraya randevu istekleri gelecek.</Typography>
+                    </Paper>
+                </Grid2>
 
-                <Navbar/>
-                <h1>Ana sayfa içeriği buraya gelecek</h1>
-                <Gauge
-                    {...settings}
-                    cornerRadius="50%"
-                    sx={(theme) => ({
-                        [`& .${gaugeClasses.valueText}`]: {
-                            fontSize: 40,
-                        },
-                        [`& .${gaugeClasses.valueArc}`]: {
-                            fill: '#52b202',
-                        },
-                        [`& .${gaugeClasses.referenceArc}`]: {
-                            fill: theme.palette.text.disabled,
-                        },
-                    })}
-                />
-            </Default>
-        </>
+                <Grid2 item xs={12} sm={6} md={3}>
+                    <Paper elevation={3} sx={{ padding: 2 }}>
+                        <Typography variant="h6">Kendi Notlarım</Typography>
+                        <Typography>Buraya kendi notlarınız gelecek.</Typography>
+                    </Paper>
+                </Grid2>
+
+                <Grid2 item xs={12} sm={6} md={3}>
+                    <Paper elevation={3} sx={{ padding: 2 }}>
+                        <Typography variant="h6">Hareketler</Typography>
+                        <Typography>Buraya hareketler gelecek.</Typography>
+                    </Paper>
+                </Grid2>
+            </Grid2>
+        </Default>
     );
 };

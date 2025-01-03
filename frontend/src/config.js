@@ -1,6 +1,6 @@
 // config.js
 const config = {
-    environment: "dev",
+    environment: "prod",
 
     dev: {
         apiUrl: 'http://localhost:3000',
@@ -9,7 +9,7 @@ const config = {
     },
 
     prod: {
-        apiUrl: 'http://localhost:3000',
+        apiUrl: 'http://164.92.252.201:3000',
         websiteName: "Diyetisyenim",
         footerText: "2024 Diyetisyen Uygulaması"
     }

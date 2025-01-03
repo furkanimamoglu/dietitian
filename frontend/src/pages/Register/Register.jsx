@@ -6,6 +6,7 @@ import config from "../../config.js";
 import {Avatar, Box, Button, Paper, TextField, Typography} from "@mui/material";
 import {green} from "@mui/material/colors";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
 
 function Register() {
     const [username, setUsername] = useState('');
@@ -46,7 +47,7 @@ function Register() {
     };
 
     return (
-        <>
+        <DefaultWithFooter>
             <Box
                 sx={{
                     height: "100vh",
@@ -129,7 +130,7 @@ function Register() {
                     </form>
                 </Paper>
             </Box>
-        </>
+        </DefaultWithFooter>
     );
 }
 

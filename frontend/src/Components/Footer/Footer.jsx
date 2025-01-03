@@ -3,15 +3,12 @@ import React from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
-// Config
-import config from '../../config.js'
-
 export default function Footer() {
     return (
-        <footer style={{marginTop: 'auto', padding: '1rem', backgroundColor: '#f5f5f5'}}>
+        <footer style={{marginTop: 'auto', padding: '0.5rem', backgroundColor: '#3d8a3d'}}>
             <Container>
-                <Typography variant="body2" color="textSecondary" align="center">
-                    &copy; {config[config.environment].footerText}
+                <Typography variant="body2" color="white" align="center">
+                    &copy; 2024 Diyetisyen Uygulaması
                 </Typography>
             </Container>
         </footer>
