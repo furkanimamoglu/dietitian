@@ -9,7 +9,7 @@ export default function Dashboard() {
         <Default>
             <Grid2 container spacing={3}>
                 {/* Yaklaşan Randevular */}
-                <Grid2 item size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Paper elevation={3} sx={{ minHeight: '35vh', padding: 2, backgroundColor: '#bbdefb' }}>
                         <Box display="flex" alignItems="center" gap={2}>
                             <Event fontSize="large" />
@@ -28,7 +28,7 @@ export default function Dashboard() {
                 </Grid2>
 
                 {/* Notlarım */}
-                <Grid2 item size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Paper elevation={3} sx={{ minHeight: '35vh', padding: 2, backgroundColor: '#fff9c4' }}>
                         <Box display="flex" alignItems="center" gap={2}>
                             <Notes fontSize="large" />
@@ -46,7 +46,7 @@ export default function Dashboard() {
                 </Grid2>
 
                 {/* Randevu Talepleri */}
-                <Grid2 item size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Paper elevation={3} sx={{ minHeight: '35vh', padding: 2, backgroundColor: '#ffccbc' }}>
                         <Box display="flex" alignItems="center" gap={2}>
                             <Notifications fontSize="large" />
@@ -81,7 +81,7 @@ export default function Dashboard() {
                 </Grid2>
 
                 {/* Hareketler */}
-                <Grid2 item size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Paper elevation={3} sx={{ minHeight: '35vh', padding: 2, backgroundColor: '#c8e6c9' }}>
                         <Box display="flex" alignItems="center" gap={2}>
                             <TrendingUp fontSize="large" />
