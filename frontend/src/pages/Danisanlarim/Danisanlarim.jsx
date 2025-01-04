@@ -126,7 +126,7 @@ export default function Danisanlarim() {
 
 
     useEffect(() => {
-        axios.get('http://localhost:3000/dietitian/getAllMyClients')
+        axios.get(  'http://localhost:3000/dietitian/getAllMyClients')
             .then(response => {
                 setClients(response.data); // API'den gelen veriyi state'e set ediyoruz
             })
