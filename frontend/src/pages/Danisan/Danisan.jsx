@@ -7,16 +7,72 @@ import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 
+// TODO: Geleceğe yönelik anamnez sorularını kenara koyayım dedim
+const AnamnezSorulari = {
+    smoking: "Sigara kullanıyor musunuz? (Evet/Hayır)",
+    alcoholConsumption: "Alkol tüketim sıklığınız nedir? (Hiç/Bazen/Sık sık)",
+    physicalActivity: "Fiziksel aktivite düzeyiniz nedir? (Düşük/Orta/Yüksek)",
+    medicalHistory: "Daha önce geçirdiğiniz hastalıklar veya tıbbi geçmişiniz var mı?",
+    currentMedications: "Şu anda kullandığınız ilaçlar var mı?",
+    allergies: "Herhangi bir alerjiniz var mı? (Gıda, ilaç, çevresel vb.)",
+    surgeries: "Daha önce geçirdiğiniz ameliyatlar var mı?",
+    familyMedicalHistory: "Ailede genetik veya kalıtsal hastalıklar var mı?",
+    stressLevel: "Günlük stres seviyeniz nedir? (Düşük/Orta/Yüksek)",
+    sleepPattern: "Uyku düzeniniz nedir? (Saat olarak belirtin)",
+    dietHistory: "Daha önce uyguladığınız diyet veya beslenme alışkanlıklarınız neler?",
+    hydration: "Günlük su tüketiminiz ne kadar? (litre olarak belirtin)",
+    caffeineIntake: "Günlük kafein tüketiminiz nedir? (Kahve, çay vb.)",
+    bowelHabits: "Bağırsak alışkanlıklarınız düzenli mi? (Evet/Hayır)",
+    mentalHealth: "Psikolojik durumunuz veya geçmişte yaşadığınız psikolojik rahatsızlıklar var mı?",
+    chronicPain: "Devam eden veya kronik ağrılarınız var mı?",
+    workEnvironment: "Çalışma ortamınız fiziksel veya zihinsel olarak ne kadar yorucu?",
+    screenTime: "Günlük ekran karşısında geçirdiğiniz süre nedir?",
+    supplements: "Herhangi bir besin takviyesi veya vitamin kullanıyor musunuz?"
+};
+
+
 const DanisanInfo = {
     id: 1,
     name: "Ahmet Yılmaz",
     age: 30,
     gender: "Erkek",
-    height: 175,
-    weight: 75,
+    height: 171, // (cm)
+    weight: 48.2, // (kg)
+    bmi: 16.5,
+    ideal_weight: 63.51, // (kg)
+    lean_mass: 39.50, // Yağsız Kitle (kg)
+    muscle: 37.35, // Kas (kg)
+    fat_mass: 8.72, // Yağ (kg)
+    fat_percentage: 18, // Yağ Oranı (%)
+    water: 26.86, // Su (kg)
+    intracellular_water: 16.86, // Hücre İçi Sıvı (kg)
+    extracellular_water: 10.00, // Hücre Dışı Sıvı (kg)
+    protein: 9.28, // (kg)
+    mineral: 2.88, // (kg)
+    bmr: 1209, // Bazal Metabolizma Hızı (kcal)
+    skeletal_muscle: 22.36, // İskelet Kaslar (kg)
+    organic_muscle: 13.98, // Organik Kaslar (kg)
+    internal_fat_rating: 1, // İç Yağlanma Oranı
+    segmental_analysis: {
+        right_arm_muscle: 1.7, // Sağ Kol Kas (kg)
+        left_arm_muscle: 1.7, // Sol Kol Kas (kg)
+        right_leg_muscle: 5.9, // Sağ Bacak Kas (kg)
+        left_leg_muscle: 6.0, // Sol Bacak Kas (kg)
+        trunk_muscle: 22.3, // Gövde Kas (kg)
+        right_arm_fat: 0.4, // Sağ Kol Yağ (kg)
+        left_arm_fat: 0.4, // Sol Kol Yağ (kg)
+        right_leg_fat: 2.2, // Sağ Bacak Yağ (kg)
+        left_leg_fat: 2.1, // Sol Bacak Yağ (kg)
+        trunk_fat: 3.4, // Gövde Yağ (kg)
+    },
+    fat_ratio_range: "18-26%", // Yağ Oranı Referansı
+    water_ratio_range: "50-61%", // Sıvı Oranı Referansı
+    internal_fat_range: "1-13", // İç Yağlanma Oranı Referansı
+    fit_score: 95, // Fitlik Puanı
     notes: "Düşük karbonhidrat diyeti uyguluyor.",
     imageUrl: "/placeholder_client.jpg"
 };
+
 
 const DanisanAnamnez = {
     id: 1,
@@ -89,7 +145,20 @@ export default function Danisan() {
                 <Grid2 xs={6} md={6}> {/* TODO: Grid2 için ayarlamasını yap */}
                     <TabContext value={value}>
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <TabList onChange={handleChange} aria-label="Danışan Navigasyon">
+                            <TabList
+                                onChange={handleChange}
+                                aria-label="Danışan Navigasyon"
+                                variant="scrollable"
+                                scrollButtons="auto"
+                                allowScrollButtonsMobile
+                                sx={{
+                                    '& .MuiTab-root': {
+                                        minWidth: 72,
+                                        padding: '6px 12px',
+                                        fontSize: '0.875rem',
+                                    },
+                                }}
+                            >
                                 <Tab label="Genel" value="genel" />
                                 <Tab label="Anamnez" value="anamnez" />
                                 <Tab label="Ölçümler" value="olcum" />
