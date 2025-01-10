@@ -16,6 +16,8 @@ const rows = [
         surname: "furkimClient",
         email: "furkimClient@gmail.com",
         phoneNumber: "05075280653",
+        height: 170,
+        weight: 200,
         status: "aktif",
         gender: "K"
     },
@@ -25,6 +27,8 @@ const rows = [
         surname: "furkimClient",
         email: "tester31@gmail.com",
         phoneNumber: "05075280653",
+        height: 170,
+        weight: 200,
         status: "aktif",
         gender: "E",
     },
@@ -34,6 +38,8 @@ const rows = [
         surname: "furkimClient",
         email: "tester31@gmail.com",
         phoneNumber: "05075280653",
+        height: 170,
+        weight: 200,
         status: "inaktif",
         gender: "E",
     },
@@ -41,15 +47,16 @@ const rows = [
 
 
 const columns = [
-    { field: "id", headerName: "ID", width: 70 },
+    { field: "id", headerName: "ID", width: 50 },
     { field: "name", headerName: "İsim", width: 150, editable: true},
     { field: "surname", headerName: "Soyisim", width: 150, editable: true },
     { field: "email", headerName: "Email", width: 200, editable: true },
-    { field: "phoneNumber", headerName: "Telefon No", width: 150, editable: true  },
+    { field: "phoneNumber", headerName: "Telefon No", width: 120, editable: true  },
+    { field: "height", headerName: "Boy", editable: true  },
+    { field: "weight", headerName: "Kilo", editable: true  },
     {
         field: "status",
         headerName: "Durum",
-        width: 150,
         editable: true,
         type: 'singleSelect',
         valueOptions: ["aktif", "inaktif"],
@@ -80,7 +87,6 @@ const columns = [
     {
         field: "gender",
         headerName: "Cinsiyet",
-        width: 150,
         type: 'singleSelect',
         valueOptions: ['Erkek', 'Kadın'],
         editable: true,
