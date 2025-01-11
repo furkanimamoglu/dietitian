@@ -40,7 +40,7 @@ app.use('/system', systemRoutes);
 // Working Directory
 try {
     process.chdir('../');
-    console.log('INFO - Working Directory: ' + process.cwd());
+    console.log('INFO - Çalışma Dizini: ' + process.cwd());
 } catch (error) {
     console.error('ERROR - ' + error);
 }
@@ -48,9 +48,9 @@ try {
 // Database Connection
 try {
     sequelize.authenticate().then(() => console.log("INFO - Sequelize Authenticated to Database."));
-    console.log('INFO - Database Connection has been established successfully.');
+    console.log('INFO - Veritabanı bağlantısı başarıyla kuruldu.');
 } catch (error) {
-    console.error('ERROR - Unable to connect to the database:', error);
+    console.error('ERROR - Veritabanına bağlanılamadı:', error);
 }
 
 // Server
@@ -60,14 +60,14 @@ if (config.ddl === "create-drop") {
     }).catch(err => {
         console.log(err)
     });
-    console.log('INFO - Sequelize is synchronized with database by create-drop. All tables are created again, old data is deleted.');
+    console.log('INFO - Sequelize, create-drop yöntemiyle veritabanı ile senkronize edildi. Tüm tablolar yeniden oluşturuldu, eski veriler silindi.');
 } else if (config.ddl === "update") {
     sequelize.sync().then(() => {
         app.listen(config.server.port);
     }).catch(err => {
         console.log(err)
     });
-    console.log('INFO - Sequelize is synchronized with database by update. Data kept same.');
+    console.log('INFO - Sequelize, update yöntemiyle veritabanı ile senkronize edildi. Veriler değişmedi.');
 } else {
-    console.log("ERROR - Check config.js");
+    console.log("ERROR - config.js dosyasını kontrol edin.");
 }

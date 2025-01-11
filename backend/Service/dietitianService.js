@@ -25,7 +25,7 @@ class DietitianService {
             });
 
             if (!dietitianInfo) {
-                throw new Exception('Invalid credentials.', 400, true);
+                throw new Exception('Hatalı giriş bilgileri.', 400, true);
             }
 
             const token = jwt.sign(
@@ -42,7 +42,7 @@ class DietitianService {
 
     async register(email, password, ipAddress) {
         if (!email || !password) {
-            throw new Exception('All fields must be filled.', 400, true);
+            throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
         }
 
         try {
@@ -73,7 +73,7 @@ class DietitianService {
             const dietitian = await Dietitian.findByPk(id);
 
             if (!dietitian) {
-                throw new Exception('Dietitian not found.', 400, true);
+                throw new Exception('Diyetisyen bulunamadı.', 400, true);
             }
 
             await dietitian.destroy();
@@ -84,7 +84,7 @@ class DietitianService {
 
     async registerClient(email, password, phoneNumber) {
         if (!email || !password || !phoneNumber) {
-            throw new Exception('All fields must be filled.', 400, true);
+            throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
         }
 
         try {
@@ -115,11 +115,11 @@ class DietitianService {
             });
 
             if (deletedRows === 0) {
-                throw new Exception('Client not found.', 400, true);
+                throw new Exception('Danışan bulunamadı.', 400, true);
             }
 
             return {
-                message: 'Client deleted successfully.'
+                message: 'Danışan silindi.'
             };
         } catch (error) {
             throw new Exception(error.message, 400);
@@ -137,7 +137,7 @@ class DietitianService {
             });
 
             if (!dietitian) {
-                throw new Error('Dietitian not found');
+                throw new Error('Diyetisyen bulunamadı.');
             }
 
             return dietitian.Clients;

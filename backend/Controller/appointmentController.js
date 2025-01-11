@@ -8,7 +8,7 @@ class AppointmentController {
 
             if (!token) {
                 return res.status(401).json({
-                    message: "Yetkisiz Erişim."
+                    message: "Yetkisiz erişim."
                 });
             }
 

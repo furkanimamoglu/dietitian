@@ -11,7 +11,7 @@ class DietitianController {
             if (!email || !password) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
@@ -38,7 +38,7 @@ class DietitianController {
             if (!email || !password || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
@@ -64,7 +64,7 @@ class DietitianController {
             if (!email || !password || !phoneNumber) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
@@ -86,7 +86,7 @@ class DietitianController {
             if (!clientUsername) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
