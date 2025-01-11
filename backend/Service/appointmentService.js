@@ -2,12 +2,11 @@ const Exception = require("../Exception/Exception");
 const Security = require("../Utils/Security");
 const Appointment = require('../Model/Appointment');
 const Client = require('../Model/Client');
+const {Op} = require("sequelize");
 
 class AppointmentService {
-    async getDietitianAppointments(token) {
+    async getDietitianAppointments(user_id) {
         try {
-            const user_id = Security.getUserIdFromToken(token);
-
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
@@ -29,6 +28,58 @@ class AppointmentService {
             return appointments;
         } catch (error) {
             throw new Exception(error.message, error.status || 500);
+        }
+    }
+
+    async addAppointment(data) {
+        const { title, startTime, endTime, dietitian_id, client_id } = data;
+
+        try {
+            if (!title || !startTime || !endTime || !dietitian_id || !client_id) {
+                throw new Error("Tüm alanları doldurmanız gerekmektedir.");
+            }
+
+            // Hata kontrolü: Randevunun zaman uyuşmazlığı
+            const conflictingAppointments = await Appointment.findOne({
+                where: {
+                    dietitian_id: dietitian_id,
+                    [Op.or]: [
+                        {
+                            startTime: {
+                                [Op.between]: [startTime, endTime],
+                            },
+                        },
+                        {
+                            endTime: {
+                                [Op.between]: [startTime, endTime],
+                            },
+                        },
+                        {
+                            [Op.and]: [
+                                { startTime: { [Op.lte]: startTime } },
+                                { endTime: { [Op.gte]: endTime } },
+                            ],
+                        },
+                    ],
+                },
+            });
+
+            if (conflictingAppointments) {
+                throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
+            }
+
+            // Yeni randevu oluştur
+            const newAppointment = await Appointment.create({
+                title,
+                startTime,
+                endTime,
+                dietitian_id,
+                client_id,
+            });
+
+            return newAppointment;
+        } catch (error) {
+            throw new Error(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
     }
 }
