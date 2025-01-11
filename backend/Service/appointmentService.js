@@ -6,14 +6,14 @@ const Client = require('../Model/Client');
 class AppointmentService {
     async getDietitianAppointments(token) {
         try {
-            const dietitian_id = Security.getUserIdFromToken(token);
+            const user_id = Security.getUserIdFromToken(token);
 
-            if (!dietitian_id) {
+            if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
             const appointments = await Appointment.findAll({
-                where: { dietitian_id: dietitian_id },
+                where: { dietitian_id: user_id },
                 include: [
                     {
                         model: Client,

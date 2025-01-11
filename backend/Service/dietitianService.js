@@ -7,11 +7,12 @@ const jwt = require('jsonwebtoken');
 const Exception = require('../Exception/Exception');
 
 // Enums
-const {DIETITIAN} = require("../Enum/Role");
+const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
 const Dietitian = require('../Model/Dietitian');
 const Client = require('../Model/Client');
+const Security = require("../Utils/Security");
 
 class DietitianService {
 
@@ -41,11 +42,11 @@ class DietitianService {
     }
 
     async register(email, password, ipAddress) {
-        if (!email || !password) {
-            throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
-        }
-
         try {
+            if (!email || !password) {
+                throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
+            }
+
             const dietitian = await Dietitian.create({
                 email: email,
                 password: password,
@@ -82,35 +83,49 @@ class DietitianService {
         }
     }
 
-    async registerClient(email, password, phoneNumber) {
-        if (!email || !password || !phoneNumber) {
-            throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
-        }
-
+    async registerClient(user_id, email, password, phoneNumber) {
         try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            if (!email || !password || !phoneNumber) {
+                throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
+            }
+
             const token = jwt.sign(
-                {email: email, role: DIETITIAN},
+                {
+                    email: email,
+                    role: CLIENT
+                },
                 config.secretkey
             );
 
             return await Client.create({
-                dietitian_id: 1,
+                dietitian_id: user_id,
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
-                role: DIETITIAN,
+                role: CLIENT,
                 token: token
-            });
+            })
         } catch (error) {
             throw new Exception(error.message, 400);
         }
     }
 
-    async deleteClient(clientUsername) {
+    async deleteClient(token, client_id) {
         try {
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
             const deletedRows = await Client.destroy({
                 where: {
-                    username: clientUsername
+                    id: client_id,
+                    dietitian_id: user_id
                 }
             });
 
@@ -119,21 +134,31 @@ class DietitianService {
             }
 
             return {
-                message: 'Danışan silindi.'
+                message: 'ID:' + client_id + ' danışanınız başarıyla silindi.'
             };
         } catch (error) {
             throw new Exception(error.message, 400);
         }
     }
 
-    async getMyAllClients(dietitianId) {
+    async getMyAllClients(token) {
         try {
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
             const dietitian = await Dietitian.findOne({
-                where: {id: dietitianId},
-                include: [{
-                    model: Client,
-                    as: 'Clients',
-                }]
+                where: {
+                    id: user_id
+                },
+                include: [
+                    {
+                        model: Client,
+                        as: 'Clients',
+                    }
+                ]
             });
 
             if (!dietitian) {
@@ -145,7 +170,6 @@ class DietitianService {
             throw new Exception(error.message, 400);
         }
     }
-
 }
 
 module.exports = new DietitianService();

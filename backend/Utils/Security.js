@@ -40,15 +40,20 @@ class Security {
     }
 
     getUserIdFromToken(token) {
-        token = token.replace('Bearer ', '');
-        let user = jwt.verify(token, config.secretkey);
+        try {
+            if (!token) {
+                return null;
+            }
+            token = token.replace('Bearer ', '');
 
-        if (!token) {
-            return null;
-        } else {
+            let user = jwt.verify(token, config.secretkey);
+
             return user.id;
+        } catch (error) {
+            return null;
         }
     }
+
 
 }
 
