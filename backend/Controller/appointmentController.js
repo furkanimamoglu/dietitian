@@ -8,7 +8,7 @@ class AppointmentController {
 
             if (!token) {
                 return res.status(401).json({
-                    message: "Authorization token is required."
+                    message: "Yetkisiz Erişim."
                 });
             }
 
