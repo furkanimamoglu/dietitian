@@ -2,6 +2,7 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
+const Appointment = require('./Appointment');
 const Anamnesis = require('./Anamnes');
 const Invoice = require('./Invoice');
 
@@ -59,5 +60,14 @@ Client.hasMany(Anamnesis, {
 Client.hasMany(Invoice, {
     foreignKey: "client_id"
 });
+
+Client.hasMany(Appointment, {
+    foreignKey: "client_id"
+});
+
+Appointment.belongsTo(Client, {
+    foreignKey: "client_id"
+});
+
 
 module.exports = Client;

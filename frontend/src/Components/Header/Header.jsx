@@ -67,7 +67,7 @@ function Header() {
     };
 
     return (
-        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static" >
+        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="fixed" >
                 <Toolbar disableGutters>
                     <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: "0.5rem", ml: "2rem"}}/>
                     <Typography
@@ -141,12 +141,6 @@ function Header() {
                         <Tooltip title="Yardım" arrow>
                             <IconButton color="inherit">
                                 <HelpIcon sx={{ color: "white" }} />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Ayarlar" arrow>
-                            <IconButton color="inherit">
-                                <SettingsIcon sx={{ color: "white" }} />
                             </IconButton>
                         </Tooltip>
                     </Box>

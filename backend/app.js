@@ -19,6 +19,7 @@ const app = express();
 // Routes
 const dietitianRoutes = require('./Routes/dietitianRoutes');
 const clientRoutes = require('./Routes/clientRoutes');
+const appointmentRoutes = require('./Routes/appointmentRoutes');
 const systemRoutes = require('./Routes/systemRoutes');
 
 app.use(bodyParser.json());
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
 // Routers
 app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
+app.use('/appointment', appointmentRoutes);
 app.use('/system', systemRoutes);
 
 // Working Directory
