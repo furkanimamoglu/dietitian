@@ -1,5 +1,4 @@
 const Exception = require("../Exception/Exception");
-const Security = require("../Utils/Security");
 const Appointment = require('../Model/Appointment');
 const Client = require('../Model/Client');
 const {Op} = require("sequelize");

@@ -1,5 +1,4 @@
 // Libraries
-const {Op} = require("sequelize");
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 
@@ -12,7 +11,6 @@ const {DIETITIAN, CLIENT} = require("../Enum/Role");
 // Models
 const Dietitian = require('../Model/Dietitian');
 const Client = require('../Model/Client');
-const Security = require("../Utils/Security");
 
 class DietitianService {
 

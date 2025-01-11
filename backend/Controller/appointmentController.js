@@ -56,7 +56,6 @@ class AppointmentController {
             });
 
             res.status(201).json({
-                message: "Randevu başarıyla oluşturuldu.",
                 appointment: newAppointment,
             });
         } catch (error) {
