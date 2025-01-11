@@ -39,6 +39,12 @@ class Security {
         }
     }
 
+    /**
+     * Security - Resolving user_id from Token.
+     * @params token - Token which starts with "Bearer ".
+     * @returns boolean
+     * @author Furkan İmamoğlu
+     */
     getUserIdFromToken(token) {
         try {
             if (!token) {

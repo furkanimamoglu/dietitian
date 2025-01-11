@@ -114,10 +114,8 @@ class DietitianService {
         }
     }
 
-    async deleteClient(token, client_id) {
+    async deleteClient(user_id, client_id) {
         try {
-            const user_id = Security.getUserIdFromToken(token);
-
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
@@ -141,10 +139,8 @@ class DietitianService {
         }
     }
 
-    async getMyAllClients(token) {
+    async getMyAllClients(user_id) {
         try {
-            const user_id = Security.getUserIdFromToken(token);
-
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }

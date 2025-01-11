@@ -60,8 +60,9 @@ class DietitianController {
     async registerClient(req, res) {
         try {
             const {email, password, phoneNumber, name, surname} = req.body;
+
             const token = req.headers.authorization;
-            const user_id = await Security.getUserIdFromToken(token);
+            const user_id = Security.getUserIdFromToken(token);
 
             if (!token) {
                 return res.status(401).json({
@@ -89,6 +90,7 @@ class DietitianController {
 
     async deleteClient(req, res) {
         const token = req.headers.authorization;
+        const user_id = Security.getUserIdFromToken(token);
 
         if (!token) {
             return res.status(401).json({
@@ -106,7 +108,7 @@ class DietitianController {
                 });
             }
 
-            const result = await DietitianService.deleteClient(token, client_id);
+            const result = await DietitianService.deleteClient(user_id, client_id);
 
             res.status(200).json(result);
         } catch (err) {
@@ -120,13 +122,14 @@ class DietitianController {
     async getAllMyClients(req, res) {
         try {
             const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
 
             if (!token) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
-            const result = await DietitianService.getMyAllClients(token)
+            const result = await DietitianService.getMyAllClients(user_id)
             res.status(200).json(result)
         } catch (error) {
             res.status(error.status || 500).json({
