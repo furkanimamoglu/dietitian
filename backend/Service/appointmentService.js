@@ -68,15 +68,13 @@ class AppointmentService {
             }
 
             // Yeni randevu oluştur
-            const newAppointment = await Appointment.create({
+            return await Appointment.create({
                 title,
                 startTime,
                 endTime,
                 dietitian_id,
                 client_id,
             });
-
-            return newAppointment;
         } catch (error) {
             throw new Error(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
