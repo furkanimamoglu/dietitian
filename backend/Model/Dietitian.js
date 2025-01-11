@@ -88,4 +88,12 @@ Dietitian.hasOne(DietitianOption, {
     foreignKey: "dietitian_id"
 });
 
+Dietitian.hasMany(Appointment, {
+    foreignKey: "dietitian_id"
+});
+
+Appointment.belongsTo(Dietitian, {
+    foreignKey: "dietitian_id"
+});
+
 module.exports = Dietitian;
