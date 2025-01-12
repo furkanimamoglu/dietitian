@@ -103,7 +103,7 @@ export default function Randevularim() {
         };
 
         // POST isteği
-        const response = axios.post(
+        axios.post(
             "http://localhost:3000/appointment/addAppointmentAsDietitian",
             requestData,
             {
@@ -111,7 +111,7 @@ export default function Randevularim() {
                     Authorization: localStorage.getItem('token'),
                 },
             }
-        );
+        ).then(response => console.log("Randevu ekleme isteği başarılı."));
 
         setRandevular(prevRandevular => {
             return [...prevRandevular, newEvent];
