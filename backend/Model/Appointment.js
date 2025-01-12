@@ -18,11 +18,11 @@ const Appointment = sequelize.define('Appointment', {
         allowNull: false,
         defaultValue: "pending"
     },
-    startTime: {
+    start: {
         type: DataTypes.DATE,
         allowNull: false,
     },
-    endTime: {
+    end: {
         type: DataTypes.DATE,
         allowNull: false,
     },

@@ -28,7 +28,7 @@ class DietitianService {
             }
 
             const token = jwt.sign(
-                {email: dietitianInfo.email, role: dietitianInfo.role},
+                {id: dietitianInfo.id, email: dietitianInfo.email, role: dietitianInfo.role},
                 config.secretkey,
                 {expiresIn: '24h'}
             );
