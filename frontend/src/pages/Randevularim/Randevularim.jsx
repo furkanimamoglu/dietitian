@@ -11,6 +11,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import Default from "../../components/Layouts/Default.jsx";
 
 import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2, TextField} from '@mui/material';
+import config from "../../config.js";
 
 export default function Randevularim() {
     useEffect(() => {
@@ -95,28 +96,25 @@ export default function Randevularim() {
                 end: eventData.end
             };
 
-            // API'ye gönderilecek veri
             const requestData = {
                 title: eventData.title,
                 start: eventData.start,
                 end: eventData.end,
-                client_id: 1, // Örnek client_id
+                client_id: 1, // TODO: client_id seçilecek
             };
 
-            // POST isteği
             const response = await axios.post(
-                "http://localhost:3000/appointment/addAppointmentAsDietitian",
+                config[config.environment].apiUrl+"/appointment/addAppointmentAsDietitian",
                 requestData,
                 {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        Authorization: localStorage.getItem('token'),
                     },
                 }
             );
 
             console.log("Randevu ekleme isteği başarılı:", response.data);
 
-            // Veritabanına ekleme başarılıysa yeni randevuyu state'e ekliyoruz
             setRandevular((prevRandevular) => {
                 return [...prevRandevular, newEvent];
             });
@@ -125,6 +123,7 @@ export default function Randevularim() {
             setRandevuEklePopup(false);
         } catch (error) {
             console.error("Randevu eklenirken bir hata oluştu:", error);
+            arg.revert();
         }
     };
 
@@ -132,19 +131,93 @@ export default function Randevularim() {
         randevuDuzenle(arg);
     };
 
-    const handleEventResize = (arg) => {
-        console.log('Event Title:', arg.event.title);
-        console.log('Start Date:', arg.event.start.toISOString());
-        console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
-        //randevuDuzenle(arg);
-    }
+    const handleEventResize = async (arg) => {
+        try {
 
-    const handleEventDrop = (arg) => {
-        console.log('Event Title:', arg.event.title);
-        console.log('Start Date:', arg.event.start.toISOString());
-        console.log('End Date:', arg.event.end ? arg.event.end.toISOString() : 'N/A');
-        //randevuDuzenle(arg);
-    }
+            const updatedEvent = {
+                id: arg.event.id,
+                title: arg.event.title,
+                start: arg.event.start.toISOString(),
+                end: arg.event.end ? arg.event.end.toISOString() : null,
+            };
+
+            const requestData = {
+                appointment_id: updatedEvent.id,
+                title: updatedEvent.title,
+                start: updatedEvent.start,
+                end: updatedEvent.end,
+                client_id: 1
+            };
+
+            const response = await axios.put(
+                config[config.environment].apiUrl+"/appointment/updateAppointmentAsDietitian",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            console.log("Randevu güncelleme başarılı:", response.data);
+
+            setRandevular((prevRandevular) => {
+                return prevRandevular.map((randevu) =>
+                    String(randevu.id) === String(updatedEvent.id)
+                        ? { ...randevu, ...updatedEvent }
+                        : randevu
+                );
+            });
+        } catch (error) {
+            console.error("Randevu güncellenirken bir hata oluştu:", error);
+
+            arg.revert();
+        }
+    };
+
+
+    const handleEventDrop = async (arg) => {
+        try {
+            const updatedEvent = {
+                id: arg.event.id,
+                title: arg.event.title,
+                start: arg.event.start.toISOString(),
+                end: arg.event.end ? arg.event.end.toISOString() : null,
+            };
+
+            const requestData = {
+                appointment_id: updatedEvent.id,
+                title: updatedEvent.title,
+                start: updatedEvent.start,
+                end: updatedEvent.end,
+                client_id: 1
+            };
+
+            const response = await axios.put(
+                config[config.environment].apiUrl+"/appointment/updateAppointmentAsDietitian",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            console.log("Randevu güncelleme başarılı:", response.data);
+
+            setRandevular((prevRandevular) => {
+                return prevRandevular.map((randevu) =>
+                    String(randevu.id) === String(updatedEvent.id)
+                        ? { ...randevu, ...updatedEvent }
+                        : randevu
+                );
+            });
+        } catch (error) {
+            console.error("Randevu güncellenirken bir hata oluştu:", error);
+
+            arg.revert();
+        }
+    };
 
     const handleRandevuEkleButton = (arg) => {
         setEventData({
@@ -157,7 +230,7 @@ export default function Randevularim() {
     }
 
     const handleEventChange = (updatedEvent) => {
-        setEventData(updatedEvent); // eventData'yı güncelliyoruz
+        setEventData(updatedEvent);
     };
 
     const handleEventSave = () => {
@@ -167,16 +240,14 @@ export default function Randevularim() {
             end: eventData.end,
         };
 
-        // API'ye gönderilecek veri
         const requestData = {
-            appointment_id: updatedEventWithDates.id, // Güncellenen randevunun ID'si
+            appointment_id: updatedEventWithDates.id,
             title: updatedEventWithDates.title,
             start: updatedEventWithDates.start,
             end: updatedEventWithDates.end,
-            client_id: 1, // Örnek client_id, ihtiyaca göre dinamik yapılabilir
+            client_id: 1,
         };
 
-        // PUT isteği ile randevuyu güncelle
         const response = axios.put(
             "http://localhost:3000/appointment/updateAppointmentAsDietitian",
             requestData,
