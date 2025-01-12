@@ -1,5 +1,4 @@
 // Libraries
-const {Op} = require("sequelize");
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 
@@ -7,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const Exception = require('../Exception/Exception');
 
 // Enums
-const {DIETITIAN} = require("../Enum/Role");
+const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
 const Dietitian = require('../Model/Dietitian');
@@ -25,11 +24,11 @@ class DietitianService {
             });
 
             if (!dietitianInfo) {
-                throw new Exception('Invalid credentials.', 400, true);
+                throw new Exception('Hatalı giriş bilgileri.', 400, true);
             }
 
             const token = jwt.sign(
-                {email: dietitianInfo.email, role: dietitianInfo.role},
+                {id: dietitianInfo.id, email: dietitianInfo.email, role: dietitianInfo.role},
                 config.secretkey,
                 {expiresIn: '24h'}
             );
@@ -41,11 +40,11 @@ class DietitianService {
     }
 
     async register(email, password, ipAddress) {
-        if (!email || !password) {
-            throw new Exception('All fields must be filled.', 400, true);
-        }
-
         try {
+            if (!email || !password) {
+                throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
+            }
+
             const dietitian = await Dietitian.create({
                 email: email,
                 password: password,
@@ -73,7 +72,7 @@ class DietitianService {
             const dietitian = await Dietitian.findByPk(id);
 
             if (!dietitian) {
-                throw new Exception('Dietitian not found.', 400, true);
+                throw new Exception('Diyetisyen bulunamadı.', 400, true);
             }
 
             await dietitian.destroy();
@@ -82,62 +81,82 @@ class DietitianService {
         }
     }
 
-    async registerClient(email, password, phoneNumber) {
-        if (!email || !password || !phoneNumber) {
-            throw new Exception('All fields must be filled.', 400, true);
-        }
-
+    async registerClient(user_id, email, password, phoneNumber) {
         try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            if (!email || !password || !phoneNumber) {
+                throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
+            }
+
             const token = jwt.sign(
-                {email: email, role: DIETITIAN},
+                {
+                    email: email,
+                    role: CLIENT
+                },
                 config.secretkey
             );
 
             return await Client.create({
-                dietitian_id: 1,
+                dietitian_id: user_id,
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
-                role: DIETITIAN,
+                role: CLIENT,
                 token: token
-            });
+            })
         } catch (error) {
             throw new Exception(error.message, 400);
         }
     }
 
-    async deleteClient(clientUsername) {
+    async deleteClient(user_id, client_id) {
         try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
             const deletedRows = await Client.destroy({
                 where: {
-                    username: clientUsername
+                    id: client_id,
+                    dietitian_id: user_id
                 }
             });
 
             if (deletedRows === 0) {
-                throw new Exception('Client not found.', 400, true);
+                throw new Exception('Danışan bulunamadı.', 400, true);
             }
 
             return {
-                message: 'Client deleted successfully.'
+                message: 'ID:' + client_id + ' danışanınız başarıyla silindi.'
             };
         } catch (error) {
             throw new Exception(error.message, 400);
         }
     }
 
-    async getMyAllClients(dietitianId) {
+    async getMyAllClients(user_id) {
         try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
             const dietitian = await Dietitian.findOne({
-                where: {id: dietitianId},
-                include: [{
-                    model: Client,
-                    as: 'Clients',
-                }]
+                where: {
+                    id: user_id
+                },
+                include: [
+                    {
+                        model: Client,
+                        as: 'Clients',
+                    }
+                ]
             });
 
             if (!dietitian) {
-                throw new Error('Dietitian not found');
+                throw new Error('Diyetisyen bulunamadı.');
             }
 
             return dietitian.Clients;
@@ -145,7 +164,6 @@ class DietitianService {
             throw new Exception(error.message, 400);
         }
     }
-
 }
 
 module.exports = new DietitianService();
