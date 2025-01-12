@@ -1,6 +1,6 @@
 // config.js
 const config = {
-    environment: "prod",
+    environment: "dev",
 
     dev: {
         apiUrl: 'http://localhost:3000',

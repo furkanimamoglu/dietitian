@@ -83,10 +83,9 @@ const beslenmePlanlari = [
 ];
 
 const beslenmeKategorileri = [
-    "Diyet",
-    "Sağlık",
-    "Hastalık",
-    "Diğer"
+    { id: 1, name: "Diyet" },
+    { id: 2, name: "Sağlık" },
+    { id: 3, name: "Çölyak" }
 ];
 
 // Verileri her 3 elemanda bir gruplara ayıran yardımcı fonksiyon
@@ -106,7 +105,7 @@ export default function Beslenme() {
             <Grid2 container sx={{height: '100%'}}>
                 {/* Sol Panel */}
                 <Grid2 container sx={{height: '80vh', flex: 1, display: { xs: 'none', sm: 'flex' } }} direction="column" spacing={2}>
-                    <Grid2 item>
+                    <Grid2>
                         <Paper elevation={3} sx={{ minHeight:"80vh" , p: "0.5rem"}}>
                             {/* Search and Add */}
                             <Grid2 container alignItems="center" spacing={2}>
@@ -143,18 +142,19 @@ export default function Beslenme() {
 
                             {/* Selectable List */}
                             <List sx={{maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden'}}>
-                                {beslenmeKategorileri.map((item) => ( //TODO: Uyarı var burada, düzeltilecek
+                                {beslenmeKategorileri.map((category) => ( //TODO: Uyarı var burada, düzeltilecek
                                     <ListItem
-                                        key={item}
+                                        key={category.id}
                                         sx={{
                                             '&:hover': {backgroundColor: '#f5f5f5'},
                                             '&:hover .delete-button': {visibility: 'visible'},
                                         }}
+                                        onClick={()=>{console.log("test")}}
                                     >
                                         <ListItemIcon>
                                             <Checkbox edge="start"/>
                                         </ListItemIcon>
-                                        <ListItemText primary={item}/>
+                                        <ListItemText primary={category.name.toString()}/>
 
                                         <Box
                                             className="delete-button"
@@ -189,13 +189,13 @@ export default function Beslenme() {
                     {groupedData.map((group, groupIndex) => (
                         <React.Fragment key={groupIndex}>
                             {group.map((item) => (
-                                <Grid2 item xs={12} sm={4} md={4} key={item.id}>
+                                <Grid2 xs={12} sm={4} md={4} key={item.id}>
                                     <Card sx={{minWidth: 410, boxShadow: 3}}>
                                         <CardActionArea>
                                             <CardMedia
                                                 component="img"
-                                                image={item.image || "/placeholder.png"}
-                                                alt={item.title}
+                                                image={item.image.toString() || "/placeholder.png"}
+                                                alt={item.title.toString()}
                                                 sx={{
                                                     height: 250,
                                                     width: 410,
@@ -205,10 +205,10 @@ export default function Beslenme() {
                                         </CardActionArea>
                                         <CardContent>
                                             <Typography gutterBottom variant="h5" component="div">
-                                                {item.title}
+                                                {item.title.toString()}
                                             </Typography>
                                             <Typography variant="body2" sx={{color: 'text.secondary'}}>
-                                                {item.description}
+                                                {item.description.toString()}
                                             </Typography>
 
                                             {/* Card Buttons */}

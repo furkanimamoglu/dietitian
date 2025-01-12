@@ -20,11 +20,11 @@ const Dietitian = sequelize.define('Dietitian', {
             type: DataTypes.STRING,
             allowNull: false,
             unique: {
-                msg: 'This email is already taken.'
+                msg: 'Bu e-posta zaten kullanılıyor.'
             },
             validate: {
                 isEmail: {
-                    msg: 'Email address must be valid.'
+                    msg: 'E-posta adresi geçerli olmalıdır.'
                 }
             }
         },
@@ -34,7 +34,7 @@ const Dietitian = sequelize.define('Dietitian', {
             validate: {
                 len: {
                     args: [4, 21],
-                    msg: 'Your password may be 4 to 21 characters only.'
+                    msg: 'Şifre 4 ile 21 karakter arasında olmak zorundadır.'
                 }
             }
         },
@@ -58,7 +58,7 @@ const Dietitian = sequelize.define('Dietitian', {
             type: DataTypes.STRING,
             allowNull: true,
             unique: {
-                msg: 'This token is already produced.'
+                msg: 'Bu token zaten mevcut.'
             },
         }
     }
@@ -85,6 +85,14 @@ Dietitian.hasMany(AnamnesQuestion, {
 });
 
 Dietitian.hasOne(DietitianOption, {
+    foreignKey: "dietitian_id"
+});
+
+Dietitian.hasMany(Appointment, {
+    foreignKey: "dietitian_id"
+});
+
+Appointment.belongsTo(Dietitian, {
     foreignKey: "dietitian_id"
 });
 
