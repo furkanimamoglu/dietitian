@@ -77,6 +77,62 @@ class AppointmentService {
             throw new Error(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
     }
+
+    async updateAppointment(appointment_id, data) {
+        const { title, start, end, dietitian_id, client_id } = data;
+
+        try {
+            if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id) {
+                throw new Error("Tüm alanları doldurmanız gerekmektedir.");
+            }
+
+            const existingAppointment = await Appointment.findByPk(appointment_id);
+            if (!existingAppointment) {
+                throw new Error("Güncellemek istediğiniz randevu bulunamadı.");
+            }
+
+            const conflictingAppointments = await Appointment.findOne({
+                where: {
+                    id: { [Op.ne]: appointment_id },
+                    dietitian_id: dietitian_id,
+                    [Op.or]: [
+                        {
+                            start: {
+                                [Op.between]: [start, end],
+                            },
+                        },
+                        {
+                            end: {
+                                [Op.between]: [start, end],
+                            },
+                        },
+                        {
+                            [Op.and]: [
+                                { start: { [Op.lte]: start } },
+                                { end: { [Op.gte]: end } },
+                            ],
+                        },
+                    ],
+                },
+            });
+
+            if (conflictingAppointments) {
+                throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
+            }
+
+            await existingAppointment.update({
+                title,
+                start,
+                end,
+                dietitian_id,
+                client_id,
+            });
+
+            return existingAppointment;
+        } catch (error) {
+            throw new Error(error.message || "Randevu güncellenirken bir hata meydana geldi.");
+        }
+    }
 }
 
 module.exports = new AppointmentService();

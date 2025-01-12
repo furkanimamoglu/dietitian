@@ -86,37 +86,46 @@ export default function Randevularim() {
         setRandevuDuzenlePopup(true);
     }
 
-    const randevuEkle = () => {
-        const newEvent = {
-            ...eventData,
-            id: randevular.length + 1,
-            start: eventData.start,
-            end: eventData.end
-        };
+    const randevuEkle = async () => {
+        try {
+            const newEvent = {
+                ...eventData,
+                id: randevular.length + 1,
+                start: eventData.start,
+                end: eventData.end
+            };
 
-        // API'ye gönderilecek veri
-        const requestData = {
-            title: eventData.title,
-            start: eventData.start,
-            end: eventData.end,
-            client_id: 1, // Örnek client_id
-        };
+            // API'ye gönderilecek veri
+            const requestData = {
+                title: eventData.title,
+                start: eventData.start,
+                end: eventData.end,
+                client_id: 1, // Örnek client_id
+            };
 
-        // POST isteği
-        axios.post(
-            "http://localhost:3000/appointment/addAppointmentAsDietitian",
-            requestData,
-            {
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                },
-            }
-        ).then(response => console.log("Randevu ekleme isteği başarılı."));
+            // POST isteği
+            const response = await axios.post(
+                "http://localhost:3000/appointment/addAppointmentAsDietitian",
+                requestData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                }
+            );
 
-        setRandevular(prevRandevular => {
-            return [...prevRandevular, newEvent];
-        });
-        setRandevuEklePopup(false);
+            console.log("Randevu ekleme isteği başarılı:", response.data);
+
+            // Veritabanına ekleme başarılıysa yeni randevuyu state'e ekliyoruz
+            setRandevular((prevRandevular) => {
+                return [...prevRandevular, newEvent];
+            });
+
+            // Popup'u kapatıyoruz
+            setRandevuEklePopup(false);
+        } catch (error) {
+            console.error("Randevu eklenirken bir hata oluştu:", error);
+        }
     };
 
     const handleEventClick = (arg) => {
@@ -157,6 +166,26 @@ export default function Randevularim() {
             start: eventData.start,
             end: eventData.end,
         };
+
+        // API'ye gönderilecek veri
+        const requestData = {
+            appointment_id: updatedEventWithDates.id, // Güncellenen randevunun ID'si
+            title: updatedEventWithDates.title,
+            start: updatedEventWithDates.start,
+            end: updatedEventWithDates.end,
+            client_id: 1, // Örnek client_id, ihtiyaca göre dinamik yapılabilir
+        };
+
+        // PUT isteği ile randevuyu güncelle
+        const response = axios.put(
+            "http://localhost:3000/appointment/updateAppointmentAsDietitian",
+            requestData,
+            {
+                headers: {
+                    Authorization: localStorage.getItem('token'),
+                },
+            }
+        );
 
         setRandevular(prevRandevular => {
             const updatedRandevular = prevRandevular.map(randevu =>
