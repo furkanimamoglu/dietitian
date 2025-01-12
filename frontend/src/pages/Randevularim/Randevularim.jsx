@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
+import axios from "axios";
 import "./Randevularim.css";
 
 import FullCalendar from "@fullcalendar/react";
@@ -9,24 +10,39 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import Default from "../../components/Layouts/Default.jsx";
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Grid2, Box } from '@mui/material';
+import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2, TextField} from '@mui/material';
 
 export default function Randevularim() {
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            try {
+                const response = await axios.get("http://localhost:3000/appointment/fetchDietitianAppointments",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                const appointments = response.data.appointment;
 
-    const [randevular, setRandevular] = useState([
-        {
-            id: 1,
-            title: "Randevu 1",
-            start: "2025-01-01T10:00:00",
-            end: "2025-01-02T11:00:00",
-        },
-        {
-            id: 2,
-            title: "Randevu 2",
-            start: "2025-01-05T14:00:00",
-            end: "2025-01-05T15:00:00",
-        },
-    ]);
+                const formattedAppointments = appointments.map((appointment) => ({
+                    id: appointment.id,
+                    title: appointment.title,
+                    start: appointment.start,
+                    end: appointment.end,
+                }));
+
+                setRandevular(formattedAppointments);
+            } catch (error) {
+                // TODO: Sweet Alert'e dönüştürülebilir
+                console.error("Randevular çekilirken bir hata oluştu:", error);
+            }
+        };
+
+        fetchAppointments();
+    }, []);
+
+    const [randevular, setRandevular] = useState([]);
 
     const [eventData, setEventData] = useState({
         title: "",
@@ -73,15 +89,32 @@ export default function Randevularim() {
     const randevuEkle = () => {
         const newEvent = {
             ...eventData,
-            id: randevular.length + 1, // Yeni bir id ataması yapılabilir
+            id: randevular.length + 1,
             start: eventData.start,
-            end: eventData.end,
+            end: eventData.end
         };
 
-        // Yeni randevuyu mevcut randevulara ekle
+        // API'ye gönderilecek veri
+        const requestData = {
+            title: eventData.title,
+            start: eventData.start,
+            end: eventData.end,
+            client_id: 1, // Örnek client_id
+        };
+
+        // POST isteği
+        const response = axios.post(
+            "http://localhost:3000/appointment/addAppointmentAsDietitian",
+            requestData,
+            {
+                headers: {
+                    Authorization: localStorage.getItem('token'),
+                },
+            }
+        );
+
         setRandevular(prevRandevular => {
-            const updatedRandevular = [...prevRandevular, newEvent];
-            return updatedRandevular; // Yeni listeyi döndür
+            return [...prevRandevular, newEvent];
         });
         setRandevuEklePopup(false);
     };

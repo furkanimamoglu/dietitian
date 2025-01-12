@@ -39,9 +39,9 @@ class AppointmentController {
             }
             const user_id = Security.getUserIdFromToken(token);
 
-            const { title, startTime, endTime, client_id } = req.body;
+            const { title, start, end, client_id } = req.body;
 
-            if (!title || !startTime || !endTime || !client_id) {
+            if (!title || !start || !end || !client_id) {
                 return res.status(400).json({
                     message: "Tüm alanları doldurmanız gerekmektedir."
                 });
@@ -49,8 +49,8 @@ class AppointmentController {
 
             const newAppointment = await AppointmentService.addAppointment({
                 title,
-                startTime,
-                endTime,
+                start,
+                end,
                 dietitian_id: user_id,
                 client_id,
             });

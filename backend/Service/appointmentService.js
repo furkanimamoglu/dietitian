@@ -31,32 +31,31 @@ class AppointmentService {
     }
 
     async addAppointment(data) {
-        const { title, startTime, endTime, dietitian_id, client_id } = data;
+        const { title, start, end, dietitian_id, client_id } = data;
 
         try {
-            if (!title || !startTime || !endTime || !dietitian_id || !client_id) {
+            if (!title || !start || !end || !dietitian_id || !client_id) {
                 throw new Error("Tüm alanları doldurmanız gerekmektedir.");
             }
 
-            // Hata kontrolü: Randevunun zaman uyuşmazlığı
             const conflictingAppointments = await Appointment.findOne({
                 where: {
                     dietitian_id: dietitian_id,
                     [Op.or]: [
                         {
-                            startTime: {
-                                [Op.between]: [startTime, endTime],
+                            start: {
+                                [Op.between]: [start, end],
                             },
                         },
                         {
-                            endTime: {
-                                [Op.between]: [startTime, endTime],
+                            end: {
+                                [Op.between]: [start, end],
                             },
                         },
                         {
                             [Op.and]: [
-                                { startTime: { [Op.lte]: startTime } },
-                                { endTime: { [Op.gte]: endTime } },
+                                { start: { [Op.lte]: start } },
+                                { end: { [Op.gte]: end } },
                             ],
                         },
                     ],
@@ -67,11 +66,10 @@ class AppointmentService {
                 throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
-            // Yeni randevu oluştur
             return await Appointment.create({
                 title,
-                startTime,
-                endTime,
+                start,
+                end,
                 dietitian_id,
                 client_id,
             });
