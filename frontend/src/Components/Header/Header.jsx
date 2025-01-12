@@ -67,9 +67,9 @@ function Header() {
     };
 
     return (
-        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="static" >
-                <Toolbar sx={{ ml:"2.5rem", mr: "2.5rem", pd: "2.5rem" }} disableGutters>
-                    <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: 1}}/>
+        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="fixed" >
+                <Toolbar disableGutters>
+                    <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: "0.5rem", ml: "2rem"}}/>
                     <Typography
                         variant="h6"
                         noWrap
@@ -143,12 +143,6 @@ function Header() {
                                 <HelpIcon sx={{ color: "white" }} />
                             </IconButton>
                         </Tooltip>
-
-                        <Tooltip title="Ayarlar" arrow>
-                            <IconButton color="inherit">
-                                <SettingsIcon sx={{ color: "white" }} />
-                            </IconButton>
-                        </Tooltip>
                     </Box>
                     {/* Notification Button End */}
 
@@ -156,7 +150,7 @@ function Header() {
                     <Box sx={{flexGrow: 0}}>
                         <Tooltip title="Profilim">
                             <IconButton onClick={handleOpenUserMenu}>
-                                <Avatar alt="Furkan" src="/static/images/avatar/2.jpg"/>
+                                <Avatar sx={{mr:"2rem"}} alt="Furkan" src="/static/images/avatar/2.jpg"/>
                             </IconButton>
                         </Tooltip>
                         <Menu

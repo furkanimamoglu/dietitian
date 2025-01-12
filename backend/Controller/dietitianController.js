@@ -1,6 +1,6 @@
-// Imports
 const DietitianService = require("../Service/dietitianService");
-const error = require("../Exception/Exception");
+require("../Exception/Exception");
+const Security = require("../Utils/Security");
 
 class DietitianController {
 
@@ -11,7 +11,7 @@ class DietitianController {
             if (!email || !password) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
@@ -38,7 +38,7 @@ class DietitianController {
             if (!email || !password || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
@@ -61,14 +61,23 @@ class DietitianController {
         try {
             const {email, password, phoneNumber, name, surname} = req.body;
 
-            if (!email || !password || !phoneNumber) {
-                return res.status(400).json({
-                    showOnScreen: true,
-                    message: 'All parameters must be filled.'
+            const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!token) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
                 });
             }
 
-            const result = await DietitianService.registerClient(email, password, phoneNumber, name, surname);
+            if (!email || !password || !phoneNumber) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm parametreler doldurulmalıdır.'
+                });
+            }
+
+            const result = await DietitianService.registerClient(user_id, email, password, phoneNumber, name, surname);
 
             res.status(200).json(result);
         } catch (err) {
@@ -80,17 +89,26 @@ class DietitianController {
     }
 
     async deleteClient(req, res) {
-        try {
-            const {clientUsername} = req.body;
+        const token = req.headers.authorization;
+        const user_id = Security.getUserIdFromToken(token);
 
-            if (!clientUsername) {
+        if (!token) {
+            return res.status(401).json({
+                message: "Yetkisiz erişim."
+            });
+        }
+
+        try {
+            const {client_id} = req.body;
+
+            if (!client_id) {
                 return res.status(400).json({
                     showOnScreen: true,
-                    message: 'All parameters must be filled.'
+                    message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.deleteClient(clientUsername);
+            const result = await DietitianService.deleteClient(user_id, client_id);
 
             res.status(200).json(result);
         } catch (err) {
@@ -103,7 +121,15 @@ class DietitianController {
 
     async getAllMyClients(req, res) {
         try {
-            const result = await DietitianService.getMyAllClients(1)
+            const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!token) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.getMyAllClients(user_id)
             res.status(200).json(result)
         } catch (error) {
             res.status(error.status || 500).json({

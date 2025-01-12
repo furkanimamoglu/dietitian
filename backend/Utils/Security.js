@@ -39,17 +39,28 @@ class Security {
         }
     }
 
+    /**
+     * Security - Resolving user_id from Token.
+     * @params token - Token which starts with "Bearer ".
+     * @returns boolean
+     * @author Furkan İmamoğlu
+     */
     getUserIdFromToken(token) {
-        token = token.replace('Bearer ', '');
-        let user = jwt.verify(token, config.secretkey);
+        try {
+            if (!token) {
+                return null;
+            }
+            token = token.replace('Bearer ', '');
 
-        if (!token) {
-            return null;
-        } else {
+            let user = jwt.verify(token, config.secretkey);
+
             return user.id;
+        } catch (error) {
+            return null;
         }
     }
 
+
 }
 
-module.exports = Security;
+module.exports = new Security();
