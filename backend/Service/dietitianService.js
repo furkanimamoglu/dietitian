@@ -81,13 +81,13 @@ class DietitianService {
         }
     }
 
-    async registerClient(user_id, email, password, phoneNumber) {
+    async registerClient(user_id, name, surname, email, password, phoneNumber, height, weight, gender) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
-            if (!email || !password || !phoneNumber) {
+            if (!email || !password || !phoneNumber || !height || !weight || !gender) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
@@ -101,9 +101,14 @@ class DietitianService {
 
             return await Client.create({
                 dietitian_id: user_id,
+                name: name,
+                surname: surname,
+                gender: gender,
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
+                height: height,
+                weight: weight,
                 role: CLIENT,
                 token: token
             })
@@ -134,6 +139,31 @@ class DietitianService {
             };
         } catch (error) {
             throw new Exception(error.message, 400);
+        }
+    }
+
+    async updateClient(user_id, client_id, updateData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: user_id,
+                },
+            });
+
+            if (!client) {
+                throw new Exception("Danışan bulunamadı.", 404, true);
+            }
+
+            await client.update(updateData);
+
+            return client;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || false);
         }
     }
 
