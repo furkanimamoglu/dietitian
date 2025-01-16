@@ -3,9 +3,7 @@ import './Danisan.css';
 import Default from "../../components/Layouts/Default.jsx";
 import Grid2 from '@mui/material/Grid2';
 import {Box, Tab, Typography, Avatar, Divider, Paper} from "@mui/material";
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
+import {TabContext,TabList,TabPanel} from '@mui/lab';
 
 // TODO: Geleceğe yönelik anamnez sorularını kenara koyayım dedim
 const AnamnezSorulari = {

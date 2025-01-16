@@ -146,14 +146,15 @@ export default function Beslenme() {
         <Default>
             <Grid2 container sx={{height: '100%'}}>
                 {/* Sol Panel */}
+                {/* TODO: xs versiyonu yapılacak */}
                 <Grid2
                     container
-                    sx={{height: '80vh', flex: 1, display: { xs: 'none', sm: 'flex' }}}
+                    sx={{height: '78vh', flex: 1, display: { xs: 'none', sm: 'flex' }}}
                     direction="column"
                     spacing={2}
                 >
                     <Grid2>
-                        <Paper elevation={3} sx={{ minHeight:"80vh" , p: "0.5rem"}}>
+                        <Paper elevation={3} sx={{ minHeight:"78vh" , p: "0.5rem"}}>
                             {/* Search and Add */}
                             <Grid2 container alignItems="center" spacing={2}>
                                 <Grid2 xs={12}>
@@ -188,7 +189,7 @@ export default function Beslenme() {
                             </Grid2>
 
                             {/* Selectable List */}
-                            <List sx={{maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden'}}>
+                            <List sx={{maxHeight: '78vh', overflowY: 'auto', overflowX: 'hidden'}}>
                                 {beslenmeKategorileri.map((category) => (
                                     <ListItem
                                         key={category.id}
@@ -236,7 +237,7 @@ export default function Beslenme() {
 
                 {/* Sağ Panel */}
                 {/* Beslenme Plan Kartlar - Start */}
-                <Grid2 container spacing={2} sx={{maxHeight: '80vh', width: "74vw", ml: "1rem", overflowY: 'auto'}}>
+                <Grid2 container spacing={2} sx={{maxHeight: '79.4vh', width: "74vw", ml: "1rem", overflowY: 'auto'}}>
                     {groupedData.map((group, groupIndex) => (
                         <React.Fragment key={groupIndex}>
                             {group.map((item) => (

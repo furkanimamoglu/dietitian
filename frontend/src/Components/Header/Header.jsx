@@ -1,62 +1,77 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
+import {
+    AppBar,
+    Box,
+    Toolbar,
+    IconButton,
+    Typography,
+    Menu,
+    Avatar,
+    Tooltip,
+    MenuItem,
+    Badge,
+    InputBase,
+    styled,
+    alpha,
+    Container,
+    Divider
+} from '@mui/material';
+
 import SpaIcon from '@mui/icons-material/Spa';
-import Badge from '@mui/material/Badge';
 import MailIcon from '@mui/icons-material/Mail';
-import {Search} from "@mui/icons-material";
-import SearchIcon from '@mui/icons-material/Search';
 import HelpIcon from '@mui/icons-material/Help';
-import {alpha, InputBase, styled} from "@mui/material";
-import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import SearchIcon from '@mui/icons-material/Search';
 
-const settings = ['Profil', 'Çıkış Yap'];
+const settings = [
+    { label: 'Profil', value: 'profil' },
+    { label: 'Çıkış Yap', value: 'cikisyap' }
+];
 
-function Header() {
+// Styled Search Container
+const SearchContainer = styled('div')(({ theme }) => ({
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    '&:hover': {
+        backgroundColor: alpha(theme.palette.common.white, 0.25),
+    },
+    marginLeft: 0,
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+        width: '250px',
+    },
+}));
+
+// Styled Icon Wrapper
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+}));
+
+// Styled Input
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: 'inherit',
+    width: '100%',
+    '& .MuiInputBase-input': {
+        padding: theme.spacing(1.2, 1, 1.2, 0),
+        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+        transition: theme.transitions.create('width'),
+    },
+}));
+
+export default function Header() {
+    React.useEffect(() => {
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/login';
+        }
+    }, []);
+
     const [anchorElUser, setAnchorElUser] = React.useState(null);
-
-    if (!localStorage.getItem('token')) {
-        window.location.href = '/login';
-    }
-
-    const Search = styled('div')(({ theme }) => ({
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: alpha(theme.palette.common.white, 0.15),
-        '&:hover': {
-            backgroundColor: alpha(theme.palette.common.white, 0.25),
-        },
-        marginLeft: 0,
-        width: '100%'
-    }));
-
-    const SearchIconWrapper = styled('div')(({ theme }) => ({
-        padding: theme.spacing(0, 2),
-        height: '100%',
-        position: 'absolute',
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    }));
-
-    const StyledInputBase = styled(InputBase)(({ theme }) => ({
-        color: 'inherit',
-        '& .MuiInputBase-input': {
-            padding: theme.spacing(1, 1, 1, 0),
-            paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-            width: '100%',
-        },
-    }));
-
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -66,121 +81,142 @@ function Header() {
         setAnchorElUser(null);
     };
 
+    const handleMenuItemClick = (value) => {
+        if (value === 'cikisyap') {
+            localStorage.removeItem('token');
+            window.location.href = '/cikisyap';
+        }
+        if (value === 'profil') {
+            window.location.href = '/profil';
+        }
+        setAnchorElUser(null);
+    };
+
     return (
-        <AppBar sx={{boxShadow: "0 4px 6px rgba(0,0,0,0.1)"}} position="fixed" >
-                <Toolbar disableGutters>
-                    <SpaIcon sx={{display: {xs: 'flex', md: 'flex'}, mr: "0.5rem", ml: "2rem"}}/>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="a"
-                        href="dashboard"
-                        sx={{
-                            mr: 2,
-                            display: {xs: 'none', md: 'flex'},
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Diyet
-                    </Typography>
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="dashboard"
-                        sx={{
-                            mr: 2,
-                            display: {xs: 'flex', md: 'none'},
-                            flexGrow: 1,
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Diyet
-                    </Typography>
+        <AppBar
+            position="fixed"
+            sx={{
+                backgroundColor: '#2e7d32',
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            }}
+        >
+            <Container maxWidth={false} disableGutters>
+                <Toolbar>
 
-                    {/* Search Bar Start */}
-                    <Box sx={{ pr: "1rem", display: {xs: 'flex', md: 'flex'}}}>
-                        <Search>
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
-                            <StyledInputBase
-                                placeholder="Arama yap…"
-                                inputProps={{ 'aria-label': 'search' }}
-                            />
-                        </Search>
+                    {/* Sol bölüm: Logo / Marka Adı */}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <SpaIcon sx={{ display: 'flex', ml: { xs: 2, md: 4 }, mr: 1 }} />
+                        <Typography
+                            variant="h6"
+                            component="a"
+                            href="/dashboard"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'none', md: 'flex' },
+                                fontFamily: 'monospace',
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: 'inherit',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            Diyet
+                        </Typography>
+                        <Typography
+                            variant="h5"
+                            component="a"
+                            href="/dashboard"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'flex', md: 'none' },
+                                flexGrow: 1,
+                                fontFamily: 'monospace',
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: 'inherit',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            Diyet
+                        </Typography>
                     </Box>
-                    {/* Search Bar End */}
 
-                    {/* Notification Button Start */}
-                    <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "flex" }, gap: "1rem", justifyContent: "flex-end", pr: "1rem" }}>
+                    {/* Orta bölüm: Empty */}
+                    <Box sx={{ flexGrow: 1, ml: { xs: 1, md: 4 }, mr: { xs: 1, md: 4 } }}>
+
+                    </Box>
+
+                    {/* Sağ bölüm: Bildirimler, Yardım, Profil */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mr: { xs: 2, md: 4 } }}>
+                        {/* Arama Çubuğu */}
+                        <Box sx={{ flexGrow: 1, ml: { xs: 1, md: 4 }, mr: { xs: 1, md: 4 } }}>
+                            <SearchContainer>
+                                <SearchIconWrapper>
+                                    <SearchIcon />
+                                </SearchIconWrapper>
+                                <StyledInputBase
+                                    placeholder="Arama yap..."
+                                    inputProps={{ 'aria-label': 'search' }}
+                                />
+                            </SearchContainer>
+                        </Box>
+                        
+                        {/* Mesajlar */}
                         <Tooltip title="Mesajlar" arrow>
                             <IconButton color="inherit">
-                                <Badge badgeContent={1} color="secondary">
-                                    <MailIcon sx={{ color: "white" }} />
+                                <Badge badgeContent={1} color="warning">
+                                    <MailIcon sx={{ color: 'white' }} />
                                 </Badge>
                             </IconButton>
                         </Tooltip>
 
-                        <Tooltip title="Bildirimler" arrow>
-                            <IconButton color="inherit">
-                                <Badge badgeContent={4} color="secondary">
-                                    <NotificationsIcon sx={{ color: "white" }} />
-                                </Badge>
-                            </IconButton>
-                        </Tooltip>
-
+                        {/* Yardım */}
                         <Tooltip title="Yardım" arrow>
                             <IconButton color="inherit">
-                                <HelpIcon sx={{ color: "white" }} />
+                                <HelpIcon sx={{ color: 'white' }} />
                             </IconButton>
                         </Tooltip>
-                    </Box>
-                    {/* Notification Button End */}
 
-                    {/* Profile Button Start */}
-                    <Box sx={{flexGrow: 0}}>
-                        <Tooltip title="Profilim">
-                            <IconButton onClick={handleOpenUserMenu}>
-                                <Avatar sx={{mr:"2rem"}} alt="Furkan" src="/static/images/avatar/2.jpg"/>
-                            </IconButton>
-                        </Tooltip>
-                        <Menu
-                            sx={{mt: "3.5rem"}}
-                            id="menu-appbar"
-                            anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            open={Boolean(anchorElUser)}
-                            onClose={handleCloseUserMenu}
-                        >
-                            <div>
-                                {settings.map((setting) => (
-                                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                        <Typography sx={{textAlign: 'center'}}>{setting}</Typography>
+                        {/* Profil Menüsü */}
+                        <Box sx={{ flexGrow: 0 }}>
+                            <Tooltip title="Profilim" arrow>
+                                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                    <Avatar alt="Furkan" src="/static/images/avatar/2.jpg" />
+                                </IconButton>
+                            </Tooltip>
+                            <Menu
+                                sx={{ mt: '45px' }}
+                                id="menu-appbar"
+                                anchorEl={anchorElUser}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                open={Boolean(anchorElUser)}
+                                onClose={handleCloseUserMenu}
+                            >
+                                <Box>
+                                    {settings.map((item) => (
+                                        <MenuItem key={item.value} onClick={() => handleMenuItemClick(item.value)}>
+                                            <Typography textAlign="center">{item.label}</Typography>
+                                        </MenuItem>
+                                    ))}
+                                    <Divider />
+                                    <MenuItem onClick={handleCloseUserMenu}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Sürüm: 1.0.0
+                                        </Typography>
                                     </MenuItem>
-                                ))}
-                            </div>
-                        </Menu>
+                                </Box>
+                            </Menu>
+                        </Box>
                     </Box>
-                    {/* Profile Button End */}
                 </Toolbar>
+            </Container>
         </AppBar>
     );
 }
-
-export default Header;
