@@ -17,7 +17,7 @@ export default function Randevularim() {
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/appointment/fetchDietitianAppointments",
+                const response = await axios.get(config[config.environment].apiUrl+"/appointment/fetchDietitianAppointments",
                     {
                         headers: {
                             Authorization: localStorage.getItem('token')
@@ -50,7 +50,7 @@ export default function Randevularim() {
         start: "",
         end: "",
     });
-
+    // TODO: 12:00'da olan bir randevuya, başka bir randevu 12:00'da biterse hata veriyor.
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
 

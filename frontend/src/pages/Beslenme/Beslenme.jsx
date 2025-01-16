@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Beslenme.css';
 import Default from "../../components/Layouts/Default.jsx";
 import {
@@ -17,7 +17,12 @@ import {
     Paper,
     TextField,
     Tooltip,
-    Typography
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from "@mui/material";
 import {Add} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
@@ -25,8 +30,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PrintIcon from '@mui/icons-material/Print';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-// Örnek veri
-const beslenmeData = [
+
+const initialBeslenmeData = [
     {id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png"},
     {id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png"},
     {id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png"},
@@ -88,7 +93,6 @@ const beslenmeKategorileri = [
     { id: 3, name: "Çölyak" }
 ];
 
-// Verileri her 3 elemanda bir gruplara ayıran yardımcı fonksiyon
 const groupByThree = (data) => {
     const groups = [];
     for (let i = 0; i < data.length; i += 3) {
@@ -98,13 +102,56 @@ const groupByThree = (data) => {
 };
 
 export default function Beslenme() {
+    const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
+
+    const [openModal, setOpenModal] = useState(false);
+
+    const [selectedBeslenmeProgram, setSelectedBeslenmeProgram] = useState(null);
+
+    const [selectedUser, setSelectedUser] = useState("");
+
     const groupedData = groupByThree(beslenmeData);
+
+    const handleOpenModal = (item) => {
+        setSelectedBeslenmeProgram(item);
+        setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+        setSelectedBeslenmeProgram(null);
+    };
+
+    const handleAddToUser = () => {
+        //TODO: Tarifi, kullanıcıya bağlayacak bir sistem yazılacak
+        console.log("Seçilen program:", selectedBeslenmeProgram);
+        console.log("Eklemek istediğin danışan:", selectedUser);
+
+        handleCloseModal();
+    };
+
+    const handlePrint = (item) => {
+        //TODO: Buraya PDF oluşturup, çıkartmaya hazır hale getirip printletecek bir sistem yazılacak.
+        console.log("Yazdırılacak Program:", item);
+        window.print();
+    };
+
+    // Sil
+    const handleDelete = (item) => {
+        const yeniListe = beslenmeData.filter((dataItem) => dataItem.id !== item.id);
+        setBeslenmeData(yeniListe);
+    };
 
     return (
         <Default>
             <Grid2 container sx={{height: '100%'}}>
                 {/* Sol Panel */}
-                <Grid2 container sx={{height: '80vh', flex: 1, display: { xs: 'none', sm: 'flex' } }} direction="column" spacing={2}>
+                <Grid2
+                    container
+                    sx={{height: '80vh', flex: 1, display: { xs: 'none', sm: 'flex' }}}
+                    direction="column"
+                    spacing={2}
+                >
                     <Grid2>
                         <Paper elevation={3} sx={{ minHeight:"80vh" , p: "0.5rem"}}>
                             {/* Search and Add */}
@@ -132,7 +179,7 @@ export default function Beslenme() {
                                             sx={{
                                                 backgroundColor: '#a50000',
                                                 '&:hover': {backgroundColor: '#ff0000'},
-                                        }}
+                                            }}
                                         >
                                             <DeleteIcon/>
                                         </Button>
@@ -142,14 +189,14 @@ export default function Beslenme() {
 
                             {/* Selectable List */}
                             <List sx={{maxHeight: '79vh', overflowY: 'auto', overflowX: 'hidden'}}>
-                                {beslenmeKategorileri.map((category) => ( //TODO: Uyarı var burada, düzeltilecek
+                                {beslenmeKategorileri.map((category) => (
                                     <ListItem
                                         key={category.id}
                                         sx={{
                                             '&:hover': {backgroundColor: '#f5f5f5'},
                                             '&:hover .delete-button': {visibility: 'visible'},
                                         }}
-                                        onClick={()=>{console.log("test")}}
+                                        onClick={()=>{console.log("Kategori tıklandı:", category.name)}}
                                     >
                                         <ListItemIcon>
                                             <Checkbox edge="start"/>
@@ -170,7 +217,11 @@ export default function Beslenme() {
                                             <IconButton
                                                 edge="end"
                                                 aria-label="delete"
-                                                sx={{ '&:hover': {backgroundColor: '#ff0000'}, backgroundColor: "#a50000", color: 'white'}}
+                                                sx={{
+                                                    '&:hover': {backgroundColor: '#ff0000'},
+                                                    backgroundColor: "#a50000",
+                                                    color: 'white'
+                                                }}
                                             >
                                                 <DeleteIcon/>
                                             </IconButton>
@@ -218,51 +269,59 @@ export default function Beslenme() {
                                                 display: 'flex',
                                                 justifyContent: 'flex-end'
                                             }}>
+                                                {/* Danışana Ekle */}
                                                 <Tooltip title={"Danışana Ekle"} arrow>
-                                                    <IconButton aria-label="danisana-ekle"
-                                                                sx={{
-                                                                    backgroundColor: '#3d8a3d',
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: '#53c153', // Hover'da arka plan değişmesin
-                                                                    },
-                                                                }}>
+                                                    <IconButton
+                                                        aria-label="danisana-ekle"
+                                                        sx={{
+                                                            backgroundColor: '#3d8a3d',
+                                                            color: 'white',
+                                                            '&:hover': { backgroundColor: '#53c153'},
+                                                        }}
+                                                        onClick={() => handleOpenModal(item)}
+                                                    >
                                                         <PersonAddIcon/>
                                                     </IconButton>
                                                 </Tooltip>
+
                                                 <Tooltip title={"Yazdır"} arrow>
-                                                    <IconButton aria-label="print"
-                                                                sx={{
-                                                                    backgroundColor: '#003095',
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: '#0052ff', // Hover'da arka plan değişmesin
-                                                                    },
-                                                                }}>
+                                                    <IconButton
+                                                        aria-label="print"
+                                                        sx={{
+                                                            backgroundColor: '#003095',
+                                                            color: 'white',
+                                                            '&:hover': { backgroundColor: '#0052ff'},
+                                                        }}
+                                                        onClick={() => handlePrint(item)}
+                                                    >
                                                         <PrintIcon/>
                                                     </IconButton>
                                                 </Tooltip>
+
                                                 <Tooltip title={"Düzenle"} arrow>
-                                                    <IconButton aria-label="duzenle"
-                                                                sx={{
-                                                                    backgroundColor: '#ff9e25',
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: '#ffaf4b', // Hover'da arka plan değişmesin
-                                                                    },
-                                                                }}>
+                                                    <IconButton
+                                                        aria-label="duzenle"
+                                                        sx={{
+                                                            backgroundColor: '#ff9e25',
+                                                            color: 'white',
+                                                            '&:hover': { backgroundColor: '#ffaf4b'},
+                                                        }}
+                                                    >
                                                         <EditIcon/>
                                                     </IconButton>
                                                 </Tooltip>
+
+                                                {/* Sil */}
                                                 <Tooltip title={"Sil"} arrow>
-                                                    <IconButton aria-label="sil"
-                                                                sx={{
-                                                                    backgroundColor: '#a50000',
-                                                                    color: 'white',
-                                                                    '&:hover': {
-                                                                        backgroundColor: '#ff0000', // Hover'da arka plan değişmesin
-                                                                    },
-                                                                }}>
+                                                    <IconButton
+                                                        aria-label="sil"
+                                                        sx={{
+                                                            backgroundColor: '#a50000',
+                                                            color: 'white',
+                                                            '&:hover': { backgroundColor: '#ff0000'},
+                                                        }}
+                                                        onClick={() => handleDelete(item)}
+                                                    >
                                                         <DeleteIcon/>
                                                     </IconButton>
                                                 </Tooltip>
@@ -276,6 +335,32 @@ export default function Beslenme() {
                 </Grid2>
                 {/* Beslenme Plan Kartlar - End */}
             </Grid2>
+
+            {/* Danışana Ekle Modal */}
+            <Dialog open={openModal} onClose={handleCloseModal}>
+                <DialogTitle>Danışana Ekle</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Seçilen program: <strong>{selectedBeslenmeProgram?.title}</strong>
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Danışan Adı"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        value={selectedUser}
+                        onChange={(e) => setSelectedUser(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseModal}>Vazgeç</Button>
+                    <Button onClick={handleAddToUser} variant="contained">
+                        Ekle
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Default>
     );
 }
