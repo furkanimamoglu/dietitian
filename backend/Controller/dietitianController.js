@@ -59,7 +59,7 @@ class DietitianController {
 
     async registerClient(req, res) {
         try {
-            const {email, password, phoneNumber, name, surname} = req.body;
+            const {name, surname, email, password, phoneNumber, height, weight, gender} = req.body;
 
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -77,7 +77,7 @@ class DietitianController {
                 });
             }
 
-            const result = await DietitianService.registerClient(user_id, email, password, phoneNumber, name, surname);
+            const result = await DietitianService.registerClient(user_id, name, surname, email, password, phoneNumber, height, weight, gender);
 
             res.status(200).json(result);
         } catch (err) {
@@ -115,6 +115,47 @@ class DietitianController {
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
+            });
+        }
+    }
+
+    async updateClient(req, res) {
+        const token = req.headers.authorization;
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Yetkisiz erişim."
+            });
+        }
+
+        const user_id = Security.getUserIdFromToken(token);
+
+        try {
+            const { id, name, surname, email, phoneNumber, height, weight, gender, status } = req.body;
+
+            if (!id || !name || !surname || !email || !phoneNumber || !height || !weight || !gender || !status) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Tüm parametreler doldurulmalıdır."
+                });
+            }
+
+            const result = await DietitianService.updateClient(user_id, id, {
+                name,
+                surname,
+                email,
+                phoneNumber,
+                height,
+                weight,
+                gender,
+                status
+            });
+
+            res.status(200).json(result)
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen || false,
+                message: err.message || "Bir hata oluştu.",
             });
         }
     }

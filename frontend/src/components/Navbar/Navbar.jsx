@@ -20,7 +20,7 @@ export default function Navbar() {
     return (
         <AppBar sx={{backgroundColor: 'rgb(238,255,238)', display: {xs: 'none', md: 'flex'}, mt:"4rem", boxShadow: "0 4px 6px rgba(0,0,0,0.3)"}} position="fixed">
             <Toolbar disableGutters>
-                    <Box sx={{flexGrow: 1, ml:"2.5rem", mr: "2.5rem", pd: "2.5rem", gap: "2rem", display: {xs: 'none', md: 'flex'}}}>
+                    <Box sx={{flexGrow: 1, ml:"2.5rem", mr: "2.5rem", pd: "2.5rem", gap: "4rem", justifyContent: 'center', display: {xs: 'none', md: 'flex'}}}>
                         {/* PC Version */}
                         {
                             pages.map((page) => (
