@@ -488,7 +488,7 @@ export default function Randevularim() {
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                label="Müşteri Ara"
+                                label="Danışan"
                                 margin="normal"
                                 required
                                 error={!eventData.client_id}
