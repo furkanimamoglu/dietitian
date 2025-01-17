@@ -10,14 +10,44 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import Default from "../../components/Layouts/Default.jsx";
 
-import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid2, TextField} from '@mui/material';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid2,
+    TextField,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+} from '@mui/material';
 import config from "../../config.js";
 
 export default function Randevularim() {
+    const [randevular, setRandevular] = useState([]);
+    const [clients, setClients] = useState([]); // Dietisyenin tüm client'larını burada tutacağız
+
+    // Randevu ekleme/düzenleme pop-up'ları için kullanılan state
+    const [randevuEklePopup, setRandevuEklePopup] = useState(false);
+    const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
+
+    const [eventData, setEventData] = useState({
+        id: null,
+        title: "",
+        start: "",
+        end: "",
+        client_id: "", // Burada client_id'yi ekliyoruz
+    });
+
+    // 1) Diyetisyene ait RANDEVULARI çekiyoruz
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
-                const response = await axios.get(config[config.environment].apiUrl+"/appointment/fetchDietitianAppointments",
+                const response = await axios.get(
+                    config[config.environment].apiUrl+"/appointment/fetchDietitianAppointments",
                     {
                         headers: {
                             Authorization: localStorage.getItem('token')
@@ -31,11 +61,13 @@ export default function Randevularim() {
                     title: appointment.title,
                     start: appointment.start,
                     end: appointment.end,
+                    extendedProps: {
+                        client_id: appointment.client_id,
+                    }
                 }));
 
                 setRandevular(formattedAppointments);
             } catch (error) {
-                // TODO: Sweet Alert'e dönüştürülebilir
                 console.error("Randevular çekilirken bir hata oluştu:", error);
             }
         };
@@ -43,16 +75,37 @@ export default function Randevularim() {
         fetchAppointments();
     }, []);
 
-    const [randevular, setRandevular] = useState([]);
+    useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                console.log(response)
+                setClients(response.data || []);
+            } catch (error) {
+                console.error("Müşteriler çekilirken bir hata oluştu:", error);
+            }
+        };
 
-    const [eventData, setEventData] = useState({
-        title: "",
-        start: "",
-        end: "",
-    });
-    // TODO: 12:00'da olan bir randevuya, başka bir randevu 12:00'da biterse hata veriyor.
-    const [randevuEklePopup, setRandevuEklePopup] = useState(false);
-    const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
+        fetchClients();
+    }, []);
+
+    const handleRandevuEkleButton = () => {
+        setEventData({
+            id: null,
+            title: "",
+            start: "",
+            end: "",
+            client_id: "",
+        });
+        setRandevuEklePopup(true);
+    };
 
     const handleDateClick = (arg) => {
         const currentView = arg.view.type;
@@ -60,51 +113,108 @@ export default function Randevularim() {
         if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
-            const startDate = new Date( arg.dateStr);
+            const startDate = new Date(arg.dateStr);
             const endDate = new Date(arg.dateStr);
             endDate.setHours(endDate.getHours() + 1);
 
-            setEventData({
+            setEventData((prev) => ({
+                ...prev,
                 title: "",
                 start: startDate.toISOString().slice(0, 16),
                 end: endDate.toISOString().slice(0, 16),
-            });
-
+                client_id: "",
+            }));
             setRandevuEklePopup(true);
         }
     };
 
-    const randevuDuzenle = (arg) => {
+    const handleEventClick = (arg) => {
         const event = arg.event;
 
         setEventData({
             id: event.id,
             title: event.title,
             start: event.start.toISOString().slice(0, 16),
-            end: event.end.toISOString().slice(0, 16),
+            end: event.end?.toISOString().slice(0, 16) || "",
+            client_id: event.extendedProps?.client_id || "",
         });
 
         setRandevuDuzenlePopup(true);
-    }
+    };
+
+    const handleEventResizeOrDrop = async (arg) => {
+        try {
+            const event = arg.event;
+
+            const updatedEvent = {
+                id: event.id,
+                title: event.title,
+                start: event.start.toISOString(),
+                end: event.end ? event.end.toISOString() : null,
+                client_id: event.extendedProps?.client_id || "",
+            };
+
+            const requestData = {
+                appointment_id: updatedEvent.id,
+                title: updatedEvent.title,
+                start: updatedEvent.start,
+                end: updatedEvent.end,
+                client_id: updatedEvent.client_id,
+            };
+
+            const response = await axios.put(
+                config[config.environment].apiUrl + "/appointment/updateAppointmentAsDietitian",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            console.log("Randevu güncelleme başarılı:", response.data);
+
+            setRandevular((prevRandevular) => {
+                return prevRandevular.map((randevu) =>
+                    String(randevu.id) === String(updatedEvent.id)
+                        ? {
+                            ...randevu,
+                            start: updatedEvent.start,
+                            end: updatedEvent.end,
+                            extendedProps: {
+                                client_id: updatedEvent.client_id,
+                            },
+                        }
+                        : randevu
+                );
+            });
+        } catch (error) {
+            console.error("Randevu güncellenirken bir hata oluştu:", error);
+            arg.revert();
+        }
+    };
 
     const randevuEkle = async () => {
         try {
             const newEvent = {
-                ...eventData,
                 id: randevular.length + 1,
+                title: eventData.title,
                 start: eventData.start,
-                end: eventData.end
+                end: eventData.end,
+                extendedProps: {
+                    client_id: eventData.client_id,
+                },
             };
 
             const requestData = {
                 title: eventData.title,
                 start: eventData.start,
                 end: eventData.end,
-                client_id: 1, // TODO: client_id seçilecek
+                client_id: eventData.client_id,
             };
 
             const response = await axios.post(
-                config[config.environment].apiUrl+"/appointment/addAppointmentAsDietitian",
+                config[config.environment].apiUrl + "/appointment/addAppointmentAsDietitian",
                 requestData,
                 {
                     headers: {
@@ -115,42 +225,33 @@ export default function Randevularim() {
 
             console.log("Randevu ekleme isteği başarılı:", response.data);
 
-            setRandevular((prevRandevular) => {
-                return [...prevRandevular, newEvent];
-            });
-
-            // Popup'u kapatıyoruz
+            setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
             setRandevuEklePopup(false);
         } catch (error) {
             console.error("Randevu eklenirken bir hata oluştu:", error);
-            arg.revert();
         }
     };
 
-    const handleEventClick = (arg) => {
-        randevuDuzenle(arg);
-    };
-
-    const handleEventResize = async (arg) => {
+    const handleEventSave = async () => {
         try {
-
-            const updatedEvent = {
-                id: arg.event.id,
-                title: arg.event.title,
-                start: arg.event.start.toISOString(),
-                end: arg.event.end ? arg.event.end.toISOString() : null,
+            const updatedEventWithDates = {
+                id: eventData.id,
+                title: eventData.title,
+                start: eventData.start,
+                end: eventData.end,
+                client_id: eventData.client_id,
             };
 
             const requestData = {
-                appointment_id: updatedEvent.id,
-                title: updatedEvent.title,
-                start: updatedEvent.start,
-                end: updatedEvent.end,
-                client_id: 1
+                appointment_id: updatedEventWithDates.id,
+                title: updatedEventWithDates.title,
+                start: updatedEventWithDates.start,
+                end: updatedEventWithDates.end,
+                client_id: updatedEventWithDates.client_id,
             };
 
             const response = await axios.put(
-                config[config.environment].apiUrl+"/appointment/updateAppointmentAsDietitian",
+                config[config.environment].apiUrl + "/appointment/updateAppointmentAsDietitian",
                 requestData,
                 {
                     headers: {
@@ -158,128 +259,46 @@ export default function Randevularim() {
                     },
                 }
             );
-
-            console.log("Randevu güncelleme başarılı:", response.data);
-
-            setRandevular((prevRandevular) => {
-                return prevRandevular.map((randevu) =>
-                    String(randevu.id) === String(updatedEvent.id)
-                        ? { ...randevu, ...updatedEvent }
-                        : randevu
-                );
-            });
-        } catch (error) {
-            console.error("Randevu güncellenirken bir hata oluştu:", error);
-
-            arg.revert();
-        }
-    };
-
-
-    const handleEventDrop = async (arg) => {
-        try {
-            const updatedEvent = {
-                id: arg.event.id,
-                title: arg.event.title,
-                start: arg.event.start.toISOString(),
-                end: arg.event.end ? arg.event.end.toISOString() : null,
-            };
-
-            const requestData = {
-                appointment_id: updatedEvent.id,
-                title: updatedEvent.title,
-                start: updatedEvent.start,
-                end: updatedEvent.end,
-                client_id: 1
-            };
-
-            const response = await axios.put(
-                config[config.environment].apiUrl+"/appointment/updateAppointmentAsDietitian",
-                requestData,
-                {
-                    headers: {
-                        Authorization: localStorage.getItem('token'),
-                    },
-                }
-            );
-
-            console.log("Randevu güncelleme başarılı:", response.data);
+            console.log("Randevu düzenleme başarılı:", response.data);
 
             setRandevular((prevRandevular) => {
                 return prevRandevular.map((randevu) =>
-                    String(randevu.id) === String(updatedEvent.id)
-                        ? { ...randevu, ...updatedEvent }
+                    String(randevu.id) === String(updatedEventWithDates.id)
+                        ? {
+                            ...randevu,
+                            title: updatedEventWithDates.title,
+                            start: updatedEventWithDates.start,
+                            end: updatedEventWithDates.end,
+                            extendedProps: {
+                                client_id: updatedEventWithDates.client_id,
+                            },
+                        }
                         : randevu
                 );
             });
+
+            handleDialogClose();
         } catch (error) {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
-
-            arg.revert();
         }
     };
-
-    const handleRandevuEkleButton = (arg) => {
-        setEventData({
-            title: "",
-            start: "",
-            end: "",
-        });
-
-        setRandevuEklePopup(true);
-    }
-
-    const handleEventChange = (updatedEvent) => {
-        setEventData(updatedEvent);
-    };
-
-    const handleEventSave = () => {
-        const updatedEventWithDates = {
-            ...eventData,
-            start: eventData.start,
-            end: eventData.end,
-        };
-
-        const requestData = {
-            appointment_id: updatedEventWithDates.id,
-            title: updatedEventWithDates.title,
-            start: updatedEventWithDates.start,
-            end: updatedEventWithDates.end,
-            client_id: 1,
-        };
-
-        const response = axios.put(
-            "http://localhost:3000/appointment/updateAppointmentAsDietitian",
-            requestData,
-            {
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                },
-            }
-        );
-
-        setRandevular(prevRandevular => {
-            const updatedRandevular = prevRandevular.map(randevu =>
-                String(randevu.id) === String(updatedEventWithDates.id)
-                    ? { ...randevu, ...updatedEventWithDates }
-                    : randevu
-            );
-            return updatedRandevular;
-        });
-        handleDialogClose();
-    };
-
 
     const handleDialogClose = () => {
         setRandevuDuzenlePopup(false);
         setRandevuEklePopup(false);
     };
 
+    const handleEventChange = (key, value) => {
+        setEventData((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
+
     return (
         <Default>
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
                 <Box sx={{ width: "100%", height: "100%" }}>
-                    {/* TODO: Resize Event sırasında eğer kullanıcı kaydetmezse, event eski boyutuna geri dönmeli */}
                     <FullCalendar
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
@@ -346,8 +365,8 @@ export default function Randevularim() {
                         }}
                         dateClick={handleDateClick}
                         eventClick={handleEventClick}
-                        eventResize={handleEventResize}
-                        eventDrop={handleEventDrop}
+                        eventResize={handleEventResizeOrDrop}
+                        eventDrop={handleEventResizeOrDrop}
                         eventResizableFromStart={true}
                         eventOverlap={false}
                     />
@@ -360,17 +379,15 @@ export default function Randevularim() {
                 <DialogContent>
                     <TextField
                         label="Randevu Başlığı"
-                        name="title"
                         value={eventData.title}
-                        onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+                        onChange={(e) => handleEventChange("title", e.target.value)}
                         fullWidth
                         margin="normal"
                     />
                     <TextField
                         label="Başlangıç Tarihi:"
-                        name="start"
                         value={eventData.start}
-                        onChange={(e) => setEventData({ ...eventData, start: e.target.value })}
+                        onChange={(e) => handleEventChange("start", e.target.value)}
                         fullWidth
                         margin="normal"
                         type="datetime-local"
@@ -378,14 +395,28 @@ export default function Randevularim() {
                     />
                     <TextField
                         label="Bitiş Tarihi:"
-                        name="end"
                         value={eventData.end}
-                        onChange={(e) => setEventData({ ...eventData, end: e.target.value })}
+                        onChange={(e) => handleEventChange("end", e.target.value)}
                         fullWidth
                         margin="normal"
                         type="datetime-local"
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel id="client-select-label">Müşteri Seç</InputLabel>
+                        <Select
+                            labelId="client-select-label"
+                            label="Müşteri Seç"
+                            value={eventData.client_id}
+                            onChange={(e) => handleEventChange("client_id", e.target.value)}
+                        >
+                            {clients.map((client) => (
+                                <MenuItem key={client.id} value={client.id}>
+                                    {client.name} {/* Örneğin client.name */}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
@@ -403,17 +434,15 @@ export default function Randevularim() {
                 <DialogContent>
                     <TextField
                         label="Randevu Başlığı"
-                        name="title"
                         value={eventData.title}
-                        onChange={(e) => handleEventChange({ ...eventData, title: e.target.value })}
+                        onChange={(e) => handleEventChange("title", e.target.value)}
                         fullWidth
                         margin="normal"
                     />
                     <TextField
                         label="Başlangıç Tarihi:"
-                        name="start"
                         value={eventData.start}
-                        onChange={(e) => handleEventChange({ ...eventData, start: e.target.value })}
+                        onChange={(e) => handleEventChange("start", e.target.value)}
                         fullWidth
                         margin="normal"
                         type="datetime-local"
@@ -421,14 +450,28 @@ export default function Randevularim() {
                     />
                     <TextField
                         label="Bitiş Tarihi:"
-                        name="end"
                         value={eventData.end}
-                        onChange={(e) => handleEventChange({ ...eventData, end: e.target.value })}
+                        onChange={(e) => handleEventChange("end", e.target.value)}
                         fullWidth
                         margin="normal"
                         type="datetime-local"
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel id="client-select-label-edit">Müşteri Seç</InputLabel>
+                        <Select
+                            labelId="client-select-label-edit"
+                            label="Müşteri Seç"
+                            value={eventData.client_id}
+                            onChange={(e) => handleEventChange("client_id", e.target.value)}
+                        >
+                            {clients.map((client) => (
+                                <MenuItem key={client.id} value={client.id}>
+                                    {client.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
