@@ -22,7 +22,7 @@ import {
     Select,
     MenuItem,
     FormControl,
-    InputLabel, FormHelperText, IconButton,
+    InputLabel, IconButton,
 } from '@mui/material';
 import config from "../../config.js";
 import {Close} from "@mui/icons-material";
@@ -30,9 +30,8 @@ import {Autocomplete} from "@mui/lab";
 
 export default function Randevularim() {
     const [randevular, setRandevular] = useState([]);
-    const [clients, setClients] = useState([]); // Dietisyenin tüm client'larını burada tutacağız
+    const [clients, setClients] = useState([]);
 
-    // Randevu ekleme/düzenleme pop-up'ları için kullanılan state
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
 
@@ -41,10 +40,9 @@ export default function Randevularim() {
         title: "",
         start: "",
         end: "",
-        client_id: "", // Burada client_id'yi ekliyoruz
+        client_id: "",
     });
 
-    // 1) Diyetisyene ait RANDEVULARI çekiyoruz
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
