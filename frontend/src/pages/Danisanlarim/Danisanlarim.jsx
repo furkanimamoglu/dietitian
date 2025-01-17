@@ -12,18 +12,18 @@ import {
     TextField,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { Cancel, CheckCircle, GroupAdd, Visibility } from "@mui/icons-material";
+import { Cancel, CheckCircle, GroupAdd, Visibility, Delete } from "@mui/icons-material";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import { green, red, blue, pink } from "@mui/material/colors";
 import Default from "../../components/Layouts/Default.jsx";
 import config from "../../config.js";
+import { useNavigate } from "react-router-dom";
 
 export default function Danisanlarim() {
     const [open, setOpen] = useState(false);
     const [clients, setClients] = useState([]);
 
-    // Yeni danışan ekleme popup'ını aç/kapat
     const openCreatePopup = () => {
         setOpen(true);
     };
@@ -38,7 +38,6 @@ export default function Danisanlarim() {
         closeCreatePopup();
     };
 
-    // API'den veri çekme
     useEffect(() => {
         axios
             .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
@@ -57,7 +56,7 @@ export default function Danisanlarim() {
     const handleRowUpdate = async (updatedRow, originalRow) => {
         try {
             const response = await axios.put(
-                config[config.environment].apiUrl+"/dietitian/updateClient",
+                config[config.environment].apiUrl + "/dietitian/updateClient",
                 updatedRow,
                 {
                     headers: {
@@ -72,6 +71,23 @@ export default function Danisanlarim() {
         } catch (error) {
             console.error("Güncelleme hatası:", error);
             return originalRow;
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(config[config.environment].apiUrl+"/dietitian/deleteClient", {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+                data: {
+                    client_id: id,
+                },
+            });
+            setClients((prev) => prev.filter((client) => client.id !== id));
+            console.log("Silme işlemi başarılı");
+        } catch (error) {
+            console.error("Silme işlemi hatası:", error);
         }
     };
 
@@ -142,16 +158,29 @@ export default function Danisanlarim() {
         },
         {
             field: "actions",
-            headerName: "Aksiyonlar",
-            width: 100,
-            renderCell: (params) => (
-                <Button
-                    variant="text"
-                    startIcon={<Visibility />}
-                    onClick={() => console.log("Görüntüle: ", params.row)}
-                >
-                </Button>
-            ),
+            headerName: "İşlemler",
+            width: 150,
+            renderCell: (params) => {
+                const navigate = useNavigate();
+                return (
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => navigate(`/danisan/${params.row.id}`)}
+                        >
+                            <Visibility />
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={() => handleDelete(params.row.id)}
+                        >
+                            <Delete />
+                        </Button>
+                    </Box>
+                );
+            },
         },
     ];
 

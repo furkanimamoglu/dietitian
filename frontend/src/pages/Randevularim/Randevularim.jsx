@@ -19,10 +19,7 @@ import {
     DialogTitle,
     Grid2,
     TextField,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel, IconButton,
+    IconButton,
 } from '@mui/material';
 import config from "../../config.js";
 import {Close} from "@mui/icons-material";
@@ -86,7 +83,6 @@ export default function Randevularim() {
                         }
                     }
                 );
-                console.log(response)
                 setClients(response.data || []);
             } catch (error) {
                 console.error("Müşteriler çekilirken bir hata oluştu:", error);
@@ -373,7 +369,6 @@ export default function Randevularim() {
                 </Box>
             </Grid2>
 
-            {/* Yeni Randevu Ekle Popup */}
             {/* Yeni Randevu Ekle Popup */}
             <Dialog open={randevuEklePopup} onClose={handleDialogClose} maxWidth="sm" fullWidth>
                 <DialogTitle>

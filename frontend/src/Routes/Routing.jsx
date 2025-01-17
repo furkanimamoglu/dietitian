@@ -24,6 +24,7 @@ export default function Routing() {
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
                 <Route path="/egzersiz/*" element={<Egzersizler/>}/>
+                <Route path="/finans/*" element={<Egzersizler/>}/>
                 <Route path="/tarif/*" element={<Tarifler/>}/>
                 <Route path="/login/*" element={<Login/>}/>
                 <Route path="/register/*" element={<Register/>}/>

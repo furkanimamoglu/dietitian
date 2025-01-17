@@ -10,7 +10,7 @@ const dietitianController = require('../Controller/dietitianController');
 router.post('/login', dietitianController.login);
 router.post('/register', dietitianController.register);
 router.post('/registerClient', dietitianController.registerClient);
-router.post('/deleteClient', dietitianController.deleteClient);
+router.delete('/deleteClient', dietitianController.deleteClient);
 router.put('/updateClient', dietitianController.updateClient)
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
 
