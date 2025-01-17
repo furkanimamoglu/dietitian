@@ -374,8 +374,23 @@ export default function Randevularim() {
             </Grid2>
 
             {/* Yeni Randevu Ekle Popup */}
+            {/* Yeni Randevu Ekle Popup */}
             <Dialog open={randevuEklePopup} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Yeni Randevu Ekle</DialogTitle>
+                <DialogTitle>
+                    Yeni Randevu Ekle
+                    <IconButton
+                        aria-label="close"
+                        onClick={handleDialogClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                        }}
+                    >
+                        <Close />
+                    </IconButton>
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         label="Randevu Başlığı"
@@ -383,6 +398,9 @@ export default function Randevularim() {
                         onChange={(e) => handleEventChange("title", e.target.value)}
                         fullWidth
                         margin="normal"
+                        required
+                        error={!eventData.title}
+                        helperText={!eventData.title ? "Bu alan zorunludur" : ""}
                     />
                     <TextField
                         label="Başlangıç Tarihi:"
@@ -391,6 +409,9 @@ export default function Randevularim() {
                         fullWidth
                         margin="normal"
                         type="datetime-local"
+                        required
+                        error={!eventData.start}
+                        helperText={!eventData.start ? "Bu alan zorunludur" : ""}
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
                     <TextField
@@ -400,29 +421,40 @@ export default function Randevularim() {
                         fullWidth
                         margin="normal"
                         type="datetime-local"
+                        required
+                        error={!eventData.end}
+                        helperText={!eventData.end ? "Bu alan zorunludur" : ""}
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="client-select-label">Müşteri Seç</InputLabel>
-                        <Select
-                            labelId="client-select-label"
-                            label="Müşteri Seç"
-                            value={eventData.client_id}
-                            onChange={(e) => handleEventChange("client_id", e.target.value)}
-                        >
-                            {clients.map((client) => (
-                                <MenuItem key={client.id} value={client.id}>
-                                    {client.name} {/* Örneğin client.name */}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <Autocomplete
+                        options={clients}
+                        getOptionLabel={(option) => option.name}
+                        onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
+                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Danışan"
+                                margin="normal"
+                                required
+                                error={!eventData.client_id}
+                                helperText={!eventData.client_id ? "Bu alan zorunludur" : ""}
+                            />
+                        )}
+                        fullWidth
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
                         Vazgeç
                     </Button>
-                    <Button onClick={randevuEkle} color="primary">
+                    <Button
+                        onClick={randevuEkle}
+                        color="primary"
+                        disabled={
+                            !eventData.title || !eventData.start || !eventData.end || !eventData.client_id
+                        }
+                    >
                         Kaydet
                     </Button>
                 </DialogActions>
