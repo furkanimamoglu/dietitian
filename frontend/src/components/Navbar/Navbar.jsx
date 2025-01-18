@@ -10,11 +10,10 @@ export default function Navbar() {
     const navigate = useNavigate();
 
     const pages = [
-        { name: "DANIŞAN", route: "/danisan" },
         { name: "DANIŞANLARIM", route: "/danisanlarim" },
         { name: "RANDEVULARIM", route: "/randevularim" },
         { name: "BESLENME", route: "/beslenme" },
-        { name: "TARİFER", route: "/tarif" },
+        { name: "TARİFLER", route: "/tarif" },
         { name: "EGZERSİZLER", route: "/egzersiz" },
         { name: "FİNANS", route: "/finans" },
     ];

@@ -1,9 +1,12 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import './Danisan.css';
 import Default from "../../components/Layouts/Default.jsx";
 import Grid2 from '@mui/material/Grid2';
 import {Box, Tab, Typography, Avatar, Divider, Paper} from "@mui/material";
 import {TabContext,TabList,TabPanel} from '@mui/lab';
+import axios from "axios";
+import config from "../../config.js";
+import {useParams} from "react-router-dom";
 
 // TODO: Geleceğe yönelik anamnez sorularını kenara koyayım dedim
 const AnamnezSorulari = {
@@ -98,7 +101,32 @@ const DanisanAnamnez = {
 
 
 export default function Danisan() {
+    const { id } = useParams();
     const [value, setValue] = React.useState('genel');
+
+    useEffect(() => {
+        const fetchDanisanInfo = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl+"/dietitian/getMyClient",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        },
+                        params: {
+                            client_id: id
+                        }
+                    }
+                );
+
+                console.log(response.data);
+            } catch (err) {
+                console.error('Hata:', err.message);
+            }
+        };
+
+        fetchDanisanInfo();
+    }, []);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -182,7 +210,6 @@ export default function Danisan() {
                                             <Typography><strong>Cinsiyet:</strong> {DanisanAnamnez.gender}</Typography>
                                             <Typography><strong>Boy:</strong> {DanisanAnamnez.height} cm</Typography>
                                             <Typography><strong>Kilo:</strong> {DanisanAnamnez.weight} kg</Typography>
-                                            <Typography><strong>Notlar:</strong> {DanisanAnamnez.notes}</Typography>
                                         </Grid2>
                                     </Grid2>
                                 </Paper>

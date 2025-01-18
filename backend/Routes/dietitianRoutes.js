@@ -12,6 +12,7 @@ router.post('/register', dietitianController.register);
 router.post('/registerClient', dietitianController.registerClient);
 router.delete('/deleteClient', dietitianController.deleteClient);
 router.put('/updateClient', dietitianController.updateClient)
+router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
 
 module.exports = router;

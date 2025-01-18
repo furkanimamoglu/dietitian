@@ -160,6 +160,27 @@ class DietitianController {
         }
     }
 
+    async getMyClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const { client_id } = req.query;
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!token) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.getMyClient(user_id, client_id)
+            res.status(200).json(result)
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            });
+        }
+    }
+
     async getAllMyClients(req, res) {
         try {
             const token = req.headers.authorization;

@@ -167,6 +167,43 @@ class DietitianService {
         }
     }
 
+    async getMyClient(user_id, client_id) {
+        try {
+
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: {
+                    id: user_id
+                },
+                include: [
+                    {
+                        model: Client,
+                        as: 'Clients',
+                        where: {
+                            id: client_id
+                        }
+                    }
+                ]
+            });
+
+            if (!dietitian) {
+                throw new Error('Diyetisyen bulunamadı veya bu Client size bağlı değil.');
+            }
+
+            if (!dietitian.Clients || dietitian.Clients.length === 0) {
+                throw new Error('Hedef Client bulunamadı.');
+            }
+
+            return dietitian.Clients[0];
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+
     async getMyAllClients(user_id) {
         try {
             if (!user_id) {

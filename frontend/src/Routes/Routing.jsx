@@ -20,7 +20,7 @@ export default function Routing() {
                 <Route path="/dashboard/*" element={<Dashboard/>}/>
                 <Route path="/profil/*" element={<Profil/>}/>
                 <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
-                <Route path="/danisan/*" element={<Danisan/>}/>
+                <Route path="/danisan/:id" element={<Danisan/>}/>
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
                 <Route path="/egzersiz/*" element={<Egzersizler/>}/>
