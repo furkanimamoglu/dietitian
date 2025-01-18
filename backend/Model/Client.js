@@ -110,21 +110,5 @@ const Client = sequelize.define('Client', {
     }
 );
 
-Client.hasMany(Anamnesis, {
-    foreignKey: "client_id"
-});
-
-Client.hasMany(Invoice, {
-    foreignKey: "client_id"
-});
-
-Client.hasMany(Appointment, {
-    foreignKey: "client_id"
-});
-
-Appointment.belongsTo(Client, {
-    foreignKey: "client_id"
-});
-
 
 module.exports = Client;
