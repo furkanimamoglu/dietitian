@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import './Beslenme.css';
 import Default from "../../../components/Layouts/Default.jsx";
 import {
@@ -32,13 +32,8 @@ import PrintIcon from '@mui/icons-material/Print';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Autocomplete from '@mui/material/Autocomplete';
-
-const danisanList = [
-    { id: 1, label: "Ahmet Yılmaz" },
-    { id: 2, label: "Ayşe Demir" },
-    { id: 3, label: "John Doe" },
-    { id: 4, label: "Jane Smith" },
-];
+import axios from "axios";
+import config from "../../../config.js";
 
 const initialCategories = [
     { id: 1, name: "Diyet" },
@@ -60,7 +55,6 @@ const initialBeslenmeData = [
     { id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png" },
 ];
 
-// 3'lü gruplama fonksiyonu (kartlar satır satır gelsin)
 const groupByThree = (data) => {
     const groups = [];
     for (let i = 0; i < data.length; i += 3) {
@@ -71,54 +65,60 @@ const groupByThree = (data) => {
 
 export default function Beslenme() {
     const [categoryData, setCategoryData] = useState(initialCategories);
-    const [checkedCategories, setCheckedCategories] = useState([]); // Seçili kategorilerin ID'lerini tutar
+    const [checkedCategories, setCheckedCategories] = useState([]);
+    const [danisanList, setDanisanList] = useState([]);
+
+    useEffect(() => {
+        axios
+            .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                setDanisanList(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching clients:", error);
+            });
+    }, []);
 
     const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
 
-    // Danışana Ekle Modal State'leri
     const [openModal, setOpenModal] = useState(false);
     const [selectedBeslenmeProgram, setSelectedBeslenmeProgram] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
 
-    // Detay Modal (Kart Resmine Tıklandığında Açılan Büyük Modal)
     const [openDetailModal, setOpenDetailModal] = useState(false);
     const [detailItem, setDetailItem] = useState(null);
 
     const groupedData = groupByThree(beslenmeData);
 
-    // Kategori Seçimi (Checkbox)
     const handleCategoryCheck = (categoryId) => {
         if (checkedCategories.includes(categoryId)) {
-            // Zaten seçili ise çıkart
             setCheckedCategories(checkedCategories.filter((id) => id !== categoryId));
         } else {
-            // Değilse ekle
             setCheckedCategories([...checkedCategories, categoryId]);
         }
     };
 
-    // Toplu Sil Butonu (Sol Panel)
     const handleMultiDelete = () => {
-        // Seçili kategorileri sil
         const newCategoryData = categoryData.filter(
             (cat) => !checkedCategories.includes(cat.id)
         );
         setCategoryData(newCategoryData);
-        setCheckedCategories([]); // silindikten sonra listeyi temizle
+        setCheckedCategories([]);
     };
 
-    // Hover'daki Tekil Sil (Sol Panel)
     const handleSingleCategoryDelete = (categoryId) => {
         const newCategoryData = categoryData.filter((cat) => cat.id !== categoryId);
         setCategoryData(newCategoryData);
 
-        // Eğer checkbox işaretli kategorilerden biriyse, onu da çıkar
         if (checkedCategories.includes(categoryId)) {
             setCheckedCategories(checkedCategories.filter((id) => id !== categoryId));
         }
     };
 
-    // Sağ Panel: Danışana Ekle Modalları
     const handleOpenModal = (item) => {
         setSelectedBeslenmeProgram(item);
         setOpenModal(true);
@@ -134,7 +134,6 @@ export default function Beslenme() {
         //TODO: Tarifi, seçilen kullanıcıya bağlayacak bir sistem yazılacak (API vb.)
         console.log("Seçilen program:", selectedBeslenmeProgram);
         console.log("Eklemek istediğin danışan:", selectedUser);
-
         handleCloseModal();
     };
 
@@ -250,7 +249,7 @@ export default function Beslenme() {
                                                 edge="end"
                                                 aria-label="delete"
                                                 onClick={(e) => {
-                                                    e.stopPropagation(); // Checkbox event'i tetiklenmesin
+                                                    e.stopPropagation();
                                                     handleSingleCategoryDelete(category.id);
                                                 }}
                                                 sx={{
@@ -320,7 +319,7 @@ export default function Beslenme() {
                                                             '&:hover': { backgroundColor: '#53c153' },
                                                         }}
                                                         onClick={(e) => {
-                                                            e.stopPropagation(); // Kart detayına gitmesin
+                                                            e.stopPropagation();
                                                             handleOpenModal(item);
                                                         }}
                                                     >
@@ -400,7 +399,7 @@ export default function Beslenme() {
                         <Autocomplete
                             fullWidth
                             options={danisanList}
-                            getOptionLabel={(option) => option.label}
+                            getOptionLabel={(option) => option.name + " " + option.surname}
                             value={selectedUser}
                             onChange={(e, newValue) => setSelectedUser(newValue)}
                             renderInput={(params) => (
@@ -415,17 +414,16 @@ export default function Beslenme() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseModal}>Vazgeç</Button>
-                    <Button onClick={handleAddToUser} variant="contained">
+                    <Button onClick={handleAddToUser} variant="contained" disabled={!selectedUser}>
                         Ekle
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Kart Detay Modal (Büyük Modal) */}
+            {/* Kart Detay Modal */}
             <Dialog open={openDetailModal} onClose={handleDetailModalClose} maxWidth="sm" fullWidth>
                 <DialogTitle>{detailItem?.title}</DialogTitle>
                 <DialogContent>
-                    {/* Büyük resim veya detaylar buraya */}
                     <DialogContentText sx={{ mb: 2 }}>
                         {detailItem?.description}
                     </DialogContentText>
@@ -437,7 +435,6 @@ export default function Beslenme() {
                             src={detailItem.image}
                         />
                     )}
-                    {/* Daha fazla metin veya öğe ekleyebilirsiniz */}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDetailModalClose}>Kapat</Button>

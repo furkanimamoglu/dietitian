@@ -24,8 +24,8 @@ import { useNavigate } from "react-router-dom";
 export default function Danisanlarim() {
     const [open, setOpen] = useState(false);
     const [clients, setClients] = useState([]);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Silme onay penceresi için state
-    const [selectedClient, setSelectedClient] = useState(null); // Silinecek danışan bilgisi
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState(null);
 
     const openCreatePopup = () => {
         setOpen(true);
