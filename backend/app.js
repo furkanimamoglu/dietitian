@@ -5,13 +5,7 @@ const bodyParser = require('body-parser');
 const config = require('./config.json');
 
 // Models
-require('./Model/Client');
-require('./Model/Dietitian');
-require('./Model/Exercise');
-require('./Model/Anamnes');
-require('./Model/Recipe');
-require('./Model/Invoice');
-require('./Model/Appointment');
+require('./Model/MainModel');
 
 // Express App
 const app = express();
