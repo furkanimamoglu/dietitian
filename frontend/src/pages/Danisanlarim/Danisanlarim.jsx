@@ -10,6 +10,7 @@ import {
     DialogTitle,
     Grid2,
     TextField,
+    Typography,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Cancel, CheckCircle, GroupAdd, Visibility, Delete } from "@mui/icons-material";
@@ -23,6 +24,8 @@ import { useNavigate } from "react-router-dom";
 export default function Danisanlarim() {
     const [open, setOpen] = useState(false);
     const [clients, setClients] = useState([]);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // Silme onay penceresi için state
+    const [selectedClient, setSelectedClient] = useState(null); // Silinecek danışan bilgisi
 
     const openCreatePopup = () => {
         setOpen(true);
@@ -76,7 +79,7 @@ export default function Danisanlarim() {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(config[config.environment].apiUrl+"/dietitian/deleteClient", {
+            await axios.delete(config[config.environment].apiUrl + "/dietitian/deleteClient", {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -89,6 +92,24 @@ export default function Danisanlarim() {
         } catch (error) {
             console.error("Silme işlemi hatası:", error);
         }
+    };
+
+    const confirmDelete = (client) => {
+        setSelectedClient(client); // Silinecek danışanı kaydet
+        setDeleteDialogOpen(true); // Onay penceresini aç
+    };
+
+    const cancelDelete = () => {
+        setDeleteDialogOpen(false); // Onay penceresini kapat
+        setSelectedClient(null); // Seçili danışanı temizle
+    };
+
+    const confirmDeleteAction = () => {
+        if (selectedClient) {
+            handleDelete(selectedClient.id);
+        }
+        setDeleteDialogOpen(false); // Onay penceresini kapat
+        setSelectedClient(null); // Seçili danışanı temizle
     };
 
     const columns = [
@@ -174,7 +195,7 @@ export default function Danisanlarim() {
                         <Button
                             variant="outlined"
                             color="error"
-                            onClick={() => handleDelete(params.row.id)}
+                            onClick={() => confirmDelete(params.row)}
                         >
                             <Delete />
                         </Button>
@@ -207,6 +228,24 @@ export default function Danisanlarim() {
                     />
                 </Grid2>
             </Grid2>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+                <DialogTitle>Silme Onayı</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {selectedClient?.name} danışanınızı silmeyi onaylıyor musunuz?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={cancelDelete} color="secondary" variant="outlined">
+                        Vazgeç
+                    </Button>
+                    <Button onClick={confirmDeleteAction} color="error" variant="contained">
+                        Sil
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Create Popup */}
             <Dialog open={open} onClose={closeCreatePopup}>
