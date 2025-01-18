@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Beslenme.css';
-import Default from "../../components/Layouts/Default.jsx";
+import Default from "../../../components/Layouts/Default.jsx";
 import {
     Box,
     Button,

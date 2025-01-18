@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './Danisan.css';
-import Default from "../../components/Layouts/Default.jsx";
+import Default from "../../../components/Layouts/Default.jsx";
 import Grid2 from '@mui/material/Grid2';
 import {Box, Tab, Typography, Avatar, Divider, Paper} from "@mui/material";
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import axios from "axios";
-import config from "../../config.js";
+import config from "../../../config.js";
 import {useParams, useNavigate} from "react-router-dom";
 
 export default function Danisan() {
@@ -59,6 +59,7 @@ export default function Danisan() {
         fetchDanisanInfo();
     }, [id, navigate]);
 
+    //TODO: Geçici çözüm olarak 404 koyduk, arada da loading'e geçiyor. Belki loader yapılabilir ama şimdilik beklemede.
     useEffect(() => {
         if (!isLoading && danisan === null) {
             navigate('/404');

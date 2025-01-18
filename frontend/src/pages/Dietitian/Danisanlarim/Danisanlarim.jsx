@@ -17,8 +17,8 @@ import { Cancel, CheckCircle, GroupAdd, Visibility, Delete } from "@mui/icons-ma
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import { green, red, blue, pink } from "@mui/material/colors";
-import Default from "../../components/Layouts/Default.jsx";
-import config from "../../config.js";
+import Default from "../../../components/Layouts/Default.jsx";
+import config from "../../../config.js";
 import { useNavigate } from "react-router-dom";
 
 export default function Danisanlarim() {
