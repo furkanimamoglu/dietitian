@@ -15,7 +15,7 @@ router.put('/updateClient', dietitianController.updateClient)
 router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
 
-router.get('/getAllMyNutritionPlanCategories', dietitianController.getAllMyNutritionPlanCategories);
-router.post('/addNutritionPlanCategories', dietitianController.addNutritionPlanCategories);
+router.get('/getAllMyNutritionCategories', dietitianController.getAllMyNutritionCategories);
+router.post('/addNutritionCategories', dietitianController.addNutritionCategories);
 
 module.exports = router;

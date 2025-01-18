@@ -9,7 +9,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const { sequelize, Dietitian, Client, NutritionPlan } = require('../Model/MainModel');
+const { sequelize, Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
 
 class DietitianService {
 
@@ -231,7 +231,7 @@ class DietitianService {
         }
     }
 
-    async getAllMyNutritionPlanCategories(user_id) {
+    async getAllMyNutritionCategories(user_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -241,8 +241,8 @@ class DietitianService {
                 where: { id: user_id },
                 include: [
                     {
-                        model: NutritionPlan,
-                        as: 'NutritionPlans',
+                        model: NutritionCategory,
+                        as: 'categories',
                     },
                 ],
             });
@@ -251,8 +251,33 @@ class DietitianService {
                 throw new Exception('Diyetisyen bulunamadı.', 404);
             }
 
-            // İlişkili tüm beslenme programlarını döndür
-            return dietitian.NutritionPlans;
+            return dietitian.categories;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+
+    async addNutritionCategory(user_id, categoryData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+            });
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404);
+            }
+
+            const newCategory = await NutritionCategory.create({
+                ...categoryData,
+                dietitian_id: user_id,
+            });
+
+            return newCategory;
         } catch (error) {
             throw new Exception(error.message, 400);
         }

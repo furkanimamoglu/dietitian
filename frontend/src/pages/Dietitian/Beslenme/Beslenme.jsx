@@ -64,8 +64,7 @@ const groupByThree = (data) => {
 };
 
 export default function Beslenme() {
-    const [categoryData, setCategoryData] = useState(initialCategories);
-    const [categories, setCategories] = useState([]);
+    const [categoryData, setCategoryData] = useState();
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
 
@@ -86,13 +85,13 @@ export default function Beslenme() {
 
     useEffect(() => {
         axios
-            .get(config[config.environment].apiUrl + "/dietitian/getAllMyCategories", {
+            .get(config[config.environment].apiUrl + "/dietitian/getAllMyNutritionCategories", {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
             })
             .then((response) => {
-                setCategories(response.data);
+                setCategoryData(response.data);
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
@@ -143,7 +142,7 @@ export default function Beslenme() {
     const handleCloseModal = () => {
         setOpenModal(false);
         setSelectedBeslenmeProgram(null);
-        setSelectedUser(null); // temizleyelim
+        setSelectedUser(null);
     };
 
     const handleAddToUser = () => {
@@ -153,7 +152,6 @@ export default function Beslenme() {
         handleCloseModal();
     };
 
-    // Yazdır
     const handlePrint = (item) => {
         //TODO: PDF veya Print sistemi
         console.log("Yazdırılacak Program:", item);
@@ -229,56 +227,62 @@ export default function Beslenme() {
                                     mt: 1
                                 }}
                             >
-                                {categoryData.map((category) => (
-                                    <ListItem
-                                        key={category.id}
-                                        sx={{
-                                            '&:hover': { backgroundColor: '#f5f5f5' },
-                                            '&:hover .delete-button': { visibility: 'visible' },
-                                            transition: 'background-color 0.2s',
-                                            cursor: 'pointer',
-                                        }}
-                                        onClick={() => handleCategoryCheck(category.id)}
-                                    >
-                                        <ListItemIcon>
-                                            <Checkbox
-                                                edge="start"
-                                                checked={checkedCategories.includes(category.id)}
-                                                tabIndex={-1}
-                                                disableRipple
-                                            />
-                                        </ListItemIcon>
-                                        <ListItemText primary={category.name.toString()} />
-
-                                        <Box
-                                            className="delete-button"
+                                {categoryData && categoryData.length > 0 ? (
+                                    categoryData.map((category) => (
+                                        <ListItem
+                                            key={category.id}
                                             sx={{
-                                                position: 'absolute',
-                                                right: 0,
-                                                top: '50%',
-                                                mr: "1rem",
-                                                transform: 'translateY(-50%)',
-                                                visibility: 'hidden',
+                                                '&:hover': { backgroundColor: '#f5f5f5' },
+                                                '&:hover .delete-button': { visibility: 'visible' },
+                                                transition: 'background-color 0.2s',
+                                                cursor: 'pointer',
                                             }}
+                                            onClick={() => handleCategoryCheck(category.id)}
                                         >
-                                            <IconButton
-                                                edge="end"
-                                                aria-label="delete"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleSingleCategoryDelete(category.id);
-                                                }}
+                                            <ListItemIcon>
+                                                <Checkbox
+                                                    edge="start"
+                                                    checked={checkedCategories.includes(category.id)}
+                                                    tabIndex={-1}
+                                                    disableRipple
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText primary={category.title} />
+
+                                            <Box
+                                                className="delete-button"
                                                 sx={{
-                                                    '&:hover': { backgroundColor: '#ff0000' },
-                                                    backgroundColor: "#a50000",
-                                                    color: 'white'
+                                                    position: 'absolute',
+                                                    right: 0,
+                                                    top: '50%',
+                                                    mr: "1rem",
+                                                    transform: 'translateY(-50%)',
+                                                    visibility: 'hidden',
                                                 }}
                                             >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Box>
-                                    </ListItem>
-                                ))}
+                                                <IconButton
+                                                    edge="end"
+                                                    aria-label="delete"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleSingleCategoryDelete(category.id);
+                                                    }}
+                                                    sx={{
+                                                        '&:hover': { backgroundColor: '#ff0000' },
+                                                        backgroundColor: "#a50000",
+                                                        color: 'white'
+                                                    }}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Box>
+                                        </ListItem>
+                                    ))
+                                ) : (
+                                    <Typography sx={{ p: 2, textAlign: 'center' }}>
+                                        Kategori bulunamadı.
+                                    </Typography>
+                                )}
                             </List>
                             {/* Kategori Listesi - End */}
                         </Paper>
