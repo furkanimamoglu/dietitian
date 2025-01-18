@@ -25,6 +25,7 @@ import {useNavigate} from "react-router-dom";
 
 const settings = [
     { label: 'Profil', value: 'profil' },
+    { label: 'Ayarlar', value: 'ayarlar' },
     { label: 'Çıkış Yap', value: 'cikisyap' }
 ];
 
@@ -87,9 +88,12 @@ export default function Header() {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
             navigate('/login');
-        }
-        if (value === 'profil') {
+        } else if (value === 'profil') {
             navigate('/profil');
+        } else if (value === 'ayarlar') {
+            navigate('/ayarlar');
+        } else {
+            navigate('/dashboard');
         }
         setAnchorElUser(null);
     };
