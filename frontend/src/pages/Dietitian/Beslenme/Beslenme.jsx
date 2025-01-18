@@ -9,7 +9,13 @@ import {
     CardContent,
     CardMedia,
     Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     Grid2,
+    IconButton,
     List,
     ListItem,
     ListItemIcon,
@@ -17,82 +23,44 @@ import {
     Paper,
     TextField,
     Tooltip,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions
+    Typography
 } from "@mui/material";
-import {Add} from "@mui/icons-material";
-import IconButton from "@mui/material/IconButton";
+
+import { Add } from "@mui/icons-material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrintIcon from '@mui/icons-material/Print';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Autocomplete from '@mui/material/Autocomplete';
+
+const danisanList = [
+    { id: 1, label: "Ahmet Yılmaz" },
+    { id: 2, label: "Ayşe Demir" },
+    { id: 3, label: "John Doe" },
+    { id: 4, label: "Jane Smith" },
+];
+
+const initialCategories = [
+    { id: 1, name: "Diyet" },
+    { id: 2, name: "Sağlık" },
+    { id: 3, name: "Çölyak" },
+];
 
 const initialBeslenmeData = [
-    {id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png"},
-    {id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png"},
-    {id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png"},
-    {id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png"},
+    { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png" },
+    { id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png" },
+    { id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png" },
+    { id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png" },
     {
         id: 5,
         title: "Sağlıklı Atıştırma",
         description: "x2 ceviz, 1x hurma, 50 gr bitter çikolata",
         image: "/placeholder.png"
     },
-    {id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png"},
-    {
-        id: 7,
-        title: "Glutensiz Diyet",
-        description: "x2 avokado, 1x yulaf sütü, 100 gr çilek",
-        image: "/placeholder.png"
-    },
-    {id: 8, title: "Enerji Diyeti", description: "x1 muz, 1x fıstık ezmesi, 50 gr ceviz", image: "/placeholder.png"},
-    {id: 9, title: "Karbonhidrat Dengesi", description: "x2 patates, 1x pilav, 1x tavuk", image: "/placeholder.png"},
-    {
-        id: 10,
-        title: "Glutensiz Diyet",
-        description: "x2 avokado, 1x yulaf sütü, 100 gr çilek",
-        image: "/placeholder.png"
-    },
-    {id: 11, title: "Enerji Diyeti", description: "x1 muz, 1x fıstık ezmesi, 50 gr ceviz", image: "/placeholder.png"},
-    {id: 12, title: "Karbonhidrat Dengesi", description: "x2 patates, 1x pilav, 1x tavuk", image: "/placeholder.png"}
+    { id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png" },
 ];
 
-const beslenmePlanlari = [
-    {id: 1, label: "Kilo Aldırma", category: "Diyet"},
-    {id: 2, label: "Kilo Verme", category: "Diyet"},
-    {id: 3, label: "Kas Yapımı", category: "Diyet"},
-    {id: 4, label: "Dengeli Beslenme", category: "Sağlık"},
-    {id: 5, label: "Sağlıklı Atıştırma", category: "Sağlık"},
-    {id: 6, label: "Protein Ağırlıklı", category: "Diyet"},
-    {id: 7, label: "Diyabet", category: "Hastalık"},
-    {id: 8, label: "Glutensiz Diyet", category: "Diyet"},
-    {id: 9, label: "Enerji Diyeti", category: "Diyet"},
-    {id: 10, label: "Karbonhidrat Dengesi", category: "Diyet"},
-    {id: 11, label: "Çölyak Hastalığı", category: "Hastalık"},
-    {id: 12, label: "Şekersiz", category: "Diyet"},
-    {id: 13, label: "Option 13", category: "Diğer"},
-    {id: 14, label: "Option 14", category: "Diğer"},
-    {id: 15, label: "Option 15", category: "Diğer"},
-    {id: 16, label: "Option 16", category: "Diğer"},
-    {id: 17, label: "Option 17", category: "Diğer"},
-    {id: 18, label: "Option 18", category: "Diğer"},
-    {id: 19, label: "Option 19", category: "Diğer"},
-    {id: 20, label: "Option 20", category: "Diğer"},
-    {id: 21, label: "Option 21", category: "Diğer"},
-    {id: 22, label: "Option 22", category: "Diğer"},
-    {id: 23, label: "Option 23", category: "Diğer"},
-];
-
-const beslenmeKategorileri = [
-    { id: 1, name: "Diyet" },
-    { id: 2, name: "Sağlık" },
-    { id: 3, name: "Çölyak" }
-];
-
+// 3'lü gruplama fonksiyonu (kartlar satır satır gelsin)
 const groupByThree = (data) => {
     const groups = [];
     for (let i = 0; i < data.length; i += 3) {
@@ -102,16 +70,55 @@ const groupByThree = (data) => {
 };
 
 export default function Beslenme() {
+    const [categoryData, setCategoryData] = useState(initialCategories);
+    const [checkedCategories, setCheckedCategories] = useState([]); // Seçili kategorilerin ID'lerini tutar
+
     const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
 
+    // Danışana Ekle Modal State'leri
     const [openModal, setOpenModal] = useState(false);
-
     const [selectedBeslenmeProgram, setSelectedBeslenmeProgram] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
 
-    const [selectedUser, setSelectedUser] = useState("");
+    // Detay Modal (Kart Resmine Tıklandığında Açılan Büyük Modal)
+    const [openDetailModal, setOpenDetailModal] = useState(false);
+    const [detailItem, setDetailItem] = useState(null);
 
     const groupedData = groupByThree(beslenmeData);
 
+    // Kategori Seçimi (Checkbox)
+    const handleCategoryCheck = (categoryId) => {
+        if (checkedCategories.includes(categoryId)) {
+            // Zaten seçili ise çıkart
+            setCheckedCategories(checkedCategories.filter((id) => id !== categoryId));
+        } else {
+            // Değilse ekle
+            setCheckedCategories([...checkedCategories, categoryId]);
+        }
+    };
+
+    // Toplu Sil Butonu (Sol Panel)
+    const handleMultiDelete = () => {
+        // Seçili kategorileri sil
+        const newCategoryData = categoryData.filter(
+            (cat) => !checkedCategories.includes(cat.id)
+        );
+        setCategoryData(newCategoryData);
+        setCheckedCategories([]); // silindikten sonra listeyi temizle
+    };
+
+    // Hover'daki Tekil Sil (Sol Panel)
+    const handleSingleCategoryDelete = (categoryId) => {
+        const newCategoryData = categoryData.filter((cat) => cat.id !== categoryId);
+        setCategoryData(newCategoryData);
+
+        // Eğer checkbox işaretli kategorilerden biriyse, onu da çıkar
+        if (checkedCategories.includes(categoryId)) {
+            setCheckedCategories(checkedCategories.filter((id) => id !== categoryId));
+        }
+    };
+
+    // Sağ Panel: Danışana Ekle Modalları
     const handleOpenModal = (item) => {
         setSelectedBeslenmeProgram(item);
         setOpenModal(true);
@@ -120,41 +127,53 @@ export default function Beslenme() {
     const handleCloseModal = () => {
         setOpenModal(false);
         setSelectedBeslenmeProgram(null);
+        setSelectedUser(null); // temizleyelim
     };
 
     const handleAddToUser = () => {
-        //TODO: Tarifi, kullanıcıya bağlayacak bir sistem yazılacak
+        //TODO: Tarifi, seçilen kullanıcıya bağlayacak bir sistem yazılacak (API vb.)
         console.log("Seçilen program:", selectedBeslenmeProgram);
         console.log("Eklemek istediğin danışan:", selectedUser);
 
         handleCloseModal();
     };
 
+    // Yazdır
     const handlePrint = (item) => {
-        //TODO: Buraya PDF oluşturup, çıkartmaya hazır hale getirip printletecek bir sistem yazılacak.
+        //TODO: PDF veya Print sistemi
         console.log("Yazdırılacak Program:", item);
         window.print();
     };
 
-    // Sil
+    // Sağ Panel Sil
     const handleDelete = (item) => {
         const yeniListe = beslenmeData.filter((dataItem) => dataItem.id !== item.id);
         setBeslenmeData(yeniListe);
     };
 
+    // Kart Resmine Tıklayınca Detay Modal Aç
+    const handleCardImageClick = (item) => {
+        setDetailItem(item);
+        setOpenDetailModal(true);
+    };
+
+    const handleDetailModalClose = () => {
+        setOpenDetailModal(false);
+        setDetailItem(null);
+    };
+
     return (
         <Default>
-            <Grid2 container sx={{height: '100%'}}>
+            <Grid2 container sx={{ height: '100%' }}>
                 {/* Sol Panel */}
-                {/* TODO: xs versiyonu yapılacak */}
                 <Grid2
                     container
-                    sx={{height: '78vh', flex: 1, display: { xs: 'none', sm: 'flex' }}}
+                    sx={{ height: '78vh', flex: 1, display: { xs: 'none', sm: 'flex' } }}
                     direction="column"
                     spacing={2}
                 >
                     <Grid2>
-                        <Paper elevation={3} sx={{ minHeight:"78vh" , p: "0.5rem"}}>
+                        <Paper elevation={3} sx={{ minHeight: "78vh", p: "0.5rem" }}>
                             {/* Search and Add */}
                             <Grid2 container alignItems="center" spacing={2}>
                                 <Grid2 xs={12}>
@@ -165,44 +184,56 @@ export default function Beslenme() {
                                         variant="outlined"
                                     />
                                 </Grid2>
-                                <Grid2 container sx={{ml: 'auto', mr: '1rem'}}>
+                                <Grid2 container sx={{ ml: 'auto', mr: '1rem', gap: '0.5rem' }}>
                                     <Grid2>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                        >
-                                            <Add/>
+                                        <Button variant="contained" color="primary">
+                                            <Add />
                                         </Button>
                                     </Grid2>
                                     <Grid2>
                                         <Button
                                             variant="contained"
+                                            onClick={handleMultiDelete}
                                             sx={{
                                                 backgroundColor: '#a50000',
-                                                '&:hover': {backgroundColor: '#ff0000'},
+                                                '&:hover': { backgroundColor: '#ff0000' },
                                             }}
                                         >
-                                            <DeleteIcon/>
+                                            <DeleteIcon />
                                         </Button>
                                     </Grid2>
                                 </Grid2>
                             </Grid2>
 
-                            {/* Selectable List */}
-                            <List sx={{maxHeight: '78vh', overflowY: 'auto', overflowX: 'hidden'}}>
-                                {beslenmeKategorileri.map((category) => (
+                            {/* Kategori Listesi */}
+                            <List
+                                sx={{
+                                    maxHeight: '70vh',
+                                    overflowY: 'auto',
+                                    overflowX: 'hidden',
+                                    mt: 1
+                                }}
+                            >
+                                {categoryData.map((category) => (
                                     <ListItem
                                         key={category.id}
                                         sx={{
-                                            '&:hover': {backgroundColor: '#f5f5f5'},
-                                            '&:hover .delete-button': {visibility: 'visible'},
+                                            '&:hover': { backgroundColor: '#f5f5f5' },
+                                            '&:hover .delete-button': { visibility: 'visible' },
+                                            transition: 'background-color 0.2s',
+                                            cursor: 'pointer',
                                         }}
-                                        onClick={()=>{console.log("Kategori tıklandı:", category.name)}}
+                                        onClick={() => handleCategoryCheck(category.id)}
                                     >
                                         <ListItemIcon>
-                                            <Checkbox edge="start"/>
+                                            <Checkbox
+                                                edge="start"
+                                                checked={checkedCategories.includes(category.id)}
+                                                tabIndex={-1}
+                                                disableRipple
+                                            />
                                         </ListItemIcon>
-                                        <ListItemText primary={category.name.toString()}/>
+                                        <ListItemText primary={category.name.toString()} />
 
                                         <Box
                                             className="delete-button"
@@ -218,32 +249,39 @@ export default function Beslenme() {
                                             <IconButton
                                                 edge="end"
                                                 aria-label="delete"
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Checkbox event'i tetiklenmesin
+                                                    handleSingleCategoryDelete(category.id);
+                                                }}
                                                 sx={{
-                                                    '&:hover': {backgroundColor: '#ff0000'},
+                                                    '&:hover': { backgroundColor: '#ff0000' },
                                                     backgroundColor: "#a50000",
                                                     color: 'white'
                                                 }}
                                             >
-                                                <DeleteIcon/>
+                                                <DeleteIcon />
                                             </IconButton>
                                         </Box>
                                     </ListItem>
                                 ))}
                             </List>
-                            {/* Selectable List - End */}
+                            {/* Kategori Listesi - End */}
                         </Paper>
                     </Grid2>
                 </Grid2>
 
                 {/* Sağ Panel */}
-                {/* Beslenme Plan Kartlar - Start */}
-                <Grid2 container spacing={2} sx={{maxHeight: '79.4vh', width: "74vw", ml: "1rem", overflowY: 'auto'}}>
+                <Grid2
+                    container
+                    spacing={2}
+                    sx={{ maxHeight: '79.4vh', width: "74vw", ml: "1rem", overflowY: 'auto' }}
+                >
                     {groupedData.map((group, groupIndex) => (
                         <React.Fragment key={groupIndex}>
                             {group.map((item) => (
                                 <Grid2 xs={12} sm={4} md={4} key={item.id}>
-                                    <Card sx={{minWidth: 410, boxShadow: 3}}>
-                                        <CardActionArea>
+                                    <Card sx={{ minWidth: 410, boxShadow: 3 }}>
+                                        <CardActionArea onClick={() => handleCardImageClick(item)}>
                                             <CardMedia
                                                 component="img"
                                                 image={item.image.toString() || "/placeholder.png"}
@@ -259,17 +297,19 @@ export default function Beslenme() {
                                             <Typography gutterBottom variant="h5" component="div">
                                                 {item.title.toString()}
                                             </Typography>
-                                            <Typography variant="body2" sx={{color: 'text.secondary'}}>
+                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                                 {item.description.toString()}
                                             </Typography>
 
-                                            {/* Card Buttons */}
-                                            <Box sx={{
-                                                mt: 2,
-                                                gap: "0.5rem",
-                                                display: 'flex',
-                                                justifyContent: 'flex-end'
-                                            }}>
+                                            {/* Card Butonları */}
+                                            <Box
+                                                sx={{
+                                                    mt: 2,
+                                                    gap: "0.5rem",
+                                                    display: 'flex',
+                                                    justifyContent: 'flex-end'
+                                                }}
+                                            >
                                                 {/* Danışana Ekle */}
                                                 <Tooltip title={"Danışana Ekle"} arrow>
                                                     <IconButton
@@ -277,11 +317,14 @@ export default function Beslenme() {
                                                         sx={{
                                                             backgroundColor: '#3d8a3d',
                                                             color: 'white',
-                                                            '&:hover': { backgroundColor: '#53c153'},
+                                                            '&:hover': { backgroundColor: '#53c153' },
                                                         }}
-                                                        onClick={() => handleOpenModal(item)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // Kart detayına gitmesin
+                                                            handleOpenModal(item);
+                                                        }}
                                                     >
-                                                        <PersonAddIcon/>
+                                                        <PersonAddIcon />
                                                     </IconButton>
                                                 </Tooltip>
 
@@ -291,11 +334,14 @@ export default function Beslenme() {
                                                         sx={{
                                                             backgroundColor: '#003095',
                                                             color: 'white',
-                                                            '&:hover': { backgroundColor: '#0052ff'},
+                                                            '&:hover': { backgroundColor: '#0052ff' },
                                                         }}
-                                                        onClick={() => handlePrint(item)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handlePrint(item);
+                                                        }}
                                                     >
-                                                        <PrintIcon/>
+                                                        <PrintIcon />
                                                     </IconButton>
                                                 </Tooltip>
 
@@ -305,10 +351,14 @@ export default function Beslenme() {
                                                         sx={{
                                                             backgroundColor: '#ff9e25',
                                                             color: 'white',
-                                                            '&:hover': { backgroundColor: '#ffaf4b'},
+                                                            '&:hover': { backgroundColor: '#ffaf4b' },
+                                                        }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            console.log("Düzenleme tıklandı:", item.title);
                                                         }}
                                                     >
-                                                        <EditIcon/>
+                                                        <EditIcon />
                                                     </IconButton>
                                                 </Tooltip>
 
@@ -319,11 +369,14 @@ export default function Beslenme() {
                                                         sx={{
                                                             backgroundColor: '#a50000',
                                                             color: 'white',
-                                                            '&:hover': { backgroundColor: '#ff0000'},
+                                                            '&:hover': { backgroundColor: '#ff0000' },
                                                         }}
-                                                        onClick={() => handleDelete(item)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDelete(item);
+                                                        }}
                                                     >
-                                                        <DeleteIcon/>
+                                                        <DeleteIcon />
                                                     </IconButton>
                                                 </Tooltip>
                                             </Box>
@@ -334,7 +387,6 @@ export default function Beslenme() {
                         </React.Fragment>
                     ))}
                 </Grid2>
-                {/* Beslenme Plan Kartlar - End */}
             </Grid2>
 
             {/* Danışana Ekle Modal */}
@@ -344,22 +396,51 @@ export default function Beslenme() {
                     <DialogContentText>
                         Seçilen program: <strong>{selectedBeslenmeProgram?.title}</strong>
                     </DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Danışan Adı"
-                        type="text"
-                        fullWidth
-                        variant="outlined"
-                        value={selectedUser}
-                        onChange={(e) => setSelectedUser(e.target.value)}
-                    />
+                    <Box sx={{ mt: 2 }}>
+                        <Autocomplete
+                            fullWidth
+                            options={danisanList}
+                            getOptionLabel={(option) => option.label}
+                            value={selectedUser}
+                            onChange={(e, newValue) => setSelectedUser(newValue)}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Danışan Seç"
+                                    variant="outlined"
+                                />
+                            )}
+                        />
+                    </Box>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseModal}>Vazgeç</Button>
                     <Button onClick={handleAddToUser} variant="contained">
                         Ekle
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Kart Detay Modal (Büyük Modal) */}
+            <Dialog open={openDetailModal} onClose={handleDetailModalClose} maxWidth="sm" fullWidth>
+                <DialogTitle>{detailItem?.title}</DialogTitle>
+                <DialogContent>
+                    {/* Büyük resim veya detaylar buraya */}
+                    <DialogContentText sx={{ mb: 2 }}>
+                        {detailItem?.description}
+                    </DialogContentText>
+                    {detailItem?.image && (
+                        <Box
+                            component="img"
+                            sx={{ width: '100%', borderRadius: 2 }}
+                            alt={detailItem.title}
+                            src={detailItem.image}
+                        />
+                    )}
+                    {/* Daha fazla metin veya öğe ekleyebilirsiniz */}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDetailModalClose}>Kapat</Button>
                 </DialogActions>
             </Dialog>
         </Default>
