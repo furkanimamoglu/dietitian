@@ -60,10 +60,14 @@ export default function Danisan() {
     }, [id, navigate]);
 
     useEffect(() => {
-        if (danisan === null) {
+        if (!isLoading && danisan === null) {
             navigate('/404');
         }
-    }, [ danisan, navigate]);
+    }, [isLoading, danisan, navigate]);
+
+    if (isLoading) {
+        return <Default><Typography>Yükleniyor...</Typography></Default>;
+    }
 
     if (!danisan) {
         return null;
