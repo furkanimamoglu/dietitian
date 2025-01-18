@@ -11,6 +11,6 @@
   "server": {
     "port": 3000
   },
-  "ddl": "update",
+  "ddl": "create-drop",
   "secretkey": "furkantopsecret"
 }

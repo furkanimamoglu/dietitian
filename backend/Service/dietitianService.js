@@ -9,8 +9,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const Dietitian = require('../Model/Dietitian');
-const Client = require('../Model/Client');
+const { sequelize, Dietitian, Client, NutritionPlan } = require('../Model/MainModel');
 
 class DietitianService {
 
@@ -231,6 +230,59 @@ class DietitianService {
             throw new Exception(error.message, 400);
         }
     }
+
+    async getAllMyNutritionPlanCategories(user_id) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+                include: [
+                    {
+                        model: NutritionPlan,
+                        as: 'NutritionPlans',
+                    },
+                ],
+            });
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404);
+            }
+
+            // İlişkili tüm beslenme programlarını döndür
+            return dietitian.NutritionPlans;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async addNutritionPlan(user_id, planData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+            });
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404);
+            }
+
+            const newPlan = await NutritionPlan.create({
+                ...planData,
+                dietitian_id: user_id,
+            });
+
+            return newPlan;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
 }
 
 module.exports = new DietitianService();

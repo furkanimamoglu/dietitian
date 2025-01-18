@@ -201,6 +201,46 @@ class DietitianController {
         }
     }
 
+    async getAllMyNutritionPlanCategories(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!token) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.getAllMyNutritionPlanCategories(user_id)
+            res.status(200).json(result)
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            });
+        }
+    }
+
+    async addNutritionPlanCategories(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
+
+            if (!token) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.addNutritionPlanCategories(user_id)
+            res.status(200).json(result)
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            });
+        }
+    }
+
 }
 
 module.exports = new DietitianController();

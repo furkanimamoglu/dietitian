@@ -65,6 +65,7 @@ const groupByThree = (data) => {
 
 export default function Beslenme() {
     const [categoryData, setCategoryData] = useState(initialCategories);
+    const [categories, setCategories] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
 
@@ -80,6 +81,21 @@ export default function Beslenme() {
             })
             .catch((error) => {
                 console.error("Error fetching clients:", error);
+            });
+    }, []);
+
+    useEffect(() => {
+        axios
+            .get(config[config.environment].apiUrl + "/dietitian/getAllMyCategories", {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                setCategories(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching categories:", error);
             });
     }, []);
 
