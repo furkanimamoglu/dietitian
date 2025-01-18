@@ -9,8 +9,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const Dietitian = require('../Model/Dietitian');
-const Client = require('../Model/Client');
+const { sequelize, Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
 
 class DietitianService {
 
@@ -81,13 +80,13 @@ class DietitianService {
         }
     }
 
-    async registerClient(user_id, email, password, phoneNumber) {
+    async registerClient(user_id, name, surname, email, password, phoneNumber, height, weight, gender) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
-            if (!email || !password || !phoneNumber) {
+            if (!email || !password || !phoneNumber || !height || !weight || !gender) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
@@ -101,9 +100,14 @@ class DietitianService {
 
             return await Client.create({
                 dietitian_id: user_id,
+                name: name,
+                surname: surname,
+                gender: gender,
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
+                height: height,
+                weight: weight,
                 role: CLIENT,
                 token: token
             })
@@ -137,6 +141,68 @@ class DietitianService {
         }
     }
 
+    async updateClient(user_id, client_id, updateData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: user_id,
+                },
+            });
+
+            if (!client) {
+                throw new Exception("Danışan bulunamadı.", 404, true);
+            }
+
+            await client.update(updateData);
+
+            return client;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || false);
+        }
+    }
+
+    async getMyClient(user_id, client_id) {
+        try {
+
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: {
+                    id: user_id
+                },
+                include: [
+                    {
+                        model: Client,
+                        as: 'Clients',
+                        where: {
+                            id: client_id
+                        }
+                    }
+                ]
+            });
+
+            if (!dietitian) {
+                throw new Error('Diyetisyen bulunamadı veya bu Client size bağlı değil.');
+            }
+
+            if (!dietitian.Clients || dietitian.Clients.length === 0) {
+                throw new Error('Hedef Client bulunamadı.');
+            }
+
+            return dietitian.Clients[0];
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+
     async getMyAllClients(user_id) {
         try {
             if (!user_id) {
@@ -164,6 +230,84 @@ class DietitianService {
             throw new Exception(error.message, 400);
         }
     }
+
+    async getAllMyNutritionCategories(user_id) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+                include: [
+                    {
+                        model: NutritionCategory,
+                        as: 'categories',
+                    },
+                ],
+            });
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404);
+            }
+
+            return dietitian.categories;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+
+    async addNutritionCategory(user_id, categoryData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+            });
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404);
+            }
+
+            const newCategory = await NutritionCategory.create({
+                ...categoryData,
+                dietitian_id: user_id,
+            });
+
+            return newCategory;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async addNutritionPlan(user_id, planData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+            });
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404);
+            }
+
+            const newPlan = await NutritionPlan.create({
+                ...planData,
+                dietitian_id: user_id,
+            });
+
+            return newPlan;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
 }
 
 module.exports = new DietitianService();

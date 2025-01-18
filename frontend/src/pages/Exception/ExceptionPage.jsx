@@ -42,7 +42,6 @@ const errorMessages = {
 };
 
 export default function ExceptionPage(statusCode) {
-    // Dinamik hata mesajını almak
     const error = errorMessages[statusCode] || {
         title: `${statusCode} Error`,
         message: "An unexpected error occurred. Please try again later.",
@@ -52,7 +51,7 @@ export default function ExceptionPage(statusCode) {
         <Default>
             <Box
                 sx={{
-                    height: "79.9vh",
+                    height: "79vh",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -86,7 +85,7 @@ export default function ExceptionPage(statusCode) {
                                 borderRadius: 5,
                                 textTransform: "none",
                                 "&:hover": {
-                                    backgroundColor: green[600], // Hover durumunda renk değişimi
+                                    backgroundColor: green[600],
                                 },
                             }}
                             onClick={() => window.history.back()}
