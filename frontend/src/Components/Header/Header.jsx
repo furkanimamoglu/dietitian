@@ -21,6 +21,7 @@ import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
 import HelpIcon from '@mui/icons-material/Help';
 import SearchIcon from '@mui/icons-material/Search';
+import {useNavigate} from "react-router-dom";
 
 const settings = [
     { label: 'Profil', value: 'profil' },
@@ -65,6 +66,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Header() {
+    const navigate = useNavigate();
     React.useEffect(() => {
         if (!localStorage.getItem('token')) {
             window.location.href = '/login';
@@ -84,10 +86,10 @@ export default function Header() {
     const handleMenuItemClick = (value) => {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
-            window.location.href = '/cikisyap';
+            navigate('/login');
         }
         if (value === 'profil') {
-            window.location.href = '/profil';
+            navigate('/profil');
         }
         setAnchorElUser(null);
     };

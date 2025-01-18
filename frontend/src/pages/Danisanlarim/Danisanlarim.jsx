@@ -228,7 +228,7 @@ export default function Danisanlarim() {
                     />
                 </Grid2>
             </Grid2>
-
+            {/* TODO: Danışanı silerken, name yok olduktan sonra popup kapanıyor. Direkt kapatsın veya ismi ekran kapanana kadar gitmesin. */}
             {/* Delete Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
                 <DialogTitle>Silme Onayı</DialogTitle>
