@@ -49,8 +49,8 @@ export default function Mesaj() {
     }, []);
 
     const handleDanisanSelect = (danisan) => {
-        setSelectedDanisan(danisan); // Seçilen danışanı ayarla
-        setMessages([]); // Yeni danışan seçildiğinde mesajları temizle
+        setSelectedDanisan(danisan);
+        setMessages([]);
     };
 
     const handleDeleteDanisan = (danisanId) => {
@@ -185,14 +185,14 @@ export default function Mesaj() {
                             <Box
                                 sx={{
                                     flex: 1,
-                                    overflowY: "auto", // Dikey kaydırma için
+                                    overflowY: "auto",
                                     display: "flex",
                                     flexDirection: "column",
-                                    gap: "0.5rem", // Mesajlar arasındaki mesafe
+                                    gap: "0.5rem",
                                     p: 2,
                                     backgroundColor: "#f9f9f9",
                                 }}
-                                ref={messageListRef} // Mesajların scroll için referansı
+                                ref={messageListRef}
                             >
                                 {messages.length > 0 ? (
                                     messages.map((message) => (
