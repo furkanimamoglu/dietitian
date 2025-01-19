@@ -5,14 +5,13 @@ class AppointmentController {
 
     async fetchDietitianAppointments(req, res) {
         try {
-            // Authentication Module
             const token = req.headers.authorization;
-            if (!token) {
+            const user_id = Security.getUserIdFromToken(token);
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
-            const user_id = Security.getUserIdFromToken(token);
 
             const result = await AppointmentService.getDietitianAppointments(user_id);
             res.status(200).json(
@@ -30,14 +29,13 @@ class AppointmentController {
 
     async addAppointmentAsDietitian(req, res) {
         try {
-            // Authentication Module
             const token = req.headers.authorization;
-            if (!token) {
+            const user_id = Security.getUserIdFromToken(token);
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
-            const user_id = Security.getUserIdFromToken(token);
 
             const { title, start, end, client_id } = req.body;
 
@@ -69,12 +67,12 @@ class AppointmentController {
     async updateAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
-            if (!token) {
+            const user_id = Security.getUserIdFromToken(token);
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
-            const user_id = Security.getUserIdFromToken(token);
 
             const { appointment_id, title, start, end, client_id } = req.body;
 
@@ -84,7 +82,6 @@ class AppointmentController {
                 });
             }
 
-            // Randevuyu güncellemek için servis çağrısı
             const updatedAppointment = await AppointmentService.updateAppointment(appointment_id, {
                 title,
                 start,

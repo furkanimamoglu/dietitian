@@ -9,7 +9,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const { sequelize, Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
 
 class DietitianService {
 
@@ -272,12 +272,10 @@ class DietitianService {
                 throw new Exception('Diyetisyen bulunamadı.', 404);
             }
 
-            const newCategory = await NutritionCategory.create({
+            return await NutritionCategory.create({
                 ...categoryData,
                 dietitian_id: user_id,
             });
-
-            return newCategory;
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -297,12 +295,10 @@ class DietitianService {
                 throw new Exception('Diyetisyen bulunamadı.', 404);
             }
 
-            const newPlan = await NutritionPlan.create({
+            return await NutritionPlan.create({
                 ...planData,
                 dietitian_id: user_id,
             });
-
-            return newPlan;
         } catch (error) {
             throw new Exception(error.message, 400);
         }

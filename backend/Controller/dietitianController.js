@@ -64,7 +64,7 @@ class DietitianController {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
 
-            if (!token) {
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
@@ -91,8 +91,7 @@ class DietitianController {
     async deleteClient(req, res) {
         const token = req.headers.authorization;
         const user_id = Security.getUserIdFromToken(token);
-
-        if (!token) {
+        if (!token || !user_id) {
             return res.status(401).json({
                 message: "Yetkisiz erişim."
             });
@@ -121,14 +120,12 @@ class DietitianController {
 
     async updateClient(req, res) {
         const token = req.headers.authorization;
-
-        if (!token) {
+        const user_id = Security.getUserIdFromToken(token);
+        if (!token || !user_id) {
             return res.status(401).json({
                 message: "Yetkisiz erişim."
             });
         }
-
-        const user_id = Security.getUserIdFromToken(token);
 
         try {
             const { id, name, surname, email, phoneNumber, height, weight, gender, status } = req.body;
@@ -166,7 +163,7 @@ class DietitianController {
             const { client_id } = req.query;
             const user_id = Security.getUserIdFromToken(token);
 
-            if (!token) {
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
@@ -185,8 +182,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
-
-            if (!token) {
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
@@ -206,7 +202,7 @@ class DietitianController {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
 
-            if (!token) {
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
@@ -226,7 +222,7 @@ class DietitianController {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
 
-            if (!token) {
+            if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
