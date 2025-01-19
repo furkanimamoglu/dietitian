@@ -35,12 +35,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import axios from "axios";
 import config from "../../../config.js";
 
-const initialCategories = [
-    { id: 1, name: "Diyet" },
-    { id: 2, name: "Sağlık" },
-    { id: 3, name: "Çölyak" },
-];
-
 const initialBeslenmeData = [
     { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png" },
     { id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png" },
