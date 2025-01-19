@@ -169,7 +169,7 @@ export default function Header() {
 
                         {/* Mesajlar */}
                         <Tooltip title="Mesajlar" arrow>
-                            <IconButton color="inherit">
+                            <IconButton onClick={()=>{navigate('/mesaj');}} color="inherit">
                                 <Badge badgeContent={1} color="warning">
                                     <MailIcon sx={{ color: 'white' }} />
                                 </Badge>
