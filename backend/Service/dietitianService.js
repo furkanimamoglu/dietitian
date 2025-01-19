@@ -304,6 +304,59 @@ class DietitianService {
         }
     }
 
+    async globalSearchbar(user_id, query) {
+        try {
+            if (!user_id) {
+                throw new Error("Yetkisiz Erişim.");
+            }
+            // TODO: Yalnızca diyetisyen rolüne sahip kişiler için doğrulama yapacağız.
+            const data = [
+                { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
+                { type: "page", name: "Randevularım", url: "/randevularim" },
+                { type: "page", name: "Ayarlar", url: "/ayarlar" },
+                { type: "page", name: "Profil", url: "/profil" },
+                { type: "page", name: "Beslenme", url: "/beslenme" },
+                { type: "page", name: "Egzersiz", url: "/egzersiz" },
+                { type: "page", name: "Finans", url: "/finans" },
+                { type: "page", name: "Tarif", url: "/tarif" },
+                { type: "page", name: "Egzersiz", url: "/egzersiz" },
+                { type: "page", name: "Mesaj", url: "/mesaj" }
+            ];
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+                include: [
+                    {
+                        model: Client,
+                        as: 'Clients',
+                    }
+                ]
+            });
+
+            if (!dietitian) {
+                throw new Error('Diyetisyen bulunamadı.');
+            }
+
+            dietitian.Clients.forEach(client => {
+                data.push({
+                    type: "danisan",
+                    name: `${client.name} ${client.surname}`,
+                    url: `/danisan/${client.id}`,
+                });
+            });
+
+            query = query ? query.toLowerCase() : "";
+
+            const filteredData = data.filter(item =>
+                item.name.toLowerCase().includes(query)
+            );
+
+            return filteredData;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
 }
 
 module.exports = new DietitianService();

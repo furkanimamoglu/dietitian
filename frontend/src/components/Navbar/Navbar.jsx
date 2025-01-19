@@ -25,10 +25,12 @@ export default function Navbar() {
                 display: { xs: "none", md: "flex" },
                 mt: "4rem",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+                zIndex: 500,
             }}
             position="fixed"
         >
-            <Toolbar disableGutters>
+
+        <Toolbar disableGutters>
                 <Box
                     sx={{
                         flexGrow: 1,
