@@ -191,7 +191,7 @@ export default function Header() {
                                 </IconButton>
                             </Tooltip>
                             <Menu
-                                sx={{ mt: '45px' }}
+                                sx={{ mt: '3rem' }}
                                 id="menu-appbar"
                                 anchorEl={anchorElUser}
                                 anchorOrigin={{
@@ -214,7 +214,7 @@ export default function Header() {
                                     <Divider />
                                     <MenuItem onClick={handleCloseUserMenu}>
                                         <Typography variant="body2" color="text.secondary">
-                                            Sürüm: 1.0.0
+                                            Sürüm: 0.0.1
                                         </Typography>
                                     </MenuItem>
                                 </Box>
