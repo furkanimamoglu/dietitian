@@ -15,6 +15,8 @@ router.put('/updateClient', dietitianController.updateClient)
 router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
 
+router.get('/globalSearchbar', dietitianController.globalSearchbar);
+
 router.get('/getAllMyNutritionCategories', dietitianController.getAllMyNutritionCategories);
 router.post('/addNutritionCategories', dietitianController.addNutritionCategories);
 
