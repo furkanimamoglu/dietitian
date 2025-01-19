@@ -13,6 +13,7 @@ import Tarifler from "../pages/Dietitian/Tarifler/Tarifler.jsx";
 import Egzersizler from "../pages/Dietitian/Egzersizler/Egzersizler.jsx";
 import Profil from "../pages/Dietitian/Profil/Profil.jsx";
 import Ayarlar from "../pages/Dietitian/Ayarlar/Ayarlar.jsx";
+import Mesaj from "../pages/Dietitian/Mesaj/Mesaj.jsx";
 
 export default function Routing() {
     return (
@@ -25,6 +26,7 @@ export default function Routing() {
                 <Route path="/danisan/:id" element={<Danisan/>}/>
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
+                <Route path="/mesaj/*" element={<Mesaj/>}/>
                 <Route path="/egzersiz/*" element={<Egzersizler/>}/>
                 <Route path="/finans/*" element={<Egzersizler/>}/>
                 <Route path="/tarif/*" element={<Tarifler/>}/>
