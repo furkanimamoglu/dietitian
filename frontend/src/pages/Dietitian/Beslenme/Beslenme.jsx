@@ -158,13 +158,11 @@ export default function Beslenme() {
         window.print();
     };
 
-    // Sağ Panel Sil
     const handleDelete = (item) => {
         const yeniListe = beslenmeData.filter((dataItem) => dataItem.id !== item.id);
         setBeslenmeData(yeniListe);
     };
 
-    // Kart Resmine Tıklayınca Detay Modal Aç
     const handleCardImageClick = (item) => {
         setDetailItem(item);
         setOpenDetailModal(true);
@@ -293,7 +291,7 @@ export default function Beslenme() {
                 <Grid2
                     container
                     spacing={2}
-                    sx={{ maxHeight: '79.4vh', width: "74vw", ml: "1rem", overflowY: 'auto' }}
+                    sx={{ maxHeight: '78vh', width: "74vw", ml: "1rem", overflowY: 'auto' }}
                 >
                     {groupedData.map((group, groupIndex) => (
                         <React.Fragment key={groupIndex}>
