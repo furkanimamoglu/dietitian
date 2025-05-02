@@ -58,6 +58,7 @@ if (config.ddl === "create-drop") {
 } else if (config.ddl === "update") {
     sequelize.sync().then(() => {
         app.listen(config.server.port);
+        console.log(`INFO - Sunucu http://localhost:${config.server.port} portunda çalışıyor.`);
     }).catch(err => {
         console.log(err)
     });
