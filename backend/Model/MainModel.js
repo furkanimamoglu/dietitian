@@ -14,7 +14,7 @@ const Invoice = require('./Invoice');
 // 1. Dietitian ve Client
 Dietitian.hasMany(Client, {
     foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE', // Diyetisyen silinirse tüm Clients silinir
+    onDelete: 'CASCADE',
 });
 Client.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
@@ -23,7 +23,7 @@ Client.belongsTo(Dietitian, {
 // 2. Dietitian ve Exercise
 Dietitian.hasMany(Exercise, {
     foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE', // Diyetisyen silinirse tüm Exercises silinir
+    onDelete: 'CASCADE',
 });
 Exercise.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
@@ -32,7 +32,7 @@ Exercise.belongsTo(Dietitian, {
 // 3. Dietitian ve Recipe
 Dietitian.hasMany(Recipe, {
     foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE', // Diyetisyen silinirse tüm Recipes silinir
+    onDelete: 'CASCADE',
 });
 Recipe.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
@@ -41,7 +41,7 @@ Recipe.belongsTo(Dietitian, {
 // 4. Dietitian ve Appointment
 Dietitian.hasMany(Appointment, {
     foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE', // Diyetisyen silinirse tüm Appointments silinir
+    onDelete: 'CASCADE',
 });
 Appointment.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
@@ -50,7 +50,7 @@ Appointment.belongsTo(Dietitian, {
 // 5. Dietitian ve NutritionPlan
 Dietitian.hasMany(NutritionPlan, {
     foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE', // Diyetisyen silinirse tüm NutritionPlans silinir
+    onDelete: 'CASCADE',
 });
 NutritionPlan.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
@@ -59,7 +59,7 @@ NutritionPlan.belongsTo(Dietitian, {
 // 6. Dietitian ve DietitianOption
 Dietitian.hasOne(DietitianOption, {
     foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE', // Diyetisyen silinirse DietitianOption silinir
+    onDelete: 'CASCADE',
 });
 DietitianOption.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
@@ -69,7 +69,7 @@ DietitianOption.belongsTo(Dietitian, {
 Dietitian.hasMany(NutritionCategory, {
     foreignKey: 'dietitian_id',
     as: 'categories',
-    onDelete: 'CASCADE', // Diyetisyen silinirse tüm NutritionCategories silinir
+    onDelete: 'CASCADE',
 });
 NutritionCategory.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',

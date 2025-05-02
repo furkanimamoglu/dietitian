@@ -1,5 +1,5 @@
 import React from 'react';
-import {Route, Routes} from 'react-router-dom';
+import {Navigate, Route, Routes} from 'react-router-dom';
 import Dashboard from '../pages/Dietitian/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
@@ -14,11 +14,12 @@ import Egzersizler from "../pages/Dietitian/Egzersizler/Egzersizler.jsx";
 import Profil from "../pages/Dietitian/Profil/Profil.jsx";
 import Ayarlar from "../pages/Dietitian/Ayarlar/Ayarlar.jsx";
 import Mesaj from "../pages/Dietitian/Mesaj/Mesaj.jsx";
+import ClientDashboard from "../pages/Client/ClientDashboard/ClientDashboard.jsx";
 
 export default function Routing() {
     return (
         <Routes>
-            {/* Diyetisyen Routes */}
+                {/* Diyetisyen Routes */}
                 <Route path="/dashboard/*" element={<Dashboard/>}/>
                 <Route path="/profil/*" element={<Profil/>}/>
                 <Route path="/ayarlar/*" element={<Ayarlar/>}/>
@@ -33,6 +34,9 @@ export default function Routing() {
                 <Route path="/login/*" element={<Login/>}/>
                 <Route path="/register/*" element={<Register/>}/>
                 <Route path="/forgotpassword/*" element={<ForgotPassword/>}/>
+
+                {/* Danışan Routes */}
+                <Route path="/client/dashboard/*" element={<ClientDashboard/>}/>
 
                 {/* Error Routes */}
                 <Route path="/*" element={ExceptionPage(404)}/>

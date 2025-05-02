@@ -1,6 +1,7 @@
 const ClientService = require("../Service/clientService");
 
 class ClientController {
+
     async login(req, res) {
         try {
             const {email, password} = req.body;
@@ -11,7 +12,6 @@ class ClientController {
                 {
                     email: client.email,
                     token: client.token,
-                    role: client.role
                 }
             );
         } catch (error) {
@@ -21,6 +21,7 @@ class ClientController {
             })
         }
     }
+
 }
 
 module.exports = new ClientController();

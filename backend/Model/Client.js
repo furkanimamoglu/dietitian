@@ -2,10 +2,6 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
-const Appointment = require('./Appointment');
-const Anamnesis = require('./Anamnes');
-const Invoice = require('./Invoice');
-
 const Client = sequelize.define('Client', {
         id: {
             type: DataTypes.INTEGER,
@@ -37,9 +33,13 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
+        role: {
+            type: DataTypes.STRING,
+            defaultValue: "CLIENT"
+        },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             unique: {
                 msg: 'Bu e-posta zaten kullanılıyor.'
             },

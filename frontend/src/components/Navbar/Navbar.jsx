@@ -3,19 +3,18 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-
 import { useNavigate } from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar({ type }) {
     const navigate = useNavigate();
 
-    const pages = [
-        { name: "DANIŞANLARIM", route: "/danisanlarim" },
-        { name: "RANDEVULARIM", route: "/randevularim" },
-        { name: "BESLENME", route: "/beslenme" },
-        { name: "TARİFLER", route: "/tarif" },
-        { name: "EGZERSİZLER", route: "/egzersiz" },
-        { name: "FİNANS", route: "/finans" },
+    const menu_items = [
+        { name: "DANIŞANLARIM", route: "/dietitian/danisanlarim" },
+        { name: "RANDEVULARIM", route: "/dietitian/randevularim" },
+        { name: "BESLENME", route: "/dietitian/beslenme" },
+        { name: "TARİFLER", route: "/dietitian/tarif" },
+        { name: "EGZERSİZLER", route: "/dietitian/egzersiz" },
+        { name: "FİNANS", route: "/dietitian/finans" },
     ];
 
     return (
@@ -29,8 +28,7 @@ export default function Navbar() {
             }}
             position="fixed"
         >
-
-        <Toolbar disableGutters>
+            <Toolbar disableGutters>
                 <Box
                     sx={{
                         flexGrow: 1,
@@ -42,13 +40,11 @@ export default function Navbar() {
                         display: { xs: "none", md: "flex" },
                     }}
                 >
-                    {/* PC Version */}
-                    {pages.map((page) => (
+                    {menu_items.map((page) => (
                         <Button
                             key={page.name}
                             onClick={() => navigate(page.route)}
                             sx={{
-                                backgroundColor: "primary.secondary",
                                 my: 2,
                                 fontWeight: "bold",
                                 color: "rgb(14,62,10)",

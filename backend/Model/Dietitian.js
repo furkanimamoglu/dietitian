@@ -2,15 +2,6 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
-const Client = require('./Client');
-const Exercise = require('./Exercise');
-const Recipe = require('./Recipe');
-const Appointment = require('./Appointment');
-const AnamnesQuestion = require('./AnamnesQuestion');
-const DietitianOption = require('./DietitianOption');
-const NutritionPlan = require('./NutritionPlan');
-const NutritionCategory = require('./NutritionCategory');
-
 const Dietitian = sequelize.define('Dietitian', {
         id: {
             type: DataTypes.INTEGER,
@@ -40,7 +31,10 @@ const Dietitian = sequelize.define('Dietitian', {
                 }
             }
         },
-        role: DataTypes.STRING,
+        role: {
+            type: DataTypes.STRING,
+            defaultValue: "DIETITIAN"
+        },
         phoneNumber: DataTypes.STRING,
         status: {
             type: DataTypes.STRING,

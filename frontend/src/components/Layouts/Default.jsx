@@ -9,7 +9,7 @@ export default function Default(props) {
     return (
         <>
             <Header/>
-            <Navbar/>
+            <Navbar type="dietitian" />
             <Box
                 sx={{
                     flex: 1,
