@@ -188,7 +188,7 @@ export default function Danisanlarim() {
                         <Button
                             variant="outlined"
                             color="primary"
-                            onClick={() => navigate(`/danisan/${params.row.id}`)}
+                            onClick={() => navigate(`/diyetisyen/danisan/${params.row.id}`)}
                         >
                             <Visibility />
                         </Button>

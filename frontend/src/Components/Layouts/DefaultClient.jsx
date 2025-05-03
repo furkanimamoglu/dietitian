@@ -1,15 +1,15 @@
 import React from 'react';
 
-import Header from "../Header/Header.jsx";
-import Navbar from "../Navbar/Navbar.jsx";
+import ClientHeader from "../Client/ClientHeader/ClientHeader.jsx";
+import ClientNavbar from "../Client/ClientNavbar/ClientNavbar.jsx";
 import Footer from "../Footer/Footer.jsx";
 import {Box} from "@mui/material";
 
-export default function Default(props) {
+export default function ClientHeader(props) {
     return (
         <>
-            <Header/>
-            <Navbar/>
+            <ClientHeader/>
+            <ClientNavbar/>
             <Box
                 sx={{
                     flex: 1,

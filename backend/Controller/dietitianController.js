@@ -15,11 +15,11 @@ class DietitianController {
                 });
             }
 
-            const dietitian = await DietitianService.login(email, password);
+            const result = await DietitianService.login(email, password);
 
             res.status(200).json({
-                email: dietitian.email,
-                token: dietitian.token
+                token: result.token,
+                role: result.role
             });
         } catch (err) {
             res.status(err.status || 500).json({
@@ -44,8 +44,8 @@ class DietitianController {
             const result = await DietitianService.register(email, password, ipAddress);
 
             res.status(200).json({
-                username: result.username,
-                token: result.token
+                token: result.token,
+                role: result.role
             });
         } catch (err) {
             res.status(err.status || 500).json({
@@ -178,6 +178,7 @@ class DietitianController {
 
     async getAllMyClients(req, res) {
         try {
+            //TODO: Client olarak bearer tokenimle çektiğimde, verilerim geliyor? Bağlı olduğu diyetisyenin clientlerini çekemiyor olması gerekiyor.
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
             if (!token || !user_id) {

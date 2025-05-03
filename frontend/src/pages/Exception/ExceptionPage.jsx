@@ -2,7 +2,7 @@ import React from 'react';
 import './ExceptionPage.css';
 import { green } from "@mui/material/colors";
 import { Box, Button, Paper, Typography } from "@mui/material";
-import Default from "../../components/Layouts/Default.jsx";
+import DefaultExcept from "../../Components/Layouts/DefaultExcept.jsx";
 
 const errorMessages = {
     400: {
@@ -48,14 +48,14 @@ export default function ExceptionPage(statusCode) {
     };
 
     return (
-        <Default>
+        <DefaultExcept>
             <Box
                 sx={{
-                    height: "79vh",
+                    height: "100vh",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: "white",
+                    backgroundColor: green[50],
                 }}
             >
                 <Paper
@@ -66,7 +66,7 @@ export default function ExceptionPage(statusCode) {
                         display: "flex",
                         justifyContent: "center",
                         flexDirection: "column",
-                        backgroundColor: green[50],
+                        backgroundColor: green[100],
                         alignItems: "center",
                     }}
                 >
@@ -95,6 +95,6 @@ export default function ExceptionPage(statusCode) {
                     )}
                 </Paper>
             </Box>
-        </Default>
+        </DefaultExcept>
     );
 }

@@ -9,8 +9,6 @@ export default function Navbar() {
     const navigate = useNavigate();
 
     const menu_items = [
-        { name: "DANIŞANLARIM", route: "/diyetisyen/danisanlarim" },
-        { name: "RANDEVULARIM", route: "/diyetisyen/randevularim" },
         { name: "BESLENME", route: "/diyetisyen/beslenme" },
         { name: "TARİFLER", route: "/diyetisyen/tarif" },
         { name: "EGZERSİZLER", route: "/diyetisyen/egzersiz" },
