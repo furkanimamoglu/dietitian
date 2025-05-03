@@ -34,7 +34,7 @@ export default function Routing() {
                 <Route path="/diyetisyen/egzersiz/*" element={<Egzersizler/>}/>
                 <Route path="/diyetisyen/finans/*" element={<Egzersizler/>}/>
                 <Route path="/diyetisyen/tarif/*" element={<Tarifler/>}/>
-                <Route path="/diyetisyen/login/*" element={<ClientLogin/>}/>
+                <Route path="/diyetisyen/login/*" element={<Login/>}/>
                 <Route path="/diyetisyen/register/*" element={<Register/>}/>
                 <Route path="/diyetisyen/forgotpassword/*" element={<ForgotPassword/>}/>
 

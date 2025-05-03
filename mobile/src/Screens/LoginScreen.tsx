@@ -32,7 +32,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
       await AsyncStorage.setItem('token', `Bearer ${token}`);
 
-      navigation.replace('Home');
+      navigation.replace('AnaSayfa');
     } catch (error: any) {
       Alert.alert('Giriş Başarısız', error?.response?.data?.message || error.message || 'Bilinmeyen hata');
     } finally {
