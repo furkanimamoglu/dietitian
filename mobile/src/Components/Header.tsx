@@ -43,19 +43,28 @@ export default function Header({ navigation }: Props) {
     }).start(() => setDrawerOpen(false));
   };
 
+  const canGoBack = navigation.canGoBack();
+
   return (
     <>
       <Appbar.Header style={styles.appbarContainer}>
         <View style={styles.appbarInner}>
-          <TouchableOpacity onPress={() => navigation.navigate('Profil')} style={styles.avatarWrapper}>
-            <View style={styles.avatarContent}>
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/100' }}
-                style={styles.avatar}
-              />
-              <Text style={styles.avatarLabel}>Furkan İmamoğlu</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.leftSection}>
+            {canGoBack && (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Icon name="arrow-left" size={24} color="#fff" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={() => navigation.navigate('Profil')} style={styles.avatarWrapper}>
+              <View style={styles.avatarContent}>
+                <Image
+                  source={{ uri: 'https://i.pravatar.cc/100' }}
+                  style={styles.avatar}
+                />
+                <Text style={styles.avatarLabel}>Furkan İmamoğlu</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.rightIconsWrapper}>
             <View style={styles.rightIcons}>
@@ -115,6 +124,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
+  },
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  backButton: {
+    marginRight: 8,
   },
   avatarWrapper: {
     marginLeft: 4,
