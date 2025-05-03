@@ -4,9 +4,9 @@ const express = require('express');
 const router = express.Router();
 
 //Controller
-const systemController = require('../Controller/systemController');
+const utilController = require('../Controller/utilController');
 
 //Routes
-router.get('/settings', systemController.settings);
+router.get('/getUserRole', utilController.getUserRole);
 
 module.exports = router;

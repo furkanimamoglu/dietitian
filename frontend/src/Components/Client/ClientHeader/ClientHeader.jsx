@@ -98,7 +98,7 @@ export default function Header() {
 
     React.useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/diyetisyen/login';
+            window.location.href = '/login';
         }
     }, []);
 
@@ -117,14 +117,13 @@ export default function Header() {
     const handleMenuItemClick = (value) => {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
-            localStorage.removeItem('role');
-            navigate('/diyetisyen/login');
+            navigate('/danisan/login');
         } else if (value === 'profil') {
-            navigate('/diyetisyen/profil');
+            navigate('/danisan/profil');
         } else if (value === 'ayarlar') {
-            navigate('/diyetisyen/ayarlar');
+            navigate('/danisan/ayarlar');
         } else {
-            navigate('/diyetisyen/dashboard');
+            navigate('/danisan/dashboard');
         }
         setAnchorElUser(null);
     };
@@ -135,7 +134,7 @@ export default function Header() {
 
         if (query.length > 2) {
             try {
-                const response = await axios.get(config[config.environment].apiUrl+`/dietitian/globalSearchbar`, {
+                const response = await axios.get(config[config.environment].apiUrl+`/danisan/globalSearchbar`, {
                     headers: {
                         Authorization: localStorage.getItem('token')
                     },
@@ -180,7 +179,7 @@ export default function Header() {
                         <Typography
                             variant="h6"
                             component="a"
-                            href="/dashboard"
+                            href="/danisan/dashboard"
                             sx={{
                                 mr: 2,
                                 display: { xs: 'none', md: 'flex' },

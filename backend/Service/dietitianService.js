@@ -27,12 +27,20 @@ class DietitianService {
             }
 
             const token = jwt.sign(
-                {id: dietitianInfo.id, email: dietitianInfo.email, role: dietitianInfo.role},
+                {
+                    id: dietitianInfo.id,
+                    role: dietitianInfo.role
+                },
                 config.secretkey,
-                {expiresIn: '24h'}
+                { expiresIn: '24h' }
             );
 
-            return {...dietitianInfo.dataValues, token: token};
+            await dietitianInfo.update({ token });
+
+            return {
+                ...dietitianInfo.dataValues,
+                token: token
+            };
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -52,12 +60,16 @@ class DietitianService {
             });
 
             const token = jwt.sign(
-                {id: dietitian.id, email: dietitian.email, role: DIETITIAN},
+                {
+                    id: dietitian.id,
+                    role: DIETITIAN
+                },
                 config.secretkey
             );
 
+            await dietitian.update({ token });
+
             return {
-                email: dietitian.email,
                 role: dietitian.role,
                 token: token
             };
@@ -333,17 +345,18 @@ class DietitianService {
                 throw new Error("Yetkisiz Erişim.");
             }
             // TODO: Yalnızca diyetisyen rolüne sahip kişiler için doğrulama yapacağız.
+            // TODO: Rol kontrolü gelecek.
             const data = [
-                { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
-                { type: "page", name: "Randevularım", url: "/randevularim" },
-                { type: "page", name: "Ayarlar", url: "/ayarlar" },
-                { type: "page", name: "Profil", url: "/profil" },
-                { type: "page", name: "Beslenme", url: "/beslenme" },
-                { type: "page", name: "Egzersiz", url: "/egzersiz" },
-                { type: "page", name: "Finans", url: "/finans" },
-                { type: "page", name: "Tarif", url: "/tarif" },
-                { type: "page", name: "Egzersiz", url: "/egzersiz" },
-                { type: "page", name: "Mesaj", url: "/mesaj" }
+                { type: "page", name: "Danışanlarım", url: "/diyetisyen/danisanlarim" },
+                { type: "page", name: "Randevularım", url: "/diyetisyen/randevularim" },
+                { type: "page", name: "Ayarlar", url: "/diyetisyen/ayarlar" },
+                { type: "page", name: "Profil", url: "/diyetisyen/profil" },
+                { type: "page", name: "Beslenme", url: "/diyetisyen/beslenme" },
+                { type: "page", name: "Egzersiz", url: "/diyetisyen/egzersiz" },
+                { type: "page", name: "Finans", url: "/diyetisyen/finans" },
+                { type: "page", name: "Tarif", url: "/diyetisyen/tarif" },
+                { type: "page", name: "Egzersiz", url: "/diyetisyen/egzersiz" },
+                { type: "page", name: "Mesaj", url: "/diyetisyen/mesaj" }
             ];
 
             const dietitian = await Dietitian.findOne({

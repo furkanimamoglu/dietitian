@@ -33,6 +33,9 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
+        token: {
+            type: DataTypes.STRING
+        },
         role: {
             type: DataTypes.STRING,
             defaultValue: "CLIENT"

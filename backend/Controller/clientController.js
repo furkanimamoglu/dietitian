@@ -6,12 +6,12 @@ class ClientController {
         try {
             const {email, password} = req.body;
 
-            const client = await ClientService.login(email, password);
+            const result = await ClientService.login(email, password);
 
             res.status(200).json(
                 {
-                    email: client.email,
-                    token: client.token,
+                    token: result.token,
+                    role: result.role
                 }
             );
         } catch (error) {
@@ -19,6 +19,32 @@ class ClientController {
                 showOnScreen: error.showOnScreen,
                 message: error.message
             })
+        }
+    }
+
+    async register(req, res) {
+        try {
+            const {email, password} = req.body;
+            const ipAddress = req.ip;
+
+            if (!email || !password || !ipAddress) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm parametreler doldurulmalıdır.'
+                });
+            }
+
+            const result = await ClientService.register(email, password, ipAddress);
+
+            res.status(200).json({
+                token: result.token,
+                role: result.role
+            });
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
         }
     }
 

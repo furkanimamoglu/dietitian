@@ -31,6 +31,9 @@ const Dietitian = sequelize.define('Dietitian', {
                 }
             }
         },
+        token: {
+            type: DataTypes.STRING
+        },
         role: {
             type: DataTypes.STRING,
             defaultValue: "DIETITIAN"

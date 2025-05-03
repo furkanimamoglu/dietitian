@@ -1,9 +1,9 @@
 import React from 'react';
 import {Navigate, Route, Routes} from 'react-router-dom';
 import Dashboard from '../pages/Dietitian/Dashboard/Dashboard';
-import Login from '../pages/Login/Login';
-import Register from '../pages/Register/Register';
-import ForgotPassword from "../pages/ForgotPassword/ForgotPassword.jsx";
+import Login from '../pages/Dietitian/Login/Login';
+import Register from '../pages/Dietitian/Register/Register';
+import ForgotPassword from "../pages/Dietitian/ForgotPassword/ForgotPassword.jsx";
 import Danisanlarim from "../pages/Dietitian/Danisanlarim/Danisanlarim.jsx";
 import ExceptionPage from "../pages/Exception/ExceptionPage.jsx";
 import Randevularim from "../pages/Dietitian/Randevularim/Randevularim.jsx";
@@ -14,29 +14,33 @@ import Egzersizler from "../pages/Dietitian/Egzersizler/Egzersizler.jsx";
 import Profil from "../pages/Dietitian/Profil/Profil.jsx";
 import Ayarlar from "../pages/Dietitian/Ayarlar/Ayarlar.jsx";
 import Mesaj from "../pages/Dietitian/Mesaj/Mesaj.jsx";
+
+
 import ClientDashboard from "../pages/Client/ClientDashboard/ClientDashboard.jsx";
+import ClientLogin from "../pages/Client/ClientLogin/ClientLogin.jsx";
 
 export default function Routing() {
     return (
         <Routes>
                 {/* Diyetisyen Routes */}
-                <Route path="/dashboard/*" element={<Dashboard/>}/>
-                <Route path="/profil/*" element={<Profil/>}/>
-                <Route path="/ayarlar/*" element={<Ayarlar/>}/>
-                <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
-                <Route path="/danisan/:id" element={<Danisan/>}/>
-                <Route path="/beslenme/*" element={<Beslenme/>}/>
-                <Route path="/randevularim/*" element={<Randevularim/>}/>
-                <Route path="/mesaj/*" element={<Mesaj/>}/>
-                <Route path="/egzersiz/*" element={<Egzersizler/>}/>
-                <Route path="/finans/*" element={<Egzersizler/>}/>
-                <Route path="/tarif/*" element={<Tarifler/>}/>
-                <Route path="/login/*" element={<Login/>}/>
-                <Route path="/register/*" element={<Register/>}/>
-                <Route path="/forgotpassword/*" element={<ForgotPassword/>}/>
+                <Route path="/diyetisyen/dashboard/*" element={<Dashboard/>}/>
+                <Route path="/diyetisyen/profil/*" element={<Profil/>}/>
+                <Route path="/diyetisyen/ayarlar/*" element={<Ayarlar/>}/>
+                <Route path="/diyetisyen/danisanlarim/*" element={<Danisanlarim/>}/>
+                <Route path="/diyetisyen/danisan/:id" element={<Danisan/>}/>
+                <Route path="/diyetisyen/beslenme/*" element={<Beslenme/>}/>
+                <Route path="/diyetisyen/randevularim/*" element={<Randevularim/>}/>
+                <Route path="/diyetisyen/mesaj/*" element={<Mesaj/>}/>
+                <Route path="/diyetisyen/egzersiz/*" element={<Egzersizler/>}/>
+                <Route path="/diyetisyen/finans/*" element={<Egzersizler/>}/>
+                <Route path="/diyetisyen/tarif/*" element={<Tarifler/>}/>
+                <Route path="/diyetisyen/login/*" element={<ClientLogin/>}/>
+                <Route path="/diyetisyen/register/*" element={<Register/>}/>
+                <Route path="/diyetisyen/forgotpassword/*" element={<ForgotPassword/>}/>
 
                 {/* Danışan Routes */}
-                <Route path="/client/dashboard/*" element={<ClientDashboard/>}/>
+                <Route path="/danisan/dashboard/*" element={<ClientDashboard/>}/>
+                <Route path="/danisan/login/*" element={<ClientLogin/>}/>
 
                 {/* Error Routes */}
                 <Route path="/*" element={ExceptionPage(404)}/>
