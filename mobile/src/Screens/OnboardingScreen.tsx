@@ -20,11 +20,15 @@ const OnboardingScreen = ({ navigation }: Props) => {
     }}>
       <View style={styles.slide}>
         <Text variant="headlineMedium">Diyetisyen Uygulamasına Hoş Geldin!</Text>
-        <Text style={styles.description}>Danışanlarını kolayca yönet, takip et ve gelişimlerini görselleştir.</Text>
+        <Text style={styles.description}>
+          Bu uygulama senin için! Beslenmeni takip et, hedeflerine ulaşırken yanında olalım.
+        </Text>
       </View>
       <View style={styles.slide}>
-        <Text variant="headlineMedium">Verimli Takip!</Text>
-        <Text style={styles.description}>Randevuları planla, notlarını al, ölçümleri analiz et.</Text>
+        <Text variant="headlineMedium">Diyetisyeninle Bağlantı Kur!</Text>
+        <Text style={styles.description}>
+          Diyetisyeninden aldığın bağlantı kodunu gir.
+        </Text>
       </View>
       <View style={styles.slide}>
 
