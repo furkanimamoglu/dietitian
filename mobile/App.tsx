@@ -6,6 +6,10 @@ import { Appbar, PaperProvider } from 'react-native-paper';
 
 import HomeScreen from './src/Screens/HomeScreen';
 import LoginScreen from './src/Screens/LoginScreen';
+import BeslenmeScreen from './src/Screens/BeslenmeScreen';
+import ProfilScreen from './src/Screens/ProfilScreen';
+import EgzersizScreen from './src/Screens/EgzersizScreen';
+import TarifScreen from './src/Screens/TarifScreen';
 import OnboardingScreen from './src/Screens/OnboardingScreen';
 import { customDarkTheme, customLightTheme } from './src/Theme/theme.ts';
 
@@ -27,6 +31,10 @@ const App = () => {
         <Stack.Navigator initialRouteName="Onboarding">
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Tarif" component={TarifScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Egzersiz" component={EgzersizScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Profil" component={ProfilScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Beslenme" component={BeslenmeScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
       </NavigationContainer>
