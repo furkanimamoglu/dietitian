@@ -11,6 +11,8 @@ import ProfilScreen from './src/Screens/ProfilScreen';
 import EgzersizScreen from './src/Screens/EgzersizScreen';
 import TarifScreen from './src/Screens/TarifScreen';
 import MesajScreen from './src/Screens/MesajScreen';
+import RandevuScreen from './src/Screens/RandevuScreen';
+import RaporScreen from './src/Screens/RaporScreen';
 import OnboardingScreen from './src/Screens/OnboardingScreen';
 import { customDarkTheme, customLightTheme } from './src/Theme/theme.ts';
 
@@ -23,7 +25,9 @@ export type RootStackParamList = {
   Beslenme: undefined;
   Onboarding: undefined;
   Profil: undefined;
-  MesajScreen: undefined;
+  Mesaj: undefined;
+  Randevu: undefined;
+  Rapor: undefined;
 };
 
 
@@ -60,6 +64,8 @@ const App = () => {
           <Stack.Screen name="Egzersiz" component={EgzersizScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Profil" component={ProfilScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Beslenme" component={BeslenmeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Randevu" component={RandevuScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Rapor" component={RaporScreen} options={{ headerShown: false }} />
           <Stack.Screen name="AnaSayfa" component={AnaSayfaScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Mesaj" component={MesajScreen} options={{ headerShown: false }} />
         </Stack.Navigator>

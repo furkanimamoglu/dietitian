@@ -352,8 +352,8 @@ export default function Randevularim() {
                         nowIndicator={true}
                         firstDay={1}
                         allDayText="Tüm Gün"
-                        slotDuration="00:30:00"
-                        slotLabelInterval="0:30"
+                        slotDuration="00:15:00"
+                        slotLabelInterval="0:15"
                         slotLabelFormat={{
                             hour: "2-digit",
                             minute: "2-digit",

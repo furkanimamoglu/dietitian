@@ -43,6 +43,7 @@ const BottomNav = ({ navigation }: Props) => {
           <Text style={styles.label}>Raporlar</Text>
         </TouchableOpacity>
 
+        {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
         <TouchableOpacity onPress={toggleMenu} style={styles.navCenterButton}>
           <Text style={styles.plusText}>+</Text>
         </TouchableOpacity>

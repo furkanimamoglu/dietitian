@@ -37,7 +37,7 @@ function Login() {
                 const token = data.token;
                 localStorage.setItem('token', 'Bearer ' + token);
                 setMessage('Giriş başarılı! Yönlendiriliyor...');
-                setTimeout(() => navigate('/diyetisyen/dashboard'), 2000);
+                setTimeout(() => navigate('/dashboard'), 2000);
             })
             .catch((error) => {
                 console.error('Exception:', error);

@@ -9,12 +9,12 @@ export default function Navbar() {
     const navigate = useNavigate();
 
     const menu_items = [
-        { name: "DANIŞANLARIM", route: "/diyetisyen/danisanlarim" },
-        { name: "RANDEVULARIM", route: "/diyetisyen/randevularim" },
-        { name: "BESLENME", route: "/diyetisyen/beslenme" },
-        { name: "TARİFLER", route: "/diyetisyen/tarif" },
-        { name: "EGZERSİZLER", route: "/diyetisyen/egzersiz" },
-        { name: "FİNANS", route: "/diyetisyen/finans" },
+        { name: "DANIŞANLARIM", route: "/danisanlarim" },
+        { name: "RANDEVULARIM", route: "/randevularim" },
+        { name: "BESLENME", route: "/beslenme" },
+        { name: "TARİFLER", route: "/tarif" },
+        { name: "EGZERSİZLER", route: "/egzersiz" },
+        { name: "FİNANS", route: "/finans" },
     ];
 
     return (

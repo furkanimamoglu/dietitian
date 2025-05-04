@@ -1,6 +1,7 @@
 // Libraries
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
+const QRCode = require('qrcode');
 
 // Imports
 const Exception = require('../Exception/Exception');
@@ -316,6 +317,22 @@ class DietitianService {
         }
     }
 
+    async generateQrCode(user_id) {
+        const url = `https://google.com`;
+
+        try {
+            return QRCode.toDataURL(url, {
+                errorCorrectionLevel: 'M',
+                margin: 2,
+                width: 300
+            });
+        } catch (err) {
+            const error = new Error("QR kodu oluşturulamadı.");
+            error.status = 500;
+            throw error;
+        }
+    }
+
     async getDietitianInfo(user_id) {
         try {
             if (!user_id) {
@@ -347,16 +364,16 @@ class DietitianService {
             // TODO: Yalnızca diyetisyen rolüne sahip kişiler için doğrulama yapacağız.
             // TODO: Rol kontrolü gelecek.
             const data = [
-                { type: "page", name: "Danışanlarım", url: "/diyetisyen/danisanlarim" },
-                { type: "page", name: "Randevularım", url: "/diyetisyen/randevularim" },
-                { type: "page", name: "Ayarlar", url: "/diyetisyen/ayarlar" },
-                { type: "page", name: "Profil", url: "/diyetisyen/profil" },
-                { type: "page", name: "Beslenme", url: "/diyetisyen/beslenme" },
-                { type: "page", name: "Egzersiz", url: "/diyetisyen/egzersiz" },
-                { type: "page", name: "Finans", url: "/diyetisyen/finans" },
-                { type: "page", name: "Tarif", url: "/diyetisyen/tarif" },
-                { type: "page", name: "Egzersiz", url: "/diyetisyen/egzersiz" },
-                { type: "page", name: "Mesaj", url: "/diyetisyen/mesaj" }
+                { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
+                { type: "page", name: "Randevularım", url: "/randevularim" },
+                { type: "page", name: "Ayarlar", url: "/ayarlar" },
+                { type: "page", name: "Profil", url: "/profil" },
+                { type: "page", name: "Beslenme", url: "/beslenme" },
+                { type: "page", name: "Egzersiz", url: "/egzersiz" },
+                { type: "page", name: "Finans", url: "/finans" },
+                { type: "page", name: "Tarif", url: "/tarif" },
+                { type: "page", name: "Egzersiz", url: "/egzersiz" },
+                { type: "page", name: "Mesaj", url: "/mesaj" }
             ];
 
             const dietitian = await Dietitian.findOne({
