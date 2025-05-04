@@ -104,7 +104,6 @@ export default function Danisanlarim() {
         setSelectedClient(null);
     };
 
-    // Fetch QR and open dialog
     const showQR = async () => {
         try {
             const { data } = await axios.get(
@@ -122,7 +121,6 @@ export default function Danisanlarim() {
         setQrData(null);
     };
 
-    // Print only the QR
     const handlePrint = () => {
         if (!qrData) return;
         const printWindow = window.open("", "_blank");
