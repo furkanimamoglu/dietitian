@@ -22,7 +22,7 @@ const { width, height } = Dimensions.get('window');
 const OnboardingContent = [
   {
     icon: "nutrition",
-    title: "Hoş Geldin!",
+    title: "Hoş Geldiniz!",
     description: "Bu uygulama sayesinde danışanlarının beslenmesini kolayca takip edebilir, öğünlerini planlayabilir ve hedeflerine ulaşmalarında rehberlik edebilirsin."
   },
   {
