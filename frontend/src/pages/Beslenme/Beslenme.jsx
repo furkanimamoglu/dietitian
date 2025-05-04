@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './Beslenme.css';
-import Default from "../../../components/Layouts/Default.jsx";
+import Default from "../../Components/Layouts/Default.jsx";
 import {
     Box,
     Button,
@@ -33,7 +33,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios from "axios";
-import config from "../../../config.js";
+import config from "../../config.js";
 
 const initialBeslenmeData = [
     { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png" },

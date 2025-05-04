@@ -38,13 +38,18 @@ class ClientService {
         }
     }
 
-    async register(email, password, ipAddress) {
+    async register(dietitian_id, email, password, ipAddress) {
         try {
+            if (!dietitian_id) {
+                throw new Exception('Bağlı bir diyetisyen bulunamadı.', 400, true);
+            }
+
             if (!email || !password) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
             const client = await Client.create({
+                dietitian_id: dietitian_id,
                 email: email,
                 password: password,
                 role: CLIENT,
@@ -53,7 +58,8 @@ class ClientService {
 
             const token = jwt.sign(
                 {
-                    id: client.id,
+                    client_id: client.id,
+                    dietitian_id: client.dietitian_id,
                     role: CLIENT
                 },
                 config.secretkey

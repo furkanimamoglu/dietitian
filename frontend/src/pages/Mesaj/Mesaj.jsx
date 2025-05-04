@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './Mesaj.css';
-import Default from "../../../components/Layouts/Default.jsx";
+import Default from "../../Components/Layouts/Default.jsx";
 import {
     Box,
     Grid2,
@@ -16,7 +16,7 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from "axios";
-import config from "../../../config.js";
+import config from "../../config.js";
 
 export default function Mesaj() {
     const [danisanList, setDanisanList] = useState([]);

@@ -169,7 +169,7 @@ class DietitianController {
             const qrData = await DietitianService.generateQrCode(user_id);
 
             return res.status(200).json({
-                qr: qrData
+                qrData
             });
         } catch (error) {
             return res.status(error.status || 500).json({

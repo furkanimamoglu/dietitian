@@ -1,6 +1,6 @@
 import React from 'react';
 import './Dashboard.css';
-import Default from "../../../Components/Layouts/Default.jsx";
+import Default from "../../Components/Layouts/Default.jsx";
 import { Grid2, Paper, Typography, Box, List, ListItem, ListItemText, Button, Divider } from '@mui/material';
 import { Event, Notes, Notifications, TrendingUp } from '@mui/icons-material';
 

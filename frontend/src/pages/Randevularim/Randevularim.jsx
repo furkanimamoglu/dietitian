@@ -8,7 +8,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 
-import Default from "../../../components/Layouts/Default.jsx";
+import Default from "../../Components/Layouts/Default.jsx";
 
 import {
     Box,
@@ -21,7 +21,7 @@ import {
     TextField,
     IconButton,
 } from '@mui/material';
-import config from "../../../config.js";
+import config from "../../config.js";
 import {Close} from "@mui/icons-material";
 import {Autocomplete} from "@mui/lab";
 

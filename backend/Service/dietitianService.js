@@ -318,18 +318,24 @@ class DietitianService {
     }
 
     async generateQrCode(user_id) {
-        const url = `https://google.com`;
+        if (!user_id) {
+            const err = new Error('Diyetisyen ID gerekli.');
+            err.status = 400;
+            throw err;
+        }
+
+        const registerUrl = `${config.base_url}/register?dietitian_id=${user_id}`;
 
         try {
-            return QRCode.toDataURL(url, {
+            return await QRCode.toDataURL(registerUrl, {
                 errorCorrectionLevel: 'M',
                 margin: 2,
                 width: 300
             });
-        } catch (err) {
-            const error = new Error("QR kodu oluşturulamadı.");
-            error.status = 500;
-            throw error;
+        } catch (error) {
+            const err = new Error('QR kodu oluşturulamadı.');
+            err.status = 500;
+            throw err;
         }
     }
 

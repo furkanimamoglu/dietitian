@@ -13,12 +13,19 @@ import {
     Typography,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { Cancel, CheckCircle, GroupAdd, Visibility, Delete } from "@mui/icons-material";
+import {
+    Cancel,
+    CheckCircle,
+    GroupAdd,
+    Visibility,
+    Delete,
+} from "@mui/icons-material";
+import QrCodeIcon from "@mui/icons-material/QrCode";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import { green, red, blue, pink } from "@mui/material/colors";
-import Default from "../../../components/Layouts/Default.jsx";
-import config from "../../../config.js";
+import Default from "../../Components/Layouts/Default.jsx";
+import config from "../../config.js";
 import { useNavigate } from "react-router-dom";
 
 export default function Danisanlarim() {
@@ -27,14 +34,16 @@ export default function Danisanlarim() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
 
+    // QR dialog state
+    const [qrOpen, setQrOpen] = useState(false);
+    const [qrData, setQrData] = useState(null);
+
     const openCreatePopup = () => {
         setOpen(true);
     };
-
     const closeCreatePopup = () => {
         setOpen(false);
     };
-
     const submitCreatePopup = (e) => {
         e.preventDefault();
         console.log("Form submitted");
@@ -44,72 +53,91 @@ export default function Danisanlarim() {
     useEffect(() => {
         axios
             .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
-                headers: {
-                    Authorization: localStorage.getItem("token"),
-                },
+                headers: { Authorization: localStorage.getItem("token") },
             })
-            .then((response) => {
-                setClients(response.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching clients:", error);
-            });
+            .then((res) => setClients(res.data))
+            .catch((err) => console.error("Error fetching clients:", err));
     }, []);
 
     const handleRowUpdate = async (updatedRow, originalRow) => {
         try {
-            const response = await axios.put(
+            const res = await axios.put(
                 config[config.environment].apiUrl + "/dietitian/updateClient",
                 updatedRow,
-                {
-                    headers: {
-                        Authorization: localStorage.getItem("token"),
-                    },
-                }
+                { headers: { Authorization: localStorage.getItem("token") } }
             );
-
-            console.log("Güncelleme başarılı:", response.data);
-
-            return response.data;
-        } catch (error) {
-            console.error("Güncelleme hatası:", error);
+            console.log("Güncelleme başarılı:", res.data);
+            return res.data;
+        } catch (err) {
+            console.error("Güncelleme hatası:", err);
             return originalRow;
         }
     };
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(config[config.environment].apiUrl + "/dietitian/deleteClient", {
-                headers: {
-                    Authorization: localStorage.getItem("token"),
-                },
-                data: {
-                    client_id: id,
-                },
-            });
-            setClients((prev) => prev.filter((client) => client.id !== id));
+            await axios.delete(
+                config[config.environment].apiUrl + "/dietitian/deleteClient",
+                {
+                    headers: { Authorization: localStorage.getItem("token") },
+                    data: { client_id: id },
+                }
+            );
+            setClients((prev) => prev.filter((c) => c.id !== id));
             console.log("Silme işlemi başarılı");
-        } catch (error) {
-            console.error("Silme işlemi hatası:", error);
+        } catch (err) {
+            console.error("Silme işlemi hatası:", err);
         }
     };
 
     const confirmDelete = (client) => {
-        setSelectedClient(client); // Silinecek danışanı kaydet
-        setDeleteDialogOpen(true); // Onay penceresini aç
+        setSelectedClient(client);
+        setDeleteDialogOpen(true);
     };
-
     const cancelDelete = () => {
-        setDeleteDialogOpen(false); // Onay penceresini kapat
-        setSelectedClient(null); // Seçili danışanı temizle
+        setDeleteDialogOpen(false);
+        setSelectedClient(null);
+    };
+    const confirmDeleteAction = () => {
+        if (selectedClient) handleDelete(selectedClient.id);
+        setDeleteDialogOpen(false);
+        setSelectedClient(null);
     };
 
-    const confirmDeleteAction = () => {
-        if (selectedClient) {
-            handleDelete(selectedClient.id);
+    // Fetch QR and open dialog
+    const showQR = async () => {
+        try {
+            const { data } = await axios.get(
+                config[config.environment].apiUrl + "/dietitian/getDietitianQR",
+                { headers: { Authorization: localStorage.getItem("token") } }
+            );
+            setQrData(data.qrData);
+            setQrOpen(true);
+        } catch (err) {
+            console.error("QR fetch hatası:", err);
         }
-        setDeleteDialogOpen(false); // Onay penceresini kapat
-        setSelectedClient(null); // Seçili danışanı temizle
+    };
+    const closeQR = () => {
+        setQrOpen(false);
+        setQrData(null);
+    };
+
+    // Print only the QR
+    const handlePrint = () => {
+        if (!qrData) return;
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+      <html>
+        <head><title>QR Yazdır</title></head>
+        <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;">
+          <img src="${qrData}" alt="QR Kod"/>
+        </body>
+      </html>
+    `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
     };
 
     const columns = [
@@ -128,27 +156,11 @@ export default function Danisanlarim() {
             valueOptions: ["aktif", "inaktif"],
             renderCell: (params) =>
                 params.value === "aktif" ? (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            width: "100%",
-                            height: "100%",
-                        }}
-                    >
-                        <CheckCircle sx={{}} style={{ color: green[500] }} />
+                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
+                        <CheckCircle style={{ color: green[500] }} />
                     </Box>
                 ) : params.value === "inaktif" ? (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            width: "100%",
-                            height: "100%",
-                        }}
-                    >
+                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
                         <Cancel style={{ color: red[500] }} />
                     </Box>
                 ) : null,
@@ -160,15 +172,7 @@ export default function Danisanlarim() {
             valueOptions: ["Erkek", "Kadın"],
             editable: true,
             renderCell: (params) => (
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "100%",
-                    }}
-                >
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
                     {params.value === "Erkek" ? (
                         <MaleIcon style={{ color: blue[500] }} />
                     ) : params.value === "Kadın" ? (
@@ -192,11 +196,7 @@ export default function Danisanlarim() {
                         >
                             <Visibility />
                         </Button>
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={() => confirmDelete(params.row)}
-                        >
+                        <Button variant="outlined" color="error" onClick={() => confirmDelete(params.row)}>
                             <Delete />
                         </Button>
                     </Box>
@@ -208,7 +208,7 @@ export default function Danisanlarim() {
     return (
         <Default>
             <Grid2 container spacing={2}>
-                <Grid2 size={12}>
+                <Grid2 xs={12}>
                     <Button
                         sx={{ marginRight: 1 }}
                         variant="outlined"
@@ -218,17 +218,26 @@ export default function Danisanlarim() {
                     >
                         Danışan Ekle
                     </Button>
+                    <Button
+                        sx={{ marginRight: 1 }}
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<QrCodeIcon />}
+                        onClick={showQR}
+                    >
+                        QR’ımı Göster
+                    </Button>
                     <DataGrid
                         rows={clients}
                         columns={columns}
                         pageSize={5}
                         editable
-                        processRowUpdate={(updatedRow, originalRow) => handleRowUpdate(updatedRow, originalRow)}
+                        processRowUpdate={handleRowUpdate}
                         onProcessRowUpdateError={(error) => console.error("Hata:", error)}
                     />
                 </Grid2>
             </Grid2>
-            {/* TODO: Danışanı silerken, name yok olduktan sonra popup kapanıyor. Direkt kapatsın veya ismi ekran kapanana kadar gitmesin. */}
+
             {/* Delete Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
                 <DialogTitle>Silme Onayı</DialogTitle>
@@ -243,6 +252,26 @@ export default function Danisanlarim() {
                     </Button>
                     <Button onClick={confirmDeleteAction} color="error" variant="contained">
                         Sil
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* QR Code Dialog */}
+            <Dialog open={qrOpen} onClose={closeQR} maxWidth="xs" fullWidth>
+                <DialogTitle>QR Kodunuz</DialogTitle>
+                <DialogContent dividers sx={{ display: "flex", justifyContent: "center" }}>
+                    {qrData ? (
+                        <img src={qrData} alt="Dietisyen QR" style={{ maxWidth: "100%", height: "auto" }} />
+                    ) : (
+                        <Typography>Yükleniyor...</Typography>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handlePrint} variant="outlined">
+                        Yazdır
+                    </Button>
+                    <Button onClick={closeQR} variant="contained" color="primary">
+                        Kapat
                     </Button>
                 </DialogActions>
             </Dialog>

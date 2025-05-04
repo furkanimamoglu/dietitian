@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import './Login.css';
-import config from "../../../config.js";
+import config from "../../config.js";
 import {Avatar, Box, Button, Link, Paper, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import {green} from "@mui/material/colors";
-import DefaultWithFooter from "../../../Components/Layouts/DefaultWithFooter.jsx";
+import DefaultWithFooter from "../../Components/Layouts/DefaultWithFooter.jsx";
 
 function Login() {
     const [email, setEmail] = useState('');

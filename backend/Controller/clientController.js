@@ -24,8 +24,16 @@ class ClientController {
 
     async register(req, res) {
         try {
+            const dietitian_id = req.query.dietitian_id || req.body.dietitian_id;
             const {email, password} = req.body;
             const ipAddress = req.ip;
+
+            if(!dietitian_id){
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Bağlı olunan bir diyetisyen bulunamadı.'
+                });
+            }
 
             if (!email || !password || !ipAddress) {
                 return res.status(400).json({
@@ -34,7 +42,7 @@ class ClientController {
                 });
             }
 
-            const result = await ClientService.register(email, password, ipAddress);
+            const result = await ClientService.register(dietitian_id, email, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,
