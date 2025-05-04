@@ -3,13 +3,12 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
     const navigate = useNavigate();
 
-    const pages = [
+    const menu_items = [
         { name: "DANIŞANLARIM", route: "/danisanlarim" },
         { name: "RANDEVULARIM", route: "/randevularim" },
         { name: "BESLENME", route: "/beslenme" },
@@ -25,6 +24,7 @@ export default function Navbar() {
                 display: { xs: "none", md: "flex" },
                 mt: "4rem",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+                zIndex: 500,
             }}
             position="fixed"
         >
@@ -40,13 +40,11 @@ export default function Navbar() {
                         display: { xs: "none", md: "flex" },
                     }}
                 >
-                    {/* PC Version */}
-                    {pages.map((page) => (
+                    {menu_items.map((page) => (
                         <Button
                             key={page.name}
                             onClick={() => navigate(page.route)}
                             sx={{
-                                backgroundColor: "primary.secondary",
                                 my: 2,
                                 fontWeight: "bold",
                                 color: "rgb(14,62,10)",

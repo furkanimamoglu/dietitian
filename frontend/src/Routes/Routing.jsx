@@ -1,23 +1,24 @@
 import React from 'react';
-import {Route, Routes} from 'react-router-dom';
-import Dashboard from '../pages/Dietitian/Dashboard/Dashboard';
+import {Navigate, Route, Routes} from 'react-router-dom';
+import Dashboard from '../pages/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword.jsx";
-import Danisanlarim from "../pages/Dietitian/Danisanlarim/Danisanlarim.jsx";
+import Danisanlarim from "../pages/Danisanlarim/Danisanlarim.jsx";
 import ExceptionPage from "../pages/Exception/ExceptionPage.jsx";
-import Randevularim from "../pages/Dietitian/Randevularim/Randevularim.jsx";
-import Beslenme from "../pages/Dietitian/Beslenme/Beslenme.jsx";
-import Danisan from "../pages/Dietitian/Danisan/Danisan.jsx";
-import Tarifler from "../pages/Dietitian/Tarifler/Tarifler.jsx";
-import Egzersizler from "../pages/Dietitian/Egzersizler/Egzersizler.jsx";
-import Profil from "../pages/Dietitian/Profil/Profil.jsx";
-import Ayarlar from "../pages/Dietitian/Ayarlar/Ayarlar.jsx";
+import Randevularim from "../pages/Randevularim/Randevularim.jsx";
+import Beslenme from "../pages/Beslenme/Beslenme.jsx";
+import Danisan from "../pages/Danisan/Danisan.jsx";
+import Tarifler from "../pages/Tarifler/Tarifler.jsx";
+import Egzersizler from "../pages/Egzersizler/Egzersizler.jsx";
+import Profil from "../pages/Profil/Profil.jsx";
+import Ayarlar from "../pages/Ayarlar/Ayarlar.jsx";
+import Mesaj from "../pages/Mesaj/Mesaj.jsx";
 
 export default function Routing() {
     return (
         <Routes>
-            {/* Diyetisyen Routes */}
+                {/* Diyetisyen Routes */}
                 <Route path="/dashboard/*" element={<Dashboard/>}/>
                 <Route path="/profil/*" element={<Profil/>}/>
                 <Route path="/ayarlar/*" element={<Ayarlar/>}/>
@@ -25,6 +26,7 @@ export default function Routing() {
                 <Route path="/danisan/:id" element={<Danisan/>}/>
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
+                <Route path="/mesaj/*" element={<Mesaj/>}/>
                 <Route path="/egzersiz/*" element={<Egzersizler/>}/>
                 <Route path="/finans/*" element={<Egzersizler/>}/>
                 <Route path="/tarif/*" element={<Tarifler/>}/>

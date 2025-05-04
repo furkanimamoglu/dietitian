@@ -1,4 +1,7 @@
 {
+  "base_url": "http://localhost:5173",
+  "app_scheme": "dietapp",
+
   "database_connection": {
     "host": "localhost",
     "database": "dietitian_db",

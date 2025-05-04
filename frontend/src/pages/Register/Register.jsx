@@ -6,7 +6,7 @@ import config from "../../config.js";
 import {Avatar, Box, Button, Paper, TextField, Typography} from "@mui/material";
 import {green} from "@mui/material/colors";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
+import DefaultWithFooter from "../../Components/Layouts/DefaultWithFooter.jsx";
 
 function Register() {
     const [username, setUsername] = useState('');

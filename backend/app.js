@@ -15,6 +15,7 @@ const dietitianRoutes = require('./Routes/dietitianRoutes');
 const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
 const systemRoutes = require('./Routes/systemRoutes');
+const utilRoutes = require('./Routes/utilRoutes');
 
 app.use(bodyParser.json());
 
@@ -30,6 +31,7 @@ app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
 app.use('/system', systemRoutes);
+app.use('/util', utilRoutes)
 
 // Working Directory
 try {
@@ -58,6 +60,7 @@ if (config.ddl === "create-drop") {
 } else if (config.ddl === "update") {
     sequelize.sync().then(() => {
         app.listen(config.server.port);
+        console.log(`INFO - Sunucu http://localhost:${config.server.port} portunda çalışıyor.`);
     }).catch(err => {
         console.log(err)
     });

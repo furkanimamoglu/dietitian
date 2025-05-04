@@ -5,7 +5,7 @@ import config from "../../config.js";
 import {Avatar, Box, Button, Link, Paper, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import {green} from "@mui/material/colors";
-import DefaultWithFooter from "../../components/Layouts/DefaultWithFooter.jsx";
+import DefaultWithFooter from "../../Components/Layouts/DefaultWithFooter.jsx";
 
 function Login() {
     const [email, setEmail] = useState('');

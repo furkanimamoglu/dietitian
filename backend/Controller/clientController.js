@@ -1,17 +1,17 @@
 const ClientService = require("../Service/clientService");
 
 class ClientController {
+
     async login(req, res) {
         try {
             const {email, password} = req.body;
 
-            const client = await ClientService.login(email, password);
+            const result = await ClientService.login(email, password);
 
             res.status(200).json(
                 {
-                    email: client.email,
-                    token: client.token,
-                    role: client.role
+                    token: result.token,
+                    role: result.role
                 }
             );
         } catch (error) {
@@ -21,6 +21,41 @@ class ClientController {
             })
         }
     }
+
+    async register(req, res) {
+        try {
+            const dietitian_id = req.query.dietitian_id || req.body.dietitian_id;
+            const {email, password} = req.body;
+            const ipAddress = req.ip;
+
+            if(!dietitian_id){
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Bağlı olunan bir diyetisyen bulunamadı.'
+                });
+            }
+
+            if (!email || !password || !ipAddress) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm parametreler doldurulmalıdır.'
+                });
+            }
+
+            const result = await ClientService.register(dietitian_id, email, password, ipAddress);
+
+            res.status(200).json({
+                token: result.token,
+                role: result.role
+            });
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
+        }
+    }
+
 }
 
 module.exports = new ClientController();

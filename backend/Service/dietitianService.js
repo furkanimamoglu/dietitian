@@ -1,6 +1,7 @@
 // Libraries
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
+const QRCode = require('qrcode');
 
 // Imports
 const Exception = require('../Exception/Exception');
@@ -9,7 +10,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const { sequelize, Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
 
 class DietitianService {
 
@@ -27,12 +28,20 @@ class DietitianService {
             }
 
             const token = jwt.sign(
-                {id: dietitianInfo.id, email: dietitianInfo.email, role: dietitianInfo.role},
+                {
+                    id: dietitianInfo.id,
+                    role: dietitianInfo.role
+                },
                 config.secretkey,
-                {expiresIn: '24h'}
+                { expiresIn: '24h' }
             );
 
-            return {...dietitianInfo.dataValues, token: token};
+            await dietitianInfo.update({ token });
+
+            return {
+                ...dietitianInfo.dataValues,
+                token: token
+            };
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -52,12 +61,16 @@ class DietitianService {
             });
 
             const token = jwt.sign(
-                {id: dietitian.id, email: dietitian.email, role: DIETITIAN},
+                {
+                    id: dietitian.id,
+                    role: DIETITIAN
+                },
                 config.secretkey
             );
 
+            await dietitian.update({ token });
+
             return {
-                email: dietitian.email,
                 role: dietitian.role,
                 token: token
             };
@@ -272,12 +285,10 @@ class DietitianService {
                 throw new Exception('Diyetisyen bulunamadı.', 404);
             }
 
-            const newCategory = await NutritionCategory.create({
+            return await NutritionCategory.create({
                 ...categoryData,
                 dietitian_id: user_id,
             });
-
-            return newCategory;
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -297,14 +308,111 @@ class DietitianService {
                 throw new Exception('Diyetisyen bulunamadı.', 404);
             }
 
-            const newPlan = await NutritionPlan.create({
+            return await NutritionPlan.create({
                 ...planData,
                 dietitian_id: user_id,
             });
-
-            return newPlan;
         } catch (error) {
             throw new Exception(error.message, 400);
+        }
+    }
+
+    async generateQrCode(user_id) {
+        if (!user_id) {
+            const err = new Error('Diyetisyen ID gerekli.');
+            err.status = 400;
+            throw err;
+        }
+
+        const registerUrl = `${config.app_scheme}://register?dietitian_id=${user_id}`;
+
+        try {
+            return await QRCode.toDataURL(registerUrl, {
+                errorCorrectionLevel: 'M',
+                margin: 2,
+                width: 300
+            });
+        } catch (error) {
+            const err = new Error('QR kodu oluşturulamadı.');
+            err.status = 500;
+            throw err;
+        }
+    }
+
+    async getDietitianInfo(user_id) {
+        try {
+            if (!user_id) {
+                throw new Error("Yetkisiz Erişim.");
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+                attributes: {
+                    exclude: ["password", "createdAt", "updatedAt"]
+                }
+            });
+
+            if (!dietitian) {
+                throw new Error("Diyetisyen bulunamadı.");
+            }
+
+            return dietitian;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async globalSearchbar(user_id, query) {
+        try {
+            if (!user_id) {
+                throw new Error("Yetkisiz Erişim.");
+            }
+            // TODO: Yalnızca diyetisyen rolüne sahip kişiler için doğrulama yapacağız.
+            // TODO: Rol kontrolü gelecek.
+            const data = [
+                { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
+                { type: "page", name: "Randevularım", url: "/randevularim" },
+                { type: "page", name: "Ayarlar", url: "/ayarlar" },
+                { type: "page", name: "Profil", url: "/profil" },
+                { type: "page", name: "Beslenme", url: "/beslenme" },
+                { type: "page", name: "Egzersiz", url: "/egzersiz" },
+                { type: "page", name: "Finans", url: "/finans" },
+                { type: "page", name: "Tarif", url: "/tarif" },
+                { type: "page", name: "Egzersiz", url: "/egzersiz" },
+                { type: "page", name: "Mesaj", url: "/mesaj" }
+            ];
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: user_id },
+                include: [
+                    {
+                        model: Client,
+                        as: 'Clients',
+                    }
+                ]
+            });
+
+            if (!dietitian) {
+                throw new Error('Diyetisyen bulunamadı.');
+            }
+
+            dietitian.Clients.forEach(client => {
+                data.push({
+                    type: "danisan",
+                    name: `${client.name} ${client.surname}`,
+                    url: `/danisan/${client.id}`,
+                });
+            });
+
+            query = query ? query.toLowerCase() : "";
+
+            const filteredData = data.filter(item =>
+                item.name.toLowerCase().includes(query)
+            );
+
+            return filteredData;
+        } catch (error) {
+            throw new Error(error.message);
         }
     }
 

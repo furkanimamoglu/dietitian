@@ -60,7 +60,6 @@ class Security {
         }
     }
 
-
 }
 
 module.exports = new Security();

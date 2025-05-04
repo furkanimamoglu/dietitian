@@ -14,22 +14,51 @@ import {
     styled,
     alpha,
     Container,
-    Divider
+    Divider,
+    Paper,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
 } from '@mui/material';
+
+import FindInPageIcon from '@mui/icons-material/FindInPage';
+import EventIcon from '@mui/icons-material/Event';
+import SportsGymnasticsIcon from '@mui/icons-material/SportsGymnastics';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonIcon from "@mui/icons-material/Person";
 
 import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
 import HelpIcon from '@mui/icons-material/Help';
 import SearchIcon from '@mui/icons-material/Search';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import config from "../../config.js";
+
+const getIconByType = (type) => {
+    switch (type) {
+        case "page":
+            return <FindInPageIcon sx={{ color: "#4caf50" }} />;
+        case "randevu":
+            return <EventIcon sx={{ color: "#e8dd00" }} />;
+        case "exercise":
+            return <SportsGymnasticsIcon sx={{ color: "#3f51b5" }} />;
+        case "tarif":
+            return <AssignmentIcon sx={{ color: "#6c07d6" }} />;
+        case "danisan":
+            return <PersonIcon sx={{ color: "#ff6200" }} />;
+        default:
+            return null;
+    }
+};
 
 const settings = [
     { label: 'Profil', value: 'profil' },
     { label: 'Ayarlar', value: 'ayarlar' },
-    { label: 'Çıkış Yap', value: 'cikisyap' }
+    { label: 'Çıkış Yap', value: 'cikisyap' },
 ];
 
-// Styled Search Container
 const SearchContainer = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -44,7 +73,6 @@ const SearchContainer = styled('div')(({ theme }) => ({
     },
 }));
 
-// Styled Icon Wrapper
 const SearchIconWrapper = styled('div')(({ theme }) => ({
     padding: theme.spacing(0, 2),
     height: '100%',
@@ -55,7 +83,6 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
     justifyContent: 'center',
 }));
 
-// Styled Input
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
     color: 'inherit',
     width: '100%',
@@ -68,13 +95,16 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function Header() {
     const navigate = useNavigate();
+
     React.useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/login';
+            window.location.href = '/diyetisyen/login';
         }
     }, []);
 
     const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [searchResults, setSearchResults] = React.useState([]);
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -87,28 +117,63 @@ export default function Header() {
     const handleMenuItemClick = (value) => {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
-            navigate('/login');
+            localStorage.removeItem('role');
+            navigate('/diyetisyen/login');
         } else if (value === 'profil') {
-            navigate('/profil');
+            navigate('/diyetisyen/profil');
         } else if (value === 'ayarlar') {
-            navigate('/ayarlar');
+            navigate('/diyetisyen/ayarlar');
         } else {
-            navigate('/dashboard');
+            navigate('/diyetisyen/dashboard');
         }
         setAnchorElUser(null);
     };
 
+    const handleSearch = async (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.length > 2) {
+            try {
+                const response = await axios.get(config[config.environment].apiUrl+`/dietitian/globalSearchbar`, {
+                    headers: {
+                        Authorization: localStorage.getItem('token')
+                    },
+                    params: { search: query },
+                });
+
+                if (Array.isArray(response.data)) {
+                    setSearchResults(response.data);
+                } else {
+                    console.error('API yanıtı beklenen formatta değil:', response.data);
+                    setSearchResults([]);
+                }
+            } catch (error) {
+                console.error('Arama sırasında hata oluştu:', error);
+                setSearchResults([]);
+            }
+        } else {
+            setSearchResults([]);
+        }
+    };
+
+    const handleResultClick = (url) => {
+        navigate(url);
+        setSearchQuery('');
+        setSearchResults([]);
+    };
+
     return (
+
         <AppBar
             position="fixed"
             sx={{
                 backgroundColor: '#2e7d32',
-                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
             }}
         >
             <Container maxWidth={false} disableGutters>
                 <Toolbar>
-
                     {/* Sol bölüm: Logo / Marka Adı */}
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <SpaIcon sx={{ display: 'flex', ml: { xs: 2, md: 4 }, mr: 1 }} />
@@ -128,62 +193,107 @@ export default function Header() {
                         >
                             Diyet
                         </Typography>
-                        <Typography
-                            variant="h5"
-                            component="a"
-                            href="/dashboard"
-                            sx={{
-                                mr: 2,
-                                display: { xs: 'flex', md: 'none' },
-                                flexGrow: 1,
-                                fontFamily: 'monospace',
-                                fontWeight: 700,
-                                letterSpacing: '.3rem',
-                                color: 'inherit',
-                                textDecoration: 'none',
-                            }}
-                        >
-                            Diyet
-                        </Typography>
                     </Box>
 
-                    {/* Orta bölüm: Empty */}
-                    <Box sx={{ flexGrow: 1, ml: { xs: 1, md: 4 }, mr: { xs: 1, md: 4 } }}>
-
+                    {/* Orta bölüm: Arama Çubuğu */}
+                    <Box
+                        sx={{
+                            flexGrow: 1,
+                            ml: { xs: 1, md: 4 },
+                            mr: { xs: 1, md: 4 },
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                        }}
+                    >
+                        <SearchContainer
+                            sx={{
+                                position: 'relative',
+                            }}
+                        >
+                            <SearchIconWrapper>
+                                <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                                placeholder="Arama yap..."
+                                inputProps={{ 'aria-label': 'search' }}
+                                value={searchQuery}
+                                onChange={handleSearch}
+                            />
+                            {Array.isArray(searchResults) && searchResults.length > 0 && (
+                                <Paper
+                                    sx={{
+                                        position: "absolute",
+                                        top: "100%",
+                                        left: 0,
+                                        backgroundColor: "#f0f9f0",
+                                        zIndex: 1300,
+                                        boxShadow: "0px 8px 20px rgba(0,0,0,0.15)",
+                                        mt: 1,
+                                        width: "100%",
+                                        maxHeight: "300px",
+                                        overflowY: "auto",
+                                        borderRadius: "12px",
+                                        border: "1px solid #cce8cc",
+                                    }}
+                                >
+                                    <List>
+                                        {searchResults.map((result, index) => (
+                                            <ListItem
+                                                key={index}
+                                                disablePadding
+                                                onClick={() => handleResultClick(result.url)}
+                                                sx={{
+                                                    "&:hover": {
+                                                        backgroundColor: "#e6f7e6",
+                                                        boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
+                                                    },
+                                                    transition: "all 0.3s ease-in-out",
+                                                }}
+                                            >
+                                                <ListItemButton
+                                                    sx={{
+                                                        padding: "12px 16px",
+                                                        color: "#333",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "space-between",
+                                                    }}
+                                                >
+                                                    <ListItemText
+                                                        primary={result.name}
+                                                        sx={{
+                                                            fontSize: "14px",
+                                                            color: "#333",
+                                                            fontWeight: "500",
+                                                        }}
+                                                    />
+                                                    {/* Type'a göre ikon */}
+                                                    {getIconByType(result.type)}
+                                                </ListItemButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                </Paper>
+                            )}
+                        </SearchContainer>
                     </Box>
 
                     {/* Sağ bölüm: Bildirimler, Yardım, Profil */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mr: { xs: 2, md: 4 } }}>
-                        {/* Arama Çubuğu */}
-                        <Box sx={{ flexGrow: 1, ml: { xs: 1, md: 4 }, mr: { xs: 1, md: 4 } }}>
-                            <SearchContainer>
-                                <SearchIconWrapper>
-                                    <SearchIcon />
-                                </SearchIconWrapper>
-                                <StyledInputBase
-                                    placeholder="Arama yap..."
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                            </SearchContainer>
-                        </Box>
-
-                        {/* Mesajlar */}
                         <Tooltip title="Mesajlar" arrow>
-                            <IconButton color="inherit">
+                            <IconButton onClick={() => navigate('/mesaj')} color="inherit">
                                 <Badge badgeContent={1} color="warning">
                                     <MailIcon sx={{ color: 'white' }} />
                                 </Badge>
                             </IconButton>
                         </Tooltip>
 
-                        {/* Yardım */}
                         <Tooltip title="Yardım" arrow>
                             <IconButton color="inherit">
                                 <HelpIcon sx={{ color: 'white' }} />
                             </IconButton>
                         </Tooltip>
 
-                        {/* Profil Menüsü */}
                         <Box sx={{ flexGrow: 0 }}>
                             <Tooltip title="Profilim" arrow>
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -191,7 +301,7 @@ export default function Header() {
                                 </IconButton>
                             </Tooltip>
                             <Menu
-                                sx={{ mt: '45px' }}
+                                sx={{ mt: '3rem' }}
                                 id="menu-appbar"
                                 anchorEl={anchorElUser}
                                 anchorOrigin={{
@@ -214,7 +324,7 @@ export default function Header() {
                                     <Divider />
                                     <MenuItem onClick={handleCloseUserMenu}>
                                         <Typography variant="body2" color="text.secondary">
-                                            Sürüm: 1.0.0
+                                            Sürüm: 0.0.1
                                         </Typography>
                                     </MenuItem>
                                 </Box>
