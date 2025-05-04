@@ -324,7 +324,7 @@ class DietitianService {
             throw err;
         }
 
-        const registerUrl = `${config.base_url}/register?dietitian_id=${user_id}`;
+        const registerUrl = `${config.app_scheme}://register?dietitian_id=${user_id}`;
 
         try {
             return await QRCode.toDataURL(registerUrl, {
