@@ -63,8 +63,7 @@ const linking = {
 
 const App = () => {
   const colorScheme = useColorScheme();
-  const paperTheme =
-    colorScheme === 'dark' ? customDarkTheme : customLightTheme;
+  const paperTheme = colorScheme === 'dark' ? customDarkTheme : customLightTheme;
   const navTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
   const navigationRef = useNavigationContainerRef();

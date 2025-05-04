@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
  type Props = NativeStackScreenProps<RootStackParamList, 'AnaSayfa'>;
 
-const HomeScreen = ({ navigation }: Props) => {
+const AnaSayfa = ({ navigation }: Props) => {
   const healthData = {
     weight: '70 kg',
     muscleRate: '%40',
@@ -158,4 +158,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default HomeScreen;
+export default AnaSayfa;
