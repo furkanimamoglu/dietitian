@@ -106,7 +106,7 @@ const LoginScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFEDE1',
+    backgroundColor: '#fff9f2',
     justifyContent: 'center',
     padding: 24,
   },
