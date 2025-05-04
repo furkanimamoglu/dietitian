@@ -43,7 +43,7 @@ const AnaSayfa = ({ navigation }: Props) => {
                 <Text style={styles.healthStatLabel}>Kas Oranı</Text>
               </View>
               <View style={styles.healthStatItem}>
-                <Text style={styles.healthStatValue}><Icon name="scale" size={16} color="#f57c00" /> {healthData.fatRate}</Text>
+                <Text style={styles.healthStatValue}><Icon name="beaker" size={16} color="#f57c00" /> {healthData.fatRate}</Text>
                 <Text style={styles.healthStatLabel}>Yağ Oranı</Text>
               </View>
               <View style={styles.healthStatItem}>
