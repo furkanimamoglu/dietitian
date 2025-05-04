@@ -22,8 +22,8 @@ import BottomNavbar from '../Components/BottomNavbar';
 
 const RandevuScreen = ({ navigation }) => {
   const [appointments, setAppointments] = useState([
-    { id: '1', date: '2025-05-10', time: '10:00', description: 'Periyodik kontrol', confirmed: true, patientName: 'Ahmet Yılmaz' },
-    { id: '2', date: '2025-05-15', time: '14:30', description: 'Protein ölçümü', confirmed: false, patientName: 'Ayşe Demir' },
+    { id: '1', date: '2025-05-10', time: '10:00', description: 'Periyodik kontrol', confirmed: true },
+    { id: '2', date: '2025-05-15', time: '14:30', description: 'Protein ölçümü', confirmed: false },
   ]);
 
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -31,7 +31,6 @@ const RandevuScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState('');
   const [description, setDescription] = useState('');
-  const [patientName, setPatientName] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
   const formatDate = useCallback(date => {
@@ -64,7 +63,6 @@ const RandevuScreen = ({ navigation }) => {
     setSelectedDate(new Date());
     setSelectedTime('');
     setDescription('');
-    setPatientName('');
   };
 
   const closeDialog = () => {
@@ -73,13 +71,12 @@ const RandevuScreen = ({ navigation }) => {
   };
 
   const addAppointment = () => {
-    if (description.trim() && selectedTime && patientName.trim()) {
+    if (description.trim() && selectedTime) {
       const newAppointment = {
         id: Date.now().toString(),
         date: formatDate(selectedDate),
         time: selectedTime,
         description,
-        patientName,
         confirmed: false
       };
 
@@ -143,7 +140,6 @@ const RandevuScreen = ({ navigation }) => {
             <Divider style={styles.divider} />
 
             <View style={styles.detailsContainer}>
-              <Text style={styles.patientName}>{item.patientName}</Text>
               <Text style={styles.description}>{item.description}</Text>
             </View>
 
@@ -251,15 +247,6 @@ const RandevuScreen = ({ navigation }) => {
           <Dialog visible={dialogVisible} onDismiss={closeDialog} style={styles.dialog}>
             <Dialog.Title style={styles.dialogTitle}>Yeni Randevu Oluştur</Dialog.Title>
             <Dialog.Content>
-              {/* Hasta Adı */}
-              <TextInput
-                label="Hasta Adı"
-                value={patientName}
-                onChangeText={setPatientName}
-                mode="outlined"
-                style={styles.input}
-              />
-
               {/* Tarih Seçici */}
               <Button
                 mode="outlined"
@@ -324,7 +311,7 @@ const RandevuScreen = ({ navigation }) => {
               <Button
                 mode="contained"
                 onPress={addAppointment}
-                disabled={!selectedTime || !description.trim() || !patientName.trim()}
+                disabled={!selectedTime || !description.trim()}
               >
                 Randevu Oluştur
               </Button>
@@ -412,11 +399,6 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     marginBottom: 8
-  },
-  patientName: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#333'
   },
   description: {
     fontSize: 14,
