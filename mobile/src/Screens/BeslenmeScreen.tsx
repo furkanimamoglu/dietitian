@@ -27,7 +27,6 @@ import {
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 
-// Yemek türlerine göre ikonları belirleme
 const mealIcons = {
   'Kahvaltı': 'coffee',
   'Öğle': 'food-variant',
