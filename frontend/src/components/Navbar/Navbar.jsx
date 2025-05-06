@@ -17,7 +17,7 @@ import EventNoteIcon from "@mui/icons-material/EventNote";
 import PeopleIcon from "@mui/icons-material/People";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import "./Navbar.css"; // CSS dosyası ekleyelim
+import "./Navbar.css";
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -33,22 +33,6 @@ export default function Navbar() {
         { name: "EGZERSİZLER", route: "/egzersiz", icon: <FitnessCenterIcon /> },
         { name: "FİNANS", route: "/finans", icon: <AccountBalanceWalletIcon /> },
     ];
-
-    // Sayfa kaydırıldığında navbar'ın görünümünü değiştir
-    useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 50) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
-            }
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, []);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -85,8 +69,7 @@ export default function Navbar() {
                 sx={{
                     display: { xs: "flex", md: "none" },
                     backgroundColor: scrolled ? "rgba(238,255,238,0.95)" : "rgb(255,244,238)",
-                    boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "none",
-                    transition: "all 0.3s ease",
+                    boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "none"
                 }}
             >
                 <Toolbar>

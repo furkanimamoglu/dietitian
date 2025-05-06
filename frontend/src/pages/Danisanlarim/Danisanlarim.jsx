@@ -10,7 +10,7 @@ import {
     DialogTitle,
     Grid2,
     TextField,
-    Typography,
+    Typography
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
