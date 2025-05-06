@@ -81,12 +81,6 @@ export default function Mesaj() {
                 text: "İyiyim teşekkürler, bu hafta diyet programıma uydum.",
                 sender: "client",
                 timestamp: "09:32"
-            },
-            {
-                id: 3,
-                text: "Harika! Su tüketiminiz nasıl?",
-                sender: "dietitian",
-                timestamp: "09:33"
             }
         ]);
 
