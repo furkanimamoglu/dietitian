@@ -24,8 +24,7 @@ class ClientController {
 
     async register(req, res) {
         try {
-            const dietitian_id = req.query.dietitian_id || req.body.dietitian_id;
-            const {phoneNumber, password} = req.body;
+            const {phoneNumber, password, name, dietitian_id} = req.body;
             const ipAddress = req.ip;
 
             if(!dietitian_id){
@@ -42,7 +41,7 @@ class ClientController {
                 });
             }
 
-            const result = await ClientService.register(dietitian_id, phoneNumber, password, ipAddress);
+            const result = await ClientService.register(dietitian_id, name, phoneNumber, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,

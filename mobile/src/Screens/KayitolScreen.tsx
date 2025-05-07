@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { TextInput, Button, Text, Divider, ActivityIndicator } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import config from '../../config';
 
@@ -16,7 +17,6 @@ const KayitolScreen: React.FC = () => {
   const dietitianId = route.params?.dietitian_id;
 
   const [name, setName] = useState('');
-  const [surname, setSurname] = useState('');
   const [dietitianCode, setDietitianCode] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +34,6 @@ const KayitolScreen: React.FC = () => {
       setDietitianName('');
       return;
     }
-
     setLoading(true);
     try {
       const response = await fetch(
@@ -49,37 +48,35 @@ const KayitolScreen: React.FC = () => {
     }
   };
 
-
   const handleRegister = async () => {
-    if (!dietitianId) {
-      Alert.alert('Hata', 'Diyetisyen bilgisi bulunamadı.');
+    if (!name || !phone || !password) {
+      console.log('Uyarı', 'Lütfen tüm alanları doldurun.');
       return;
     }
-    if (!name || !surname || !phone || !password) {
-      Alert.alert('Uyarı', 'Lütfen tüm alanları doldurun.');
-      return;
-    }
-
     setLoading(true);
     try {
       const response = await fetch(
-        `${config.apiUrl}/register?dietitian_id=${dietitianId}`,
+        `${config.apiUrl}/client/register`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({
+            phoneNumber: parseInt(phone),
+            password: password,
+            name: name,
+            dietitian_id: parseInt(dietitianCode),
+          })
         }
       );
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Başarılı', 'Kayıt başarılı. Giriş yapabilirsiniz.', [
-          { text: 'Tamam', onPress: () => navigation.navigate('Login') }
-        ]);
+        await AsyncStorage.setItem('token', `Bearer ${data.token}`);
+        navigation.navigate('AnaSayfa')
       } else {
-        Alert.alert('Hata', data.message || 'Kayıt başarısız.');
+        console.log('Hata', data.message || 'Kayıt başarısız.');
       }
     } catch (error) {
-      Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
+      console.log('Hata', 'Sunucuya bağlanılamadı.', error);
     } finally {
       setLoading(false);
     }
@@ -89,18 +86,10 @@ const KayitolScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Kayıt Ol</Text>
       <TextInput
-        label="İsim"
+        label="İsim Soyisim"
         mode="outlined"
         value={name}
         onChangeText={setName}
-        autoCapitalize="true"
-        style={styles.input}
-      />
-      <TextInput
-        label="Soyisim"
-        mode="outlined"
-        value={surname}
-        onChangeText={setSurname}
         autoCapitalize="true"
         style={styles.input}
       />

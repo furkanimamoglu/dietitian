@@ -38,18 +38,19 @@ class ClientService {
         }
     }
 
-    async register(dietitian_id, phoneNumber, password, ipAddress) {
+    async register(dietitian_id, name, phoneNumber, password, ipAddress) {
         try {
             if (!dietitian_id) {
-                throw new Exception('Bağlı bir diyetisyen bulunamadı.', 400, true);
+                throw new Exception('Diyetisyen bulunamadı.', 400, true);
             }
 
-            if (!phoneNumber || !password) {
+            if (!phoneNumber || !name || !password) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
             const client = await Client.create({
                 dietitian_id: dietitian_id,
+                name: name,
                 phoneNumber: phoneNumber,
                 password: password,
                 role: CLIENT,

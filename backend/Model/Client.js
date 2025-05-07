@@ -72,7 +72,6 @@ const Client = sequelize.define('Client', {
         },
         gender: {
             type: DataTypes.STRING,
-            allowNull: false,
             validate: {
                 isIn: {
                     args: [["Erkek", "Kadın"]],
