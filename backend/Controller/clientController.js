@@ -4,9 +4,9 @@ class ClientController {
 
     async login(req, res) {
         try {
-            const {email, password} = req.body;
+            const {phoneNumber, password} = req.body;
 
-            const result = await ClientService.login(email, password);
+            const result = await ClientService.login(phoneNumber, password);
 
             res.status(200).json(
                 {
@@ -25,7 +25,7 @@ class ClientController {
     async register(req, res) {
         try {
             const dietitian_id = req.query.dietitian_id || req.body.dietitian_id;
-            const {email, password} = req.body;
+            const {phoneNumber, password} = req.body;
             const ipAddress = req.ip;
 
             if(!dietitian_id){
@@ -35,14 +35,14 @@ class ClientController {
                 });
             }
 
-            if (!email || !password || !ipAddress) {
+            if (!phoneNumber || !password || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await ClientService.register(dietitian_id, email, password, ipAddress);
+            const result = await ClientService.register(dietitian_id, phoneNumber, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,

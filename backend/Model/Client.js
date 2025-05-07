@@ -13,6 +13,35 @@ const Client = sequelize.define('Client', {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        phoneNumber: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            unique: {
+                msg: 'Bu telefon numarası zaten kullanılıyor.'
+            },
+            validate: {
+                min: 5000000000,
+                max: 5999999999
+            }
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                len: {
+                    args: [4, 21],
+                    msg: 'Şifre 4 ile 21 karakter arasında olmak zorundadır.'
+                }
+            }
+        },
+        token: {
+            type: DataTypes.STRING
+        },
+        role: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: "CLIENT"
+        },
         name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -33,41 +62,24 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
-        token: {
-            type: DataTypes.STRING
-        },
-        role: {
-            type: DataTypes.STRING,
-            defaultValue: "CLIENT"
-        },
         email: {
             type: DataTypes.STRING,
             allowNull: true,
-            unique: {
-                msg: 'Bu e-posta zaten kullanılıyor.'
-            },
             validate: {
                 isEmail: {
                     msg: 'E-posta adresi geçerli olmalıdır.'
                 }
             }
         },
-        password: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                len: {
-                    args: [4, 21],
-                    msg: 'Şifre 4 ile 21 karakter arasında olmak zorundadır.'
-                }
-            }
-        },
-        phoneNumber: DataTypes.STRING,
         status: {
-            type: DataTypes.STRING,
-            defaultValue: "aktif",
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
         },
-        language: DataTypes.STRING,
+        language: {
+            type: DataTypes.STRING,
+            defaultValue: "TR",
+        },
         gender: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -97,8 +109,8 @@ const Client = sequelize.define('Client', {
             allowNull: true,
             validate: {
                 min: {
-                    args: 10,
-                    msg: 'Kilo 10 kg\'dan küçük olamaz.'
+                    args: 1,
+                    msg: 'Kilo 1 kg\'dan küçük olamaz.'
                 },
                 max: {
                     args: 500,

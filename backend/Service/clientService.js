@@ -5,11 +5,11 @@ const config = require("../config.json");
 const {CLIENT} = require("../Enum/Role");
 
 class ClientService {
-    async login(email, password) {
+    async login(phoneNumber, password) {
         try {
             const clientInfo = await Client.findOne({
                 where: {
-                    email: email,
+                    phoneNumber: phoneNumber,
                     password: password
                 }
             });
@@ -38,19 +38,19 @@ class ClientService {
         }
     }
 
-    async register(dietitian_id, email, password, ipAddress) {
+    async register(dietitian_id, phoneNumber, password, ipAddress) {
         try {
             if (!dietitian_id) {
                 throw new Exception('Bağlı bir diyetisyen bulunamadı.', 400, true);
             }
 
-            if (!email || !password) {
+            if (!phoneNumber || !password) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
             const client = await Client.create({
                 dietitian_id: dietitian_id,
-                email: email,
+                phoneNumber: phoneNumber,
                 password: password,
                 role: CLIENT,
                 ipAddress: ipAddress

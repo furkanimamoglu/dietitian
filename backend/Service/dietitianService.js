@@ -99,7 +99,7 @@ class DietitianService {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
-            if (!email || !password || !phoneNumber || !height || !weight || !gender) {
+            if (!phoneNumber || !password || !name || !surname) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 

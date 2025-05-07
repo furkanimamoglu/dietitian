@@ -12,16 +12,21 @@ import { RootStackParamList } from '../App';
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({ navigation }: Props) => {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [secure, setSecure] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (text: string) => {
+      const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
+      setPhone(digits);
+    };
 
   const handleLogin = async () => {
     try {
       setLoading(true);
       const response = await axios.post(`${config.apiUrl}/client/login`, {
-        email: username,
+        phoneNumber: phone,
         password: password,
       });
       const token = response.data?.token;
@@ -49,14 +54,16 @@ const LoginScreen = ({ navigation }: Props) => {
       <Card style={styles.formCard}>
         <Card.Content>
           <TextInput
-            label="E-posta"
-            value={username}
-            onChangeText={setUsername}
-            mode="outlined"
-            style={styles.input}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
+                label="Telefon"
+                mode="outlined"
+                value={phone}
+                onChangeText={handleChange}
+                keyboardType="phone-pad"
+                maxLength={10}
+                placeholder="5xxxxxxxxx"
+                left={<TextInput.Affix text="+90" />}
+                style={styles.input}
+              />
 
           <TextInput
             label="Şifre"
@@ -73,12 +80,14 @@ const LoginScreen = ({ navigation }: Props) => {
             style={styles.input}
           />
 
-          <TouchableOpacity
-            onPress={() => console.log('Şifre sıfırlama')}
-            style={styles.forgotContainer}
-          >
-            <Text style={styles.forgotText}>Şifremi unuttum?</Text>
-          </TouchableOpacity>
+          {/*
+            <TouchableOpacity
+              onPress={() => console.log('Şifre sıfırlama')}
+              style={styles.forgotContainer}
+            >
+              <Text style={styles.forgotText}>Şifremi unuttum?</Text>
+            </TouchableOpacity>
+          */}
 
           <Button
             mode="contained"
@@ -90,6 +99,7 @@ const LoginScreen = ({ navigation }: Props) => {
             Giriş Yap
           </Button>
 
+          {/*
           <Button
             mode="text"
             onPress={handleDietitianLogin}
@@ -97,6 +107,7 @@ const LoginScreen = ({ navigation }: Props) => {
           >
             Diyetisyen Girişi
           </Button>
+          */}
         </Card.Content>
       </Card>
     </View>

@@ -68,7 +68,7 @@ class DietitianController {
                 });
             }
 
-            if (!email || !password || !phoneNumber) {
+            if (!phoneNumber || !password || !name || !surname) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
