@@ -362,6 +362,26 @@ class DietitianService {
         }
     }
 
+    async getDietitianNameById(dietitian_id) {
+        try {
+            if (!dietitian_id) {
+                throw new Error("Diyetisyen bulunamadı.");
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: dietitian_id }
+            });
+
+            if (!dietitian) {
+                throw new Error("Diyetisyen bulunamadı.");
+            }
+
+            return {dietitian_name: dietitian.name};
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
     async globalSearchbar(user_id, query) {
         try {
             if (!user_id) {

@@ -47,18 +47,8 @@ const Client = sequelize.define('Client', {
             allowNull: false,
             validate: {
                 len: {
-                    args: [2, 50],
-                    msg: 'İsim en az 2, en fazla 50 karakter olmalıdır.'
-                }
-            }
-        },
-        surname: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                len: {
-                    args: [2, 50],
-                    msg: 'Soyisim en az 2, en fazla 50 karakter olmalıdır.'
+                    args: [2, 80],
+                    msg: 'İsim Soyisim en az 2, en fazla 80 karakter olmalıdır.'
                 }
             }
         },

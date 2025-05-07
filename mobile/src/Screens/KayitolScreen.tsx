@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
+import { TextInput, Button, Text, Divider, ActivityIndicator } from 'react-native-paper';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import config from '../../config';
 
-// Navigation params tanımı
 type RootStackParamList = {
   Kayitol: { dietitian_id: string };
 };
@@ -18,14 +17,38 @@ const KayitolScreen: React.FC = () => {
 
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
+  const [dietitianCode, setDietitianCode] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+
+  const [dietitianName, setDietitianName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (text: string) => {
     const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
     setPhone(digits);
   };
+
+  const handleDietitianFetch = async (id: string) => {
+    if (!id || id.length < 1) {
+      setDietitianName('');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${config.apiUrl}/dietitian/getDietitianNameById?dietitian_id=${id}`
+      );
+      const data = await response.json();
+      setDietitianName(typeof data === 'string' ? data : data.dietitian_name);
+    } catch (error) {
+      setDietitianName('Hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const handleRegister = async () => {
     if (!dietitianId) {
@@ -40,7 +63,7 @@ const KayitolScreen: React.FC = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${config.base_url}/register?dietitian_id=${dietitianId}`,
+        `${config.apiUrl}/register?dietitian_id=${dietitianId}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,17 +89,6 @@ const KayitolScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Kayıt Ol</Text>
       <TextInput
-        label="Telefon"
-        mode="outlined"
-        value={phone}
-        onChangeText={handleChange}
-        keyboardType="phone-pad"
-        maxLength={10}
-        placeholder="5xxxxxxxxx"
-        left={<TextInput.Affix text="+90" />}
-        style={styles.input}
-      />
-      <TextInput
         label="İsim"
         mode="outlined"
         value={name}
@@ -92,6 +104,18 @@ const KayitolScreen: React.FC = () => {
         autoCapitalize="true"
         style={styles.input}
       />
+      <Divider style={styles.divider} />
+      <TextInput
+        label="Telefon"
+        mode="outlined"
+        value={phone}
+        onChangeText={handleChange}
+        keyboardType="phone-pad"
+        maxLength={10}
+        placeholder="5xxxxxxxxx"
+        left={<TextInput.Affix text="+90" />}
+        style={styles.input}
+      />
       <TextInput
         label="Şifre"
         mode="outlined"
@@ -100,7 +124,20 @@ const KayitolScreen: React.FC = () => {
         onChangeText={setPassword}
         style={styles.input}
       />
-
+      <Divider style={styles.divider} />
+      <TextInput
+        label="Diyetisyen Referans Kodu"
+        mode="outlined"
+        value={dietitianId}
+        onChangeText={(text) => {
+          setDietitianCode(text);
+          handleDietitianFetch(text);
+        }}
+        keyboardType="phone-pad"
+        style={styles.input}
+      />
+      <Text style={styles.nameText}>Diyetisyen: {dietitianName}</Text>
+      <Divider style={styles.divider} />
       {loading ? (
         <ActivityIndicator animating size="large" style={styles.loader} />
       ) : (
@@ -132,6 +169,9 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 16
+  },
+  divider: {
+    marginVertical: 12
   }
 });
 

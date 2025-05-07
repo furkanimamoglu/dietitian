@@ -16,7 +16,8 @@ router.get('/getAllMyClients', dietitianController.getAllMyClients);
 
 router.get('/globalSearchbar', dietitianController.globalSearchbar);
 
-router.get('/getDietitianQR', dietitianController.createMyQR)
+router.get('/getDietitianQR', dietitianController.createMyQR);
+router.get('/getDietitianNameById', dietitianController.getDietitianNameById);
 
 router.get('/getAllMyNutritionCategories', dietitianController.getAllMyNutritionCategories);
 router.post('/addNutritionCategories', dietitianController.addNutritionCategories);

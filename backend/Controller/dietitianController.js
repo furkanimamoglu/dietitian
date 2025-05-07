@@ -312,6 +312,18 @@ class DietitianController {
         }
     }
 
+    async getDietitianNameById(req, res) {
+        try {
+            const { dietitian_id } = req.query;
+            const result = await DietitianService.getDietitianNameById(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
 
 }
 
