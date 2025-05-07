@@ -54,16 +54,16 @@ const LoginScreen = ({ navigation }: Props) => {
       <Card style={styles.formCard}>
         <Card.Content>
           <TextInput
-                label="Telefon"
-                mode="outlined"
-                value={phone}
-                onChangeText={handleChange}
-                keyboardType="phone-pad"
-                maxLength={10}
-                placeholder="5xxxxxxxxx"
-                left={<TextInput.Affix text="+90" />}
-                style={styles.input}
-              />
+            label="Telefon"
+            mode="outlined"
+            value={phone}
+            onChangeText={handleChange}
+            keyboardType="phone-pad"
+            maxLength={10}
+            placeholder="5xxxxxxxxx"
+            left={<TextInput.Affix text="+90" />}
+            style={styles.input}
+          />
 
           <TextInput
             label="Şifre"

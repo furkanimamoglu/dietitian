@@ -17,16 +17,22 @@ const KayitolScreen: React.FC = () => {
   const dietitianId = route.params?.dietitian_id;
 
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [surname, setSurname] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (text: string) => {
+    const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
+    setPhone(digits);
+  };
 
   const handleRegister = async () => {
     if (!dietitianId) {
       Alert.alert('Hata', 'Diyetisyen bilgisi bulunamadı.');
       return;
     }
-    if (!name || !email || !password) {
+    if (!name || !surname || !phone || !password) {
       Alert.alert('Uyarı', 'Lütfen tüm alanları doldurun.');
       return;
     }
@@ -43,8 +49,6 @@ const KayitolScreen: React.FC = () => {
       );
       const data = await response.json();
       if (response.ok) {
-        // Kayıt başarılı, token alındıysa kaydet veya yönlendir
-        // Örneğin giriş ekranına dön
         Alert.alert('Başarılı', 'Kayıt başarılı. Giriş yapabilirsiniz.', [
           { text: 'Tamam', onPress: () => navigation.navigate('Login') }
         ]);
@@ -62,19 +66,30 @@ const KayitolScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Kayıt Ol</Text>
       <TextInput
+        label="Telefon"
+        mode="outlined"
+        value={phone}
+        onChangeText={handleChange}
+        keyboardType="phone-pad"
+        maxLength={10}
+        placeholder="5xxxxxxxxx"
+        left={<TextInput.Affix text="+90" />}
+        style={styles.input}
+      />
+      <TextInput
         label="İsim"
         mode="outlined"
         value={name}
         onChangeText={setName}
+        autoCapitalize="true"
         style={styles.input}
       />
       <TextInput
-        label="Email"
+        label="Soyisim"
         mode="outlined"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
+        value={surname}
+        onChangeText={setSurname}
+        autoCapitalize="true"
         style={styles.input}
       />
       <TextInput

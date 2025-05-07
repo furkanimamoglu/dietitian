@@ -90,7 +90,7 @@ const App = () => {
         theme={navTheme}
         linking={linking}
       >
-        <Stack.Navigator initialRouteName="Onboarding">
+        <Stack.Navigator initialRouteName="Kayitol">
           <Stack.Screen
             name="Onboarding"
             component={OnboardingScreen}
