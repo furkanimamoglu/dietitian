@@ -48,7 +48,6 @@ const BottomNav = ({ navigation }: Props) => {
     if (!newMeal || !newPortion || !selectedMealType) return;
     setIsSubmitting(true);
     try {
-      // API isteği örneği
       await fetch('https://your-api-endpoint.com/meals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,8 +62,7 @@ const BottomNav = ({ navigation }: Props) => {
       setNewPortion('');
       setSelectedMealType('Kahvaltı');
     } catch (e) {
-      // Hata yönetimi
-      Alert.alert('Hata', 'Bir hata oluştu.');
+      console.log('Hata:', 'Hızlı Öğün Ekle butonunda bir hata oluştu.');
     } finally {
       setIsSubmitting(false);
     }
@@ -74,7 +72,6 @@ const BottomNav = ({ navigation }: Props) => {
     if (!selectedExerciseType || !exerciseDuration) return;
     setIsExerciseSubmitting(true);
     try {
-      // API isteği örneği
       await fetch('https://your-api-endpoint.com/exercises', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -87,7 +84,7 @@ const BottomNav = ({ navigation }: Props) => {
       setSelectedExerciseType('Koşu');
       setExerciseDuration('');
     } catch (e) {
-      Alert.alert('Hata', 'Bir hata oluştu.');
+      console.log('Hata:', 'Hızlı Egzersiz Ekle butonunda bir hata oluştu.');
     } finally {
       setIsExerciseSubmitting(false);
     }
