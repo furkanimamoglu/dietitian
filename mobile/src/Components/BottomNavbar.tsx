@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Text, StyleSheet, Modal } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useRoute } from '@react-navigation/native';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
@@ -12,9 +13,14 @@ const BottomNav = ({ navigation }: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMealPopup, setShowMealPopup] = useState(false);
   const [showExercisePopup, setShowExercisePopup] = useState(false);
+  const route = useRoute();
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const isActive = (routeName: string) => {
+    return route.name === routeName;
   };
 
   return (
@@ -34,13 +40,13 @@ const BottomNav = ({ navigation }: Props) => {
       )}
 
       <View style={styles.bottomNavbar}>
-        <TouchableOpacity onPress={() => navigation.replace('Egzersiz')} style={styles.navItem}>
-          <Icon name="dumbbell" size={24} color="#ffffff" />
-          <Text style={styles.label}>Egzersiz</Text>
+        <TouchableOpacity onPress={() => navigation.replace('Egzersiz')} style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
+          <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'} />
+          <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.replace('Rapor')} style={styles.navItem}>
-          <Icon name="chart-line" size={24} color="#ffffff" />
-          <Text style={styles.label}>Raporlar</Text>
+        <TouchableOpacity onPress={() => navigation.replace('Rapor')} style={[styles.navItem, isActive('Rapor') && styles.activeNavItem]}>
+          <Icon name="chart-line" size={24} color={isActive('Rapor') ? '#ffffff' : '#ffffff80'} />
+          <Text style={[styles.label, isActive('Rapor') && styles.activeLabel]}>Raporlar</Text>
         </TouchableOpacity>
 
         {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
@@ -48,13 +54,13 @@ const BottomNav = ({ navigation }: Props) => {
           <Text style={styles.plusText}>+</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.replace('Beslenme')} style={styles.navItem}>
-          <Icon name="food" size={24} color="#ffffff" />
-          <Text style={styles.label}>Beslenme</Text>
+        <TouchableOpacity onPress={() => navigation.replace('Beslenme')} style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
+          <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'} />
+          <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.replace('AnaSayfa')} style={styles.navItem}>
-          <Icon name="home" size={24} color="#ffffff" />
-          <Text style={styles.label}>Ana Sayfa</Text>
+        <TouchableOpacity onPress={() => navigation.replace('AnaSayfa')} style={[styles.navItem, isActive('AnaSayfa') && styles.activeNavItem]}>
+          <Icon name="home" size={24} color={isActive('AnaSayfa') ? '#ffffff' : '#ffffff80'} />
+          <Text style={[styles.label, isActive('AnaSayfa') && styles.activeLabel]}>Ana Sayfa</Text>
         </TouchableOpacity>
       </View>
 
@@ -190,6 +196,13 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  activeNavItem: {
+    opacity: 1,
+  },
+  activeLabel: {
+    color: '#ffffff',
     fontWeight: 'bold',
   },
 });

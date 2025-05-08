@@ -10,6 +10,7 @@ const DietitianOption = require('./DietitianOption');
 const NutritionPlan = require('./NutritionPlan');
 const NutritionCategory = require('./NutritionCategory');
 const Invoice = require('./Invoice');
+const Notification = require('./Notification');
 
 // 1. Dietitian ve Client
 Dietitian.hasMany(Client, {
@@ -133,4 +134,5 @@ module.exports = {
     NutritionPlan,
     NutritionCategory,
     Invoice,
+    Notification
 };
