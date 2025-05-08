@@ -1,70 +1,220 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import './Beslenme.css';
 import Default from "../../Components/Layouts/Default.jsx";
-import {
-    Box,
-    Button,
-    Card,
-    CardActionArea,
-    CardContent,
-    CardMedia,
-    Checkbox,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Grid2,
-    IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Paper,
-    TextField,
-    Tooltip,
-    Typography
-} from "@mui/material";
+import axios from "axios";
+import config from "../../config.js";
 
-import { Add } from "@mui/icons-material";
+// Icons
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrintIcon from '@mui/icons-material/Print';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import Autocomplete from '@mui/material/Autocomplete';
-import axios from "axios";
-import config from "../../config.js";
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import EventNoteIcon from '@mui/icons-material/EventNote';
 
 const initialBeslenmeData = [
-    { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png" },
-    { id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png" },
-    { id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png" },
-    { id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png" },
-    {
-        id: 5,
-        title: "Sağlıklı Atıştırma",
-        description: "x2 ceviz, 1x hurma, 50 gr bitter çikolata",
-        image: "/placeholder.png"
-    },
-    { id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png" },
+    { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png", categoryId: 1 },
+    { id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png", categoryId: 2 },
+    { id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png", categoryId: 3 },
+    { id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png", categoryId: 4 },
+    { id: 5, title: "Sağlıklı Atıştırma", description: "x2 ceviz, 1x hurma, 50 gr bitter çikolata", image: "/placeholder.png", categoryId: 5 },
+    { id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png", categoryId: 1 },
 ];
 
-const groupByThree = (data) => {
-    const groups = [];
-    for (let i = 0; i < data.length; i += 3) {
-        groups.push(data.slice(i, i + 3));
-    }
-    return groups;
+// Days and meals constants
+const DAYS_OF_WEEK = [
+    "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
+];
+
+const MEALS = [
+    "Kahvaltı", "Ara Öğün 1", "Öğle Yemeği", "Ara Öğün 2", "Akşam Yemeği", "Ara Öğün 3"
+];
+
+// Category Item Component
+const CategoryItem = ({ category, isChecked, onCheck, onDelete }) => {
+    return (
+        <div 
+            className={`category-item ${isChecked ? 'checked' : ''}`}
+            onClick={onCheck}
+        >
+            <div className="category-checkbox">
+                <input 
+                    type="checkbox" 
+                    checked={isChecked}
+                    onChange={() => {}} // Controlled component
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </div>
+            <div className="category-title">{category.title}</div>
+            <button 
+                className="category-delete-btn"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(category.id);
+                }}
+            >
+                <DeleteIcon />
+            </button>
+        </div>
+    );
+};
+
+// Nutrition Card Component
+const NutritionCard = ({ item, onImageClick, onAddToUser, onPrint, onEdit, onDelete, onPlanMeals }) => {
+    return (
+        <div className="nutrition-card">
+            <div className="card-image-container" onClick={() => onImageClick(item)}>
+                <img 
+                    src={item.image || "/placeholder.png"} 
+                    alt={item.title} 
+                    className="card-image"
+                />
+            </div>
+            <div className="card-content">
+                <h3 className="card-title">{item.title}</h3>
+                <p className="card-description">{item.description}</p>
+                
+                <div className="card-actions">
+                    <button 
+                        className="action-button plan-meals-btn" 
+                        title="Haftalık Plan"
+                        onClick={() => onPlanMeals(item)}
+                    >
+                        <EventNoteIcon />
+                    </button>
+                    <button 
+                        className="action-button add-user-btn" 
+                        title="Danışana Ekle"
+                        onClick={() => onAddToUser(item)}
+                    >
+                        <PersonAddIcon />
+                    </button>
+                    <button 
+                        className="action-button print-btn" 
+                        title="Yazdır"
+                        onClick={() => onPrint(item)}
+                    >
+                        <PrintIcon />
+                    </button>
+                    <button 
+                        className="action-button edit-btn" 
+                        title="Düzenle"
+                        onClick={() => onEdit(item)}
+                    >
+                        <EditIcon />
+                    </button>
+                    <button 
+                        className="action-button delete-btn" 
+                        title="Sil"
+                        onClick={() => onDelete(item)}
+                    >
+                        <DeleteIcon />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Modal Component
+const Modal = ({ isOpen, title, onClose, children, fullWidth = false }) => {
+    if (!isOpen) return null;
+    
+    return (
+        <div className="modal-overlay">
+            <div className={`modal-container ${fullWidth ? 'full-width' : ''}`}>
+                <div className="modal-header">
+                    <h2>{title}</h2>
+                    <button className="modal-close-btn" onClick={onClose}>
+                        <CloseIcon />
+                    </button>
+                </div>
+                <div className="modal-content">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Meal Plan Table Component
+const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => {
+    return (
+        <div className="meal-plan-container">
+            <div className="day-tabs">
+                {DAYS_OF_WEEK.map((day) => (
+                    <button 
+                        key={day} 
+                        className={`day-tab ${selectedDay === day ? 'active' : ''}`}
+                        onClick={() => onDayChange(day)}
+                    >
+                        {day}
+                    </button>
+                ))}
+            </div>
+            
+            <div className="meal-plan-content">
+                {MEALS.map((meal) => (
+                    <div key={meal} className="meal-row">
+                        <div className="meal-label">
+                            <RestaurantIcon className="meal-icon" />
+                            <span>{meal}</span>
+                        </div>
+                        <div className="meal-input-container">
+                            <textarea
+                                className="meal-input"
+                                value={mealPlan[selectedDay][meal] || ''}
+                                onChange={(e) => onMealChange(selectedDay, meal, e.target.value)}
+                                placeholder={`${selectedDay} - ${meal} için yemekleri girin...`}
+                                rows={3}
+                            />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
 export default function Beslenme() {
-    const [categoryData, setCategoryData] = useState();
+    const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
+    const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // Modal states
+    const [addToUserModal, setAddToUserModal] = useState(false);
+    const [detailModal, setDetailModal] = useState(false);
+    const [addCategoryModal, setAddCategoryModal] = useState(false);
+    const [mealPlanModal, setMealPlanModal] = useState(false);
+    const [selectedProgram, setSelectedProgram] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [detailItem, setDetailItem] = useState(null);
+    const [newCategoryTitle, setNewCategoryTitle] = useState('');
+    
+    // Meal planning states
+    const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
+    const [mealPlan, setMealPlan] = useState(() => {
+        // Initialize empty meal plan structure
+        const initialPlan = {};
+        DAYS_OF_WEEK.forEach(day => {
+            initialPlan[day] = {};
+            MEALS.forEach(meal => {
+                initialPlan[day][meal] = '';
+            });
+        });
+        return initialPlan;
+    });
 
+    // Fetch clients data
     useEffect(() => {
         axios
-            .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
+            .get(`${config[config.environment].apiUrl}/dietitian/getAllMyClients`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -77,9 +227,10 @@ export default function Beslenme() {
             });
     }, []);
 
+    // Fetch nutrition categories
     useEffect(() => {
         axios
-            .get(config[config.environment].apiUrl + "/dietitian/getAllMyNutritionCategories", {
+            .get(`${config[config.environment].apiUrl}/dietitian/getAllMyNutritionCategories`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -89,369 +240,397 @@ export default function Beslenme() {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
+                // Fallback to sample categories if API fails
+                setCategoryData([
+                    { id: 1, title: "Kilo Aldırma" },
+                    { id: 2, title: "Kilo Verme" },
+                    { id: 3, title: "Kas Yapımı" },
+                    { id: 4, title: "Dengeli Beslenme" },
+                    { id: 5, title: "Sağlıklı Atıştırma" }
+                ]);
             });
     }, []);
 
-    const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
+    // Filter categories based on search term
+    const filteredCategories = categoryData?.filter(category => 
+        category.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const [openModal, setOpenModal] = useState(false);
-    const [selectedBeslenmeProgram, setSelectedBeslenmeProgram] = useState(null);
-    const [selectedUser, setSelectedUser] = useState(null);
-
-    const [openDetailModal, setOpenDetailModal] = useState(false);
-    const [detailItem, setDetailItem] = useState(null);
-
-    const groupedData = groupByThree(beslenmeData);
-
-    const handleCategoryCheck = (categoryId) => {
-        if (checkedCategories.includes(categoryId)) {
-            setCheckedCategories(checkedCategories.filter((id) => id !== categoryId));
-        } else {
-            setCheckedCategories([...checkedCategories, categoryId]);
+    // Filter nutrition programs based on selected categories
+    const filteredBeslenmeData = beslenmeData.filter(item => {
+        // If no categories are checked, show all items
+        if (checkedCategories.length === 0) {
+            return true;
         }
+        // Otherwise, show only items that belong to checked categories
+        return checkedCategories.includes(item.categoryId);
+    });
+
+    // Category handlers
+    const handleCategoryCheck = (categoryId) => {
+        setCheckedCategories(prev => 
+            prev.includes(categoryId) 
+                ? prev.filter(id => id !== categoryId) 
+                : [...prev, categoryId]
+        );
     };
 
     const handleMultiDelete = () => {
-        const newCategoryData = categoryData.filter(
-            (cat) => !checkedCategories.includes(cat.id)
+        setCategoryData(prev => 
+            prev.filter(cat => !checkedCategories.includes(cat.id))
         );
-        setCategoryData(newCategoryData);
         setCheckedCategories([]);
     };
 
     const handleSingleCategoryDelete = (categoryId) => {
-        const newCategoryData = categoryData.filter((cat) => cat.id !== categoryId);
-        setCategoryData(newCategoryData);
-
-        if (checkedCategories.includes(categoryId)) {
-            setCheckedCategories(checkedCategories.filter((id) => id !== categoryId));
-        }
+        setCategoryData(prev => prev.filter(cat => cat.id !== categoryId));
+        setCheckedCategories(prev => prev.filter(id => id !== categoryId));
     };
 
-    const handleOpenModal = (item) => {
-        setSelectedBeslenmeProgram(item);
-        setOpenModal(true);
+    const handleAddCategory = () => {
+        if (newCategoryTitle.trim() === '') return;
+        
+        const newCategory = {
+            id: categoryData.length > 0 ? Math.max(...categoryData.map(c => c.id)) + 1 : 1,
+            title: newCategoryTitle.trim()
+        };
+        
+        // In a real app, you would make an API call here
+        // axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
+        //     headers: { Authorization: localStorage.getItem("token") }
+        // })
+        // .then(response => {
+        //     setCategoryData([...categoryData, response.data]);
+        // })
+        // .catch(error => console.error("Error adding category:", error));
+        
+        // For now, just update the state directly
+        setCategoryData([...categoryData, newCategory]);
+        setNewCategoryTitle('');
+        setAddCategoryModal(false);
     };
 
-    const handleCloseModal = () => {
-        setOpenModal(false);
-        setSelectedBeslenmeProgram(null);
-        setSelectedUser(null);
+    // Nutrition card handlers
+    const handleOpenDetailModal = (item) => {
+        setDetailItem(item);
+        setDetailModal(true);
+    };
+
+    const handleOpenAddToUserModal = (item) => {
+        setSelectedProgram(item);
+        setAddToUserModal(true);
+    };
+
+    const handleOpenMealPlanModal = (item) => {
+        setSelectedProgram(item);
+        // Reset meal plan when opening for a new program
+        setMealPlan(() => {
+            const initialPlan = {};
+            DAYS_OF_WEEK.forEach(day => {
+                initialPlan[day] = {};
+                MEALS.forEach(meal => {
+                    initialPlan[day][meal] = '';
+                });
+            });
+            return initialPlan;
+        });
+        setSelectedDay(DAYS_OF_WEEK[0]);
+        setMealPlanModal(true);
     };
 
     const handleAddToUser = () => {
-        //TODO: Tarifi, seçilen kullanıcıya bağlayacak bir sistem yazılacak (API vb.)
-        console.log("Seçilen program:", selectedBeslenmeProgram);
-        console.log("Eklemek istediğin danışan:", selectedUser);
-        handleCloseModal();
+        console.log("Adding program:", selectedProgram);
+        console.log("To user:", selectedUser);
+        setAddToUserModal(false);
+        setSelectedProgram(null);
+        setSelectedUser(null);
     };
 
     const handlePrint = (item) => {
-        //TODO: PDF veya Print sistemi
-        console.log("Yazdırılacak Program:", item);
+        console.log("Printing:", item);
         window.print();
     };
 
+    const handleEdit = (item) => {
+        console.log("Editing:", item);
+        // Implement edit functionality
+    };
+
     const handleDelete = (item) => {
-        const yeniListe = beslenmeData.filter((dataItem) => dataItem.id !== item.id);
-        setBeslenmeData(yeniListe);
+        setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== item.id));
     };
 
-    const handleCardImageClick = (item) => {
-        setDetailItem(item);
-        setOpenDetailModal(true);
+    // Meal plan handlers
+    const handleMealChange = (day, meal, value) => {
+        setMealPlan(prev => ({
+            ...prev,
+            [day]: {
+                ...prev[day],
+                [meal]: value
+            }
+        }));
     };
 
-    const handleDetailModalClose = () => {
-        setOpenDetailModal(false);
-        setDetailItem(null);
+    const handleDayChange = (day) => {
+        setSelectedDay(day);
+    };
+
+    const handleSaveMealPlan = () => {
+        console.log("Saving meal plan for program:", selectedProgram?.title);
+        console.log("Meal plan data:", mealPlan);
+        
+        // In a real app, you would make an API call here to save the meal plan
+        // axios.post(`${config[config.environment].apiUrl}/dietitian/saveMealPlan`, {
+        //     programId: selectedProgram.id,
+        //     mealPlan: mealPlan
+        // }, {
+        //     headers: { Authorization: localStorage.getItem("token") }
+        // })
+        // .then(response => {
+        //     // Handle success
+        //     setMealPlanModal(false);
+        // })
+        // .catch(error => console.error("Error saving meal plan:", error));
+        
+        // For now, just close the modal
+        setMealPlanModal(false);
     };
 
     return (
         <Default>
-            <Grid2 container sx={{ height: '100%' }}>
-                {/* Sol Panel */}
-                <Grid2
-                    container
-                    sx={{ height: '78vh', flex: 1, display: { xs: 'none', sm: 'flex' } }}
-                    direction="column"
-                    spacing={2}
-                >
-                    <Grid2>
-                        <Paper elevation={3} sx={{ minHeight: "78vh", p: "0.5rem" }}>
-                            {/* Search and Add */}
-                            <Grid2 container alignItems="center" spacing={2}>
-                                <Grid2 xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
+            <div className="beslenme-container">
+                {/* Left Panel - Categories */}
+                <div className="categories-panel">
+                    <div className="panel-header">
+                        <div className="search-container">
+                            <SearchIcon className="search-icon" />
+                            <input 
+                                type="text" 
+                                className="search-input"
                                         placeholder="Ara..."
-                                        variant="outlined"
-                                    />
-                                </Grid2>
-                                <Grid2 container sx={{ ml: 'auto', mr: '1rem', gap: '0.5rem' }}>
-                                    <Grid2>
-                                        <Button variant="contained" color="primary">
-                                            <Add />
-                                        </Button>
-                                    </Grid2>
-                                    <Grid2>
-                                        <Button
-                                            variant="contained"
-                                            onClick={handleMultiDelete}
-                                            sx={{
-                                                backgroundColor: '#a50000',
-                                                '&:hover': { backgroundColor: '#ff0000' },
-                                            }}
-                                        >
-                                            <DeleteIcon />
-                                        </Button>
-                                    </Grid2>
-                                </Grid2>
-                            </Grid2>
-
-                            {/* Kategori Listesi */}
-                            <List
-                                sx={{
-                                    maxHeight: '70vh',
-                                    overflowY: 'auto',
-                                    overflowX: 'hidden',
-                                    mt: 1
-                                }}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="category-actions">
+                            <button 
+                                className="action-btn add-btn" 
+                                title="Kategori Ekle"
+                                onClick={() => setAddCategoryModal(true)}
                             >
-                                {categoryData && categoryData.length > 0 ? (
-                                    categoryData.map((category) => (
-                                        <ListItem
-                                            key={category.id}
-                                            sx={{
-                                                '&:hover': { backgroundColor: '#f5f5f5' },
-                                                '&:hover .delete-button': { visibility: 'visible' },
-                                                transition: 'background-color 0.2s',
-                                                cursor: 'pointer',
-                                            }}
-                                            onClick={() => handleCategoryCheck(category.id)}
-                                        >
-                                            <ListItemIcon>
-                                                <Checkbox
-                                                    edge="start"
-                                                    checked={checkedCategories.includes(category.id)}
-                                                    tabIndex={-1}
-                                                    disableRipple
-                                                />
-                                            </ListItemIcon>
-                                            <ListItemText primary={category.title} />
-
-                                            <Box
-                                                className="delete-button"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    right: 0,
-                                                    top: '50%',
-                                                    mr: "1rem",
-                                                    transform: 'translateY(-50%)',
-                                                    visibility: 'hidden',
-                                                }}
-                                            >
-                                                <IconButton
-                                                    edge="end"
-                                                    aria-label="delete"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleSingleCategoryDelete(category.id);
-                                                    }}
-                                                    sx={{
-                                                        '&:hover': { backgroundColor: '#ff0000' },
-                                                        backgroundColor: "#a50000",
-                                                        color: 'white'
-                                                    }}
+                                <AddIcon />
+                            </button>
+                            <button 
+                                className="action-btn delete-btn" 
+                                title="Seçilenleri Sil"
+                                onClick={handleMultiDelete}
+                                disabled={checkedCategories.length === 0}
                                                 >
                                                     <DeleteIcon />
-                                                </IconButton>
-                                            </Box>
-                                        </ListItem>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="categories-list">
+                        {filteredCategories && filteredCategories.length > 0 ? (
+                            filteredCategories.map((category) => (
+                                <CategoryItem 
+                                    key={category.id}
+                                    category={category}
+                                    isChecked={checkedCategories.includes(category.id)}
+                                    onCheck={() => handleCategoryCheck(category.id)}
+                                    onDelete={handleSingleCategoryDelete}
+                                />
                                     ))
                                 ) : (
-                                    <Typography sx={{ p: 2, textAlign: 'center' }}>
-                                        Kategori bulunamadı.
-                                    </Typography>
-                                )}
-                            </List>
-                            {/* Kategori Listesi - End */}
-                        </Paper>
-                    </Grid2>
-                </Grid2>
+                            <div className="no-categories">Kategori bulunamadı.</div>
+                        )}
+                    </div>
+                </div>
 
-                {/* Sağ Panel */}
-                <Grid2
-                    container
-                    spacing={2}
-                    sx={{ maxHeight: '78vh', width: "74vw", ml: "1rem", overflowY: 'auto' }}
-                >
-                    {groupedData.map((group, groupIndex) => (
-                        <React.Fragment key={groupIndex}>
-                            {group.map((item) => (
-                                <Grid2 xs={12} sm={4} md={4} key={item.id}>
-                                    <Card sx={{ minWidth: 410, boxShadow: 3 }}>
-                                        <CardActionArea onClick={() => handleCardImageClick(item)}>
-                                            <CardMedia
-                                                component="img"
-                                                image={item.image.toString() || "/placeholder.png"}
-                                                alt={item.title.toString()}
-                                                sx={{
-                                                    height: 250,
-                                                    width: 410,
-                                                    objectFit: 'cover',
-                                                }}
-                                            />
-                                        </CardActionArea>
-                                        <CardContent>
-                                            <Typography gutterBottom variant="h5" component="div">
-                                                {item.title.toString()}
-                                            </Typography>
-                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                {item.description.toString()}
-                                            </Typography>
-
-                                            {/* Card Butonları */}
-                                            <Box
-                                                sx={{
-                                                    mt: 2,
-                                                    gap: "0.5rem",
-                                                    display: 'flex',
-                                                    justifyContent: 'flex-end'
-                                                }}
-                                            >
-                                                {/* Danışana Ekle */}
-                                                <Tooltip title={"Danışana Ekle"} arrow>
-                                                    <IconButton
-                                                        aria-label="danisana-ekle"
-                                                        sx={{
-                                                            backgroundColor: '#3d8a3d',
-                                                            color: 'white',
-                                                            '&:hover': { backgroundColor: '#53c153' },
-                                                        }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleOpenModal(item);
-                                                        }}
-                                                    >
-                                                        <PersonAddIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-
-                                                <Tooltip title={"Yazdır"} arrow>
-                                                    <IconButton
-                                                        aria-label="print"
-                                                        sx={{
-                                                            backgroundColor: '#003095',
-                                                            color: 'white',
-                                                            '&:hover': { backgroundColor: '#0052ff' },
-                                                        }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handlePrint(item);
-                                                        }}
-                                                    >
-                                                        <PrintIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-
-                                                <Tooltip title={"Düzenle"} arrow>
-                                                    <IconButton
-                                                        aria-label="duzenle"
-                                                        sx={{
-                                                            backgroundColor: '#ff9e25',
-                                                            color: 'white',
-                                                            '&:hover': { backgroundColor: '#ffaf4b' },
-                                                        }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            console.log("Düzenleme tıklandı:", item.title);
-                                                        }}
-                                                    >
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-
-                                                {/* Sil */}
-                                                <Tooltip title={"Sil"} arrow>
-                                                    <IconButton
-                                                        aria-label="sil"
-                                                        sx={{
-                                                            backgroundColor: '#a50000',
-                                                            color: 'white',
-                                                            '&:hover': { backgroundColor: '#ff0000' },
-                                                        }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(item);
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                </Grid2>
-                            ))}
-                        </React.Fragment>
-                    ))}
-                </Grid2>
-            </Grid2>
-
-            {/* Danışana Ekle Modal */}
-            <Dialog open={openModal} onClose={handleCloseModal}>
-                <DialogTitle>Danışana Ekle</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Seçilen program: <strong>{selectedBeslenmeProgram?.title}</strong>
-                    </DialogContentText>
-                    <Box sx={{ mt: 2 }}>
-                        <Autocomplete
-                            fullWidth
-                            options={danisanList}
-                            getOptionLabel={(option) => option.name + " " + option.surname}
-                            value={selectedUser}
-                            onChange={(e, newValue) => setSelectedUser(newValue)}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Danışan Seç"
-                                    variant="outlined"
+                {/* Right Panel - Nutrition Programs */}
+                <div className="programs-panel">
+                    <div className="nutrition-cards-grid">
+                        {filteredBeslenmeData.length > 0 ? (
+                            filteredBeslenmeData.map((item) => (
+                                <NutritionCard 
+                                    key={item.id}
+                                    item={item}
+                                    onImageClick={handleOpenDetailModal}
+                                    onAddToUser={handleOpenAddToUserModal}
+                                    onPlanMeals={handleOpenMealPlanModal}
+                                    onPrint={handlePrint}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
                                 />
-                            )}
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseModal}>Vazgeç</Button>
-                    <Button onClick={handleAddToUser} variant="contained" disabled={!selectedUser}>
-                        Ekle
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                            ))
+                        ) : (
+                            <div className="no-programs">
+                                <p>Bu kategoriye ait beslenme programı bulunamadı.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
 
-            {/* Kart Detay Modal */}
-            <Dialog open={openDetailModal} onClose={handleDetailModalClose} maxWidth="sm" fullWidth>
-                <DialogTitle>{detailItem?.title}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText sx={{ mb: 2 }}>
-                        {detailItem?.description}
-                    </DialogContentText>
+            {/* Add Category Modal */}
+            <Modal 
+                isOpen={addCategoryModal} 
+                title="Kategori Ekle" 
+                onClose={() => setAddCategoryModal(false)}
+            >
+                <div className="modal-body">
+                    <div className="input-container">
+                        <label htmlFor="categoryTitle">Kategori Adı</label>
+                        <input 
+                            type="text" 
+                            id="categoryTitle"
+                            className="text-input" 
+                            value={newCategoryTitle}
+                            onChange={(e) => setNewCategoryTitle(e.target.value)}
+                            placeholder="Kategori adını giriniz"
+                        />
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => setAddCategoryModal(false)}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn confirm-btn" 
+                        onClick={handleAddCategory}
+                        disabled={!newCategoryTitle.trim()}
+                    >
+                        Ekle
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Add to User Modal */}
+            <Modal 
+                isOpen={addToUserModal} 
+                title="Danışana Ekle" 
+                onClose={() => setAddToUserModal(false)}
+            >
+                <div className="modal-body">
+                    <p className="selected-program">
+                        Seçilen program: <strong>{selectedProgram?.title}</strong>
+                    </p>
+                    <div className="user-select-container">
+                        <select 
+                            className="user-select"
+                            value={selectedUser?.id || ''}
+                            onChange={(e) => {
+                                const userId = e.target.value;
+                                const user = danisanList.find(u => u.id === parseInt(userId));
+                                setSelectedUser(user);
+                            }}
+                        >
+                            <option value="">Danışan Seçin</option>
+                            {danisanList.map(user => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name} {user.surname}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => setAddToUserModal(false)}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn confirm-btn" 
+                        onClick={handleAddToUser}
+                        disabled={!selectedUser}
+                    >
+                        Ekle
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Meal Plan Modal */}
+            <Modal 
+                isOpen={mealPlanModal} 
+                title={`Haftalık Beslenme Planı - ${selectedProgram?.title}`}
+                onClose={() => setMealPlanModal(false)}
+                fullWidth={true}
+            >
+                <div className="modal-body meal-plan-modal">
+                    <MealPlanTable 
+                        mealPlan={mealPlan}
+                        onMealChange={handleMealChange}
+                        selectedDay={selectedDay}
+                        onDayChange={handleDayChange}
+                    />
+                </div>
+                <div className="modal-footer">
+                    <div className="meal-plan-client-select">
+                        <select 
+                            className="user-select"
+                            value={selectedUser?.id || ''}
+                            onChange={(e) => {
+                                const userId = e.target.value;
+                                const user = danisanList.find(u => u.id === parseInt(userId));
+                                setSelectedUser(user);
+                            }}
+                        >
+                            <option value="">Danışan Seçin</option>
+                            {danisanList.map(user => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name} {user.surname}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => setMealPlanModal(false)}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn confirm-btn" 
+                        onClick={handleSaveMealPlan}
+                        disabled={!selectedUser}
+                    >
+                        <SaveIcon className="save-icon" />
+                        Kaydet
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Detail Modal */}
+            <Modal 
+                isOpen={detailModal} 
+                title={detailItem?.title} 
+                onClose={() => setDetailModal(false)}
+            >
+                <div className="detail-modal-content">
+                    <p className="detail-description">{detailItem?.description}</p>
                     {detailItem?.image && (
-                        <Box
-                            component="img"
-                            sx={{ width: '100%', borderRadius: 2 }}
+                        <img 
+                            src={detailItem.image} 
                             alt={detailItem.title}
-                            src={detailItem.image}
+                            className="detail-image"
                         />
                     )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDetailModalClose}>Kapat</Button>
-                </DialogActions>
-            </Dialog>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn close-btn" 
+                        onClick={() => setDetailModal(false)}
+                    >
+                        Kapat
+                    </button>
+                </div>
+            </Modal>
         </Default>
     );
 }
