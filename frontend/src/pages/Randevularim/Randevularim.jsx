@@ -158,6 +158,7 @@ export default function Randevularim() {
                 start: event.start.toISOString(),
                 end: event.end ? event.end.toISOString() : null,
                 client_id: event.extendedProps?.client_id || "",
+                status: event.extendedProps?.status || "pending",
             };
 
             const requestData = {
@@ -166,6 +167,7 @@ export default function Randevularim() {
                 start: updatedEvent.start,
                 end: updatedEvent.end,
                 client_id: updatedEvent.client_id,
+                status: updatedEvent.status,
             };
 
             const response = await axios.put(
@@ -178,7 +180,7 @@ export default function Randevularim() {
                 }
             );
 
-            console.log("Randevu güncelleme başarılı:", response.data);
+            const updatedStatus = response.data?.appointment?.status || updatedEvent.status;
 
             setRandevular((prevRandevular) => {
                 return prevRandevular.map((randevu) =>
@@ -189,7 +191,9 @@ export default function Randevularim() {
                             end: updatedEvent.end,
                             extendedProps: {
                                 client_id: updatedEvent.client_id,
+                                status: updatedStatus,
                             },
+                            color: updatedStatus === "approved" || updatedStatus === "confirmed" ? "#4CAF50" : "#FF9800"
                         }
                         : randevu
                 );
