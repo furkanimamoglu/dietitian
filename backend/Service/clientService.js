@@ -1,4 +1,4 @@
-const {Client, Dietitian} = require("../Model/MainModel");
+const {Client, Dietitian, Notification} = require("../Model/MainModel");
 const Exception = require("../Exception/Exception");
 const jwt = require("jsonwebtoken");
 const config = require("../config.json");
@@ -7,30 +7,32 @@ const {CLIENT} = require("../Enum/Role");
 class ClientService {
     async login(phoneNumber, password) {
         try {
-            const clientInfo = await Client.findOne({
+            const client = await Client.findOne({
                 where: {
                     phoneNumber: phoneNumber,
                     password: password
                 }
             });
 
-            if (!clientInfo) {
+            if (!client) {
                 throw new Exception('Hatalı giriş bilgileri.', 400, true);
             }
 
             const token = jwt.sign(
                 {
-                    id: clientInfo.id,
-                    role: clientInfo.role
+                    id: client.id,
+                    dietitian_id: client.dietitian_id,
+                    role: client.role,
+                    phoneNumber: client.phoneNumber,
                 },
                 config.secretkey,
                 { expiresIn: '24h' }
             );
 
-            await clientInfo.update({ token });
+            await client.update({ token });
 
             return {
-                ...clientInfo.dataValues,
+                ...client.dataValues,
                 token: token
             };
         } catch (error) {
@@ -61,6 +63,7 @@ class ClientService {
                 {
                     client_id: client.id,
                     dietitian_id: client.dietitian_id,
+                    phoneNumber: client.phoneNumber,
                     role: CLIENT
                 },
                 config.secretkey
@@ -95,6 +98,51 @@ class ClientService {
             }
 
             return client;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async getMyNotifications(phoneNumber) {
+        try {
+            if (!phoneNumber) {
+                throw new Error("Yetkisiz Erişim.");
+            }
+
+            const notifications = await Notification.findAll({
+                where: { phoneNumber: phoneNumber }
+            });
+
+            if (!notifications || notifications.length === 0) {
+                throw new Error("Bildiriminiz yok.");
+            }
+
+            return notifications;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async readMyAllNotifications(phoneNumber) {
+        try {
+            if (!phoneNumber) {
+                throw new Error("Yetkisiz Erişim.");
+            }
+
+            const [affectedRows] = await Notification.update(
+                { isRead: true },
+                {
+                    where: { phoneNumber: phoneNumber, isRead: false }
+                }
+            );
+
+            if (affectedRows === 0) {
+                throw new Error("Okunmamış bildiriminiz yok.");
+            }
+
+            return {
+                message: "Basarili"
+            };
         } catch (error) {
             throw new Exception(error.message, 400);
         }

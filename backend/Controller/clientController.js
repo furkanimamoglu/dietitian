@@ -77,6 +77,44 @@ class ClientController {
         }
     }
 
+    async getMyNotifications(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const phoneNumber = Security.getPhoneNumberFromToken(token);
+            if (!token || !phoneNumber) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await ClientService.getMyNotifications(phoneNumber);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async readMyAllNotifications(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const phoneNumber = Security.getPhoneNumberFromToken(token);
+            if (!token || !phoneNumber) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await ClientService.readMyAllNotifications(phoneNumber);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
 }
 
 module.exports = new ClientController();
