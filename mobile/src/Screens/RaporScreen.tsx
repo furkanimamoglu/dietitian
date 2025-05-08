@@ -8,12 +8,10 @@ import BottomNavbar from '../Components/BottomNavbar';
 const RaporEkrani = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('genel');
 
-  // Sabit veri - gerçek uygulamada API'den gelecek
   const danisanBilgisi = {
     ad: 'Ayşe Yılmaz',
     yas: 32,
     baslangicTarihi: '15 Ocak 2025',
-    diyetisyen: 'Dr. Mehmet Öz',
     sonRandevu: '1 Mayıs 2025',
     gelecekRandevu: '15 Mayıs 2025'
   };
@@ -66,7 +64,6 @@ const RaporEkrani = ({ navigation }) => {
     }
   ];
 
-  // useMemo ile hesaplı değerler
   const sonOlcumler = useMemo(() => {
     const sonIndex = olcumler.kilo.length - 1;
     return {
@@ -88,7 +85,6 @@ const RaporEkrani = ({ navigation }) => {
     };
   }, [olcumler]);
 
-  // Tab içerikleri - ihtiyaç olduğunda render edilir
   const renderGenelTab = () => (
     <View style={styles.tabContent}>
       <Card style={styles.card}>
@@ -151,7 +147,6 @@ const RaporEkrani = ({ navigation }) => {
             <View style={styles.randevuDetay}>
               <Text style={styles.randevuTarih}>{danisanBilgisi.gelecekRandevu}</Text>
               <Text style={styles.randevuSaat}>14:30</Text>
-              <Text style={styles.randevuDiyetisyen}>{danisanBilgisi.diyetisyen} ile</Text>
             </View>
           </View>
         </Card.Content>
@@ -325,7 +320,6 @@ const RaporEkrani = ({ navigation }) => {
           />
           <Card.Content>
             <Text style={styles.raporDetay}>{rapor.detay}</Text>
-            <Chip icon="check-circle" style={styles.chip}>Diyetisyen Onaylı</Chip>
           </Card.Content>
           <Card.Actions>
             <Button
@@ -641,11 +635,7 @@ const styles = StyleSheet.create({
     color: '#2e7d32',
     fontWeight: '500'
   },
-  randevuDiyetisyen: {
-    fontSize: 14,
-    color: '#757575',
-    marginTop: 4
-  },
+
   notIcon: {
     backgroundColor: '#2e7d32'
   },

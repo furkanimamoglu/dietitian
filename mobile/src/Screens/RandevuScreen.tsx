@@ -176,7 +176,6 @@ const RandevuScreen = ({ navigation }) => {
 
         {/* Filtre Seçenekleri */}
         <View style={styles.filterContainer}>
-          <Text style={styles.filterLabel}>Randevular:</Text>
           <View style={styles.chipContainer}>
             <Chip
               selected={filterStatus === 'all'}
@@ -192,7 +191,7 @@ const RandevuScreen = ({ navigation }) => {
               style={[styles.filterChip, filterStatus === 'confirmed' && styles.activeChip]}
               textStyle={filterStatus === 'confirmed' ? styles.activeChipText : {}}
             >
-              Onaylananlar
+              Onaylı
             </Chip>
             <Chip
               selected={filterStatus === 'pending'}
@@ -200,7 +199,7 @@ const RandevuScreen = ({ navigation }) => {
               style={[styles.filterChip, filterStatus === 'pending' && styles.activeChip]}
               textStyle={filterStatus === 'pending' ? styles.activeChipText : {}}
             >
-              Bekleyenler
+              Bekleyen
             </Chip>
           </View>
         </View>

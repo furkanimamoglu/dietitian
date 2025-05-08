@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { View, StyleSheet, ScrollView, Text as RNText, Dimensions } from 'react-native';
-import { Card, Text, Surface, ProgressBar } from 'react-native-paper';
+import { Avatar, Card, Text, Surface, ProgressBar } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import Header from '../Components/Header';
@@ -73,8 +73,7 @@ const AnaSayfa = ({ navigation }: Props) => {
         <Surface style={styles.welcomeCard}>
           <View style={styles.welcomeContent}>
             <View>
-              <Text style={styles.dateText}>{todayDate}</Text>
-              <Text style={styles.welcomeText}>Merhaba, {userName}!</Text>
+              <Text style={styles.welcomeText}>Merhaba,{'\n'}{userName}!</Text>
               <Text style={styles.subText}>Bugün programın için harika bir gün 💪</Text>
             </View>
           </View>
@@ -114,6 +113,19 @@ const AnaSayfa = ({ navigation }: Props) => {
             <Text style={styles.statLabel}>Su</Text>
           </View>
         </Surface>
+
+        <Card style={styles.card}>
+          <Card.Title title="Gelecek Randevu Tarihiniz" />
+          <Card.Content>
+            <View style={styles.randevuBilgi}>
+              <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon} />
+              <View style={styles.randevuDetay}>
+                <Text style={styles.randevuTarih}>25.05.2025</Text>
+                <Text style={styles.randevuSaat}>14:30</Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
 
         {/* İlerleme Grafiği - LineChart olmadan
         <Text style={styles.sectionTitle}>Haftalık İlerleme</Text>
@@ -481,7 +493,33 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 24
-  }
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    marginBottom: 16,
+    borderRadius: 16,
+    elevation: 2
+  },
+  randevuBilgi: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8
+  },
+  randevuIcon: {
+    backgroundColor: '#2e7d32'
+  },
+  randevuDetay: {
+    marginLeft: 16
+  },
+  randevuTarih: {
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  randevuSaat: {
+    fontSize: 14,
+    color: '#2e7d32',
+    fontWeight: '500'
+  },
 });
 
 export default AnaSayfa;
