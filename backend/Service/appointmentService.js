@@ -137,7 +137,7 @@ class AppointmentService {
     async getClientAppointments(client_id) {
         try {
             if (!client_id) {
-                throw new Exception("Yetkisiz Erişim.", 401);
+                throw new Error("Yetkisiz Erişim.");
             }
 
             const appointments = await Appointment.findAll({
@@ -145,7 +145,7 @@ class AppointmentService {
             });
 
             if (!appointments || appointments.length === 0) {
-                throw new Exception("Şu anda herhangi bir randevu bulunmamaktadır.", 404);
+                throw new Error("Şu anda herhangi bir randevu bulunmamaktadır.");
             }
 
             return appointments;

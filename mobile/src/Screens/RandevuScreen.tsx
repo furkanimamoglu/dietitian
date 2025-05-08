@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import {
   Card,
@@ -13,18 +13,78 @@ import {
   Divider,
   Surface,
   IconButton,
-  Colors,
   Avatar
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../../config';
 
-const RandevuScreen = ({ navigation }) => {
-  const [appointments, setAppointments] = useState([
-    { id: '1', date: '2025-05-10', time: '10:00', description: 'Periyodik kontrol', confirmed: true },
-    { id: '2', date: '2025-05-15', time: '14:30', description: 'Protein ölçümü', confirmed: false },
-  ]);
+interface Appointment {
+  id: number;
+  title: string;
+  status: 'pending' | 'confirmed';
+  start: string;
+  end: string;
+  dietitian_id: number;
+  client_id: number;
+}
+
+interface NavigationProps {
+  navigation: any;
+}
+
+const RandevuScreen = ({ navigation }: NavigationProps) => {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchAppointments = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.error('Token Bulunamadı');
+        return;
+      }
+
+      const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 500) {
+        setAppointments([]);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (data && Array.isArray(data)) {
+        setAppointments(data);
+      } else {
+        setAppointments([]);
+      }
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setAppointments([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchAppointments();
+  }, []);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -33,7 +93,7 @@ const RandevuScreen = ({ navigation }) => {
   const [description, setDescription] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const formatDate = useCallback(date => {
+  const formatDate = useCallback((date: Date) => {
     return date.toISOString().split('T')[0];
   }, []);
 
@@ -52,8 +112,8 @@ const RandevuScreen = ({ navigation }) => {
   // Dolu saatleri kontrol et (performans için useMemo)
   const busySlots = useMemo(() => {
     return appointments.map(app => ({
-      date: app.date,
-      time: app.time
+      date: new Date(app.start).toISOString().split('T')[0],
+      time: new Date(app.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
     }));
   }, [appointments]);
 
@@ -72,12 +132,14 @@ const RandevuScreen = ({ navigation }) => {
 
   const addAppointment = () => {
     if (description.trim() && selectedTime) {
-      const newAppointment = {
-        id: Date.now().toString(),
-        date: formatDate(selectedDate),
-        time: selectedTime,
-        description,
-        confirmed: false
+      const newAppointment: Appointment = {
+        id: Date.now(),
+        title: description,
+        status: 'pending' as const,
+        start: new Date(`${formatDate(selectedDate)}T${selectedTime}`).toISOString(),
+        end: new Date(`${formatDate(selectedDate)}T${selectedTime}`).toISOString(),
+        dietitian_id: 1, // Bu değer API'den alınmalı
+        client_id: 3 // Bu değer API'den alınmalı
       };
 
       setAppointments(prev => [...prev, newAppointment]);
@@ -86,7 +148,7 @@ const RandevuScreen = ({ navigation }) => {
   };
 
   // Date picker işlemleri
-  const onChangeDate = (_, date) => {
+  const onChangeDate = (_: any, date?: Date) => {
     setShowDatePicker(false);
     if (date) setSelectedDate(date);
   };
@@ -95,29 +157,29 @@ const RandevuScreen = ({ navigation }) => {
   const filteredAppointments = useMemo(() => {
     if (filterStatus === 'all') return appointments;
     return appointments.filter(app =>
-      filterStatus === 'confirmed' ? app.confirmed : !app.confirmed
+      filterStatus === 'confirmed' ? app.status === 'confirmed' : app.status === 'pending'
     );
   }, [appointments, filterStatus]);
 
   // Tarihe göre sıralama - en yakın tarihler önce
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments].sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`);
-      const dateB = new Date(`${b.date}T${b.time}`);
-      return dateA - dateB;
+      const dateA = new Date(a.start);
+      const dateB = new Date(b.start);
+      return dateA.getTime() - dateB.getTime();
     });
   }, [filteredAppointments]);
 
   // Tarih formatını daha okunabilir yap (10 Mayıs 2025 gibi)
-  const formatDisplayDate = useCallback((dateStr) => {
+  const formatDisplayDate = useCallback((dateStr: string) => {
     const date = new Date(dateStr);
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('tr-TR', options);
   }, []);
 
   // Liste öğesi render fonksiyonu - performans için useCallback
-  const renderItem = useCallback(({ item }) => {
-    const isToday = item.date === formatDate(new Date());
+  const renderItem = useCallback(({ item }: { item: Appointment }) => {
+    const isToday = new Date(item.start).toISOString().split('T')[0] === formatDate(new Date());
 
     return (
       <Surface style={styles.cardSurface}>
@@ -127,33 +189,34 @@ const RandevuScreen = ({ navigation }) => {
               <Avatar.Icon
                 size={36}
                 icon={isToday ? "calendar-today" : "calendar"}
-                style={styles.calendarIcon}
+                style={[styles.calendarIcon, { backgroundColor: isToday ? "#2196F3" : "#E3F2FD" }]}
                 color={isToday ? "#ffffff" : "#2196F3"}
-                backgroundColor={isToday ? "#2196F3" : "#E3F2FD"}
               />
               <View style={styles.dateTimeText}>
-                <Text style={styles.dateText}>{formatDisplayDate(item.date)}</Text>
-                <Text style={styles.timeText}>{item.time}</Text>
+                <Text style={styles.dateText}>{formatDisplayDate(item.start)}</Text>
+                <Text style={styles.timeText}>
+                  {new Date(item.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                </Text>
               </View>
             </View>
 
             <Divider style={styles.divider} />
 
             <View style={styles.detailsContainer}>
-              <Text style={styles.description}>{item.description}</Text>
+              <Text style={styles.description}>{item.title}</Text>
             </View>
 
             <View style={styles.statusContainer}>
               <Chip
                 mode="outlined"
-                icon={item.confirmed ? "check-circle" : "clock-outline"}
+                icon={item.status === 'confirmed' ? "check-circle" : "clock-outline"}
                 style={[
                   styles.statusChip,
-                  item.confirmed ? styles.confirmedChip : styles.pendingChip
+                  item.status === 'confirmed' ? styles.confirmedChip : styles.pendingChip
                 ]}
-                textStyle={item.confirmed ? styles.confirmedText : styles.pendingText}
+                textStyle={item.status === 'confirmed' ? styles.confirmedText : styles.pendingText}
               >
-                {item.confirmed ? 'Onaylandı' : 'Onay Bekleniyor'}
+                {item.status === 'confirmed' ? 'Onaylandı' : 'Onay Bekleniyor'}
               </Chip>
 
               <IconButton
@@ -207,15 +270,17 @@ const RandevuScreen = ({ navigation }) => {
         {/* Randevu Listesi */}
         <FlatList
           data={sortedAppointments}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.content}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Avatar.Icon
                 size={64}
                 icon="calendar-blank"
-                backgroundColor="#F5F5F5"
+                style={{ backgroundColor: "#F5F5F5" }}
                 color="#cccccc"
               />
               <Text style={styles.empty}>Henüz randevunuz bulunmuyor.</Text>
