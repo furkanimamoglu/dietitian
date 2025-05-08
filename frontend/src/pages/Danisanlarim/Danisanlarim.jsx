@@ -31,7 +31,6 @@ import {
     Female as FemaleIcon,
     Group as GroupIcon,
     CheckCircleOutline,
-    CancelOutlined,
     Edit as EditIcon,
     ArrowForward,
     Close as CloseIcon,
@@ -73,8 +72,8 @@ export default function Danisanlarim() {
     // İstatistikler
     // ---------------------------
     const totalCount = clients.length;
-    const activeCount = clients.filter(c => c.status === "aktif").length;
-    const inactiveCount = clients.filter(c => c.status === "inaktif").length;
+    const activeCount = clients.filter(c => c.status === true).length;
+    const inactiveCount = clients.filter(c => c.status === false).length;
     const maleCount = clients.filter(c => c.gender === "Erkek").length;
     const femaleCount = clients.filter(c => c.gender === "Kadın").length;
 
@@ -138,16 +137,19 @@ export default function Danisanlarim() {
                         updatedRow,
                         { headers: { Authorization: localStorage.getItem("token") } }
                     );
+                    setEditDialogOpen(false);
                     resolve(res.data);
                     unsubscribe();
                 } catch (err) {
                     console.error("Güncelleme hatası:", err);
+                    setEditDialogOpen(false);
                     resolve(originalRow);
                     unsubscribe();
                 }
             };
 
             const handleCancel = () => {
+                setEditDialogOpen(false);
                 resolve(originalRow);
                 unsubscribe();
             };
@@ -162,6 +164,7 @@ export default function Danisanlarim() {
     };
 
     const handleEditCancel = () => {
+        setEditDialogOpen(false);
         window.dispatchEvent(new Event('editCancelled'));
     };
 
@@ -226,10 +229,10 @@ export default function Danisanlarim() {
             headerName: "Durum",
             width: 90,
             type: "singleSelect",
-            valueOptions: ["aktif", "inaktif"],
+            valueOptions: [true, false],
             editable: true,
             renderCell: (params) =>
-                params.value === "aktif" ? (
+                params.row.status ? (
                     <CheckCircle sx={{ color: green[500] }} />
                 ) : (
                     <Cancel sx={{ color: red[500] }} />

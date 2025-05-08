@@ -47,11 +47,12 @@ export default function Navbar() {
             <List>
                 {menu_items.map((item) => (
                     <ListItem
-                        button
+                        component="div"
                         key={item.name}
                         onClick={() => navigate(item.route)}
                         className={location.pathname === item.route ? "active-mobile-item" : ""}
                         disabled={item.name === "TARİFLER" || item.name === "EGZERSİZLER" || item.name === "FİNANS"}
+                        sx={{ cursor: 'pointer' }}
                     >
                         <Box sx={{ mr: 2, color: "rgb(14,62,10)" }}>{item.icon}</Box>
                         <ListItemText primary={item.name} />

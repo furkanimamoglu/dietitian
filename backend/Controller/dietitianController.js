@@ -128,7 +128,7 @@ class DietitianController {
         try {
             const { id, name, email, phoneNumber, gender, status } = req.body;
 
-            if (!id || !name || !email || !phoneNumber || !gender || !status) {
+            if (!id || !name || !phoneNumber || !status) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: "Tüm parametreler doldurulmalıdır."
