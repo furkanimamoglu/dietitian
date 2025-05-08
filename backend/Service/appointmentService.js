@@ -133,6 +133,53 @@ class AppointmentService {
             throw new Error(error.message || "Randevu güncellenirken bir hata meydana geldi.");
         }
     }
+
+    async getClientAppointments(client_id) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const appointments = await Appointment.findAll({
+                where: { client_id: client_id }
+            });
+
+            if (!appointments || appointments.length === 0) {
+                throw new Exception("Şu anda herhangi bir randevu bulunmamaktadır.", 404);
+            }
+
+            return appointments;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 500);
+        }
+    }
+
+    async approveAppointment(appointment_id, dietitian_id) {
+        try {
+            if (!appointment_id || !dietitian_id) {
+                throw new Error("Geçersiz randevu veya diyetisyen bilgisi.");
+            }
+
+            const appointment = await Appointment.findOne({
+                where: {
+                    id: appointment_id,
+                    dietitian_id: dietitian_id
+                }
+            });
+
+            if (!appointment) {
+                throw new Error("Randevu bulunamadı veya bu randevuyu onaylama yetkiniz yok.");
+            }
+
+            await appointment.update({
+                status: "approved"
+            });
+
+            return appointment;
+        } catch (error) {
+            throw new Error(error.message || "Randevu onaylanırken bir hata meydana geldi.");
+        }
+    }
 }
 
 module.exports = new AppointmentService();
