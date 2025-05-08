@@ -7,7 +7,8 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  StatusBar
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -152,6 +153,7 @@ export default function Header({ navigation }: Props) {
   return (
     <>
       <Appbar.Header style={styles.appbarContainer}>
+        <StatusBar backgroundColor="#2e7d32" barStyle="light-content" />
         <View style={styles.appbarInner}>
           <View style={styles.leftSection}>
             {canGoBack && (

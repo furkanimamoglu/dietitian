@@ -4,8 +4,7 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  TouchableOpacity,
-  StatusBar
+  TouchableOpacity
 } from 'react-native';
 import {
   Card,
@@ -233,7 +232,6 @@ const Beslenme = ({ navigation }) => {
 
   return (
     <Provider>
-      <StatusBar backgroundColor="#2e7d32" barStyle="light-content" />
       <View style={styles.container}>
         <Header navigation={navigation} />
 
