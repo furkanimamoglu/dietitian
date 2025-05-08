@@ -470,7 +470,6 @@ export default function Randevularim() {
                         >
                             <MenuItem value="confirmed">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
-                            <MenuItem value="rejected">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
                 </DialogContent>
