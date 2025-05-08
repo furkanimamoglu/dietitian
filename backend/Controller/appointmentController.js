@@ -53,9 +53,7 @@ class AppointmentController {
                 client_id,
             });
 
-            res.status(201).json({
-                appointment: newAppointment,
-            });
+            res.status(201).json(newAppointment);
         } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: true,
@@ -144,6 +142,42 @@ class AppointmentController {
 
             res.status(200).json({
                 appointment: updatedAppointment,
+            });
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: true,
+                message: error.message,
+            });
+        }
+    }
+
+    async addAppointmentAsClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
+            if (!token || !user_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { title, start, end } = req.body;
+
+            if (!title || !start || !end) {
+                return res.status(400).json({
+                    message: "Tüm alanları doldurmanız gerekmektedir."
+                });
+            }
+
+            const newAppointment = await AppointmentService.addAppointment({
+                title,
+                start,
+                end,
+                client_id: user_id,
+            });
+
+            res.status(201).json({
+                appointment: newAppointment,
             });
         } catch (error) {
             res.status(error.status || 500).json({

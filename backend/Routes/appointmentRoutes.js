@@ -12,5 +12,6 @@ router.post('/addAppointmentAsDietitian', appointmentController.addAppointmentAs
 router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian)
 
 router.get('/fetchClientAppointments', appointmentController.fetchClientAppointments);
+router.post('/addAppointmentAsClient', appointmentController.addAppointmentAsClient);
 
 module.exports = router;

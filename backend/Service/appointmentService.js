@@ -31,7 +31,15 @@ class AppointmentService {
     }
 
     async addAppointment(data) {
-        const { title, start, end, dietitian_id, client_id } = data;
+        const { title, start, end, client_id } = data;
+
+        const Client = require("../Model/Client");
+        const client = await Client.findByPk(client_id);
+        if (!client) {
+            throw new Exception("Kullanıcı bulunamadı.", 404);
+        }
+
+        const dietitian_id = client.dietitian_id;
 
         try {
             if (!title || !start || !end || !dietitian_id || !client_id) {

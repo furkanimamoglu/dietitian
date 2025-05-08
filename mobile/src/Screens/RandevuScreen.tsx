@@ -20,6 +20,7 @@ import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
+import { Alert } from 'react-native';
 
 interface Appointment {
   id: number;
@@ -130,20 +131,43 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
     setShowDatePicker(false);
   };
 
-  const addAppointment = () => {
+  const addAppointment = async () => {
     if (description.trim() && selectedTime) {
-      const newAppointment: Appointment = {
-        id: Date.now(),
-        title: description,
-        status: 'pending' as const,
-        start: new Date(`${formatDate(selectedDate)}T${selectedTime}`).toISOString(),
-        end: new Date(`${formatDate(selectedDate)}T${selectedTime}`).toISOString(),
-        dietitian_id: 1, // Bu değer API'den alınmalı
-        client_id: 3 // Bu değer API'den alınmalı
-      };
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          console.error('Token bulunamadı');
+          return;
+        }
 
-      setAppointments(prev => [...prev, newAppointment]);
-      closeDialog();
+        // start ve end zamanlarını oluştur
+        const startDateTime = new Date(`${formatDate(selectedDate)}T${selectedTime}`);
+        const endDateTime = new Date(startDateTime.getTime() + 30 * 60000); // 30 dakika ekle
+
+        const response = await fetch(`${config.apiUrl}/appointment/addAppointmentAsClient`, {
+          method: 'POST',
+          headers: {
+            'Authorization': token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: description,
+            start: startDateTime.toISOString(),
+            end: endDateTime.toISOString()
+          })
+        });
+
+        if (response.ok) {
+          closeDialog();
+          fetchAppointments();
+        } else {
+          const data = await response.json();
+          Alert.alert('Hata', data.message || 'Randevu oluşturulamadı.');
+        }
+      } catch (err) {
+        console.error('Randevu eklenirken hata:', err);
+        Alert.alert('Hata', 'Bir hata oluştu.');
+      }
     }
   };
 
