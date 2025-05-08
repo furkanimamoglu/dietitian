@@ -79,10 +79,10 @@ class AppointmentService {
     }
 
     async updateAppointment(appointment_id, data) {
-        const { title, start, end, dietitian_id, client_id } = data;
+        const { title, start, end, dietitian_id, client_id, status } = data;
 
         try {
-            if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id) {
+            if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
                 throw new Error("Tüm alanları doldurmanız gerekmektedir.");
             }
 
@@ -126,6 +126,7 @@ class AppointmentService {
                 end,
                 dietitian_id,
                 client_id,
+                status,
             });
 
             return existingAppointment;

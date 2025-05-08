@@ -74,9 +74,9 @@ class AppointmentController {
                 });
             }
 
-            const { appointment_id, title, start, end, client_id } = req.body;
+            const { appointment_id, title, start, end, client_id, status } = req.body;
 
-            if (!appointment_id || !title || !start || !end || !client_id) {
+            if (!appointment_id || !title || !start || !end || !client_id || !status) {
                 return res.status(400).json({
                     message: "Tüm alanları doldurmanız gerekmektedir."
                 });
@@ -88,6 +88,7 @@ class AppointmentController {
                 end,
                 dietitian_id: user_id,
                 client_id,
+                status,
             });
 
             res.status(200).json({
