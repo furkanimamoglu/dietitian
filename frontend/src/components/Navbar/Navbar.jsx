@@ -51,6 +51,7 @@ export default function Navbar() {
                         key={item.name}
                         onClick={() => navigate(item.route)}
                         className={location.pathname === item.route ? "active-mobile-item" : ""}
+                        disabled={item.name === "TARİFLER" || item.name === "EGZERSİZLER" || item.name === "FİNANS"}
                     >
                         <Box sx={{ mr: 2, color: "rgb(14,62,10)" }}>{item.icon}</Box>
                         <ListItemText primary={item.name} />
@@ -127,11 +128,13 @@ export default function Navbar() {
                     >
                         {menu_items.map((page) => {
                             const isActive = location.pathname === page.route;
+                            const isDisabled = page.name === "TARİFLER" || page.name === "EGZERSİZLER" || page.name === "FİNANS";
                             return (
                                 <Button
                                     key={page.name}
                                     onClick={() => navigate(page.route)}
                                     className={`nav-button ${isActive ? "active" : ""}`}
+                                    disabled={isDisabled}
                                     sx={{
                                         my: 2,
                                         mx: 1,
