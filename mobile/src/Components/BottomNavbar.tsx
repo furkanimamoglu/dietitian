@@ -21,7 +21,7 @@ const BottomNav = ({ navigation }: Props) => {
     <View>
       {menuOpen && (
         <View style={styles.floatingMenuRow}>
-          <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('Randevu')}>
+          <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.replace('Randevu')}>
             <Icon name="calendar-check" size={24} color="#f57c00" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.floatingButton} onPress={() => setShowMealPopup(true)}>
@@ -34,11 +34,11 @@ const BottomNav = ({ navigation }: Props) => {
       )}
 
       <View style={styles.bottomNavbar}>
-        <TouchableOpacity onPress={() => navigation.navigate('Egzersiz')} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.replace('Egzersiz')} style={styles.navItem}>
           <Icon name="dumbbell" size={24} color="#ffffff" />
           <Text style={styles.label}>Egzersiz</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Rapor')} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.replace('Rapor')} style={styles.navItem}>
           <Icon name="chart-line" size={24} color="#ffffff" />
           <Text style={styles.label}>Raporlar</Text>
         </TouchableOpacity>
@@ -48,11 +48,11 @@ const BottomNav = ({ navigation }: Props) => {
           <Text style={styles.plusText}>+</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Beslenme')} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.replace('Beslenme')} style={styles.navItem}>
           <Icon name="food" size={24} color="#ffffff" />
           <Text style={styles.label}>Beslenme</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('AnaSayfa')} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.replace('AnaSayfa')} style={styles.navItem}>
           <Icon name="home" size={24} color="#ffffff" />
           <Text style={styles.label}>Ana Sayfa</Text>
         </TouchableOpacity>

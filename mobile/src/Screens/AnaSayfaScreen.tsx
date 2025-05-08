@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, StyleSheet, ScrollView, Text as RNText, Dimensions } from 'react-native';
 import { Card, Text, Surface, ProgressBar } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,12 +6,41 @@ import { RootStackParamList } from '../App';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../../config';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AnaSayfa'>;
 
 const { width } = Dimensions.get('window');
 
 const AnaSayfa = ({ navigation }: Props) => {
+
+    const [userName, setUserName] = useState<string>('Yükleniyor...');
+
+    useEffect(() => {
+      const fetchClientInfo = async () => {
+        try {
+          const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': await AsyncStorage.getItem('token') || ''
+            }
+          });
+          const data = await response.json();
+          if (response.ok) {
+            setUserName(data.name || 'Bilinmiyor');
+          } else {
+            console.log('Kullanıcı bilgisi alınamadı:', data.message);
+          }
+        } catch (error) {
+          console.error('Hata:', error);
+        }
+      };
+
+      fetchClientInfo();
+    }, []);
+
   const healthData = {
     weight: '70 kg',
     muscleRate: '%40',
@@ -20,11 +49,9 @@ const AnaSayfa = ({ navigation }: Props) => {
     waterAmount: '1.5L / 2.5L'
   };
 
-  const danisanAdi = 'Furkan';
   const waterPercentage = parseInt(healthData.waterRate.replace('%', ''));
   const todayDate = new Date().toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // Haftalık ilerleme verileri
   const weeklyProgress = [
     { day: "Pzt", value: 65 },
     { day: "Sal", value: 68 },
@@ -47,14 +74,13 @@ const AnaSayfa = ({ navigation }: Props) => {
           <View style={styles.welcomeContent}>
             <View>
               <Text style={styles.dateText}>{todayDate}</Text>
-              <Text style={styles.welcomeText}>Merhaba, {danisanAdi}!</Text>
-              <Text style={styles.subText}>Bugün programını tamamlamak için harika bir gün 💪</Text>
+              <Text style={styles.welcomeText}>Merhaba, {userName}!</Text>
+              <Text style={styles.subText}>Bugün programın için harika bir gün 💪</Text>
             </View>
           </View>
         </Surface>
 
         {/* Sağlık Göstergeleri */}
-        <Text style={styles.sectionTitle}>Sağlık Durumu</Text>
         <Surface style={styles.statsContainer}>
           <View style={styles.statItem}>
             <View style={[styles.statIconContainer, { backgroundColor: '#e8f5e9' }]}>
@@ -89,7 +115,7 @@ const AnaSayfa = ({ navigation }: Props) => {
           </View>
         </Surface>
 
-        {/* İlerleme Grafiği - LineChart olmadan */}
+        {/* İlerleme Grafiği - LineChart olmadan
         <Text style={styles.sectionTitle}>Haftalık İlerleme</Text>
         <Surface style={styles.chartCard}>
           <Text style={styles.chartTitle}>Ağırlık Takibi (kg)</Text>
@@ -113,8 +139,9 @@ const AnaSayfa = ({ navigation }: Props) => {
             ))}
           </View>
         </Surface>
+        */}
 
-        {/* Su Tüketimi */}
+        {/* Su Tüketimi
         <Text style={styles.sectionTitle}>Su Tüketimi</Text>
         <Surface style={styles.waterCard}>
           <View style={styles.waterHeader}>
@@ -144,10 +171,9 @@ const AnaSayfa = ({ navigation }: Props) => {
               </View>
             ))}
           </View>
-        </Surface>
+        </Surface> */}
 
         {/* Günlük Plan */}
-        <Text style={styles.sectionTitle}>Günlük Plan</Text>
         <Surface style={styles.planCard}>
           <View style={styles.planSection}>
             <View style={[styles.planIcon, { backgroundColor: '#fff3e0' }]}>
