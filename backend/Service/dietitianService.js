@@ -93,13 +93,13 @@ class DietitianService {
         }
     }
 
-    async registerClient(user_id, name, surname, email, password, phoneNumber, height, weight, gender) {
+    async registerClient(user_id, name, email, password, phoneNumber, gender) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
-            if (!phoneNumber || !password || !name || !surname) {
+            if (!phoneNumber || !password || !name) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
@@ -114,13 +114,10 @@ class DietitianService {
             return await Client.create({
                 dietitian_id: user_id,
                 name: name,
-                surname: surname,
                 gender: gender,
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
-                height: height,
-                weight: weight,
                 role: CLIENT,
                 token: token
             })
