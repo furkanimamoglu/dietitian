@@ -36,32 +36,31 @@ const mealIcons = {
 const Beslenme = ({ navigation }) => {
   const [meals, setMeals] = useState({
     Kahvaltı: [
-      { item: '2 haşlanmış yumurta', checked: false, protein: 12, calorie: 140 },
-      { item: '1 dilim tam buğday ekmeği', checked: false, protein: 3, calorie: 80 },
-      { item: 'Salatalık, domates', checked: false, protein: 1, calorie: 25 },
+      { item: '2 haşlanmış yumurta', checked: false, portion: '2 adet' },
+      { item: '1 dilim tam buğday ekmeği', checked: false, portion: '1 dilim' },
+      { item: 'Salatalık, domates', checked: false, portion: '1 porsiyon' },
     ],
     Öğle: [
-      { item: 'Tavuk göğsü (120g)', checked: false, protein: 25, calorie: 165 },
-      { item: 'Bulgur pilavı (1 porsiyon)', checked: false, protein: 3, calorie: 110 },
-      { item: 'Yoğurt (1 kase)', checked: false, protein: 5, calorie: 80 },
+      { item: 'Tavuk göğsü', checked: false, portion: '120g' },
+      { item: 'Bulgur pilavı', checked: false, portion: '1 porsiyon' },
+      { item: 'Yoğurt', checked: false, portion: '1 kase' },
     ],
     Akşam: [
-      { item: 'Zeytinyağlı sebze yemeği', checked: false, protein: 3, calorie: 120 },
-      { item: '1 dilim ekmek', checked: false, protein: 2, calorie: 70 },
-      { item: 'Salata', checked: false, protein: 1, calorie: 45 },
+      { item: 'Zeytinyağlı sebze yemeği', checked: false, portion: '1 porsiyon' },
+      { item: 'Ekmek', checked: false, portion: '1 dilim' },
+      { item: 'Salata', checked: false, portion: '1 porsiyon' },
     ],
     Aperatifler: [
-      { item: '1 avuç badem', checked: false, protein: 6, calorie: 160 },
-      { item: '1 orta boy elma', checked: false, protein: 0, calorie: 95 },
-      { item: 'Bitki çayı', checked: false, protein: 0, calorie: 5 },
+      { item: 'Badem', checked: false, portion: '1 avuç' },
+      { item: 'Elma', checked: false, portion: '1 adet' },
+      { item: 'Bitki çayı', checked: false, portion: '1 fincan' },
     ],
   });
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState('Kahvaltı');
   const [newMeal, setNewMeal] = useState('');
-  const [newProtein, setNewProtein] = useState('');
-  const [newCalorie, setNewCalorie] = useState('');
+  const [newPortion, setNewPortion] = useState('');
   const [waterIntake, setWaterIntake] = useState(2);
   const [maxWaterIntake, setMaxWaterIntake] = useState(8);
   const [dailyStats, setDailyStats] = useState({ protein: 0, calories: 0 });
@@ -95,8 +94,7 @@ const Beslenme = ({ navigation }) => {
   const openModal = () => {
     setSelectedMealType('Kahvaltı');
     setNewMeal('');
-    setNewProtein('');
-    setNewCalorie('');
+    setNewPortion('');
     setModalVisible(true);
   };
 
@@ -106,13 +104,11 @@ const Beslenme = ({ navigation }) => {
       updatedMeals[selectedMealType].push({
         item: newMeal,
         checked: false,
-        protein: Number(newProtein) || 0,
-        calorie: Number(newCalorie) || 0
+        portion: newPortion
       });
       setMeals(updatedMeals);
       setNewMeal('');
-      setNewProtein('');
-      setNewCalorie('');
+      setNewPortion('');
       setModalVisible(false);
     }
   };
@@ -249,7 +245,6 @@ const Beslenme = ({ navigation }) => {
             </View>
           </Surface>
 
-          {renderDailyStats()}
           {renderWaterTracker()}
 
           {/* Yemek kategorileri */}
@@ -295,38 +290,20 @@ const Beslenme = ({ navigation }) => {
                         {meal.item}
                       </Text>
                       <View style={styles.nutritionInfo}>
-                        {meal.protein > 0 && (
-                          <Chip
-                            style={styles.nutritionChip}
-                            textStyle={styles.chipText}
-                            avatar={
-                              <Avatar.Icon
-                                size={16}
-                                icon="arm-flex"
-                                color="#7cb342"
-                                style={{backgroundColor: 'transparent'}}
-                              />
-                            }
-                          >
-                            {meal.protein}g protein
-                          </Chip>
-                        )}
-                        {meal.calorie > 0 && (
-                          <Chip
-                            style={styles.nutritionChip}
-                            textStyle={styles.chipText}
-                            avatar={
-                              <Avatar.Icon
-                                size={16}
-                                icon="fire"
-                                color="#ff7043"
-                                style={{backgroundColor: 'transparent'}}
-                              />
-                            }
-                          >
-                            {meal.calorie} kcal
-                          </Chip>
-                        )}
+                        <Chip
+                          style={styles.nutritionChip}
+                          textStyle={styles.chipText}
+                          avatar={
+                            <Avatar.Icon
+                              size={16}
+                              icon="scale"
+                              color="#7cb342"
+                              style={{backgroundColor: 'transparent'}}
+                            />
+                          }
+                        >
+                          {meal.portion}
+                        </Chip>
                       </View>
                     </View>
                   </View>
@@ -378,22 +355,12 @@ const Beslenme = ({ navigation }) => {
                 onChangeText={setNewMeal}
               />
 
-              <Text style={styles.dialogLabel}>Protein (g)</Text>
+              <Text style={styles.dialogLabel}>Porsiyon/Adet/Gram</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Protein miktarı (g)"
-                value={newProtein}
-                onChangeText={setNewProtein}
-                keyboardType="numeric"
-              />
-
-              <Text style={styles.dialogLabel}>Kalori (kcal)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Kalori miktarı (kcal)"
-                value={newCalorie}
-                onChangeText={setNewCalorie}
-                keyboardType="numeric"
+                placeholder="Örn: 1 porsiyon, 2 adet, 150g"
+                value={newPortion}
+                onChangeText={setNewPortion}
               />
             </Dialog.Content>
             <Dialog.Actions>
@@ -443,16 +410,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4
+    marginBottom: 8,
+    paddingHorizontal: 4
   },
   progressPercentage: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4caf50'
+    color: '#4caf50',
+    minWidth: 60
   },
   progressDescription: {
     fontSize: 14,
-    color: '#666'
+    color: '#666',
+    flex: 1,
+    textAlign: 'right',
+    marginLeft: 12
   },
   progressBar: {
     height: 10,
@@ -494,16 +466,24 @@ const styles = StyleSheet.create({
   nutritionInfo: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 2
+    marginTop: 4,
+    gap: 8
   },
   nutritionChip: {
-    marginRight: 8,
+    marginRight: 0,
     marginBottom: 4,
-    height: 24,
-    backgroundColor: '#f0f0f0'
+    height: 32,
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 12,
+    paddingVertical: 0,
+    justifyContent: 'center'
   },
   chipText: {
-    fontSize: 12
+    fontSize: 13,
+    lineHeight: 20,
+    marginLeft: 4,
+    marginRight: 4,
+    color: '#424242'
   },
   fab: {
     position: 'absolute',

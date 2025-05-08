@@ -60,7 +60,9 @@ export default function Randevularim() {
                     end: appointment.end,
                     extendedProps: {
                         client_id: appointment.client_id,
-                    }
+                        status: appointment.status,
+                    },
+                    color: appointment.status === "approved" || appointment.status === "confirmed" ? "#4CAF50" : "#FF9800"
                 }));
 
                 setRandevular(formattedAppointments);
