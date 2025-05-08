@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import axios from "axios";
 import "./Randevularim.css";
 
@@ -20,6 +20,10 @@ import {
     Grid2,
     TextField,
     IconButton,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
 import config from "../../config.js";
 import {Close} from "@mui/icons-material";
@@ -38,7 +42,10 @@ export default function Randevularim() {
         start: "",
         end: "",
         client_id: "",
+        status: "pending",
     });
+
+    const calendarRef = useRef(null);
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -101,6 +108,7 @@ export default function Randevularim() {
             start: "",
             end: "",
             client_id: "",
+            status: "pending",
         });
         setRandevuEklePopup(true);
     };
@@ -121,6 +129,7 @@ export default function Randevularim() {
                 start: startDate.toISOString().slice(0, 16),
                 end: endDate.toISOString().slice(0, 16),
                 client_id: "",
+                status: "pending",
             }));
             setRandevuEklePopup(true);
         }
@@ -128,15 +137,14 @@ export default function Randevularim() {
 
     const handleEventClick = (arg) => {
         const event = arg.event;
-
         setEventData({
             id: event.id,
             title: event.title,
             start: event.start.toISOString().slice(0, 16),
             end: event.end?.toISOString().slice(0, 16) || "",
             client_id: event.extendedProps?.client_id || "",
+            status: event.extendedProps?.status || "pending",
         });
-
         setRandevuDuzenlePopup(true);
     };
 
@@ -238,6 +246,7 @@ export default function Randevularim() {
                 start: eventData.start,
                 end: eventData.end,
                 client_id: eventData.client_id,
+                status: eventData.status,
             };
 
             const requestData = {
@@ -246,6 +255,7 @@ export default function Randevularim() {
                 start: updatedEventWithDates.start,
                 end: updatedEventWithDates.end,
                 client_id: updatedEventWithDates.client_id,
+                status: updatedEventWithDates.status,
             };
 
             const response = await axios.put(
@@ -269,7 +279,9 @@ export default function Randevularim() {
                             end: updatedEventWithDates.end,
                             extendedProps: {
                                 client_id: updatedEventWithDates.client_id,
+                                status: updatedEventWithDates.status,
                             },
+                            color: updatedEventWithDates.status === "approved" || updatedEventWithDates.status === "confirmed" ? "#4CAF50" : "#FF9800"
                         }
                         : randevu
                 );
@@ -298,6 +310,7 @@ export default function Randevularim() {
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
                 <Box sx={{ width: "100%", height: "100%" }}>
                     <FullCalendar
+                        ref={calendarRef}
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
                         timeZone={'UTC'}
@@ -307,6 +320,7 @@ export default function Randevularim() {
                         droppable={true}
                         locale="tr"
                         contentHeight="68vh"
+                        scrollTime="06:00:00"
                         headerToolbar={{
                             left: "prev,next today randevuEkle",
                             center: "title",
@@ -440,6 +454,21 @@ export default function Randevularim() {
                         )}
                         fullWidth
                     />
+                    {/* Status Selectbox (MUI) */}
+                    <FormControl fullWidth margin="normal" required>
+                        <InputLabel id="status-label">Durum</InputLabel>
+                        <Select
+                            labelId="status-label"
+                            id="status-select"
+                            value={eventData.status}
+                            label="Durum"
+                            onChange={(e) => handleEventChange("status", e.target.value)}
+                        >
+                            <MenuItem value="confirmed">Onaylandı</MenuItem>
+                            <MenuItem value="pending">Beklemede</MenuItem>
+                            <MenuItem value="rejected">Reddedildi</MenuItem>
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
@@ -526,6 +555,20 @@ export default function Randevularim() {
                         )}
                         fullWidth
                     />
+                    {/* Status Selectbox (MUI) */}
+                    <FormControl fullWidth margin="normal" required>
+                        <InputLabel id="status-label">Durum</InputLabel>
+                        <Select
+                            labelId="status-label"
+                            id="status-select"
+                            value={eventData.status}
+                            label="Durum"
+                            onChange={(e) => handleEventChange("status", e.target.value)}
+                        >
+                            <MenuItem value="confirmed">Onaylandı</MenuItem>
+                            <MenuItem value="pending">Beklemede</MenuItem>
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button
