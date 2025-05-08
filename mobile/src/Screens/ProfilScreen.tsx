@@ -1,16 +1,54 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import { Card, Text, Button } from 'react-native-paper';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../../config';
 
 const Profil = ({ navigation }) => {
-  const user = {
-    name: 'Furkan İmamoğlu',
-    phone: '+90 532 000 0000',
-    avatar: 'https://i.pravatar.cc/150?img=3',
-    dietitian: 'Dyt. Nur Seda'
+  const [user, setUser] = useState({
+    name: 'Yükleniyor...',
+    phone: '',
+    email: '',
+  });
+
+  useEffect(() => {
+    const fetchClientInfo = async () => {
+      try {
+        const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': await AsyncStorage.getItem('token') || ''
+          }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setUser({
+            name: data.name || 'İsimsiz',
+            phone: data.phoneNumber || '',
+            email: data.email || ''
+          });
+        } else {
+          console.log('Kullanıcı bilgisi alınamadı:', data.message);
+        }
+      } catch (error) {
+        console.error('Hata:', error);
+      }
+    };
+
+    fetchClientInfo();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      navigation.replace('Login');
+    } catch (error) {
+      console.error('Çıkış yapılırken hata oluştu:', error);
+    }
   };
 
   return (
@@ -19,10 +57,10 @@ const Profil = ({ navigation }) => {
 
       <ScrollView style={styles.content}>
         <View style={styles.profileSection}>
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          <Image source={{ uri: 'https://i.pravatar.cc/150?img=3' }} style={styles.avatar} />
           <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.labelText}>{user.phone}</Text>
-          <Text style={styles.labelText}>Diyetisyeniniz: {user.dietitian}</Text>
+          <Text style={styles.labelText}>Telefon: {user.phone}</Text>
+          <Text style={styles.labelText}>Mail: {user.email}</Text>
         </View>
 
         <Card style={styles.card}>
@@ -30,7 +68,7 @@ const Profil = ({ navigation }) => {
             <Button onPress={() => console.log('Profili Düzenle')} mode="outlined" style={styles.button}>Profili Düzenle</Button>
             <Button onPress={() => console.log('Şifreyi Değiştir')} mode="outlined" style={styles.button}>Şifreyi Değiştir</Button>
             <Button onPress={() => console.log('Ayarlar')} mode="outlined" style={styles.button}>Ayarlar</Button>
-            <Button onPress={() => console.log('Çıkış yap')} mode="outlined" textColor="#d32f2f" style={styles.button} icon="logout">Çıkış Yap</Button>
+            <Button onPress={handleLogout} mode="outlined" textColor="#d32f2f" style={styles.button} icon="logout">Çıkış Yap</Button>
           </Card.Content>
         </Card>
       </ScrollView>

@@ -99,7 +99,7 @@ class DietitianService {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
-            if (!email || !password || !phoneNumber || !height || !weight || !gender) {
+            if (!phoneNumber || !password || !name || !surname) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
@@ -357,6 +357,26 @@ class DietitianService {
             }
 
             return dietitian;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async getDietitianNameById(dietitian_id) {
+        try {
+            if (!dietitian_id) {
+                throw new Error("Diyetisyen bulunamadı.");
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: { id: dietitian_id }
+            });
+
+            if (!dietitian) {
+                throw new Error("Diyetisyen bulunamadı.");
+            }
+
+            return {dietitian_name: dietitian.name};
         } catch (error) {
             throw new Exception(error.message, 400);
         }

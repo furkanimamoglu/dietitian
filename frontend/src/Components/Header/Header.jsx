@@ -98,7 +98,7 @@ export default function Header() {
 
     React.useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/diyetisyen/login';
+            window.location.href = '/login';
         }
     }, []);
 
@@ -118,13 +118,13 @@ export default function Header() {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
-            navigate('/diyetisyen/login');
+            navigate('/login');
         } else if (value === 'profil') {
-            navigate('/diyetisyen/profil');
+            navigate('/profil');
         } else if (value === 'ayarlar') {
-            navigate('/diyetisyen/ayarlar');
+            navigate('/ayarlar');
         } else {
-            navigate('/diyetisyen/dashboard');
+            navigate('/dashboard');
         }
         setAnchorElUser(null);
     };

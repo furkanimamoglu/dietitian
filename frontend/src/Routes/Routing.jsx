@@ -1,5 +1,5 @@
 import React from 'react';
-import {Navigate, Route, Routes} from 'react-router-dom';
+import {Route, Routes} from 'react-router-dom';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
@@ -14,6 +14,7 @@ import Egzersizler from "../pages/Egzersizler/Egzersizler.jsx";
 import Profil from "../pages/Profil/Profil.jsx";
 import Ayarlar from "../pages/Ayarlar/Ayarlar.jsx";
 import Mesaj from "../pages/Mesaj/Mesaj.jsx";
+import Finans from "../pages/Finans/Finans.jsx";
 
 export default function Routing() {
     return (
@@ -24,6 +25,7 @@ export default function Routing() {
                 <Route path="/ayarlar/*" element={<Ayarlar/>}/>
                 <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
                 <Route path="/danisan/:id" element={<Danisan/>}/>
+                <Route path="/finans/*" element={<Finans/>}/>
                 <Route path="/beslenme/*" element={<Beslenme/>}/>
                 <Route path="/randevularim/*" element={<Randevularim/>}/>
                 <Route path="/mesaj/*" element={<Mesaj/>}/>

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import "./Danisanlarim.css";
 import {
     Box,
     Button,
@@ -8,238 +7,273 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Grid2,
+    Stack,
     TextField,
     Typography,
+    Paper,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import {
+    DataGrid,
+    GridToolbarQuickFilter,
+    GridToolbarContainer,
+    GridToolbarExport
+} from "@mui/x-data-grid";
+import { trTR } from "@mui/x-data-grid/locales";
 import {
     Cancel,
     CheckCircle,
     GroupAdd,
     Visibility,
-    Delete,
+    Delete as DeleteIcon,
+    QrCode as QrCodeIcon,
+    Male as MaleIcon,
+    Female as FemaleIcon,
 } from "@mui/icons-material";
-import QrCodeIcon from "@mui/icons-material/QrCode";
-import MaleIcon from "@mui/icons-material/Male";
-import FemaleIcon from "@mui/icons-material/Female";
 import { green, red, blue, pink } from "@mui/material/colors";
+import { useNavigate } from "react-router-dom";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
-import { useNavigate } from "react-router-dom";
+
+// ---------------------------
+// Custom Toolbar with Search & Export
+// ---------------------------
+function QuickSearchToolbar() {
+    return (
+        <GridToolbarContainer sx={{ justifyContent: "space-between", py: 1 }}>
+            <GridToolbarQuickFilter placeholder="Danışan Ara" />
+            <GridToolbarExport csvOptions={{ utf8WithBom: true }} />
+        </GridToolbarContainer>
+    );
+}
 
 export default function Danisanlarim() {
-    const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
+
+    // ---------------------------
+    // State
+    // ---------------------------
     const [clients, setClients] = useState([]);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
 
-    // QR dialog state
-    const [qrOpen, setQrOpen] = useState(false);
-    const [qrData, setQrData] = useState(null);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [qrDialogOpen, setQrDialogOpen] = useState(false);
+    const [qrData, setQrData] = useState("");
 
-    const openCreatePopup = () => {
-        setOpen(true);
-    };
-    const closeCreatePopup = () => {
-        setOpen(false);
-    };
-    const submitCreatePopup = (e) => {
-        e.preventDefault();
-        console.log("Form submitted");
-        closeCreatePopup();
-    };
-
+    // ---------------------------
+    // Data Fetch
+    // ---------------------------
     useEffect(() => {
         axios
-            .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
-                headers: { Authorization: localStorage.getItem("token") },
-            })
+            .get(
+                `${config[config.environment].apiUrl}/dietitian/getAllMyClients`,
+                { headers: { Authorization: localStorage.getItem("token") } }
+            )
             .then((res) => setClients(res.data))
             .catch((err) => console.error("Error fetching clients:", err));
     }, []);
 
-    const handleRowUpdate = async (updatedRow, originalRow) => {
+    // ---------------------------
+    // CRUD Helpers
+    // ---------------------------
+    const handleRowUpdate = useCallback(async (updatedRow, originalRow) => {
         try {
             const res = await axios.put(
-                config[config.environment].apiUrl + "/dietitian/updateClient",
+                `${config[config.environment].apiUrl}/dietitian/updateClient`,
                 updatedRow,
                 { headers: { Authorization: localStorage.getItem("token") } }
             );
-            console.log("Güncelleme başarılı:", res.data);
-            return res.data;
+            return { ...updatedRow, ...res.data };
         } catch (err) {
             console.error("Güncelleme hatası:", err);
-            return originalRow;
+            return originalRow; // revert on error
         }
-    };
+    }, []);
 
     const handleDelete = async (id) => {
         try {
             await axios.delete(
-                config[config.environment].apiUrl + "/dietitian/deleteClient",
+                `${config[config.environment].apiUrl}/dietitian/deleteClient`,
                 {
                     headers: { Authorization: localStorage.getItem("token") },
                     data: { client_id: id },
                 }
             );
             setClients((prev) => prev.filter((c) => c.id !== id));
-            console.log("Silme işlemi başarılı");
         } catch (err) {
             console.error("Silme işlemi hatası:", err);
         }
     };
 
-    const confirmDelete = (client) => {
+    // ---------------------------
+    // Dialog Handlers
+    // ---------------------------
+    const openCreateDialog = () => setCreateDialogOpen(true);
+    const closeCreateDialog = () => setCreateDialogOpen(false);
+
+    const openDeleteDialog = (client) => {
         setSelectedClient(client);
         setDeleteDialogOpen(true);
     };
-    const cancelDelete = () => {
+    const closeDeleteDialog = () => {
         setDeleteDialogOpen(false);
         setSelectedClient(null);
     };
-    const confirmDeleteAction = () => {
+    const confirmDelete = () => {
         if (selectedClient) handleDelete(selectedClient.id);
-        setDeleteDialogOpen(false);
-        setSelectedClient(null);
+        closeDeleteDialog();
     };
 
-    // Fetch QR and open dialog
-    const showQR = async () => {
+    const fetchQR = async () => {
         try {
             const { data } = await axios.get(
-                config[config.environment].apiUrl + "/dietitian/getDietitianQR",
+                `${config[config.environment].apiUrl}/dietitian/getDietitianQR`,
                 { headers: { Authorization: localStorage.getItem("token") } }
             );
             setQrData(data.qrData);
-            setQrOpen(true);
+            setQrDialogOpen(true);
         } catch (err) {
             console.error("QR fetch hatası:", err);
         }
     };
-    const closeQR = () => {
-        setQrOpen(false);
-        setQrData(null);
-    };
+    const closeQrDialog = () => setQrDialogOpen(false);
 
-    // Print only the QR
-    const handlePrint = () => {
-        if (!qrData) return;
-        const printWindow = window.open("", "_blank");
-        printWindow.document.write(`
-      <html>
-        <head><title>QR Yazdır</title></head>
-        <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;">
-          <img src="${qrData}" alt="QR Kod"/>
-        </body>
-      </html>
-    `);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-    };
-
+    // ---------------------------
+    // DataGrid Column Definitions
+    // ---------------------------
     const columns = [
-        { field: "id", headerName: "ID", width: 50 },
-        { field: "name", headerName: "İsim", width: 150, editable: true },
-        { field: "surname", headerName: "Soyisim", width: 150, editable: true },
-        { field: "email", headerName: "Email", width: 200, editable: true },
-        { field: "phoneNumber", headerName: "Telefon No", width: 120, editable: true },
-        { field: "height", headerName: "Boy", width: 25, editable: true },
-        { field: "weight", headerName: "Kilo", width: 25, editable: true },
+        { field: "id", headerName: "ID", width: 70 },
+        { field: "name", headerName: "İsim", flex: 1, editable: true },
+        { field: "surname", headerName: "Soyisim", flex: 1, editable: true },
+        { field: "email", headerName: "Email", flex: 1.2, editable: true },
+        { field: "phoneNumber", headerName: "Telefon", flex: 1, editable: true },
+        { field: "height", headerName: "Boy (cm)", width: 90, editable: true, type: "number" },
+        { field: "weight", headerName: "Kilo (kg)", width: 90, editable: true, type: "number" },
         {
             field: "status",
             headerName: "Durum",
-            editable: true,
+            width: 90,
             type: "singleSelect",
             valueOptions: ["aktif", "inaktif"],
+            editable: true,
             renderCell: (params) =>
                 params.value === "aktif" ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
-                        <CheckCircle style={{ color: green[500] }} />
-                    </Box>
-                ) : params.value === "inaktif" ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
-                        <Cancel style={{ color: red[500] }} />
-                    </Box>
-                ) : null,
+                    <CheckCircle sx={{ color: green[500] }} />
+                ) : (
+                    <Cancel sx={{ color: red[500] }} />
+                ),
         },
         {
             field: "gender",
             headerName: "Cinsiyet",
+            width: 90,
             type: "singleSelect",
             valueOptions: ["Erkek", "Kadın"],
             editable: true,
-            renderCell: (params) => (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100%" }}>
-                    {params.value === "Erkek" ? (
-                        <MaleIcon style={{ color: blue[500] }} />
-                    ) : params.value === "Kadın" ? (
-                        <FemaleIcon style={{ color: pink[500] }} />
-                    ) : null}
-                </Box>
-            ),
+            renderCell: (params) =>
+                params.value === "Erkek" ? (
+                    <MaleIcon sx={{ color: blue[500] }} />
+                ) : (
+                    <FemaleIcon sx={{ color: pink[500] }} />
+                ),
         },
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 150,
-            renderCell: (params) => {
-                const navigate = useNavigate();
-                return (
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => navigate(`/diyetisyen/danisan/${params.row.id}`)}
-                        >
-                            <Visibility />
-                        </Button>
-                        <Button variant="outlined" color="error" onClick={() => confirmDelete(params.row)}>
-                            <Delete />
-                        </Button>
-                    </Box>
-                );
-            },
+            width: 140,
+            sortable: false,
+            renderCell: (params) => (
+                <Stack direction="row" spacing={1}>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => navigate(`/danisan/${params.row.id}`)}
+                    >
+                        <Visibility fontSize="small" />
+                    </Button>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        onClick={() => openDeleteDialog(params.row)}
+                    >
+                        <DeleteIcon fontSize="small" />
+                    </Button>
+                </Stack>
+            ),
         },
     ];
 
+    // ---------------------------
+    // Create Client Submit (placeholder – integrate with API)
+    // ---------------------------
+    const handleCreateSubmit = (e) => {
+        e.preventDefault();
+        // TODO: Post new client → refresh list
+        closeCreateDialog();
+    };
+
+    // ---------------------------
+    // Render
+    // ---------------------------
     return (
         <Default>
-            <Grid2 container spacing={2}>
-                <Grid2 xs={12}>
+            <Stack spacing={2} sx={{ mt: "15px" }}>
+                {/* Action Buttons */}
+                <Stack direction="row" spacing={2}>
                     <Button
-                        sx={{ marginRight: 1 }}
-                        variant="outlined"
-                        color="primary"
+                        variant="contained"
                         startIcon={<GroupAdd />}
-                        onClick={openCreatePopup}
+                        onClick={openCreateDialog}
+                        sx={{
+                            borderRadius: 10,
+                            textTransform: "none",
+                            boxShadow: 3
+                        }}
                     >
                         Danışan Ekle
                     </Button>
+
                     <Button
-                        sx={{ marginRight: 1 }}
-                        variant="outlined"
-                        color="primary"
+                        variant="contained"
                         startIcon={<QrCodeIcon />}
-                        onClick={showQR}
+                        onClick={fetchQR}
+                        sx={{
+                            borderRadius: 10,
+                            textTransform: "none",
+                            boxShadow: 3
+                        }}
                     >
                         QR’ımı Göster
                     </Button>
+                </Stack>
+
+                {/* Data Grid */}
+                <Paper elevation={2} sx={{ height: "calc(100vh - 300px)", width: "100%" }}>
                     <DataGrid
+                        localeText={trTR.components.MuiDataGrid.defaultProps.localeText}
                         rows={clients}
                         columns={columns}
-                        pageSize={5}
-                        editable
+                        pageSize={10}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        disableSelectionOnClick
                         processRowUpdate={handleRowUpdate}
-                        onProcessRowUpdateError={(error) => console.error("Hata:", error)}
+                        onProcessRowUpdateError={(error) => console.error(error)}
+                        slots={{ toolbar: QuickSearchToolbar }}
+                        sx={{
+                            "& .MuiDataGrid-columnHeaders": {
+                                bgcolor: "background.default",
+                            },
+                            "& .MuiDataGrid-footerContainer": {
+                                bgcolor: "background.default",
+                            },
+                        }}
                     />
-                </Grid2>
-            </Grid2>
+                </Paper>
+            </Stack>
 
             {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+            <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
                 <DialogTitle>Silme Onayı</DialogTitle>
                 <DialogContent>
                     <Typography>
@@ -247,62 +281,48 @@ export default function Danisanlarim() {
                     </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={cancelDelete} color="secondary" variant="outlined">
+                    <Button onClick={closeDeleteDialog} variant="outlined" color="secondary">
                         Vazgeç
                     </Button>
-                    <Button onClick={confirmDeleteAction} color="error" variant="contained">
+                    <Button onClick={confirmDelete} variant="contained" color="error">
                         Sil
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* QR Code Dialog */}
-            <Dialog open={qrOpen} onClose={closeQR} maxWidth="xs" fullWidth>
+            {/* QR Dialog */}
+            <Dialog open={qrDialogOpen} onClose={closeQrDialog} maxWidth="xs" fullWidth>
                 <DialogTitle>QR Kodunuz</DialogTitle>
                 <DialogContent dividers sx={{ display: "flex", justifyContent: "center" }}>
                     {qrData ? (
-                        <img src={qrData} alt="Dietisyen QR" style={{ maxWidth: "100%", height: "auto" }} />
+                        <img src={qrData} alt="Dietisyen QR" style={{ maxWidth: "100%" }} />
                     ) : (
-                        <Typography>Yükleniyor...</Typography>
+                        <Typography>Yükleniyor…</Typography>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handlePrint} variant="outlined">
+                    <Button onClick={() => window.print()} variant="outlined">
                         Yazdır
                     </Button>
-                    <Button onClick={closeQR} variant="contained" color="primary">
+                    <Button onClick={closeQrDialog} variant="contained">
                         Kapat
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Create Popup */}
-            <Dialog open={open} onClose={closeCreatePopup}>
+            {/* Create Client Dialog */}
+            <Dialog open={createDialogOpen} onClose={closeCreateDialog} maxWidth="sm" fullWidth>
                 <DialogTitle>Yeni Danışan Oluştur</DialogTitle>
-                <form onSubmit={submitCreatePopup}>
-                    <DialogContent>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="name"
-                            label="Adınız"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            required
-                        />
-                        <TextField
-                            margin="dense"
-                            id="email"
-                            label="E-posta"
-                            type="email"
-                            fullWidth
-                            variant="outlined"
-                            required
-                        />
+                <form onSubmit={handleCreateSubmit}>
+                    <DialogContent sx={{ pt: 2 }}>
+                        <Stack spacing={2}>
+                            <TextField label="Adınız" name="name" required fullWidth />
+                            <TextField label="E-posta" name="email" type="email" required fullWidth />
+                        </Stack>
                     </DialogContent>
                     <DialogActions>
-                        <Button type="submit" color="primary" variant="contained">
+                        <Button onClick={closeCreateDialog}>İptal</Button>
+                        <Button type="submit" variant="contained">
                             Oluştur
                         </Button>
                     </DialogActions>

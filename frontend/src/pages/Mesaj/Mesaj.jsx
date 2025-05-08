@@ -1,22 +1,35 @@
 import React, { useRef, useEffect, useState } from 'react';
-import './Mesaj.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import {
+    Avatar,
     Box,
-    Grid2,
+    Chip,
+    Divider,
+    Grid,
     IconButton,
+    InputAdornment,
     List,
-    ListItem,
+    ListItemAvatar,
+    ListItemButton,
     ListItemText,
     Paper,
     TextField,
     Typography,
-    Button
+    useTheme
 } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
+import PersonIcon from '@mui/icons-material/Person';
+import InfoIcon from '@mui/icons-material/Info';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import HeightIcon from '@mui/icons-material/Height';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import WcIcon from '@mui/icons-material/Wc';
 import axios from "axios";
 import config from "../../config.js";
+import "./Mesaj.css";
 
 export default function Mesaj() {
     const [danisanList, setDanisanList] = useState([]);
@@ -24,8 +37,10 @@ export default function Mesaj() {
     const [selectedDanisan, setSelectedDanisan] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const theme = useTheme();
 
     const messageListRef = useRef();
+    const messageInputRef = useRef();
 
     useEffect(() => {
         if (messageListRef.current) {
@@ -34,6 +49,10 @@ export default function Mesaj() {
     }, [messages]);
 
     useEffect(() => {
+        fetchDanisanList();
+    }, []);
+
+    const fetchDanisanList = () => {
         axios
             .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
                 headers: {
@@ -46,289 +65,347 @@ export default function Mesaj() {
             .catch((error) => {
                 console.error("Error fetching clients:", error);
             });
-    }, []);
+    };
 
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
-        setMessages([]);
-    };
+        setMessages([
+            {
+                id: 1,
+                text: "Merhaba, nasılsınız?",
+                sender: "dietitian",
+                timestamp: "09:30"
+            },
+            {
+                id: 2,
+                text: "İyiyim teşekkürler, bu hafta diyet programıma uydum.",
+                sender: "client",
+                timestamp: "09:32"
+            }
+        ]);
 
-    const handleDeleteDanisan = (danisanId) => {
-        const updatedList = danisanList.filter((danisan) => danisan.id !== danisanId);
-        setDanisanList(updatedList);
-
-        if (selectedDanisan?.id === danisanId) {
-            setSelectedDanisan(null);
-            setMessages([]);
-        }
+        // Input alanına odaklan
+        setTimeout(() => {
+            if (messageInputRef.current) {
+                messageInputRef.current.focus();
+            }
+        }, 100);
     };
 
     const handleSendMessage = () => {
         if (newMessage.trim() === "") return;
+
         const newMsg = {
             id: Date.now(),
             text: newMessage,
-            timestamp: new Date().toLocaleTimeString(),
+            sender: "dietitian",
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
+
         setMessages([...messages, newMsg]);
         setNewMessage("");
+
+        // Gerçek uygulamada mesajı API'ye gönder
     };
 
     const handleKeyPress = (e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
             handleSendMessage();
         }
+    };
+
+    const getInitials = (name, surname) => {
+        return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
+    };
+
+    const getAvatarColor = (name) => {
+        const colors = [
+            '#1976d2', '#388e3c', '#d32f2f', '#7b1fa2',
+            '#c2185b', '#f57c00', '#0288d1', '#689f38'
+        ];
+
+        const charCodeSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+        return colors[charCodeSum % colors.length];
     };
 
     const filteredDanisanList = danisanList.filter((danisan) =>
         `${danisan.name} ${danisan.surname}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const formatDate = () => {
+        const today = new Date();
+        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        return today.toLocaleDateString('tr-TR', options);
+    };
+
     return (
         <Default>
-            <Grid2 container sx={{ height: '100%' }}>
-                {/* Sol Panel */}
-                <Grid2
-                    container
-                    sx={{ height: '78vh', flex: 1, display: 'flex' }}
-                    direction="column"
-                    spacing={2}
-                >
-                    <Grid2>
-                        <Paper elevation={3} sx={{ minHeight: "78vh", p: "0.5rem" }}>
-                            {/* Danışan Ara */}
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Danışan Ara..."
-                                variant="outlined"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+            <Box className="mesaj-container">
 
-                            {/* Danışan Listesi */}
-                            <List
-                                sx={{
-                                    maxHeight: '70vh',
-                                    overflowY: 'auto',
-                                    overflowX: 'hidden',
-                                    mt: 1
-                                }}
-                            >
-                                {filteredDanisanList && filteredDanisanList.length > 0 ? (
-                                    filteredDanisanList.map((danisan) => (
-                                        <ListItem
-                                            key={danisan.id}
-                                            sx={{
-                                                '&:hover': {
-                                                    backgroundColor: '#f5f5f5',
-                                                    '.delete-button': { visibility: 'visible' },
-                                                },
-                                                transition: 'background-color 0.2s',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            <ListItemText
-                                                primary={`${danisan.name} ${danisan.surname}`}
-                                                onClick={() => handleDanisanSelect(danisan)}
-                                            />
-                                            {/* Sil Butonu */}
-                                            <IconButton
-                                                edge="end"
-                                                className="delete-button"
-                                                aria-label="delete"
-                                                onClick={() => handleDeleteDanisan(danisan.id)}
-                                                sx={{
-                                                    visibility: 'hidden',
-                                                    '&:hover': { backgroundColor: '#ff0000' },
-                                                    backgroundColor: "#a50000",
-                                                    color: 'white',
-                                                }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </ListItem>
-                                    ))
-                                ) : (
-                                    <Typography sx={{ p: 2, textAlign: 'center' }}>
-                                        Danışan bulunamadı.
-                                    </Typography>
-                                )}
-                            </List>
-                        </Paper>
-                    </Grid2>
-                </Grid2>
-
-                {/* Orta Panel (Sohbet) */}
-                <Grid2
-                    container
-                    sx={{
-                        height: '78vh',
-                        width: '50vw',
-                        ml: "1rem",
-                        display: 'flex',
-                        flexDirection: 'column',
-                        position: 'relative',
-                    }}
-                >
-                    {selectedDanisan ? (
-                        <Paper elevation={3} sx={{ width: "100%", height: "100%", display: 'flex', flexDirection: 'column' }}>
-                            {/* Danışan Bilgisi */}
-                            <Typography variant="h6" sx={{ mb: 2, p: 2, borderBottom: "1px solid #ddd" }}>
-                                {selectedDanisan.name} {selectedDanisan.surname} ile Sohbet
-                            </Typography>
-
-                            {/* Mesajlar */}
-                            <Box
-                                sx={{
-                                    flex: 1,
-                                    overflowY: "auto",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "0.5rem",
-                                    p: 2,
-                                    backgroundColor: "#f9f9f9",
-                                }}
-                                ref={messageListRef}
-                            >
-                                {messages.length > 0 ? (
-                                    messages.map((message) => (
-                                        <Box
-                                            key={message.id}
-                                            sx={{
-                                                alignSelf: message.sender === "You" ? "flex-end" : "flex-start",
-                                                backgroundColor: message.sender === "You" ? "#ffe3b3" : "#d1f7c4",
-                                                p: 2,
-                                                borderRadius: 2,
-                                                maxWidth: "60%",
-                                                boxShadow: 1,
-                                            }}
-                                        >
-                                            <Typography variant="body1">{message.text}</Typography>
-                                            <Typography
-                                                variant="caption"
-                                                sx={{ display: "block", textAlign: "right", mt: 1 }}
-                                            >
-                                                {message.timestamp}
-                                            </Typography>
-                                        </Box>
-                                    ))
-                                ) : (
-                                    <Typography variant="body2" color="textSecondary">
-                                        Mesaj yok.
-                                    </Typography>
-                                )}
-                            </Box>
-
-                            {/* Mesaj Gönder */}
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    gap: 1,
-                                    backgroundColor: "#ffffff",
-                                    p: 1,
-                                    borderTop: "1px solid #ddd",
-                                }}
-                            >
+                <Grid container spacing={2} className="mesaj-grid">
+                    {/* Sol Panel - Danışan Listesi */}
+                    <Grid item xs={12} md={3} className="danisan-list-container">
+                        <Paper elevation={2} className="danisan-list-paper">
+                            <Box className="search-box">
                                 <TextField
                                     fullWidth
                                     size="small"
-                                    placeholder="Mesaj yaz..."
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                />
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleSendMessage}
-                                    endIcon={<SendIcon />}
-                                    sx={{
-                                        textTransform: "none",
-                                        fontWeight: "bold",
+                                    placeholder="Danışan Ara..."
+                                    variant="outlined"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <SearchIcon color="action" />
+                                            </InputAdornment>
+                                        ),
                                     }}
-                                >
-                                    Gönder
-                                </Button>
+                                />
                             </Box>
-                        </Paper>
-                    ) : (
-                        <Typography
-                            variant="h6"
-                            color="textSecondary"
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                height: "100%",
-                                textAlign: "center",
-                            }}
-                        >
-                            Sohbet başlatmak için bir danışan seçin.
-                        </Typography>
-                    )}
-                </Grid2>
 
-                {/* Sağ Panel (Danışan Bilgileri) */}
-                <Grid2
-                    container
-                    sx={{
-                        height: '78vh',
-                        width: '24vw',
-                        ml: "1rem",
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}
-                >
-                    {selectedDanisan ? (
-                        <Paper elevation={3} sx={{ width: "100%", height: "100%", p: 2 }}>
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                Danışan Bilgileri
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Ad:</strong> {selectedDanisan.name}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Soyad:</strong> {selectedDanisan.surname}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Cinsiyet:</strong> {selectedDanisan.gender}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Email:</strong> {selectedDanisan.email || "Bilinmiyor"}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Telefon:</strong> {selectedDanisan.phoneNumber || "Bilinmiyor"}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Boy:</strong> {selectedDanisan.height || "Yok"}
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                <strong>Kilo:</strong> {selectedDanisan.weight || "Yok"}
-                            </Typography>
+                            <Divider />
+
+                            <List className="danisan-list">
+                                {filteredDanisanList && filteredDanisanList.length > 0 ? (
+                                    filteredDanisanList.map((danisan) => (
+                                        <ListItemButton
+                                            key={danisan.id}
+                                            onClick={() => handleDanisanSelect(danisan)}
+                                            selected={selectedDanisan?.id === danisan.id}
+                                            className={selectedDanisan?.id === danisan.id ? "danisan-item-selected" : "danisan-item"}
+                                        >
+                                            <ListItemAvatar>
+                                                <Avatar
+                                                    sx={{ bgcolor: getAvatarColor(danisan.name) }}
+                                                >
+                                                    {getInitials(danisan.name, danisan.surname)}
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary={`${danisan.name} ${danisan.surname}`}
+                                                secondary={danisan.lastMessage || "Danışan"}
+                                            />
+                                        </ListItemButton>
+                                    ))
+                                ) : (
+                                    <ListItemButton>
+                                        <ListItemText
+                                            primary="Danışan bulunamadı"
+                                            primaryTypographyProps={{ align: 'center', color: 'text.secondary' }}
+                                        />
+                                    </ListItemButton>
+                                )}
+                            </List>
                         </Paper>
-                    ) : (
-                        <Paper elevation={3} sx={{ width: "100%", height: "100%", p: 2 }}>
-                            <Typography
-                                variant="h6"
-                                color="textSecondary"
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    height: "100%",
-                                    textAlign: "center",
-                                }}
-                            >
-                                Danışan seçildiğinde bilgileri burada görünecek.
-                            </Typography>
+                    </Grid>
+
+                    {/* Orta Panel - Mesajlaşma */}
+                    <Grid item xs={12} md={6} className="chat-container">
+                        <Paper elevation={2} className="chat-paper">
+                            {selectedDanisan ? (
+                                <>
+                                    <Box className="chat-header">
+                                        <Avatar
+                                            sx={{ bgcolor: getAvatarColor(selectedDanisan.name) }}
+                                        >
+                                            {getInitials(selectedDanisan.name, selectedDanisan.surname)}
+                                        </Avatar>
+                                        <Box ml={1}>
+                                            <Typography variant="h6">
+                                                {selectedDanisan.name} {selectedDanisan.surname}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {selectedDanisan.lastActive || "Çevrimiçi"}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+
+                                    <Divider />
+
+                                    <Box className="messages-container" ref={messageListRef}>
+                                        {messages.length > 0 ? (
+                                            messages.map((message) => (
+                                                <Box
+                                                    key={message.id}
+                                                    className={`message ${message.sender === "dietitian" ? "sent" : "received"}`}
+                                                >
+                                                    <Box className="message-content">
+                                                        <Typography variant="body1">
+                                                            {message.text}
+                                                        </Typography>
+                                                        <Typography variant="caption" className="message-time">
+                                                            {message.timestamp}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            ))
+                                        ) : (
+                                            <Box className="no-messages">
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Henüz mesaj bulunmuyor. Sohbete başlayın!
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </Box>
+
+                                    <Box className="message-input-container">
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Mesajınızı yazın..."
+                                            variant="outlined"
+                                            size="small"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            onKeyPress={handleKeyPress}
+                                            inputRef={messageInputRef}
+                                            multiline
+                                            maxRows={3}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            color="primary"
+                                                            onClick={handleSendMessage}
+                                                            disabled={!newMessage.trim()}
+                                                        >
+                                                            <SendIcon />
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Box>
+                                </>
+                            ) : (
+                                <Box className="no-chat-selected">
+                                    <Typography variant="h6" color="text.secondary">
+                                        Sohbete başlamak için bir danışan seçin
+                                    </Typography>
+                                </Box>
+                            )}
                         </Paper>
-                    )}
-                </Grid2>
-            </Grid2>
+                    </Grid>
+
+                    {/* Sağ Panel - Danışan Bilgileri */}
+                    <Grid item xs={12} md={3} className="danisan-info-container">
+                        <Paper elevation={2} className="danisan-info-paper">
+                            {selectedDanisan ? (
+                                <>
+                                    <Box className="danisan-info-header">
+                                        <Avatar
+                                            sx={{
+                                                width: 64,
+                                                height: 64,
+                                                bgcolor: getAvatarColor(selectedDanisan.name)
+                                            }}
+                                        >
+                                            {getInitials(selectedDanisan.name, selectedDanisan.surname)}
+                                        </Avatar>
+                                        <Typography variant="h6" mt={2} align="center">
+                                            {selectedDanisan.name} {selectedDanisan.surname}
+                                        </Typography>
+                                        <Chip
+                                            label={selectedDanisan.status || "Aktif Danışan"}
+                                            color="primary"
+                                            size="small"
+                                            sx={{ mt: 1 }}
+                                        />
+                                    </Box>
+
+                                    <Divider sx={{ my: 2 }} />
+
+                                    <List dense className="danisan-info-list">
+                                        <ListItemButton>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
+                                                    <WcIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary="Cinsiyet"
+                                                secondary={selectedDanisan.gender || "Belirtilmemiş"}
+                                            />
+                                        </ListItemButton>
+
+                                        <ListItemButton>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
+                                                    <EmailIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary="E-posta"
+                                                secondary={selectedDanisan.email || "Belirtilmemiş"}
+                                            />
+                                        </ListItemButton>
+
+                                        <ListItemButton>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
+                                                    <PhoneIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary="Telefon"
+                                                secondary={selectedDanisan.phoneNumber || "Belirtilmemiş"}
+                                            />
+                                        </ListItemButton>
+
+                                        <Divider sx={{ my: 1 }} />
+
+                                        <ListItemButton>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: theme.palette.success.light }}>
+                                                    <HeightIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary="Boy"
+                                                secondary={selectedDanisan.height ? `${selectedDanisan.height} cm` : "Belirtilmemiş"}
+                                            />
+                                        </ListItemButton>
+
+                                        <ListItemButton>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: theme.palette.success.light }}>
+                                                    <FitnessCenterIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary="Kilo"
+                                                secondary={selectedDanisan.weight ? `${selectedDanisan.weight} kg` : "Belirtilmemiş"}
+                                            />
+                                        </ListItemButton>
+
+                                        {selectedDanisan.bmi && (
+                                            <ListItemButton>
+                                                <ListItemAvatar>
+                                                    <Avatar sx={{ bgcolor: theme.palette.success.light }}>
+                                                        <InfoIcon />
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary="BMI"
+                                                    secondary={selectedDanisan.bmi}
+                                                />
+                                            </ListItemButton>
+                                        )}
+                                    </List>
+                                </>
+                            ) : (
+                                <Box className="no-danisan-selected">
+                                    <PersonIcon sx={{ fontSize: 60, color: 'text.secondary', opacity: 0.3 }} />
+                                    <Typography variant="body1" color="text.secondary" mt={2}>
+                                        Danışan seçildiğinde bilgileri burada görünecek
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Paper>
+                    </Grid>
+                </Grid>
+            </Box>
         </Default>
     );
 }

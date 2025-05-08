@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TextInput,
   TouchableOpacity,
   Text,
@@ -11,26 +11,50 @@ import {
   Image,
   PermissionsAndroid,
   Modal,
-  Pressable
+  Pressable,
+  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import Header from '../Components/Header';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 const Mesaj = ({ navigation }) => {
+  // Örnek avatar URL'leri - gerçek projenizde bunlar kullanıcı profillerinden gelmeli
+  const DIYETISYEN_AVATAR = 'https://i.pravatar.cc/101';
+  const USER_AVATAR = 'https://i.pravatar.cc/102';
+
+  // State tanımlamaları
   const [messages, setMessages] = useState([
-    { from: 'diyetisyen', text: 'Merhaba, bugün nasılsın?' },
-    { from: 'user', text: 'Merhaba hocam, gayet iyiyim. Siz nasılsınız?' },
+    { id: '1', from: 'diyetisyen', text: 'Merhaba, bugün nasılsınız?', timestamp: '09:10' },
+    { id: '2', from: 'user', text: 'Merhaba hocam, gayet iyiyim. Siz nasılsınız?', timestamp: '09:12' },
+    { id: '3', from: 'diyetisyen', text: 'Ben de iyiyim teşekkür ederim. Geçen hafta verdiğim diyet programını uyguladınız mı?', timestamp: '09:13' },
+    { id: '4', from: 'user', text: 'Evet, büyük ölçüde uyguladım. Sadece Pazar günü dışarıda yemek yediğimde biraz program dışına çıktım.', timestamp: '09:15' },
   ]);
 
   const [input, setInput] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImageUri, setModalImageUri] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  // Otomatik scroll için ref
+  const flatListRef = useRef(null);
+
+  // Komponent yüklendiğinde kamera izinlerini sor
   useEffect(() => {
     requestCameraPermission();
   }, []);
 
+  // Yeni mesaj geldiğinde en alta kaydır
+  useEffect(() => {
+    if (flatListRef.current && messages.length > 0) {
+      setTimeout(() => {
+        flatListRef.current.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [messages]);
+
+  // Kamera izinlerini iste
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -43,9 +67,7 @@ const Mesaj = ({ navigation }) => {
           buttonPositive: 'Tamam'
         }
       );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Kamera izni verildi');
-      } else {
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
         console.log('Kamera izni reddedildi');
       }
     } catch (err) {
@@ -53,19 +75,43 @@ const Mesaj = ({ navigation }) => {
     }
   };
 
-  const sendMessage = () => {
+  const sendMessage = useCallback(() => {
     if (input.trim() === '') return;
-    setMessages([...messages, { from: 'user', text: input }]);
-    setInput('');
-  };
 
-  const openCamera = () => {
+    const newMessage = {
+      id: Date.now().toString(),
+      from: 'user',
+      text: input.trim(),
+      timestamp: getCurrentTime()
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setInput('');
+
+//     setTimeout(() => {
+//       const replyMessage = {
+//         id: (Date.now() + 1).toString(),
+//         from: 'diyetisyen',
+//         text: 'Mesajınızı aldım, teşekkürler! En kısa sürede dönüş yapacağım.',
+//         timestamp: getCurrentTime()
+//       };
+//       setMessages(prev => [...prev, replyMessage]);
+//     }, 1000);
+  }, [input]);
+
+  // Kamera aç
+  const openCamera = useCallback(() => {
+    setLoading(true);
     launchCamera(
       {
         mediaType: 'photo',
         saveToPhotos: true,
+        quality: 0.8,
+        maxWidth: 1000,
+        maxHeight: 1000,
       },
       (response) => {
+        setLoading(false);
         if (response.didCancel) {
           console.log('Kullanıcı kamerayı iptal etti');
         } else if (response.errorCode) {
@@ -73,19 +119,31 @@ const Mesaj = ({ navigation }) => {
         } else {
           const imageUri = response.assets?.[0]?.uri;
           if (imageUri) {
-            setMessages([...messages, { from: 'user', image: imageUri }]);
+            const newMessage = {
+              id: Date.now().toString(),
+              from: 'user',
+              image: imageUri,
+              timestamp: getCurrentTime()
+            };
+            setMessages(prev => [...prev, newMessage]);
           }
         }
       }
     );
-  };
+  }, []);
 
-  const openGallery = () => {
+  // Galeri aç
+  const openGallery = useCallback(() => {
+    setLoading(true);
     launchImageLibrary(
       {
         mediaType: 'photo',
+        quality: 0.8,
+        maxWidth: 1000,
+        maxHeight: 1000,
       },
       (response) => {
+        setLoading(false);
         if (response.didCancel) {
           console.log('Kullanıcı galeriyi iptal etti');
         } else if (response.errorCode) {
@@ -93,78 +151,151 @@ const Mesaj = ({ navigation }) => {
         } else {
           const imageUri = response.assets?.[0]?.uri;
           if (imageUri) {
-            setMessages([...messages, { from: 'user', image: imageUri }]);
+            const newMessage = {
+              id: Date.now().toString(),
+              from: 'user',
+              image: imageUri,
+              timestamp: getCurrentTime()
+            };
+            setMessages(prev => [...prev, newMessage]);
           }
         }
       }
     );
-  };
+  }, []);
 
-  const handleImagePress = (uri) => {
+  // Resim modalını aç
+  const handleImagePress = useCallback((uri) => {
     setModalImageUri(uri);
     setModalVisible(true);
+  }, []);
+
+  // Geçerli saati al
+  const getCurrentTime = () => {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   };
 
+  // Mesaj balonu render - optimize edilmiş
+  const renderMessageItem = useCallback(({ item }) => {
+    const isUser = item.from === 'user';
+
+    return (
+      <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
+        {!isUser && (
+          <Image
+            source={{ uri: DIYETISYEN_AVATAR }}
+            style={styles.avatar}
+          />
+        )}
+
+        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
+          {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+
+          {item.image && (
+            <TouchableOpacity onPress={() => handleImagePress(item.image)} activeOpacity={0.8}>
+              <Image
+                source={{ uri: item.image }}
+                style={styles.sentImage}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          )}
+
+          <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.diyetisyenTimestamp]}>
+            {item.timestamp}
+          </Text>
+        </View>
+
+        {isUser && (
+          <Image
+            source={{ uri: USER_AVATAR }}
+            style={styles.avatar}
+          />
+        )}
+      </View>
+    );
+  }, [handleImagePress]);
+
+  // Mesaj listesi için header
+  const ListHeaderComponent = useMemo(() => (
+    <View style={styles.dateHeader}>
+      <Text style={styles.dateHeaderText}>Bugün</Text>
+    </View>
+  ), []);
+
+  // Render - KeyboardAvoidingView ile klavye açılınca kaymayı önlüyoruz
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#f57c00" barStyle="light-content" />
       <Header navigation={navigation} />
 
-      <ScrollView style={styles.messagesContainer} contentContainerStyle={{ padding: 16 }}>
-        {messages.map((msg, index) => (
-          <View
-            key={index}
-            style={[styles.messageRow, msg.from === 'user' ? styles.userRow : styles.diyetisyenRow]}
-          >
-            {msg.from === 'diyetisyen' && (
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/101' }}
-                style={styles.avatar}
-              />
-            )}
-            <View
-              style={[styles.messageBubble, msg.from === 'user' ? styles.userBubble : styles.diyetisyenBubble]}
-            >
-              {msg.text && <Text style={styles.messageText}>{msg.text}</Text>}
-              {msg.image && (
-                <TouchableOpacity onPress={() => handleImagePress(msg.image)}>
-                  <Image source={{ uri: msg.image }} style={styles.sentImage} />
-                </TouchableOpacity>
-              )}
-            </View>
-            {msg.from === 'user' && (
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/102' }}
-                style={styles.avatar}
-              />
-            )}
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={item => item.id}
+        renderItem={renderMessageItem}
+        contentContainerStyle={styles.messagesContainer}
+        ListHeaderComponent={ListHeaderComponent}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Icon name="chat-outline" size={60} color="#ccc" />
+            <Text style={styles.emptyText}>Henüz mesaj yok</Text>
           </View>
-        ))}
-      </ScrollView>
+        }
+      />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={90}
-        style={styles.inputWrapper}
       >
-        <TouchableOpacity style={styles.iconButton} onPress={openCamera}>
-          <Icon name="camera" size={24} color="#555" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={openGallery}>
-          <Icon name="image" size={24} color="#555" />
-        </TouchableOpacity>
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder="Mesajınızı yazın..."
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Icon name="send" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.inputWrapper}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              value={input}
+              onChangeText={setInput}
+              placeholder="Mesajınızı yazın..."
+              style={styles.input}
+              multiline
+            />
+
+            <View style={styles.inputActions}>
+              <TouchableOpacity style={styles.iconButton} onPress={openCamera} disabled={loading}>
+                <Icon name="camera" size={24} color={loading ? "#ccc" : "#555"} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.iconButton} onPress={openGallery} disabled={loading}>
+                <Icon name="image" size={24} color={loading ? "#ccc" : "#555"} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={sendMessage}
+            style={[styles.sendButton, input.trim() === '' && styles.sendButtonDisabled]}
+            disabled={input.trim() === '' || loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Icon name="send" size={22} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
 
+      {/* Büyük resim modali */}
       <Modal visible={modalVisible} transparent={true} animationType="fade">
         <Pressable style={styles.modalBackground} onPress={() => setModalVisible(false)}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Icon name="close" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
           <Image source={{ uri: modalImageUri }} style={styles.fullImage} resizeMode="contain" />
         </Pressable>
       </Modal>
@@ -175,10 +306,11 @@ const Mesaj = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa'
+    backgroundColor: '#f5f5f7'
   },
   messagesContainer: {
-    flex: 1,
+    padding: 16,
+    paddingBottom: 20,
   },
   messageRow: {
     flexDirection: 'row',
@@ -195,6 +327,7 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
     padding: 10,
     borderRadius: 16,
+    minWidth: 80,
   },
   userBubble: {
     backgroundColor: '#e1f5fe',
@@ -207,17 +340,31 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   messageText: {
-    fontSize: 14,
+    fontSize: 15,
+    lineHeight: 20,
+    color: '#333',
   },
   sentImage: {
-    width: 160,
-    height: 160,
+    width: 200,
+    height: 200,
     borderRadius: 12,
+    marginVertical: 4,
+  },
+  timestamp: {
+    fontSize: 11,
     marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+  userTimestamp: {
+    color: '#78909c',
+  },
+  diyetisyenTimestamp: {
+    color: '#bf8c5c',
   },
   fullImage: {
-    width: '100%',
-    height: '100%',
+    width: '90%',
+    height: '80%',
+    borderRadius: 8,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -225,33 +372,93 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#ffffff',
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: '#e0e0e0',
+  },
+  inputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#f1f1f1',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    alignItems: 'center',
   },
   input: {
     flex: 1,
-    padding: 10,
-    borderRadius: 20,
-    backgroundColor: '#f1f1f1',
-    marginHorizontal: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 5,
+    maxHeight: 100,
+    fontSize: 15,
+  },
+  inputActions: {
+    flexDirection: 'row',
   },
   sendButton: {
     backgroundColor: '#f57c00',
-    borderRadius: 20,
-    padding: 10,
+    borderRadius: 25,
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#f5ac71',
   },
   iconButton: {
     padding: 6,
   },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginBottom: 5,
   },
   modalBackground: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.9)',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  modalHeader: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
+  },
+  closeButton: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    padding: 8,
+  },
+  dateHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  dateHeaderText: {
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    color: '#666',
+    fontSize: 12,
+    fontWeight: '500',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 50,
+  },
+  emptyText: {
+    color: '#999',
+    fontSize: 16,
+    marginTop: 10,
   },
 });
 

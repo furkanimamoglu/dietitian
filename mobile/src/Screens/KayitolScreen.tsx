@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
+import { TextInput, Button, Text, Divider, ActivityIndicator } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import config from '../../config';
 
-// Navigation params tanımı
 type RootStackParamList = {
   Kayitol: { dietitian_id: string };
 };
@@ -17,42 +17,66 @@ const KayitolScreen: React.FC = () => {
   const dietitianId = route.params?.dietitian_id;
 
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [dietitianCode, setDietitianCode] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+
+  const [dietitianName, setDietitianName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async () => {
-    if (!dietitianId) {
-      Alert.alert('Hata', 'Diyetisyen bilgisi bulunamadı.');
-      return;
-    }
-    if (!name || !email || !password) {
-      Alert.alert('Uyarı', 'Lütfen tüm alanları doldurun.');
-      return;
-    }
+  const handleChange = (text: string) => {
+    const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
+    setPhone(digits);
+  };
 
+  const handleDietitianFetch = async (id: string) => {
+    if (!id || id.length < 1) {
+      setDietitianName('');
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch(
-        `${config.base_url}/register?dietitian_id=${dietitianId}`,
+        `${config.apiUrl}/dietitian/getDietitianNameById?dietitian_id=${id}`
+      );
+      const data = await response.json();
+      setDietitianName(typeof data === 'string' ? data : data.dietitian_name);
+    } catch (error) {
+      setDietitianName('Hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!name || !phone || !password) {
+      console.log('Uyarı', 'Lütfen tüm alanları doldurun.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${config.apiUrl}/client/register`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({
+            phoneNumber: parseInt(phone),
+            password: password,
+            name: name,
+            dietitian_id: parseInt(dietitianCode),
+          })
         }
       );
       const data = await response.json();
       if (response.ok) {
-        // Kayıt başarılı, token alındıysa kaydet veya yönlendir
-        // Örneğin giriş ekranına dön
-        Alert.alert('Başarılı', 'Kayıt başarılı. Giriş yapabilirsiniz.', [
-          { text: 'Tamam', onPress: () => navigation.navigate('Login') }
-        ]);
+        await AsyncStorage.setItem('token', `Bearer ${data.token}`);
+        navigation.replace('AnaSayfa')
       } else {
-        Alert.alert('Hata', data.message || 'Kayıt başarısız.');
+        console.log('Hata', data.message || 'Kayıt başarısız.');
       }
     } catch (error) {
-      Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
+      console.log('Hata', 'Sunucuya bağlanılamadı.', error);
     } finally {
       setLoading(false);
     }
@@ -62,19 +86,23 @@ const KayitolScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Kayıt Ol</Text>
       <TextInput
-        label="İsim"
+        label="İsim Soyisim"
         mode="outlined"
         value={name}
         onChangeText={setName}
+        autoCapitalize="true"
         style={styles.input}
       />
+      <Divider style={styles.divider} />
       <TextInput
-        label="Email"
+        label="Telefon"
         mode="outlined"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
+        value={phone}
+        onChangeText={handleChange}
+        keyboardType="phone-pad"
+        maxLength={10}
+        placeholder="5xxxxxxxxx"
+        left={<TextInput.Affix text="+90" />}
         style={styles.input}
       />
       <TextInput
@@ -85,7 +113,20 @@ const KayitolScreen: React.FC = () => {
         onChangeText={setPassword}
         style={styles.input}
       />
-
+      <Divider style={styles.divider} />
+      <TextInput
+        label="Diyetisyen Referans Kodu"
+        mode="outlined"
+        value={dietitianId}
+        onChangeText={(text) => {
+          setDietitianCode(text);
+          handleDietitianFetch(text);
+        }}
+        keyboardType="phone-pad"
+        style={styles.input}
+      />
+      <Text style={styles.nameText}>Diyetisyen: {dietitianName}</Text>
+      <Divider style={styles.divider} />
       {loading ? (
         <ActivityIndicator animating size="large" style={styles.loader} />
       ) : (
@@ -117,6 +158,9 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 16
+  },
+  divider: {
+    marginVertical: 12
   }
 });
 

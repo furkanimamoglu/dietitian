@@ -31,6 +31,9 @@ const Dietitian = sequelize.define('Dietitian', {
                 }
             }
         },
+        name: {
+            type: DataTypes.STRING
+        },
         token: {
             type: DataTypes.STRING
         },
