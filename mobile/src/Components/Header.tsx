@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   TouchableOpacity,
   Image,
@@ -12,7 +12,9 @@ import {
 import { Appbar } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import config from '../../config';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -25,6 +27,53 @@ export default function Header({ navigation }: Props) {
   const messageCount = 5;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerAnim] = useState(new Animated.Value(screenWidth));
+
+  const [userName, setUserName] = useState<string>('Yükleniyor...');
+  const [userProfile, setUserProfile] = useState<string>('');
+
+  useEffect(() => {
+
+    const checkToken = async () => {
+        try {
+          const token = await AsyncStorage.getItem('token');
+                if (!token) {
+                  console.log('Token bulunamadı, giriş ekranına yönlendiriliyor...');
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                  });
+                  return;
+                } else {
+                    console.log('Token bulundu, kontrol başarılı.');
+                }
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    }
+
+    const fetchClientInfo = async () => {
+      try {
+        const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': await AsyncStorage.getItem('token') || ''
+          }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setUserName(data.name || 'Bilinmiyor');
+        } else {
+          console.log('Kullanıcı bilgisi alınamadı:', data.message);
+        }
+      } catch (error) {
+        console.error('Hata:', error);
+      }
+    };
+
+    fetchClientInfo();
+    checkToken();
+  }, []);
 
   const openDrawer = () => {
     setDrawerOpen(true);
@@ -58,10 +107,10 @@ export default function Header({ navigation }: Props) {
             <TouchableOpacity onPress={() => navigation.navigate('Profil')} style={styles.avatarWrapper}>
               <View style={styles.avatarContent}>
                 <Image
-                  source={{ uri: 'https://i.pravatar.cc/100' }}
+                  source={{ uri: userProfile || 'https://i.pravatar.cc/101' }}
                   style={styles.avatar}
                 />
-                <Text style={styles.avatarLabel}>Furkan İmamoğlu</Text>
+                <Text style={styles.avatarLabel}>{userName}</Text>
               </View>
             </TouchableOpacity>
           </View>

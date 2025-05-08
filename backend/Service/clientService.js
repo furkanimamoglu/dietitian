@@ -1,4 +1,4 @@
-const {Client} = require("../Model/MainModel");
+const {Client, Dietitian} = require("../Model/MainModel");
 const Exception = require("../Exception/Exception");
 const jwt = require("jsonwebtoken");
 const config = require("../config.json");
@@ -72,6 +72,29 @@ class ClientService {
                 ...client.dataValues,
                 token: token
             };
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    async getClientInfo(user_id) {
+        try {
+            if (!user_id) {
+                throw new Error("Yetkisiz Erişim.");
+            }
+
+            const client = await Client.findOne({
+                where: { id: user_id },
+                attributes: {
+                    exclude: ["password", "createdAt", "updatedAt"]
+                }
+            });
+
+            if (!client) {
+                throw new Error("Diyetisyen bulunamadı.");
+            }
+
+            return client;
         } catch (error) {
             throw new Exception(error.message, 400);
         }

@@ -1,4 +1,6 @@
 const ClientService = require("../Service/clientService");
+const Security = require("../Utils/Security");
+const DietitianService = require("../Service/dietitianService");
 
 class ClientController {
 
@@ -51,6 +53,26 @@ class ClientController {
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
+            });
+        }
+    }
+
+    async getClientInfo(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const user_id = Security.getUserIdFromToken(token);
+            // TODO: user_id yerine telefon numarasını unique yapalım
+            if (!token || !user_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await ClientService.getClientInfo(user_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
             });
         }
     }

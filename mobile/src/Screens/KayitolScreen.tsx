@@ -71,7 +71,7 @@ const KayitolScreen: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         await AsyncStorage.setItem('token', `Bearer ${data.token}`);
-        navigation.navigate('AnaSayfa')
+        navigation.replace('AnaSayfa')
       } else {
         console.log('Hata', data.message || 'Kayıt başarısız.');
       }
