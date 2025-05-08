@@ -22,7 +22,12 @@ import {
   Chip,
   Skeleton,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar
 } from "@mui/material";
 
 // Icons
@@ -35,6 +40,10 @@ import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
 import WcIcon from '@mui/icons-material/Wc';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
+import PrintIcon from '@mui/icons-material/Print';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EventIcon from '@mui/icons-material/Event';
 
 export default function Danisan() {
     const { id } = useParams();
@@ -219,47 +228,1273 @@ export default function Danisan() {
                 );
             case 'anamnez':
                 return (
-                    <Paper elevation={2} sx={{ p: 3 }}>
+                    <Box>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Anamnez
+                            Anamnez Formu
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz anamnez verisi bulunmamaktadır.
-                        </Typography>
-                    </Paper>
+                        
+                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                    Sağlık Bilgileri
+                                </Typography>
+                                <Chip label="Son Güncelleme: 15.05.2023" size="small" color="primary" />
+                            </Box>
+                            <Divider sx={{ mb: 2 }} />
+                            
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Kronik Hastalıklar</Typography>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                            <Chip label="Hipertansiyon" size="small" color="primary" variant="outlined" />
+                                            <Chip label="Tip 2 Diyabet" size="small" color="primary" variant="outlined" />
+                                        </Box>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Alerjiler</Typography>
+                                        <Typography variant="body2" color="text.secondary">Laktoz intoleransı, Fındık alerjisi</Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>İlaç Kullanımı</Typography>
+                                        <Typography variant="body2" color="text.secondary">Metformin 500mg (günde 2 kez)</Typography>
+                                    </Box>
+                                </Grid>
+                                
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Geçmiş Ameliyatlar</Typography>
+                                        <Typography variant="body2" color="text.secondary">Apendektomi (2015)</Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Aile Sağlık Geçmişi</Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Anne: Hipertansiyon<br />
+                                            Baba: Kalp hastalığı
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Kan Değerleri</Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Son kontrol: 10.04.2023<br />
+                                            HbA1c: 6.8%<br />
+                                            Kolesterol: 210 mg/dL
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                        
+                        <Paper elevation={3} sx={{ p: 3 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                    Diyet Alışkanlıkları
+                                </Typography>
+                                <IconButton aria-label="düzenle">
+                                    <EditIcon />
+                                </IconButton>
+                            </Box>
+                            <Divider sx={{ mb: 2 }} />
+                            
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Günlük Su Tüketimi</Typography>
+                                        <Typography variant="body2" color="text.secondary">4-5 bardak (yetersiz)</Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Favori Yiyecekler</Typography>
+                                        <Typography variant="body2" color="text.secondary">Makarna, beyaz ekmek, şekerli içecekler</Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Sevmediği Yiyecekler</Typography>
+                                        <Typography variant="body2" color="text.secondary">Brokoli, karnabahar, ıspanak</Typography>
+                                    </Box>
+                                </Grid>
+                                
+                                <Grid item xs={12} md={6}>
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Öğün Düzeni</Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Sabah: Genellikle atlanıyor<br />
+                                            Öğle: Hafif yemek<br />
+                                            Akşam: Ağır ve geç yemek
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Atıştırmalık Alışkanlıkları</Typography>
+                                        <Typography variant="body2" color="text.secondary">Akşam TV izlerken tatlı ve cips tüketimi</Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Dışarıda Yemek</Typography>
+                                        <Typography variant="body2" color="text.secondary">Haftada 3-4 kez fast-food tüketimi</Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </Box>
                 );
             case 'olcum':
                 return (
-                    <Paper elevation={2} sx={{ p: 3 }}>
+                    <Box>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
                             Ölçüm Takibi
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Ölçümler henüz eklenmemiştir.
-                        </Typography>
-                    </Paper>
+                        
+                        <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                                <Card elevation={3}>
+                                    <CardHeader 
+                                        title="Kilo Takibi" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        action={
+                                            <Button 
+                                                variant="contained" 
+                                                size="small" 
+                                                startIcon={<EditIcon />}
+                                                sx={{ bgcolor: theme.palette.primary.main }}
+                                            >
+                                                Yeni Ölçüm
+                                            </Button>
+                                        }
+                                        sx={{ 
+                                            bgcolor: 'primary.light', 
+                                            color: 'primary.contrastText',
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <CardContent>
+                                        <Box sx={{ height: 250, p: 1, position: 'relative' }}>
+                                            <Box sx={{ 
+                                                position: 'absolute', 
+                                                left: 0, 
+                                                top: 0, 
+                                                bottom: 0, 
+                                                width: '60px', 
+                                                display: 'flex', 
+                                                flexDirection: 'column', 
+                                                justifyContent: 'space-between' 
+                                            }}>
+                                                <Typography variant="caption">85 kg</Typography>
+                                                <Typography variant="caption">80 kg</Typography>
+                                                <Typography variant="caption">75 kg</Typography>
+                                                <Typography variant="caption">70 kg</Typography>
+                                            </Box>
+                                            <Box sx={{ pl: '60px', height: '100%', display: 'flex', alignItems: 'flex-end' }}>
+                                                <Box sx={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'flex-end', 
+                                                    height: '100%',
+                                                    width: '100%',
+                                                    position: 'relative'
+                                                }}>
+                                                    <Box sx={{ 
+                                                        width: '15%', 
+                                                        position: 'absolute', 
+                                                        left: '0%',
+                                                        height: '80%', 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-end'
+                                                    }}>
+                                                        <Box sx={{ 
+                                                            width: 12, 
+                                                            height: 12, 
+                                                            borderRadius: '50%', 
+                                                            bgcolor: 'primary.main',
+                                                            mb: 1
+                                                        }} />
+                                                        <Typography variant="caption">15 Nisan</Typography>
+                                                    </Box>
+                                                    <Box sx={{ 
+                                                        width: '15%', 
+                                                        position: 'absolute', 
+                                                        left: '20%',
+                                                        height: '75%', 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-end'
+                                                    }}>
+                                                        <Box sx={{ 
+                                                            width: 12, 
+                                                            height: 12, 
+                                                            borderRadius: '50%', 
+                                                            bgcolor: 'primary.main',
+                                                            mb: 1
+                                                        }} />
+                                                        <Typography variant="caption">30 Nisan</Typography>
+                                                    </Box>
+                                                    <Box sx={{ 
+                                                        width: '15%', 
+                                                        position: 'absolute', 
+                                                        left: '40%',
+                                                        height: '65%', 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-end'
+                                                    }}>
+                                                        <Box sx={{ 
+                                                            width: 12, 
+                                                            height: 12, 
+                                                            borderRadius: '50%', 
+                                                            bgcolor: 'primary.main',
+                                                            mb: 1
+                                                        }} />
+                                                        <Typography variant="caption">15 Mayıs</Typography>
+                                                    </Box>
+                                                    <Box sx={{ 
+                                                        width: '15%', 
+                                                        position: 'absolute', 
+                                                        left: '60%',
+                                                        height: '50%', 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-end'
+                                                    }}>
+                                                        <Box sx={{ 
+                                                            width: 12, 
+                                                            height: 12, 
+                                                            borderRadius: '50%', 
+                                                            bgcolor: 'primary.main',
+                                                            mb: 1
+                                                        }} />
+                                                        <Typography variant="caption">31 Mayıs</Typography>
+                                                    </Box>
+                                                    <Box sx={{ 
+                                                        width: '15%', 
+                                                        position: 'absolute', 
+                                                        left: '80%',
+                                                        height: '40%', 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-end'
+                                                    }}>
+                                                        <Box sx={{ 
+                                                            width: 12, 
+                                                            height: 12, 
+                                                            borderRadius: '50%', 
+                                                            bgcolor: 'primary.main',
+                                                            mb: 1
+                                                        }} />
+                                                        <Typography variant="caption">15 Haziran</Typography>
+                                                    </Box>
+                                                    
+                                                    <Box sx={{ 
+                                                        position: 'absolute',
+                                                        top: '80%',
+                                                        left: '6px',
+                                                        width: '10%',
+                                                        height: '2px',
+                                                        bgcolor: 'primary.main',
+                                                        transform: 'rotate(-10deg)'
+                                                    }} />
+                                                    <Box sx={{ 
+                                                        position: 'absolute',
+                                                        top: '75%',
+                                                        left: '18%',
+                                                        width: '20%',
+                                                        height: '2px',
+                                                        bgcolor: 'primary.main',
+                                                        transform: 'rotate(-15deg)'
+                                                    }} />
+                                                    <Box sx={{ 
+                                                        position: 'absolute',
+                                                        top: '65%',
+                                                        left: '40%',
+                                                        width: '18%',
+                                                        height: '2px',
+                                                        bgcolor: 'primary.main',
+                                                        transform: 'rotate(-20deg)'
+                                                    }} />
+                                                    <Box sx={{ 
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        left: '60%',
+                                                        width: '18%',
+                                                        height: '2px',
+                                                        bgcolor: 'primary.main',
+                                                        transform: 'rotate(-15deg)'
+                                                    }} />
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            
+                            <Grid item xs={12} md={6}>
+                                <Card elevation={3} sx={{ height: '100%' }}>
+                                    <CardHeader 
+                                        title="Vücut Ölçümleri" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        sx={{ 
+                                            bgcolor: 'primary.light', 
+                                            color: 'primary.contrastText',
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <CardContent>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                    <th style={{ padding: '8px', textAlign: 'left' }}>Tarih</th>
+                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Bel (cm)</th>
+                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Kalça (cm)</th>
+                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Göğüs (cm)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                    <td style={{ padding: '8px' }}>15 Nisan 2023</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>108</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>96</td>
+                                                </tr>
+                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                    <td style={{ padding: '8px' }}>30 Nisan 2023</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>90</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>106</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>95</td>
+                                                </tr>
+                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                    <td style={{ padding: '8px' }}>15 Mayıs 2023</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>88</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>104</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>94</td>
+                                                </tr>
+                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                    <td style={{ padding: '8px' }}>31 Mayıs 2023</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>86</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>102</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>93</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            
+                            <Grid item xs={12} md={6}>
+                                <Card elevation={3} sx={{ height: '100%' }}>
+                                    <CardHeader 
+                                        title="Vücut Analizi" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        sx={{ 
+                                            bgcolor: 'primary.light', 
+                                            color: 'primary.contrastText',
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                            <Box>
+                                                <Typography variant="subtitle1" gutterBottom>Vücut Yağ Oranı</Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                        <Box 
+                                                            sx={{ 
+                                                                width: '32%', 
+                                                                bgcolor: theme.palette.primary.main, 
+                                                                height: '100%', 
+                                                                borderRadius: 5 
+                                                            }} 
+                                                        />
+                                                    </Box>
+                                                    <Typography variant="body2">32%</Typography>
+                                                </Box>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Hedef: 25-28% | Standart: 25-31%
+                                                </Typography>
+                                            </Box>
+                                            
+                                            <Box>
+                                                <Typography variant="subtitle1" gutterBottom>Kas Kütlesi</Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                        <Box 
+                                                            sx={{ 
+                                                                width: '28%', 
+                                                                bgcolor: theme.palette.info.main, 
+                                                                height: '100%', 
+                                                                borderRadius: 5 
+                                                            }} 
+                                                        />
+                                                    </Box>
+                                                    <Typography variant="body2">28%</Typography>
+                                                </Box>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Hedef: 30-35% | Standart: 30-35%
+                                                </Typography>
+                                            </Box>
+                                            
+                                            <Box>
+                                                <Typography variant="subtitle1" gutterBottom>Vücut Suyu</Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                        <Box 
+                                                            sx={{ 
+                                                                width: '45%', 
+                                                                bgcolor: theme.palette.info.light, 
+                                                                height: '100%', 
+                                                                borderRadius: 5 
+                                                            }} 
+                                                        />
+                                                    </Box>
+                                                    <Typography variant="body2">45%</Typography>
+                                                </Box>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Hedef: 45-60% | Standart: 45-60%
+                                                </Typography>
+                                            </Box>
+                                            
+                                            <Box>
+                                                <Typography variant="subtitle1" gutterBottom>BMI</Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                        <Box 
+                                                            sx={{ 
+                                                                width: '80%', 
+                                                                bgcolor: theme.palette.warning.main, 
+                                                                height: '100%', 
+                                                                borderRadius: 5 
+                                                            }} 
+                                                        />
+                                                    </Box>
+                                                    <Typography variant="body2">28.4</Typography>
+                                                </Box>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Hedef: 18.5-25 | Şu an: Hafif Obez
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+                    </Box>
                 );
             case 'beslenme':
                 return (
-                    <Paper elevation={2} sx={{ p: 3 }}>
+                    <Box>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
                             Beslenme Programı
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz beslenme programı eklenmemiştir.
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="h6">Haftalık Plan</Typography>
+                            <Box>
+                                <Button 
+                                    variant="outlined" 
+                                    size="small" 
+                                    sx={{ mr: 1 }}
+                                    startIcon={<PrintIcon />}
+                                >
+                                    Yazdır
+                                </Button>
+                                <Button 
+                                    variant="contained" 
+                                    size="small" 
+                                    startIcon={<EditIcon />}
+                                >
+                                    Düzenle
+                                </Button>
+                            </Box>
+                        </Box>
+                        
+                        <Paper elevation={3} sx={{ mb: 3 }}>
+                            <Box sx={{ 
+                                p: 2, 
+                                bgcolor: 'primary.main', 
+                                color: 'white',
+                                borderTopLeftRadius: 4,
+                                borderTopRightRadius: 4,
+                                display: 'flex',
+                                justifyContent: 'space-between'
+                            }}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                    1800 kalori / gün - Düşük Karbonhidratlı Plan
+                                </Typography>
+                                <Chip 
+                                    label="Aktif" 
+                                    size="small" 
+                                    sx={{ bgcolor: 'success.light', color: 'success.contrastText' }}
+                                />
+                            </Box>
+                            
+                            <Divider />
+                            
+                            <Box sx={{ overflowX: 'auto' }}>
+                                <Box sx={{ minWidth: 900, p: 2 }}>
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={2}>
+                                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Öğün</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={10}>
+                                            <Grid container>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Pzt</Typography>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Sal</Typography>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Çar</Typography>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Per</Typography>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Cum</Typography>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Cmt</Typography>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Paz</Typography>
+                                                    </Box>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    
+                                    <Divider sx={{ my: 1 }} />
+                                    
+                                    {/* Kahvaltı */}
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={2}>
+                                            <Box sx={{ 
+                                                bgcolor: 'primary.light', 
+                                                color: 'primary.contrastText', 
+                                                p: 1, 
+                                                borderRadius: 1,
+                                                height: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Kahvaltı</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={10}>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 haşlanmış yumurta<br />
+                                                            2 dilim tam buğday ekmeği<br />
+                                                            1 dilim beyaz peynir<br />
+                                                            5 adet zeytin
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Omlet (2 yumurta)<br />
+                                                            1 dilim tam buğday ekmeği<br />
+                                                            Salatalık, domates
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Yulaf ezmesi (40g)<br />
+                                                            1 orta boy muz<br />
+                                                            Tarçın, süt (200ml)
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 haşlanmış yumurta<br />
+                                                            1 dilim tam buğday ekmeği<br />
+                                                            1 dilim kaşar peyniri<br />
+                                                            5 adet zeytin
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Protein shake<br />
+                                                            1 avuç yaban mersini<br />
+                                                            3 adet ceviz
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Menemen (2 yumurta)<br />
+                                                            1 dilim tam buğday ekmeği<br />
+                                                            Salatalık, domates
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Yulaf ezmesi (40g)<br />
+                                                            1 orta boy elma<br />
+                                                            Tarçın, süt (200ml)
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    
+                                    <Divider sx={{ my: 1 }} />
+                                    
+                                    {/* Ara Öğün */}
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={2}>
+                                            <Box sx={{ 
+                                                bgcolor: 'info.light', 
+                                                color: 'info.contrastText', 
+                                                p: 1, 
+                                                borderRadius: 1,
+                                                height: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Ara Öğün</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={10}>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 orta boy elma<br />
+                                                            5 adet badem
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 adet yoğurt (150g)<br />
+                                                            1 tatlı kaşığı bal
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 avuç karışık kuruyemiş<br />
+                                                            1 adet mandalina
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            2 adet kuru incir<br />
+                                                            1 bardak ayran
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 orta boy armut<br />
+                                                            5 adet ceviz
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 adet muz<br />
+                                                            1 yemek kaşığı fıstık ezmesi
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            1 avuç üzüm<br />
+                                                            10 adet badem
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    
+                                    <Divider sx={{ my: 1 }} />
+                                    
+                                    {/* Öğle Yemeği */}
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={2}>
+                                            <Box sx={{ 
+                                                bgcolor: 'warning.light', 
+                                                color: 'warning.contrastText', 
+                                                p: 1, 
+                                                borderRadius: 1,
+                                                height: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Öğle</Typography>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={10}>
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Izgara tavuk (120g)<br />
+                                                            Yeşil salata<br />
+                                                            1/2 avokado
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Ton balıklı salata<br />
+                                                            1 dilim tam buğday ekmeği<br />
+                                                            Zeytinyağı limon sosu
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Mercimek çorbası<br />
+                                                            2 dilim tam buğday ekmeği<br />
+                                                            Yoğurt (150g)
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Izgara köfte (100g)<br />
+                                                            Bulgur pilavı (5 yemek kaşığı)<br />
+                                                            Mevsim salata
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Sebze yemeği<br />
+                                                            3 yemek kaşığı pirinç<br />
+                                                            Yoğurt (150g)
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Izgara balık (150g)<br />
+                                                            Haşlanmış sebze<br />
+                                                            Limonlu zeytinyağı sosu
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                                <Grid item xs={1.7}>
+                                                    <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
+                                                        <Typography variant="body2">
+                                                            Tavuk şiş (120g)<br />
+                                                            5 yemek kaşığı bulgur<br />
+                                                            Cacık
+                                                        </Typography>
+                                                    </Paper>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    
+                                    {/* Diğer öğünler kısaltıldı */}
+                                </Box>
+                            </Box>
+                            
+                            <Divider />
+                            
+                            <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    Bu beslenme planı <strong>Dr. Ayşe Demir</strong> tarafından 02.06.2023 tarihinde hazırlanmıştır.
+                                </Typography>
+                                <Button size="small">Detaylı Görüntüle</Button>
+                            </Box>
+                        </Paper>
+                        
+                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Öneriler ve Notlar
                         </Typography>
-                    </Paper>
+                        
+                        <Card elevation={3} sx={{ mb: 3 }}>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                        <Box sx={{ 
+                                            bgcolor: 'primary.main', 
+                                            color: 'white', 
+                                            borderRadius: '50%', 
+                                            width: 24, 
+                                            height: 24, 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold',
+                                            flexShrink: 0,
+                                            mt: 0.2
+                                        }}>1</Box>
+                                        <Typography variant="body1">
+                                            Günde en az <strong>2.5 litre su</strong> içmeye özen gösterin.
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                        <Box sx={{ 
+                                            bgcolor: 'primary.main', 
+                                            color: 'white', 
+                                            borderRadius: '50%', 
+                                            width: 24, 
+                                            height: 24, 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold',
+                                            flexShrink: 0,
+                                            mt: 0.2
+                                        }}>2</Box>
+                                        <Typography variant="body1">
+                                            Akşam yemeğini <strong>saat 19:00'dan önce</strong> tüketmeye çalışın.
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                        <Box sx={{ 
+                                            bgcolor: 'primary.main', 
+                                            color: 'white', 
+                                            borderRadius: '50%', 
+                                            width: 24, 
+                                            height: 24, 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold',
+                                            flexShrink: 0,
+                                            mt: 0.2
+                                        }}>3</Box>
+                                        <Typography variant="body1">
+                                            Şeker ve beyaz un içeren ürünleri <strong>tamamen kesmemeye</strong> çalışın.
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                        <Box sx={{ 
+                                            bgcolor: 'primary.main', 
+                                            color: 'white', 
+                                            borderRadius: '50%', 
+                                            width: 24, 
+                                            height: 24, 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold',
+                                            flexShrink: 0,
+                                            mt: 0.2
+                                        }}>4</Box>
+                                        <Typography variant="body1">
+                                            Egzersiz programınızı düzenli olarak uygulayın. Özellikle kardio egzersizlerine ağırlık verin.
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Box>
                 );
             case 'randevu':
                 return (
-                    <Paper elevation={2} sx={{ p: 3 }}>
+                    <Box>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
                             Randevular
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz randevu verisi bulunmamaktadır.
-                        </Typography>
-                    </Paper>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="h6">Randevu Geçmişi</Typography>
+                            <Button 
+                                variant="contained" 
+                                size="small" 
+                                startIcon={<AddIcon />}
+                                sx={{ bgcolor: theme.palette.primary.main }}
+                            >
+                                Yeni Randevu
+                            </Button>
+                        </Box>
+                        
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={7}>
+                                {/* Yaklaşan Randevular */}
+                                <Card elevation={3} sx={{ mb: 3 }}>
+                                    <CardHeader 
+                                        title="Yaklaşan Randevular" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        sx={{ 
+                                            bgcolor: 'primary.light', 
+                                            color: 'primary.contrastText',
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <List>
+                                        <ListItem 
+                                            secondaryAction={
+                                                <Box>
+                                                    <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton edge="end" aria-label="delete">
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            }
+                                        >
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                    <EventIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText 
+                                                primary={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                            Beslenme Danışmanlığı
+                                                        </Typography>
+                                                        <Chip 
+                                                            label="Online" 
+                                                            size="small" 
+                                                            color="info" 
+                                                            sx={{ ml: 1 }}
+                                                        />
+                                                    </Box>
+                                                }
+                                                secondary={
+                                                    <Box>
+                                                        <Typography variant="body2" component="span">
+                                                            25 Haziran 2023, Salı - 14:30
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Notlar: 3 aylık takip sonrası değerlendirme randevusu
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                            />
+                                        </ListItem>
+                                        
+                                        <Divider variant="inset" component="li" />
+                                        
+                                        <ListItem 
+                                            secondaryAction={
+                                                <Box>
+                                                    <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton edge="end" aria-label="delete">
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            }
+                                        >
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                    <EventIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText 
+                                                primary={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                            Vücut Analizi
+                                                        </Typography>
+                                                        <Chip 
+                                                            label="Yüz yüze" 
+                                                            size="small" 
+                                                            color="success" 
+                                                            sx={{ ml: 1 }}
+                                                        />
+                                                    </Box>
+                                                }
+                                                secondary={
+                                                    <Box>
+                                                        <Typography variant="body2" component="span">
+                                                            10 Temmuz 2023, Pazartesi - 10:00
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Notlar: Detaylı vücut ölçümleri için gelecek
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                            />
+                                        </ListItem>
+                                    </List>
+                                </Card>
+                                
+                                {/* Geçmiş Randevular */}
+                                <Card elevation={3}>
+                                    <CardHeader 
+                                        title="Geçmiş Randevular" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        sx={{ 
+                                            bgcolor: 'grey.200', 
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <List>
+                                        <ListItem>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
+                                                    <EventIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText 
+                                                primary={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                            Beslenme Danışmanlığı
+                                                        </Typography>
+                                                        <Chip 
+                                                            label="Tamamlandı" 
+                                                            size="small" 
+                                                            color="success" 
+                                                            sx={{ ml: 1 }}
+                                                        />
+                                                    </Box>
+                                                }
+                                                secondary={
+                                                    <Box>
+                                                        <Typography variant="body2" component="span">
+                                                            15 Mayıs 2023, Pazartesi - 14:30
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                            />
+                                        </ListItem>
+                                        
+                                        <Divider variant="inset" component="li" />
+                                        
+                                        <ListItem>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
+                                                    <EventIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText 
+                                                primary={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                            İlk Değerlendirme
+                                                        </Typography>
+                                                        <Chip 
+                                                            label="Tamamlandı" 
+                                                            size="small" 
+                                                            color="success" 
+                                                            sx={{ ml: 1 }}
+                                                        />
+                                                    </Box>
+                                                }
+                                                secondary={
+                                                    <Box>
+                                                        <Typography variant="body2" component="span">
+                                                            15 Nisan 2023, Çarşamba - 10:00
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                            />
+                                        </ListItem>
+                                        
+                                        <Divider variant="inset" component="li" />
+                                        
+                                        <ListItem>
+                                            <ListItemAvatar>
+                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
+                                                    <EventIcon />
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText 
+                                                primary={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                            Tanışma Görüşmesi
+                                                        </Typography>
+                                                        <Chip 
+                                                            label="Tamamlandı" 
+                                                            size="small" 
+                                                            color="success" 
+                                                            sx={{ ml: 1 }}
+                                                        />
+                                                    </Box>
+                                                }
+                                                secondary={
+                                                    <Box>
+                                                        <Typography variant="body2" component="span">
+                                                            1 Nisan 2023, Cumartesi - 11:30
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                            />
+                                        </ListItem>
+                                    </List>
+                                </Card>
+                            </Grid>
+                            
+                            <Grid item xs={12} md={5}>
+                                {/* Randevu Notları */}
+                                <Card elevation={3} sx={{ mb: 3 }}>
+                                    <CardHeader 
+                                        title="Son Randevu Notları" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        subheader="15 Mayıs 2023"
+                                        sx={{ 
+                                            bgcolor: 'primary.light', 
+                                            color: 'primary.contrastText',
+                                            '& .MuiCardHeader-subheader': {
+                                                color: 'primary.contrastText'
+                                            },
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <CardContent>
+                                        <Typography variant="body1" paragraph>
+                                            Danışan son 1 ayda 3 kg verdi. Ancak yağ oranında istenen düşüş yaşanmadı.
+                                        </Typography>
+                                        <Typography variant="body1" paragraph>
+                                            Önceki beslenme planında bazı değişiklikler yapıldı. Karbonhidrat miktarı azaltıldı, protein miktarı artırıldı.
+                                        </Typography>
+                                        <Typography variant="body1" paragraph>
+                                            Danışanın şeker tüketimi hala yüksek. Kendisine bununla ilgili tavsiyeler verildi.
+                                        </Typography>
+                                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                                            Yapılacaklar:
+                                        </Typography>
+                                        <ul>
+                                            <li>Yeni beslenme planı hazırlandı</li>
+                                            <li>3 günlük su içme hatırlatıcısı eklendi</li>
+                                            <li>Haftalık egzersiz programı güncellendi</li>
+                                        </ul>
+                                    </CardContent>
+                                </Card>
+                                
+                                {/* İstatistikler */}
+                                <Card elevation={3}>
+                                    <CardHeader 
+                                        title="Randevu İstatistikleri" 
+                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        sx={{ 
+                                            bgcolor: 'grey.200', 
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
+                                    />
+                                    <CardContent>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={6}>
+                                                <Box sx={{ 
+                                                    p: 2, 
+                                                    bgcolor: 'success.light', 
+                                                    color: 'success.contrastText',
+                                                    borderRadius: 2,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>3</Typography>
+                                                    <Typography variant="body2">Tamamlanan</Typography>
+                                                </Box>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Box sx={{ 
+                                                    p: 2, 
+                                                    bgcolor: 'primary.light', 
+                                                    color: 'primary.contrastText',
+                                                    borderRadius: 2,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>2</Typography>
+                                                    <Typography variant="body2">Yaklaşan</Typography>
+                                                </Box>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Box sx={{ 
+                                                    p: 2, 
+                                                    bgcolor: 'warning.light', 
+                                                    color: 'warning.contrastText',
+                                                    borderRadius: 2,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>0</Typography>
+                                                    <Typography variant="body2">İptal Edilen</Typography>
+                                                </Box>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Box sx={{ 
+                                                    p: 2, 
+                                                    bgcolor: 'info.light', 
+                                                    color: 'info.contrastText',
+                                                    borderRadius: 2,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>5</Typography>
+                                                    <Typography variant="body2">Toplam</Typography>
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
+                    </Box>
                 );
             case 'tarif':
                 return (
