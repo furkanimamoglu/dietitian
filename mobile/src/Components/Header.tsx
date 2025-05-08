@@ -22,17 +22,46 @@ type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList>;
 };
 
+type Notification = {
+  id: number;
+  phoneNumber: string;
+  isRead: boolean;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export default function Header({ navigation }: Props) {
   const notificationCount = 3;
   const messageCount = 5;
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerAnim] = useState(new Animated.Value(screenWidth));
 
   const [userName, setUserName] = useState<string>('Yükleniyor...');
   const [userProfile, setUserProfile] = useState<string>('');
 
-  useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`${config.apiUrl}/client/getMyNotifications`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': await AsyncStorage.getItem('token') || ''
+        }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setNotifications(data);
+      } else {
+        console.log('Bildirimler alınamadı:', data.message);
+      }
+    } catch (error) {
+      console.error('Bildirim hatası:', error);
+    }
+  };
 
+  useEffect(() => {
     const checkToken = async () => {
         try {
           const token = await AsyncStorage.getItem('token');
@@ -73,7 +102,10 @@ export default function Header({ navigation }: Props) {
 
     fetchClientInfo();
     checkToken();
+    fetchNotifications();
   }, []);
+
+  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
 
   const openDrawer = () => {
     setDrawerOpen(true);
@@ -84,7 +116,30 @@ export default function Header({ navigation }: Props) {
     }).start();
   };
 
-  const closeDrawer = () => {
+  const closeDrawer = async () => {
+    try {
+      const response = await fetch(`${config.apiUrl}/client/readMyAllNotifications`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': await AsyncStorage.getItem('token') || ''
+        }
+      });
+      
+      if (response.ok) {
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notification => ({
+            ...notification,
+            isRead: true
+          }))
+        );
+      } else {
+        console.log('Bildirimler okundu olarak işaretlenemedi');
+      }
+    } catch (error) {
+      console.error('Bildirim okuma hatası:', error);
+    }
+
     Animated.timing(drawerAnim, {
       toValue: screenWidth,
       duration: 300,
@@ -128,9 +183,9 @@ export default function Header({ navigation }: Props) {
 
               <TouchableOpacity onPress={openDrawer} style={styles.notificationWrapper}>
                 <Icon name="bell-outline" size={24} color="#ffffff" style={styles.icon} />
-                {notificationCount > 0 && (
+                {unreadNotificationsCount > 0 && (
                   <View style={styles.notificationBadge}>
-                    <Text style={styles.notificationText}>{notificationCount}</Text>
+                    <Text style={styles.notificationText}>{unreadNotificationsCount}</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -145,9 +200,15 @@ export default function Header({ navigation }: Props) {
             <Animated.View style={[styles.drawer, { transform: [{ translateX: drawerAnim }] }]}>
               <View style={styles.drawerContent}>
                 <Text style={styles.drawerTitle}>Bildirimler</Text>
-                {['Yeni mesajınız var', 'Haftalık rapor hazır', 'Su tüketimi düşük'].map((item, index) => (
-                  <View key={index} style={styles.notificationBox}>
-                    <Text>{item}</Text>
+                {notifications.map((notification) => (
+                  <View key={notification.id} style={[
+                    styles.notificationBox,
+                    !notification.isRead && styles.unreadNotification
+                  ]}>
+                    <Text style={styles.notificationMessage}>{notification.message}</Text>
+                    <Text style={styles.notificationDate}>
+                      {new Date(notification.createdAt).toLocaleDateString('tr-TR')}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -269,5 +330,18 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
-  }
+  },
+  unreadNotification: {
+    backgroundColor: '#fff3e0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#f57c00',
+  },
+  notificationMessage: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  notificationDate: {
+    fontSize: 12,
+    color: '#666',
+  },
 });

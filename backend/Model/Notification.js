@@ -10,7 +10,7 @@ const Notification = sequelize.define('Notification', {
             primaryKey: true
         },
         phoneNumber: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false
         },
         isRead: {

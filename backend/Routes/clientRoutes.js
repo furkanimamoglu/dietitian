@@ -12,4 +12,7 @@ router.post('/register', clientController.register);
 
 router.get('/getClientInfo', clientController.getClientInfo);
 
+router.get('/getMyNotifications', clientController.getMyNotifications);
+router.get('/readMyAllNotifications', clientController.readMyAllNotifications);
+
 module.exports = router;
