@@ -409,6 +409,29 @@ class DietitianController {
         }
     }
 
+    async addNutritionPlan(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { title, description, image, category_id, mealPlan } = req.body;
+
+            const result = await DietitianService.addNutritionPlan(dietitian_id, {
+                title,
+                description,
+                image,
+                category_id,
+                mealPlan
+            });
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = new DietitianController();

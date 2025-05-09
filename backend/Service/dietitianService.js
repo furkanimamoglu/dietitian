@@ -517,6 +517,47 @@ class DietitianService {
         return { success: true, message: "Beslenme planı başarıyla silindi." };
     }
 
+    async addNutritionPlan(dietitian_id, { title, description, image, category_id, mealPlan }) {
+        if (!dietitian_id || !title || !description || !category_id) {
+            throw new Exception("Başlık, açıklama ve kategori zorunludur.", 400, true);
+        }
+
+        const category = await NutritionCategory.findOne({
+            where: {
+                id: category_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!category) {
+            throw new Exception("Bu kategori size ait değil.", 403, true);
+        }
+
+        const existing = await NutritionPlan.findOne({
+            where: {
+                title,
+                dietitian_id
+            }
+        });
+
+        if (existing) {
+            throw new Exception("Bu isimde bir plan zaten mevcut.", 409, true);
+        }
+
+        if (mealPlan && typeof mealPlan !== 'object') {
+            throw new Exception("Meal plan geçerli bir JSON formatında olmalıdır.", 400, true);
+        }
+
+        return await NutritionPlan.create({
+            title,
+            description,
+            image: image || '/placeholder.png',
+            category_id,
+            mealPlan,
+            dietitian_id
+        });
+    }
+
 }
 
 module.exports = new DietitianService();

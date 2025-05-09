@@ -22,7 +22,9 @@ router.get('/getDietitianNameById', dietitianController.getDietitianNameById);
 router.get('/getNutritionCategories', dietitianController.getNutritionCategories);
 router.delete('/deleteNutritionCategory', dietitianController.deleteNutritionCategory);
 router.post('/addNutritionCategory', dietitianController.addNutritionCategory);
+
 router.post('/assignNutritionPlanToClient', dietitianController.assignNutritionPlanToClient);
+router.post('/addNutritionPlan', dietitianController.addNutritionPlan);
 router.get('/getNutritionPlans', dietitianController.getNutritionPlans);
 router.delete('/deleteNutritionPlan', dietitianController.deleteNutritionPlan);
 
