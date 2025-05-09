@@ -1295,12 +1295,7 @@ export default function Beslenme() {
                     />
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn close-btn" 
-                        onClick={() => setViewProgramModal(false)}
-                    >
-                        Kapat
-                    </button>
+
                 </div>
             </Modal>
 
