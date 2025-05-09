@@ -58,7 +58,7 @@ export default function Randevularim() {
                         }
                     }
                 );
-                const appointments = response.data.appointment;
+                const appointments = response.data || [];
 
                 const formattedAppointments = appointments.map((appointment) => ({
                     id: appointment.id,

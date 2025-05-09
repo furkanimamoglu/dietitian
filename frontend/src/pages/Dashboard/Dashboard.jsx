@@ -182,7 +182,7 @@ export default function Dashboard() {
 
     return (
         <Default>
-            <Box sx={{ flexGrow: 1, p: 3, bgcolor: '#f8f9fa', minHeight: '100vh' }}>
+            <Box sx={{ flexGrow: 1, p: 3, bgcolor: '#f8f9fa', minHeight: '70vh' }}>
                 {/* Stats Section */}
                 <Grid container spacing={3} sx={{ mb: 3 }}>
                     {statCards.map((card, index) => (

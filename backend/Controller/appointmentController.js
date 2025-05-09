@@ -14,11 +14,7 @@ class AppointmentController {
             }
 
             const result = await AppointmentService.getDietitianAppointments(user_id);
-            res.status(200).json(
-                {
-                    appointment: result
-                }
-            );
+            res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,

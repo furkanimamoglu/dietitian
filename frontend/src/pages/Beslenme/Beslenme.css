@@ -486,7 +486,7 @@ input[type="date"].text-input {
 }
 
 .modal-btn.confirm-btn {
-  background-color: #3f51b5;
+  background-color: #ff9e25;
   color: white;
   display: flex;
   align-items: center;
@@ -494,7 +494,7 @@ input[type="date"].text-input {
 }
 
 .modal-btn.confirm-btn:hover {
-  background-color: #303f9f;
+  background-color: #ff8c00;
 }
 
 .modal-btn.confirm-btn:disabled {
@@ -855,7 +855,7 @@ input[type="date"].text-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #3f51b5;
+  background-color: #ff9e25;
   color: white;
   border: none;
   border-radius: 0 4px 4px 0;
@@ -865,7 +865,7 @@ input[type="date"].text-input {
 }
 
 .add-meal-button:hover {
-  background-color: #303f9f;
+  background-color: #ff9008;
 }
 
 /* View meal plan styles */
