@@ -13,6 +13,7 @@ router.delete('/deleteClient', dietitianController.deleteClient);
 router.put('/updateClient', dietitianController.updateClient)
 router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
+router.get('/getMyClientCount', dietitianController.getMyClientCount)
 
 router.get('/globalSearchbar', dietitianController.globalSearchbar);
 

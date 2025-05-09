@@ -240,30 +240,16 @@ class DietitianService {
         }
     }
 
-    async getAllMyNutritionCategories(user_id) {
-        try {
-            if (!user_id) {
-                throw new Exception("Yetkisiz Erişim.", 401);
-            }
-
-            const dietitian = await Dietitian.findOne({
-                where: { id: user_id },
-                include: [
-                    {
-                        model: NutritionCategory,
-                        as: 'categories',
-                    },
-                ],
-            });
-
-            if (!dietitian) {
-                throw new Exception('Diyetisyen bulunamadı.', 404);
-            }
-
-            return dietitian.categories;
-        } catch (error) {
-            throw new Exception(error.message, 400);
+    async getMyClientCount(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
         }
+
+        const result = await Client.count({
+            where: { dietitian_id }
+        });
+
+        return {clientCount: result};
     }
 
     async generateQrCode(user_id) {

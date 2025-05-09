@@ -266,11 +266,23 @@ export default function Beslenme() {
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
+    const [addPlanModal, setAddPlanModal] = useState(false);
     const [editProgramModal, setEditProgramModal] = useState(false);
     const [selectedProgram, setSelectedProgram] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [detailItem, setDetailItem] = useState(null);
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
+    const [assignmentNote, setAssignmentNote] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    
+    // New plan state
+    const [newPlan, setNewPlan] = useState({
+        title: '',
+        description: '',
+        category_id: '',
+        image: ''
+    });
     
     // Delete confirmation modal states
     const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
@@ -473,6 +485,38 @@ export default function Beslenme() {
         });
     };
 
+    const handleAddPlan = () => {
+        if (!newPlan.title.trim() || !newPlan.category_id) return;
+        
+        const planData = {
+            title: newPlan.title.trim(),
+            description: newPlan.description.trim(),
+            category_id: newPlan.category_id,
+            image: newPlan.image || ''
+        };
+        
+        // Make API call to add the plan
+        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            // Add the new plan to the state
+            setBeslenmeData([...beslenmeData, response.data]);
+            // Reset form
+            setNewPlan({
+                title: '',
+                description: '',
+                category_id: '',
+                image: ''
+            });
+            setAddPlanModal(false);
+        })
+        .catch(error => {
+            console.error("Error adding plan:", error);
+            // You might want to show an error message to the user here
+        });
+    };
+
     // Nutrition card handlers
     const handleOpenDetailModal = (item) => {
         setDetailItem(item);
@@ -481,15 +525,35 @@ export default function Beslenme() {
 
     const handleOpenAddToUserModal = (item) => {
         setSelectedProgram(item);
+        // Set default dates (today and a week from today)
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+        
+        // Format dates as YYYY-MM-DD
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        setStartDate(formatDate(today));
+        setEndDate(formatDate(nextWeek));
+        setAssignmentNote('');
+        setSelectedUser(null);
         setAddToUserModal(true);
     };
 
     const handleAddToUser = () => {
-        if (!selectedProgram || !selectedUser) return;
+        if (!selectedProgram || !selectedUser || !startDate || !endDate) return;
         
         const addData = {
             client_id: selectedUser.id,
-            plan_id: selectedProgram.id
+            nutrition_plan_id: selectedProgram.id,
+            start_date: startDate,
+            end_date: endDate,
+            note: assignmentNote
         };
         
         axios.post(`${config[config.environment].apiUrl}/dietitian/assignNutritionPlanToClient`, addData, {
@@ -503,6 +567,9 @@ export default function Beslenme() {
             setAddToUserModal(false);
             setSelectedProgram(null);
             setSelectedUser(null);
+            setStartDate('');
+            setEndDate('');
+            setAssignmentNote('');
         })
         .catch(error => {
             console.error("Error assigning plan to client:", error);
@@ -798,11 +865,20 @@ export default function Beslenme() {
                         </div>
                         <div className="category-actions">
                             <button 
+                                className="action-btn add-plan-btn" 
+                                title="Plan Ekle"
+                                onClick={() => setAddPlanModal(true)}
+                            >
+                                <AddIcon />
+                                <span className="btn-text">Plan Ekle</span>
+                            </button>
+                            <button 
                                 className="action-btn add-btn" 
                                 title="Kategori Ekle"
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon />
+                                <span className="btn-text">Kategori Ekle</span>
                             </button>
                             <button 
                                 className="action-btn delete-btn" 
@@ -856,6 +932,80 @@ export default function Beslenme() {
                 </div>
             </div>
 
+            {/* Add Plan Modal */}
+            <Modal 
+                isOpen={addPlanModal} 
+                title="Beslenme Planı Ekle" 
+                onClose={() => setAddPlanModal(false)}
+            >
+                <div className="modal-body">
+                    <div className="input-container">
+                        <label htmlFor="planTitle">Plan Adı</label>
+                        <input 
+                            type="text" 
+                            id="planTitle"
+                            className="text-input" 
+                            value={newPlan.title}
+                            onChange={(e) => setNewPlan({...newPlan, title: e.target.value})}
+                            placeholder="Plan adını giriniz"
+                        />
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="planDescription">Açıklama</label>
+                        <textarea 
+                            id="planDescription"
+                            className="text-input textarea" 
+                            value={newPlan.description}
+                            onChange={(e) => setNewPlan({...newPlan, description: e.target.value})}
+                            placeholder="Plan açıklaması giriniz"
+                            rows={3}
+                        />
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="planCategory">Kategori</label>
+                        <select 
+                            id="planCategory"
+                            className="text-input" 
+                            value={newPlan.category_id}
+                            onChange={(e) => setNewPlan({...newPlan, category_id: e.target.value})}
+                        >
+                            <option value="">Kategori Seçin</option>
+                            {categoryData.map(category => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name || category.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="planImage">Görsel URL (Opsiyonel)</label>
+                        <input 
+                            type="text" 
+                            id="planImage"
+                            className="text-input" 
+                            value={newPlan.image}
+                            onChange={(e) => setNewPlan({...newPlan, image: e.target.value})}
+                            placeholder="Görsel URL giriniz"
+                        />
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => setAddPlanModal(false)}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn confirm-btn" 
+                        onClick={handleAddPlan}
+                        disabled={!newPlan.title.trim() || !newPlan.category_id}
+                    >
+                        Ekle
+                    </button>
+                </div>
+            </Modal>
+
             {/* Add Category Modal */}
             <Modal 
                 isOpen={addCategoryModal} 
@@ -902,9 +1052,11 @@ export default function Beslenme() {
                     <p className="selected-program">
                         Seçilen program: <strong>{selectedProgram?.title}</strong>
                     </p>
-                    <div className="user-select-container">
+                    <div className="input-container">
+                        <label htmlFor="userSelect">Danışan Seçin</label>
                         <select 
-                            className="user-select"
+                            id="userSelect"
+                            className="text-input"
                             value={selectedUser?.id || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
@@ -920,6 +1072,39 @@ export default function Beslenme() {
                             ))}
                         </select>
                     </div>
+                    <div className="date-inputs-container">
+                        <div className="input-container half-width">
+                            <label htmlFor="startDate">Başlangıç Tarihi</label>
+                            <input 
+                                type="date" 
+                                id="startDate"
+                                className="text-input" 
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="input-container half-width">
+                            <label htmlFor="endDate">Bitiş Tarihi</label>
+                            <input 
+                                type="date" 
+                                id="endDate"
+                                className="text-input" 
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="assignmentNote">Not (Opsiyonel)</label>
+                        <textarea 
+                            id="assignmentNote"
+                            className="text-input textarea" 
+                            value={assignmentNote}
+                            onChange={(e) => setAssignmentNote(e.target.value)}
+                            placeholder="Danışana özel notlar..."
+                            rows={3}
+                        />
+                    </div>
                 </div>
                 <div className="modal-footer">
                     <button 
@@ -931,7 +1116,7 @@ export default function Beslenme() {
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={handleAddToUser}
-                        disabled={!selectedUser}
+                        disabled={!selectedUser || !startDate || !endDate}
                     >
                         Ekle
                     </button>

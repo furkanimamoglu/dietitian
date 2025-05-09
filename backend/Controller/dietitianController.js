@@ -432,6 +432,28 @@ class DietitianController {
         }
     }
 
+    async getMyClientCount(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await DietitianService.getMyClientCount(dietitian_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = new DietitianController();
