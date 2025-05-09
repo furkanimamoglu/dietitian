@@ -10,7 +10,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const {Dietitian, Client, NutritionPlan, NutritionCategory} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment} = require('../Model/MainModel');
 
 class DietitianService {
 
@@ -454,6 +454,38 @@ class DietitianService {
         } catch (error) {
             throw new Error(error.message);
         }
+    }
+
+    async assignNutritionPlanToClient({ dietitian_id, client_id, nutrition_plan_id, start_date, end_date, note }) {
+        const client = await Client.findOne({
+            where: {
+                id: client_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!client) {
+            throw new Error("Bu danışan size ait değil. Atama yapılamaz.");
+        }
+
+        const plan = await NutritionPlan.findOne({
+            where: {
+                id: nutrition_plan_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!plan) {
+            throw new Error("Bu plan size ait değil. Atama yapılamaz.");
+        }
+
+        return await NutritionAssignment.create({
+            client_id,
+            nutrition_plan_id,
+            start_date,
+            end_date,
+            note
+        });
     }
 
 }

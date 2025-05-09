@@ -334,6 +334,38 @@ class DietitianController {
         }
     }
 
+    async assignNutritionPlanToClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { client_id, nutrition_plan_id, start_date, end_date, note } = req.body;
+
+            if (!dietitian_id || !client_id || !nutrition_plan_id || !start_date || !end_date) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Tüm alanlar zorunludur."
+                });
+            }
+
+            const result = await DietitianService.assignNutritionPlanToClient({
+                dietitian_id,
+                client_id,
+                nutrition_plan_id,
+                start_date,
+                end_date,
+                note
+            });
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = new DietitianController();
