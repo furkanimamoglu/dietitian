@@ -246,6 +246,85 @@ class AppointmentService {
 
         return { count };
     }
+
+    async updateAppointmentStatus(dietitian_id, appointment_id, action) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        const appointment = await Appointment.findOne({
+            where: {
+                id: appointment_id,
+                dietitian_id
+            }
+        });
+
+        if (!appointment) {
+            throw new Exception("Bu randevu size ait değil veya bulunamadı.", 404, true);
+        }
+
+        if (appointment.status !== 'pending') {
+            throw new Exception("Bu randevu zaten değerlendirilmiş.", 400, true);
+        }
+
+        if (!['approved', 'denied'].includes(action)) {
+            throw new Exception("Geçersiz işlem türü.", 400, true);
+        }
+
+        appointment.status = action;
+        await appointment.save();
+
+        return {
+            success: true,
+            message: `Randevu ${action === 'approved' ? 'onaylandı' : 'reddedildi'}.`
+        };
+    }
+
+    async getPendingAppointments(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        return await Appointment.findAll({
+            where: {
+                dietitian_id,
+                status: 'pending'
+            },
+            include: [
+                {
+                    model: Client,
+                    attributes: ['id', 'name', 'phoneNumber']
+                }
+            ],
+            order: [['start', 'ASC']]
+        });
+    }
+
+    async getTodayAppointments(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        const now = new Date();
+        const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+
+        return await Appointment.findAll({
+            where: {
+                dietitian_id,
+                start: {
+                    [Op.between]: [startOfDay, endOfDay]
+                }
+            },
+            include: [
+                {
+                    model: Client,
+                    attributes: ['id', 'name', 'phoneNumber']
+                }
+            ],
+            order: [['start', 'ASC']]
+        });
+    }
 }
 
 module.exports = new AppointmentService();

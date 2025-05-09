@@ -46,6 +46,11 @@ export default function Dashboard() {
     const [pendingRequests, setPendingRequests] = useState(0);
     const [activeClients, setActiveClients] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [pendingAppointments, setPendingAppointments] = useState([]);
+    
+    // Success popup states
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -55,7 +60,8 @@ export default function Dashboard() {
                     fetchTodayAppointments(),
                     fetchRemainingAppointments(),
                     fetchPendingRequests(),
-                    fetchActiveClients()
+                    fetchActiveClients(),
+                    fetchPendingAppointments()
                 ]);
             } catch (error) {
                 console.error("Dashboard verileri çekilirken bir hata oluştu:", error);
@@ -132,8 +138,71 @@ export default function Dashboard() {
             }
         };
 
+        const fetchPendingAppointments = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/appointment/getPendingAppointments",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setPendingAppointments(response.data || []);
+            } catch (error) {
+                console.error("Bekleyen randevular çekilirken bir hata oluştu:", error);
+                setPendingAppointments([]);
+            }
+        };
+
         fetchDashboardData();
     }, []);
+
+    // Auto-hide success popup after 3 seconds
+    useEffect(() => {
+        if (showSuccessPopup) {
+            const timer = setTimeout(() => {
+                setShowSuccessPopup(false);
+            }, 3000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessPopup]);
+
+    const handleAppointmentAction = async (appointmentId, action) => {
+        try {
+            await axios.put(
+                config[config.environment].apiUrl + "/appointment/updateAppointmentStatus",
+                {
+                    appointment_id: appointmentId,
+                    action: action
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token')
+                    }
+                }
+            );
+            
+            // Find the appointment to get client name for success message
+            const appointment = pendingAppointments.find(app => app.id === appointmentId);
+            const clientName = appointment ? `${appointment.Client.name} ${appointment.Client.surname}` : 'Danışan';
+            
+            // Set success message based on action
+            const actionText = action === 'approved' ? 'onaylandı' : 'reddedildi';
+            setSuccessMessage(`${clientName} için randevu talebi başarıyla ${actionText}.`);
+            setShowSuccessPopup(true);
+            
+            // Remove the appointment from the list after successful action
+            setPendingAppointments(pendingAppointments.filter(app => app.id !== appointmentId));
+            
+            // Update the pending requests count
+            setPendingRequests(prev => Math.max(0, prev - 1));
+            
+        } catch (error) {
+            console.error(`Randevu ${action === 'approved' ? 'onaylanırken' : 'reddedilirken'} bir hata oluştu:`, error);
+        }
+    };
 
     const handleAddNote = (e) => {
         e.preventDefault();
@@ -410,64 +479,66 @@ export default function Dashboard() {
                             <Divider />
                             <CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, maxHeight: 360, overflow: 'auto' }}>
                                 <List>
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary="Ali Veli" 
-                                            secondary="16:00 - Pazartesi • İlk Görüşme" 
-                                        />
-                                        <Box sx={{ display: 'flex', gap: 1 }}>
-                                            <Button variant="contained" color="success" size="small">Onayla</Button>
-                                            <Button variant="contained" color="error" size="small">Reddet</Button>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary="Fatma Nur" 
-                                            secondary="12:00 - Salı • Kontrol Randevusu" 
-                                        />
-                                        <Box sx={{ display: 'flex', gap: 1 }}>
-                                            <Button variant="contained" color="success" size="small">Onayla</Button>
-                                            <Button variant="contained" color="error" size="small">Reddet</Button>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary="Emre Can" 
-                                            secondary="14:30 - Çarşamba • Diyet Planı" 
-                                        />
-                                        <Box sx={{ display: 'flex', gap: 1 }}>
-                                            <Button variant="contained" color="success" size="small">Onayla</Button>
-                                            <Button variant="contained" color="error" size="small">Reddet</Button>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary="Selin Yıldız" 
-                                            secondary="10:15 - Perşembe • İlk Görüşme" 
-                                        />
-                                        <Box sx={{ display: 'flex', gap: 1 }}>
-                                            <Button variant="contained" color="success" size="small">Onayla</Button>
-                                            <Button variant="contained" color="error" size="small">Reddet</Button>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary="Burak Şahin" 
-                                            secondary="15:45 - Cuma • Kontrol Randevusu" 
-                                        />
-                                        <Box sx={{ display: 'flex', gap: 1 }}>
-                                            <Button variant="contained" color="success" size="small">Onayla</Button>
-                                            <Button variant="contained" color="error" size="small">Reddet</Button>
-                                        </Box>
-                                    </ListItem>
+                                    {loading ? (
+                                        <ListItem>
+                                            <ListItemText primary="Yükleniyor..." />
+                                        </ListItem>
+                                    ) : pendingAppointments.length > 0 ? (
+                                        pendingAppointments.map((appointment) => (
+                                            <React.Fragment key={appointment.id}>
+                                                <ListItem>
+                                                <ListItemText
+                                                    primary={
+                                                        <Stack
+                                                        direction="row"
+                                                        spacing={4}
+                                                        alignItems="center"
+                                                        >
+                                                        <Typography variant="subtitle1" fontWeight={600}>
+                                                            {appointment.Client.name} {appointment.Client.surname}
+                                                        </Typography>
+
+                                                        <Typography variant="subtitle2" color="text.secondary" fontWeight="500">
+                                                        {appointment.title}
+                                                        </Typography>
+
+                                                        <Typography variant="body2" color="text.secondary" whiteSpace="nowrap">
+                                                            📞 {appointment.Client.phoneNumber}
+                                                        </Typography>
+
+                                                        <Typography variant="body2" color="text.secondary" whiteSpace="nowrap">
+                                                            🕒 {new Date(appointment.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(appointment.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </Typography>
+                                                        </Stack>
+                                                    }
+                                                    />
+                                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                                        <Button 
+                                                            variant="contained" 
+                                                            color="success" 
+                                                            size="small"
+                                                            onClick={() => handleAppointmentAction(appointment.id, 'approved')}
+                                                        >
+                                                            Onayla
+                                                        </Button>
+                                                        <Button 
+                                                            variant="contained" 
+                                                            color="error" 
+                                                            size="small"
+                                                            onClick={() => handleAppointmentAction(appointment.id, 'denied')}
+                                                        >
+                                                            Reddet
+                                                        </Button>
+                                                    </Box>
+                                                </ListItem>
+                                                <Divider component="li" />
+                                            </React.Fragment>
+                                        ))
+                                    ) : (
+                                        <ListItem>
+                                            <ListItemText primary="Bekleyen randevu talebi bulunmamaktadır." />
+                                        </ListItem>
+                                    )}
                                 </List>
                             </CardContent>
                         </Card>
@@ -700,6 +771,16 @@ export default function Dashboard() {
                         </Card>
                     </Grid>
                 </Grid>
+
+                {/* Success Popup */}
+                {showSuccessPopup && (
+                    <div className="success-popup">
+                        <div className="success-popup-content">
+                            <CheckCircleIcon className="success-icon" />
+                            <p>{successMessage}</p>
+                        </div>
+                    </div>
+                )}
             </Box>
         </Default>
     );

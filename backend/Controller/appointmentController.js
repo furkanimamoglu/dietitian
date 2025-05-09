@@ -228,6 +228,60 @@ class AppointmentController {
         }
     }
 
+    async updateAppointmentStatus(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { appointment_id, action } = req.body;
+
+            if (!appointment_id || !action) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "appointment_id ve action zorunludur."
+                });
+            }
+
+            const result = await AppointmentService.updateAppointmentStatus(dietitian_id, appointment_id, action);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getPendingAppointments(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await AppointmentService.getPendingAppointments(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getTodayAppointments(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await AppointmentService.getTodayAppointments(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = new AppointmentController();

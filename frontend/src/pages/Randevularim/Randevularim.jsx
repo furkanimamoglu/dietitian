@@ -24,10 +24,10 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
+    Autocomplete
 } from '@mui/material';
 import config from "../../config.js";
 import {Close} from "@mui/icons-material";
-import {Autocomplete} from "@mui/lab";
 
 export default function Randevularim() {
     const [randevular, setRandevular] = useState([]);
