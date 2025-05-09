@@ -212,56 +212,6 @@ class DietitianController {
         }
     }
 
-    async getAllMyNutritionCategories(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
-            const result = await DietitianService.getAllMyNutritionCategories(user_id)
-            res.status(200).json(result)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen,
-                message: error.message
-            });
-        }
-    }
-
-    async addNutritionCategories(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const categoryData = req.body;
-
-            if (!categoryData || !categoryData.title) {
-                return res.status(400).json({
-                    message: "Kategori başlığı gereklidir."
-                });
-            }
-
-            const result = await DietitianService.addNutritionCategory(user_id, categoryData);
-
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
-            });
-        }
-    }
-
     async globalSearchbar(req, res) {
         try {
             const token = req.headers.authorization;
@@ -308,6 +258,73 @@ class DietitianController {
         try {
             const { dietitian_id } = req.query;
             const result = await DietitianService.getDietitianNameById(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async addNutritionCategory(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { category_name } = req.body;
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.addNutritionCategory(dietitian_id, category_name);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async getNutritionCategories(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { category_name } = req.body;
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.getNutritionCategories(dietitian_id, category_name);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async deleteNutritionCategory(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { category_id } = req.query;
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            if(!category_id) {
+                return res.status(400).json({
+                    message: "Geçersiz istek. Kategori id eksik."
+                });
+            }
+            const result = await DietitianService.deleteNutritionCategory(dietitian_id, category_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({

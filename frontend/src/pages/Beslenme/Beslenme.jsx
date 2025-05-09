@@ -53,7 +53,7 @@ const CategoryItem = ({ category, isChecked, onCheck, onDelete }) => {
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
-            <div className="category-title">{category.title}</div>
+            <div className="category-title">{category.name || category.title}</div>
             <button 
                 className="category-delete-btn"
                 onClick={(e) => {
@@ -319,30 +319,24 @@ export default function Beslenme() {
     // Fetch nutrition categories
     useEffect(() => {
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getAllMyNutritionCategories`, {
+            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionCategories`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
             })
             .then((response) => {
+                console.log(response.data);
                 setCategoryData(response.data);
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
-                // Fallback to sample categories if API fails
-                setCategoryData([
-                    { id: 1, title: "Kilo Aldırma" },
-                    { id: 2, title: "Kilo Verme" },
-                    { id: 3, title: "Kas Yapımı" },
-                    { id: 4, title: "Dengeli Beslenme" },
-                    { id: 5, title: "Sağlıklı Atıştırma" }
-                ]);
+                setCategoryData([]);
             });
     }, []);
 
     // Filter categories based on search term
-    const filteredCategories = categoryData?.filter(category => 
-        category.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredCategories = categoryData?.filter(category =>
+        (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Filter nutrition programs based on selected categories
@@ -352,7 +346,7 @@ export default function Beslenme() {
             return true;
         }
         // Otherwise, show only items that belong to checked categories
-        return checkedCategories.includes(item.categoryId);
+        return checkedCategories.includes(item.categoryId || item.dietitian_id);
     });
 
     // Category handlers
@@ -365,38 +359,63 @@ export default function Beslenme() {
     };
 
     const handleMultiDelete = () => {
-        setCategoryData(prev => 
-            prev.filter(cat => !checkedCategories.includes(cat.id))
+        const deletePromises = checkedCategories.map(categoryId => 
+            axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
+                headers: { Authorization: localStorage.getItem("token") }
+            })
         );
-        setCheckedCategories([]);
+        
+        // Execute all promises
+        Promise.all(deletePromises)
+            .then(() => {
+                // Update local state after successful deletion
+                setCategoryData(prev => 
+                    prev.filter(cat => !checkedCategories.includes(cat.id))
+                );
+                setCheckedCategories([]);
+            })
+            .catch(error => {
+                console.error("Error deleting categories:", error);
+                // You might want to show an error message to the user here
+            });
     };
 
     const handleSingleCategoryDelete = (categoryId) => {
-        setCategoryData(prev => prev.filter(cat => cat.id !== categoryId));
-        setCheckedCategories(prev => prev.filter(id => id !== categoryId));
+        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(() => {
+            // Update local state after successful deletion
+            setCategoryData(prev => prev.filter(cat => cat.id !== categoryId));
+            setCheckedCategories(prev => prev.filter(id => id !== categoryId));
+        })
+        .catch(error => {
+            console.error("Error deleting category:", error);
+            // You might want to show an error message to the user here
+        });
     };
 
     const handleAddCategory = () => {
         if (newCategoryTitle.trim() === '') return;
         
         const newCategory = {
-            id: categoryData.length > 0 ? Math.max(...categoryData.map(c => c.id)) + 1 : 1,
-            title: newCategoryTitle.trim()
+            category_name: newCategoryTitle.trim()
         };
         
-        // In a real app, you would make an API call here
-        // axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
-        //     headers: { Authorization: localStorage.getItem("token") }
-        // })
-        // .then(response => {
-        //     setCategoryData([...categoryData, response.data]);
-        // })
-        // .catch(error => console.error("Error adding category:", error));
-        
-        // For now, just update the state directly
-        setCategoryData([...categoryData, newCategory]);
-        setNewCategoryTitle('');
-        setAddCategoryModal(false);
+        // Make API call to add the category
+        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            // Add the new category to the state
+            setCategoryData([...categoryData, response.data]);
+            setNewCategoryTitle('');
+            setAddCategoryModal(false);
+        })
+        .catch(error => {
+            console.error("Error adding category:", error);
+            // You might want to show an error message to the user here
+        });
     };
 
     // Nutrition card handlers
@@ -688,7 +707,7 @@ export default function Beslenme() {
                     <div className="categories-list">
                         {filteredCategories && filteredCategories.length > 0 ? (
                             filteredCategories.map((category) => (
-                                <CategoryItem 
+                                <CategoryItem
                                     key={category.id}
                                     category={category}
                                     isChecked={checkedCategories.includes(category.id)}

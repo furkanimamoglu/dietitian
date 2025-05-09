@@ -84,6 +84,7 @@ NutritionCategory.hasMany(NutritionPlan, {
     foreignKey: 'category_id',
     as: 'nutritionPlans',
     onDelete: 'CASCADE',
+    hooks: true
 });
 NutritionPlan.belongsTo(NutritionCategory, {
     foreignKey: 'category_id',
@@ -96,7 +97,9 @@ NutritionAssignment.belongsTo(NutritionPlan, {
 });
 NutritionPlan.hasMany(NutritionAssignment, {
     foreignKey: 'nutrition_plan_id',
-    as: 'assignments'
+    as: 'assignments',
+    onDelete: 'CASCADE',
+    hooks: true
 });
 
 

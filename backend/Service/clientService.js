@@ -172,7 +172,18 @@ class ClientService {
             };
         }
 
-        return assignment.NutritionPlan.mealPlan;
+        const mealPlan = assignment.NutritionPlan.mealPlan;
+        const todayMeal = mealPlan?.[dayName];
+
+        if (!todayMeal) {
+            throw {
+                status: 404,
+                showOnScreen: true,
+                message: `Plan var ancak ${dayName} için bir öğün bulunamadı.`
+            };
+        }
+
+        return todayMeal;
     }
 }
 

@@ -267,53 +267,6 @@ class DietitianService {
         }
     }
 
-
-    async addNutritionCategory(user_id, categoryData) {
-        try {
-            if (!user_id) {
-                throw new Exception("Yetkisiz Erişim.", 401);
-            }
-
-            const dietitian = await Dietitian.findOne({
-                where: { id: user_id },
-            });
-
-            if (!dietitian) {
-                throw new Exception('Diyetisyen bulunamadı.', 404);
-            }
-
-            return await NutritionCategory.create({
-                ...categoryData,
-                dietitian_id: user_id,
-            });
-        } catch (error) {
-            throw new Exception(error.message, 400);
-        }
-    }
-
-    async addNutritionPlan(user_id, planData) {
-        try {
-            if (!user_id) {
-                throw new Exception("Yetkisiz Erişim.", 401);
-            }
-
-            const dietitian = await Dietitian.findOne({
-                where: { id: user_id },
-            });
-
-            if (!dietitian) {
-                throw new Exception('Diyetisyen bulunamadı.', 404);
-            }
-
-            return await NutritionPlan.create({
-                ...planData,
-                dietitian_id: user_id,
-            });
-        } catch (error) {
-            throw new Exception(error.message, 400);
-        }
-    }
-
     async generateQrCode(user_id) {
         if (!user_id) {
             const err = new Error('Diyetisyen ID gerekli.');
@@ -377,6 +330,76 @@ class DietitianService {
         } catch (error) {
             throw new Exception(error.message, 400);
         }
+    }
+
+    async addNutritionCategory(dietitian_id, category_name) {
+        if (!dietitian_id) {
+            throw {
+                status: 400,
+                showOnScreen: true,
+                message: "Yetkisiz Erişim."
+            };
+        }
+
+        if (!category_name) {
+            throw {
+                status: 400,
+                showOnScreen: true,
+                message: "Kategori adı boş olamaz."
+            };
+        }
+
+        return await NutritionCategory.create({
+            name: category_name,
+            dietitian_id
+        });
+    }
+
+    async getNutritionCategories(dietitian_id) {
+        if (!dietitian_id) {
+            throw {
+                status: 401,
+                showOnScreen: true,
+                message: "Diyetisyen kimliği geçersiz."
+            };
+        }
+
+        return await NutritionCategory.findAll({
+            where: {dietitian_id},
+            order: [['id', 'ASC']]
+        });
+    }
+
+    async deleteNutritionCategory(dietitian_id, category_id) {
+        if (!dietitian_id || !category_id) {
+            throw {
+                status: 400,
+                showOnScreen: true,
+                message: "Geçersiz istek. Diyetisyen veya kategori bilgisi eksik."
+            };
+        }
+
+        const category = await NutritionCategory.findOne({
+            where: {
+                id: category_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!category) {
+            throw {
+                status: 403,
+                showOnScreen: true,
+                message: "Bu kategori size ait değil veya bulunamadı."
+            };
+        }
+
+        await category.destroy();
+
+        return {
+            success: true,
+            message: "Kategori başarıyla silindi."
+        };
     }
 
     async globalSearchbar(user_id, query) {
