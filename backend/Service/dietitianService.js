@@ -240,7 +240,7 @@ class DietitianService {
         }
     }
 
-    async getMyClientCount(dietitian_id) {
+    async getMyActiveClientCount(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -249,7 +249,7 @@ class DietitianService {
             where: { dietitian_id }
         });
 
-        return {clientCount: result};
+        return {count: result};
     }
 
     async generateQrCode(user_id) {

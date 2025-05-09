@@ -11,6 +11,10 @@ router.get('/fetchDietitianAppointments', appointmentController.fetchDietitianAp
 router.post('/addAppointmentAsDietitian', appointmentController.addAppointmentAsDietitian);
 router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian)
 
+router.get('/getTodayAppointmentCount', appointmentController.getTodayAppointmentCount);
+router.get('/getRemainingTodayAppointmentCount', appointmentController.getRemainingTodayAppointmentCount);
+router.get('/getPendingAppointmentCount', appointmentController.getPendingAppointmentCount);
+
 router.get('/fetchClientAppointments', appointmentController.fetchClientAppointments);
 router.post('/addAppointmentAsClient', appointmentController.addAppointmentAsClient);
 

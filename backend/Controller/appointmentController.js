@@ -187,6 +187,51 @@ class AppointmentController {
         }
     }
 
+    async getTodayAppointmentCount(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await AppointmentService.getTodayAppointmentCount(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getRemainingTodayAppointmentCount(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await AppointmentService.getRemainingTodayAppointmentCount(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getPendingAppointmentCount(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await AppointmentService.getPendingAppointmentCount(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = new AppointmentController();

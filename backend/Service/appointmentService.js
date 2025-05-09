@@ -189,6 +189,63 @@ class AppointmentService {
             throw new Error(error.message || "Randevu onaylanırken bir hata meydana geldi.");
         }
     }
+
+    async getTodayAppointmentCount(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        const now = new Date();
+        const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+
+        const count = await Appointment.count({
+            where: {
+                dietitian_id,
+                start: {
+                    [Op.between]: [startOfDay, endOfDay]
+                }
+            }
+        });
+
+        return { count };
+    }
+
+    async getRemainingTodayAppointmentCount(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        const now = new Date();
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const count = await Appointment.count({
+            where: {
+                dietitian_id,
+                start: {
+                    [Op.between]: [now, endOfDay]
+                }
+            }
+        });
+
+        return { count };
+    }
+
+    async getPendingAppointmentCount(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        const count = await Appointment.count({
+            where: {
+                dietitian_id,
+                status: 'pending'
+            }
+        });
+
+        return { count };
+    }
 }
 
 module.exports = new AppointmentService();

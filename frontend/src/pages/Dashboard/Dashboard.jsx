@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import { 
@@ -18,20 +18,19 @@ import {
   Avatar, 
   IconButton, 
   TextField,
-  Stack,
-  Tooltip
+  Stack
 } from '@mui/material';
 import { 
   People as PeopleIcon, 
   Event as EventIcon, 
   Notifications as NotificationsIcon, 
-  Assessment as AssessmentIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
   CheckCircle as CheckCircleIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
-  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
+import axios from 'axios';
+import config from "../../config.js";
 
 export default function Dashboard() {
     const [noteText, setNoteText] = useState('');
@@ -42,6 +41,99 @@ export default function Dashboard() {
         'Haftalık beslenme bülteni gönder',
         'Yeni sağlıklı tarifler araştır'
     ]);
+    const [todayAppointments, setTodayAppointments] = useState(0);
+    const [remainingAppointments, setRemainingAppointments] = useState(0);
+    const [pendingRequests, setPendingRequests] = useState(0);
+    const [activeClients, setActiveClients] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([
+                    fetchTodayAppointments(),
+                    fetchRemainingAppointments(),
+                    fetchPendingRequests(),
+                    fetchActiveClients()
+                ]);
+            } catch (error) {
+                console.error("Dashboard verileri çekilirken bir hata oluştu:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        const fetchTodayAppointments = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/appointment/getTodayAppointmentCount",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setTodayAppointments(response.data.count);
+            } catch (error) {
+                console.error("Bugünkü randevu sayısı çekilirken bir hata oluştu:", error);
+                setTodayAppointments(0);
+            }
+        };
+
+        const fetchRemainingAppointments = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/appointment/getRemainingTodayAppointmentCount",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setRemainingAppointments(response.data.count);
+            } catch (error) {
+                console.error("Kalan randevu sayısı çekilirken bir hata oluştu:", error);
+                setRemainingAppointments(0);
+            }
+        };
+
+        const fetchPendingRequests = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/appointment/getPendingAppointmentCount",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setPendingRequests(response.data.count);
+            } catch (error) {
+                console.error("Bekleyen talep sayısı çekilirken bir hata oluştu:", error);
+                setPendingRequests(0);
+            }
+        };
+
+        const fetchActiveClients = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getMyActiveClientCount",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setActiveClients(response.data.count);
+            } catch (error) {
+                console.error("Aktif danışan sayısı çekilirken bir hata oluştu:", error);
+                setActiveClients(0);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
 
     const handleAddNote = (e) => {
         e.preventDefault();
@@ -60,29 +152,29 @@ export default function Dashboard() {
     const statCards = [
         {
             icon: <PeopleIcon />,
-            value: 24,
+            value: loading ? '...' : activeClients,
             label: 'Aktif Danışan',
             color: '#8884d8',
             bgColor: '#f5f5ff'
         },
         {
             icon: <EventIcon />,
-            value: 8,
+            value: loading ? '...' : todayAppointments,
             label: 'Bugünkü Randevu',
             color: '#82ca9d',
             bgColor: '#f0fff4'
         },
         {
             icon: <NotificationsIcon />,
-            value: 3,
+            value: loading ? '...' : pendingRequests,
             label: 'Bekleyen Talep',
             color: '#ffc658',
             bgColor: '#fff9e6'
         },
         {
-            icon: <AssessmentIcon />,
-            value: 12,
-            label: 'Aylık Rapor',
+            icon: <EventIcon />,
+            value: loading ? '...' : remainingAppointments,
+            label: 'Kalan Randevu',
             color: '#ff8042',
             bgColor: '#fff1ec'
         }
@@ -139,7 +231,8 @@ export default function Dashboard() {
                                             fontWeight: 700,
                                             color: card.color,
                                             mb: 1,
-                                            fontSize: '2.5rem'
+                                            fontSize: '2.5rem',
+                                            opacity: loading ? 0.7 : 1
                                         }}
                                     >
                                         {card.value}

@@ -3,6 +3,7 @@ const express = require('express');
 const sequelize = require('./Utils/Database');
 const bodyParser = require('body-parser');
 const config = require('./config.json');
+const cors = require('cors');
 
 // Models
 require('./Model/MainModel');
@@ -18,6 +19,11 @@ const systemRoutes = require('./Routes/systemRoutes');
 const utilRoutes = require('./Routes/utilRoutes');
 
 app.use(bodyParser.json());
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

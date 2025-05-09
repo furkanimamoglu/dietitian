@@ -453,7 +453,7 @@ class DietitianController {
         }
     }
 
-    async getMyClientCount(req, res) {
+    async getMyActiveClientCount(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -464,7 +464,7 @@ class DietitianController {
                 });
             }
 
-            const result = await DietitianService.getMyClientCount(dietitian_id);
+            const result = await DietitianService.getMyActiveClientCount(dietitian_id);
 
             res.status(200).json(result);
         } catch (error) {
