@@ -544,6 +544,39 @@ class DietitianService {
         });
     }
 
+    async updateNutritionPlan(dietitian_id, nutrition_plan_id, updateData) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz erişim.", 401, true);
+        }
+
+        const { title, description, image, category_id, mealPlan } = updateData;
+
+        const plan = await NutritionPlan.findOne({
+            where: {
+                id: nutrition_plan_id,
+                dietitian_id
+            }
+        });
+
+        if (!plan) {
+            throw new Exception("Bu plan size ait değil veya bulunamadı.", 403, true);
+        }
+
+        if (mealPlan && typeof mealPlan !== 'object') {
+            throw new Exception("mealPlan geçerli bir JSON formatında olmalıdır.", 400, true);
+        }
+
+        await plan.update({
+            title: title ?? plan.title,
+            description: description ?? plan.description,
+            image: image ?? plan.image,
+            category_id: category_id ?? plan.category_id,
+            mealPlan: mealPlan ?? plan.mealPlan
+        });
+
+        return plan;
+    }
+
 }
 
 module.exports = new DietitianService();

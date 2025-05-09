@@ -432,6 +432,27 @@ class DietitianController {
         }
     }
 
+    async updateNutritionPlan(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { nutrition_plan_id, title, description, image, category_id, mealPlan } = req.body;
+
+            const result = await DietitianService.updateNutritionPlan(
+                dietitian_id,
+                nutrition_plan_id,
+                { title, description, image, category_id, mealPlan }
+            );
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
     async getMyClientCount(req, res) {
         try {
             const token = req.headers.authorization;

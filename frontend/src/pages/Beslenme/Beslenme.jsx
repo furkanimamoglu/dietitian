@@ -256,28 +256,6 @@ const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
     );
 };
 
-// Success Popup Component
-const SuccessPopup = ({ message, isOpen, onClose }) => {
-    if (!isOpen) return null;
-    
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            onClose();
-        }, 3000);
-        
-        return () => clearTimeout(timer);
-    }, [onClose]);
-    
-    return (
-        <div className="success-popup">
-            <div className="success-popup-content">
-                <CheckCircleIcon className="success-icon" />
-                <p>{message}</p>
-            </div>
-        </div>
-    );
-};
-
 export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
@@ -302,6 +280,17 @@ export default function Beslenme() {
     // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    
+    // Auto-hide success popup after 3 seconds
+    useEffect(() => {
+        if (showSuccessPopup) {
+            const timer = setTimeout(() => {
+                setShowSuccessPopup(false);
+            }, 3000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessPopup]);
     
     // New plan state
     const [newPlan, setNewPlan] = useState({
@@ -859,15 +848,23 @@ export default function Beslenme() {
     const handleSaveMealPlan = () => {
         // Create update data
         const updateData = {
-            plan_id: selectedProgram.id,
+            nutrition_plan_id: selectedProgram.id,
+            title: selectedProgram.title,
+            description: selectedProgram.description || '',
+            image: selectedProgram.image || '',
+            category_id: selectedProgram.category_id,
             mealPlan: mealPlan
         };
+        
+        console.log("Sending update data:", updateData);
         
         // Update the program with the meal plan
         axios.put(`${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`, updateData, {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
+            console.log("Update response:", response.data);
+            
             // Update local state with the updated data
             setBeslenmeData(prev => 
                 prev.map(item => 
@@ -879,10 +876,15 @@ export default function Beslenme() {
             
             // Close the modal
             setEditProgramModal(false);
+            
+            // Show success popup
+            setSuccessMessage(`"${selectedProgram.title}" programı başarıyla güncellendi.`);
+            setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error updating nutrition plan:", error);
-            // You might want to show an error message to the user here
+            console.error("Error details:", error.response?.data || "No response data");
+            alert("Program güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
         });
     };
 
@@ -1405,11 +1407,14 @@ export default function Beslenme() {
             </Modal>
 
             {/* Success Popup */}
-            <SuccessPopup 
-                isOpen={showSuccessPopup}
-                message={successMessage}
-                onClose={() => setShowSuccessPopup(false)}
-            />
+            {showSuccessPopup && (
+                <div className="success-popup">
+                    <div className="success-popup-content">
+                        <CheckCircleIcon className="success-icon" />
+                        <p>{successMessage}</p>
+                    </div>
+                </div>
+            )}
         </Default>
     );
 }
