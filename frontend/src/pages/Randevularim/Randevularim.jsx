@@ -69,7 +69,7 @@ export default function Randevularim() {
                         client_id: appointment.client_id,
                         status: appointment.status,
                     },
-                    color: appointment.status === "approved" || appointment.status === "confirmed" ? "#4CAF50" : "#FF9800"
+                    color: appointment.status === "approved" ? "#4CAF50" : "#FF9800"
                 }));
 
                 setRandevular(formattedAppointments);
@@ -193,7 +193,7 @@ export default function Randevularim() {
                                 client_id: updatedEvent.client_id,
                                 status: updatedStatus,
                             },
-                            color: updatedStatus === "approved" || updatedStatus === "confirmed" ? "#4CAF50" : "#FF9800"
+                            color: updatedStatus === "approved" ? "#4CAF50" : "#FF9800"
                         }
                         : randevu
                 );
@@ -285,7 +285,7 @@ export default function Randevularim() {
                                 client_id: updatedEventWithDates.client_id,
                                 status: updatedEventWithDates.status,
                             },
-                            color: updatedEventWithDates.status === "approved" || updatedEventWithDates.status === "confirmed" ? "#4CAF50" : "#FF9800"
+                            color: updatedEventWithDates.status === "approved" ? "#4CAF50" : "#FF9800"
                         }
                         : randevu
                 );
@@ -468,8 +468,9 @@ export default function Randevularim() {
                             label="Durum"
                             onChange={(e) => handleEventChange("status", e.target.value)}
                         >
-                            <MenuItem value="confirmed">Onaylandı</MenuItem>
+                            <MenuItem value="approved">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
+                            <MenuItem value="denied">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
                 </DialogContent>
@@ -568,8 +569,9 @@ export default function Randevularim() {
                             label="Durum"
                             onChange={(e) => handleEventChange("status", e.target.value)}
                         >
-                            <MenuItem value="confirmed">Onaylandı</MenuItem>
+                            <MenuItem value="approved">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
+                            <MenuItem value="denied">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
                 </DialogContent>

@@ -25,7 +25,7 @@ import { Alert } from 'react-native';
 interface Appointment {
   id: number;
   title: string;
-  status: 'pending' | 'confirmed';
+  status: 'pending' | 'approved' | 'denied';
   start: string;
   end: string;
   dietitian_id: number;
@@ -181,7 +181,7 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
   const filteredAppointments = useMemo(() => {
     if (filterStatus === 'all') return appointments;
     return appointments.filter(app =>
-      filterStatus === 'confirmed' ? app.status === 'confirmed' : app.status === 'pending'
+      filterStatus === 'approved' ? app.status === 'approved' : app.status === 'pending'
     );
   }, [appointments, filterStatus]);
 
@@ -233,14 +233,14 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
             <View style={styles.statusContainer}>
               <Chip
                 mode="outlined"
-                icon={item.status === 'confirmed' ? "check-circle" : "clock-outline"}
+                icon={item.status === 'approved' ? "check-circle" : "clock-outline"}
                 style={[
                   styles.statusChip,
-                  item.status === 'confirmed' ? styles.confirmedChip : styles.pendingChip
+                  item.status === 'approved' ? styles.confirmedChip : styles.pendingChip
                 ]}
-                textStyle={item.status === 'confirmed' ? styles.confirmedText : styles.pendingText}
+                textStyle={item.status === 'approved' ? styles.confirmedText : styles.pendingText}
               >
-                {item.status === 'confirmed' ? 'Onaylandı' : 'Onay Bekleniyor'}
+                {item.status === 'approved' ? 'Onaylandı' : 'Onay Bekleniyor'}
               </Chip>
 
               <IconButton
@@ -273,10 +273,10 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
               Tümü
             </Chip>
             <Chip
-              selected={filterStatus === 'confirmed'}
-              onPress={() => setFilterStatus('confirmed')}
-              style={[styles.filterChip, filterStatus === 'confirmed' && styles.activeChip]}
-              textStyle={filterStatus === 'confirmed' ? styles.activeChipText : {}}
+              selected={filterStatus === 'approved'}
+              onPress={() => setFilterStatus('approved')}
+              style={[styles.filterChip, filterStatus === 'approved' && styles.activeChip]}
+              textStyle={filterStatus === 'approved' ? styles.activeChipText : {}}
             >
               Onaylı
             </Chip>
