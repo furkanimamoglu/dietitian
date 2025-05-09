@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, TextInput, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -14,6 +14,27 @@ const BottomNav = ({ navigation }: Props) => {
   const [showMealPopup, setShowMealPopup] = useState(false);
   const [showExercisePopup, setShowExercisePopup] = useState(false);
   const route = useRoute();
+  const [selectedMealType, setSelectedMealType] = useState('Kahvaltı');
+  const [newMeal, setNewMeal] = useState('');
+  const [newPortion, setNewPortion] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedExerciseType, setSelectedExerciseType] = useState('Koşu');
+  const [exerciseDuration, setExerciseDuration] = useState('');
+  const [isExerciseSubmitting, setIsExerciseSubmitting] = useState(false);
+
+  const mealTypes = ['Kahvaltı', 'Öğle', 'Akşam', 'Aperatifler'];
+  const exerciseTypes = [
+    'Koşu',
+    'Yürüyüş',
+    'Bisiklet',
+    'Yüzme',
+    'Yoga',
+    'Pilates',
+    'Futbol',
+    'Basketbol',
+    'Voleybol',
+    'Tenis',
+  ];
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -21,6 +42,52 @@ const BottomNav = ({ navigation }: Props) => {
 
   const isActive = (routeName: string) => {
     return route.name === routeName;
+  };
+
+  const handleAddMeal = async () => {
+    if (!newMeal || !newPortion || !selectedMealType) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('https://your-api-endpoint.com/meals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mealType: selectedMealType,
+          item: newMeal,
+          portion: newPortion,
+        }),
+      });
+      setShowMealPopup(false);
+      setNewMeal('');
+      setNewPortion('');
+      setSelectedMealType('Kahvaltı');
+    } catch (e) {
+      console.log('Hata:', 'Hızlı Öğün Ekle butonunda bir hata oluştu.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAddExercise = async () => {
+    if (!selectedExerciseType || !exerciseDuration) return;
+    setIsExerciseSubmitting(true);
+    try {
+      await fetch('https://your-api-endpoint.com/exercises', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exerciseType: selectedExerciseType,
+          duration: exerciseDuration,
+        }),
+      });
+      setShowExercisePopup(false);
+      setSelectedExerciseType('Koşu');
+      setExerciseDuration('');
+    } catch (e) {
+      console.log('Hata:', 'Hızlı Egzersiz Ekle butonunda bir hata oluştu.');
+    } finally {
+      setIsExerciseSubmitting(false);
+    }
   };
 
   return (
@@ -44,9 +111,9 @@ const BottomNav = ({ navigation }: Props) => {
           <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'} />
           <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.replace('Rapor')} style={[styles.navItem, isActive('Rapor') && styles.activeNavItem]}>
-          <Icon name="chart-line" size={24} color={isActive('Rapor') ? '#ffffff' : '#ffffff80'} />
-          <Text style={[styles.label, isActive('Rapor') && styles.activeLabel]}>Raporlar</Text>
+        <TouchableOpacity onPress={() => navigation.replace('Randevu')} style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
+          <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'} />
+          <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
         </TouchableOpacity>
 
         {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
@@ -73,10 +140,62 @@ const BottomNav = ({ navigation }: Props) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.popupBox}>
-            <Text style={styles.popupText}>Öğün eklemek için bu alanı özelleştirin.</Text>
-            <TouchableOpacity onPress={() => setShowMealPopup(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Kapat</Text>
-            </TouchableOpacity>
+            <Text style={styles.popupText}>Yeni Öğün Ekle</Text>
+            <Text style={styles.dialogLabel}>Öğün Türü</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
+              {mealTypes.map(type => (
+                <TouchableOpacity
+                  key={type}
+                  style={{ flexDirection: 'row', alignItems: 'center', marginRight: 16, marginBottom: 4 }}
+                  onPress={() => setSelectedMealType(type)}
+                >
+                  <View style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: '#f57c00',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 4,
+                    backgroundColor: selectedMealType === type ? '#f57c00' : '#fff',
+                  }}>
+                    {selectedMealType === type && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff' }} />}
+                  </View>
+                  <Text>{type}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.dialogLabel}>Yemek Adı</Text>
+            <View style={{ width: '100%', marginBottom: 8 }}>
+              <TextInput
+                style={styles.input}
+                placeholder="Örn: Mercimek çorbası"
+                value={newMeal}
+                onChangeText={setNewMeal}
+              />
+            </View>
+            <Text style={styles.dialogLabel}>Porsiyon/Adet/Gram</Text>
+            <View style={{ width: '100%', marginBottom: 16 }}>
+              <TextInput
+                style={styles.input}
+                placeholder="Örn: 1 porsiyon, 2 adet, 150g"
+                value={newPortion}
+                onChangeText={setNewPortion}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', width: '100%' }}>
+              <TouchableOpacity onPress={() => setShowMealPopup(false)} style={[styles.closeButton, { marginRight: 8 }]}> 
+                <Text style={styles.closeButtonText}>İptal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleAddMeal}
+                style={[styles.closeButton, { backgroundColor: isSubmitting ? '#ccc' : '#f57c00' }]}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.closeButtonText}>{isSubmitting ? 'Ekleniyor...' : 'Ekle'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -90,10 +209,54 @@ const BottomNav = ({ navigation }: Props) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.popupBox}>
-            <Text style={styles.popupText}>Egzersiz eklemek için bu alanı özelleştirin.</Text>
-            <TouchableOpacity onPress={() => setShowExercisePopup(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Kapat</Text>
-            </TouchableOpacity>
+            <Text style={styles.popupText}>Yeni Egzersiz Ekle</Text>
+            <Text style={styles.dialogLabel}>Egzersiz Türü</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
+              {exerciseTypes.map(type => (
+                <TouchableOpacity
+                  key={type}
+                  style={{ flexDirection: 'row', alignItems: 'center', marginRight: 16, marginBottom: 4 }}
+                  onPress={() => setSelectedExerciseType(type)}
+                >
+                  <View style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: '#f57c00',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 4,
+                    backgroundColor: selectedExerciseType === type ? '#f57c00' : '#fff',
+                  }}>
+                    {selectedExerciseType === type && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff' }} />}
+                  </View>
+                  <Text>{type}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.dialogLabel}>Süre (dakika)</Text>
+            <View style={{ width: '100%', marginBottom: 16 }}>
+              <TextInput
+                style={styles.input}
+                placeholder="Örn: 30"
+                value={exerciseDuration}
+                onChangeText={setExerciseDuration}
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', width: '100%' }}>
+              <TouchableOpacity onPress={() => setShowExercisePopup(false)} style={[styles.closeButton, { marginRight: 8 }]}> 
+                <Text style={styles.closeButtonText}>İptal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleAddExercise}
+                style={[styles.closeButton, { backgroundColor: isExerciseSubmitting ? '#ccc' : '#f57c00' }]}
+                disabled={isExerciseSubmitting}
+              >
+                <Text style={styles.closeButtonText}>{isExerciseSubmitting ? 'Ekleniyor...' : 'Ekle'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -204,6 +367,23 @@ const styles = StyleSheet.create({
   activeLabel: {
     color: '#ffffff',
     fontWeight: 'bold',
+  },
+  dialogLabel: {
+    fontSize: 14,
+    marginTop: 12,
+    marginBottom: 4,
+    color: '#666',
+    fontWeight: '500',
+    alignSelf: 'flex-start',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    width: '100%',
+    marginBottom: 0,
   },
 });
 

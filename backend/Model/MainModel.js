@@ -7,10 +7,12 @@ const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
 const AnamnesQuestion = require('./AnamnesQuestion');
 const DietitianOption = require('./DietitianOption');
-const NutritionPlan = require('./NutritionPlan');
-const NutritionCategory = require('./NutritionCategory');
 const Invoice = require('./Invoice');
 const Notification = require('./Notification');
+const Message = require('./Message');
+const NutritionPlan = require('./NutritionPlan');
+const NutritionCategory = require('./NutritionCategory');
+const NutritionAssignment = require('./NutritionAssignment');
 
 // 1. Dietitian ve Client
 Dietitian.hasMany(Client, {
@@ -82,11 +84,24 @@ NutritionCategory.hasMany(NutritionPlan, {
     foreignKey: 'category_id',
     as: 'nutritionPlans',
     onDelete: 'CASCADE',
+    hooks: true
 });
 NutritionPlan.belongsTo(NutritionCategory, {
     foreignKey: 'category_id',
     as: 'category',
 });
+
+NutritionAssignment.belongsTo(NutritionPlan, {
+    foreignKey: 'nutrition_plan_id',
+    as: 'NutritionPlan'
+});
+NutritionPlan.hasMany(NutritionAssignment, {
+    foreignKey: 'nutrition_plan_id',
+    as: 'assignments',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+
 
 // 9. Client ve Appointment
 Client.hasMany(Appointment, {
@@ -131,8 +146,10 @@ module.exports = {
     Anamnes,
     AnamnesQuestion,
     DietitianOption,
+    Invoice,
+    Notification,
+    Message,
     NutritionPlan,
     NutritionCategory,
-    Invoice,
-    Notification
+    NutritionAssignment
 };

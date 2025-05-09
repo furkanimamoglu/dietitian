@@ -1,4 +1,3 @@
-// Libraries
 const { DataTypes } = require('sequelize');
 const sequelize = require('../Utils/Database');
 
@@ -6,17 +5,15 @@ const NutritionCategory = sequelize.define('NutritionCategory', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        allowNull: false,
-        primaryKey: true,
+        primaryKey: true
     },
-    title: {
+    name: {
         type: DataTypes.STRING,
-        allowNull: false,
-    },
-    dietitian_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
+        allowNull: false
+    }
+}, {
+    tableName: 'NutritionCategories',
+    timestamps: false
 });
 
 module.exports = NutritionCategory;

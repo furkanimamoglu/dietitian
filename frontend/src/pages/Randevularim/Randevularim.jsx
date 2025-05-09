@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import axios from "axios";
 import "./Randevularim.css";
 
@@ -20,10 +20,14 @@ import {
     Grid2,
     TextField,
     IconButton,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Autocomplete
 } from '@mui/material';
 import config from "../../config.js";
 import {Close} from "@mui/icons-material";
-import {Autocomplete} from "@mui/lab";
 
 export default function Randevularim() {
     const [randevular, setRandevular] = useState([]);
@@ -38,7 +42,10 @@ export default function Randevularim() {
         start: "",
         end: "",
         client_id: "",
+        status: "pending",
     });
+
+    const calendarRef = useRef(null);
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -51,7 +58,7 @@ export default function Randevularim() {
                         }
                     }
                 );
-                const appointments = response.data.appointment;
+                const appointments = response.data || [];
 
                 const formattedAppointments = appointments.map((appointment) => ({
                     id: appointment.id,
@@ -60,7 +67,9 @@ export default function Randevularim() {
                     end: appointment.end,
                     extendedProps: {
                         client_id: appointment.client_id,
-                    }
+                        status: appointment.status,
+                    },
+                    color: appointment.status === "approved" || appointment.status === "confirmed" ? "#4CAF50" : "#FF9800"
                 }));
 
                 setRandevular(formattedAppointments);
@@ -99,6 +108,7 @@ export default function Randevularim() {
             start: "",
             end: "",
             client_id: "",
+            status: "pending",
         });
         setRandevuEklePopup(true);
     };
@@ -119,6 +129,7 @@ export default function Randevularim() {
                 start: startDate.toISOString().slice(0, 16),
                 end: endDate.toISOString().slice(0, 16),
                 client_id: "",
+                status: "pending",
             }));
             setRandevuEklePopup(true);
         }
@@ -126,15 +137,14 @@ export default function Randevularim() {
 
     const handleEventClick = (arg) => {
         const event = arg.event;
-
         setEventData({
             id: event.id,
             title: event.title,
             start: event.start.toISOString().slice(0, 16),
             end: event.end?.toISOString().slice(0, 16) || "",
             client_id: event.extendedProps?.client_id || "",
+            status: event.extendedProps?.status || "pending",
         });
-
         setRandevuDuzenlePopup(true);
     };
 
@@ -148,6 +158,7 @@ export default function Randevularim() {
                 start: event.start.toISOString(),
                 end: event.end ? event.end.toISOString() : null,
                 client_id: event.extendedProps?.client_id || "",
+                status: event.extendedProps?.status || "pending",
             };
 
             const requestData = {
@@ -156,6 +167,7 @@ export default function Randevularim() {
                 start: updatedEvent.start,
                 end: updatedEvent.end,
                 client_id: updatedEvent.client_id,
+                status: updatedEvent.status,
             };
 
             const response = await axios.put(
@@ -168,7 +180,7 @@ export default function Randevularim() {
                 }
             );
 
-            console.log("Randevu güncelleme başarılı:", response.data);
+            const updatedStatus = response.data?.appointment?.status || updatedEvent.status;
 
             setRandevular((prevRandevular) => {
                 return prevRandevular.map((randevu) =>
@@ -179,7 +191,9 @@ export default function Randevularim() {
                             end: updatedEvent.end,
                             extendedProps: {
                                 client_id: updatedEvent.client_id,
+                                status: updatedStatus,
                             },
+                            color: updatedStatus === "approved" || updatedStatus === "confirmed" ? "#4CAF50" : "#FF9800"
                         }
                         : randevu
                 );
@@ -236,6 +250,7 @@ export default function Randevularim() {
                 start: eventData.start,
                 end: eventData.end,
                 client_id: eventData.client_id,
+                status: eventData.status,
             };
 
             const requestData = {
@@ -244,6 +259,7 @@ export default function Randevularim() {
                 start: updatedEventWithDates.start,
                 end: updatedEventWithDates.end,
                 client_id: updatedEventWithDates.client_id,
+                status: updatedEventWithDates.status,
             };
 
             const response = await axios.put(
@@ -267,7 +283,9 @@ export default function Randevularim() {
                             end: updatedEventWithDates.end,
                             extendedProps: {
                                 client_id: updatedEventWithDates.client_id,
+                                status: updatedEventWithDates.status,
                             },
+                            color: updatedEventWithDates.status === "approved" || updatedEventWithDates.status === "confirmed" ? "#4CAF50" : "#FF9800"
                         }
                         : randevu
                 );
@@ -296,6 +314,7 @@ export default function Randevularim() {
             <Grid2 container sx={{ height: "100%", width: "100%" }}>
                 <Box sx={{ width: "100%", height: "100%" }}>
                     <FullCalendar
+                        ref={calendarRef}
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
                         timeZone={'UTC'}
@@ -305,6 +324,7 @@ export default function Randevularim() {
                         droppable={true}
                         locale="tr"
                         contentHeight="68vh"
+                        scrollTime="06:00:00"
                         headerToolbar={{
                             left: "prev,next today randevuEkle",
                             center: "title",
@@ -438,6 +458,20 @@ export default function Randevularim() {
                         )}
                         fullWidth
                     />
+                    {/* Status Selectbox (MUI) */}
+                    <FormControl fullWidth margin="normal" required>
+                        <InputLabel id="status-label">Durum</InputLabel>
+                        <Select
+                            labelId="status-label"
+                            id="status-select"
+                            value={eventData.status}
+                            label="Durum"
+                            onChange={(e) => handleEventChange("status", e.target.value)}
+                        >
+                            <MenuItem value="confirmed">Onaylandı</MenuItem>
+                            <MenuItem value="pending">Beklemede</MenuItem>
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
@@ -524,6 +558,20 @@ export default function Randevularim() {
                         )}
                         fullWidth
                     />
+                    {/* Status Selectbox (MUI) */}
+                    <FormControl fullWidth margin="normal" required>
+                        <InputLabel id="status-label">Durum</InputLabel>
+                        <Select
+                            labelId="status-label"
+                            id="status-select"
+                            value={eventData.status}
+                            label="Durum"
+                            onChange={(e) => handleEventChange("status", e.target.value)}
+                        >
+                            <MenuItem value="confirmed">Onaylandı</MenuItem>
+                            <MenuItem value="pending">Beklemede</MenuItem>
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button

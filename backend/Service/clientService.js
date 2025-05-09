@@ -1,8 +1,9 @@
-const {Client, Dietitian, Notification} = require("../Model/MainModel");
+const {Client, Dietitian, Notification, NutritionAssignment, NutritionPlan} = require("../Model/MainModel");
 const Exception = require("../Exception/Exception");
 const jwt = require("jsonwebtoken");
 const config = require("../config.json");
 const {CLIENT} = require("../Enum/Role");
+const {Op} = require("sequelize");
 
 class ClientService {
     async login(phoneNumber, password) {
@@ -146,6 +147,43 @@ class ClientService {
         } catch (error) {
             throw new Exception(error.message, 400);
         }
+    }
+
+    async getTodayMeal(clientId, todayDate, dayName) {
+        const assignment = await NutritionAssignment.findOne({
+            where: {
+                client_id: clientId,
+                start_date: { [Op.lte]: todayDate },
+                end_date: { [Op.gte]: todayDate }
+            },
+            include: [
+                {
+                    model: NutritionPlan,
+                    as: 'NutritionPlan'
+                }
+            ]
+        });
+
+        if (!assignment) {
+            throw {
+                status: 404,
+                showOnScreen: true,
+                message: "Bugün için atanmış bir beslenme planı bulunamadı."
+            };
+        }
+
+        const mealPlan = assignment.NutritionPlan.mealPlan;
+        const todayMeal = mealPlan?.[dayName];
+
+        if (!todayMeal) {
+            throw {
+                status: 404,
+                showOnScreen: true,
+                message: `Plan var ancak ${dayName} için bir öğün bulunamadı.`
+            };
+        }
+
+        return todayMeal;
     }
 }
 

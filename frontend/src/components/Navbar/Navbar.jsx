@@ -15,6 +15,7 @@ import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import PeopleIcon from "@mui/icons-material/People";
+import HomeIcon from "@mui/icons-material/Home";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import "./Navbar.css";
@@ -26,6 +27,7 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
 
     const menu_items = [
+        { name: "ANA SAYFA", route: "/dashboard", icon: <HomeIcon /> },
         { name: "DANIŞANLARIM", route: "/danisanlarim", icon: <PeopleIcon /> },
         { name: "RANDEVULARIM", route: "/randevularim", icon: <EventNoteIcon /> },
         { name: "BESLENME", route: "/beslenme", icon: <LocalDiningIcon /> },
@@ -47,10 +49,12 @@ export default function Navbar() {
             <List>
                 {menu_items.map((item) => (
                     <ListItem
-                        button
+                        component="div"
                         key={item.name}
                         onClick={() => navigate(item.route)}
                         className={location.pathname === item.route ? "active-mobile-item" : ""}
+                        disabled={item.name === "TARİFLER" || item.name === "EGZERSİZLER" || item.name === "FİNANS"}
+                        sx={{ cursor: 'pointer' }}
                     >
                         <Box sx={{ mr: 2, color: "rgb(14,62,10)" }}>{item.icon}</Box>
                         <ListItemText primary={item.name} />
@@ -127,11 +131,13 @@ export default function Navbar() {
                     >
                         {menu_items.map((page) => {
                             const isActive = location.pathname === page.route;
+                            const isDisabled = page.name === "TARİFLER" || page.name === "EGZERSİZLER" || page.name === "FİNANS";
                             return (
                                 <Button
                                     key={page.name}
                                     onClick={() => navigate(page.route)}
                                     className={`nav-button ${isActive ? "active" : ""}`}
+                                    disabled={isDisabled}
                                     sx={{
                                         my: 2,
                                         mx: 1,

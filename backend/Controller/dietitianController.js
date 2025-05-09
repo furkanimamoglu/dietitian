@@ -57,7 +57,7 @@ class DietitianController {
 
     async registerClient(req, res) {
         try {
-            const {name, surname, email, password, phoneNumber, height, weight, gender} = req.body;
+            const {name, email, password, phoneNumber, gender} = req.body;
 
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -68,14 +68,14 @@ class DietitianController {
                 });
             }
 
-            if (!phoneNumber || !password || !name || !surname) {
+            if (!phoneNumber || !password || !name) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.registerClient(user_id, name, surname, email, password, phoneNumber, height, weight, gender);
+            const result = await DietitianService.registerClient(user_id, name, email, password, phoneNumber, gender);
 
             res.status(200).json(result);
         } catch (err) {
@@ -126,27 +126,19 @@ class DietitianController {
         }
 
         try {
-            const { id, name, surname, email, phoneNumber, height, weight, gender, status } = req.body;
+            const { id, name, email, phoneNumber, gender, status } = req.body;
 
-            if (!id || !name || !surname || !email || !phoneNumber || !height || !weight || !gender || !status) {
+            if (!id || !name || !phoneNumber || !status) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: "Tüm parametreler doldurulmalıdır."
                 });
             }
 
-            const result = await DietitianService.updateClient(user_id, id, {
-                name,
-                surname,
-                email,
-                phoneNumber,
-                height,
-                weight,
-                gender,
-                status
-            });
+            const updateData = { name, email, phoneNumber, gender, status };
 
-            res.status(200).json(result)
+            const result = await DietitianService.updateClient(user_id, id, updateData);
+            res.status(200).json(result);
         } catch (err) {
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen || false,
@@ -220,56 +212,6 @@ class DietitianController {
         }
     }
 
-    async getAllMyNutritionCategories(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
-            const result = await DietitianService.getAllMyNutritionCategories(user_id)
-            res.status(200).json(result)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen,
-                message: error.message
-            });
-        }
-    }
-
-    async addNutritionCategories(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const categoryData = req.body;
-
-            if (!categoryData || !categoryData.title) {
-                return res.status(400).json({
-                    message: "Kategori başlığı gereklidir."
-                });
-            }
-
-            const result = await DietitianService.addNutritionCategory(user_id, categoryData);
-
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
-            });
-        }
-    }
-
     async globalSearchbar(req, res) {
         try {
             const token = req.headers.authorization;
@@ -321,6 +263,214 @@ class DietitianController {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async addNutritionCategory(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { category_name } = req.body;
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.addNutritionCategory(dietitian_id, category_name);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async getNutritionCategories(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { category_name } = req.body;
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+            const result = await DietitianService.getNutritionCategories(dietitian_id, category_name);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async deleteNutritionCategory(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { category_id } = req.query;
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            if(!category_id) {
+                return res.status(400).json({
+                    message: "Geçersiz istek. Kategori id eksik."
+                });
+            }
+            const result = await DietitianService.deleteNutritionCategory(dietitian_id, category_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
+    async assignNutritionPlanToClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { client_id, nutrition_plan_id, start_date, end_date, note } = req.body;
+
+            if (!dietitian_id || !client_id || !nutrition_plan_id || !start_date || !end_date) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Tüm alanlar zorunludur."
+                });
+            }
+
+            const result = await DietitianService.assignNutritionPlanToClient({
+                dietitian_id,
+                client_id,
+                nutrition_plan_id,
+                start_date,
+                end_date,
+                note
+            });
+
+            res.status(200).json(result);
+
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getNutritionPlans(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await DietitianService.getNutritionPlans(dietitian_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async deleteNutritionPlan(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { nutrition_plan_id } = req.query;
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await DietitianService.deleteNutritionPlan(dietitian_id, nutrition_plan_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async addNutritionPlan(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { title, description, image, category_id, mealPlan } = req.body;
+
+            const result = await DietitianService.addNutritionPlan(dietitian_id, {
+                title,
+                description,
+                image,
+                category_id,
+                mealPlan
+            });
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async updateNutritionPlan(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const { nutrition_plan_id, title, description, image, category_id, mealPlan } = req.body;
+
+            const result = await DietitianService.updateNutritionPlan(
+                dietitian_id,
+                nutrition_plan_id,
+                { title, description, image, category_id, mealPlan }
+            );
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getMyActiveClientCount(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await DietitianService.getMyActiveClientCount(dietitian_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
             });
         }
     }

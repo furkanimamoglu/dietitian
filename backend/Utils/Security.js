@@ -50,6 +50,7 @@ class Security {
             if (!token) {
                 return null;
             }
+
             token = token.replace('Bearer ', '');
 
             let solvedToken = jwt.verify(token, config.secretkey);
