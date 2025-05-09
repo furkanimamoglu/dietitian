@@ -14,6 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import WarningIcon from '@mui/icons-material/Warning';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
@@ -271,6 +272,14 @@ export default function Beslenme() {
     const [detailItem, setDetailItem] = useState(null);
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
     
+    // Delete confirmation modal states
+    const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
+    const [affectedPlans, setAffectedPlans] = useState([]);
+
     // Meal planning states
     const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
     const [mealPlan, setMealPlan] = useState(() => {
@@ -364,6 +373,18 @@ export default function Beslenme() {
         );
     };
 
+    const handleOpenMultiDeleteConfirm = () => {
+        if (checkedCategories.length === 0) return;
+        
+        // Find plans that would be affected by deleting these categories
+        const plansToDelete = beslenmeData.filter(plan => 
+            checkedCategories.includes(plan.category_id)
+        );
+        
+        setAffectedPlans(plansToDelete);
+        setDeleteMultiCategoriesConfirmModal(true);
+    };
+
     const handleMultiDelete = () => {
         const deletePromises = checkedCategories.map(categoryId => 
             axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
@@ -378,26 +399,54 @@ export default function Beslenme() {
                 setCategoryData(prev => 
                     prev.filter(cat => !checkedCategories.includes(cat.id))
                 );
+                // Also remove any plans that were in the deleted categories
+                setBeslenmeData(prev => 
+                    prev.filter(plan => !checkedCategories.includes(plan.category_id))
+                );
                 setCheckedCategories([]);
+                setDeleteMultiCategoriesConfirmModal(false);
+                setAffectedPlans([]);
             })
             .catch(error => {
                 console.error("Error deleting categories:", error);
-                // You might want to show an error message to the user here
+                setDeleteMultiCategoriesConfirmModal(false);
+                setAffectedPlans([]);
             });
     };
 
-    const handleSingleCategoryDelete = (categoryId) => {
-        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
+    const handleOpenCategoryDeleteConfirm = (categoryId) => {
+        const category = categoryData.find(cat => cat.id === categoryId);
+        if (!category) return;
+        
+        // Find plans that would be affected by deleting this category
+        const plansToDelete = beslenmeData.filter(plan => plan.category_id === categoryId);
+        
+        setCategoryToDelete(category);
+        setAffectedPlans(plansToDelete);
+        setDeleteCategoryConfirmModal(true);
+    };
+
+    const handleSingleCategoryDelete = () => {
+        if (!categoryToDelete) return;
+        
+        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryToDelete.id}`, {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(() => {
             // Update local state after successful deletion
-            setCategoryData(prev => prev.filter(cat => cat.id !== categoryId));
-            setCheckedCategories(prev => prev.filter(id => id !== categoryId));
+            setCategoryData(prev => prev.filter(cat => cat.id !== categoryToDelete.id));
+            setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
+            // Also remove any plans that were in the deleted category
+            setBeslenmeData(prev => prev.filter(plan => plan.category_id !== categoryToDelete.id));
+            setDeleteCategoryConfirmModal(false);
+            setCategoryToDelete(null);
+            setAffectedPlans([]);
         })
         .catch(error => {
             console.error("Error deleting category:", error);
-            // You might want to show an error message to the user here
+            setDeleteCategoryConfirmModal(false);
+            setCategoryToDelete(null);
+            setAffectedPlans([]);
         });
     };
 
@@ -649,17 +698,29 @@ export default function Beslenme() {
         setEditProgramModal(true);
     };
 
-    const handleDelete = (item) => {
-        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionPlan?plan_id=${item.id}`, {
+    const handleOpenDeleteConfirm = (item) => {
+        setItemToDelete(item);
+        setDeleteConfirmModal(true);
+    };
+
+    const handleDelete = () => {
+        if (!itemToDelete) return;
+        
+        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionPlan?nutrition_plan_id=${itemToDelete.id}`, {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(() => {
             // Update local state after successful deletion
-            setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== item.id));
+            setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== itemToDelete.id));
+            // Close the modal and reset the item to delete
+            setDeleteConfirmModal(false);
+            setItemToDelete(null);
         })
         .catch(error => {
             console.error("Error deleting nutrition plan:", error);
             // You might want to show an error message to the user here
+            setDeleteConfirmModal(false);
+            setItemToDelete(null);
         });
     };
 
@@ -746,7 +807,7 @@ export default function Beslenme() {
                             <button 
                                 className="action-btn delete-btn" 
                                 title="Seçilenleri Sil"
-                                onClick={handleMultiDelete}
+                                onClick={handleOpenMultiDeleteConfirm}
                                 disabled={checkedCategories.length === 0}
                             >
                                 <DeleteIcon />
@@ -762,7 +823,7 @@ export default function Beslenme() {
                                     category={category}
                                     isChecked={checkedCategories.includes(category.id)}
                                     onCheck={() => handleCategoryCheck(category.id)}
-                                    onDelete={handleSingleCategoryDelete}
+                                    onDelete={handleOpenCategoryDeleteConfirm}
                                 />
                             ))
                         ) : (
@@ -782,7 +843,7 @@ export default function Beslenme() {
                                     onAddToUser={handleOpenAddToUserModal}
                                     onPrint={handlePrint}
                                     onEdit={handleEdit}
-                                    onDelete={handleDelete}
+                                    onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewProgram}
                                 />
                             ))
@@ -956,6 +1017,154 @@ export default function Beslenme() {
                         onClick={() => setViewProgramModal(false)}
                     >
                         Kapat
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal 
+                isOpen={deleteConfirmModal} 
+                title="Beslenme Programını Sil" 
+                onClose={() => {
+                    setDeleteConfirmModal(false);
+                    setItemToDelete(null);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            <strong>{itemToDelete?.title}</strong> programını silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    <p className="delete-note important">
+                        <strong>Önemli:</strong> Bu program silindiğinde, atanmış olduğu tüm danışanların takviminden de kaldırılacaktır.
+                    </p>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => {
+                            setDeleteConfirmModal(false);
+                            setItemToDelete(null);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={handleDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Category Confirmation Modal */}
+            <Modal 
+                isOpen={deleteCategoryConfirmModal} 
+                title="Kategoriyi Sil" 
+                onClose={() => {
+                    setDeleteCategoryConfirmModal(false);
+                    setCategoryToDelete(null);
+                    setAffectedPlans([]);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            <strong>{categoryToDelete?.name || categoryToDelete?.title}</strong> kategorisini silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    
+                    {affectedPlans.length > 0 && (
+                        <div className="affected-plans">
+                            <p className="delete-note important">
+                                <strong>Önemli:</strong> Bu kategori ile ilişkili aşağıdaki beslenme programları da silinecektir:
+                            </p>
+                            <ul className="affected-plans-list">
+                                {affectedPlans.map(plan => (
+                                    <li key={plan.id}>{plan.title}</li>
+                                ))}
+                            </ul>
+                            <p className="delete-note">
+                                Bu programlar danışanlara atanmışsa, danışanların takviminden de kaldırılacaktır.
+                            </p>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => {
+                            setDeleteCategoryConfirmModal(false);
+                            setCategoryToDelete(null);
+                            setAffectedPlans([]);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={handleSingleCategoryDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Multiple Categories Confirmation Modal */}
+            <Modal 
+                isOpen={deleteMultiCategoriesConfirmModal} 
+                title="Kategorileri Sil" 
+                onClose={() => {
+                    setDeleteMultiCategoriesConfirmModal(false);
+                    setAffectedPlans([]);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            <strong>{checkedCategories.length}</strong> kategoriyi silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    
+                    {affectedPlans.length > 0 && (
+                        <div className="affected-plans">
+                            <p className="delete-note important">
+                                <strong>Önemli:</strong> Bu kategoriler ile ilişkili aşağıdaki beslenme programları da silinecektir:
+                            </p>
+                            <ul className="affected-plans-list">
+                                {affectedPlans.map(plan => (
+                                    <li key={plan.id}>{plan.title}</li>
+                                ))}
+                            </ul>
+                            <p className="delete-note">
+                                Bu programlar danışanlara atanmışsa, danışanların takviminden de kaldırılacaktır.
+                            </p>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => {
+                            setDeleteMultiCategoriesConfirmModal(false);
+                            setAffectedPlans([]);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={handleMultiDelete}
+                    >
+                        Sil
                     </button>
                 </div>
             </Modal>

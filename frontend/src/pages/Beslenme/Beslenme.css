@@ -840,6 +840,70 @@
   padding: 0;
 }
 
+/* Delete Confirmation Modal Styles */
+.delete-confirm-modal {
+  padding: 1rem 0;
+}
+
+.delete-warning {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.warning-icon {
+  color: #f44336;
+  font-size: 2.5rem !important;
+}
+
+.warning-text {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.delete-note {
+  color: #757575;
+  font-size: 0.9rem;
+  margin: 0;
+  padding-left: 3.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.delete-note.important {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.affected-plans {
+  margin-top: 1rem;
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+.affected-plans-list {
+  margin: 0.5rem 0;
+  padding-left: 2rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.affected-plans-list li {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.delete-confirm-btn {
+  background-color: #f44336 !important;
+  color: white;
+}
+
+.delete-confirm-btn:hover {
+  background-color: #d32f2f !important;
+}
+
 .view-meal-plan-container {
   width: 100%;
 }
