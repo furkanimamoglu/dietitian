@@ -1083,11 +1083,11 @@ export default function Beslenme() {
                     {affectedPlans.length > 0 && (
                         <div className="affected-plans">
                             <p className="delete-note important">
-                                <strong>Önemli:</strong> Bu kategori ile ilişkili aşağıdaki beslenme programları da silinecektir:
+                                <strong>Önemli:</strong> Bu kategori ile ilişkili <strong>{affectedPlans.length}</strong> beslenme programı silinecektir:
                             </p>
                             <ul className="affected-plans-list">
                                 {affectedPlans.map(plan => (
-                                    <li key={plan.id}>{plan.title}</li>
+                                    <li key={plan.id}><span className="plan-title">{plan.title}</span></li>
                                 ))}
                             </ul>
                             <p className="delete-note">
@@ -1137,11 +1137,11 @@ export default function Beslenme() {
                     {affectedPlans.length > 0 && (
                         <div className="affected-plans">
                             <p className="delete-note important">
-                                <strong>Önemli:</strong> Bu kategoriler ile ilişkili aşağıdaki beslenme programları da silinecektir:
+                                <strong>Önemli:</strong> Bu kategoriler ile ilişkili <strong>{affectedPlans.length}</strong> beslenme programı silinecektir:
                             </p>
                             <ul className="affected-plans-list">
                                 {affectedPlans.map(plan => (
-                                    <li key={plan.id}>{plan.title}</li>
+                                    <li key={plan.id}><span className="plan-title">{plan.title}</span></li>
                                 ))}
                             </ul>
                             <p className="delete-note">
