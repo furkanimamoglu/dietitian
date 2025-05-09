@@ -4,7 +4,6 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
-// Icons
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrintIcon from '@mui/icons-material/Print';
@@ -14,7 +13,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
-import EventNoteIcon from '@mui/icons-material/EventNote';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';

@@ -15,4 +15,6 @@ router.get('/getClientInfo', clientController.getClientInfo);
 router.get('/getMyNotifications', clientController.getMyNotifications);
 router.get('/readMyAllNotifications', clientController.readMyAllNotifications);
 
+router.get('/getTodayMeal', clientController.getTodayMeal);
+
 module.exports = router;
