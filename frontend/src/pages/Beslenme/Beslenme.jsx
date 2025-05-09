@@ -15,6 +15,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
@@ -255,6 +256,28 @@ const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
     );
 };
 
+// Success Popup Component
+const SuccessPopup = ({ message, isOpen, onClose }) => {
+    if (!isOpen) return null;
+    
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+    }, [onClose]);
+    
+    return (
+        <div className="success-popup">
+            <div className="success-popup-content">
+                <CheckCircleIcon className="success-icon" />
+                <p>{message}</p>
+            </div>
+        </div>
+    );
+};
+
 export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
@@ -275,6 +298,10 @@ export default function Beslenme() {
     const [assignmentNote, setAssignmentNote] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    
+    // Success popup states
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     
     // New plan state
     const [newPlan, setNewPlan] = useState({
@@ -415,9 +442,15 @@ export default function Beslenme() {
                 setBeslenmeData(prev => 
                     prev.filter(plan => !checkedCategories.includes(plan.category_id))
                 );
+                
+                const categoryCount = checkedCategories.length;
                 setCheckedCategories([]);
                 setDeleteMultiCategoriesConfirmModal(false);
                 setAffectedPlans([]);
+                
+                // Show success popup
+                setSuccessMessage(`${categoryCount} kategori başarıyla silindi.`);
+                setShowSuccessPopup(true);
             })
             .catch(error => {
                 console.error("Error deleting categories:", error);
@@ -453,6 +486,10 @@ export default function Beslenme() {
             setDeleteCategoryConfirmModal(false);
             setCategoryToDelete(null);
             setAffectedPlans([]);
+            
+            // Show success popup
+            setSuccessMessage(`"${categoryToDelete.name || categoryToDelete.title}" kategorisi başarıyla silindi.`);
+            setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error deleting category:", error);
@@ -561,7 +598,10 @@ export default function Beslenme() {
         })
         .then(response => {
             console.log("Plan assigned to client:", response.data);
-            // You might want to show a success message
+            
+            // Store names for success message
+            const programName = selectedProgram.title;
+            const userName = `${selectedUser.name}`;
             
             // Close the modal and reset selections
             setAddToUserModal(false);
@@ -570,6 +610,10 @@ export default function Beslenme() {
             setStartDate('');
             setEndDate('');
             setAssignmentNote('');
+            
+            // Show success popup
+            setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı.`);
+            setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error assigning plan to client:", error);
@@ -777,15 +821,21 @@ export default function Beslenme() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(() => {
+            // Store name for success message
+            const planName = itemToDelete.title;
+            
             // Update local state after successful deletion
             setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== itemToDelete.id));
             // Close the modal and reset the item to delete
             setDeleteConfirmModal(false);
             setItemToDelete(null);
+            
+            // Show success popup
+            setSuccessMessage(`"${planName}" programı başarıyla silindi.`);
+            setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error deleting nutrition plan:", error);
-            // You might want to show an error message to the user here
             setDeleteConfirmModal(false);
             setItemToDelete(null);
         });
@@ -1067,7 +1117,7 @@ export default function Beslenme() {
                             <option value="">Danışan Seçin</option>
                             {danisanList.map(user => (
                                 <option key={user.id} value={user.id}>
-                                    {user.name} {user.surname}
+                                    {user.name}
                                 </option>
                             ))}
                         </select>
@@ -1353,6 +1403,13 @@ export default function Beslenme() {
                     </button>
                 </div>
             </Modal>
+
+            {/* Success Popup */}
+            <SuccessPopup 
+                isOpen={showSuccessPopup}
+                message={successMessage}
+                onClose={() => setShowSuccessPopup(false)}
+            />
         </Default>
     );
 }
