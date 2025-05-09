@@ -17,18 +17,6 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
-const initialBeslenmeData = [
-    { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png", categoryId: 1, mealPlan: {
-        "Pazartesi": { "Kahvaltı": "Yumurta, Peynir, Zeytin", "Öğle Yemeği": "Tavuk, Pilav, Salata", "Akşam Yemeği": "Köfte, Bulgur Pilavı", "Aparatif": "Meyve, Kuruyemiş" },
-        "Salı": { "Kahvaltı": "Menemen, Peynir", "Öğle Yemeği": "Etli Fasulye, Pilav", "Akşam Yemeği": "Balık, Salata", "Aparatif": "Yoğurt, Meyve" }
-    }},
-    { id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png", categoryId: 2 },
-    { id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png", categoryId: 3 },
-    { id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png", categoryId: 4 },
-    { id: 5, title: "Sağlıklı Atıştırma", description: "x2 ceviz, 1x hurma, 50 gr bitter çikolata", image: "/placeholder.png", categoryId: 5 },
-    { id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png", categoryId: 1 },
-];
-
 // Days and meals constants
 const DAYS_OF_WEEK = [
     "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
@@ -270,7 +258,7 @@ export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
-    const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
+    const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     
     // Modal states
@@ -334,6 +322,24 @@ export default function Beslenme() {
             });
     }, []);
 
+    // Fetch nutrition plans
+    useEffect(() => {
+        axios
+            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionPlans`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                console.log("Nutrition Plans:", response.data);
+                setBeslenmeData(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching nutrition plans:", error);
+                setBeslenmeData([]);
+            });
+    }, []);
+
     // Filter categories based on search term
     const filteredCategories = categoryData?.filter(category =>
         (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
@@ -346,7 +352,7 @@ export default function Beslenme() {
             return true;
         }
         // Otherwise, show only items that belong to checked categories
-        return checkedCategories.includes(item.categoryId || item.dietitian_id);
+        return checkedCategories.includes(item.category_id);
     });
 
     // Category handlers
@@ -430,11 +436,29 @@ export default function Beslenme() {
     };
 
     const handleAddToUser = () => {
-        console.log("Adding program:", selectedProgram);
-        console.log("To user:", selectedUser);
-        setAddToUserModal(false);
-        setSelectedProgram(null);
-        setSelectedUser(null);
+        if (!selectedProgram || !selectedUser) return;
+        
+        const addData = {
+            client_id: selectedUser.id,
+            plan_id: selectedProgram.id
+        };
+        
+        axios.post(`${config[config.environment].apiUrl}/dietitian/assignNutritionPlanToClient`, addData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            console.log("Plan assigned to client:", response.data);
+            // You might want to show a success message
+            
+            // Close the modal and reset selections
+            setAddToUserModal(false);
+            setSelectedProgram(null);
+            setSelectedUser(null);
+        })
+        .catch(error => {
+            console.error("Error assigning plan to client:", error);
+            // You might want to show an error message
+        });
     };
 
     const handlePrint = (item) => {
@@ -626,7 +650,17 @@ export default function Beslenme() {
     };
 
     const handleDelete = (item) => {
-        setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== item.id));
+        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionPlan?plan_id=${item.id}`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(() => {
+            // Update local state after successful deletion
+            setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== item.id));
+        })
+        .catch(error => {
+            console.error("Error deleting nutrition plan:", error);
+            // You might want to show an error message to the user here
+        });
     };
 
     // Meal plan handlers
@@ -645,17 +679,33 @@ export default function Beslenme() {
     };
 
     const handleSaveMealPlan = () => {
-        // Update the program with the meal plan
-        setBeslenmeData(prev => 
-            prev.map(item => 
-                item.id === selectedProgram.id 
-                    ? { ...item, mealPlan: mealPlan }
-                    : item
-            )
-        );
+        // Create update data
+        const updateData = {
+            plan_id: selectedProgram.id,
+            mealPlan: mealPlan
+        };
         
-        // Close the modal
-        setEditProgramModal(false);
+        // Update the program with the meal plan
+        axios.put(`${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`, updateData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            // Update local state with the updated data
+            setBeslenmeData(prev => 
+                prev.map(item => 
+                    item.id === selectedProgram.id 
+                        ? { ...item, mealPlan: mealPlan }
+                        : item
+                )
+            );
+            
+            // Close the modal
+            setEditProgramModal(false);
+        })
+        .catch(error => {
+            console.error("Error updating nutrition plan:", error);
+            // You might want to show an error message to the user here
+        });
     };
 
     // View meal plan handler

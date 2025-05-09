@@ -23,5 +23,7 @@ router.get('/getNutritionCategories', dietitianController.getNutritionCategories
 router.delete('/deleteNutritionCategory', dietitianController.deleteNutritionCategory);
 router.post('/addNutritionCategory', dietitianController.addNutritionCategory);
 router.post('/assignNutritionPlanToClient', dietitianController.assignNutritionPlanToClient);
+router.get('/getNutritionPlans', dietitianController.getNutritionPlans);
+router.delete('/deleteNutritionPlan', dietitianController.deleteNutritionPlan);
 
 module.exports = router;

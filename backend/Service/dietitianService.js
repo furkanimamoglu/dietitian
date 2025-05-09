@@ -178,9 +178,8 @@ class DietitianService {
 
     async getMyClient(user_id, client_id) {
         try {
-
             if (!user_id) {
-                throw new Exception("Yetkisiz Erişim.", 401);
+                throw new Exception("Yetkisiz Erişim.", 401, true);
             }
 
             const dietitian = await Dietitian.findOne({
@@ -283,16 +282,14 @@ class DietitianService {
                 width: 300
             });
         } catch (error) {
-            const err = new Error('QR kodu oluşturulamadı.');
-            err.status = 500;
-            throw err;
+            throw new Exception(error.message, 400);
         }
     }
 
     async getDietitianInfo(user_id) {
         try {
             if (!user_id) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.", 401, true);
             }
 
             const dietitian = await Dietitian.findOne({
@@ -303,7 +300,7 @@ class DietitianService {
             });
 
             if (!dietitian) {
-                throw new Error("Diyetisyen bulunamadı.");
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
             }
 
             return dietitian;
@@ -315,7 +312,7 @@ class DietitianService {
     async getDietitianNameById(dietitian_id) {
         try {
             if (!dietitian_id) {
-                throw new Error("Diyetisyen bulunamadı.");
+                throw new Exception("Yetkisiz Erişim.", 401, true);
             }
 
             const dietitian = await Dietitian.findOne({
@@ -323,7 +320,7 @@ class DietitianService {
             });
 
             if (!dietitian) {
-                throw new Error("Diyetisyen bulunamadı.");
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
             }
 
             return {dietitian_name: dietitian.name};
@@ -433,7 +430,7 @@ class DietitianService {
             });
 
             if (!dietitian) {
-                throw new Error('Diyetisyen bulunamadı.');
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
             }
 
             dietitian.Clients.forEach(client => {
@@ -465,7 +462,7 @@ class DietitianService {
         });
 
         if (!client) {
-            throw new Error("Bu danışan size ait değil. Atama yapılamaz.");
+            throw new Exception("Bu danışan size ait değil. Atama yapılamaz.", 401, true);
         }
 
         const plan = await NutritionPlan.findOne({
@@ -476,7 +473,7 @@ class DietitianService {
         });
 
         if (!plan) {
-            throw new Error("Bu plan size ait değil. Atama yapılamaz.");
+            throw new Exception("Bu plan size ait değil. Atama yapılamaz.", 401, true);
         }
 
         return await NutritionAssignment.create({
@@ -486,6 +483,38 @@ class DietitianService {
             end_date,
             note
         });
+    }
+
+    async getNutritionPlans(dietitian_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        return await NutritionPlan.findAll({
+            where: {dietitian_id},
+            order: [['id', 'ASC']]
+        });
+    }
+
+    async deleteNutritionPlan(dietitian_id, nutrition_plan_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        const plan = await NutritionPlan.findOne({
+            where: {
+                id: nutrition_plan_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!plan) {
+            throw new Exception("Bu plan size ait değil veya bulunamadı.", 403, true);
+        }
+
+        await plan.destroy();
+
+        return { success: true, message: "Beslenme planı başarıyla silindi." };
     }
 
 }
