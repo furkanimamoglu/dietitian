@@ -4,7 +4,9 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import {
   Card,
@@ -24,37 +26,43 @@ import {
   Avatar
 } from 'react-native-paper';
 import Header from '../Components/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
+import config from '../../config.js';
 
-const mealIcons = {
+interface MealItem {
+  item: string;
+  checked: boolean;
+  portion: string;
+  protein?: number;
+  calorie?: number;
+}
+
+interface DailyMealPlan {
+  Kahvaltı: string;
+  'Öğle Yemeği': string;
+  'Akşam Yemeği': string;
+  Aparatif: string;
+}
+
+interface DailyStats {
+  protein: number;
+  calories: number;
+}
+
+const mealIcons: { [key: string]: string } = {
   'Kahvaltı': 'coffee',
   'Öğle': 'food-variant',
   'Akşam': 'food-fork-drink',
   'Aperatifler': 'food-apple'
 };
 
-const Beslenme = ({ navigation }) => {
-  const [meals, setMeals] = useState({
-    Kahvaltı: [
-      { item: '2 haşlanmış yumurta', checked: false, portion: '2 adet' },
-      { item: '1 dilim tam buğday ekmeği', checked: false, portion: '1 dilim' },
-      { item: 'Salatalık, domates', checked: false, portion: '1 porsiyon' },
-    ],
-    Öğle: [
-      { item: 'Tavuk göğsü', checked: false, portion: '120g' },
-      { item: 'Bulgur pilavı', checked: false, portion: '1 porsiyon' },
-      { item: 'Yoğurt', checked: false, portion: '1 kase' },
-    ],
-    Akşam: [
-      { item: 'Zeytinyağlı sebze yemeği', checked: false, portion: '1 porsiyon' },
-      { item: 'Ekmek', checked: false, portion: '1 dilim' },
-      { item: 'Salata', checked: false, portion: '1 porsiyon' },
-    ],
-    Aperatifler: [
-      { item: 'Badem', checked: false, portion: '1 avuç' },
-      { item: 'Elma', checked: false, portion: '1 adet' },
-      { item: 'Bitki çayı', checked: false, portion: '1 fincan' },
-    ],
+const Beslenme = ({ navigation }: { navigation: any }) => {
+  const [meals, setMeals] = useState<{ [key: string]: MealItem[] }>({
+    Kahvaltı: [],
+    Öğle: [],
+    Akşam: [],
+    Aperatifler: [],
   });
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -63,11 +71,100 @@ const Beslenme = ({ navigation }) => {
   const [newPortion, setNewPortion] = useState('');
   const [waterIntake, setWaterIntake] = useState(2);
   const [maxWaterIntake, setMaxWaterIntake] = useState(8);
-  const [dailyStats, setDailyStats] = useState({ protein: 0, calories: 0 });
+  const [dailyStats, setDailyStats] = useState<DailyStats>({ protein: 0, calories: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     calculateDailyStats();
-  }, [meals]);
+    fetchTodayMeal();
+  }, []);
+
+  const fetchTodayMeal = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Fetching meal plan from:', `${config.apiUrl}/client/getTodayMeal`);
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.error('Token Bulunamadı');
+        return;
+      }
+      const response = await fetch(`${config.apiUrl}/client/getTodayMeal`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data: DailyMealPlan = await response.json();
+      console.log('Received meal plan:', data);
+      
+      updateMealsFromPlan(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching meal plan:', error);
+      setError('Beslenme planı yüklenemedi. Lütfen tekrar deneyin.');
+      setLoading(false);
+      
+      // Show an alert with the error
+      Alert.alert(
+        'Bağlantı Hatası',
+        'Beslenme planı yüklenemedi. Lütfen internet bağlantınızı kontrol edin.',
+        [{ text: 'Tamam' }]
+      );
+    }
+  };
+
+  const updateMealsFromPlan = (dayPlan: DailyMealPlan) => {
+    const newMeals: { [key: string]: MealItem[] } = {
+      Kahvaltı: [],
+      Öğle: [],
+      Akşam: [],
+      Aperatifler: []
+    };
+    
+    // Convert API response to our meal structure
+    if (dayPlan.Kahvaltı) {
+      newMeals.Kahvaltı = dayPlan.Kahvaltı.split(', ').map(item => ({
+        item,
+        checked: false,
+        portion: '1 porsiyon'
+      }));
+    }
+    
+    if (dayPlan['Öğle Yemeği']) {
+      newMeals.Öğle = dayPlan['Öğle Yemeği'].split(', ').map(item => ({
+        item,
+        checked: false,
+        portion: '1 porsiyon'
+      }));
+    }
+    
+    if (dayPlan['Akşam Yemeği']) {
+      newMeals.Akşam = dayPlan['Akşam Yemeği'].split(', ').map(item => ({
+        item,
+        checked: false,
+        portion: '1 porsiyon'
+      }));
+    }
+    
+    if (dayPlan.Aparatif) {
+      newMeals.Aperatifler = dayPlan.Aparatif.split(', ').map(item => ({
+        item,
+        checked: false,
+        portion: '1 porsiyon'
+      }));
+    }
+    
+    setMeals(newMeals);
+  };
 
   const calculateDailyStats = () => {
     let totalProtein = 0;
@@ -85,7 +182,7 @@ const Beslenme = ({ navigation }) => {
     setDailyStats({ protein: totalProtein, calories: totalCalories });
   };
 
-  const toggleCheck = (mealType, index) => {
+  const toggleCheck = (mealType: string, index: number) => {
     const newMeals = { ...meals };
     newMeals[mealType][index].checked = !newMeals[mealType][index].checked;
     setMeals(newMeals);
@@ -104,7 +201,7 @@ const Beslenme = ({ navigation }) => {
       updatedMeals[selectedMealType].push({
         item: newMeal,
         checked: false,
-        portion: newPortion
+        portion: newPortion || '1 porsiyon'
       });
       setMeals(updatedMeals);
       setNewMeal('');
@@ -226,100 +323,139 @@ const Beslenme = ({ navigation }) => {
     return "Tüm öğünler tamamlandı";
   };
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4caf50" />
+          <Text style={styles.loadingText}>Beslenme planı yükleniyor...</Text>
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Avatar.Icon
+            size={60}
+            icon="alert-circle"
+            color="#f44336"
+            style={{backgroundColor: '#ffebee'}}
+          />
+          <Text style={styles.errorText}>{error}</Text>
+          <Button 
+            mode="contained" 
+            onPress={fetchTodayMeal}
+            style={styles.retryButton}
+          >
+            Tekrar Dene
+          </Button>
+        </View>
+      );
+    }
+
+    return (
+      <>
+        <Surface style={styles.headerCard}>
+          <Text style={styles.sectionTitle}>Günlük Beslenme Planın</Text>
+          <Text style={styles.sectionSubtitle}>Dengeli beslen, enerjik hisset</Text>
+
+          <View style={styles.progressContainer}>
+            <View style={styles.progressTextRow}>
+              <Text style={styles.progressPercentage}>%{Math.round(progress * 100)}</Text>
+              <Text style={styles.progressDescription}>{getCompletionText()}</Text>
+            </View>
+            <ProgressBar progress={progress} color="#4caf50" style={styles.progressBar} />
+          </View>
+        </Surface>
+
+        {/*renderWaterTracker()*/}
+        {renderDailyStats()}
+
+        {/* Yemek kategorileri */}
+        {Object.entries(meals).map(([mealType, items]) => (
+          <Card key={mealType} style={styles.mealCard} mode="elevated">
+            <Card.Title
+              title={mealType}
+              titleStyle={styles.cardTitle}
+              left={(props) => (
+                <Avatar.Icon
+                  size={40}
+                  icon={mealIcons[mealType] || 'food'}
+                  color="#4caf50"
+                  style={{backgroundColor: '#e8f5e9'}}
+                />
+              )}
+              right={(props) => (
+                <IconButton
+                  {...props}
+                  icon="plus"
+                  iconColor="#4caf50"
+                  onPress={() => {
+                    setSelectedMealType(mealType);
+                    setModalVisible(true);
+                  }}
+                />
+              )}
+            />
+            <Divider />
+            <Card.Content style={styles.cardContent}>
+              {items.map((meal, index) => (
+                <View key={index} style={styles.mealItem}>
+                  <Checkbox.Android
+                    status={meal.checked ? 'checked' : 'unchecked'}
+                    onPress={() => toggleCheck(mealType, index)}
+                    color="#4caf50"
+                  />
+                  <View style={styles.mealInfo}>
+                    <Text style={[
+                      styles.mealName,
+                      meal.checked && styles.mealChecked
+                    ]}>
+                      {meal.item}
+                    </Text>
+                    <View style={styles.nutritionInfo}>
+                      <Chip
+                        style={styles.nutritionChip}
+                        textStyle={styles.chipText}
+                        avatar={
+                          <Avatar.Icon
+                            size={16}
+                            icon="scale"
+                            color="#7cb342"
+                            style={{backgroundColor: 'transparent'}}
+                          />
+                        }
+                      >
+                        {meal.portion}
+                      </Chip>
+                    </View>
+                  </View>
+                </View>
+              ))}
+
+              {items.length === 0 && (
+                <Text style={styles.emptyMealText}>
+                  Bu öğün için henüz yemek eklenmemiş
+                </Text>
+              )}
+            </Card.Content>
+          </Card>
+        ))}
+
+        {/* Ekstra boşluk - FAB button için */}
+        <View style={{ height: 80 }} />
+      </>
+    );
+  };
+
   return (
     <Provider>
       <View style={styles.container}>
         <Header navigation={navigation} />
 
-        <ScrollView style={styles.content}>
-          <Surface style={styles.headerCard}>
-            <Text style={styles.sectionTitle}>Günlük Beslenme Planın</Text>
-            <Text style={styles.sectionSubtitle}>Dengeli beslen, enerjik hisset</Text>
-
-            <View style={styles.progressContainer}>
-              <View style={styles.progressTextRow}>
-                <Text style={styles.progressPercentage}>%{Math.round(progress * 100)}</Text>
-                <Text style={styles.progressDescription}>{getCompletionText()}</Text>
-              </View>
-              <ProgressBar progress={progress} color="#4caf50" style={styles.progressBar} />
-            </View>
-          </Surface>
-
-          {renderWaterTracker()}
-
-          {/* Yemek kategorileri */}
-          {Object.entries(meals).map(([mealType, items]) => (
-            <Card key={mealType} style={styles.mealCard} mode="elevated">
-              <Card.Title
-                title={mealType}
-                titleStyle={styles.cardTitle}
-                left={(props) => (
-                  <Avatar.Icon
-                    size={40}
-                    icon={mealIcons[mealType] || 'food'}
-                    color="#4caf50"
-                    style={{backgroundColor: '#e8f5e9'}}
-                  />
-                )}
-                right={(props) => (
-                  <IconButton
-                    {...props}
-                    icon="plus"
-                    iconColor="#4caf50"
-                    onPress={() => {
-                      setSelectedMealType(mealType);
-                      setModalVisible(true);
-                    }}
-                  />
-                )}
-              />
-              <Divider />
-              <Card.Content style={styles.cardContent}>
-                {items.map((meal, index) => (
-                  <View key={index} style={styles.mealItem}>
-                    <Checkbox.Android
-                      status={meal.checked ? 'checked' : 'unchecked'}
-                      onPress={() => toggleCheck(mealType, index)}
-                      color="#4caf50"
-                    />
-                    <View style={styles.mealInfo}>
-                      <Text style={[
-                        styles.mealName,
-                        meal.checked && styles.mealChecked
-                      ]}>
-                        {meal.item}
-                      </Text>
-                      <View style={styles.nutritionInfo}>
-                        <Chip
-                          style={styles.nutritionChip}
-                          textStyle={styles.chipText}
-                          avatar={
-                            <Avatar.Icon
-                              size={16}
-                              icon="scale"
-                              color="#7cb342"
-                              style={{backgroundColor: 'transparent'}}
-                            />
-                          }
-                        >
-                          {meal.portion}
-                        </Chip>
-                      </View>
-                    </View>
-                  </View>
-                ))}
-
-                {items.length === 0 && (
-                  <Text style={styles.emptyMealText}>
-                    Bu öğün için henüz yemek eklenmemiş
-                  </Text>
-                )}
-              </Card.Content>
-            </Card>
-          ))}
-
-          {/* Ekstra boşluk - FAB button için */}
-          <View style={{ height: 80 }} />
+        <ScrollView style={styles.content} contentContainerStyle={loading || error ? styles.centeredContent : undefined}>
+          {renderContent()}
         </ScrollView>
 
         <FAB
@@ -383,6 +519,39 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16
   },
+  centeredContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666'
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  errorText: {
+    marginTop: 16,
+    marginBottom: 16,
+    fontSize: 16,
+    color: '#f44336',
+    textAlign: 'center'
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#4caf50'
+  },
   headerCard: {
     padding: 16,
     marginBottom: 16,
@@ -443,7 +612,6 @@ const styles = StyleSheet.create({
   cardContent: {
     paddingVertical: 8
   },
-
   mealItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',

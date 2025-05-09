@@ -1,6 +1,7 @@
 const ClientService = require("../Service/clientService");
 const Security = require("../Utils/Security");
-const DietitianService = require("../Service/dietitianService");
+const moment = require('moment');
+
 
 class ClientController {
 
@@ -114,6 +115,31 @@ class ClientController {
             });
         }
     }
+
+    async getTodayMeal(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const clientId = Security.getUserIdFromToken(token);
+
+            if (!token || !clientId) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const today = moment().format('YYYY-MM-DD');
+            const dayName = moment().locale('tr').format('dddd'); // örn: 'Pazartesi'
+
+            const result = await ClientService.getTodayMeal(clientId, today, dayName);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 
 }
 

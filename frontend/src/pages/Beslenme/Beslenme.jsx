@@ -4,7 +4,6 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
-// Icons
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrintIcon from '@mui/icons-material/Print';
@@ -14,22 +13,11 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
-import EventNoteIcon from '@mui/icons-material/EventNote';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-
-const initialBeslenmeData = [
-    { id: 1, title: "Kilo Aldırma", description: "x2 yumurta, 5x furkan, 500 gr peynir", image: "/kiloal.png", categoryId: 1, mealPlan: {
-        "Pazartesi": { "Kahvaltı": "Yumurta, Peynir, Zeytin", "Öğle Yemeği": "Tavuk, Pilav, Salata", "Akşam Yemeği": "Köfte, Bulgur Pilavı", "Aparatif": "Meyve, Kuruyemiş" },
-        "Salı": { "Kahvaltı": "Menemen, Peynir", "Öğle Yemeği": "Etli Fasulye, Pilav", "Akşam Yemeği": "Balık, Salata", "Aparatif": "Yoğurt, Meyve" }
-    }},
-    { id: 2, title: "Kilo Verme", description: "x1 yumurta, 1x elma, 200 gr yoğurt", image: "/placeholder.png", categoryId: 2 },
-    { id: 3, title: "Kas Yapımı", description: "x3 yumurta, 300 gr tavuk, 1x muz", image: "/placeholder.png", categoryId: 3 },
-    { id: 4, title: "Dengeli Beslenme", description: "x1 avokado, 200 gr yulaf, 1x yoğurt", image: "/placeholder.png", categoryId: 4 },
-    { id: 5, title: "Sağlıklı Atıştırma", description: "x2 ceviz, 1x hurma, 50 gr bitter çikolata", image: "/placeholder.png", categoryId: 5 },
-    { id: 6, title: "Protein Ağırlıklı", description: "x5 yumurta, 200 gr hindi, 2x muz", image: "/placeholder.png", categoryId: 1 },
-];
 
 // Days and meals constants
 const DAYS_OF_WEEK = [
@@ -55,7 +43,7 @@ const CategoryItem = ({ category, isChecked, onCheck, onDelete }) => {
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
-            <div className="category-title">{category.title}</div>
+            <div className="category-title">{category.name || category.title}</div>
             <button 
                 className="category-delete-btn"
                 onClick={(e) => {
@@ -272,19 +260,58 @@ export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
-    const [beslenmeData, setBeslenmeData] = useState(initialBeslenmeData);
+    const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
+    const [addPlanModal, setAddPlanModal] = useState(false);
     const [editProgramModal, setEditProgramModal] = useState(false);
     const [selectedProgram, setSelectedProgram] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [detailItem, setDetailItem] = useState(null);
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
+    const [assignmentNote, setAssignmentNote] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
     
+    // Edit program states
+    const [editTitle, setEditTitle] = useState('');
+    const [editDescription, setEditDescription] = useState('');
+    const [editCategoryId, setEditCategoryId] = useState('');
+    
+    // Success popup states
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    
+    // Auto-hide success popup after 3 seconds
+    useEffect(() => {
+        if (showSuccessPopup) {
+            const timer = setTimeout(() => {
+                setShowSuccessPopup(false);
+            }, 3000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessPopup]);
+    
+    // New plan state
+    const [newPlan, setNewPlan] = useState({
+        title: '',
+        description: '',
+        category_id: ''
+    });
+    
+    // Delete confirmation modal states
+    const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
+    const [affectedPlans, setAffectedPlans] = useState([]);
+
     // Meal planning states
     const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
     const [mealPlan, setMealPlan] = useState(() => {
@@ -321,7 +348,7 @@ export default function Beslenme() {
     // Fetch nutrition categories
     useEffect(() => {
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getAllMyNutritionCategories`, {
+            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionCategories`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -331,20 +358,30 @@ export default function Beslenme() {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
-                // Fallback to sample categories if API fails
-                setCategoryData([
-                    { id: 1, title: "Kilo Aldırma" },
-                    { id: 2, title: "Kilo Verme" },
-                    { id: 3, title: "Kas Yapımı" },
-                    { id: 4, title: "Dengeli Beslenme" },
-                    { id: 5, title: "Sağlıklı Atıştırma" }
-                ]);
+                setCategoryData([]);
+            });
+    }, []);
+
+    // Fetch nutrition plans
+    useEffect(() => {
+        axios
+            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionPlans`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                setBeslenmeData(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching nutrition plans:", error);
+                setBeslenmeData([]);
             });
     }, []);
 
     // Filter categories based on search term
-    const filteredCategories = categoryData?.filter(category => 
-        category.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredCategories = categoryData?.filter(category =>
+        (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Filter nutrition programs based on selected categories
@@ -354,7 +391,7 @@ export default function Beslenme() {
             return true;
         }
         // Otherwise, show only items that belong to checked categories
-        return checkedCategories.includes(item.categoryId);
+        return checkedCategories.includes(item.category_id);
     });
 
     // Category handlers
@@ -366,39 +403,144 @@ export default function Beslenme() {
         );
     };
 
-    const handleMultiDelete = () => {
-        setCategoryData(prev => 
-            prev.filter(cat => !checkedCategories.includes(cat.id))
+    const handleOpenMultiDeleteConfirm = () => {
+        if (checkedCategories.length === 0) return;
+        
+        // Find plans that would be affected by deleting these categories
+        const plansToDelete = beslenmeData.filter(plan => 
+            checkedCategories.includes(plan.category_id)
         );
-        setCheckedCategories([]);
+        
+        setAffectedPlans(plansToDelete);
+        setDeleteMultiCategoriesConfirmModal(true);
     };
 
-    const handleSingleCategoryDelete = (categoryId) => {
-        setCategoryData(prev => prev.filter(cat => cat.id !== categoryId));
-        setCheckedCategories(prev => prev.filter(id => id !== categoryId));
+    const handleMultiDelete = () => {
+        const deletePromises = checkedCategories.map(categoryId => 
+            axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
+                headers: { Authorization: localStorage.getItem("token") }
+            })
+        );
+        
+        // Execute all promises
+        Promise.all(deletePromises)
+            .then(() => {
+                // Update local state after successful deletion
+                setCategoryData(prev => 
+                    prev.filter(cat => !checkedCategories.includes(cat.id))
+                );
+                // Also remove any plans that were in the deleted categories
+                setBeslenmeData(prev => 
+                    prev.filter(plan => !checkedCategories.includes(plan.category_id))
+                );
+                
+                const categoryCount = checkedCategories.length;
+                setCheckedCategories([]);
+                setDeleteMultiCategoriesConfirmModal(false);
+                setAffectedPlans([]);
+                
+                // Show success popup
+                setSuccessMessage(`${categoryCount} kategori başarıyla silindi.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error deleting categories:", error);
+                setDeleteMultiCategoriesConfirmModal(false);
+                setAffectedPlans([]);
+            });
+    };
+
+    const handleOpenCategoryDeleteConfirm = (categoryId) => {
+        const category = categoryData.find(cat => cat.id === categoryId);
+        if (!category) return;
+        
+        // Find plans that would be affected by deleting this category
+        const plansToDelete = beslenmeData.filter(plan => plan.category_id === categoryId);
+        
+        setCategoryToDelete(category);
+        setAffectedPlans(plansToDelete);
+        setDeleteCategoryConfirmModal(true);
+    };
+
+    const handleSingleCategoryDelete = () => {
+        if (!categoryToDelete) return;
+        
+        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryToDelete.id}`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(() => {
+            // Update local state after successful deletion
+            setCategoryData(prev => prev.filter(cat => cat.id !== categoryToDelete.id));
+            setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
+            // Also remove any plans that were in the deleted category
+            setBeslenmeData(prev => prev.filter(plan => plan.category_id !== categoryToDelete.id));
+            setDeleteCategoryConfirmModal(false);
+            setCategoryToDelete(null);
+            setAffectedPlans([]);
+            
+            // Show success popup
+            setSuccessMessage(`"${categoryToDelete.name || categoryToDelete.title}" kategorisi başarıyla silindi.`);
+            setShowSuccessPopup(true);
+        })
+        .catch(error => {
+            console.error("Error deleting category:", error);
+            setDeleteCategoryConfirmModal(false);
+            setCategoryToDelete(null);
+            setAffectedPlans([]);
+        });
     };
 
     const handleAddCategory = () => {
         if (newCategoryTitle.trim() === '') return;
         
         const newCategory = {
-            id: categoryData.length > 0 ? Math.max(...categoryData.map(c => c.id)) + 1 : 1,
-            title: newCategoryTitle.trim()
+            category_name: newCategoryTitle.trim()
         };
         
-        // In a real app, you would make an API call here
-        // axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
-        //     headers: { Authorization: localStorage.getItem("token") }
-        // })
-        // .then(response => {
-        //     setCategoryData([...categoryData, response.data]);
-        // })
-        // .catch(error => console.error("Error adding category:", error));
+        // Make API call to add the category
+        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            // Add the new category to the state
+            setCategoryData([...categoryData, response.data]);
+            setNewCategoryTitle('');
+            setAddCategoryModal(false);
+        })
+        .catch(error => {
+            console.error("Error adding category:", error);
+            // You might want to show an error message to the user here
+        });
+    };
+
+    const handleAddPlan = () => {
+        if (!newPlan.title.trim() || !newPlan.category_id) return;
         
-        // For now, just update the state directly
-        setCategoryData([...categoryData, newCategory]);
-        setNewCategoryTitle('');
-        setAddCategoryModal(false);
+        const planData = {
+            title: newPlan.title.trim(),
+            description: newPlan.description.trim(),
+            category_id: newPlan.category_id
+        };
+        
+        // Make API call to add the plan
+        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            // Add the new plan to the state
+            setBeslenmeData([...beslenmeData, response.data]);
+            // Reset form
+            setNewPlan({
+                title: '',
+                description: '',
+                category_id: ''
+            });
+            setAddPlanModal(false);
+        })
+        .catch(error => {
+            console.error("Error adding plan:", error);
+            // You might want to show an error message to the user here
+        });
     };
 
     // Nutrition card handlers
@@ -409,15 +551,63 @@ export default function Beslenme() {
 
     const handleOpenAddToUserModal = (item) => {
         setSelectedProgram(item);
+        // Set default dates (today and a week from today)
+        const today = new Date();
+        const nextWeek = new Date();
+        nextWeek.setDate(today.getDate() + 7);
+        
+        // Format dates as YYYY-MM-DD
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        setStartDate(formatDate(today));
+        setEndDate(formatDate(nextWeek));
+        setAssignmentNote('');
+        setSelectedUser(null);
         setAddToUserModal(true);
     };
 
     const handleAddToUser = () => {
-        console.log("Adding program:", selectedProgram);
-        console.log("To user:", selectedUser);
-        setAddToUserModal(false);
-        setSelectedProgram(null);
-        setSelectedUser(null);
+        if (!selectedProgram || !selectedUser || !startDate || !endDate) return;
+        
+        const addData = {
+            client_id: selectedUser.id,
+            nutrition_plan_id: selectedProgram.id,
+            start_date: startDate,
+            end_date: endDate,
+            note: assignmentNote
+        };
+        
+        axios.post(`${config[config.environment].apiUrl}/dietitian/assignNutritionPlanToClient`, addData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            console.log("Plan assigned to client:", response.data);
+            
+            // Store names for success message
+            const programName = selectedProgram.title;
+            const userName = `${selectedUser.name}`;
+            
+            // Close the modal and reset selections
+            setAddToUserModal(false);
+            setSelectedProgram(null);
+            setSelectedUser(null);
+            setStartDate('');
+            setEndDate('');
+            setAssignmentNote('');
+            
+            // Show success popup
+            setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı.`);
+            setShowSuccessPopup(true);
+        })
+        .catch(error => {
+            console.error("Error assigning plan to client:", error);
+            // You might want to show an error message
+        });
     };
 
     const handlePrint = (item) => {
@@ -591,6 +781,12 @@ export default function Beslenme() {
 
     const handleEdit = (item) => {
         setSelectedProgram(item);
+        
+        // Set form fields with current values
+        setEditTitle(item.title || '');
+        setEditDescription(item.description || '');
+        setEditCategoryId(item.category_id || '');
+        
         // Initialize meal plan from item or create empty one
         const initialPlan = item.mealPlan || {};
         
@@ -608,8 +804,52 @@ export default function Beslenme() {
         setEditProgramModal(true);
     };
 
-    const handleDelete = (item) => {
-        setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== item.id));
+    const handleSaveMealPlan = () => {
+        // Create update data with edited fields
+        const updateData = {
+            nutrition_plan_id: selectedProgram.id,
+            title: editTitle,
+            description: editDescription,
+            category_id: editCategoryId,
+            mealPlan: mealPlan
+        };
+        
+        console.log("Sending update data:", updateData);
+        
+        // Update the program with the meal plan
+        axios.put(`${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`, updateData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            console.log("Update response:", response.data);
+            
+            // Update local state with the updated data
+            setBeslenmeData(prev => 
+                prev.map(item => 
+                    item.id === selectedProgram.id 
+                        ? { 
+                            ...item, 
+                            title: editTitle,
+                            description: editDescription,
+                            category_id: editCategoryId,
+                            mealPlan: mealPlan 
+                          }
+                        : item
+                )
+            );
+            
+            // Close the modal
+            setEditProgramModal(false);
+            
+            // Show success popup
+            setSuccessMessage(`"${editTitle}" programı başarıyla güncellendi.`);
+            setShowSuccessPopup(true);
+        })
+        .catch(error => {
+            console.error("Error updating nutrition plan:", error);
+            console.error("Error details:", error.response?.data || "No response data");
+            alert("Program güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
+        });
     };
 
     // Meal plan handlers
@@ -627,20 +867,6 @@ export default function Beslenme() {
         setSelectedDay(day);
     };
 
-    const handleSaveMealPlan = () => {
-        // Update the program with the meal plan
-        setBeslenmeData(prev => 
-            prev.map(item => 
-                item.id === selectedProgram.id 
-                    ? { ...item, mealPlan: mealPlan }
-                    : item
-            )
-        );
-        
-        // Close the modal
-        setEditProgramModal(false);
-    };
-
     // View meal plan handler
     const handleViewProgram = (item) => {
         setSelectedProgram(item);
@@ -650,6 +876,38 @@ export default function Beslenme() {
     // Export PDF handler
     const handleExportPdf = () => {
         generatePDF(selectedProgram);
+    };
+
+    const handleOpenDeleteConfirm = (item) => {
+        setItemToDelete(item);
+        setDeleteConfirmModal(true);
+    };
+
+    const handleDelete = () => {
+        if (!itemToDelete) return;
+        
+        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionPlan?nutrition_plan_id=${itemToDelete.id}`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(() => {
+            // Store name for success message
+            const planName = itemToDelete.title;
+            
+            // Update local state after successful deletion
+            setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== itemToDelete.id));
+            // Close the modal and reset the item to delete
+            setDeleteConfirmModal(false);
+            setItemToDelete(null);
+            
+            // Show success popup
+            setSuccessMessage(`"${planName}" programı başarıyla silindi.`);
+            setShowSuccessPopup(true);
+        })
+        .catch(error => {
+            console.error("Error deleting nutrition plan:", error);
+            setDeleteConfirmModal(false);
+            setItemToDelete(null);
+        });
     };
 
     return (
@@ -670,16 +928,25 @@ export default function Beslenme() {
                         </div>
                         <div className="category-actions">
                             <button 
+                                className="action-btn add-plan-btn" 
+                                title="Plan Ekle"
+                                onClick={() => setAddPlanModal(true)}
+                            >
+                                <AddIcon />
+                                <span className="btn-text">Plan Ekle</span>
+                            </button>
+                            <button 
                                 className="action-btn add-btn" 
                                 title="Kategori Ekle"
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon />
+                                <span className="btn-text">Kategori Ekle</span>
                             </button>
                             <button 
                                 className="action-btn delete-btn" 
                                 title="Seçilenleri Sil"
-                                onClick={handleMultiDelete}
+                                onClick={handleOpenMultiDeleteConfirm}
                                 disabled={checkedCategories.length === 0}
                             >
                                 <DeleteIcon />
@@ -690,12 +957,12 @@ export default function Beslenme() {
                     <div className="categories-list">
                         {filteredCategories && filteredCategories.length > 0 ? (
                             filteredCategories.map((category) => (
-                                <CategoryItem 
+                                <CategoryItem
                                     key={category.id}
                                     category={category}
                                     isChecked={checkedCategories.includes(category.id)}
                                     onCheck={() => handleCategoryCheck(category.id)}
-                                    onDelete={handleSingleCategoryDelete}
+                                    onDelete={handleOpenCategoryDeleteConfirm}
                                 />
                             ))
                         ) : (
@@ -715,7 +982,7 @@ export default function Beslenme() {
                                     onAddToUser={handleOpenAddToUserModal}
                                     onPrint={handlePrint}
                                     onEdit={handleEdit}
-                                    onDelete={handleDelete}
+                                    onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewProgram}
                                 />
                             ))
@@ -727,6 +994,69 @@ export default function Beslenme() {
                     </div>
                 </div>
             </div>
+
+            {/* Add Plan Modal */}
+            <Modal 
+                isOpen={addPlanModal} 
+                title="Beslenme Planı Ekle" 
+                onClose={() => setAddPlanModal(false)}
+            >
+                <div className="modal-body">
+                    <div className="input-container">
+                        <label htmlFor="planTitle">Plan Adı</label>
+                        <input 
+                            type="text" 
+                            id="planTitle"
+                            className="text-input" 
+                            value={newPlan.title}
+                            onChange={(e) => setNewPlan({...newPlan, title: e.target.value})}
+                            placeholder="Plan adını giriniz"
+                        />
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="planDescription">Açıklama</label>
+                        <textarea 
+                            id="planDescription"
+                            className="text-input textarea" 
+                            value={newPlan.description}
+                            onChange={(e) => setNewPlan({...newPlan, description: e.target.value})}
+                            placeholder="Plan açıklaması giriniz"
+                            rows={3}
+                        />
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="planCategory">Kategori</label>
+                        <select 
+                            id="planCategory"
+                            className="text-input" 
+                            value={newPlan.category_id}
+                            onChange={(e) => setNewPlan({...newPlan, category_id: e.target.value})}
+                        >
+                            <option value="">Kategori Seçin</option>
+                            {categoryData.map(category => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name || category.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => setAddPlanModal(false)}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn confirm-btn" 
+                        onClick={handleAddPlan}
+                        disabled={!newPlan.title.trim() || !newPlan.category_id}
+                    >
+                        Ekle
+                    </button>
+                </div>
+            </Modal>
 
             {/* Add Category Modal */}
             <Modal 
@@ -774,9 +1104,11 @@ export default function Beslenme() {
                     <p className="selected-program">
                         Seçilen program: <strong>{selectedProgram?.title}</strong>
                     </p>
-                    <div className="user-select-container">
+                    <div className="input-container">
+                        <label htmlFor="userSelect">Danışan Seçin</label>
                         <select 
-                            className="user-select"
+                            id="userSelect"
+                            className="text-input"
                             value={selectedUser?.id || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
@@ -787,10 +1119,43 @@ export default function Beslenme() {
                             <option value="">Danışan Seçin</option>
                             {danisanList.map(user => (
                                 <option key={user.id} value={user.id}>
-                                    {user.name} {user.surname}
+                                    {user.name}
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="date-inputs-container">
+                        <div className="input-container half-width">
+                            <label htmlFor="startDate">Başlangıç Tarihi</label>
+                            <input 
+                                type="date" 
+                                id="startDate"
+                                className="text-input" 
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="input-container half-width">
+                            <label htmlFor="endDate">Bitiş Tarihi</label>
+                            <input 
+                                type="date" 
+                                id="endDate"
+                                className="text-input" 
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="assignmentNote">Not (Opsiyonel)</label>
+                        <textarea 
+                            id="assignmentNote"
+                            className="text-input textarea" 
+                            value={assignmentNote}
+                            onChange={(e) => setAssignmentNote(e.target.value)}
+                            placeholder="Danışana özel notlar..."
+                            rows={3}
+                        />
                     </div>
                 </div>
                 <div className="modal-footer">
@@ -803,7 +1168,7 @@ export default function Beslenme() {
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={handleAddToUser}
-                        disabled={!selectedUser}
+                        disabled={!selectedUser || !startDate || !endDate}
                     >
                         Ekle
                     </button>
@@ -813,17 +1178,62 @@ export default function Beslenme() {
             {/* Edit Program Modal */}
             <Modal 
                 isOpen={editProgramModal} 
-                title={`Beslenme Programı Düzenle - ${selectedProgram?.title}`}
+                title="Beslenme Programı Düzenle"
                 onClose={() => setEditProgramModal(false)}
                 fullWidth={true}
             >
-                <div className="modal-body meal-plan-modal">
-                    <MealPlanTable 
-                        mealPlan={mealPlan}
-                        onMealChange={handleMealChange}
-                        selectedDay={selectedDay}
-                        onDayChange={handleDayChange}
-                    />
+                <div className="modal-body">
+                    <div className="program-details-section">
+                        <h3 className="section-title">Program Bilgileri</h3>
+                        <div className="input-container">
+                            <label htmlFor="editTitle">Program Adı</label>
+                            <input 
+                                type="text" 
+                                id="editTitle"
+                                className="text-input" 
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                placeholder="Program adını giriniz"
+                            />
+                        </div>
+                        <div className="input-container">
+                            <label htmlFor="editDescription">Açıklama</label>
+                            <textarea 
+                                id="editDescription"
+                                className="text-input textarea" 
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                placeholder="Program açıklaması giriniz"
+                                rows={3}
+                            />
+                        </div>
+                        <div className="input-container">
+                            <label htmlFor="editCategory">Kategori</label>
+                            <select 
+                                id="editCategory"
+                                className="text-input" 
+                                value={editCategoryId}
+                                onChange={(e) => setEditCategoryId(e.target.value)}
+                            >
+                                <option value="">Kategori Seçin</option>
+                                {categoryData.map(category => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name || category.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div className="meal-plan-section">
+                        <h3 className="section-title">Öğün Planı</h3>
+                        <MealPlanTable 
+                            mealPlan={mealPlan}
+                            onMealChange={handleMealChange}
+                            selectedDay={selectedDay}
+                            onDayChange={handleDayChange}
+                        />
+                    </div>
                 </div>
                 <div className="modal-footer">
                     <button 
@@ -835,6 +1245,7 @@ export default function Beslenme() {
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={handleSaveMealPlan}
+                        disabled={!editTitle || !editCategoryId}
                     >
                         <SaveIcon className="save-icon" />
                         Kaydet
@@ -892,6 +1303,164 @@ export default function Beslenme() {
                     </button>
                 </div>
             </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal 
+                isOpen={deleteConfirmModal} 
+                title="Beslenme Programını Sil" 
+                onClose={() => {
+                    setDeleteConfirmModal(false);
+                    setItemToDelete(null);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            <strong>{itemToDelete?.title}</strong> programını silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    <p className="delete-note important">
+                        <strong>Önemli:</strong> Bu program silindiğinde, atanmış olduğu tüm danışanların takviminden de kaldırılacaktır.
+                    </p>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => {
+                            setDeleteConfirmModal(false);
+                            setItemToDelete(null);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={handleDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Category Confirmation Modal */}
+            <Modal 
+                isOpen={deleteCategoryConfirmModal} 
+                title="Kategoriyi Sil" 
+                onClose={() => {
+                    setDeleteCategoryConfirmModal(false);
+                    setCategoryToDelete(null);
+                    setAffectedPlans([]);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            <strong>{categoryToDelete?.name || categoryToDelete?.title}</strong> kategorisini silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    
+                    {affectedPlans.length > 0 && (
+                        <div className="affected-plans">
+                            <p className="delete-note important">
+                                <strong>Önemli:</strong> Bu kategori ile ilişkili <strong>{affectedPlans.length}</strong> beslenme programı silinecektir:
+                            </p>
+                            <ul className="affected-plans-list">
+                                {affectedPlans.map(plan => (
+                                    <li key={plan.id}><span className="plan-title">{plan.title}</span></li>
+                                ))}
+                            </ul>
+                            <p className="delete-note">
+                                Bu programlar danışanlara atanmışsa, danışanların takviminden de kaldırılacaktır.
+                            </p>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => {
+                            setDeleteCategoryConfirmModal(false);
+                            setCategoryToDelete(null);
+                            setAffectedPlans([]);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={handleSingleCategoryDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Multiple Categories Confirmation Modal */}
+            <Modal 
+                isOpen={deleteMultiCategoriesConfirmModal} 
+                title="Kategorileri Sil" 
+                onClose={() => {
+                    setDeleteMultiCategoriesConfirmModal(false);
+                    setAffectedPlans([]);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            <strong>{checkedCategories.length}</strong> kategoriyi silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    
+                    {affectedPlans.length > 0 && (
+                        <div className="affected-plans">
+                            <p className="delete-note important">
+                                <strong>Önemli:</strong> Bu kategoriler ile ilişkili <strong>{affectedPlans.length}</strong> beslenme programı silinecektir:
+                            </p>
+                            <ul className="affected-plans-list">
+                                {affectedPlans.map(plan => (
+                                    <li key={plan.id}><span className="plan-title">{plan.title}</span></li>
+                                ))}
+                            </ul>
+                            <p className="delete-note">
+                                Bu programlar danışanlara atanmışsa, danışanların takviminden de kaldırılacaktır.
+                            </p>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={() => {
+                            setDeleteMultiCategoriesConfirmModal(false);
+                            setAffectedPlans([]);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={handleMultiDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Success Popup */}
+            {showSuccessPopup && (
+                <div className="success-popup">
+                    <div className="success-popup-content">
+                        <CheckCircleIcon className="success-icon" />
+                        <p>{successMessage}</p>
+                    </div>
+                </div>
+            )}
         </Default>
     );
 }

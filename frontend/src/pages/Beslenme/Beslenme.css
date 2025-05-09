@@ -3,6 +3,7 @@
   display: flex;
   height: 78vh;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 /* Left Panel - Categories */
@@ -58,7 +59,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
+  min-width: 36px;
   height: 36px;
   border: none;
   border-radius: 4px;
@@ -67,8 +68,26 @@
   transition: background-color 0.2s;
 }
 
+.action-btn.add-plan-btn {
+  background-color: #4caf50;
+  width: auto;
+  padding: 0 12px;
+}
+
+.action-btn.add-plan-btn:hover {
+  background-color: #388e3c;
+}
+
+.btn-text {
+  margin-left: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .action-btn.add-btn {
   background-color: #3f51b5;
+  width: auto;
+  padding: 0 12px;
 }
 
 .action-btn.add-btn:hover {
@@ -420,6 +439,20 @@
 .user-select:focus {
   outline: none;
   border-color: #3f51b5;
+}
+
+.date-inputs-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.half-width {
+  width: 50%;
+}
+
+input[type="date"].text-input {
+  padding: 0.7rem;
 }
 
 .modal-footer {
@@ -840,6 +873,99 @@
   padding: 0;
 }
 
+/* Delete Confirmation Modal Styles */
+.delete-confirm-modal {
+  padding: 1rem 0;
+}
+
+.delete-warning {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.warning-icon {
+  color: #f44336;
+  font-size: 2.5rem !important;
+}
+
+.warning-text {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.delete-note {
+  color: #757575;
+  font-size: 0.9rem;
+  margin: 0;
+  padding-left: 3.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.delete-note.important {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.affected-plans {
+  margin-top: 1rem;
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+.affected-plans-list {
+  margin: 0.5rem 0;
+  padding-left: 2rem;
+  max-height: 150px;
+  overflow-y: auto;
+  list-style-type: none;
+}
+
+.affected-plans-list li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.4;
+}
+
+.plan-title {
+  font-weight: 500;
+  color: #333;
+}
+
+.affected-plans-list li::before {
+  content: "•";
+  color: #f44336;
+  font-weight: bold;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 0;
+  top: -2px;
+}
+
+.affected-plans-list li:last-child {
+  margin-bottom: 0;
+}
+
+.affected-plans .delete-note {
+  padding-left: 0;
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+.delete-confirm-btn {
+  background-color: #f44336 !important;
+  color: white;
+}
+
+.delete-confirm-btn:hover {
+  background-color: #d32f2f !important;
+}
+
 .view-meal-plan-container {
   width: 100%;
 }
@@ -885,7 +1011,7 @@
 }
 
 .day-header {
-  background-color: #3f51b5;
+  background-color: #ffa955;
   color: white;
   padding: 10px 16px;
   font-weight: 600;
@@ -937,4 +1063,93 @@
 
 .action-button.view-btn:hover {
   background-color: #455a64;
+}
+
+/* Textarea style for plan description */
+.text-input.textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* Success Popup */
+.success-popup {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 2000;
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.success-popup-content {
+  background-color: #4caf50;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.success-icon {
+  font-size: 24px !important;
+}
+
+.success-popup p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .success-popup {
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+  }
+  
+  .success-popup-content {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+/* Program Edit Styles */
+.section-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #3f51b5;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.program-details-section {
+  margin-bottom: 2rem;
+}
+
+.meal-plan-section {
+  margin-top: 2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .program-details-section,
+  .meal-plan-section {
+    margin-bottom: 1.5rem;
+  }
 }

@@ -15,6 +15,7 @@ import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import PeopleIcon from "@mui/icons-material/People";
+import HomeIcon from "@mui/icons-material/Home";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import "./Navbar.css";
@@ -26,6 +27,7 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
 
     const menu_items = [
+        { name: "ANA SAYFA", route: "/dashboard", icon: <HomeIcon /> },
         { name: "DANIŞANLARIM", route: "/danisanlarim", icon: <PeopleIcon /> },
         { name: "RANDEVULARIM", route: "/randevularim", icon: <EventNoteIcon /> },
         { name: "BESLENME", route: "/beslenme", icon: <LocalDiningIcon /> },
