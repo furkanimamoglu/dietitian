@@ -12,7 +12,7 @@ router.post('/addAppointmentAsDietitian', appointmentController.addAppointmentAs
 router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian)
 router.put('/updateAppointmentStatus', appointmentController.updateAppointmentStatus);
 router.get('/getPendingAppointments', appointmentController.getPendingAppointments);
-router.get('/getTodayAppointments', appointmentController.getTodayAppointments);
+router.get('/getTodayApprovedAppointments', appointmentController.getTodayApprovedAppointments);
 
 router.get('/getTodayAppointmentCount', appointmentController.getTodayAppointmentCount);
 router.get('/getRemainingTodayAppointmentCount', appointmentController.getRemainingTodayAppointmentCount);

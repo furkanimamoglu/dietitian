@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import { 
@@ -47,10 +48,15 @@ export default function Dashboard() {
     const [activeClients, setActiveClients] = useState(0);
     const [loading, setLoading] = useState(true);
     const [pendingAppointments, setPendingAppointments] = useState([]);
+    const [approvedAppointments, setApprovedAppointments] = useState([]);
     
     // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+
+    // State for pagination
+    const [approvedLimit, setApprovedLimit] = useState(5);
+    const [pendingLimit, setPendingLimit] = useState(5);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -61,7 +67,8 @@ export default function Dashboard() {
                     fetchRemainingAppointments(),
                     fetchPendingRequests(),
                     fetchActiveClients(),
-                    fetchPendingAppointments()
+                    fetchPendingAppointments(),
+                    fetchTodayApprovedAppointments()
                 ]);
             } catch (error) {
                 console.error("Dashboard verileri çekilirken bir hata oluştu:", error);
@@ -155,6 +162,23 @@ export default function Dashboard() {
             }
         };
 
+        const fetchTodayApprovedAppointments = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/appointment/getTodayApprovedAppointments",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setApprovedAppointments(response.data || []);
+            } catch (error) {
+                console.error("Bugünkü onaylanmış randevular çekilirken bir hata oluştu:", error);
+                setApprovedAppointments([]);
+            }
+        };
+
         fetchDashboardData();
     }, []);
 
@@ -192,6 +216,11 @@ export default function Dashboard() {
             const actionText = action === 'approved' ? 'onaylandı' : 'reddedildi';
             setSuccessMessage(`${clientName} için randevu talebi başarıyla ${actionText}.`);
             setShowSuccessPopup(true);
+            
+            // If approved, add to today's appointments list
+            if (action === 'approved' && appointment) {
+                setApprovedAppointments(prev => [...prev, appointment]);
+            }
             
             // Remove the appointment from the list after successful action
             setPendingAppointments(pendingAppointments.filter(app => app.id !== appointmentId));
@@ -248,6 +277,27 @@ export default function Dashboard() {
             bgColor: '#fff1ec'
         }
     ];
+
+    // Helper function to format appointment time
+    const formatAppointmentTime = (dateString) => {
+        return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    // Helper function to format appointment time range
+    const formatTimeRange = (startDate, endDate) => {
+        const start = new Date(startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const end = new Date(endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `${start}-${end}`;
+    };
+
+    // Handle loading more appointments
+    const handleLoadMoreApproved = () => {
+        setApprovedLimit(prev => prev + 5);
+    };
+
+    const handleLoadMorePending = () => {
+        setPendingLimit(prev => prev + 5);
+    };
 
     return (
         <Default>
@@ -340,117 +390,58 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Bugünkü Randevular"
-                                action={
-                                    <Button color="primary" size="small">Tümünü Gör</Button>
-                                }
                                 sx={{ pb: 1 }}
                             />
                             <Divider />
-                            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, maxHeight: 360, overflow: 'auto' }}>
                                 <List>
-                                    <ListItem 
-                                        secondaryAction={
-                                            <Chip 
-                                                label="Yeni" 
-                                                size="small" 
-                                                sx={{ bgcolor: '#3498db', color: 'white' }} 
-                                            />
-                                        }
-                                    >
-                                        <Box sx={{ 
-                                            bgcolor: '#f8f9fa', 
-                                            borderRadius: 1, 
-                                            p: '6px 10px', 
-                                            mr: 2, 
-                                            minWidth: 60, 
-                                            textAlign: 'center' 
-                                        }}>
-                                            <Typography variant="body2" fontWeight="bold">09:00</Typography>
-                                        </Box>
-                                        <ListItemText 
-                                            primary="Ahmet Yılmaz" 
-                                            secondary="İlk Değerlendirme • 45 dakika" 
-                                        />
-                                    </ListItem>
-                                    <Divider component="li" variant="inset" />
-                                    
-                                    <ListItem 
-                                        secondaryAction={
-                                            <Chip 
-                                                label="Düzenli" 
-                                                size="small" 
-                                                sx={{ bgcolor: '#2ecc71', color: 'white' }} 
-                                            />
-                                        }
-                                    >
-                                        <Box sx={{ 
-                                            bgcolor: '#f8f9fa', 
-                                            borderRadius: 1, 
-                                            p: '6px 10px', 
-                                            mr: 2, 
-                                            minWidth: 60, 
-                                            textAlign: 'center' 
-                                        }}>
-                                            <Typography variant="body2" fontWeight="bold">11:30</Typography>
-                                        </Box>
-                                        <ListItemText 
-                                            primary="Ayşe Kara" 
-                                            secondary="Kontrol • 30 dakika" 
-                                        />
-                                    </ListItem>
-                                    <Divider component="li" variant="inset" />
-                                    
-                                    <ListItem 
-                                        secondaryAction={
-                                            <Chip 
-                                                label="Düzenli" 
-                                                size="small" 
-                                                sx={{ bgcolor: '#2ecc71', color: 'white' }} 
-                                            />
-                                        }
-                                    >
-                                        <Box sx={{ 
-                                            bgcolor: '#f8f9fa', 
-                                            borderRadius: 1, 
-                                            p: '6px 10px', 
-                                            mr: 2, 
-                                            minWidth: 60, 
-                                            textAlign: 'center' 
-                                        }}>
-                                            <Typography variant="body2" fontWeight="bold">14:15</Typography>
-                                        </Box>
-                                        <ListItemText 
-                                            primary="Mehmet Demir" 
-                                            secondary="İlerleme Değerlendirmesi • 30 dakika" 
-                                        />
-                                    </ListItem>
-                                    <Divider component="li" variant="inset" />
-                                    
-                                    <ListItem 
-                                        secondaryAction={
-                                            <Chip 
-                                                label="Acil" 
-                                                size="small" 
-                                                sx={{ bgcolor: '#e74c3c', color: 'white' }} 
-                                            />
-                                        }
-                                    >
-                                        <Box sx={{ 
-                                            bgcolor: '#f8f9fa', 
-                                            borderRadius: 1, 
-                                            p: '6px 10px', 
-                                            mr: 2, 
-                                            minWidth: 60, 
-                                            textAlign: 'center' 
-                                        }}>
-                                            <Typography variant="body2" fontWeight="bold">16:45</Typography>
-                                        </Box>
-                                        <ListItemText 
-                                            primary="Zeynep Aydın" 
-                                            secondary="Diyet Planı Güncelleme • 45 dakika" 
-                                        />
-                                    </ListItem>
+                                    {loading ? (
+                                        <ListItem>
+                                            <ListItemText primary="Yükleniyor..." />
+                                        </ListItem>
+                                    ) : approvedAppointments.length > 0 ? (
+                                        approvedAppointments.slice(0, approvedLimit).map((appointment) => (
+                                            <React.Fragment key={appointment.id}>
+                                                <ListItem>
+                                                    <Box sx={{ 
+                                                        bgcolor: '#f8f9fa', 
+                                                        borderRadius: 1, 
+                                                        p: '6px 10px', 
+                                                        mr: 2, 
+                                                        minWidth: 60, 
+                                                        textAlign: 'center' 
+                                                    }}>
+                                                        <Typography variant="body2" fontWeight="bold">
+                                                            {formatTimeRange(appointment.start, appointment.end)}
+                                                        </Typography>
+                                                    </Box>
+                                                    <ListItemText 
+                                                        primary={`${appointment.Client.name}`}
+                                                        secondary={`${appointment.title}`}
+                                                    />
+                                                </ListItem>
+                                                <Divider component="li" variant="inset" />
+                                            </React.Fragment>
+                                        ))
+                                    ) : (
+                                        <ListItem>
+                                            <ListItemText primary="Bugün için randevu bulunmamaktadır." />
+                                        </ListItem>
+                                    )}
                                 </List>
+                                {approvedAppointments.length > approvedLimit && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                                        <Button 
+                                            variant="text" 
+                                            color="primary" 
+                                            size="small"
+                                            onClick={handleLoadMoreApproved}
+                                            sx={{ fontSize: '0.85rem' }}
+                                        >
+                                            Daha Fazla Yükle
+                                        </Button>
+                                    </Box>
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>
@@ -471,9 +462,6 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Randevu Talepleri"
-                                action={
-                                    <Button color="primary" size="small">Tümünü Gör</Button>
-                                }
                                 sx={{ pb: 1 }}
                             />
                             <Divider />
@@ -484,33 +472,33 @@ export default function Dashboard() {
                                             <ListItemText primary="Yükleniyor..." />
                                         </ListItem>
                                     ) : pendingAppointments.length > 0 ? (
-                                        pendingAppointments.map((appointment) => (
+                                        pendingAppointments.slice(0, pendingLimit).map((appointment) => (
                                             <React.Fragment key={appointment.id}>
                                                 <ListItem>
-                                                <ListItemText
-                                                    primary={
-                                                        <Stack
-                                                        direction="row"
-                                                        spacing={4}
-                                                        alignItems="center"
-                                                        >
-                                                        <Typography variant="subtitle1" fontWeight={600}>
-                                                            {appointment.Client.name} {appointment.Client.surname}
+                                                    <Box sx={{ 
+                                                        bgcolor: '#f8f9fa', 
+                                                        borderRadius: 1, 
+                                                        p: '6px 10px', 
+                                                        mr: 2, 
+                                                        minWidth: 60, 
+                                                        textAlign: 'center' 
+                                                    }}>
+                                                        <Typography variant="body2" fontWeight="bold">
+                                                            {formatTimeRange(appointment.start, appointment.end)}
                                                         </Typography>
-
-                                                        <Typography variant="subtitle2" color="text.secondary" fontWeight="500">
-                                                        {appointment.title}
-                                                        </Typography>
-
-                                                        <Typography variant="body2" color="text.secondary" whiteSpace="nowrap">
-                                                            📞 {appointment.Client.phoneNumber}
-                                                        </Typography>
-
-                                                        <Typography variant="body2" color="text.secondary" whiteSpace="nowrap">
-                                                            🕒 {new Date(appointment.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(appointment.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </Typography>
-                                                        </Stack>
-                                                    }
+                                                    </Box>
+                                                    <ListItemText
+                                                        primary={`${appointment.Client.name}`}
+                                                        secondary={
+                                                            <React.Fragment>
+                                                                <Typography variant="body2" component="span" sx={{ display: 'block' }}>
+                                                                    {appointment.title}
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                                                                    📞 {appointment.Client.phoneNumber}
+                                                                </Typography>
+                                                            </React.Fragment>
+                                                        }
                                                     />
                                                     <Box sx={{ display: 'flex', gap: 1 }}>
                                                         <Button 
@@ -540,6 +528,19 @@ export default function Dashboard() {
                                         </ListItem>
                                     )}
                                 </List>
+                                {pendingAppointments.length > pendingLimit && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                                        <Button 
+                                            variant="text" 
+                                            color="primary" 
+                                            size="small"
+                                            onClick={handleLoadMorePending}
+                                            sx={{ fontSize: '0.85rem' }}
+                                        >
+                                            Daha Fazla Yükle
+                                        </Button>
+                                    </Box>
+                                )}
                             </CardContent>
                         </Card>
                     </Grid>
@@ -558,10 +559,13 @@ export default function Dashboard() {
                                 }
                             }}
                         >
+                            {/* TODO: Burada ahref bıraktım, sonradan navigate'e dönüştüreceğim */}
                             <CardHeader
-                                title="Son Danışanlar"
+                                title="Günlük Danışan Beslenme Durumları"
                                 action={
-                                    <Button color="primary" size="small">Tüm Danışanlar</Button>
+                                    <Button color="primary" size="small" href="/danisanlarim">
+                                    Tüm Danışanlar
+                                    </Button>
                                 }
                                 sx={{ pb: 1 }}
                             />

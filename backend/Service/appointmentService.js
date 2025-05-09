@@ -300,7 +300,7 @@ class AppointmentService {
         });
     }
 
-    async getTodayAppointments(dietitian_id) {
+    async getTodayApprovedAppointments(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -312,6 +312,7 @@ class AppointmentService {
         return await Appointment.findAll({
             where: {
                 dietitian_id,
+                status: "approved",
                 start: {
                     [Op.between]: [startOfDay, endOfDay]
                 }

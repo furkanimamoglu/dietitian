@@ -267,12 +267,12 @@ class AppointmentController {
         }
     }
 
-    async getTodayAppointments(req, res) {
+    async getTodayApprovedAppointments(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const result = await AppointmentService.getTodayAppointments(dietitian_id);
+            const result = await AppointmentService.getTodayApprovedAppointments(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
