@@ -15,7 +15,19 @@ import {
     Paper,
     TextField,
     Typography,
-    useTheme
+    useTheme,
+    Badge,
+    Tooltip,
+    Zoom,
+    Fade,
+    Menu,
+    MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    CircularProgress
 } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,6 +39,13 @@ import HeightIcon from '@mui/icons-material/Height';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WcIcon from '@mui/icons-material/Wc';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import axios from "axios";
 import config from "../../config.js";
 import "./Mesaj.css";
@@ -37,10 +56,16 @@ export default function Mesaj() {
     const [selectedDanisan, setSelectedDanisan] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+    const [emojiPickerAnchor, setEmojiPickerAnchor] = useState(null);
+    const [fileUploadDialog, setFileUploadDialog] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
     const theme = useTheme();
 
     const messageListRef = useRef();
     const messageInputRef = useRef();
+    const fileInputRef = useRef();
 
     useEffect(() => {
         if (messageListRef.current) {
@@ -60,29 +85,74 @@ export default function Mesaj() {
                 },
             })
             .then((response) => {
-                setDanisanList(response.data);
+                // Add some mock data for demo purposes
+                const enhancedData = response.data.map(client => ({
+                    ...client,
+                    lastMessage: client.lastMessage || getRandomGreeting(),
+                    lastActive: getRandomTimeAgo(),
+                    unreadCount: Math.floor(Math.random() * 3)
+                }));
+                setDanisanList(enhancedData);
             })
             .catch((error) => {
                 console.error("Error fetching clients:", error);
             });
     };
 
+    const getRandomGreeting = () => {
+        const greetings = [
+            "Merhaba, nasılsınız?",
+            "Bugün diyet programımı uyguladım!",
+            "Yeni tarifler önerebilir misiniz?",
+            "Egzersiz programımı güncelleyebilir miyiz?",
+            "Teşekkür ederim, çok yardımcı oldunuz!"
+        ];
+        return greetings[Math.floor(Math.random() * greetings.length)];
+    };
+
+    const getRandomTimeAgo = () => {
+        const times = ["Az önce", "5 dk önce", "30 dk önce", "1 saat önce", "Dün"];
+        return times[Math.floor(Math.random() * times.length)];
+    };
+
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
-        setMessages([
+        
+        // Generate some sample messages for demo
+        const sampleMessages = [
             {
                 id: 1,
-                text: "Merhaba, nasılsınız?",
+                text: "Merhaba, nasılsınız bugün? 😊",
                 sender: "dietitian",
                 timestamp: "09:30"
             },
             {
                 id: 2,
-                text: "İyiyim teşekkürler, bu hafta diyet programıma uydum.",
+                text: "İyiyim teşekkürler, bu hafta diyet programıma uydum ve 1kg verdim! 💪",
                 sender: "client",
                 timestamp: "09:32"
+            },
+            {
+                id: 3,
+                text: "Harika ilerleme! Tebrikler! 🎉 Herhangi bir zorluk yaşadınız mı?",
+                sender: "dietitian",
+                timestamp: "09:33"
+            },
+            {
+                id: 4,
+                text: "Akşam yemeklerinde biraz zorlandım ama su tüketimimi artırdım.",
+                sender: "client",
+                timestamp: "09:35"
+            },
+            {
+                id: 5,
+                text: "Çok iyi. Size yeni haftalık programınızı hazırlayacağım. Yarın gönderebilirim. 📋",
+                sender: "dietitian",
+                timestamp: "09:36"
             }
-        ]);
+        ];
+        
+        setMessages(sampleMessages);
 
         // Input alanına odaklan
         setTimeout(() => {
@@ -104,8 +174,31 @@ export default function Mesaj() {
 
         setMessages([...messages, newMsg]);
         setNewMessage("");
+        
+        // Simulate client response after a delay
+        setIsTyping(true);
+        setTimeout(() => {
+            const clientResponse = {
+                id: Date.now() + 1,
+                text: getRandomClientResponse(),
+                sender: "client",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            setMessages(prev => [...prev, clientResponse]);
+            setIsTyping(false);
+        }, 3000);
+    };
 
-        // Gerçek uygulamada mesajı API'ye gönder
+    const getRandomClientResponse = () => {
+        const responses = [
+            "Teşekkür ederim! 😊",
+            "Anladım, deneyeceğim.",
+            "Bu hafta daha fazla egzersiz yapmaya çalışacağım 💪",
+            "Önerileriniz için teşekkürler, çok yardımcı oldu!",
+            "Peki, su tüketimimi nasıl artırabilirim? 🥤",
+            "Bugün 10.000 adım hedefimi tamamladım! 🚶‍♀️"
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
     };
 
     const handleKeyPress = (e) => {
@@ -116,10 +209,12 @@ export default function Mesaj() {
     };
 
     const getInitials = (name, surname) => {
+        if (!name || !surname) return '??';
         return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
     };
 
     const getAvatarColor = (name) => {
+        if (!name) return '#1976d2'; // default color
         const colors = [
             '#1976d2', '#388e3c', '#d32f2f', '#7b1fa2',
             '#c2185b', '#f57c00', '#0288d1', '#689f38'
@@ -130,7 +225,7 @@ export default function Mesaj() {
     };
 
     const filteredDanisanList = danisanList.filter((danisan) =>
-        `${danisan.name} ${danisan.surname}`.toLowerCase().includes(searchTerm.toLowerCase())
+        `${danisan.name || ''} ${danisan.surname || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const formatDate = () => {
@@ -139,14 +234,114 @@ export default function Mesaj() {
         return today.toLocaleDateString('tr-TR', options);
     };
 
+    const handleEmojiSelect = (emoji) => {
+        setNewMessage(prev => prev + emoji.native);
+        setEmojiPickerAnchor(null);
+    };
+
+    const handleFileSelect = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const isImage = file.type.startsWith('image/');
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (file.size > maxSize) {
+            alert('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+            return;
+        }
+
+        setIsUploading(true);
+        setUploadProgress(0);
+
+        try {
+            // Simüle edilmiş dosya yükleme
+            await simulateFileUpload(file, (progress) => {
+                setUploadProgress(progress);
+            });
+
+            const fileUrl = URL.createObjectURL(file);
+            const newMsg = {
+                id: Date.now(),
+                text: isImage ? null : 'Dosya gönderildi: ' + file.name,
+                sender: "dietitian",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                file: {
+                    url: fileUrl,
+                    name: file.name,
+                    type: file.type,
+                    isImage
+                }
+            };
+
+            setMessages(prev => [...prev, newMsg]);
+        } catch (error) {
+            console.error('Dosya yükleme hatası:', error);
+            alert('Dosya yüklenirken bir hata oluştu.');
+        } finally {
+            setIsUploading(false);
+            setFileUploadDialog(false);
+        }
+    };
+
+    const simulateFileUpload = (file, progressCallback) => {
+        return new Promise((resolve) => {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressCallback(progress);
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 200);
+        });
+    };
+
+    const renderMessage = (message) => {
+        if (message.file) {
+            if (message.file.isImage) {
+                return (
+                    <Box sx={{ maxWidth: '300px', maxHeight: '300px', overflow: 'hidden', borderRadius: '8px' }}>
+                        <img 
+                            src={message.file.url} 
+                            alt={message.file.name}
+                            style={{ width: '100%', height: 'auto', display: 'block' }}
+                        />
+                    </Box>
+                );
+            } else {
+                return (
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 1,
+                        backgroundColor: 'rgba(0,0,0,0.04)',
+                        padding: '8px',
+                        borderRadius: '8px'
+                    }}>
+                        <AttachFileIcon />
+                        <Typography variant="body2" component="a" href={message.file.url} download={message.file.name}>
+                            {message.file.name}
+                        </Typography>
+                    </Box>
+                );
+            }
+        }
+        return (
+            <Typography variant="body1">
+                {message.text}
+            </Typography>
+        );
+    };
+
     return (
         <Default>
             <Box className="mesaj-container">
-
                 <Grid container spacing={2} className="mesaj-grid">
                     {/* Sol Panel - Danışan Listesi */}
                     <Grid item xs={12} md={3} className="danisan-list-container">
-                        <Paper elevation={2} className="danisan-list-paper">
+                        <Paper elevation={3} className="danisan-list-paper">
                             <Box className="search-box">
                                 <TextField
                                     fullWidth
@@ -170,24 +365,58 @@ export default function Mesaj() {
                             <List className="danisan-list">
                                 {filteredDanisanList && filteredDanisanList.length > 0 ? (
                                     filteredDanisanList.map((danisan) => (
-                                        <ListItemButton
-                                            key={danisan.id}
-                                            onClick={() => handleDanisanSelect(danisan)}
-                                            selected={selectedDanisan?.id === danisan.id}
-                                            className={selectedDanisan?.id === danisan.id ? "danisan-item-selected" : "danisan-item"}
-                                        >
-                                            <ListItemAvatar>
-                                                <Avatar
-                                                    sx={{ bgcolor: getAvatarColor(danisan.name) }}
-                                                >
-                                                    {getInitials(danisan.name, danisan.surname)}
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText
-                                                primary={`${danisan.name} ${danisan.surname}`}
-                                                secondary={danisan.lastMessage || "Danışan"}
-                                            />
-                                        </ListItemButton>
+                                        <Zoom in={true} style={{ transitionDelay: `${filteredDanisanList.indexOf(danisan) * 100}ms` }} key={danisan.id}>
+                                            <ListItemButton
+                                                onClick={() => handleDanisanSelect(danisan)}
+                                                selected={selectedDanisan?.id === danisan.id}
+                                                className={selectedDanisan?.id === danisan.id ? "danisan-item-selected" : "danisan-item"}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Badge
+                                                        color="success"
+                                                        variant="dot"
+                                                        invisible={danisan.lastActive !== "Az önce"}
+                                                    >
+                                                        <Avatar
+                                                            sx={{ bgcolor: getAvatarColor(danisan.name || '') }}
+                                                        >
+                                                            {getInitials(danisan.name || '', danisan.surname || '')}
+                                                        </Avatar>
+                                                    </Badge>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                            <Typography variant="body1" noWrap>
+                                                                {danisan.name || ''} {danisan.surname || ''}
+                                                            </Typography>
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                {danisan.lastActive || ""}
+                                                            </Typography>
+                                                        </Box>
+                                                    }
+                                                    secondary={
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <Typography 
+                                                                variant="body2" 
+                                                                color="text.secondary" 
+                                                                noWrap
+                                                                sx={{ maxWidth: '80%' }}
+                                                            >
+                                                                {danisan.lastMessage || "Yeni danışan"}
+                                                            </Typography>
+                                                            {danisan.unreadCount > 0 && (
+                                                                <Badge 
+                                                                    badgeContent={danisan.unreadCount} 
+                                                                    color="primary" 
+                                                                    size="small"
+                                                                />
+                                                            )}
+                                                        </Box>
+                                                    }
+                                                />
+                                            </ListItemButton>
+                                        </Zoom>
                                     ))
                                 ) : (
                                     <ListItemButton>
@@ -203,49 +432,76 @@ export default function Mesaj() {
 
                     {/* Orta Panel - Mesajlaşma */}
                     <Grid item xs={12} md={6} className="chat-container">
-                        <Paper elevation={2} className="chat-paper">
+                        <Paper elevation={3} className="chat-paper">
                             {selectedDanisan ? (
                                 <>
                                     <Box className="chat-header">
                                         <Avatar
-                                            sx={{ bgcolor: getAvatarColor(selectedDanisan.name) }}
+                                            sx={{ bgcolor: getAvatarColor(selectedDanisan.name || '') }}
                                         >
-                                            {getInitials(selectedDanisan.name, selectedDanisan.surname)}
+                                            {getInitials(selectedDanisan.name || '', selectedDanisan.surname || '')}
                                         </Avatar>
-                                        <Box ml={1}>
+                                        <Box ml={1} sx={{ flexGrow: 1 }}>
                                             <Typography variant="h6">
-                                                {selectedDanisan.name} {selectedDanisan.surname}
+                                                {selectedDanisan.name || ''} {selectedDanisan.surname || ''}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">
                                                 {selectedDanisan.lastActive || "Çevrimiçi"}
                                             </Typography>
                                         </Box>
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                                            {formatDate()}
+                                        </Typography>
                                     </Box>
 
                                     <Divider />
 
                                     <Box className="messages-container" ref={messageListRef}>
+                                        <Box sx={{ p: 2, textAlign: 'center' }}>
+                                            <Chip 
+                                                label={`Sohbet başladı - ${formatDate()}`} 
+                                                variant="outlined" 
+                                                size="small" 
+                                            />
+                                        </Box>
+                                        
                                         {messages.length > 0 ? (
                                             messages.map((message) => (
-                                                <Box
-                                                    key={message.id}
-                                                    className={`message ${message.sender === "dietitian" ? "sent" : "received"}`}
-                                                >
-                                                    <Box className="message-content">
-                                                        <Typography variant="body1">
-                                                            {message.text}
-                                                        </Typography>
-                                                        <Typography variant="caption" className="message-time">
-                                                            {message.timestamp}
-                                                        </Typography>
+                                                <Fade in={true} key={message.id}>
+                                                    <Box
+                                                        className={`message ${message.sender === "dietitian" ? "sent" : "received"}`}
+                                                    >
+                                                        <Box className="message-content">
+                                                            {renderMessage(message)}
+                                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5 }}>
+                                                                <Typography variant="caption" className="message-time">
+                                                                    {message.timestamp}
+                                                                </Typography>
+                                                                {message.sender === "dietitian" && (
+                                                                    <CheckCircleIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+                                                                )}
+                                                            </Box>
+                                                        </Box>
                                                     </Box>
-                                                </Box>
+                                                </Fade>
                                             ))
                                         ) : (
                                             <Box className="no-messages">
                                                 <Typography variant="body2" color="text.secondary">
                                                     Henüz mesaj bulunmuyor. Sohbete başlayın!
                                                 </Typography>
+                                            </Box>
+                                        )}
+                                        
+                                        {isTyping && (
+                                            <Box className="message received typing-indicator">
+                                                <Box className="message-content">
+                                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                                        <span className="typing-dot"></span>
+                                                        <span className="typing-dot"></span>
+                                                        <span className="typing-dot"></span>
+                                                    </Box>
+                                                </Box>
                                             </Box>
                                         )}
                                     </Box>
@@ -263,15 +519,46 @@ export default function Mesaj() {
                                             multiline
                                             maxRows={3}
                                             InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <Tooltip title="Emoji ekle">
+                                                            <IconButton 
+                                                                size="small" 
+                                                                color="primary"
+                                                                onClick={(e) => setEmojiPickerAnchor(e.currentTarget)}
+                                                            >
+                                                                <EmojiEmotionsIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Dosya/Resim ekle">
+                                                            <IconButton 
+                                                                size="small" 
+                                                                color="primary"
+                                                                onClick={() => setFileUploadDialog(true)}
+                                                            >
+                                                                <AttachFileIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </InputAdornment>
+                                                ),
                                                 endAdornment: (
                                                     <InputAdornment position="end">
-                                                        <IconButton
-                                                            color="primary"
-                                                            onClick={handleSendMessage}
-                                                            disabled={!newMessage.trim()}
-                                                        >
-                                                            <SendIcon />
-                                                        </IconButton>
+                                                        <Tooltip title="Gönder">
+                                                            <IconButton
+                                                                color="primary"
+                                                                onClick={handleSendMessage}
+                                                                disabled={!newMessage.trim()}
+                                                                sx={{
+                                                                    backgroundColor: newMessage.trim() ? theme.palette.primary.main : 'inherit',
+                                                                    color: newMessage.trim() ? 'white' : 'inherit',
+                                                                    '&:hover': {
+                                                                        backgroundColor: newMessage.trim() ? theme.palette.primary.dark : 'inherit',
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <SendIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </InputAdornment>
                                                 ),
                                             }}
@@ -283,6 +570,9 @@ export default function Mesaj() {
                                     <Typography variant="h6" color="text.secondary">
                                         Sohbete başlamak için bir danışan seçin
                                     </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                        Danışanlarınızla mesajlaşmaya başlayın 💬
+                                    </Typography>
                                 </Box>
                             )}
                         </Paper>
@@ -290,21 +580,21 @@ export default function Mesaj() {
 
                     {/* Sağ Panel - Danışan Bilgileri */}
                     <Grid item xs={12} md={3} className="danisan-info-container">
-                        <Paper elevation={2} className="danisan-info-paper">
+                        <Paper elevation={3} className="danisan-info-paper">
                             {selectedDanisan ? (
                                 <>
                                     <Box className="danisan-info-header">
                                         <Avatar
                                             sx={{
-                                                width: 64,
-                                                height: 64,
-                                                bgcolor: getAvatarColor(selectedDanisan.name)
+                                                width: 80,
+                                                height: 80,
+                                                bgcolor: getAvatarColor(selectedDanisan.name || '')
                                             }}
                                         >
-                                            {getInitials(selectedDanisan.name, selectedDanisan.surname)}
+                                            {getInitials(selectedDanisan.name || '', selectedDanisan.surname || '')}
                                         </Avatar>
                                         <Typography variant="h6" mt={2} align="center">
-                                            {selectedDanisan.name} {selectedDanisan.surname}
+                                            {selectedDanisan.name || ''} {selectedDanisan.surname || ''}
                                         </Typography>
                                         <Chip
                                             label={selectedDanisan.status || "Aktif Danışan"}
@@ -406,6 +696,91 @@ export default function Mesaj() {
                     </Grid>
                 </Grid>
             </Box>
+
+            {/* Emoji Picker */}
+            <Menu
+                anchorEl={emojiPickerAnchor}
+                open={Boolean(emojiPickerAnchor)}
+                onClose={() => setEmojiPickerAnchor(null)}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+            >
+                <Box sx={{ p: 1 }}>
+                    <Picker 
+                        data={data} 
+                        onEmojiSelect={handleEmojiSelect}
+                        theme={theme.palette.mode}
+                    />
+                </Box>
+            </Menu>
+
+            {/* File Upload Dialog */}
+            <Dialog
+                open={fileUploadDialog}
+                onClose={() => !isUploading && setFileUploadDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    Dosya/Resim Yükle
+                    {!isUploading && (
+                        <IconButton
+                            aria-label="close"
+                            onClick={() => setFileUploadDialog(false)}
+                            sx={{
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    )}
+                </DialogTitle>
+                <DialogContent>
+                    {isUploading ? (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 3 }}>
+                            <CircularProgress variant="determinate" value={uploadProgress} />
+                            <Typography variant="body2" color="text.secondary">
+                                Yükleniyor... {uploadProgress}%
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 2 }}>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileSelect}
+                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                            />
+                            <Button
+                                variant="outlined"
+                                startIcon={<ImageIcon />}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                Resim Seç
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                startIcon={<AttachFileIcon />}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                Dosya Seç
+                            </Button>
+                            <Typography variant="caption" color="text.secondary" align="center">
+                                Maksimum dosya boyutu: 5MB
+                            </Typography>
+                        </Box>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Default>
     );
 }
