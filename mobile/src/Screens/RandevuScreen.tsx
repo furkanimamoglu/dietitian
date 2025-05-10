@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E3F2FD'
   },
   activeChipText: {
-    color: '#FF9800',
+    color: '#4CAF50',
     fontWeight: 'bold'
   },
   cardSurface: {
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   },
   todayCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#FF9800'
+    borderLeftColor: '#4CAF50'
   },
   cardContent: {
     padding: 8
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#4CAF50'
+    color: '#000000'
   },
   timeChipContainer: {
     flexDirection: 'row',
