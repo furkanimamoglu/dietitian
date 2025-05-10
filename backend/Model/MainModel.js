@@ -13,6 +13,7 @@ const Message = require('./Message');
 const NutritionPlan = require('./NutritionPlan');
 const NutritionCategory = require('./NutritionCategory');
 const NutritionAssignment = require('./NutritionAssignment');
+const Notes = require('./Notes');
 
 // 1. Dietitian ve Client
 Dietitian.hasMany(Client, {
@@ -159,5 +160,6 @@ module.exports = {
     Message,
     NutritionPlan,
     NutritionCategory,
-    NutritionAssignment
+    NutritionAssignment,
+    Notes
 };

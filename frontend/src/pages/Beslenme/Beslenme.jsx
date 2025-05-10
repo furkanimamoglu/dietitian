@@ -16,6 +16,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
@@ -286,6 +287,10 @@ export default function Beslenme() {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     
+    // Error popup states
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
@@ -296,6 +301,17 @@ export default function Beslenme() {
             return () => clearTimeout(timer);
         }
     }, [showSuccessPopup]);
+    
+    // Auto-hide error popup after 5 seconds
+    useEffect(() => {
+        if (showErrorPopup) {
+            const timer = setTimeout(() => {
+                setShowErrorPopup(false);
+            }, 5000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [showErrorPopup]);
     
     // New plan state
     const [newPlan, setNewPlan] = useState({
@@ -586,6 +602,13 @@ export default function Beslenme() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
+            if (!response.data.ok) {
+                // Handle error response from API
+                setErrorMessage(response.data.message);
+                setShowErrorPopup(true);
+                return;
+            }
+            
             // Store names for success message
             const programName = selectedProgram.title;
             const userName = `${selectedUser.name}`;
@@ -604,7 +627,9 @@ export default function Beslenme() {
         })
         .catch(error => {
             console.error("Error assigning plan to client:", error);
-            // You might want to show an error message
+            // Show error popup
+            setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+            setShowErrorPopup(true);
         });
     };
 
@@ -1451,6 +1476,16 @@ export default function Beslenme() {
                     <div className="success-popup-content">
                         <CheckCircleIcon className="success-icon" />
                         <p>{successMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Popup */}
+            {showErrorPopup && (
+                <div className="error-popup">
+                    <div className="error-popup-content">
+                        <ErrorIcon className="error-icon" />
+                        <p>{errorMessage}</p>
                     </div>
                 </div>
             )}

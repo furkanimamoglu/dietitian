@@ -463,6 +463,28 @@ class DietitianService {
             throw new Exception("Bu plan size ait değil. Atama yapılamaz.", 401, true);
         }
 
+        const existingAssignment = await NutritionAssignment.findOne({
+            where: {
+                client_id,
+                [Op.or]: [
+                    {
+                        start_date: { [Op.between]: [start_date, end_date] }
+                    },
+                    {
+                        end_date: { [Op.between]: [start_date, end_date] }
+                    },
+                    {
+                        start_date: { [Op.lte]: start_date },
+                        end_date: { [Op.gte]: end_date }
+                    }
+                ]
+            }
+        });
+
+        if (existingAssignment) {
+            throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
+        }
+
         return await NutritionAssignment.create({
             client_id,
             nutrition_plan_id,
