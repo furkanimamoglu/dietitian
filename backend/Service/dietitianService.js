@@ -11,6 +11,7 @@ const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
 const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment} = require('../Model/MainModel');
+const {Op} = require("sequelize");
 
 class DietitianService {
 
@@ -575,6 +576,22 @@ class DietitianService {
         });
 
         return plan;
+    }
+
+    async getPlansByDateRange(dietitian_id, client_id, startDate, endDate) {
+        return await NutritionAssignment.findAll({
+            where: {
+                client_id,
+                start_date: { [Op.lte]: endDate },
+                end_date: { [Op.gte]: startDate }
+            },
+            include: [{
+                model: NutritionPlan,
+                as: 'NutritionPlan',
+                where: { dietitian_id }
+            }],
+            order: [['start_date', 'ASC']]
+        });
     }
 
 }

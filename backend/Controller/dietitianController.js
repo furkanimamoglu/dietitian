@@ -1,6 +1,7 @@
 const DietitianService = require("../Service/dietitianService");
 require("../Exception/Exception");
 const Security = require("../Utils/Security");
+const moment = require("moment");
 
 class DietitianController {
 
@@ -471,6 +472,58 @@ class DietitianController {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    async getNutritionPlanByClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const { client_id, range } = req.body;
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({ message: "Yetkisiz erişim." });
+            }
+
+            if (!client_id || !range) {
+                return res.status(400).json({ message: "client_id ve range zorunludur." });
+            }
+
+            let startDate, endDate;
+            const now = moment();
+
+            switch (range) {
+                case 'day':
+                    startDate = now.clone().startOf('day').toDate();
+                    endDate = now.clone().endOf('day').toDate();
+                    break;
+                case 'week':
+                    startDate = now.clone().startOf('isoWeek').toDate();
+                    endDate = now.clone().endOf('isoWeek').toDate();
+                    break;
+                case 'month':
+                    startDate = now.clone().startOf('month').toDate();
+                    endDate = now.clone().endOf('month').toDate();
+                    break;
+                default:
+                    return res.status(400).json({ message: "Geçersiz range: 'day', 'week' veya 'month' olmalı." });
+            }
+
+            const plans = await DietitianService.getPlansByDateRange(
+                dietitian_id,
+                client_id,
+                startDate,
+                endDate
+            );
+
+            return res.status(200).json(plans);
+        } catch (error) {
+            console.error("Plan çekme hatası:", error);
+            return res.status(error.status || 500).json({
+                message: error.message || "Bir hata oluştu.",
+                showOnScreen: error.showOnScreen ?? true
             });
         }
     }
