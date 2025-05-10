@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal, TextInput, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, TextInput, Alert, TouchableWithoutFeedback } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -94,16 +94,44 @@ const BottomNav = ({ navigation }: Props) => {
     <View>
       {menuOpen && (
         <View style={styles.floatingMenuRow}>
-          <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.replace('Randevu')}>
+          <TouchableOpacity 
+            style={styles.floatingButton} 
+            onPress={() => {
+              navigation.replace('Randevu');
+              setMenuOpen(false);
+            }}
+            activeOpacity={0.8}
+          >
             <Icon name="calendar-check" size={24} color="#f57c00" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.floatingButton} onPress={() => setShowMealPopup(true)}>
+          <TouchableOpacity 
+            style={styles.floatingButton} 
+            onPress={() => {
+              setShowMealPopup(true);
+              setMenuOpen(false);
+            }}
+            activeOpacity={0.8}
+          >
             <Icon name="silverware-fork-knife" size={24} color="#f57c00" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.floatingButton} onPress={() => setShowExercisePopup(true)}>
+          <TouchableOpacity 
+            style={styles.floatingButton} 
+            onPress={() => {
+              setShowExercisePopup(true);
+              setMenuOpen(false);
+            }}
+            activeOpacity={0.8}
+          >
             <Icon name="run" size={24} color="#f57c00" />
           </TouchableOpacity>
         </View>
+      )}
+
+      {/* Overlay to close menu when clicked outside */}
+      {menuOpen && (
+        <TouchableWithoutFeedback onPress={() => setMenuOpen(false)}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
       )}
 
       <View style={styles.bottomNavbar}>
@@ -332,6 +360,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 6,
+    zIndex: 11,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+    zIndex: 9,
   },
   modalOverlay: {
     flex: 1,

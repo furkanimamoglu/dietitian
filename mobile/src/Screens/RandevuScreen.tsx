@@ -197,8 +197,22 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
   // Tarih formatını daha okunabilir yap (10 Mayıs 2025 gibi)
   const formatDisplayDate = useCallback((dateStr: string) => {
     const date = new Date(dateStr);
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Europe/Istanbul' };
     return date.toLocaleDateString('tr-TR', options);
+  }, []);
+
+  // Saat formatını düzenle
+  const formatTime = useCallback((dateStr: string) => {
+    // Backend'den gelen tarih string'ini parse et
+    const date = new Date(dateStr);
+    
+    // Backend'den gelen saati olduğu gibi kullan, timezone dönüşümü yapma
+    return date.toLocaleTimeString('tr-TR', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'UTC' // UTC olarak işle, böylece backend'den gelen saat değişmez
+    });
   }, []);
 
   // Liste öğesi render fonksiyonu - performans için useCallback
@@ -213,13 +227,13 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
               <Avatar.Icon
                 size={36}
                 icon={isToday ? "calendar-today" : "calendar"}
-                style={[styles.calendarIcon, { backgroundColor: isToday ? "#2196F3" : "#E3F2FD" }]}
-                color={isToday ? "#ffffff" : "#2196F3"}
+                style={[styles.calendarIcon, { backgroundColor: isToday ? "#FF9800" : "#E3F2FD" }]}
+                color={isToday ? "#ffffff" : "#FF9800"}
               />
               <View style={styles.dateTimeText}>
                 <Text style={styles.dateText}>{formatDisplayDate(item.start)}</Text>
                 <Text style={styles.timeText}>
-                  {new Date(item.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                  {formatTime(item.start)} - {formatTime(item.end)}
                 </Text>
               </View>
             </View>
@@ -253,7 +267,7 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
         </Card>
       </Surface>
     );
-  }, [formatDisplayDate, formatDate]);
+  }, [formatDisplayDate, formatDate, formatTime]);
 
   // Ana Sayfa Render
   return (
@@ -341,6 +355,7 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
                 icon="calendar"
                 onPress={() => setShowDatePicker(true)}
                 style={styles.dateButton}
+                color="#4CAF50"
               >
                 {formatDate(selectedDate)}
               </Button>
@@ -375,6 +390,7 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
                         selectedTime === time && styles.selectedTimeChip,
                         isDisabled && styles.disabledTimeChip
                       ]}
+                      selectedColor="#4CAF50"
                     >
                       {time}
                     </Chip>
@@ -391,15 +407,17 @@ const RandevuScreen = ({ navigation }: NavigationProps) => {
                 multiline
                 numberOfLines={2}
                 style={styles.input}
+                theme={{ colors: { primary: '#4CAF50' } }}
               />
             </Dialog.Content>
 
             <Dialog.Actions>
-              <Button onPress={closeDialog}>İptal</Button>
+              <Button onPress={closeDialog} color="#F57C00">İptal</Button>
               <Button
                 mode="contained"
                 onPress={addAppointment}
                 disabled={!selectedTime || !description.trim()}
+                color="#4CAF50"
               >
                 Randevu Oluştur
               </Button>
@@ -445,7 +463,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E3F2FD'
   },
   activeChipText: {
-    color: '#2196F3',
+    color: '#FF9800',
     fontWeight: 'bold'
   },
   cardSurface: {
@@ -458,7 +476,7 @@ const styles = StyleSheet.create({
   },
   todayCard: {
     borderLeftWidth: 4,
-    borderLeftColor: '#2196F3'
+    borderLeftColor: '#FF9800'
   },
   cardContent: {
     padding: 8
@@ -531,25 +549,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     bottom: 80,
-    backgroundColor: '#2196F3'
+    backgroundColor: '#4CAF50'
   },
   dialog: {
     borderRadius: 16
   },
   dialogTitle: {
     textAlign: 'center',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#4CAF50'
   },
   input: {
     marginBottom: 16,
     backgroundColor: '#fff'
   },
   dateButton: {
-    marginBottom: 16
+    marginBottom: 16,
+    borderColor: '#4CAF50'
   },
   timeLabel: {
     fontWeight: 'bold',
-    marginBottom: 8
+    marginBottom: 8,
+    color: '#4CAF50'
   },
   timeChipContainer: {
     flexDirection: 'row',
@@ -560,7 +581,8 @@ const styles = StyleSheet.create({
     margin: 4
   },
   selectedTimeChip: {
-    backgroundColor: '#E3F2FD'
+    backgroundColor: '#E8F5E9',
+    borderColor: '#4CAF50'
   },
   disabledTimeChip: {
     backgroundColor: '#f0f0f0'
