@@ -337,9 +337,9 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
           color="#ff9800"
           style={{backgroundColor: '#fff3e0', marginBottom: 20}}
         />
-        <Text style={styles.emptyTitle}>Beslenme Programı Bulunamadı</Text>
+        <Text style={styles.emptyTitle}>Bugün diyet yok mu?</Text>
         <Text style={styles.emptyText}>
-          {error || "Henüz size tanımlanmış bir beslenme programı bulunmamaktadır. Diyetisyeninizden bir program tanımlamasını talep edebilirsiniz."}
+          {error || "Bugüne tanımlanmış bir beslenme programınız bulunmamaktadır. Diyetisyeninizden bir program tanımlamasını talep edebilirsiniz"}
         </Text>
         <Button 
           mode="contained" 
