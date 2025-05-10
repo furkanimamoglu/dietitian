@@ -23,12 +23,14 @@ import {
   Surface,
   Chip,
   Divider,
-  Avatar
+  Avatar,
+  Badge
 } from 'react-native-paper';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
 import config from '../../config.js';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface MealItem {
   item: string;
@@ -36,15 +38,14 @@ interface MealItem {
   portion: string;
   protein?: number;
   calorie?: number;
-  isAlternative?: boolean;
-  alternativeFor?: string;
+  alternatives?: string[];
 }
 
 interface DailyMealPlan {
-  Kahvaltı: string[] | string;
-  'Öğle Yemeği': string[] | string;
-  'Akşam Yemeği': string[] | string;
-  Aparatif: string[] | string;
+  Kahvaltı: string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  'Öğle Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  'Akşam Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  Aparatif: string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
 }
 
 interface DailyStats {
@@ -137,10 +138,12 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       
       // Get the main items depending on format
       let mainItems: string[] = [];
+      let alternatives: {[key: string]: string[]} = {};
       
       // Complex format with main and alternatives
       if (mealData.main && Array.isArray(mealData.main)) {
         mainItems = [...mealData.main];
+        alternatives = mealData.alternatives || {};
       } 
       // Simple array format
       else if (Array.isArray(mealData)) {
@@ -154,28 +157,16 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       // Convert to MealItem format
       const targetMeal = convertApiMealNameToAppMealName(mealType);
       if (targetMeal && newMeals[targetMeal]) {
-        newMeals[targetMeal] = mainItems.map(item => ({
-          item,
-          checked: false,
-          portion: '1 porsiyon'
-        }));
-        
-        // Add alternatives if available as separate items with a note
-        if (mealData.alternatives) {
-          Object.keys(mealData.alternatives).forEach(mainItem => {
-            if (Array.isArray(mealData.alternatives[mainItem])) {
-              mealData.alternatives[mainItem].forEach((alt: string) => {
-                newMeals[targetMeal].push({
-                  item: `${alt} (${mainItem} alternatifi)`,
-                  checked: false,
-                  portion: '1 porsiyon',
-                  isAlternative: true,
-                  alternativeFor: mainItem
-                });
-              });
-            }
-          });
-        }
+        // Add each main item with its alternatives
+        newMeals[targetMeal] = mainItems.map(item => {
+          const itemAlternatives = alternatives[item] || [];
+          return {
+            item,
+            checked: false,
+            portion: '1 porsiyon',
+            alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
+          };
+        });
       }
     };
     
@@ -474,45 +465,44 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
             <Divider />
             <Card.Content style={styles.cardContent}>
               {items.map((meal, index) => (
-                <View key={index} style={styles.mealItem}>
-                  <Checkbox.Android
-                    status={meal.checked ? 'checked' : 'unchecked'}
-                    onPress={() => toggleCheck(mealType, index)}
-                    color="#4caf50"
-                  />
-                  <View style={styles.mealInfo}>
-                    <Text style={[
-                      styles.mealName,
-                      meal.checked && styles.mealChecked,
-                      meal.isAlternative && styles.alternativeMeal
-                    ]}>
-                      {meal.item}
-                    </Text>
-                    {meal.isAlternative && (
-                      <Text style={styles.alternativeLabel}>
-                        Alternatif: {meal.alternativeFor}
-                      </Text>
-                    )}
-                    <View style={styles.nutritionInfo}>
-                      <Chip
-                        style={[
-                          styles.nutritionChip,
-                          meal.isAlternative && styles.alternativeChip
-                        ]}
-                        textStyle={styles.chipText}
-                        avatar={
-                          <Avatar.Icon
-                            size={16}
-                            icon={meal.isAlternative ? "swap-horizontal" : "scale"}
-                            color={meal.isAlternative ? "#ff9800" : "#7cb342"}
-                            style={{backgroundColor: 'transparent'}}
-                          />
-                        }
-                      >
-                        {meal.portion}
-                      </Chip>
+                <View key={index} style={styles.mealItemContainer}>
+                  <View style={styles.mealItem}>
+                    <Checkbox.Android
+                      status={meal.checked ? 'checked' : 'unchecked'}
+                      onPress={() => toggleCheck(mealType, index)}
+                      color="#4caf50"
+                    />
+                    <View style={styles.mealInfo}>
+                      <View style={styles.mealNameRow}>
+                        <Text style={[
+                          styles.mealName,
+                          meal.checked && styles.mealChecked
+                        ]}>
+                          {meal.item}
+                        </Text>
+                        <Text style={styles.portionText}>
+                          {meal.portion}
+                        </Text>
+                      </View>
                     </View>
                   </View>
+                  
+                  {/* Show alternatives as chips */}
+                  {meal.alternatives && meal.alternatives.length > 0 && (
+                    <View style={styles.alternativesContainer}>
+                      {meal.alternatives.map((alt, altIndex) => (
+                        <Chip
+                          key={altIndex}
+                          icon="swap-horizontal"
+                          mode="outlined"
+                          style={styles.alternativeChip}
+                          textStyle={styles.alternativeChipText}
+                        >
+                          {alt}
+                        </Chip>
+                      ))}
+                    </View>
+                  )}
                 </View>
               ))}
 
@@ -719,16 +709,25 @@ const styles = StyleSheet.create({
   cardContent: {
     paddingVertical: 8
   },
+  mealItemContainer: {
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    paddingBottom: 8
+  },
   mealItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0'
+    paddingVertical: 8
   },
   mealInfo: {
     flex: 1,
     marginLeft: 8
+  },
+  mealNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   mealName: {
     fontSize: 16,
@@ -738,27 +737,26 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#999'
   },
-  nutritionInfo: {
+  portionText: {
+    fontSize: 14,
+    color: '#666'
+  },
+  alternativesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 4,
+    paddingLeft: 46, // Align with the text next to checkbox
+    marginTop: -4,
+    marginBottom: 8,
     gap: 8
   },
-  nutritionChip: {
-    marginRight: 0,
-    marginBottom: 4,
-    height: 32,
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 0,
-    justifyContent: 'center'
+  alternativeChip: {
+    backgroundColor: '#fff8e1',
+    borderColor: '#ffb300',
+    height: 28
   },
-  chipText: {
-    fontSize: 13,
-    lineHeight: 20,
-    marginLeft: 4,
-    marginRight: 4,
-    color: '#424242'
+  alternativeChipText: {
+    fontSize: 12,
+    color: '#f57c00'
   },
   fab: {
     position: 'absolute',
@@ -892,22 +890,6 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     paddingVertical: 12
-  },
-  alternativeMeal: {
-    color: '#ff9800',
-    fontStyle: 'italic'
-  },
-  alternativeChip: {
-    backgroundColor: '#fff3e0',
-    borderColor: '#ff9800',
-    borderWidth: 1
-  },
-  alternativeLabel: {
-    fontSize: 11,
-    color: '#ff9800',
-    fontStyle: 'italic',
-    marginTop: 2,
-    marginBottom: 2
   }
 });
 
