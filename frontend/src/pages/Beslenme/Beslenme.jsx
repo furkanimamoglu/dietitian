@@ -586,8 +586,6 @@ export default function Beslenme() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
-            console.log("Plan assigned to client:", response.data);
-            
             // Store names for success message
             const programName = selectedProgram.title;
             const userName = `${selectedUser.name}`;

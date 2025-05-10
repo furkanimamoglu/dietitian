@@ -89,15 +89,15 @@ class DietitianController {
 
     async deleteClient(req, res) {
         const token = req.headers.authorization;
-        const user_id = Security.getUserIdFromToken(token);
-        if (!token || !user_id) {
+        const dietitian_id = Security.getUserIdFromToken(token);
+        if (!token || !dietitian_id) {
             return res.status(401).json({
                 message: "Yetkisiz erişim."
             });
         }
 
         try {
-            const {client_id} = req.body;
+            const { client_id } = req.body;
 
             if (!client_id) {
                 return res.status(400).json({
@@ -106,7 +106,7 @@ class DietitianController {
                 });
             }
 
-            const result = await DietitianService.deleteClient(user_id, client_id);
+            const result = await DietitianService.deleteClient(dietitian_id, client_id);
 
             res.status(200).json(result);
         } catch (err) {
@@ -197,13 +197,13 @@ class DietitianController {
         try {
             //TODO: Client olarak bearer tokenimle çektiğimde, verilerim geliyor? Bağlı olduğu diyetisyenin clientlerini çekemiyor olması gerekiyor.
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const dietitian_id = Security.getUserIdFromToken(token);
+            if (!token || !dietitian_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
-            const result = await DietitianService.getMyAllClients(user_id)
+            const result = await DietitianService.getMyAllClients(dietitian_id);
             res.status(200).json(result)
         } catch (error) {
             res.status(error.status || 500).json({

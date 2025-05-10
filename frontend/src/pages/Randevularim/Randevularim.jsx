@@ -58,6 +58,7 @@ export default function Randevularim() {
                         }
                     }
                 );
+
                 const appointments = response.data || [];
 
                 const formattedAppointments = appointments.map((appointment) => ({
@@ -74,7 +75,7 @@ export default function Randevularim() {
 
                 setRandevular(formattedAppointments);
             } catch (error) {
-                console.error("Randevular çekilirken bir hata oluştu:", error);
+                console.log("Randevular çekilirken bir hata oluştu:", error);
             }
         };
 

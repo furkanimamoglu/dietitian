@@ -113,7 +113,9 @@ export default function Danisanlarim() {
                 `${config[config.environment].apiUrl}/dietitian/getAllMyClients`,
                 { headers: { Authorization: localStorage.getItem("token") } }
             )
-            .then((res) => setClients(res.data))
+            .then((res) => {
+                setClients(res.data);
+            })
             .catch((err) => console.error("Error fetching clients:", err));
     }, []);
 
@@ -197,12 +199,16 @@ export default function Danisanlarim() {
 
     const handleDelete = async (id) => {
         try {
+            console.log("Deleting client with ID:", id);
+            const requestConfig = {
+                headers: { Authorization: localStorage.getItem("token") },
+                data: { client_id: id },
+            };
+            console.log("Request configuration:", requestConfig);
+            
             await axios.delete(
                 `${config[config.environment].apiUrl}/dietitian/deleteClient`,
-                {
-                    headers: { Authorization: localStorage.getItem("token") },
-                    data: { client_id: id },
-                }
+                requestConfig
             );
             setClients((prev) => prev.filter((c) => c.id !== id));
         } catch (err) {
@@ -217,6 +223,7 @@ export default function Danisanlarim() {
     const closeCreateDialog = () => setCreateDialogOpen(false);
 
     const openDeleteDialog = (client) => {
+        console.log("Opening delete dialog for client:", client);
         setSelectedClient(client);
         setDeleteDialogOpen(true);
     };
@@ -225,7 +232,11 @@ export default function Danisanlarim() {
         setSelectedClient(null);
     };
     const confirmDelete = () => {
-        if (selectedClient) handleDelete(selectedClient.id);
+        if (selectedClient) {
+            console.log("Confirming delete for client:", selectedClient);
+            console.log("Using ID:", selectedClient.id);
+            handleDelete(selectedClient.id);
+        }
         closeDeleteDialog();
     };
 
@@ -651,6 +662,7 @@ export default function Danisanlarim() {
                         processRowUpdate={handleRowUpdate}
                         onProcessRowUpdateError={(error) => console.error(error)}
                         slots={{ toolbar: QuickSearchToolbar }}
+                        getRowId={(row) => row.id}
                         sx={{
                             "& .MuiDataGrid-columnHeaders": {
                                 bgcolor: "background.default",

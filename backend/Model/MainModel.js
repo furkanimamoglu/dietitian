@@ -102,6 +102,14 @@ NutritionPlan.hasMany(NutritionAssignment, {
     hooks: true
 });
 
+Client.hasMany(NutritionAssignment, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+    hooks: true,
+});
+NutritionAssignment.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
 
 // 9. Client ve Appointment
 Client.hasMany(Appointment, {

@@ -232,7 +232,7 @@ class DietitianService {
             });
 
             if (!dietitian) {
-                throw new Error('Diyetisyen bulunamadı.');
+                return [];
             }
 
             return dietitian.Clients;
