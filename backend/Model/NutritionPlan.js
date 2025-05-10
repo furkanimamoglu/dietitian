@@ -12,8 +12,7 @@ const NutritionPlan = sequelize.define('NutritionPlan', {
     allowNull: false
   },
   description: {
-    type: DataTypes.TEXT,
-    allowNull: false
+    type: DataTypes.TEXT
   },
   image: {
     type: DataTypes.STRING,

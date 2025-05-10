@@ -168,11 +168,34 @@ class ClientService {
             throw new Exception("Bugün için atanmış bir beslenme planı bulunamadı. Lütfen diyetisyeninizden size bir beslenme programı atamasını talep edin.", 404, true);
         }
 
+        if (!assignment.NutritionPlan) {
+            throw new Exception("Beslenme planı detayları bulunamadı.", 404, true);
+        }
+
         const mealPlan = assignment.NutritionPlan.mealPlan;
-        const todayMeal = mealPlan?.[dayName];
+        
+        if (!mealPlan) {
+            throw new Exception("Beslenme planı içeriği bulunamadı.", 404, true);
+        }
+        
+        // First try with the exact day name
+        let todayMeal = mealPlan[dayName];
+        
+        // If not found, try to find a case-insensitive match
+        if (!todayMeal) {
+            const dayKeys = Object.keys(mealPlan);
+            const matchingDayKey = dayKeys.find(
+                key => key.toLowerCase() === dayName.toLowerCase()
+            );
+            
+            if (matchingDayKey) {
+                todayMeal = mealPlan[matchingDayKey];
+            }
+        }
 
         if (!todayMeal) {
-            throw new Exception(`Plan var ancak ${dayName} için bir öğün bulunamadı.`, 404, true);
+            // If still not found, return a helpful error message
+            throw new Exception(`Bugün (${dayName}) için bir öğün planı bulunamadı. Lütfen diyetisyeninize başvurun.`, 404, true);
         }
 
         return todayMeal;

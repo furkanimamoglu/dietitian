@@ -192,8 +192,8 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
                                     <button 
                                         className="add-meal-button"
                                         onClick={(e) => {
-                                            const input = e.target.previousSibling;
-                                            if (input.value.trim()) {
+                                            const input = e.target.closest('.meal-input-container').querySelector('input');
+                                            if (input && input.value && input.value.trim()) {
                                                 const currentItems = mealPlan[selectedDay][meal] || '';
                                                 const newValue = currentItems 
                                                     ? `${currentItems}, ${input.value.trim()}` 
