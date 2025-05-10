@@ -165,22 +165,14 @@ class ClientService {
         });
 
         if (!assignment) {
-            throw {
-                status: 404,
-                showOnScreen: true,
-                message: "Bugün için atanmış bir beslenme planı bulunamadı."
-            };
+            throw new Exception("Bugün için atanmış bir beslenme planı bulunamadı. Lütfen diyetisyeninizden size bir beslenme programı atamasını talep edin.", 404, true);
         }
 
         const mealPlan = assignment.NutritionPlan.mealPlan;
         const todayMeal = mealPlan?.[dayName];
 
         if (!todayMeal) {
-            throw {
-                status: 404,
-                showOnScreen: true,
-                message: `Plan var ancak ${dayName} için bir öğün bulunamadı.`
-            };
+            throw new Exception(`Plan var ancak ${dayName} için bir öğün bulunamadı.`, 404, true);
         }
 
         return todayMeal;

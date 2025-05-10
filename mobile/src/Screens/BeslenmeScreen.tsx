@@ -74,6 +74,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
   const [dailyStats, setDailyStats] = useState<DailyStats>({ protein: 0, calories: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
     calculateDailyStats();
@@ -99,26 +100,24 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
         }
       });
       
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      
-      const data: DailyMealPlan = await response.json();
+      const data = await response.json();
       console.log('Received meal plan:', data);
+      
+      // Check if response contains showOnScreen and message
+      if (data.showOnScreen && data.message) {
+        setError(data.message);
+        setIsEmpty(true);
+        setLoading(false);
+        return;
+      }
       
       updateMealsFromPlan(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching meal plan:', error);
       setError('Beslenme planı yüklenemedi. Lütfen tekrar deneyin.');
+      setIsEmpty(true);
       setLoading(false);
-      
-      // Show an alert with the error
-      Alert.alert(
-        'Bağlantı Hatası',
-        'Beslenme planı yüklenemedi. Lütfen internet bağlantınızı kontrol edin.',
-        [{ text: 'Tamam' }]
-      );
     }
   };
 
@@ -163,6 +162,12 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       }));
     }
     
+    // Check if meal plan is empty
+    const totalMealItems = Object.values(newMeals).reduce(
+      (total, items) => total + items.length, 0
+    );
+    
+    setIsEmpty(totalMealItems === 0);
     setMeals(newMeals);
   };
 
@@ -323,6 +328,31 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     return "Tüm öğünler tamamlandı";
   };
 
+  const renderEmptyMealPlan = () => {
+    return (
+      <View style={styles.emptyContainer}>
+        <Avatar.Icon
+          size={80}
+          icon="food-off"
+          color="#ff9800"
+          style={{backgroundColor: '#fff3e0', marginBottom: 20}}
+        />
+        <Text style={styles.emptyTitle}>Beslenme Programı Bulunamadı</Text>
+        <Text style={styles.emptyText}>
+          {error || "Henüz size tanımlanmış bir beslenme programı bulunmamaktadır. Diyetisyeninizden bir program tanımlamasını talep edebilirsiniz."}
+        </Text>
+        <Button 
+          mode="contained" 
+          icon="message-text"
+          onPress={() => navigation.navigate('Mesajlar')}
+          style={styles.contactButton}
+        >
+          Diyetisyeninize Mesaj Gönder
+        </Button>
+      </View>
+    );
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -335,14 +365,14 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
 
     if (error) {
       return (
-        <View style={styles.errorContainer}>
+        <View style={styles.noticeContainer}>
           <Avatar.Icon
             size={60}
-            icon="alert-circle"
-            color="#f44336"
-            style={{backgroundColor: '#ffebee'}}
+            icon="information"
+            color="#ff9800"
+            style={{backgroundColor: '#fff3e0'}}
           />
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.noticeText}>{error}</Text>
           <Button 
             mode="contained" 
             onPress={fetchTodayMeal}
@@ -352,6 +382,10 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
           </Button>
         </View>
       );
+    }
+
+    if (isEmpty) {
+      return renderEmptyMealPlan();
     }
 
     return (
@@ -454,16 +488,18 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       <View style={styles.container}>
         <Header navigation={navigation} />
 
-        <ScrollView style={styles.content} contentContainerStyle={loading || error ? styles.centeredContent : undefined}>
+        <ScrollView style={styles.content} contentContainerStyle={loading || error || isEmpty ? styles.centeredContent : undefined}>
           {renderContent()}
         </ScrollView>
 
-        <FAB
-          style={styles.fab}
-          icon="plus"
-          onPress={openModal}
-          color="#fff"
-        />
+        {!isEmpty && (
+          <FAB
+            style={styles.fab}
+            icon="plus"
+            onPress={openModal}
+            color="#fff"
+          />
+        )}
 
         <BottomNavbar navigation={navigation} />
 
@@ -536,17 +572,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666'
   },
-  errorContainer: {
+  noticeContainer: {
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center'
   },
-  errorText: {
+  noticeText: {
     marginTop: 16,
     marginBottom: 16,
     fontSize: 16,
-    color: '#f44336',
+    color: '#ff9800',
     textAlign: 'center'
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ff9800',
+    marginBottom: 12
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24
+  },
+  contactButton: {
+    marginTop: 16,
+    backgroundColor: '#ff9800',
+    paddingHorizontal: 16
   },
   retryButton: {
     marginTop: 16,
