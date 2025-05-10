@@ -557,6 +557,29 @@ class DietitianService {
             throw new Exception("Meal plan geçerli bir JSON formatında olmalıdır.", 400, true);
         }
 
+        if (mealPlan) {
+            const validDays = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+            const validMeals = ["Kahvaltı", "Öğle Yemeği", "Akşam Yemeği", "Aparatif"];
+
+            for (const day of validDays) {
+                const meals = mealPlan[day];
+                if (meals) {
+                    for (const meal of validMeals) {
+                        if (!Array.isArray(meals[meal].main)) {
+                            throw new Exception(`'${day}' günündeki '${meal}' öğününün 'main' kısmı bir dizi (array) olmalıdır.`, 400, true);
+                        }
+                        if (meals[meal].alternatives) {
+                            for (const ingredient in meals[meal].alternatives) {
+                                if (!Array.isArray(meals[meal].alternatives[ingredient])) {
+                                    throw new Exception(`'${day}' günündeki '${meal}' öğününün '${ingredient}' alternatifi geçerli bir dizi olmalıdır.`, 400, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return await NutritionPlan.create({
             title,
             description,
@@ -585,8 +608,10 @@ class DietitianService {
             throw new Exception("Bu plan size ait değil veya bulunamadı.", 403, true);
         }
 
-        if (mealPlan && typeof mealPlan !== 'object') {
-            throw new Exception("mealPlan geçerli bir JSON formatında olmalıdır.", 400, true);
+        if (mealPlan) {
+            if (typeof mealPlan !== 'object') {
+                throw new Exception("mealPlan geçerli bir JSON formatında olmalıdır.", 400, true);
+            }
         }
 
         await plan.update({

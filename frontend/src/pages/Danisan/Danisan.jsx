@@ -177,6 +177,17 @@ export default function Danisan() {
         }
     };
 
+    // Helper function to display meal items (works with both arrays and strings)
+    const renderMealItems = (mealItems) => {
+        if (!mealItems) return "Öğün girilmemiş.";
+        
+        if (Array.isArray(mealItems)) {
+            return mealItems.join(", ");
+        }
+        
+        return mealItems;
+    };
+
     const renderTabContent = () => {
         switch(activeTab) {
             case 'genel':
@@ -854,56 +865,70 @@ export default function Danisan() {
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.Kahvaltı || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.Kahvaltı)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
@@ -934,56 +959,70 @@ export default function Danisan() {
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.["Öğle Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.["Öğle Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
@@ -1014,56 +1053,70 @@ export default function Danisan() {
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.["Akşam Yemeği"] || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.["Akşam Yemeği"])
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
@@ -1094,56 +1147,70 @@ export default function Danisan() {
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
-                                                                {nutritionPlan && nutritionPlan.length > 0 && nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.Aparatif || 
-                                                                "Öğün girilmemiş."}
+                                                                {nutritionPlan && nutritionPlan.length > 0 
+                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.Aparatif)
+                                                                    : "Öğün girilmemiş."
+                                                                }
                                                             </Typography>
                                                         </Paper>
                                                     </Grid>

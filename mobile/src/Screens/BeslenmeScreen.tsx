@@ -36,13 +36,15 @@ interface MealItem {
   portion: string;
   protein?: number;
   calorie?: number;
+  isAlternative?: boolean;
+  alternativeFor?: string;
 }
 
 interface DailyMealPlan {
-  Kahvaltı: string;
-  'Öğle Yemeği': string;
-  'Akşam Yemeği': string;
-  Aparatif: string;
+  Kahvaltı: string[] | string;
+  'Öğle Yemeği': string[] | string;
+  'Akşam Yemeği': string[] | string;
+  Aparatif: string[] | string;
 }
 
 interface DailyStats {
@@ -129,45 +131,82 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       Aperatifler: []
     };
     
-    // Convert API response to our meal structure
+    // Helper function to process meal items from various formats
+    const processMealItems = (mealData: any, mealType: string) => {
+      if (!mealData) return;
+      
+      // Get the main items depending on format
+      let mainItems: string[] = [];
+      
+      // Complex format with main and alternatives
+      if (mealData.main && Array.isArray(mealData.main)) {
+        mainItems = [...mealData.main];
+      } 
+      // Simple array format
+      else if (Array.isArray(mealData)) {
+        mainItems = [...mealData];
+      } 
+      // String format (backward compatibility)
+      else if (typeof mealData === 'string') {
+        mainItems = mealData.split(', ').map(item => item.trim()).filter(item => item !== '');
+      }
+      
+      // Convert to MealItem format
+      const targetMeal = convertApiMealNameToAppMealName(mealType);
+      if (targetMeal && newMeals[targetMeal]) {
+        newMeals[targetMeal] = mainItems.map(item => ({
+          item,
+          checked: false,
+          portion: '1 porsiyon'
+        }));
+        
+        // Add alternatives if available as separate items with a note
+        if (mealData.alternatives) {
+          Object.keys(mealData.alternatives).forEach(mainItem => {
+            if (Array.isArray(mealData.alternatives[mainItem])) {
+              mealData.alternatives[mainItem].forEach((alt: string) => {
+                newMeals[targetMeal].push({
+                  item: `${alt} (${mainItem} alternatifi)`,
+                  checked: false,
+                  portion: '1 porsiyon',
+                  isAlternative: true,
+                  alternativeFor: mainItem
+                });
+              });
+            }
+          });
+        }
+      }
+    };
+    
+    // Convert API meal names to app meal names
+    const convertApiMealNameToAppMealName = (apiMealName: string): string => {
+      switch (apiMealName) {
+        case 'Kahvaltı': return 'Kahvaltı';
+        case 'Öğle Yemeği': return 'Öğle';
+        case 'Akşam Yemeği': return 'Akşam';
+        case 'Aparatif': return 'Aperatifler';
+        default: return '';
+      }
+    };
+    
+    // Process each meal type
     if (dayPlan.Kahvaltı) {
-      newMeals.Kahvaltı = dayPlan.Kahvaltı.split(', ').map(item => ({
-        item,
-        checked: false,
-        portion: '1 porsiyon'
-      }));
+      processMealItems(dayPlan.Kahvaltı, 'Kahvaltı');
     }
     
     if (dayPlan['Öğle Yemeği']) {
-      newMeals.Öğle = dayPlan['Öğle Yemeği'].split(', ').map(item => ({
-        item,
-        checked: false,
-        portion: '1 porsiyon'
-      }));
+      processMealItems(dayPlan['Öğle Yemeği'], 'Öğle Yemeği');
     }
     
     if (dayPlan['Akşam Yemeği']) {
-      newMeals.Akşam = dayPlan['Akşam Yemeği'].split(', ').map(item => ({
-        item,
-        checked: false,
-        portion: '1 porsiyon'
-      }));
+      processMealItems(dayPlan['Akşam Yemeği'], 'Akşam Yemeği');
     }
     
     if (dayPlan.Aparatif) {
-      newMeals.Aperatifler = dayPlan.Aparatif.split(', ').map(item => ({
-        item,
-        checked: false,
-        portion: '1 porsiyon'
-      }));
+      processMealItems(dayPlan.Aparatif, 'Aparatif');
     }
     
-    // Check if meal plan is empty
-    const totalMealItems = Object.values(newMeals).reduce(
-      (total, items) => total + items.length, 0
-    );
-    
-    setIsEmpty(totalMealItems === 0);
     setMeals(newMeals);
   };
 
@@ -444,19 +483,28 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
                   <View style={styles.mealInfo}>
                     <Text style={[
                       styles.mealName,
-                      meal.checked && styles.mealChecked
+                      meal.checked && styles.mealChecked,
+                      meal.isAlternative && styles.alternativeMeal
                     ]}>
                       {meal.item}
                     </Text>
+                    {meal.isAlternative && (
+                      <Text style={styles.alternativeLabel}>
+                        Alternatif: {meal.alternativeFor}
+                      </Text>
+                    )}
                     <View style={styles.nutritionInfo}>
                       <Chip
-                        style={styles.nutritionChip}
+                        style={[
+                          styles.nutritionChip,
+                          meal.isAlternative && styles.alternativeChip
+                        ]}
                         textStyle={styles.chipText}
                         avatar={
                           <Avatar.Icon
                             size={16}
-                            icon="scale"
-                            color="#7cb342"
+                            icon={meal.isAlternative ? "swap-horizontal" : "scale"}
+                            color={meal.isAlternative ? "#ff9800" : "#7cb342"}
                             style={{backgroundColor: 'transparent'}}
                           />
                         }
@@ -844,6 +892,22 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     paddingVertical: 12
+  },
+  alternativeMeal: {
+    color: '#ff9800',
+    fontStyle: 'italic'
+  },
+  alternativeChip: {
+    backgroundColor: '#fff3e0',
+    borderColor: '#ff9800',
+    borderWidth: 1
+  },
+  alternativeLabel: {
+    fontSize: 11,
+    color: '#ff9800',
+    fontStyle: 'italic',
+    marginTop: 2,
+    marginBottom: 2
   }
 });
 
