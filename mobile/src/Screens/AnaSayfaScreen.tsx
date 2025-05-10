@@ -185,54 +185,6 @@ const AnaSayfa = ({ navigation }: Props) => {
           </View>
         </Surface> */}
 
-        {/* Günlük Plan */}
-        <Surface style={styles.planCard}>
-          <View style={styles.planSection}>
-            <View style={[styles.planIcon, { backgroundColor: '#fff3e0' }]}>
-              <Icon name="food" size={22} color="#f57c00" />
-            </View>
-            <View style={styles.planContent}>
-              <Text style={styles.planTitle}>Beslenme Programı</Text>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-eight-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>08:00</Text>
-                <Text style={styles.planText}>Kahvaltı 🥣</Text>
-              </View>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-one-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>13:00</Text>
-                <Text style={styles.planText}>Öğle Yemeği 🍛</Text>
-              </View>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-seven-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>19:00</Text>
-                <Text style={styles.planText}>Akşam Yemeği 🍲</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.planSection}>
-            <View style={[styles.planIcon, { backgroundColor: '#e3f2fd' }]}>
-              <Icon name="dumbbell" size={22} color="#1976d2" />
-            </View>
-            <View style={styles.planContent}>
-              <Text style={styles.planTitle}>Egzersiz Planı</Text>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-nine-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>09:00</Text>
-                <Text style={styles.planText}>Kardiyo - 15 dk 🏃‍♂️</Text>
-              </View>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-six-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>18:00</Text>
-                <Text style={styles.planText}>Yoga - 20 dk 🧘‍♀️</Text>
-              </View>
-            </View>
-          </View>
-        </Surface>
-
         {/* Motivasyon Kartı */}
         <Surface style={styles.motivationCard}>
           <Icon name="star-circle" size={36} color="#fff" style={styles.motivationIcon} />

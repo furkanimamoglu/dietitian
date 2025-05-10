@@ -12,6 +12,15 @@ import {
     Typography,
     Paper,
     Grid,
+    IconButton,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    InputAdornment,
+    FormHelperText,
+    Snackbar,
+    Alert
 } from "@mui/material";
 import {
     DataGrid,
@@ -34,6 +43,8 @@ import {
     Edit as EditIcon,
     ArrowForward,
     Close as CloseIcon,
+    Autorenew as AutorenewIcon,
+    VisibilityOff,
 } from "@mui/icons-material";
 import { green, red, blue, pink } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
@@ -67,6 +78,22 @@ export default function Danisanlarim() {
     const [qrData, setQrData] = useState("");
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
+
+    // Add these new states for form handling
+    const [newClient, setNewClient] = useState({
+        phoneNumber: "",
+        password: "",
+        name: "",
+        gender: "",
+        email: ""
+    });
+    const [formErrors, setFormErrors] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
 
     // ---------------------------
     // İstatistikler
@@ -216,6 +243,109 @@ export default function Danisanlarim() {
     };
     const closeQrDialog = () => setQrDialogOpen(false);
 
+    // Function to generate a random password
+    const generatePassword = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let password = "";
+        for (let i = 0; i < 8; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        setNewClient(prev => ({ ...prev, password }));
+    };
+
+    // Validate form before submission
+    const validateForm = () => {
+        const errors = {};
+        if (!newClient.phoneNumber) errors.phoneNumber = "Telefon numarası zorunludur";
+        else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
+        
+        if (!newClient.password) errors.password = "Şifre zorunludur";
+        if (!newClient.name) errors.name = "İsim zorunludur";
+        
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    // Handle form input changes
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewClient(prev => ({ ...prev, [name]: value }));
+        
+        // Clear the error when user types
+        if (formErrors[name]) {
+            setFormErrors(prev => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    // Handle phone number specific validation
+    const handlePhoneChange = (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.startsWith('0')) {
+            value = value.substring(1);
+        }
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        setNewClient(prev => ({ ...prev, phoneNumber: value }));
+        
+        if (formErrors.phoneNumber) {
+            setFormErrors(prev => ({ ...prev, phoneNumber: "" }));
+        }
+    };
+
+    // Update the existing handleCreateSubmit function
+    const handleCreateSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!validateForm()) return;
+        
+        try {
+            const response = await axios.post(
+                `${config[config.environment].apiUrl}/dietitian/registerClient`,
+                newClient,
+                { headers: { Authorization: localStorage.getItem("token") } }
+            );
+            
+            // Add the new client to the list
+            setClients(prev => [...prev, response.data]);
+            
+            // Show success message
+            setSnackbar({
+                open: true,
+                message: "Danışan başarıyla eklendi",
+                severity: "success"
+            });
+            
+            // Reset form and close dialog
+            setNewClient({
+                phoneNumber: "",
+                password: "",
+                name: "",
+                gender: "",
+                email: ""
+            });
+            closeCreateDialog();
+            
+        } catch (error) {
+            console.error("Danışan eklenirken hata oluştu:", error);
+            setSnackbar({
+                open: true,
+                message: error.response?.data?.message || "Danışan eklenirken bir hata oluştu",
+                severity: "error"
+            });
+        }
+    };
+
+    // Handle snackbar close
+    const handleSnackbarClose = () => {
+        setSnackbar(prev => ({ ...prev, open: false }));
+    };
+
+    // Toggle password visibility
+    const togglePasswordVisibility = () => {
+        setShowPassword(prev => !prev);
+    };
+
     // ---------------------------
     // DataGrid Column Definitions
     // ---------------------------
@@ -278,15 +408,6 @@ export default function Danisanlarim() {
             ),
         },
     ];
-
-    // ---------------------------
-    // Create Client Submit (placeholder – integrate with API)
-    // ---------------------------
-    const handleCreateSubmit = (e) => {
-        e.preventDefault();
-        // TODO: Post new client → refresh list
-        closeCreateDialog();
-    };
 
     // ---------------------------
     // Render
@@ -709,23 +830,161 @@ export default function Danisanlarim() {
             </Dialog>
 
             {/* Create Client Dialog */}
-            <Dialog open={createDialogOpen} onClose={closeCreateDialog} maxWidth="sm" fullWidth>
-                <DialogTitle>Yeni Danışan Oluştur</DialogTitle>
+            <Dialog 
+                open={createDialogOpen} 
+                onClose={closeCreateDialog}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle sx={{ 
+                    backgroundColor: 'primary.main', 
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <GroupAdd />
+                        <Typography variant="h6">Yeni Danışan Ekle</Typography>
+                    </Box>
+                    <IconButton 
+                        edge="end" 
+                        color="inherit" 
+                        onClick={closeCreateDialog}
+                        aria-label="close"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
                 <form onSubmit={handleCreateSubmit}>
-                    <DialogContent sx={{ pt: 2 }}>
-                        <Stack spacing={2}>
-                            <TextField label="Adınız" name="name" required fullWidth />
-                            <TextField label="E-posta" name="email" type="email" required fullWidth />
+                    <DialogContent dividers>
+                        <Stack spacing={3} sx={{ mt: 1 }}>
+                            <TextField
+                                label="İsim Soyisim"
+                                name="name"
+                                fullWidth
+                                required
+                                value={newClient.name}
+                                onChange={handleInputChange}
+                                error={!!formErrors.name}
+                                helperText={formErrors.name}
+                                placeholder="Danışanın adı ve soyadı"
+                                variant="outlined"
+                            />
+                            
+                            <TextField
+                                label="Telefon Numarası"
+                                name="phoneNumber"
+                                fullWidth
+                                required
+                                value={newClient.phoneNumber}
+                                onChange={handlePhoneChange}
+                                error={!!formErrors.phoneNumber}
+                                helperText={formErrors.phoneNumber || "Başında 0 olmadan 10 haneli numara (5XX...)"}
+                                placeholder="5XXXXXXXXX"
+                                variant="outlined"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">+90</InputAdornment>
+                                    ),
+                                }}
+                            />
+                            
+                            <TextField
+                                label="Şifre"
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                fullWidth
+                                required
+                                value={newClient.password}
+                                onChange={handleInputChange}
+                                error={!!formErrors.password}
+                                helperText={formErrors.password}
+                                variant="outlined"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={togglePasswordVisibility}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={generatePassword}
+                                                edge="end"
+                                                color="primary"
+                                                title="Otomatik şifre oluştur"
+                                            >
+                                                <AutorenewIcon />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            
+                            <TextField
+                                label="E-posta Adresi"
+                                name="email"
+                                type="email"
+                                fullWidth
+                                value={newClient.email}
+                                onChange={handleInputChange}
+                                error={!!formErrors.email}
+                                helperText={formErrors.email}
+                                placeholder="ornek@domain.com"
+                                variant="outlined"
+                            />
+                            
+                            <FormControl fullWidth>
+                                <InputLabel id="gender-label">Cinsiyet</InputLabel>
+                                <Select
+                                    labelId="gender-label"
+                                    name="gender"
+                                    value={newClient.gender}
+                                    label="Cinsiyet"
+                                    onChange={handleInputChange}
+                                >
+                                    <MenuItem value="Erkek">Erkek</MenuItem>
+                                    <MenuItem value="Kadın">Kadın</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Stack>
                     </DialogContent>
-                    <DialogActions>
-                        <Button onClick={closeCreateDialog}>İptal</Button>
-                        <Button type="submit" variant="contained">
-                            Oluştur
+                    <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+                        <Button 
+                            onClick={closeCreateDialog} 
+                            variant="outlined"
+                            startIcon={<CloseIcon />}
+                        >
+                            İptal
+                        </Button>
+                        <Button 
+                            type="submit" 
+                            variant="contained"
+                            startIcon={<GroupAdd />}
+                        >
+                            Danışan Ekle
                         </Button>
                     </DialogActions>
                 </form>
             </Dialog>
+
+            {/* Success/Error Notification */}
+            <Snackbar 
+                open={snackbar.open} 
+                autoHideDuration={6000} 
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={handleSnackbarClose} 
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Default>
     );
 }

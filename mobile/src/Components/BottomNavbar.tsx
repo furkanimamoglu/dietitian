@@ -135,7 +135,7 @@ const BottomNav = ({ navigation }: Props) => {
       )}
 
       <View style={styles.bottomNavbar}>
-        <TouchableOpacity onPress={() => navigation.replace('Egzersiz')} style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
+        <TouchableOpacity disabled onPress={() => navigation.replace('Egzersiz')} style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
           <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'} />
           <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
         </TouchableOpacity>
