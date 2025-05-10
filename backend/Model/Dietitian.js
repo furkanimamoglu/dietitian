@@ -9,9 +9,20 @@ const Dietitian = sequelize.define('Dietitian', {
             allowNull: false,
             primaryKey: true
         },
+        phoneNumber: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            unique: {
+                msg: 'Bu telefon numarası zaten kullanılıyor.'
+            },
+            validate: {
+                isNumeric: {
+                    msg: 'Telefon numarası yalnızca rakamlardan oluşmalıdır.'
+                }
+            }
+        },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
             unique: {
                 msg: 'Bu e-posta zaten kullanılıyor.'
             },
@@ -32,23 +43,22 @@ const Dietitian = sequelize.define('Dietitian', {
             }
         },
         name: {
-            type: DataTypes.STRING
-        },
-        token: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: "İsimsiz Danışan"
         },
         role: {
             type: DataTypes.STRING,
             defaultValue: "DIETITIAN"
         },
-        phoneNumber: DataTypes.STRING,
         status: {
-            type: DataTypes.STRING,
-            defaultValue: "true",
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
         },
         language: DataTypes.STRING,
         currency: {
             type: DataTypes.INTEGER,
+            allowNull: false,
             defaultValue: 0
         },
         gender: DataTypes.STRING,

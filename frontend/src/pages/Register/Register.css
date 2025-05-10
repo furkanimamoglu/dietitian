@@ -1,0 +1,12 @@
+.register-container {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@media (max-width: 600px) {
+    .register-container {
+        padding: 16px;
+    }
+}

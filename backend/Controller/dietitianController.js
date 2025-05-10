@@ -7,16 +7,16 @@ class DietitianController {
 
     async login(req, res) {
         try {
-            const {email, password} = req.body;
+            const {phoneNumber, password} = req.body;
 
-            if (!email || !password) {
+            if (!phoneNumber || !password) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.login(email, password);
+            const result = await DietitianService.login(phoneNumber, password);
 
             res.status(200).json({
                 token: result.token,
@@ -32,17 +32,17 @@ class DietitianController {
 
     async register(req, res) {
         try {
-            const {email, password} = req.body;
+            const {phoneNumber, password} = req.body;
             const ipAddress = req.ip;
 
-            if (!email || !password || !ipAddress) {
+            if (!phoneNumber || !password || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.register(email, password, ipAddress);
+            const result = await DietitianService.register(phoneNumber, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,

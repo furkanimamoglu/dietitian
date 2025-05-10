@@ -15,11 +15,11 @@ const {Op} = require("sequelize");
 
 class DietitianService {
 
-    async login(email, password) {
+    async login(phoneNumber, password) {
         try {
             const dietitianInfo = await Dietitian.findOne({
                 where: {
-                    email: email,
+                    phoneNumber: phoneNumber,
                     password: password
                 }
             });
@@ -48,14 +48,14 @@ class DietitianService {
         }
     }
 
-    async register(email, password, ipAddress) {
+    async register(phoneNumber, password, ipAddress) {
         try {
-            if (!email || !password) {
+            if (!phoneNumber || !password) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
             const dietitian = await Dietitian.create({
-                email: email,
+                phoneNumber: phoneNumber,
                 password: password,
                 role: DIETITIAN,
                 ipAddress: ipAddress

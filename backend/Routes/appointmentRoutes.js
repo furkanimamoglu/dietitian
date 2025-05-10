@@ -8,6 +8,7 @@ const appointmentController = require('../Controller/appointmentController');
 
 //Routes
 router.get('/fetchDietitianAppointments', appointmentController.fetchDietitianAppointments);
+router.delete('/deleteAppointmentAsDietitian', appointmentController.deleteAppointmentAsDietitian);
 router.post('/addAppointmentAsDietitian', appointmentController.addAppointmentAsDietitian);
 router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian)
 router.put('/updateAppointmentStatus', appointmentController.updateAppointmentStatus);

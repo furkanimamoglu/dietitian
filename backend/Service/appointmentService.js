@@ -326,6 +326,34 @@ class AppointmentService {
             order: [['start', 'ASC']]
         });
     }
+
+    async deleteAppointment(dietitian_id, appointment_id) {
+        if (!dietitian_id || !appointment_id) {
+            throw {
+                status: 400,
+                message: "Diyetisyen ID ve randevu ID gereklidir."
+            };
+        }
+
+        const appointment = await Appointment.findOne({
+            where: {
+                id: appointment_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!appointment) {
+            throw {
+                status: 404,
+                message: "Bu randevu bulunamadı veya size ait değil."
+            };
+        }
+
+        await appointment.destroy();
+
+        return { success: true };
+    }
+
 }
 
 module.exports = new AppointmentService();
