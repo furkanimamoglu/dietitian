@@ -21,6 +21,7 @@ import RandevuScreen from './src/Screens/RandevuScreen';
 import RaporScreen from './src/Screens/RaporScreen';
 import OnboardingScreen from './src/Screens/OnboardingScreen';
 import KayitolScreen from './src/Screens/KayitolScreen';
+import SifremiUnuttumScreen from './src/Screens/SifremiUnuttumScreen';
 import { customDarkTheme, customLightTheme } from './src/Theme/theme';
 
 export type RootStackParamList = {
@@ -35,6 +36,7 @@ export type RootStackParamList = {
   AnaSayfa: undefined;
   Mesaj: undefined;
   Kayitol: { dietitian_id: string };
+  SifremiUnuttum: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -56,7 +58,8 @@ const linking = {
       Randevu: 'randevu',
       Rapor: 'rapor',
       AnaSayfa: 'anasayfa',
-      Mesaj: 'mesaj'
+      Mesaj: 'mesaj',
+      SifremiUnuttum: 'sifremiunuttum'
     }
   }
 };
@@ -144,6 +147,11 @@ const App = () => {
           <Stack.Screen
             name="Kayitol"
             component={KayitolScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="SifremiUnuttum"
+            component={SifremiUnuttumScreen}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

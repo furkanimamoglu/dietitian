@@ -1,28 +1,41 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { TextInput, Button, Text, Divider, ActivityIndicator } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, StatusBar, Dimensions, TouchableOpacity } from 'react-native';
+import { TextInput, Button, Text, Divider, ActivityIndicator, Card, useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import config from '../../config';
 
 type RootStackParamList = {
   Kayitol: { dietitian_id: string };
+  AnaSayfa: undefined;
 };
 
 type KayitolRouteProp = RouteProp<RootStackParamList, 'Kayitol'>;
 
 const KayitolScreen: React.FC = () => {
+  const theme = useTheme();
   const route = useRoute<KayitolRouteProp>();
   const navigation = useNavigation();
-  const dietitianId = route.params?.dietitian_id;
+  const dietitianId = route.params?.dietitian_id || '';
 
   const [name, setName] = useState('');
-  const [dietitianCode, setDietitianCode] = useState('');
+  const [dietitianCode, setDietitianCode] = useState(dietitianId);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [securePassword, setSecurePassword] = useState(true);
+  const [secureConfirmPassword, setSecureConfirmPassword] = useState(true);
 
   const [dietitianName, setDietitianName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetchingDietitian, setFetchingDietitian] = useState(false);
+
+  useEffect(() => {
+    if (dietitianId) {
+      handleDietitianFetch(dietitianId);
+    }
+  }, [dietitianId]);
 
   const handleChange = (text: string) => {
     const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
@@ -34,7 +47,7 @@ const KayitolScreen: React.FC = () => {
       setDietitianName('');
       return;
     }
-    setLoading(true);
+    setFetchingDietitian(true);
     try {
       const response = await fetch(
         `${config.apiUrl}/dietitian/getDietitianNameById?dietitian_id=${id}`
@@ -42,17 +55,47 @@ const KayitolScreen: React.FC = () => {
       const data = await response.json();
       setDietitianName(typeof data === 'string' ? data : data.dietitian_name);
     } catch (error) {
-      setDietitianName('Hata oluştu');
+      setDietitianName('');
+      Alert.alert('Hata', 'Diyetisyen bulunamadı');
     } finally {
-      setLoading(false);
+      setFetchingDietitian(false);
     }
   };
 
+  const validateForm = () => {
+    if (!name.trim()) {
+      Alert.alert('Uyarı', 'Lütfen isminizi girin');
+      return false;
+    }
+    
+    if (phone.length < 10) {
+      Alert.alert('Uyarı', 'Lütfen geçerli bir telefon numarası girin');
+      return false;
+    }
+    
+    if (password.length < 6) {
+      Alert.alert('Uyarı', 'Şifre en az 6 karakter olmalıdır');
+      return false;
+    }
+    
+    if (password !== confirmPassword) {
+      Alert.alert('Uyarı', 'Şifreler eşleşmiyor');
+      return false;
+    }
+    
+    if (!dietitianCode) {
+      Alert.alert('Uyarı', 'Lütfen diyetisyen kodunu girin');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleRegister = async () => {
-    if (!name || !phone || !password) {
-      console.log('Uyarı', 'Lütfen tüm alanları doldurun.');
+    if (!validateForm()) {
       return;
     }
+    
     setLoading(true);
     try {
       const response = await fetch(
@@ -71,12 +114,15 @@ const KayitolScreen: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         await AsyncStorage.setItem('token', `Bearer ${data.token}`);
-        navigation.replace('AnaSayfa')
+        Alert.alert('Başarılı', 'Kaydınız başarıyla oluşturuldu', [
+          { text: 'Tamam', onPress: () => navigation.navigate('AnaSayfa' as never) }
+        ]);
       } else {
-        console.log('Hata', data.message || 'Kayıt başarısız.');
+        Alert.alert('Hata', data.message || 'Kayıt başarısız.');
       }
     } catch (error) {
-      console.log('Hata', 'Sunucuya bağlanılamadı.', error);
+      Alert.alert('Hata', 'Sunucuya bağlanılamadı.');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -84,84 +130,268 @@ const KayitolScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Kayıt Ol</Text>
-      <TextInput
-        label="İsim Soyisim"
-        mode="outlined"
-        value={name}
-        onChangeText={setName}
-        autoCapitalize="true"
-        style={styles.input}
-      />
-      <Divider style={styles.divider} />
-      <TextInput
-        label="Telefon"
-        mode="outlined"
-        value={phone}
-        onChangeText={handleChange}
-        keyboardType="phone-pad"
-        maxLength={10}
-        placeholder="5xxxxxxxxx"
-        left={<TextInput.Affix text="+90" />}
-        style={styles.input}
-      />
-      <TextInput
-        label="Şifre"
-        mode="outlined"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-      />
-      <Divider style={styles.divider} />
-      <TextInput
-        label="Diyetisyen Referans Kodu"
-        mode="outlined"
-        value={dietitianId}
-        onChangeText={(text) => {
-          setDietitianCode(text);
-          handleDietitianFetch(text);
-        }}
-        keyboardType="phone-pad"
-        style={styles.input}
-      />
-      <Text style={styles.nameText}>Diyetisyen: {dietitianName}</Text>
-      <Divider style={styles.divider} />
-      {loading ? (
-        <ActivityIndicator animating size="large" style={styles.loader} />
-      ) : (
-        <Button mode="contained" onPress={handleRegister} style={styles.button}>
-          Kayıt Ol
-        </Button>
-      )}
+      <StatusBar backgroundColor="#F57C00" barStyle="light-content" />
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.keyboardAvoidingView}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollView}
+          keyboardShouldPersistTaps="handled"
+        >
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="arrow-left" size={24} color="#F57C00" />
+          </TouchableOpacity>
+          
+          <View style={styles.headerContainer}>
+            <Icon name="account-plus" size={50} color="#F57C00" style={styles.icon} />
+            <Text style={styles.header}>Hesap Oluştur</Text>
+          </View>
+          
+          <Card style={styles.card}>
+            <Card.Content>
+              <TextInput
+                label="İsim Soyisim"
+                mode="outlined"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                style={styles.input}
+                outlineColor="#DDD"
+                activeOutlineColor="#F57C00"
+                left={<TextInput.Icon icon="account" color="#AAA" />}
+              />
+              
+              <TextInput
+                label="Telefon"
+                mode="outlined"
+                value={phone}
+                onChangeText={handleChange}
+                keyboardType="phone-pad"
+                maxLength={10}
+                placeholder="5xxxxxxxxx"
+                left={<TextInput.Affix text="+90" />}
+                style={styles.input}
+                outlineColor="#DDD"
+                activeOutlineColor="#F57C00"
+              />
+              
+              <TextInput
+                label="Şifre"
+                mode="outlined"
+                secureTextEntry={securePassword}
+                value={password}
+                onChangeText={setPassword}
+                style={styles.input}
+                outlineColor="#DDD"
+                activeOutlineColor="#F57C00"
+                right={
+                  <TextInput.Icon
+                    icon={securePassword ? 'eye' : 'eye-off'}
+                    onPress={() => setSecurePassword(!securePassword)}
+                    color="#F57C00"
+                  />
+                }
+              />
+              
+              <TextInput
+                label="Şifre Tekrar"
+                mode="outlined"
+                secureTextEntry={secureConfirmPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                style={styles.input}
+                outlineColor="#DDD"
+                activeOutlineColor="#F57C00"
+                right={
+                  <TextInput.Icon
+                    icon={secureConfirmPassword ? 'eye' : 'eye-off'}
+                    onPress={() => setSecureConfirmPassword(!secureConfirmPassword)}
+                    color="#F57C00"
+                  />
+                }
+              />
+              
+              <View style={styles.dietitianSection}>
+                <Text style={styles.sectionTitle}>Diyetisyen Bilgileri</Text>
+                <TextInput
+                  label="Diyetisyen Referans Kodu"
+                  mode="outlined"
+                  value={dietitianCode}
+                  onChangeText={(text) => {
+                    setDietitianCode(text);
+                    handleDietitianFetch(text);
+                  }}
+                  keyboardType="number-pad"
+                  style={styles.input}
+                  outlineColor="#DDD"
+                  activeOutlineColor="#F57C00"
+                  right={
+                    fetchingDietitian ? 
+                    <TextInput.Icon icon={() => <ActivityIndicator size={20} color="#F57C00" />} /> : 
+                    undefined
+                  }
+                />
+                
+                {dietitianName ? (
+                  <View style={styles.dietitianInfo}>
+                    <Icon name="account-check" size={20} color="#4CAF50" />
+                    <Text style={styles.dietitianName}>Diyetisyen: {dietitianName}</Text>
+                  </View>
+                ) : dietitianCode ? (
+                  <View style={styles.dietitianInfo}>
+                    <Icon name="alert-circle" size={20} color="#FF9800" />
+                    <Text style={styles.dietitianNotFound}>Diyetisyen bulunamadı</Text>
+                  </View>
+                ) : null}
+              </View>
+            </Card.Content>
+          </Card>
+          
+          {loading ? (
+            <ActivityIndicator animating size="large" color="#F57C00" style={styles.loader} />
+          ) : (
+            <Button 
+              mode="contained" 
+              onPress={handleRegister} 
+              style={styles.button}
+              buttonColor="#F57C00"
+              contentStyle={styles.buttonContent}
+              labelStyle={styles.buttonLabel}
+            >
+              Kayıt Ol
+            </Button>
+          )}
+          
+          <TouchableOpacity
+            style={styles.loginLink}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.loginText}>Zaten hesabınız var mı? <Text style={styles.loginTextBold}>Giriş Yap</Text></Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff9f2',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollView: {
+    flexGrow: 1,
+    padding: 24,
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
+    padding: 10,
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  icon: {
+    backgroundColor: 'rgba(245, 124, 0, 0.1)',
     padding: 16,
-    justifyContent: 'center',
-    backgroundColor: '#fff'
+    borderRadius: 50,
+    marginBottom: 16,
   },
   header: {
     fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subheader: {
+    fontSize: 14,
+    color: '#777',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  card: {
+    borderRadius: 16,
+    elevation: 4,
     marginBottom: 24,
-    textAlign: 'center'
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   input: {
-    marginBottom: 16
+    marginBottom: 16,
+    backgroundColor: '#fff',
+  },
+  dietitianSection: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: 12,
+  },
+  dietitianInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  dietitianName: {
+    color: '#4CAF50',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  dietitianNotFound: {
+    color: '#FF9800',
+    marginLeft: 8,
+    fontWeight: '500',
   },
   button: {
-    marginTop: 8
+    marginVertical: 16,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  buttonContent: {
+    height: 48,
+  },
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   loader: {
-    marginTop: 16
+    marginTop: 20,
   },
-  divider: {
-    marginVertical: 12
-  }
+  loginLink: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  loginText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  loginTextBold: {
+    color: '#F57C00',
+    fontWeight: 'bold',
+  },
 });
 
 export default KayitolScreen;
