@@ -484,13 +484,45 @@ class DietitianService {
             throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
         }
 
+        // Transform the meal plan structure to include "yenildi" field for each meal item
+        const transformedMealPlan = {};
+        if (plan.mealPlan) {
+            Object.keys(plan.mealPlan).forEach(day => {
+                transformedMealPlan[day] = {};
+                Object.keys(plan.mealPlan[day] || {}).forEach(mealType => {
+                    // Get the meal items based on the format
+                    let mealItems = [];
+                    const mealData = plan.mealPlan[day][mealType];
+                    
+                    // Handle complex format with main and alternatives
+                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
+                        mealItems = [...mealData.main];
+                    } 
+                    // Handle simple array format
+                    else if (Array.isArray(mealData)) {
+                        mealItems = [...mealData];
+                    } 
+                    // Handle string format (backward compatibility)
+                    else if (typeof mealData === 'string') {
+                        mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
+                    }
+
+                    // Transform to new format with "yenildi" field
+                    transformedMealPlan[day][mealType] = mealItems.map(item => ({
+                        isim: item,
+                        yenildi: false
+                    }));
+                });
+            });
+        }
+
         return await NutritionAssignment.create({
             client_id,
             nutrition_plan_id,
             start_date,
             end_date,
             note,
-            mealPlan: plan.mealPlan
+            mealPlan: transformedMealPlan
         });
     }
 

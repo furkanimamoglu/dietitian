@@ -960,7 +960,7 @@ export default function Beslenme() {
             setAssignmentNote('');
             
             // Show success popup
-            setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı.`);
+            setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı. Danışanınız bu plana göre yediklerini işaretleyebilecek.`);
             setShowSuccessPopup(true);
         })
         .catch(error => {
@@ -1586,6 +1586,9 @@ export default function Beslenme() {
                 <div className="modal-body">
                     <p className="selected-program">
                         Seçilen program: <strong>{selectedProgram?.title}</strong>
+                    </p>
+                    <p className="assign-note">
+                        <strong>Not:</strong> Danışanınız bu beslenme planını uyguladıkça, yediği öğünleri mobil uygulamada işaretleyebilecek.
                     </p>
                     <div className="input-container">
                         <label htmlFor="userSelect">Danışan Seçin</label>

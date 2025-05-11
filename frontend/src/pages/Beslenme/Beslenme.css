@@ -423,6 +423,16 @@
   font-size: 0.95rem;
 }
 
+.assign-note {
+  background-color: #f8f9fa;
+  border-left: 3px solid #4caf50;
+  padding: 10px 15px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #333;
+  border-radius: 4px;
+}
+
 .user-select-container {
   margin-top: 1rem;
 }

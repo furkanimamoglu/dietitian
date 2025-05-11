@@ -43,10 +43,10 @@ interface MealItem {
 }
 
 interface DailyMealPlan {
-  Kahvaltı: string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
-  'Öğle Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
-  'Akşam Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
-  Aparatif: string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  Kahvaltı: string[] | string | { main: string[], alternatives: {[key: string]: string[]} } | { isim: string, yenildi: boolean }[];
+  'Öğle Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} } | { isim: string, yenildi: boolean }[];
+  'Akşam Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} } | { isim: string, yenildi: boolean }[];
+  Aparatif: string[] | string | { main: string[], alternatives: {[key: string]: string[]} } | { isim: string, yenildi: boolean }[];
 }
 
 interface DailyStats {
@@ -204,9 +204,18 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       // Get the main items depending on format
       let mainItems: string[] = [];
       let alternatives: {[key: string]: string[]} = {};
+      let checkedItems: {[key: string]: boolean} = {};
       
+      // New format with 'isim' and 'yenildi' fields
+      if (Array.isArray(mealData) && mealData.length > 0 && mealData[0].hasOwnProperty('isim')) {
+        mainItems = mealData.map(item => item.isim);
+        // Store the checked status for each item
+        mealData.forEach(item => {
+          checkedItems[item.isim] = item.yenildi;
+        });
+      }
       // Complex format with main and alternatives
-      if (mealData.main && Array.isArray(mealData.main)) {
+      else if (mealData.main && Array.isArray(mealData.main)) {
         mainItems = [...mealData.main];
         alternatives = mealData.alternatives || {};
       } 
@@ -228,7 +237,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
           const itemAlternatives = alternatives[item] || [];
           return {
             item,
-            checked: false,
+            checked: checkedItems[item] || false, // Use the stored check status
             portion: '1 porsiyon',
             alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
           };
@@ -290,8 +299,8 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     setMeals(newMeals);
     calculateDailyStats();
     
-    // Update the meal plan on the server without changing the structure
-    // We only track completion status locally, no need to update the server for meal checks
+    // Update the meal plan on the server with the new yenildi status
+    updateMealPlanOnServer(newMeals);
   };
 
   const openModal = () => {
@@ -356,8 +365,11 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       Object.entries(updatedMeals).forEach(([mealType, items]) => {
         const apiMealType = convertAppMealNameToApiMealName(mealType);
         if (apiMealType) {
-          // Convert the items to simple string array format
-          updatedDayPlan[apiMealType as keyof DailyMealPlan] = items.map(item => item.item);
+          // Convert the items to the new format with 'isim' and 'yenildi' fields
+          updatedDayPlan[apiMealType as keyof DailyMealPlan] = items.map(item => ({
+            isim: item.item,
+            yenildi: item.checked
+          }));
         }
       });
       
