@@ -49,11 +49,6 @@ interface DailyMealPlan {
   Aparatif: string[] | string | { main: string[], alternatives: {[key: string]: string[]} } | { isim: string, yenildi: boolean }[];
 }
 
-interface DailyStats {
-  protein: number;
-  calories: number;
-}
-
 const mealIcons: { [key: string]: string } = {
   'Kahvaltı': 'coffee',
   'Öğle': 'food-variant',
@@ -75,7 +70,6 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
   const [newPortion, setNewPortion] = useState('');
   const [waterIntake, setWaterIntake] = useState(2);
   const [maxWaterIntake, setMaxWaterIntake] = useState(8);
-  const [dailyStats, setDailyStats] = useState<DailyStats>({ protein: 0, calories: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
@@ -83,7 +77,6 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    calculateDailyStats();
     fetchTodayMeal();
   }, []);
 
@@ -274,30 +267,12 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     }
     
     setMeals(newMeals);
-    calculateDailyStats();
-  };
-
-  const calculateDailyStats = () => {
-    let totalProtein = 0;
-    let totalCalories = 0;
-
-    Object.values(meals).forEach(mealItems => {
-      mealItems.forEach(meal => {
-        if (meal.checked) {
-          totalProtein += meal.protein || 0;
-          totalCalories += meal.calorie || 0;
-        }
-      });
-    });
-
-    setDailyStats({ protein: totalProtein, calories: totalCalories });
   };
 
   const toggleCheck = (mealType: string, index: number) => {
     const newMeals = { ...meals };
     newMeals[mealType][index].checked = !newMeals[mealType][index].checked;
     setMeals(newMeals);
-    calculateDailyStats();
     
     // Update the meal plan on the server with the new yenildi status
     updateMealPlanOnServer(newMeals);
@@ -470,49 +445,6 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     );
   };
 
-  const renderDailyStats = () => {
-    return (
-      <Surface style={styles.statsCard}>
-        <Text style={styles.statsTitle}>Bugünkü Besin Değerleri</Text>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Avatar.Icon
-              size={40}
-              icon="fire"
-              color="#ff7043"
-              style={{backgroundColor: '#ffebee'}}
-            />
-            <Text style={styles.statValue}>{dailyStats.calories}</Text>
-            <Text style={styles.statLabel}>kalori</Text>
-          </View>
-
-          <View style={styles.statItem}>
-            <Avatar.Icon
-              size={40}
-              icon="arm-flex"
-              color="#7cb342"
-              style={{backgroundColor: '#f1f8e9'}}
-            />
-            <Text style={styles.statValue}>{dailyStats.protein}g</Text>
-            <Text style={styles.statLabel}>protein</Text>
-          </View>
-
-          <View style={styles.statItem}>
-            <Avatar.Icon
-              size={40}
-              icon="water"
-              color="#29b6f6"
-              style={{backgroundColor: '#e1f5fe'}}
-            />
-            <Text style={styles.statValue}>{waterIntake * 250}ml</Text>
-            <Text style={styles.statLabel}>su</Text>
-          </View>
-        </View>
-      </Surface>
-    );
-  };
-
   const getCompletionText = () => {
     const percentage = Math.round(progress * 100);
     if (percentage === 0) return "Henüz başlamadın";
@@ -598,7 +530,6 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
         </Surface>
 
         {/*renderWaterTracker()*/}
-        {renderDailyStats()}
 
         {/* Yemek kategorileri */}
         {Object.entries(meals).map(([mealType, items]) => (
