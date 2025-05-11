@@ -9,7 +9,7 @@ export default function Footer() {
             <Container maxWidth="lg">
                 <Box className="footer-bottom">
                     <Typography variant="body2" align="center" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                        &copy; {new Date().getFullYear()} Diyetisyen Uygulaması. Sevgiyle hazırlandı 
+                        &copy; {new Date().getFullYear()} Diyetisyen Uygulaması.
                         <FavoriteIcon fontSize="small" color="error" sx={{ mx: 0.5, animation: 'pulse 1.5s infinite' }} />
                     </Typography>
                 </Box>
