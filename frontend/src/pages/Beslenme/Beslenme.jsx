@@ -858,8 +858,17 @@ export default function Beslenme() {
         const planData = {
             title: newPlan.title.trim(),
             description: newPlan.description.trim(),
-            category_id: newPlan.category_id
+            category_id: newPlan.category_id,
+            mealPlan: {}
         };
+        
+        // Initialize the meal plan structure with empty arrays
+        DAYS_OF_WEEK.forEach(day => {
+            planData.mealPlan[day] = {};
+            MEALS.forEach(meal => {
+                planData.mealPlan[day][meal] = [];
+            });
+        });
         
         // Make API call to add the plan
         axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
@@ -875,10 +884,16 @@ export default function Beslenme() {
                 category_id: ''
             });
             setAddPlanModal(false);
+            
+            // Show success message
+            setSuccessMessage(`"${planData.title}" programı başarıyla oluşturuldu.`);
+            setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error adding plan:", error);
-            // You might want to show an error message to the user here
+            // Show error message
+            setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+            setShowErrorPopup(true);
         });
     };
 
@@ -925,15 +940,18 @@ export default function Beslenme() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
-            if (!response.data.ok) {
-                setErrorMessage(response.data.message);
+            // Check if response has an error message
+            if (response.data && response.data.message && !response.data.ok) {
+                setErrorMessage(response.data.message || "Bir hata oluştu.");
                 setShowErrorPopup(true);
                 return;
             }
             
+            // Success case - store info for success message
             const programName = selectedProgram.title;
-            const userName = `${selectedUser.name}`;
+            const userName = selectedUser.name;
             
+            // Close the modal and reset states
             setAddToUserModal(false);
             setSelectedProgram(null);
             setSelectedUser(null);
@@ -947,7 +965,7 @@ export default function Beslenme() {
         })
         .catch(error => {
             console.error("Error assigning plan to client:", error);
-            // Show error popup
+            // Show error popup with specific message from API if available
             setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
             setShowErrorPopup(true);
         });
@@ -1203,30 +1221,32 @@ export default function Beslenme() {
                 data.nutrition_plan_id = selectedProgram.id;
             }
             
-            // Process mealPlan to ensure correct format for all entries
-            Object.keys(mealPlan).forEach(day => {
+            // Initialize the meal plan structure even if there's no data
+            DAYS_OF_WEEK.forEach(day => {
                 data.mealPlan[day] = {};
-                Object.keys(mealPlan[day]).forEach(meal => {
-                    const mealData = mealPlan[day][meal];
+                MEALS.forEach(meal => {
+                    // Initialize with empty arrays by default
+                    data.mealPlan[day][meal] = [];
                     
-                    // Already has the complex format with main and alternatives
-                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
-                        data.mealPlan[day][meal] = {...mealData};
-                    }
-                    // Simple array format -> keep as is (API will handle it)
-                    else if (Array.isArray(mealData)) {
-                        data.mealPlan[day][meal] = [...mealData];
-                    }
-                    // Handle string format (for backward compatibility)
-                    else if (typeof mealData === 'string') {
-                        data.mealPlan[day][meal] = mealData
-                            .split(',')
-                            .map(item => item.trim())
-                            .filter(item => item !== '');
-                    }
-                    // Empty or invalid format
-                    else {
-                        data.mealPlan[day][meal] = [];
+                    // If we have data for this day/meal, process it
+                    if (mealPlan && mealPlan[day] && mealPlan[day][meal]) {
+                        const mealData = mealPlan[day][meal];
+                        
+                        // Already has the complex format with main and alternatives
+                        if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
+                            data.mealPlan[day][meal] = {...mealData};
+                        }
+                        // Simple array format -> keep as is (API will handle it)
+                        else if (Array.isArray(mealData)) {
+                            data.mealPlan[day][meal] = [...mealData];
+                        }
+                        // Handle string format (for backward compatibility)
+                        else if (typeof mealData === 'string') {
+                            data.mealPlan[day][meal] = mealData
+                                .split(',')
+                                .map(item => item.trim())
+                                .filter(item => item !== '');
+                        }
                     }
                 });
             });
