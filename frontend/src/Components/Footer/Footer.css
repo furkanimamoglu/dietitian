@@ -1,0 +1,31 @@
+.footer {
+    background: linear-gradient(135deg, #2c8a46 0%, #3d8a3d 50%, #2c8a46 100%);
+    color: white;
+    position: sticky;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    padding: 12px 0;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 8px 0;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+} 

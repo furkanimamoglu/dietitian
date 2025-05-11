@@ -1,16 +1,19 @@
 import React from 'react';
-
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
+import './Footer.css';
+import { Box, Typography, Container, IconButton } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 export default function Footer() {
     return (
-        <footer style={{marginTop: 'auto', padding: '0.5rem', backgroundColor: '#3d8a3d'}}>
-            <Container>
-                <Typography variant="body2" color="white" align="center">
-                    &copy; 2024 Diyetisyen Uygulaması
-                </Typography>
+        <Box component="footer" className="footer">
+            <Container maxWidth="lg">
+                <Box className="footer-bottom">
+                    <Typography variant="body2" align="center" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                        &copy; {new Date().getFullYear()} Diyetisyen Uygulaması. Sevgiyle hazırlandı 
+                        <FavoriteIcon fontSize="small" color="error" sx={{ mx: 0.5, animation: 'pulse 1.5s infinite' }} />
+                    </Typography>
+                </Box>
             </Container>
-        </footer>
+        </Box>
     );
 };
