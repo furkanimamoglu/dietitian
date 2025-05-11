@@ -1242,95 +1242,89 @@ export default function Danisan() {
                                 </Box>
                             </Paper>
                         )}
-                        
+
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                            Öneriler ve Notlar
+                            Atanmış Beslenme Planları
                         </Typography>
                         
                         <Card elevation={3} sx={{ mb: 3 }}>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                        <Box sx={{ 
-                                            bgcolor: 'primary.main', 
-                                            color: 'white', 
-                                            borderRadius: '50%', 
-                                            width: 24, 
-                                            height: 24, 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 'bold',
-                                            flexShrink: 0,
-                                            mt: 0.2
-                                        }}>1</Box>
-                                        <Typography variant="body1">
-                                            Günde en az <strong>2.5 litre su</strong> içmeye özen gösterin.
-                                        </Typography>
+                            <CardHeader 
+                                title="Atanmış Planlar" 
+                                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                sx={{ 
+                                    bgcolor: 'primary.light', 
+                                    color: 'primary.contrastText',
+                                    borderBottom: '1px solid',
+                                    borderColor: 'divider'
+                                }}
+                            />
+                            <List>
+                                {nutritionPlanLoading ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                        <CircularProgress />
                                     </Box>
-                                    
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                        <Box sx={{ 
-                                            bgcolor: 'primary.main', 
-                                            color: 'white', 
-                                            borderRadius: '50%', 
-                                            width: 24, 
-                                            height: 24, 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 'bold',
-                                            flexShrink: 0,
-                                            mt: 0.2
-                                        }}>2</Box>
-                                        <Typography variant="body1">
-                                            Akşam yemeğini <strong>saat 19:00'dan önce</strong> tüketmeye çalışın.
-                                        </Typography>
-                                    </Box>
-                                    
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                        <Box sx={{ 
-                                            bgcolor: 'primary.main', 
-                                            color: 'white', 
-                                            borderRadius: '50%', 
-                                            width: 24, 
-                                            height: 24, 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 'bold',
-                                            flexShrink: 0,
-                                            mt: 0.2
-                                        }}>3</Box>
-                                        <Typography variant="body1">
-                                            Şeker ve beyaz un içeren ürünleri <strong>tamamen kesmemeye</strong> çalışın.
-                                        </Typography>
-                                    </Box>
-                                    
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                        <Box sx={{ 
-                                            bgcolor: 'primary.main', 
-                                            color: 'white', 
-                                            borderRadius: '50%', 
-                                            width: 24, 
-                                            height: 24, 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'center',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 'bold',
-                                            flexShrink: 0,
-                                            mt: 0.2
-                                        }}>4</Box>
-                                        <Typography variant="body1">
-                                            Egzersiz programınızı düzenli olarak uygulayın. Özellikle kardio egzersizlerine ağırlık verin.
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </CardContent>
+                                ) : nutritionPlan && nutritionPlan.length > 0 ? (
+                                    nutritionPlan.map((plan, index) => (
+                                        <React.Fragment key={plan.id || index}>
+                                            <ListItem
+                                                secondaryAction={
+                                                    <Box>
+                                                        <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                        <IconButton edge="end" aria-label="delete">
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Box>
+                                                }
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                        <EventIcon />
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText 
+                                                    primary={
+                                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                {plan.NutritionPlan?.title || "Beslenme Planı"}
+                                                            </Typography>
+                                                            <Chip 
+                                                                label="Aktif" 
+                                                                size="small" 
+                                                                color="success" 
+                                                                sx={{ ml: 1 }}
+                                                            />
+                                                        </Box>
+                                                    }
+                                                    secondary={
+                                                        <Box>
+                                                            <Typography variant="body2" component="span">
+                                                                {plan.start_date && plan.end_date 
+                                                                    ? `${new Date(plan.start_date).toLocaleDateString('tr-TR')} - ${new Date(plan.end_date).toLocaleDateString('tr-TR')}` 
+                                                                    : "Tarih belirtilmemiş"}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Not: {plan.note || "Not eklenmemiş"}
+                                                            </Typography>
+                                                        </Box>
+                                                    }
+                                                />
+                                            </ListItem>
+                                            {index < nutritionPlan.length - 1 && (
+                                                <Divider variant="inset" component="li" />
+                                            )}
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <ListItem>
+                                        <ListItemText 
+                                            primary="Atanmış beslenme planı bulunamadı"
+                                            secondary="Danışana henüz bir beslenme planı atanmamış"
+                                        />
+                                    </ListItem>
+                                )}
+                            </List>
                         </Card>
                     </Box>
                 );
