@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal, TextInput, Alert, TouchableWithoutFeedback } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, TextInput, Alert, TouchableWithoutFeedback, Animated } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../App';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../../config.js';
+
+// Define a simple navigation prop type that doesn't depend on RootStackParamList
+type NavigationProp = {
+  replace: (routeName: string) => void;
+  navigate: (routeName: string) => void;
+};
 
 type Props = {
-  navigation: NativeStackNavigationProp<RootStackParamList>;
+  navigation: NavigationProp;
 };
+
+interface DailyMealPlan {
+  Kahvaltı: string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  'Öğle Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  'Akşam Yemeği': string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+  Aparatif: string[] | string | { main: string[], alternatives: {[key: string]: string[]} };
+}
 
 const BottomNav = ({ navigation }: Props) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,6 +35,69 @@ const BottomNav = ({ navigation }: Props) => {
   const [selectedExerciseType, setSelectedExerciseType] = useState('Koşu');
   const [exerciseDuration, setExerciseDuration] = useState('');
   const [isExerciseSubmitting, setIsExerciseSubmitting] = useState(false);
+  const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
+  
+  // Toast notification state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const toastOpacity = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    // Fetch nutrition plan ID on component mount
+    fetchNutritionPlanId();
+  }, []);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+    
+    // Animate fade in
+    Animated.timing(toastOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true
+    }).start();
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      Animated.timing(toastOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true
+      }).start(() => setToastVisible(false));
+    }, 3000);
+  };
+
+  const fetchNutritionPlanId = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.error('Token Bulunamadı');
+        return;
+      }
+      
+      const response = await fetch(`${config.apiUrl}/client/getTodayMeal`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      // Store the nutrition plan ID
+      if (data.nutrition_plan_id) {
+        setNutritionPlanId(data.nutrition_plan_id);
+      } else if (data.NutritionPlan && data.NutritionPlan.id) {
+        setNutritionPlanId(data.NutritionPlan.id);
+      }
+    } catch (error) {
+      console.error('Error fetching nutrition plan ID:', error);
+    }
+  };
 
   const mealTypes = ['Kahvaltı', 'Öğle', 'Akşam', 'Aperatifler'];
   const exerciseTypes = [
@@ -47,22 +124,144 @@ const BottomNav = ({ navigation }: Props) => {
   const handleAddMeal = async () => {
     if (!newMeal || !newPortion || !selectedMealType) return;
     setIsSubmitting(true);
+    
     try {
-      await fetch('https://your-api-endpoint.com/meals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mealType: selectedMealType,
-          item: newMeal,
-          portion: newPortion,
-        }),
+      // Get current day of the week in Turkish
+      const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      const today = new Date().getDay();
+      const todayTurkish = days[today];
+      
+      // If we don't have a nutrition plan ID, we need to fetch it
+      if (nutritionPlanId === null) {
+        await fetchNutritionPlanId();
+        if (nutritionPlanId === null) {
+          showToast('Beslenme planı bulunamadı. Lütfen daha sonra tekrar deneyin.', 'error');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
+      // Convert app meal names to API meal names
+      const convertAppMealNameToApiMealName = (appMealName: string): string => {
+        switch (appMealName) {
+          case 'Kahvaltı': return 'Kahvaltı';
+          case 'Öğle': return 'Öğle Yemeği';
+          case 'Akşam': return 'Akşam Yemeği';
+          case 'Aperatifler': return 'Aparatif';
+          default: return '';
+        }
+      };
+      
+      // First get the current meal plan to update it
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        showToast('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.', 'error');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const response = await fetch(`${config.apiUrl}/client/getTodayMeal`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      const data = await response.json();
+      
+      // Find the meal plan data
+      let mealPlanData: any = null;
+      
+      if (data.mealPlan) {
+        mealPlanData = data.mealPlan;
+      } else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
+        mealPlanData = data.NutritionPlan.mealPlan;
+      }
+      
+      if (!mealPlanData) {
+        // If we can't find a meal plan, create a new one
+        mealPlanData = {
+          [todayTurkish]: {
+            'Kahvaltı': [],
+            'Öğle Yemeği': [],
+            'Akşam Yemeği': [],
+            'Aparatif': []
+          }
+        };
+      }
+      
+      // Make sure today's plan exists
+      if (!mealPlanData[todayTurkish]) {
+        mealPlanData[todayTurkish] = {
+          'Kahvaltı': [],
+          'Öğle Yemeği': [],
+          'Akşam Yemeği': [],
+          'Aparatif': []
+        };
+      }
+      
+      // Get the API meal type
+      const apiMealType = convertAppMealNameToApiMealName(selectedMealType);
+      
+      // Create or update the meal array for this meal type
+      const todayPlan = mealPlanData[todayTurkish];
+      
+      // Initialize the meal type if it doesn't exist
+      if (!todayPlan[apiMealType]) {
+        todayPlan[apiMealType] = [];
+      } else if (typeof todayPlan[apiMealType] === 'object' && 
+                !Array.isArray(todayPlan[apiMealType]) && 
+                todayPlan[apiMealType] && 
+                'main' in todayPlan[apiMealType]) {
+        // If it's in the complex format with main and alternatives
+        const mealData = todayPlan[apiMealType] as {main: string[], alternatives?: {[key: string]: string[]}};
+        
+        // Check if the meal is already in the list to avoid duplicates
+        if (!mealData.main.includes(newMeal)) {
+          mealData.main.push(newMeal);
+        }
+      } else if (Array.isArray(todayPlan[apiMealType])) {
+        // Simple array format - Check if the meal is already in the list to avoid duplicates
+        const meals = todayPlan[apiMealType] as string[];
+        if (!meals.includes(newMeal)) {
+          meals.push(newMeal);
+        }
+      }
+      
+      // Prepare the update data
+      const updateData = {
+        nutrition_plan_id: nutritionPlanId,
+        mealPlan: {
+          [todayTurkish]: todayPlan
+        }
+      };
+      
+      // Send the update to the server
+      const updateResponse = await fetch(`${config.apiUrl}/client/updateMealPlan`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      });
+      
+      const updateResult = await updateResponse.json();
+      
+      if (!updateResponse.ok) {
+        showToast('Öğün eklenirken bir hata oluştu: ' + (updateResult.message || 'Bilinmeyen hata'), 'error');
+      } else {
+        showToast('Öğün başarıyla eklendi', 'success');
+      }
+      
       setShowMealPopup(false);
       setNewMeal('');
       setNewPortion('');
       setSelectedMealType('Kahvaltı');
     } catch (e) {
-      console.log('Hata:', 'Hızlı Öğün Ekle butonunda bir hata oluştu.');
+      console.error('Error adding meal:', e);
+      showToast('Öğün eklenirken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +331,23 @@ const BottomNav = ({ navigation }: Props) => {
         <TouchableWithoutFeedback onPress={() => setMenuOpen(false)}>
           <View style={styles.overlay} />
         </TouchableWithoutFeedback>
+      )}
+
+      {/* Toast Notification */}
+      {toastVisible && (
+        <Animated.View style={[
+          styles.toast, 
+          toastType === 'error' ? styles.errorToast : styles.successToast,
+          { opacity: toastOpacity }
+        ]}>
+          <Icon 
+            name={toastType === 'error' ? 'alert-circle' : 'check-circle'} 
+            size={20} 
+            color="#fff" 
+            style={styles.toastIcon} 
+          />
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </Animated.View>
       )}
 
       <View style={styles.bottomNavbar}>
@@ -423,6 +639,37 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 0,
   },
+  toast: {
+    position: 'absolute',
+    bottom: 80,
+    left: 20,
+    right: 20,
+    backgroundColor: '#333',
+    padding: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 9999,
+  },
+  successToast: {
+    backgroundColor: '#4caf50',
+  },
+  errorToast: {
+    backgroundColor: '#f44336',
+  },
+  toastIcon: {
+    marginRight: 8,
+  },
+  toastText: {
+    color: '#fff',
+    fontSize: 14,
+    flex: 1,
+  }
 });
 
 export default BottomNav;
