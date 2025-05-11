@@ -477,7 +477,7 @@ class DietitianController {
         }
     }
 
-    async getNutritionPlanByClient(req, res) {
+    async getNutritionAssignmentPlanByClient(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -512,7 +512,7 @@ class DietitianController {
                     return res.status(400).json({ message: "Geçersiz range: 'day', 'week' veya 'month' olmalı." });
             }
 
-            const plans = await DietitianService.getPlansByDateRange(
+            const plans = await DietitianService.getNutritionAssignmentPlanByClient(
                 dietitian_id,
                 client_id,
                 startDate,

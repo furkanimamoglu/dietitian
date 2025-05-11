@@ -113,7 +113,7 @@ export default function Danisan() {
                 setNutritionPlanLoading(true);
                 try {
                     const response = await axios.post(
-                        config[config.environment].apiUrl + "/dietitian/getNutritionPlanByClient",
+                        config[config.environment].apiUrl + "/dietitian/getNutritionAssignmentPlanByClient",
                         {
                             client_id: id,
                             range: "week"

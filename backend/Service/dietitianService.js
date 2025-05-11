@@ -603,7 +603,7 @@ class DietitianService {
         return plan;
     }
 
-    async getPlansByDateRange(dietitian_id, client_id, startDate, endDate) {
+    async getNutritionAssignmentPlanByClient(dietitian_id, client_id, startDate, endDate) {
         return await NutritionAssignment.findAll({
             where: {
                 client_id,
@@ -613,7 +613,8 @@ class DietitianService {
             include: [{
                 model: NutritionPlan,
                 as: 'NutritionPlan',
-                where: { dietitian_id }
+                where: { dietitian_id },
+                attributes: ['id', 'mealPlan'] // burada mealPlan'ı ve gerekiyorsa diğer alanları dahil ediyoruz
             }],
             order: [['start_date', 'ASC']]
         });

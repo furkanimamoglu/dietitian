@@ -28,7 +28,7 @@ router.get('/getNutritionCategories', dietitianController.getNutritionCategories
 router.delete('/deleteNutritionCategory', dietitianController.deleteNutritionCategory);
 router.post('/addNutritionCategory', dietitianController.addNutritionCategory);
 router.put('/updateNutritionPlan', dietitianController.updateNutritionPlan);
-router.post('/getNutritionPlanByClient', dietitianController.getNutritionPlanByClient);
+router.post('/getNutritionAssignmentPlanByClient', dietitianController.getNutritionAssignmentPlanByClient);
 
 router.post('/assignNutritionPlanToClient', dietitianController.assignNutritionPlanToClient);
 router.post('/addNutritionPlan', dietitianController.addNutritionPlan);
