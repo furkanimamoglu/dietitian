@@ -119,18 +119,18 @@ class ClientController {
     async getTodayMeal(req, res) {
         try {
             const token = req.headers.authorization;
-            const clientId = Security.getUserIdFromToken(token);
+            const client_id = Security.getUserIdFromToken(token);
 
-            if (!token || !clientId) {
+            if (!token || !client_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
 
             const today = moment().format('YYYY-MM-DD');
-            const dayName = moment().locale('tr').format('dddd'); // örn: 'Pazartesi'
+            const dayName = moment().locale('tr').format('dddd');
 
-            const result = await ClientService.getTodayMeal(clientId, today, dayName);
+            const result = await ClientService.getTodayMeal(client_id, today, dayName);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -140,8 +140,38 @@ class ClientController {
         }
     }
 
+    async updateMealPlan(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const { nutrition_plan_id, mealPlan } = req.body;
 
+            if (!token || !client_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
 
+            if (!nutrition_plan_id || !mealPlan) {
+                return res.status(400).json({
+                    success: false,
+                    message: "clientId, nutritionPlanId ve mealPlan alanları zorunludur."
+                });
+            }
+
+            const result = await ClientService.updateMealPlan(client_id, nutrition_plan_id, mealPlan);
+
+            return res.status(200).json(result);
+
+        } catch (error) {
+            console.error("updateMealPlan error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Bir hata oluştu.",
+                error: error.message
+            });
+        }
+    }
 
 }
 

@@ -430,11 +430,9 @@ class DietitianService {
 
             query = query ? query.toLowerCase() : "";
 
-            const filteredData = data.filter(item =>
+            return data.filter(item =>
                 item.name.toLowerCase().includes(query)
             );
-
-            return filteredData;
         } catch (error) {
             throw new Error(error.message);
         }
@@ -490,9 +488,11 @@ class DietitianService {
             nutrition_plan_id,
             start_date,
             end_date,
-            note
+            note,
+            mealPlan: plan.mealPlan
         });
     }
+
 
     async getNutritionPlans(dietitian_id) {
         if (!dietitian_id) {
@@ -555,29 +555,6 @@ class DietitianService {
 
         if (mealPlan && typeof mealPlan !== 'object') {
             throw new Exception("Meal plan geçerli bir JSON formatında olmalıdır.", 400, true);
-        }
-
-        if (mealPlan) {
-            const validDays = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-            const validMeals = ["Kahvaltı", "Öğle Yemeği", "Akşam Yemeği", "Aparatif"];
-
-            for (const day of validDays) {
-                const meals = mealPlan[day];
-                if (meals) {
-                    for (const meal of validMeals) {
-                        if (!Array.isArray(meals[meal].main)) {
-                            throw new Exception(`'${day}' günündeki '${meal}' öğününün 'main' kısmı bir dizi (array) olmalıdır.`, 400, true);
-                        }
-                        if (meals[meal].alternatives) {
-                            for (const ingredient in meals[meal].alternatives) {
-                                if (!Array.isArray(meals[meal].alternatives[ingredient])) {
-                                    throw new Exception(`'${day}' günündeki '${meal}' öğününün '${ingredient}' alternatifi geçerli bir dizi olmalıdır.`, 400, true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         return await NutritionPlan.create({

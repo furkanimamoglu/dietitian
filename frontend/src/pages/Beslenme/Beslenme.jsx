@@ -926,17 +926,14 @@ export default function Beslenme() {
         })
         .then(response => {
             if (!response.data.ok) {
-                // Handle error response from API
                 setErrorMessage(response.data.message);
                 setShowErrorPopup(true);
                 return;
             }
             
-            // Store names for success message
             const programName = selectedProgram.title;
             const userName = `${selectedUser.name}`;
             
-            // Close the modal and reset selections
             setAddToUserModal(false);
             setSelectedProgram(null);
             setSelectedUser(null);

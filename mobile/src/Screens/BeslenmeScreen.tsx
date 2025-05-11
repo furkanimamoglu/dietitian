@@ -78,6 +78,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
 
   useEffect(() => {
     calculateDailyStats();
@@ -104,7 +105,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       });
       
       const data = await response.json();
-      console.log('Received meal plan:', data);
+      console.log('Received meal plan:', JSON.stringify(data, null, 2));
       
       // Check if response contains showOnScreen and message
       if (data.showOnScreen && data.message) {
@@ -114,7 +115,67 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
         return;
       }
       
-      updateMealsFromPlan(data);
+      // Store the nutrition plan ID for later use
+      if (data.nutrition_plan_id) {
+        setNutritionPlanId(data.nutrition_plan_id);
+      } else if (data.NutritionPlan && data.NutritionPlan.id) {
+        setNutritionPlanId(data.NutritionPlan.id);
+      }
+      
+      // Get current day of the week in Turkish
+      const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      const today = new Date().getDay();
+      const todayTurkish = days[today];
+      
+      console.log('Today is:', today, 'Day in Turkish:', todayTurkish);
+      
+      // Find the meal plan data - handle different response structures
+      let mealPlanData = null;
+      
+      // Option 1: Direct mealPlan property
+      if (data.mealPlan) {
+        console.log('Found mealPlan directly in response');
+        mealPlanData = data.mealPlan;
+      } 
+      // Option 2: Inside NutritionPlan object
+      else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
+        console.log('Found mealPlan inside NutritionPlan object');
+        mealPlanData = data.NutritionPlan.mealPlan;
+      } 
+      // Option 3: The entire response is the meal plan
+      else if (data.Kahvaltı || data['Öğle Yemeği'] || data['Akşam Yemeği'] || data.Aparatif) {
+        console.log('The response itself appears to be the meal plan for a day');
+        // In this case, the response is already the day plan
+        updateMealsFromPlan(data);
+        setLoading(false);
+        return;
+      }
+      
+      if (mealPlanData) {
+        console.log('Available days in meal plan:', Object.keys(mealPlanData));
+        
+        // Check if we have a meal plan for today
+        if (mealPlanData[todayTurkish]) {
+          console.log('Found meal plan for today:', JSON.stringify(mealPlanData[todayTurkish], null, 2));
+          updateMealsFromPlan(mealPlanData[todayTurkish]);
+        } else {
+          // For debugging: let's try to look for any day's meal plan
+          const anyDay = Object.keys(mealPlanData)[0];
+          if (anyDay) {
+            console.log('No meal plan for today, using first available day instead:', anyDay);
+            updateMealsFromPlan(mealPlanData[anyDay]);
+          } else {
+            console.log('No meal plan found for any day');
+            setError('Beslenme planı bulunamadı.');
+            setIsEmpty(true);
+          }
+        }
+      } else {
+        console.log('No meal plan structure found in response');
+        setError('Beslenme planı verisi bulunamadı.');
+        setIsEmpty(true);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching meal plan:', error);
@@ -159,6 +220,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       if (targetMeal && newMeals[targetMeal]) {
         // Add each main item with its alternatives
         newMeals[targetMeal] = mainItems.map(item => {
+          // Find alternatives for this specific item if they exist
           const itemAlternatives = alternatives[item] || [];
           return {
             item,
@@ -199,6 +261,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     }
     
     setMeals(newMeals);
+    calculateDailyStats();
   };
 
   const calculateDailyStats = () => {
@@ -221,6 +284,10 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     const newMeals = { ...meals };
     newMeals[mealType][index].checked = !newMeals[mealType][index].checked;
     setMeals(newMeals);
+    calculateDailyStats();
+    
+    // Update the meal plan on the server without changing the structure
+    // We only track completion status locally, no need to update the server for meal checks
   };
 
   const openModal = () => {
@@ -242,6 +309,87 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       setNewMeal('');
       setNewPortion('');
       setModalVisible(false);
+      
+      // Update the meal plan on the server
+      updateMealPlanOnServer(updatedMeals);
+    }
+  };
+
+  const updateMealPlanOnServer = async (updatedMeals: { [key: string]: MealItem[] }) => {
+    try {
+      // If we don't have a nutrition plan ID, we can't update
+      if (nutritionPlanId === null) {
+        console.error('Nutrition plan ID is missing, cannot update meal plan');
+        Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
+        return;
+      }
+      
+      // Get current day of the week in Turkish
+      const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+      const today = new Date().getDay();
+      const todayTurkish = days[today];
+      
+      // Convert app meal names to API meal names
+      const convertAppMealNameToApiMealName = (appMealName: string): string => {
+        switch (appMealName) {
+          case 'Kahvaltı': return 'Kahvaltı';
+          case 'Öğle': return 'Öğle Yemeği';
+          case 'Akşam': return 'Akşam Yemeği';
+          case 'Aperatifler': return 'Aparatif';
+          default: return '';
+        }
+      };
+      
+      // Create the updated meal plan structure for today
+      const updatedDayPlan: DailyMealPlan = {
+        Kahvaltı: [],
+        'Öğle Yemeği': [],
+        'Akşam Yemeği': [],
+        Aparatif: []
+      };
+      
+      // Convert each meal type to the API format
+      Object.entries(updatedMeals).forEach(([mealType, items]) => {
+        const apiMealType = convertAppMealNameToApiMealName(mealType);
+        if (apiMealType) {
+          // Convert the items to simple string array format
+          updatedDayPlan[apiMealType as keyof DailyMealPlan] = items.map(item => item.item);
+        }
+      });
+      
+      // Prepare the data to be sent to the server
+      const mealPlanUpdate = {
+        nutrition_plan_id: nutritionPlanId,
+        mealPlan: {
+          [todayTurkish]: updatedDayPlan
+        }
+      };
+      
+      console.log('Updating meal plan:', mealPlanUpdate);
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.error('Token Bulunamadı');
+        return;
+      }
+      
+      const response = await fetch(`${config.apiUrl}/client/updateMealPlan`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(mealPlanUpdate)
+      });
+      
+      const data = await response.json();
+      console.log('Meal plan update response:', data);
+      
+      if (!response.ok) {
+        Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
+      }
+    } catch (error) {
+      console.error('Error updating meal plan:', error);
+      Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
     }
   };
 

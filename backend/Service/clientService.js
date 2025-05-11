@@ -149,7 +149,7 @@ class ClientService {
         }
     }
 
-    async getTodayMeal(clientId, todayDate, dayName) {
+    async getTodayMeal(clientId, todayDate) {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: clientId,
@@ -168,38 +168,28 @@ class ClientService {
             throw new Exception("Bugün için atanmış bir beslenme planı bulunamadı. Lütfen diyetisyeninizden size bir beslenme programı atamasını talep edin.", 404, true);
         }
 
-        if (!assignment.NutritionPlan) {
-            throw new Exception("Beslenme planı detayları bulunamadı.", 404, true);
-        }
-
-        const mealPlan = assignment.NutritionPlan.mealPlan;
-        
-        if (!mealPlan) {
-            throw new Exception("Beslenme planı içeriği bulunamadı.", 404, true);
-        }
-        
-        // First try with the exact day name
-        let todayMeal = mealPlan[dayName];
-        
-        // If not found, try to find a case-insensitive match
-        if (!todayMeal) {
-            const dayKeys = Object.keys(mealPlan);
-            const matchingDayKey = dayKeys.find(
-                key => key.toLowerCase() === dayName.toLowerCase()
-            );
-            
-            if (matchingDayKey) {
-                todayMeal = mealPlan[matchingDayKey];
-            }
-        }
-
-        if (!todayMeal) {
-            // If still not found, return a helpful error message
-            throw new Exception(`Bugün (${dayName}) için bir öğün planı bulunamadı. Lütfen diyetisyeninize başvurun.`, 404, true);
-        }
-
-        return todayMeal;
+        return assignment;
     }
+
+    async updateMealPlan(client_id, nutrition_plan_id, newMealPlan) {
+        const assignment = await NutritionAssignment.findOne({
+            where: {
+                client_id: client_id,
+                nutrition_plan_id: nutrition_plan_id
+            }
+        });
+
+        if (!assignment) {
+            throw new Exception("Belirtilen kullanıcıya ait beslenme ataması bulunamadı.", 404, true);
+        }
+
+        assignment.mealPlan = newMealPlan;
+
+        await assignment.save();
+
+        return assignment;
+    }
+
 }
 
 module.exports = new ClientService();

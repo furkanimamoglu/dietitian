@@ -23,6 +23,14 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
             key: 'id'
         }
     },
+    mealPlan: {
+        type: DataTypes.JSON,
+        allowNull: true
+    },
+    note: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
     start_date: {
         type: DataTypes.DATEONLY,
         allowNull: false
@@ -30,10 +38,6 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
     end_date: {
         type: DataTypes.DATEONLY,
         allowNull: false
-    },
-    note: {
-        type: DataTypes.TEXT,
-        allowNull: true
     }
 }, {
     tableName: 'NutritionAssignments',
