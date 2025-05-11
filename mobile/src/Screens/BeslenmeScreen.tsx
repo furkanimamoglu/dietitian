@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert
+  Alert,
+  FlatList
 } from 'react-native';
 import {
   Card,
@@ -79,6 +80,7 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     calculateDailyStats();
@@ -182,6 +184,8 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
       setError('Beslenme planı yüklenemedi. Lütfen tekrar deneyin.');
       setIsEmpty(true);
       setLoading(false);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -669,14 +673,36 @@ const Beslenme = ({ navigation }: { navigation: any }) => {
     );
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchTodayMeal();
+  }, []);
+
+  const renderFlatListContent = () => {
+    const contentArray = [{ key: 'content' }];
+    return (
+      <FlatList
+        data={contentArray}
+        keyExtractor={(item) => item.key}
+        renderItem={() => (
+          <View>
+            {renderContent()}
+          </View>
+        )}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        contentContainerStyle={loading || error || isEmpty ? styles.centeredContent : styles.content}
+        showsVerticalScrollIndicator={false}
+      />
+    );
+  };
+
   return (
     <Provider>
       <View style={styles.container}>
         <Header navigation={navigation} />
 
-        <ScrollView style={styles.content} contentContainerStyle={loading || error || isEmpty ? styles.centeredContent : undefined}>
-          {renderContent()}
-        </ScrollView>
+        {renderFlatListContent()}
 
         {!isEmpty && (
           <FAB

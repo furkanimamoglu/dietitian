@@ -265,7 +265,7 @@ const SifremiUnuttumScreen: React.FC = () => {
             <Icon name="lock-reset" size={50} color="#F57C00" style={styles.icon} />
             <Text style={styles.header}>Şifremi Unuttum</Text>
             <Text style={styles.subheader}>
-              {step === 1 && 'Şifrenizi sıfırlamak için telefon numaranızı girin'}
+              {step === 1 && 'Şifrenizi sıfırlamak için telefon numaranızı girin veya diyetisyeninize başvurun.'}
               {step === 2 && 'Doğrulama kodunu girin'}
               {step === 3 && 'Yeni şifrenizi oluşturun'}
             </Text>
