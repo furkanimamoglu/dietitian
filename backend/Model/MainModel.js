@@ -145,6 +145,15 @@ Anamnes.belongsTo(AnamnesQuestion, {
     foreignKey: 'anamnes_question_id',
 });
 
+// 13. Dietitian ve Notes
+Dietitian.hasMany(Notes, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+});
+Notes.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
+});
+
 module.exports = {
     sequelize,
     Dietitian,

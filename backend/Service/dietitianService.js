@@ -10,8 +10,9 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes} = require('../Model/MainModel');
 const {Op} = require("sequelize");
+const Security = require("../Utils/Security");
 
 class DietitianService {
 
@@ -616,6 +617,30 @@ class DietitianService {
             }],
             order: [['start_date', 'ASC']]
         });
+    }
+
+    async getMyNotes(dietitian_id) {
+        try {
+            return await Notes.findAll({
+                where: {
+                    dietitian_id: dietitian_id
+                },
+                order: [['createdAt', 'DESC']]
+            });
+        } catch (error) {
+            throw new Exception("Notlar alınırken bir hata oluştu.", 500, true);
+        }
+    }
+
+    async addNote(dietitian_id, note) {
+        try {
+            return await Notes.create({
+                dietitian_id,
+                noteContent: note
+            });
+        } catch (error) {
+            throw new Exception("Not eklenirken bir hata oluştu.", 500, true);
+        }
     }
 
 }

@@ -2,6 +2,7 @@ const DietitianService = require("../Service/dietitianService");
 require("../Exception/Exception");
 const Security = require("../Utils/Security");
 const moment = require("moment");
+const {Notes} = require("../Model/MainModel");
 
 class DietitianController {
 
@@ -520,13 +521,106 @@ class DietitianController {
 
             return res.status(200).json(plans);
         } catch (error) {
-            console.error("Plan çekme hatası:", error);
             return res.status(error.status || 500).json({
                 message: error.message || "Bir hata oluştu.",
                 showOnScreen: error.showOnScreen ?? true
             });
         }
     }
+
+    async getMyNotes(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await DietitianService.getMyNotes(dietitian_id);
+            return res.status(200).json(result);
+        } catch(error) {
+            return res.status(error.status || 500).json({
+                message: error.message || "Bir hata oluştu.",
+                showOnScreen: error.showOnScreen ?? true
+            });
+        }
+    }
+
+    async addNote(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { note } = req.body
+
+            if(!note) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Note içeriği girilmedi."
+                });
+            }
+
+            const result = await DietitianService.addNote(dietitian_id, note);
+
+            return res.status(200).json(result);
+        } catch(error) {
+            return res.status(error.status || 500).json({
+                message: error.message || "Bir hata oluştu.",
+                showOnScreen: error.showOnScreen ?? true
+            });
+        }
+    }
+
+    async deleteNote(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { note_id } = req.query;
+
+            if (!note_id) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Silinecek notun ID'si belirtilmelidir."
+                });
+            }
+
+            const note = await Notes.findByPk(note_id);
+
+            if (!note) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Not bulunamadı."
+                });
+            }
+
+            await note.destroy();
+
+            return res.status(200).json({
+                success: true,
+                message: "Not başarıyla silindi."
+            });
+        } catch (error) {
+            console.error("deleteNote error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Bir hata oluştu.",
+                error: error.message
+            });
+        }
+    }
+
 
 }
 

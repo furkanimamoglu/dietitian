@@ -20,6 +20,10 @@ router.get('/globalSearchbar', dietitianController.globalSearchbar);
 router.get('/getDietitianQR', dietitianController.createMyQR);
 router.get('/getDietitianNameById', dietitianController.getDietitianNameById);
 
+router.get('/getMyNotes', dietitianController.getMyNotes);
+router.post('/addNote', dietitianController.addNote);
+router.delete('/deleteNote', dietitianController.deleteNote);
+
 router.get('/getNutritionCategories', dietitianController.getNutritionCategories);
 router.delete('/deleteNutritionCategory', dietitianController.deleteNutritionCategory);
 router.post('/addNutritionCategory', dietitianController.addNutritionCategory);

@@ -35,13 +35,7 @@ import config from "../../config.js";
 
 export default function Dashboard() {
     const [noteText, setNoteText] = useState('');
-    const [notes, setNotes] = useState([
-        'Ahmet Yılmaz için yeni diyet planı hazırla',
-        'Aylık ilerleme raporlarını hazırla',
-        'Yeni danışan formlarını güncelle',
-        'Haftalık beslenme bülteni gönder',
-        'Yeni sağlıklı tarifler araştır'
-    ]);
+    const [notes, setNotes] = useState([]);
     const [todayAppointments, setTodayAppointments] = useState(0);
     const [remainingAppointments, setRemainingAppointments] = useState(0);
     const [pendingRequests, setPendingRequests] = useState(0);
@@ -68,7 +62,8 @@ export default function Dashboard() {
                     fetchPendingRequests(),
                     fetchActiveClients(),
                     fetchPendingAppointments(),
-                    fetchTodayApprovedAppointments()
+                    fetchTodayApprovedAppointments(),
+                    fetchNotes()
                 ]);
             } catch (error) {
                 console.error("Dashboard verileri çekilirken bir hata oluştu:", error);
@@ -179,6 +174,23 @@ export default function Dashboard() {
             }
         };
 
+        const fetchNotes = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getMyNotes",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setNotes(response.data || []);
+            } catch (error) {
+                console.error("Notlar çekilirken bir hata oluştu:", error);
+                setNotes([]);
+            }
+        };
+
         fetchDashboardData();
     }, []);
 
@@ -233,18 +245,66 @@ export default function Dashboard() {
         }
     };
 
-    const handleAddNote = (e) => {
+    const handleAddNote = async (e) => {
         e.preventDefault();
         if (noteText.trim()) {
-            setNotes([...notes, noteText]);
-            setNoteText('');
+            try {
+                await axios.post(
+                    config[config.environment].apiUrl + "/dietitian/addNote",
+                    { note: noteText },
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                
+                // Refresh notes after adding
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getMyNotes",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setNotes(response.data || []);
+                
+                // Clear input field
+                setNoteText('');
+                
+                // Show success message
+                setSuccessMessage('Not başarıyla eklendi.');
+                setShowSuccessPopup(true);
+            } catch (error) {
+                console.error("Not eklenirken bir hata oluştu:", error);
+            }
         }
     };
 
-    const handleDeleteNote = (index) => {
-        const newNotes = [...notes];
-        newNotes.splice(index, 1);
-        setNotes(newNotes);
+    const handleDeleteNote = async (noteId) => {
+        try {
+            await axios.delete(
+                `${config[config.environment].apiUrl}/dietitian/deleteNote`,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token')
+                    },
+                    params: {
+                        note_id: noteId
+                    }
+                }
+            );
+            
+            // Remove the note from local state
+            setNotes(notes.filter(note => note.id !== noteId));
+            
+            // Show success message
+            setSuccessMessage('Not başarıyla silindi.');
+            setShowSuccessPopup(true);
+        } catch (error) {
+            console.error("Not silinirken bir hata oluştu:", error);
+        }
     };
 
     const statCards = [
@@ -746,14 +806,14 @@ export default function Dashboard() {
                                 </Box>
                                 
                                 <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-                                    {notes.map((note, index) => (
-                                        <React.Fragment key={index}>
+                                    {notes.map((note) => (
+                                        <React.Fragment key={note.id}>
                                             <ListItem
                                                 secondaryAction={
                                                     <IconButton 
                                                         edge="end" 
                                                         aria-label="delete"
-                                                        onClick={() => handleDeleteNote(index)}
+                                                        onClick={() => handleDeleteNote(note.id)}
                                                     >
                                                         <DeleteIcon />
                                                     </IconButton>
@@ -765,11 +825,18 @@ export default function Dashboard() {
                                                     borderLeft: '3px solid #3498db'
                                                 }}
                                             >
-                                                <ListItemText primary={note} />
+                                                <ListItemText 
+                                                    primary={note.noteContent} 
+                                                    secondary={new Date(note.createdAt).toLocaleString()}
+                                                />
                                             </ListItem>
-                                            {index < notes.length - 1 && <Box sx={{ mb: 1 }} />}
                                         </React.Fragment>
                                     ))}
+                                    {notes.length === 0 && (
+                                        <ListItem>
+                                            <ListItemText primary="Henüz not bulunmamaktadır." />
+                                        </ListItem>
+                                    )}
                                 </List>
                             </CardContent>
                         </Card>
