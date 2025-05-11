@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from "react";
 import axios from "axios";
 import "./Randevularim.css";
+import { toast } from 'react-hot-toast';
 
 import FullCalendar from "@fullcalendar/react";
 import "@fullcalendar/core";
@@ -27,7 +28,7 @@ import {
     Autocomplete
 } from '@mui/material';
 import config from "../../config.js";
-import {Close} from "@mui/icons-material";
+import {Close, Delete} from "@mui/icons-material";
 
 export default function Randevularim() {
     const [randevular, setRandevular] = useState([]);
@@ -35,6 +36,7 @@ export default function Randevularim() {
 
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
     const [eventData, setEventData] = useState({
         id: null,
@@ -138,6 +140,12 @@ export default function Randevularim() {
 
     const handleEventClick = (arg) => {
         const event = arg.event;
+        console.log("Tıklanan randevu bilgileri:", {
+            id: event.id,
+            title: event.title,
+            extendedProps: event.extendedProps
+        });
+        
         setEventData({
             id: event.id,
             title: event.title,
@@ -207,16 +215,6 @@ export default function Randevularim() {
 
     const randevuEkle = async () => {
         try {
-            const newEvent = {
-                id: randevular.length + 1,
-                title: eventData.title,
-                start: eventData.start,
-                end: eventData.end,
-                extendedProps: {
-                    client_id: eventData.client_id,
-                },
-            };
-
             const requestData = {
                 title: eventData.title,
                 start: eventData.start,
@@ -235,11 +233,46 @@ export default function Randevularim() {
             );
 
             console.log("Randevu ekleme isteği başarılı:", response.data);
+            
+            // API yanıt yapısını kontrol et
+            let appointmentData;
+            
+            // Apı cevabı farklı formatlarda olabilir, kontrol ediyoruz
+            if (response.data && response.data.appointment) {
+                // {appointment: {...}} yapısı
+                appointmentData = response.data.appointment;
+            } else if (response.data && response.data.id) {
+                // Doğrudan appointment verisi döndüren yapı
+                appointmentData = response.data;
+            } else {
+                console.error("API yanıtı beklenen formatta değil:", response.data);
+                toast.error('Sunucu yanıtı beklenmeyen formatta. Yöneticinize başvurun.');
+                return;
+            }
+            
+            console.log("İşlenecek appointment verisi:", appointmentData);
+            
+            // Yeni oluşturulan randevuyu API'den dönen verilerle ekle
+            const newEvent = {
+                id: appointmentData.id,
+                title: appointmentData.title || eventData.title,
+                start: appointmentData.start || eventData.start,
+                end: appointmentData.end || eventData.end,
+                extendedProps: {
+                    client_id: appointmentData.client_id || eventData.client_id,
+                    status: appointmentData.status || "pending",
+                },
+                color: (appointmentData.status === "approved") ? "#4CAF50" : "#FF9800"
+            };
 
             setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
             setRandevuEklePopup(false);
+            
+            // Başarılı ekleme bildirimi
+            toast.success('Randevu başarıyla oluşturuldu!');
         } catch (error) {
             console.error("Randevu eklenirken bir hata oluştu:", error);
+            toast.error('Randevu eklenirken bir hata oluştu: ' + (error.response?.data?.message || error.message || 'Bilinmeyen hata'));
         }
     };
 
@@ -308,6 +341,50 @@ export default function Randevularim() {
             ...prev,
             [key]: value,
         }));
+    };
+
+    const handleEventDelete = async () => {
+        try {
+            // Get the appointment ID and log it to make sure it's correct
+            const appointmentId = eventData.id;
+            console.log("Silinecek randevu ID:", appointmentId);
+            
+            // Use a properly formatted query parameter
+            const response = await axios.delete(
+                `${config[config.environment].apiUrl}/appointment/deleteAppointmentAsDietitian`,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        appointment_id: appointmentId
+                    }
+                }
+            );
+            
+            console.log("Randevu silme başarılı:", response.data);
+            
+            // Randevu listesinden sil
+            setRandevular((prevRandevular) => 
+                prevRandevular.filter((randevu) => String(randevu.id) !== String(appointmentId))
+            );
+            
+            // Toast bildirim göster
+            toast.success('Randevu başarıyla silindi!');
+            
+            // Dialogları kapat
+            setConfirmDialogOpen(false);
+            handleDialogClose();
+            
+        } catch (error) {
+            console.error("Randevu silinirken bir hata oluştu:", error);
+            toast.error('Randevu silinirken bir hata oluştu!');
+            setConfirmDialogOpen(false);
+        }
+    };
+
+    const handleDeleteClick = () => {
+        setConfirmDialogOpen(true);
     };
 
     return (
@@ -577,6 +654,13 @@ export default function Randevularim() {
                     </FormControl>
                 </DialogContent>
                 <DialogActions>
+                    <Button 
+                        onClick={handleDeleteClick} 
+                        color="error" 
+                        startIcon={<Delete />}
+                    >
+                        Sil
+                    </Button>
                     <Button
                         onClick={handleEventSave}
                         color="primary"
@@ -585,6 +669,70 @@ export default function Randevularim() {
                         }
                     >
                         Kaydet
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Silme Onay Diyaloğu */}
+            <Dialog
+                open={confirmDialogOpen}
+                onClose={() => setConfirmDialogOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                        padding: '10px'
+                    }
+                }}
+            >
+                <DialogTitle 
+                    id="alert-dialog-title"
+                    sx={{ 
+                        backgroundColor: '#f8f9fa',
+                        borderBottom: '1px solid #e9ecef',
+                        padding: '16px 24px',
+                        fontWeight: 'bold',
+                        color: '#dc3545',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                    }}
+                >
+                    <Delete color="error" />
+                    Randevu Silme Onayı
+                </DialogTitle>
+                <DialogContent sx={{ padding: '24px', paddingTop: '24px !important' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Box sx={{ fontWeight: 'medium', fontSize: '16px' }}>
+                            "{eventData.title}" randevusunu silmek istediğinize emin misiniz?
+                        </Box>
+                        <Box sx={{ color: 'text.secondary', fontSize: '14px' }}>
+                            Bu işlem geri alınamaz. Randevu kalıcı olarak silinecektir.
+                        </Box>
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ padding: '16px 24px', borderTop: '1px solid #e9ecef' }}>
+                    <Button 
+                        onClick={() => setConfirmDialogOpen(false)} 
+                        color="inherit"
+                        sx={{ fontWeight: 'medium' }}
+                    >
+                        Vazgeç
+                    </Button>
+                    <Button 
+                        onClick={handleEventDelete} 
+                        color="error" 
+                        variant="contained"
+                        autoFocus
+                        sx={{ 
+                            fontWeight: 'medium',
+                            boxShadow: 'none',
+                            '&:hover': { boxShadow: 'none' }
+                        }}
+                    >
+                        Sil
                     </Button>
                 </DialogActions>
             </Dialog>

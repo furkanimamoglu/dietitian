@@ -126,7 +126,7 @@ class AppointmentController {
                 });
             }
 
-            const { appointment_id } = req.params;
+            const { appointment_id } = req.query;
 
             if (!appointment_id) {
                 return res.status(400).json({
