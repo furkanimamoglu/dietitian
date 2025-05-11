@@ -110,6 +110,11 @@ const Client = sequelize.define('Client', {
         ipAddress: {
             type: DataTypes.STRING,
             allowNull: true,
+        },
+        kvkkApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }
 );

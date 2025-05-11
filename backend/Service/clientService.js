@@ -190,6 +190,48 @@ class ClientService {
         return assignment;
     }
 
+    async getMyKVKKStatus(client_id) {
+        try {
+            const client = await Client.findOne({
+                where: { id: client_id },
+                attributes: ['kvkkApproval']
+            });
+
+            if (!client) {
+                throw new Exception("Kullanıcı bilgisi bulunamadı.", 404, true);
+            }
+
+            return {
+                kvkkApproval: client.kvkkApproval
+            };
+        } catch (error) {
+            console.error("KVKK durumu alınırken hata:", error.message);
+            return false;
+        }
+    }
+
+
+    async approveKVKK(client_id) {
+        try {
+            const client = await Client.findByPk(client_id);
+
+            if (!client) {
+                throw new Exception("Kullanıcı bilgisi bulunamadı.", 404, true);
+            }
+
+            client.kvkkApproval = true;
+            await client.save();
+
+            return {
+                updated: true,
+                message: "KVKK onayı başarıyla kaydedildi."
+            };
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+
 }
 
 module.exports = new ClientService();

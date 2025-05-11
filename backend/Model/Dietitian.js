@@ -72,6 +72,11 @@ const Dietitian = sequelize.define('Dietitian', {
             unique: {
                 msg: 'Bu token zaten mevcut.'
             },
+        },
+        kvkkApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }
 );

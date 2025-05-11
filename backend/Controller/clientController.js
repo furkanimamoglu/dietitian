@@ -164,12 +164,54 @@ class ClientController {
             return res.status(200).json(result);
 
         } catch (error) {
-            console.error("updateMealPlan error:", error);
-            return res.status(500).json({
-                success: false,
-                message: "Bir hata oluştu.",
-                error: error.message
-            });
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    async getMyKVKKStatus(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+
+            if (!token || !client_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.getMyKVKKStatus(client_id);
+
+            return res.status(200).json(result);
+        } catch ( error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    async approveKVKK(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+
+            if (!token || !client_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.approveKVKK(client_id);
+
+            return res.status(200).json(result);
+        } catch ( error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
         }
     }
 
