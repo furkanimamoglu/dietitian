@@ -41,7 +41,6 @@ import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
 import WcIcon from '@mui/icons-material/Wc';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
-import PrintIcon from '@mui/icons-material/Print';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EventIcon from '@mui/icons-material/Event';
@@ -1358,10 +1357,6 @@ export default function Danisan() {
             case 'randevu':
                 return (
                     <Box>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Randevular
-                        </Typography>
-                        
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Typography variant="h6">Randevu Geçmişi</Typography>
                             <Button 
