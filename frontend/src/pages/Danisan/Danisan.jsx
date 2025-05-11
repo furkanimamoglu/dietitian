@@ -57,6 +57,56 @@ export default function Danisan() {
     const [activeTab, setActiveTab] = useState('genel');
     const [nutritionPlan, setNutritionPlan] = useState(null);
     const [nutritionPlanLoading, setNutritionPlanLoading] = useState(false);
+    const [selectedPlanIndex, setSelectedPlanIndex] = useState(0);
+
+    // Function to find the plan that covers today's date
+    const findCurrentPlan = (plans) => {
+        if (!plans || plans.length === 0) return 0;
+        
+        const today = new Date();
+        
+        // Try to find a plan where today falls between start_date and end_date
+        for (let i = 0; i < plans.length; i++) {
+            const plan = plans[i];
+            if (plan.start_date && plan.end_date) {
+                const startDate = new Date(plan.start_date);
+                const endDate = new Date(plan.end_date);
+                
+                if (today >= startDate && today <= endDate) {
+                    return i;
+                }
+            }
+        }
+        
+        // If no matching plan, try to find the most recent plan
+        let mostRecentPlanIndex = 0;
+        let mostRecentDate = null;
+        
+        for (let i = 0; i < plans.length; i++) {
+            const plan = plans[i];
+            if (plan.start_date) {
+                const startDate = new Date(plan.start_date);
+                
+                if (!mostRecentDate || startDate > mostRecentDate) {
+                    mostRecentDate = startDate;
+                    mostRecentPlanIndex = i;
+                }
+            }
+        }
+        
+        return mostRecentPlanIndex;
+    };
+
+    // First, add a function to check if a plan includes today's date
+    const isActivePlan = (plan) => {
+        if (!plan.start_date || !plan.end_date) return false;
+        
+        const today = new Date();
+        const startDate = new Date(plan.start_date);
+        const endDate = new Date(plan.end_date);
+        
+        return today >= startDate && today <= endDate;
+    };
 
     useEffect(() => {
         const fetchDanisanInfo = async () => {
@@ -116,7 +166,7 @@ export default function Danisan() {
                         config[config.environment].apiUrl + "/dietitian/getNutritionAssignmentPlanByClient",
                         {
                             client_id: id,
-                            range: "week"
+                            range: "all"
                         },
                         {
                             headers: {
@@ -126,6 +176,12 @@ export default function Danisan() {
                     );
                     
                     setNutritionPlan(response.data);
+                    
+                    // Set the default selected plan to the one that includes today's date
+                    if (response.data && response.data.length > 0) {
+                        const currentPlanIndex = findCurrentPlan(response.data);
+                        setSelectedPlanIndex(currentPlanIndex);
+                    }
                 } catch (err) {
                     console.error("Beslenme planı yüklenirken hata:", err.message);
                 } finally {
@@ -781,14 +837,9 @@ export default function Danisan() {
                                 }}>
                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                         {nutritionPlan && nutritionPlan.length > 0 
-                                            ? nutritionPlan[0].NutritionPlan.title 
+                                            ? nutritionPlan[selectedPlanIndex]?.note || "İsim Girilmemiş Plan"
                                             : "İsim Girilmemiş Plan"}
                                     </Typography>
-                                    <Chip 
-                                        label="Aktif" 
-                                        size="small" 
-                                        sx={{ bgcolor: 'success.light', color: 'success.contrastText' }}
-                                    />
                                 </Box>
                                 
                                 <Divider />
@@ -866,7 +917,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -876,7 +927,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -886,7 +937,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -896,7 +947,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -906,7 +957,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -916,7 +967,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -926,7 +977,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.Kahvaltı)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Kahvaltı)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -960,7 +1011,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -970,7 +1021,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -980,7 +1031,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -990,7 +1041,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1000,7 +1051,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1010,7 +1061,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1020,7 +1071,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.["Öğle Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Öğle Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1054,7 +1105,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1064,7 +1115,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1074,7 +1125,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1084,7 +1135,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1094,7 +1145,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1104,7 +1155,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1114,7 +1165,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.["Akşam Yemeği"])
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Akşam Yemeği"])
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1148,7 +1199,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazartesi?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1158,7 +1209,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Salı?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1168,7 +1219,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Çarşamba?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1178,7 +1229,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Perşembe?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1188,7 +1239,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cuma?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1198,7 +1249,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Cumartesi?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1208,7 +1259,7 @@ export default function Danisan() {
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
                                                             <Typography variant="body2">
                                                                 {nutritionPlan && nutritionPlan.length > 0 
-                                                                    ? renderMealItems(nutritionPlan[0].NutritionPlan.mealPlan?.Pazar?.Aparatif)
+                                                                    ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Aparatif)
                                                                     : "Öğün girilmemiş."
                                                                 }
                                                             </Typography>
@@ -1219,34 +1270,10 @@ export default function Danisan() {
                                         </Grid>                                        
                                     </Box>
                                 </Box>
-                                
                                 <Divider />
-                                
-                                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {nutritionPlan && nutritionPlan.length > 0 
-                                            ? `Beslenme planı oluşturulma: ${new Date(nutritionPlan[0].createdAt).toLocaleDateString('tr-TR')}`
-                                            : "Bu beslenme planı sizin tarafınızdan hazırlanmıştır."
-                                        }
-                                    </Typography>
-                                    <Button 
-                                        size="small" 
-                                        onClick={() => {
-                                            if (nutritionPlan && nutritionPlan.length > 0) {
-                                                window.open(`/nutrition-plans/${nutritionPlan[0].nutrition_plan_id}`, '_blank');
-                                            }
-                                        }}
-                                    >
-                                        Detaylı Görüntüle
-                                    </Button>
-                                </Box>
                             </Paper>
                         )}
 
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                            Atanmış Beslenme Planları
-                        </Typography>
-                        
                         <Card elevation={3} sx={{ mb: 3 }}>
                             <CardHeader 
                                 title="Atanmış Planlar" 
@@ -1267,16 +1294,14 @@ export default function Danisan() {
                                     nutritionPlan.map((plan, index) => (
                                         <React.Fragment key={plan.id || index}>
                                             <ListItem
-                                                secondaryAction={
-                                                    <Box>
-                                                        <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
-                                                            <EditIcon />
-                                                        </IconButton>
-                                                        <IconButton edge="end" aria-label="delete">
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </Box>
-                                                }
+                                                onClick={() => setSelectedPlanIndex(index)}
+                                                sx={{ 
+                                                    cursor: 'pointer',
+                                                    bgcolor: selectedPlanIndex === index ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(0, 0, 0, 0.08)'
+                                                    }
+                                                }}
                                             >
                                                 <ListItemAvatar>
                                                     <Avatar sx={{ bgcolor: 'primary.main' }}>
@@ -1287,14 +1312,16 @@ export default function Danisan() {
                                                     primary={
                                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                                {plan.NutritionPlan?.title || "Beslenme Planı"}
+                                                                {plan.note || "Beslenme Planı"}
                                                             </Typography>
-                                                            <Chip 
-                                                                label="Aktif" 
-                                                                size="small" 
-                                                                color="success" 
-                                                                sx={{ ml: 1 }}
-                                                            />
+                                                            {isActivePlan(plan) && (
+                                                                <Chip 
+                                                                    label="Aktif Plan" 
+                                                                    size="small" 
+                                                                    color="success" 
+                                                                    sx={{ ml: 1 }}
+                                                                />
+                                                            )}
                                                         </Box>
                                                     }
                                                     secondary={
@@ -1826,12 +1853,12 @@ export default function Danisan() {
                             >
                                 <Tab label="Genel" value="genel" />
                                 <Tab label="Anamnez" value="anamnez" />
-                                <Tab label="Ölçümler" value="olcum" />
+                                {/* <Tab label="Ölçümler" value="olcum" /> */}
                                 <Tab label="Beslenme" value="beslenme" />
                                 <Tab label="Randevular" value="randevu" />
-                                <Tab label="Tarifler" value="tarif" />
-                                <Tab label="Egzersizler" value="egzersiz" />
-                                <Tab label="Ödemeler" value="odeme" />
+                                {/* <Tab label="Tarifler" value="tarif" /> */}
+                                {/* <Tab label="Egzersizler" value="egzersiz" /> */}
+                                {/* <Tab label="Ödemeler" value="odeme" /> */}
                                 </Tabs>
                         </Box>
                             <Box sx={{ p: 3, minHeight: '50vh' }}>

@@ -607,15 +607,11 @@ class DietitianService {
         return await NutritionAssignment.findAll({
             where: {
                 client_id,
-                start_date: { [Op.lte]: endDate },
-                end_date: { [Op.gte]: startDate }
+                ...(startDate && endDate && {
+                    start_date: { [Op.lte]: endDate },
+                    end_date: { [Op.gte]: startDate }
+                })
             },
-            include: [{
-                model: NutritionPlan,
-                as: 'NutritionPlan',
-                where: { dietitian_id },
-                attributes: ['id', 'mealPlan'] // burada mealPlan'ı ve gerekiyorsa diğer alanları dahil ediyoruz
-            }],
             order: [['start_date', 'ASC']]
         });
     }

@@ -508,6 +508,10 @@ class DietitianController {
                     startDate = now.clone().startOf('month').toDate();
                     endDate = now.clone().endOf('month').toDate();
                     break;
+                case 'all':
+                    startDate = null;
+                    endDate = null;
+                    break;
                 default:
                     return res.status(400).json({ message: "Geçersiz range: 'day', 'week' veya 'month' olmalı." });
             }
