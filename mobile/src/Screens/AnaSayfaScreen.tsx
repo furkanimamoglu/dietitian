@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { View, StyleSheet, ScrollView, Text as RNText, Dimensions } from 'react-native';
-import { Avatar, Card, Text, Surface, ProgressBar } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Text as RNText, Dimensions, Modal, TouchableOpacity } from 'react-native';
+import { Avatar, Card, Text, Surface, ProgressBar, Button } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import Header from '../Components/Header';
@@ -16,6 +16,57 @@ const { width } = Dimensions.get('window');
 const AnaSayfa = ({ navigation }: Props) => {
 
     const [userName, setUserName] = useState<string>('Yükleniyor...');
+    const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
+
+    const checkKVKKStatus = async () => {
+      try {
+        const response = await fetch(`${config.apiUrl}/client/getMyKVKKStatus`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': await AsyncStorage.getItem('token') || ''
+          }
+        });
+        const data = await response.json();
+        if (response.ok && data.kvkkApproval === false) {
+          setShowKVKKModal(true);
+        }
+      } catch (error) {
+        console.error('KVKK status kontrol hatası:', error);
+      }
+    };
+
+    const approveKVKK = async () => {
+      try {
+        const response = await fetch(`${config.apiUrl}/client/approveKVKK`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': await AsyncStorage.getItem('token') || ''
+          }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setShowKVKKModal(false);
+        } else {
+          console.log('KVKK onayı hatası:', data.message);
+        }
+      } catch (error) {
+        console.error('KVKK onayı hatası:', error);
+      }
+    };
+
+    const rejectKVKK = async () => {
+      try {
+        await AsyncStorage.removeItem('token');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      } catch (error) {
+        console.error('Çıkış yapılırken hata:', error);
+      }
+    };
 
     useEffect(() => {
       const fetchClientInfo = async () => {
@@ -39,6 +90,7 @@ const AnaSayfa = ({ navigation }: Props) => {
       };
 
       fetchClientInfo();
+      checkKVKKStatus();
     }, []);
 
   const healthData = {
@@ -185,54 +237,6 @@ const AnaSayfa = ({ navigation }: Props) => {
           </View>
         </Surface> */}
 
-        {/* Günlük Plan */}
-        <Surface style={styles.planCard}>
-          <View style={styles.planSection}>
-            <View style={[styles.planIcon, { backgroundColor: '#fff3e0' }]}>
-              <Icon name="food" size={22} color="#f57c00" />
-            </View>
-            <View style={styles.planContent}>
-              <Text style={styles.planTitle}>Beslenme Programı</Text>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-eight-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>08:00</Text>
-                <Text style={styles.planText}>Kahvaltı 🥣</Text>
-              </View>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-one-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>13:00</Text>
-                <Text style={styles.planText}>Öğle Yemeği 🍛</Text>
-              </View>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-seven-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>19:00</Text>
-                <Text style={styles.planText}>Akşam Yemeği 🍲</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.planSection}>
-            <View style={[styles.planIcon, { backgroundColor: '#e3f2fd' }]}>
-              <Icon name="dumbbell" size={22} color="#1976d2" />
-            </View>
-            <View style={styles.planContent}>
-              <Text style={styles.planTitle}>Egzersiz Planı</Text>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-nine-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>09:00</Text>
-                <Text style={styles.planText}>Kardiyo - 15 dk 🏃‍♂️</Text>
-              </View>
-              <View style={styles.planItem}>
-                <Icon name="clock-time-six-outline" size={16} color="#757575" />
-                <Text style={styles.planTime}>18:00</Text>
-                <Text style={styles.planText}>Yoga - 20 dk 🧘‍♀️</Text>
-              </View>
-            </View>
-          </View>
-        </Surface>
-
         {/* Motivasyon Kartı */}
         <Surface style={styles.motivationCard}>
           <Icon name="star-circle" size={36} color="#fff" style={styles.motivationIcon} />
@@ -244,6 +248,61 @@ const AnaSayfa = ({ navigation }: Props) => {
         {/* Alt boşluk */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* KVKK Modal */}
+      <Modal
+        visible={showKVKKModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>KVKK Aydınlatma Metni</Text>
+            <ScrollView style={styles.modalScrollView}>
+              <Text style={styles.modalText}>
+                Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizin işlenmesi, saklanması ve kullanılması hakkında aşağıdaki bilgileri siz değerli kullanıcılarımızla paylaşmak isteriz.
+                {'\n\n'}
+                Uygulamamız, sağlık verilerinizi, beslenme alışkanlıklarınızı, fiziksel aktivitelerinizi ve sizinle ilgili diğer kişisel bilgileri, size özel hizmet sunabilmek amacıyla toplamakta ve işlemektedir.
+                {'\n\n'}
+                Kişisel verileriniz, sadece uygulama içerisindeki hizmetlerin sunulması, iyileştirilmesi ve kişiselleştirilmesi amacıyla kullanılacak olup, açık rızanız olmadan üçüncü kişilerle paylaşılmayacaktır.
+                {'\n\n'}
+                Kişisel verilerinizin güvenliği için gerekli tüm teknik ve idari tedbirler alınmıştır. KVKK kapsamında sahip olduğunuz haklar:
+                {'\n\n'}
+                - Kişisel verilerinizin işlenip işlenmediğini öğrenme
+                {'\n'}
+                - Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme
+                {'\n'}
+                - Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme
+                {'\n'}
+                - Yurtiçinde veya yurtdışında kişisel verilerinizin aktarıldığı üçüncü kişileri bilme
+                {'\n'}
+                - Kişisel verilerinizin eksik veya yanlış işlenmiş olması hâlinde bunların düzeltilmesini isteme
+                {'\n'}
+                - KVKK'nın 7. maddesinde öngörülen şartlar çerçevesinde kişisel verilerinizin silinmesini veya yok edilmesini isteme
+                {'\n\n'}
+                Bu aydınlatma metnini kabul etmeniz, uygulamayı kullanabilmeniz için gereklidir. Kabul etmediğiniz takdirde, uygulamayı kullanamayacağınızı belirtmek isteriz.
+              </Text>
+            </ScrollView>
+            <View style={styles.modalButtonContainer}>
+              <Button
+                mode="contained"
+                style={[styles.modalButton, styles.rejectButton]}
+                onPress={rejectKVKK}
+              >
+                Reddet
+              </Button>
+              <Button
+                mode="contained"
+                style={[styles.modalButton, styles.acceptButton]}
+                onPress={approveKVKK}
+              >
+                Kabul Et
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <BottomNavbar navigation={navigation} />
     </View>
@@ -519,6 +578,51 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e7d32',
     fontWeight: '500'
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    width: '100%',
+    maxHeight: '80%',
+    padding: 20,
+    elevation: 5
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 16,
+    textAlign: 'center'
+  },
+  modalScrollView: {
+    maxHeight: 400,
+    marginBottom: 16
+  },
+  modalText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#424242'
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  modalButton: {
+    flex: 1,
+    margin: 8
+  },
+  acceptButton: {
+    backgroundColor: '#2e7d32'
+  },
+  rejectButton: {
+    backgroundColor: '#d32f2f'
   },
 });
 

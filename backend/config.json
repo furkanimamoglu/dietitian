@@ -1,6 +1,6 @@
 {
   "base_url": "http://localhost:3000",
-  "app_scheme": "dietapp",
+  "app_scheme": "diyetia",
 
   "database_connection": {
     "host": "localhost",

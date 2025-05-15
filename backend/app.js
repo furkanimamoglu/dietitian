@@ -16,7 +16,9 @@ const dietitianRoutes = require('./Routes/dietitianRoutes');
 const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
 const systemRoutes = require('./Routes/systemRoutes');
-const utilRoutes = require('./Routes/utilRoutes');
+const invoiceRoutes = require('./Routes/invoiceRoutes');
+const recipeRoutes = require('./Routes/recipeRoutes');
+const exerciseRoutes = require('./Routes/exerciseRoutes');
 
 app.use(bodyParser.json());
 
@@ -36,8 +38,10 @@ app.use((req, res, next) => {
 app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
+app.use('/recipe', recipeRoutes);
+app.use('/exercise', exerciseRoutes);
+app.use('/invoice', invoiceRoutes);
 app.use('/system', systemRoutes);
-app.use('/util', utilRoutes)
 
 // Working Directory
 try {

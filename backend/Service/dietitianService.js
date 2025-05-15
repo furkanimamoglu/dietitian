@@ -10,15 +10,17 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes} = require('../Model/MainModel');
+const {Op} = require("sequelize");
+const Security = require("../Utils/Security");
 
 class DietitianService {
 
-    async login(email, password) {
+    async login(phoneNumber, password) {
         try {
             const dietitianInfo = await Dietitian.findOne({
                 where: {
-                    email: email,
+                    phoneNumber: phoneNumber,
                     password: password
                 }
             });
@@ -47,14 +49,14 @@ class DietitianService {
         }
     }
 
-    async register(email, password, ipAddress) {
+    async register(phoneNumber, password, ipAddress) {
         try {
-            if (!email || !password) {
+            if (!phoneNumber || !password) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
             const dietitian = await Dietitian.create({
-                email: email,
+                phoneNumber: phoneNumber,
                 password: password,
                 role: DIETITIAN,
                 ipAddress: ipAddress
@@ -231,7 +233,7 @@ class DietitianService {
             });
 
             if (!dietitian) {
-                throw new Error('Diyetisyen bulunamadı.');
+                return [];
             }
 
             return dietitian.Clients;
@@ -429,11 +431,9 @@ class DietitianService {
 
             query = query ? query.toLowerCase() : "";
 
-            const filteredData = data.filter(item =>
+            return data.filter(item =>
                 item.name.toLowerCase().includes(query)
             );
-
-            return filteredData;
         } catch (error) {
             throw new Error(error.message);
         }
@@ -462,14 +462,70 @@ class DietitianService {
             throw new Exception("Bu plan size ait değil. Atama yapılamaz.", 401, true);
         }
 
+        const existingAssignment = await NutritionAssignment.findOne({
+            where: {
+                client_id,
+                [Op.or]: [
+                    {
+                        start_date: { [Op.between]: [start_date, end_date] }
+                    },
+                    {
+                        end_date: { [Op.between]: [start_date, end_date] }
+                    },
+                    {
+                        start_date: { [Op.lte]: start_date },
+                        end_date: { [Op.gte]: end_date }
+                    }
+                ]
+            }
+        });
+
+        if (existingAssignment) {
+            throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
+        }
+
+        // Transform the meal plan structure to include "yenildi" field for each meal item
+        const transformedMealPlan = {};
+        if (plan.mealPlan) {
+            Object.keys(plan.mealPlan).forEach(day => {
+                transformedMealPlan[day] = {};
+                Object.keys(plan.mealPlan[day] || {}).forEach(mealType => {
+                    // Get the meal items based on the format
+                    let mealItems = [];
+                    const mealData = plan.mealPlan[day][mealType];
+                    
+                    // Handle complex format with main and alternatives
+                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
+                        mealItems = [...mealData.main];
+                    } 
+                    // Handle simple array format
+                    else if (Array.isArray(mealData)) {
+                        mealItems = [...mealData];
+                    } 
+                    // Handle string format (backward compatibility)
+                    else if (typeof mealData === 'string') {
+                        mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
+                    }
+
+                    // Transform to new format with "yenildi" field
+                    transformedMealPlan[day][mealType] = mealItems.map(item => ({
+                        isim: item,
+                        yenildi: false
+                    }));
+                });
+            });
+        }
+
         return await NutritionAssignment.create({
             client_id,
             nutrition_plan_id,
             start_date,
             end_date,
-            note
+            note,
+            mealPlan: transformedMealPlan
         });
     }
+
 
     async getNutritionPlans(dietitian_id) {
         if (!dietitian_id) {
@@ -562,8 +618,10 @@ class DietitianService {
             throw new Exception("Bu plan size ait değil veya bulunamadı.", 403, true);
         }
 
-        if (mealPlan && typeof mealPlan !== 'object') {
-            throw new Exception("mealPlan geçerli bir JSON formatında olmalıdır.", 400, true);
+        if (mealPlan) {
+            if (typeof mealPlan !== 'object') {
+                throw new Exception("mealPlan geçerli bir JSON formatında olmalıdır.", 400, true);
+            }
         }
 
         await plan.update({
@@ -575,6 +633,43 @@ class DietitianService {
         });
 
         return plan;
+    }
+
+    async getNutritionAssignmentPlanByClient(dietitian_id, client_id, startDate, endDate) {
+        return await NutritionAssignment.findAll({
+            where: {
+                client_id,
+                ...(startDate && endDate && {
+                    start_date: { [Op.lte]: endDate },
+                    end_date: { [Op.gte]: startDate }
+                })
+            },
+            order: [['start_date', 'ASC']]
+        });
+    }
+
+    async getMyNotes(dietitian_id) {
+        try {
+            return await Notes.findAll({
+                where: {
+                    dietitian_id: dietitian_id
+                },
+                order: [['createdAt', 'DESC']]
+            });
+        } catch (error) {
+            throw new Exception("Notlar alınırken bir hata oluştu.", 500, true);
+        }
+    }
+
+    async addNote(dietitian_id, note) {
+        try {
+            return await Notes.create({
+                dietitian_id,
+                noteContent: note
+            });
+        } catch (error) {
+            throw new Exception("Not eklenirken bir hata oluştu.", 500, true);
+        }
     }
 
 }

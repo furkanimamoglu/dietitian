@@ -9,29 +9,59 @@ const Exercise = sequelize.define('Exercise', {
             allowNull: false,
             primaryKey: true
         },
-        dietitian_id: DataTypes.INTEGER,
+        dietitian_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Dietitians',
+                key: 'id'
+            }
+        },
+        category_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'ExerciseCategories',
+                key: 'id'
+            }
+        },
         exercise_name: {
             type: DataTypes.STRING,
             allowNull: false
         },
         exercise_description: {
-            type: DataTypes.STRING
-        },
-        exercise_path: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
-        exercise_link: {
+        video: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true,
+            defaultValue: null
         },
-        exercise_isFile: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false
+        duration: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0
+        },
+        difficulty: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 1
+        },
+        equipment: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: null
+        },
+        calories_burned: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0
         }
     },
     {
         timestamps: false,
+        tableName: 'Exercises'
     }
 );
 

@@ -131,24 +131,6 @@ export default function Mesaj() {
                 text: "İyiyim teşekkürler, bu hafta diyet programıma uydum ve 1kg verdim! 💪",
                 sender: "client",
                 timestamp: "09:32"
-            },
-            {
-                id: 3,
-                text: "Harika ilerleme! Tebrikler! 🎉 Herhangi bir zorluk yaşadınız mı?",
-                sender: "dietitian",
-                timestamp: "09:33"
-            },
-            {
-                id: 4,
-                text: "Akşam yemeklerinde biraz zorlandım ama su tüketimimi artırdım.",
-                sender: "client",
-                timestamp: "09:35"
-            },
-            {
-                id: 5,
-                text: "Çok iyi. Size yeni haftalık programınızı hazırlayacağım. Yarın gönderebilirim. 📋",
-                sender: "dietitian",
-                timestamp: "09:36"
             }
         ];
         

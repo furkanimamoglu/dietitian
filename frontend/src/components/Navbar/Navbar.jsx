@@ -53,8 +53,17 @@ export default function Navbar() {
                         key={item.name}
                         onClick={() => navigate(item.route)}
                         className={location.pathname === item.route ? "active-mobile-item" : ""}
-                        disabled={item.name === "TARİFLER" || item.name === "EGZERSİZLER" || item.name === "FİNANS"}
-                        sx={{ cursor: 'pointer' }}
+                        sx={{ 
+                            cursor: 'pointer',
+                            padding: '12px 16px',
+                            margin: '2px 0',
+                            borderRadius: '4px',
+                            transition: 'background-color 0.2s ease',
+                            backgroundColor: location.pathname === item.route ? 'rgba(71,145,64,0.1)' : 'transparent',
+                            '&:hover': {
+                                backgroundColor: 'rgba(71,145,64,0.05)'
+                            }
+                        }}
                     >
                         <Box sx={{ mr: 2, color: "rgb(14,62,10)" }}>{item.icon}</Box>
                         <ListItemText primary={item.name} />
@@ -131,16 +140,14 @@ export default function Navbar() {
                     >
                         {menu_items.map((page) => {
                             const isActive = location.pathname === page.route;
-                            const isDisabled = page.name === "TARİFLER" || page.name === "EGZERSİZLER" || page.name === "FİNANS";
                             return (
                                 <Button
                                     key={page.name}
                                     onClick={() => navigate(page.route)}
                                     className={`nav-button ${isActive ? "active" : ""}`}
-                                    disabled={isDisabled}
                                     sx={{
                                         my: 2,
-                                        mx: 1,
+                                        mx: 1.5,
                                         fontWeight: "bold",
                                         color: "rgb(14,62,10)",
                                         display: "flex",
@@ -152,11 +159,11 @@ export default function Navbar() {
                                             : "transparent",
                                         "&:hover": {
                                             backgroundColor: "rgba(71,145,64,0.15)",
-                                            transform: "translateY(-2px)",
                                         },
-                                        transition: "all 0.3s ease",
+                                        transition: "background-color 0.3s ease",
                                         position: "relative",
-                                        overflow: "hidden",
+                                        overflow: "visible",
+                                        zIndex: 0,
                                         "&::after": isActive ? {
                                             content: '""',
                                             position: "absolute",
@@ -166,6 +173,7 @@ export default function Navbar() {
                                             height: "3px",
                                             backgroundColor: "rgb(71,145,64)",
                                             borderRadius: "10px",
+                                            zIndex: -1,
                                         } : {},
                                     }}
                                 >

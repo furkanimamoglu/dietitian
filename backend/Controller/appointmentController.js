@@ -116,29 +116,30 @@ class AppointmentController {
         }
     }
 
-    async approveAppointmentAsDietitian(req, res) {
+    async deleteAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const dietitian_id = Security.getUserIdFromToken(token);
+            if (!token || !dietitian_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const { appointment_id } = req.body;
+            const { appointment_id } = req.query;
 
             if (!appointment_id) {
                 return res.status(400).json({
-                    message: "Randevu ID'si gereklidir."
+                    message: "Randevu ID'si gerekli."
                 });
             }
 
-            const updatedAppointment = await AppointmentService.approveAppointment(appointment_id, user_id);
+            await AppointmentService.deleteAppointment(dietitian_id,appointment_id);
 
             res.status(200).json({
-                appointment: updatedAppointment,
+                message: "Randevu başarıyla silindi."
             });
+
         } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: true,

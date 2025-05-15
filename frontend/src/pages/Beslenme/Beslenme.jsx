@@ -3,6 +3,7 @@ import './Beslenme.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
+import { toast } from 'react-hot-toast';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,6 +17,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
@@ -130,6 +132,198 @@ const Modal = ({ isOpen, title, onClose, children, fullWidth = false }) => {
 
 // Meal Plan Table Component
 const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => {
+    // Helper function to get all meal items as a flat array
+    const getMealItemsArray = (mealData) => {
+        if (!mealData) return [];
+        
+        // For simple array format
+        if (Array.isArray(mealData)) {
+            return [...mealData];
+        }
+        
+        // For complex format with main and alternatives
+        if (mealData.main && Array.isArray(mealData.main)) {
+            return [...mealData.main];
+        }
+        
+        // For string format (backward compatibility)
+        if (typeof mealData === 'string') {
+            return mealData.split(',').map(item => item.trim()).filter(item => item !== '');
+        }
+        
+        return [];
+    };
+    
+    // Helper function to get alternatives for a specific item
+    const getAlternativesForItem = (mealData, itemName) => {
+        if (!mealData || !mealData.alternatives || !mealData.alternatives[itemName]) {
+            return [];
+        }
+        return mealData.alternatives[itemName];
+    };
+    
+    // Helper function to add a main meal item
+    const addMainItem = (day, meal, newItem) => {
+        if (!newItem.trim()) return;
+        
+        const currentData = mealPlan[day][meal];
+        let updatedData;
+        
+        // Handle different formats
+        if (Array.isArray(currentData)) {
+            // Simple array format
+            updatedData = [...currentData, newItem.trim()];
+        } else if (currentData && currentData.main) {
+            // Complex format with main and alternatives
+            updatedData = {
+                ...currentData,
+                main: [...currentData.main, newItem.trim()]
+            };
+        } else if (typeof currentData === 'string') {
+            // String format (backward compatibility)
+            const items = currentData ? 
+                currentData.split(',').map(item => item.trim()).filter(item => item !== '') : 
+                [];
+            updatedData = [...items, newItem.trim()];
+        } else {
+            // Initialize new complex format
+            updatedData = {
+                main: [newItem.trim()],
+                alternatives: {}
+            };
+        }
+        
+        onMealChange(day, meal, updatedData);
+    };
+    
+    // Helper function to remove a main meal item
+    const removeMainItem = (day, meal, indexToRemove) => {
+        const currentData = mealPlan[day][meal];
+        let updatedData;
+        let removedItemName = '';
+        
+        // Handle different formats
+        if (Array.isArray(currentData)) {
+            // Simple array format
+            removedItemName = currentData[indexToRemove];
+            updatedData = currentData.filter((_, index) => index !== indexToRemove);
+        } else if (currentData && currentData.main) {
+            // Complex format with main and alternatives
+            removedItemName = currentData.main[indexToRemove];
+            const newMain = currentData.main.filter((_, index) => index !== indexToRemove);
+            
+            // Also remove alternatives for this item if they exist
+            const newAlternatives = {...currentData.alternatives};
+            if (newAlternatives[removedItemName]) {
+                delete newAlternatives[removedItemName];
+            }
+            
+            updatedData = {
+                main: newMain,
+                alternatives: newAlternatives
+            };
+        } else if (typeof currentData === 'string') {
+            // String format (backward compatibility)
+            const items = currentData.split(',').map(item => item.trim()).filter(item => item !== '');
+            removedItemName = items[indexToRemove];
+            updatedData = items.filter((_, index) => index !== indexToRemove);
+        }
+        
+        // Close alternatives UI if the removed item was selected
+        if (selectedMainItem === removedItemName && showAlternatives[meal]) {
+            setShowAlternatives(prev => ({
+                ...prev,
+                [meal]: false
+            }));
+            setSelectedMainItem('');
+        }
+        
+        onMealChange(day, meal, updatedData);
+    };
+    
+    // Helper function to add an alternative for a main item
+    const addAlternative = (day, meal, mainItem, alternativeItem) => {
+        if (!alternativeItem.trim() || !mainItem) return;
+        
+        const currentData = mealPlan[day][meal];
+        let updatedData;
+        
+        // Convert to complex format if needed
+        if (Array.isArray(currentData)) {
+            // Convert simple array to complex format
+            updatedData = {
+                main: [...currentData],
+                alternatives: {
+                    [mainItem]: [alternativeItem.trim()]
+                }
+            };
+        } else if (currentData && currentData.main) {
+            // Add to existing complex format
+            const newAlternatives = {...currentData.alternatives};
+            
+            if (newAlternatives[mainItem]) {
+                newAlternatives[mainItem] = [...newAlternatives[mainItem], alternativeItem.trim()];
+            } else {
+                newAlternatives[mainItem] = [alternativeItem.trim()];
+            }
+            
+            updatedData = {
+                main: [...currentData.main],
+                alternatives: newAlternatives
+            };
+        } else if (typeof currentData === 'string') {
+            // Convert string format to complex format
+            const items = currentData ? 
+                currentData.split(',').map(item => item.trim()).filter(item => item !== '') : 
+                [];
+            
+            updatedData = {
+                main: items,
+                alternatives: {
+                    [mainItem]: [alternativeItem.trim()]
+                }
+            };
+        }
+        
+        onMealChange(day, meal, updatedData);
+    };
+    
+    // Helper function to remove an alternative
+    const removeAlternative = (day, meal, mainItem, alternativeIndex) => {
+        const currentData = mealPlan[day][meal];
+        
+        if (!currentData || !currentData.alternatives || !currentData.alternatives[mainItem]) {
+            return;
+        }
+        
+        const newAlternatives = {...currentData.alternatives};
+        newAlternatives[mainItem] = newAlternatives[mainItem].filter((_, index) => index !== alternativeIndex);
+        
+        // Remove the alternatives entry if empty
+        if (newAlternatives[mainItem].length === 0) {
+            delete newAlternatives[mainItem];
+        }
+        
+        const updatedData = {
+            main: [...currentData.main],
+            alternatives: newAlternatives
+        };
+        
+        onMealChange(day, meal, updatedData);
+    };
+    
+    const [selectedMainItem, setSelectedMainItem] = useState('');
+    const [alternativeInput, setAlternativeInput] = useState('');
+    const [showAlternatives, setShowAlternatives] = useState({});
+    
+    // Toggle showing alternatives for a specific meal
+    const toggleAlternatives = (meal) => {
+        setShowAlternatives(prev => ({
+            ...prev,
+            [meal]: !prev[meal]
+        }));
+    };
+    
     return (
         <div className="meal-plan-container">
             <div className="day-tabs">
@@ -145,71 +339,135 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
             </div>
             
             <div className="meal-plan-content">
-                {MEALS.map((meal) => (
-                    <div key={meal} className="meal-row">
-                        <div className="meal-label">
-                            <RestaurantIcon className="meal-icon" />
-                            <span>{meal}</span>
-                        </div>
-                        <div className="meal-input-container">
-                            <div className="simple-meal-editor">
-                                <div className="meal-items-container">
-                                    {(mealPlan[selectedDay][meal] || "").split(',')
-                                        .filter(item => item.trim() !== '')
-                                        .map((item, index) => (
+                {MEALS.map((meal) => {
+                    const mealData = mealPlan[selectedDay][meal];
+                    const mainItems = getMealItemsArray(mealData);
+                    
+                    return (
+                        <div key={meal} className="meal-row">
+                            <div className="meal-label">
+                                <RestaurantIcon className="meal-icon" />
+                                <span>{meal}</span>
+                            </div>
+                            <div className="meal-input-container">
+                                <div className="simple-meal-editor">
+                                    <div className="meal-items-container">
+                                        {mainItems.map((item, index) => (
                                             <div key={index} className="meal-item">
-                                                <span>{item.trim()}</span>
+                                                <span>{item}</span>
+                                                <button 
+                                                    className="meal-item-options" 
+                                                    onClick={() => {
+                                                        setSelectedMainItem(item);
+                                                        toggleAlternatives(meal);
+                                                    }}
+                                                    title="Alternatif Ekle"
+                                                >
+                                                    •••
+                                                </button>
                                                 <button 
                                                     className="remove-meal-item" 
-                                                    onClick={() => {
-                                                        const items = mealPlan[selectedDay][meal].split(',')
-                                                            .filter(i => i.trim() !== '')
-                                                            .filter((_, i) => i !== index);
-                                                        onMealChange(selectedDay, meal, items.join(', '));
-                                                    }}
+                                                    onClick={() => removeMainItem(selectedDay, meal, index)}
                                                 >
                                                     <CloseIcon fontSize="small" />
                                                 </button>
                                             </div>
                                         ))}
-                                </div>
-                                <div className="add-meal-item-container">
-                                    <input
-                                        type="text"
-                                        className="add-meal-input"
-                                        placeholder={`${meal} için yiyecek ekleyin...`}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && e.target.value.trim()) {
-                                                const currentItems = mealPlan[selectedDay][meal] || '';
-                                                const newValue = currentItems 
-                                                    ? `${currentItems}, ${e.target.value.trim()}` 
-                                                    : e.target.value.trim();
-                                                onMealChange(selectedDay, meal, newValue);
-                                                e.target.value = '';
-                                            }
-                                        }}
-                                    />
-                                    <button 
-                                        className="add-meal-button"
-                                        onClick={(e) => {
-                                            const input = e.target.previousSibling;
-                                            if (input.value.trim()) {
-                                                const currentItems = mealPlan[selectedDay][meal] || '';
-                                                const newValue = currentItems 
-                                                    ? `${currentItems}, ${input.value.trim()}` 
-                                                    : input.value.trim();
-                                                onMealChange(selectedDay, meal, newValue);
-                                                input.value = '';
-                                            }
-                                        }}
-                                    >
-                                        <AddIcon />
-                                    </button>
+                                    </div>
+                                    
+                                    {/* Main meal input */}
+                                    <div className="add-meal-item-container">
+                                        <input
+                                            type="text"
+                                            className="add-meal-input"
+                                            placeholder={`${meal} için yiyecek ekleyin...`}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && e.target.value.trim()) {
+                                                    addMainItem(selectedDay, meal, e.target.value.trim());
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                        />
+                                        <button 
+                                            className="add-meal-button"
+                                            onClick={(e) => {
+                                                const input = e.target.closest('.meal-input-container').querySelector('.add-meal-input');
+                                                if (input && input.value && input.value.trim()) {
+                                                    addMainItem(selectedDay, meal, input.value.trim());
+                                                    input.value = '';
+                                                }
+                                            }}
+                                        >
+                                            <AddIcon />
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Alternatives section */}
+                                    {showAlternatives[meal] && selectedMainItem && (
+                                        <div className="alternatives-section">
+                                            <div className="alternatives-header">
+                                                <h4>"{selectedMainItem}" için Alternatifler</h4>
+                                                <button 
+                                                    className="close-alternatives-btn"
+                                                    onClick={() => {
+                                                        setShowAlternatives(prev => ({...prev, [meal]: false}));
+                                                        setSelectedMainItem('');
+                                                    }}
+                                                >
+                                                    <CloseIcon fontSize="small" />
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="alternatives-items">
+                                                {mealData && 
+                                                 mealData.alternatives && 
+                                                 mealData.alternatives[selectedMainItem] && 
+                                                 mealData.alternatives[selectedMainItem].map((alt, index) => (
+                                                    <div key={index} className="alternative-item">
+                                                        <span>{alt}</span>
+                                                        <button 
+                                                            className="remove-alternative-item" 
+                                                            onClick={() => removeAlternative(selectedDay, meal, selectedMainItem, index)}
+                                                        >
+                                                            <CloseIcon fontSize="small" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            
+                                            <div className="add-alternative-container">
+                                                <input
+                                                    type="text"
+                                                    className="add-alternative-input"
+                                                    placeholder="Alternatif ekleyin..."
+                                                    value={alternativeInput}
+                                                    onChange={(e) => setAlternativeInput(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && alternativeInput.trim()) {
+                                                            addAlternative(selectedDay, meal, selectedMainItem, alternativeInput);
+                                                            setAlternativeInput('');
+                                                        }
+                                                    }}
+                                                />
+                                                <button 
+                                                    className="add-alternative-button"
+                                                    onClick={() => {
+                                                        if (alternativeInput.trim()) {
+                                                            addAlternative(selectedDay, meal, selectedMainItem, alternativeInput);
+                                                            setAlternativeInput('');
+                                                        }
+                                                    }}
+                                                >
+                                                    <AddIcon />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
@@ -217,6 +475,39 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
 
 // View Meal Plan Component
 const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
+    // Helper function to get meal items and their alternatives
+    const getMealContent = (mealData) => {
+        if (!mealData) return { mainItems: [], hasAlternatives: false };
+        
+        // Handle array format (simple list of items)
+        if (Array.isArray(mealData)) {
+            return { 
+                mainItems: mealData,
+                hasAlternatives: false 
+            };
+        }
+        
+        // Handle complex format with main and alternatives
+        if (mealData.main && Array.isArray(mealData.main)) {
+            return {
+                mainItems: mealData.main,
+                hasAlternatives: mealData.alternatives && Object.keys(mealData.alternatives).length > 0,
+                alternatives: mealData.alternatives
+            };
+        }
+        
+        // Handle string format (backward compatibility)
+        if (typeof mealData === 'string') {
+            const items = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
+            return {
+                mainItems: items,
+                hasAlternatives: false
+            };
+        }
+        
+        return { mainItems: [], hasAlternatives: false };
+    };
+    
     return (
         <div className="view-meal-plan-container">
             <div className="view-meal-plan-header">
@@ -232,22 +523,43 @@ const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
                     <div key={day} className="day-card">
                         <div className="day-header">{day}</div>
                         <div className="day-meals">
-                            {MEALS.map(meal => (
-                                <div key={meal} className="meal-block">
-                                    <div className="meal-name">{meal}</div>
-                                    <div className="meal-content">
-                                        {mealPlan && mealPlan[day] && mealPlan[day][meal] ? (
-                                            <ul className="meal-items-list">
-                                                {mealPlan[day][meal].split(',').map((item, index) => (
-                                                    item.trim() && <li key={index}>{item.trim()}</li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            <p className="no-meal-data">Veri girilmemiş</p>
-                                        )}
+                            {MEALS.map(meal => {
+                                const { mainItems, hasAlternatives, alternatives } = getMealContent(
+                                    mealPlan && mealPlan[day] ? mealPlan[day][meal] : null
+                                );
+                                
+                                return (
+                                    <div key={meal} className="meal-block">
+                                        <div className="meal-name">{meal}</div>
+                                        <div className="meal-content">
+                                            {mainItems.length > 0 ? (
+                                                <div>
+                                                    <ul className="meal-items-list">
+                                                        {mainItems.map((item, index) => (
+                                                            <li key={index} className="meal-item-with-alternatives">
+                                                                <span className="main-meal-item">{item}</span>
+                                                                
+                                                                {hasAlternatives && alternatives && alternatives[item] && (
+                                                                    <ul className="alternatives-list">
+                                                                        {alternatives[item].map((alt, altIndex) => (
+                                                                            <li key={altIndex} className="alternative-item">
+                                                                                <span className="alternative-prefix">alternatif: </span>
+                                                                                {alt}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                )}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : (
+                                                <p className="no-meal-data">Veri girilmemiş</p>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 ))}
@@ -262,6 +574,7 @@ export default function Beslenme() {
     const [danisanList, setDanisanList] = useState([]);
     const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
     
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
@@ -286,6 +599,10 @@ export default function Beslenme() {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     
+    // Error popup states
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
@@ -296,6 +613,17 @@ export default function Beslenme() {
             return () => clearTimeout(timer);
         }
     }, [showSuccessPopup]);
+    
+    // Auto-hide error popup after 5 seconds
+    useEffect(() => {
+        if (showErrorPopup) {
+            const timer = setTimeout(() => {
+                setShowErrorPopup(false);
+            }, 5000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [showErrorPopup]);
     
     // New plan state
     const [newPlan, setNewPlan] = useState({
@@ -320,7 +648,7 @@ export default function Beslenme() {
         DAYS_OF_WEEK.forEach(day => {
             initialPlan[day] = {};
             MEALS.forEach(meal => {
-                initialPlan[day][meal] = '';
+                initialPlan[day][meal] = [];
             });
         });
         return initialPlan;
@@ -328,6 +656,9 @@ export default function Beslenme() {
 
     const [viewProgramModal, setViewProgramModal] = useState(false);
     const mealPlanRef = useRef(null);
+
+    // Edit form state
+    const [isSaving, setIsSaving] = useState(false);
 
     // Fetch clients data
     useEffect(() => {
@@ -363,7 +694,8 @@ export default function Beslenme() {
     }, []);
 
     // Fetch nutrition plans
-    useEffect(() => {
+    const fetchNutritionPlans = () => {
+        setLoading(true);
         axios
             .get(`${config[config.environment].apiUrl}/dietitian/getNutritionPlans`, {
                 headers: {
@@ -372,11 +704,18 @@ export default function Beslenme() {
             })
             .then((response) => {
                 setBeslenmeData(response.data);
+                setLoading(false);
             })
             .catch((error) => {
                 console.error("Error fetching nutrition plans:", error);
                 setBeslenmeData([]);
+                setLoading(false);
             });
+    };
+
+    // Initial fetch
+    useEffect(() => {
+        fetchNutritionPlans();
     }, []);
 
     // Filter categories based on search term
@@ -519,8 +858,17 @@ export default function Beslenme() {
         const planData = {
             title: newPlan.title.trim(),
             description: newPlan.description.trim(),
-            category_id: newPlan.category_id
+            category_id: newPlan.category_id,
+            mealPlan: {}
         };
+        
+        // Initialize the meal plan structure with empty arrays
+        DAYS_OF_WEEK.forEach(day => {
+            planData.mealPlan[day] = {};
+            MEALS.forEach(meal => {
+                planData.mealPlan[day][meal] = [];
+            });
+        });
         
         // Make API call to add the plan
         axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
@@ -536,10 +884,16 @@ export default function Beslenme() {
                 category_id: ''
             });
             setAddPlanModal(false);
+            
+            // Show success message
+            setSuccessMessage(`"${planData.title}" programı başarıyla oluşturuldu.`);
+            setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error adding plan:", error);
-            // You might want to show an error message to the user here
+            // Show error message
+            setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+            setShowErrorPopup(true);
         });
     };
 
@@ -586,13 +940,18 @@ export default function Beslenme() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
-            console.log("Plan assigned to client:", response.data);
+            // Check if response has an error message
+            if (response.data && response.data.message && !response.data.ok) {
+                setErrorMessage(response.data.message || "Bir hata oluştu.");
+                setShowErrorPopup(true);
+                return;
+            }
             
-            // Store names for success message
+            // Success case - store info for success message
             const programName = selectedProgram.title;
-            const userName = `${selectedUser.name}`;
+            const userName = selectedUser.name;
             
-            // Close the modal and reset selections
+            // Close the modal and reset states
             setAddToUserModal(false);
             setSelectedProgram(null);
             setSelectedUser(null);
@@ -601,12 +960,14 @@ export default function Beslenme() {
             setAssignmentNote('');
             
             // Show success popup
-            setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı.`);
+            setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı. Danışanınız bu plana göre yediklerini işaretleyebilecek.`);
             setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error assigning plan to client:", error);
-            // You might want to show an error message
+            // Show error popup with specific message from API if available
+            setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+            setShowErrorPopup(true);
         });
     };
 
@@ -668,6 +1029,28 @@ export default function Beslenme() {
         let yPos = 45; // Start after the header
         let dayCount = 0;
         
+        // Helper function to extract meal items from different formats
+        const getMealItems = (mealData) => {
+            if (!mealData) return [];
+            
+            // For complex format with main and alternatives
+            if (mealData.main && Array.isArray(mealData.main)) {
+                return mealData.main;
+            }
+            
+            // For simple array format
+            if (Array.isArray(mealData)) {
+                return mealData;
+            }
+            
+            // For string format (backward compatibility)
+            if (typeof mealData === 'string') {
+                return mealData.split(',').map(item => item.trim()).filter(item => item !== '');
+            }
+            
+            return [];
+        };
+        
         // Loop through days
         DAYS_OF_WEEK.forEach((day, index) => {
             // For the last 3 days (5, 6, 7), put them on the second row
@@ -720,10 +1103,7 @@ export default function Beslenme() {
                     program.mealPlan[day] && 
                     program.mealPlan[day][meal]) {
                     
-                    const mealItems = program.mealPlan[day][meal]
-                        .split(',')
-                        .map(item => item.trim())
-                        .filter(item => item);
+                    const mealItems = getMealItems(program.mealPlan[day][meal]);
                     
                     if (mealItems.length > 0) {
                         // Limit to first 2 items to save space
@@ -795,7 +1175,28 @@ export default function Beslenme() {
         DAYS_OF_WEEK.forEach(day => {
             fullPlan[day] = {};
             MEALS.forEach(meal => {
-                fullPlan[day][meal] = initialPlan[day]?.[meal] || '';
+                // Handle complex format (new structure)
+                if (initialPlan[day] && initialPlan[day][meal] && initialPlan[day][meal].main) {
+                    fullPlan[day][meal] = {
+                        main: [...initialPlan[day][meal].main],
+                        alternatives: {...initialPlan[day][meal].alternatives}
+                    };
+                }
+                // Handle array format 
+                else if (initialPlan[day] && initialPlan[day][meal] && Array.isArray(initialPlan[day][meal])) {
+                    fullPlan[day][meal] = [...initialPlan[day][meal]];
+                }
+                // Handle string format (backward compatibility)
+                else if (initialPlan[day] && initialPlan[day][meal] && typeof initialPlan[day][meal] === 'string') {
+                    // Convert comma-separated string to array for compatibility with older data
+                    fullPlan[day][meal] = initialPlan[day][meal]
+                        .split(',')
+                        .map(item => item.trim())
+                        .filter(item => item !== '');
+                } 
+                else {
+                    fullPlan[day][meal] = [];
+                }
             });
         });
         
@@ -804,52 +1205,129 @@ export default function Beslenme() {
         setEditProgramModal(true);
     };
 
-    const handleSaveMealPlan = () => {
-        // Create update data with edited fields
-        const updateData = {
-            nutrition_plan_id: selectedProgram.id,
-            title: editTitle,
-            description: editDescription,
-            category_id: editCategoryId,
-            mealPlan: mealPlan
-        };
-        
-        console.log("Sending update data:", updateData);
-        
-        // Update the program with the meal plan
-        axios.put(`${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`, updateData, {
-            headers: { Authorization: localStorage.getItem("token") }
-        })
-        .then(response => {
-            console.log("Update response:", response.data);
+    const handleSaveMealPlan = async () => {
+        setIsSaving(true);
+        try {
+            // Prepare the data to send
+            const data = {
+                title: editTitle,
+                description: editDescription,
+                category_id: editCategoryId,
+                mealPlan: {} // We'll copy the structure with proper handling for different formats
+            };
             
-            // Update local state with the updated data
-            setBeslenmeData(prev => 
-                prev.map(item => 
-                    item.id === selectedProgram.id 
-                        ? { 
-                            ...item, 
-                            title: editTitle,
-                            description: editDescription,
-                            category_id: editCategoryId,
-                            mealPlan: mealPlan 
-                          }
-                        : item
-                )
-            );
+            // Add nutrition_plan_id for updates
+            if (selectedProgram && selectedProgram.id) {
+                data.nutrition_plan_id = selectedProgram.id;
+            }
             
-            // Close the modal
-            setEditProgramModal(false);
+            // Initialize the meal plan structure even if there's no data
+            DAYS_OF_WEEK.forEach(day => {
+                data.mealPlan[day] = {};
+                MEALS.forEach(meal => {
+                    // Initialize with empty arrays by default
+                    data.mealPlan[day][meal] = [];
+                    
+                    // If we have data for this day/meal, process it
+                    if (mealPlan && mealPlan[day] && mealPlan[day][meal]) {
+                        const mealData = mealPlan[day][meal];
+                        
+                        // Already has the complex format with main and alternatives
+                        if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
+                            data.mealPlan[day][meal] = {...mealData};
+                        }
+                        // Simple array format -> keep as is (API will handle it)
+                        else if (Array.isArray(mealData)) {
+                            data.mealPlan[day][meal] = [...mealData];
+                        }
+                        // Handle string format (for backward compatibility)
+                        else if (typeof mealData === 'string') {
+                            data.mealPlan[day][meal] = mealData
+                                .split(',')
+                                .map(item => item.trim())
+                                .filter(item => item !== '');
+                        }
+                    }
+                });
+            });
             
-            // Show success popup
-            setSuccessMessage(`"${editTitle}" programı başarıyla güncellendi.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error updating nutrition plan:", error);
-            console.error("Error details:", error.response?.data || "No response data");
-            alert("Program güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
-        });
+            // Define API URL based on whether we're updating or creating
+            let url;
+            let method;
+            
+            if (selectedProgram && selectedProgram.id) {
+                // Update existing plan
+                url = `${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`;
+                method = 'put';
+            } else {
+                // Create new plan
+                url = `${config[config.environment].apiUrl}/dietitian/addNutritionPlan`;
+                method = 'post';
+            }
+            
+            // Make the API request
+            const response = await axios({
+                method,
+                url,
+                data,
+                headers: {
+                    Authorization: localStorage.getItem('token'),
+                }
+            });
+            
+            // Refresh data after successful operation
+            if (response.status === 200 || response.status === 201 || response.data.ok) {
+                // Update local state with the updated data if it's an update
+                if (selectedProgram && selectedProgram.id) {
+                    setBeslenmeData(prev => 
+                        prev.map(item => 
+                            item.id === selectedProgram.id 
+                                ? { 
+                                    ...item, 
+                                    title: editTitle,
+                                    description: editDescription,
+                                    category_id: editCategoryId,
+                                    mealPlan: data.mealPlan
+                                  }
+                                : item
+                        )
+                    );
+                } else {
+                    // Fetch all data again if it's a new item
+                    fetchNutritionPlans();
+                }
+                
+                // Close the modal
+                setEditProgramModal(false);
+                
+                // Show success message
+                setSuccessMessage(`"${editTitle}" programı başarıyla ${selectedProgram && selectedProgram.id ? 'güncellendi' : 'oluşturuldu'}.`);
+                setShowSuccessPopup(true);
+                
+                // Reset form
+                setEditTitle('');
+                setEditDescription('');
+                setEditCategoryId('');
+                
+                // Reset meal plan
+                const emptyPlan = {};
+                DAYS_OF_WEEK.forEach(day => {
+                    emptyPlan[day] = {};
+                    MEALS.forEach(meal => {
+                        emptyPlan[day][meal] = [];
+                    });
+                });
+                setMealPlan(emptyPlan);
+                
+                setSelectedProgram(null);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+            console.error('Hata detayları:', error.response?.data || 'Detay yok');
+            alert(`Program ${selectedProgram && selectedProgram.id ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu. Lütfen tekrar deneyin.`);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Meal plan handlers
@@ -974,7 +1452,12 @@ export default function Beslenme() {
                 {/* Right Panel - Nutrition Programs */}
                 <div className="programs-panel">
                     <div className="nutrition-cards-grid">
-                        {filteredBeslenmeData.length > 0 ? (
+                        {loading ? (
+                            <div className="loading-container">
+                                <div className="loading-spinner"></div>
+                                <p>Beslenme programları yükleniyor...</p>
+                            </div>
+                        ) : filteredBeslenmeData.length > 0 ? (
                             filteredBeslenmeData.map((item) => (
                                 <NutritionCard 
                                     key={item.id}
@@ -1103,6 +1586,9 @@ export default function Beslenme() {
                 <div className="modal-body">
                     <p className="selected-program">
                         Seçilen program: <strong>{selectedProgram?.title}</strong>
+                    </p>
+                    <p className="assign-note">
+                        <strong>Not:</strong> Danışanınız bu beslenme planını uyguladıkça, yediği öğünleri mobil uygulamada işaretleyebilecek.
                     </p>
                     <div className="input-container">
                         <label htmlFor="userSelect">Danışan Seçin</label>
@@ -1240,15 +1726,14 @@ export default function Beslenme() {
                         className="modal-btn cancel-btn" 
                         onClick={() => setEditProgramModal(false)}
                     >
-                        Vazgeç
+                        İptal
                     </button>
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={handleSaveMealPlan}
-                        disabled={!editTitle || !editCategoryId}
+                        disabled={isSaving}
                     >
-                        <SaveIcon className="save-icon" />
-                        Kaydet
+                        {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                     </button>
                 </div>
             </Modal>
@@ -1295,12 +1780,7 @@ export default function Beslenme() {
                     />
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn close-btn" 
-                        onClick={() => setViewProgramModal(false)}
-                    >
-                        Kapat
-                    </button>
+
                 </div>
             </Modal>
 
@@ -1458,6 +1938,16 @@ export default function Beslenme() {
                     <div className="success-popup-content">
                         <CheckCircleIcon className="success-icon" />
                         <p>{successMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Popup */}
+            {showErrorPopup && (
+                <div className="error-popup">
+                    <div className="error-popup-content">
+                        <ErrorIcon className="error-icon" />
+                        <p>{errorMessage}</p>
                     </div>
                 </div>
             )}

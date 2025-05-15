@@ -1,21 +1,23 @@
 const DietitianService = require("../Service/dietitianService");
 require("../Exception/Exception");
 const Security = require("../Utils/Security");
+const moment = require("moment");
+const {Notes} = require("../Model/MainModel");
 
 class DietitianController {
 
     async login(req, res) {
         try {
-            const {email, password} = req.body;
+            const {phoneNumber, password} = req.body;
 
-            if (!email || !password) {
+            if (!phoneNumber || !password) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.login(email, password);
+            const result = await DietitianService.login(phoneNumber, password);
 
             res.status(200).json({
                 token: result.token,
@@ -31,17 +33,17 @@ class DietitianController {
 
     async register(req, res) {
         try {
-            const {email, password} = req.body;
+            const {phoneNumber, password} = req.body;
             const ipAddress = req.ip;
 
-            if (!email || !password || !ipAddress) {
+            if (!phoneNumber || !password || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.register(email, password, ipAddress);
+            const result = await DietitianService.register(phoneNumber, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,
@@ -88,15 +90,15 @@ class DietitianController {
 
     async deleteClient(req, res) {
         const token = req.headers.authorization;
-        const user_id = Security.getUserIdFromToken(token);
-        if (!token || !user_id) {
+        const dietitian_id = Security.getUserIdFromToken(token);
+        if (!token || !dietitian_id) {
             return res.status(401).json({
                 message: "Yetkisiz erişim."
             });
         }
 
         try {
-            const {client_id} = req.body;
+            const { client_id } = req.body;
 
             if (!client_id) {
                 return res.status(400).json({
@@ -105,7 +107,7 @@ class DietitianController {
                 });
             }
 
-            const result = await DietitianService.deleteClient(user_id, client_id);
+            const result = await DietitianService.deleteClient(dietitian_id, client_id);
 
             res.status(200).json(result);
         } catch (err) {
@@ -196,13 +198,13 @@ class DietitianController {
         try {
             //TODO: Client olarak bearer tokenimle çektiğimde, verilerim geliyor? Bağlı olduğu diyetisyenin clientlerini çekemiyor olması gerekiyor.
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const dietitian_id = Security.getUserIdFromToken(token);
+            if (!token || !dietitian_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
-            const result = await DietitianService.getMyAllClients(user_id)
+            const result = await DietitianService.getMyAllClients(dietitian_id);
             res.status(200).json(result)
         } catch (error) {
             res.status(error.status || 500).json({
@@ -474,6 +476,155 @@ class DietitianController {
             });
         }
     }
+
+    async getNutritionAssignmentPlanByClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const { client_id, range } = req.body;
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({ message: "Yetkisiz erişim." });
+            }
+
+            if (!client_id || !range) {
+                return res.status(400).json({ message: "client_id ve range zorunludur." });
+            }
+
+            let startDate, endDate;
+            const now = moment();
+
+            switch (range) {
+                case 'day':
+                    startDate = now.clone().startOf('day').toDate();
+                    endDate = now.clone().endOf('day').toDate();
+                    break;
+                case 'week':
+                    startDate = now.clone().startOf('isoWeek').toDate();
+                    endDate = now.clone().endOf('isoWeek').toDate();
+                    break;
+                case 'month':
+                    startDate = now.clone().startOf('month').toDate();
+                    endDate = now.clone().endOf('month').toDate();
+                    break;
+                case 'all':
+                    startDate = null;
+                    endDate = null;
+                    break;
+                default:
+                    return res.status(400).json({ message: "Geçersiz range: 'day', 'week' veya 'month' olmalı." });
+            }
+
+            const plans = await DietitianService.getNutritionAssignmentPlanByClient(
+                dietitian_id,
+                client_id,
+                startDate,
+                endDate
+            );
+
+            return res.status(200).json(plans);
+        } catch (error) {
+            return res.status(error.status || 500).json({
+                message: error.message || "Bir hata oluştu.",
+                showOnScreen: error.showOnScreen ?? true
+            });
+        }
+    }
+
+    async getMyNotes(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            const result = await DietitianService.getMyNotes(dietitian_id);
+            return res.status(200).json(result);
+        } catch(error) {
+            return res.status(error.status || 500).json({
+                message: error.message || "Bir hata oluştu.",
+                showOnScreen: error.showOnScreen ?? true
+            });
+        }
+    }
+
+    async addNote(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { note } = req.body
+
+            if(!note) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Note içeriği girilmedi."
+                });
+            }
+
+            const result = await DietitianService.addNote(dietitian_id, note);
+
+            return res.status(200).json(result);
+        } catch(error) {
+            return res.status(error.status || 500).json({
+                message: error.message || "Bir hata oluştu.",
+                showOnScreen: error.showOnScreen ?? true
+            });
+        }
+    }
+
+    async deleteNote(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { note_id } = req.query;
+
+            if (!note_id) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Silinecek notun ID'si belirtilmelidir."
+                });
+            }
+
+            const note = await Notes.findByPk(note_id);
+
+            if (!note) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Not bulunamadı."
+                });
+            }
+
+            await note.destroy();
+
+            return res.status(200).json({
+                success: true,
+                message: "Not başarıyla silindi."
+            });
+        } catch (error) {
+            console.error("deleteNote error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Bir hata oluştu.",
+                error: error.message
+            });
+        }
+    }
+
 
 }
 

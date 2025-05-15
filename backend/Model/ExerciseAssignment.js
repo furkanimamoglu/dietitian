@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../Utils/Database');
 
-const NutritionAssignment = sequelize.define('NutritionAssignment', {
+const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -15,17 +15,13 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
             key: 'id'
         }
     },
-    nutrition_plan_id: {
+    exercise_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'NutritionPlans',
+            model: 'Exercises',
             key: 'id'
         }
-    },
-    mealPlan: {
-        type: DataTypes.JSON,
-        allowNull: true
     },
     note: {
         type: DataTypes.TEXT,
@@ -40,8 +36,8 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
         allowNull: false
     }
 }, {
-    tableName: 'NutritionAssignments',
+    tableName: 'ExerciseAssignments',
     timestamps: true
 });
 
-module.exports = NutritionAssignment;
+module.exports = ExerciseAssignment;
