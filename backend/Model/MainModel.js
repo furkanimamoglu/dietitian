@@ -2,7 +2,6 @@ const sequelize = require('../Utils/Database'); // Sequelize instance
 const Dietitian = require('./Dietitian');
 const Client = require('./Client');
 const Exercise = require('./Exercise');
-const Recipe = require('./Recipe');
 const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
 const AnamnesQuestion = require('./AnamnesQuestion');
@@ -13,6 +12,8 @@ const Message = require('./Message');
 const NutritionPlan = require('./NutritionPlan');
 const NutritionCategory = require('./NutritionCategory');
 const NutritionAssignment = require('./NutritionAssignment');
+const Recipe = require('./Recipe');
+const RecipeCategory = require('./RecipeCategory');
 const Notes = require('./Notes');
 
 // 1. Dietitian ve Client
@@ -154,12 +155,34 @@ Notes.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
+// 14. Recipe ve Recipe Category
+RecipeCategory.hasMany(Recipe, {
+    foreignKey: 'category_id',
+    as: 'recipe',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+Recipe.belongsTo(RecipeCategory, {
+    foreignKey: 'category_id',
+    as: 'category',
+});
+
+// 15. Dietitian ve Recipe Category
+Dietitian.hasMany(RecipeCategory, {
+    foreignKey: 'dietitian_id',
+    as: 'recipeCategories',
+    onDelete: 'CASCADE',
+});
+RecipeCategory.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
+    as: 'dietitian',
+});
+
 module.exports = {
     sequelize,
     Dietitian,
     Client,
     Exercise,
-    Recipe,
     Appointment,
     Anamnes,
     AnamnesQuestion,
@@ -170,5 +193,7 @@ module.exports = {
     NutritionPlan,
     NutritionCategory,
     NutritionAssignment,
-    Notes
+    Notes,
+    Recipe,
+    RecipeCategory
 };

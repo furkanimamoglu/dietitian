@@ -17,7 +17,7 @@ const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
 const systemRoutes = require('./Routes/systemRoutes');
 const invoiceRoutes = require('./Routes/invoiceRoutes');
-
+const recipeRoutes = require('./Routes/recipeRoutes');
 app.use(bodyParser.json());
 
 app.use(cors({
@@ -36,6 +36,7 @@ app.use((req, res, next) => {
 app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
+app.use('/recipe', recipeRoutes);
 app.use('/invoice', invoiceRoutes);
 app.use('/system', systemRoutes);
 

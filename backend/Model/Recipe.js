@@ -13,6 +13,14 @@ const Recipe = sequelize.define('Recipe', {
             type: DataTypes.STRING,
             allowNull: false
         },
+        category_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'RecipeCategories',
+                key: 'id'
+            }
+        },
         hasVideo: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
@@ -32,22 +40,22 @@ const Recipe = sequelize.define('Recipe', {
             allowNull: false
         },
         kcal: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0
         },
         protein: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0
         },
         karbonhidrat: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0
         },
         yag: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: 0
         }

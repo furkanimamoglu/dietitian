@@ -1,5 +1,5 @@
 const config = {
-    app_scheme: "dietapp",
+    app_scheme: "diyetia",
     apiUrl: 'http://192.168.1.135:3000',
 };
 

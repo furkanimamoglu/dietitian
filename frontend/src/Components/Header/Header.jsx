@@ -191,7 +191,7 @@ export default function Header() {
                                 textDecoration: 'none',
                             }}
                         >
-                            Diyet
+                            Diyetia
                         </Typography>
                     </Box>
 

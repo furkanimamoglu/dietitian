@@ -300,22 +300,22 @@ const RecipeCard = ({ item, onPrint, onEdit, onDelete, onView }) => {
                     <div className="card-nutritional-info">
                         {item.nutritional_info.calories && (
                             <span className="nutri-badge calories">
-                                {item.nutritional_info.calories} kcal
+                                {item.nutritional_info.calories} Kcal
                             </span>
                         )}
                         {item.nutritional_info.protein && (
                             <span className="nutri-badge protein">
-                                {item.nutritional_info.protein}g protein
+                                {item.nutritional_info.protein}g Protein
                             </span>
                         )}
                         {item.nutritional_info.carbs && (
                             <span className="nutri-badge carbs">
-                                {item.nutritional_info.carbs}g karb
+                                {item.nutritional_info.carbs}g Karbonhidrat
                             </span>
                         )}
                         {item.nutritional_info.fat && (
                             <span className="nutri-badge fat">
-                                {item.nutritional_info.fat}g yağ
+                                {item.nutritional_info.fat}g Yağ
                             </span>
                         )}
                     </div>

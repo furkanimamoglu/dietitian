@@ -62,7 +62,7 @@ class ClientController {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
-            // TODO: user_id yerine telefon numarasını unique yapalım
+
             if (!token || !user_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."

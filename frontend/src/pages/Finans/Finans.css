@@ -98,3 +98,25 @@
         margin-bottom: 16px;
     }
 }
+
+.date-range-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 0 8px;
+    border: 1px solid rgba(0, 0, 0, 0.23);
+}
+
+.date-range-picker {
+    border: none;
+    font-family: inherit;
+    padding: 8px 0;
+    width: 230px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.date-range-picker:focus {
+    outline: none;
+}
