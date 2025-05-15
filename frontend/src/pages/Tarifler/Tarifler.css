@@ -995,3 +995,24 @@ input[type="number"].text-input {
 .modal-btn.cancel-btn:hover {
   background-color: #e0e0e0;
 }
+
+/* Required fields */
+label[for] {
+  position: relative;
+}
+
+/* The asterisk is already included in the label text in JSX */
+input:required:invalid,
+textarea:required:invalid,
+select:required:invalid {
+  border-color: #e32 !important;
+}
+
+.styled-form .text-input:required:focus:invalid {
+  box-shadow: 0 0 0 2px rgba(227, 50, 50, 0.25) !important;
+}
+
+.styled-form .text-input:required:focus:valid {
+  border-color: #4caf50 !important;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25) !important;
+}

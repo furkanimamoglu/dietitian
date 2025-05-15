@@ -477,11 +477,10 @@ export default function Tarifler() {
             });
     }, []);
 
-    // Fetch recipe categories (placeholder)
+    // Fetch recipe categories
     useEffect(() => {
-        // Replace with actual API endpoint
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getRecipeCategories`, {
+            .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -491,98 +490,43 @@ export default function Tarifler() {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
-                // For demo purposes, add sample categories if API fails
-                setCategoryData([
-                    { id: 1, name: "Çorbalar" },
-                    { id: 2, name: "Ana Yemekler" },
-                    { id: 3, name: "Tatlılar" },
-                    { id: 4, name: "Salata & Mezeler" }
-                ]);
+                toast.error("Kategoriler yüklenirken bir hata oluştu.");
             });
     }, []);
 
-    // Fetch recipes (placeholder)
+    // Fetch recipes
     const fetchRecipes = () => {
         setLoading(true);
-        // Replace with actual API endpoint
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getRecipes`, {
+            .get(`${config[config.environment].apiUrl}/recipe/getMyRecipes`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
             })
             .then((response) => {
-                setRecipeData(response.data);
+                // Map API response to component's expected data structure
+                const mappedRecipes = response.data.map(recipe => ({
+                    id: recipe.id,
+                    title: recipe.name,
+                    description: "",  // API doesn't provide description
+                    category_id: recipe.category_id,
+                    image: "/placeholder.png",  // API doesn't provide image
+                    video_url: recipe.hasVideo ? recipe.video : "",
+                    ingredients: recipe.malzemeler,
+                    instructions: recipe.hazirlanis,
+                    nutritional_info: {
+                        calories: recipe.kcal,
+                        protein: recipe.protein,
+                        carbs: recipe.karbonhidrat,
+                        fat: recipe.yag
+                    }
+                }));
+                setRecipeData(mappedRecipes);
                 setLoading(false);
             })
             .catch((error) => {
                 console.error("Error fetching recipes:", error);
-                // For demo purposes, add sample recipes if API fails
-                setRecipeData([
-                    { 
-                        id: 1, 
-                        title: "Sebzeli Mercimek Çorbası", 
-                        description: "Protein açısından zengin, lezzetli mercimek çorbası",
-                        category_id: 1,
-                        image: "/placeholder.png",
-                        video_url: "https://www.youtube.com/watch?v=8LDU8U3Ix-I",
-                        ingredients: "1 su bardağı kırmızı mercimek, 1 adet soğan, 1 adet havuç, 2 yemek kaşığı zeytinyağı",
-                        instructions: "Mercimekleri yıkayın. Soğanları ve havuçları doğrayın. Zeytinyağında soğanları kavurun. Havuçları ekleyin. Mercimekleri ekleyin ve su ilave edin. Kaynayınca kısık ateşte 30 dakika pişirin.",
-                        nutritional_info: {
-                            calories: "180",
-                            protein: "12",
-                            carbs: "25",
-                            fat: "5"
-                        }
-                    },
-                    { 
-                        id: 2, 
-                        title: "Fırında Tavuk", 
-                        description: "Sebzeli fırında tavuk",
-                        category_id: 2,
-                        image: "/placeholder.png",
-                        video_url: "https://www.youtube.com/watch?v=JQgJeIRFIrk",
-                        ingredients: "4 adet tavuk but, 2 adet patates, 2 adet havuç, Tuz, karabiber",
-                        instructions: "Tavukları yıkayın ve tuz karabiber ile ovun. Sebzeleri doğrayın. Fırın tepsisine yerleştirin. 180 derecede 45 dakika pişirin.",
-                        nutritional_info: {
-                            calories: "320",
-                            protein: "28",
-                            carbs: "15",
-                            fat: "18"
-                        }
-                    },
-                    { 
-                        id: 3, 
-                        title: "Çikolatalı Brownie", 
-                        description: "Dışı çıtır içi yumuşak çikolatalı brownie",
-                        category_id: 3,
-                        image: "/placeholder.png",
-                        video_url: "https://www.youtube.com/watch?v=VvJm4pQZ04s",
-                        ingredients: "200g bitter çikolata, 150g tereyağı, 3 yumurta, 1 su bardağı şeker, 1 su bardağı un",
-                        instructions: "Çikolatayı benmari usulü eritin. Tereyağını ekleyin. Yumurta ve şekeri çırpın. Çikolatalı karışıma ekleyin. Unu ekleyin. Yağlanmış fırın kabına dökün. 175 derecede 25 dakika pişirin.",
-                        nutritional_info: {
-                            calories: "420",
-                            protein: "5",
-                            carbs: "45",
-                            fat: "28"
-                        }
-                    },
-                    { 
-                        id: 4, 
-                        title: "Renkli Salata", 
-                        description: "Vitamin deposu karışık salata",
-                        category_id: 4,
-                        image: "/placeholder.png",
-                        ingredients: "3 adet domates, 1 salatalık, 1 kırmızı soğan, 1 demet maydanoz, Zeytinyağı, Limon, Tuz",
-                        instructions: "Tüm sebzeleri küp küp doğrayın. Bir kaseye alın. Zeytinyağı, limon ve tuz ile karıştırın. Servis edin.",
-                        nutritional_info: {
-                            calories: "120",
-                            protein: "2",
-                            carbs: "10",
-                            fat: "8"
-                        }
-                    }
-                ]);
+                toast.error("Tarifler yüklenirken bir hata oluştu.");
                 setLoading(false);
             });
     };
@@ -865,6 +809,12 @@ export default function Tarifler() {
                     >
                         Kapat
                     </button>
+                    <button 
+                        className="modal-btn confirm-btn" 
+                        onClick={() => handlePrint(detailItem)}
+                    >
+                        <PrintIcon style={{ marginRight: '5px' }} /> PDF Oluştur
+                    </button>
                 </div>
             </Modal>
 
@@ -876,7 +826,7 @@ export default function Tarifler() {
             >
                 <div className="modal-body styled-form">
                     <div className="input-container">
-                        <label htmlFor="recipeTitle">Tarif Adı</label>
+                        <label htmlFor="recipeTitle">Tarif Adı *</label>
                         <input 
                             type="text" 
                             id="recipeTitle"
@@ -884,6 +834,7 @@ export default function Tarifler() {
                             value={newRecipe.title}
                             onChange={(e) => setNewRecipe({...newRecipe, title: e.target.value})}
                             placeholder="Tarif adını giriniz"
+                            required
                         />
                     </div>
                     <div className="input-container">
@@ -984,7 +935,7 @@ export default function Tarifler() {
                     </div>
                     
                     <div className="input-container">
-                        <label htmlFor="recipeIngredients">Malzemeler</label>
+                        <label htmlFor="recipeIngredients">Malzemeler *</label>
                         <textarea 
                             id="recipeIngredients"
                             className="text-input textarea" 
@@ -992,10 +943,11 @@ export default function Tarifler() {
                             onChange={(e) => setNewRecipe({...newRecipe, ingredients: e.target.value})}
                             placeholder="Malzemeleri virgülle ayırarak giriniz"
                             rows={4}
+                            required
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="recipeInstructions">Hazırlanışı</label>
+                        <label htmlFor="recipeInstructions">Hazırlanışı *</label>
                         <textarea 
                             id="recipeInstructions"
                             className="text-input textarea" 
@@ -1003,15 +955,17 @@ export default function Tarifler() {
                             onChange={(e) => setNewRecipe({...newRecipe, instructions: e.target.value})}
                             placeholder="Hazırlanışını adım adım yazınız"
                             rows={6}
+                            required
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="recipeCategory">Kategori</label>
+                        <label htmlFor="recipeCategory">Kategori *</label>
                         <select 
                             id="recipeCategory"
                             className="text-input" 
                             value={newRecipe.category_id}
                             onChange={(e) => setNewRecipe({...newRecipe, category_id: e.target.value})}
+                            required
                         >
                             <option value="">Kategori Seçin</option>
                             {categoryData.map(category => (
@@ -1032,11 +986,85 @@ export default function Tarifler() {
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={() => {
-                            // Implement add recipe functionality
-                            // Replace alert with toast message
-                            setSuccessMessage("Tarif başarıyla eklendi.");
-                            setShowSuccessPopup(true);
-                            setAddRecipeModal(false);
+                            // Validate form
+                            if (!newRecipe.title.trim()) {
+                                setErrorMessage("Lütfen tarif adını giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            if (!newRecipe.category_id) {
+                                setErrorMessage("Lütfen bir kategori seçiniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            if (!newRecipe.ingredients.trim()) {
+                                setErrorMessage("Lütfen malzemeleri giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            if (!newRecipe.instructions.trim()) {
+                                setErrorMessage("Lütfen hazırlanışı giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            // Prepare data for API
+                            const recipeData = {
+                                category_id: parseInt(newRecipe.category_id),
+                                name: newRecipe.title,
+                                hasVideo: !!newRecipe.video_url,
+                                video: newRecipe.video_url || null,
+                                hazirlanis: newRecipe.instructions,
+                                malzemeler: newRecipe.ingredients,
+                                kcal: newRecipe.nutritional_info.calories || 0,
+                                protein: newRecipe.nutritional_info.protein || 0,
+                                karbonhidrat: newRecipe.nutritional_info.carbs || 0,
+                                yag: newRecipe.nutritional_info.fat || 0
+                            };
+                            
+                            // Send POST request to API
+                            axios.post(
+                                `${config[config.environment].apiUrl}/recipe/addRecipe`,
+                                recipeData,
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                }
+                            )
+                            .then(response => {
+                                // Refresh recipes list
+                                fetchRecipes();
+                                
+                                // Show success message
+                                setSuccessMessage("Tarif başarıyla eklendi.");
+                                setShowSuccessPopup(true);
+                                
+                                // Reset form and close modal
+                                setNewRecipe({
+                                    title: '',
+                                    description: '',
+                                    ingredients: '',
+                                    instructions: '',
+                                    category_id: '',
+                                    video_url: '',
+                                    nutritional_info: {
+                                        calories: '',
+                                        protein: '',
+                                        carbs: '',
+                                        fat: ''
+                                    }
+                                });
+                                setAddRecipeModal(false);
+                            })
+                            .catch(error => {
+                                console.error("Error adding recipe:", error);
+                                setErrorMessage("Tarif eklenirken bir hata oluştu.");
+                                setShowErrorPopup(true);
+                            });
                         }}
                         disabled={!newRecipe.title.trim() || !newRecipe.category_id}
                     >
@@ -1053,7 +1081,7 @@ export default function Tarifler() {
             >
                 <div className="modal-body">
                     <div className="input-container">
-                        <label htmlFor="categoryTitle">Kategori Adı</label>
+                        <label htmlFor="categoryTitle">Kategori Adı *</label>
                         <input 
                             type="text" 
                             id="categoryTitle"
@@ -1061,6 +1089,7 @@ export default function Tarifler() {
                             value={newCategoryTitle}
                             onChange={(e) => setNewCategoryTitle(e.target.value)}
                             placeholder="Kategori adını giriniz"
+                            required
                         />
                     </div>
                 </div>
@@ -1074,11 +1103,53 @@ export default function Tarifler() {
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={() => {
-                            // Implement add category functionality
-                            // Replace alert with toast message
-                            setSuccessMessage(`"${newCategoryTitle}" kategorisi başarıyla eklendi.`);
-                            setShowSuccessPopup(true);
-                            setAddCategoryModal(false);
+                            // Validate input
+                            if (!newCategoryTitle.trim()) {
+                                setErrorMessage("Lütfen kategori adını giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            // Prepare request data
+                            const categoryData = {
+                                recipe_category_name: newCategoryTitle.trim()
+                            };
+                            
+                            // Send request to API
+                            axios.post(
+                                `${config[config.environment].apiUrl}/recipe/addRecipeCategory`,
+                                categoryData,
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                }
+                            )
+                            .then(response => {
+                                // Refresh categories
+                                axios
+                                    .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
+                                        headers: {
+                                            Authorization: localStorage.getItem("token"),
+                                        },
+                                    })
+                                    .then((response) => {
+                                        setCategoryData(response.data);
+                                    });
+                                
+                                // Show success message
+                                setSuccessMessage(`"${newCategoryTitle}" kategorisi başarıyla eklendi.`);
+                                setShowSuccessPopup(true);
+                                
+                                // Reset form and close modal
+                                setNewCategoryTitle("");
+                                setAddCategoryModal(false);
+                            })
+                            .catch(error => {
+                                console.error("Error adding category:", error);
+                                setErrorMessage("Kategori eklenirken bir hata oluştu.");
+                                setShowErrorPopup(true);
+                            });
                         }}
                         disabled={!newCategoryTitle.trim()}
                     >
@@ -1118,12 +1189,46 @@ export default function Tarifler() {
                     <button 
                         className="modal-btn delete-confirm-btn" 
                         onClick={() => {
-                            // Implement delete recipe functionality
-                            // Replace alert with toast message
-                            setSuccessMessage(`"${itemToDelete?.title}" tarifi başarıyla silindi.`);
-                            setShowSuccessPopup(true);
-                            setDeleteConfirmModal(false);
-                            setItemToDelete(null);
+                            if (!itemToDelete || !itemToDelete.id) {
+                                setErrorMessage("Silinecek tarif bulunamadı.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            // Send DELETE request to API
+                            axios.delete(
+                                `${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`,
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                }
+                            )
+                            .then(response => {
+                                if (response.data.success) {
+                                    // Remove deleted recipe from state
+                                    setRecipeData(prevData => 
+                                        prevData.filter(recipe => recipe.id !== itemToDelete.id)
+                                    );
+                                    
+                                    // Show success message
+                                    setSuccessMessage(`"${itemToDelete.title}" tarifi başarıyla silindi.`);
+                                    setShowSuccessPopup(true);
+                                } else {
+                                    // Show error if API returns success false
+                                    setErrorMessage("Tarif silinirken bir hata oluştu.");
+                                    setShowErrorPopup(true);
+                                }
+                                
+                                // Close modal and reset state
+                                setDeleteConfirmModal(false);
+                                setItemToDelete(null);
+                            })
+                            .catch(error => {
+                                console.error("Error deleting recipe:", error);
+                                setErrorMessage("Tarif silinirken bir hata oluştu.");
+                                setShowErrorPopup(true);
+                            });
                         }}
                     >
                         Sil
@@ -1139,7 +1244,7 @@ export default function Tarifler() {
             >
                 <div className="modal-body styled-form">
                     <div className="input-container">
-                        <label htmlFor="editTitle">Tarif Adı</label>
+                        <label htmlFor="editTitle">Tarif Adı *</label>
                         <input 
                             type="text" 
                             id="editTitle"
@@ -1147,6 +1252,7 @@ export default function Tarifler() {
                             value={editTitle}
                             onChange={(e) => setEditTitle(e.target.value)}
                             placeholder="Tarif adını giriniz"
+                            required
                         />
                     </div>
                     <div className="input-container">
@@ -1235,7 +1341,7 @@ export default function Tarifler() {
                     </div>
                     
                     <div className="input-container">
-                        <label htmlFor="editIngredients">Malzemeler</label>
+                        <label htmlFor="editIngredients">Malzemeler *</label>
                         <textarea 
                             id="editIngredients"
                             className="text-input textarea" 
@@ -1243,10 +1349,11 @@ export default function Tarifler() {
                             onChange={(e) => setEditIngredients(e.target.value)}
                             placeholder="Malzemeleri virgülle ayırarak giriniz"
                             rows={4}
+                            required
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="editInstructions">Hazırlanışı</label>
+                        <label htmlFor="editInstructions">Hazırlanışı *</label>
                         <textarea 
                             id="editInstructions"
                             className="text-input textarea" 
@@ -1254,15 +1361,17 @@ export default function Tarifler() {
                             onChange={(e) => setEditInstructions(e.target.value)}
                             placeholder="Hazırlanışını adım adım yazınız"
                             rows={6}
+                            required
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="editCategory">Kategori</label>
+                        <label htmlFor="editCategory">Kategori *</label>
                         <select 
                             id="editCategory"
                             className="text-input" 
                             value={editCategoryId}
                             onChange={(e) => setEditCategoryId(e.target.value)}
+                            required
                         >
                             <option value="">Kategori Seçin</option>
                             {categoryData.map(category => (
@@ -1283,31 +1392,101 @@ export default function Tarifler() {
                     <button 
                         className="modal-btn confirm-btn" 
                         onClick={() => {
-                            // Implement save recipe functionality with nutritional info and video URL
-                            const updatedRecipe = {
-                                ...selectedRecipe,
-                                title: editTitle,
-                                description: editDescription,
-                                ingredients: editIngredients,
-                                instructions: editInstructions,
-                                category_id: editCategoryId,
-                                video_url: editVideoUrl,
-                                nutritional_info: editNutritionalInfo
+                            // Validate required fields
+                            if (!editTitle.trim()) {
+                                setErrorMessage("Lütfen tarif adını giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            if (!editCategoryId) {
+                                setErrorMessage("Lütfen bir kategori seçiniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            if (!editIngredients.trim()) {
+                                setErrorMessage("Lütfen malzemeleri giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            if (!editInstructions.trim()) {
+                                setErrorMessage("Lütfen hazırlanışı giriniz.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            // Set saving state
+                            setIsSaving(true);
+                            
+                            // Prepare data for API
+                            const recipeData = {
+                                recipe_id: selectedRecipe.id,
+                                category_id: parseInt(editCategoryId),
+                                name: editTitle,
+                                hasVideo: !!editVideoUrl,
+                                video: editVideoUrl || null,
+                                hazirlanis: editInstructions,
+                                malzemeler: editIngredients,
+                                kcal: editNutritionalInfo.calories || 0,
+                                protein: editNutritionalInfo.protein || 0,
+                                karbonhidrat: editNutritionalInfo.carbs || 0,
+                                yag: editNutritionalInfo.fat || 0
                             };
                             
-                            // Update the recipeData array with the edited recipe
-                            setRecipeData(prev => 
-                                prev.map(recipe => 
-                                    recipe.id === selectedRecipe.id ? updatedRecipe : recipe
-                                )
-                            );
-                            
-                            // Replace alert with toast message
-                            setSuccessMessage(`"${editTitle}" tarifi başarıyla güncellendi.`);
-                            setShowSuccessPopup(true);
-                            setEditRecipeModal(false);
+                            // Send PUT request to API
+                            axios.put(
+                                `${config[config.environment].apiUrl}/recipe/updateRecipe`,
+                                recipeData,
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                }
+                            )
+                            .then(response => {
+                                // Map the updated recipe to our component's data structure
+                                const updatedRecipe = {
+                                    id: response.data.id,
+                                    title: response.data.name,
+                                    description: "",  // API doesn't handle description
+                                    category_id: response.data.category_id,
+                                    image: "/placeholder.png",  // API doesn't handle image
+                                    video_url: response.data.hasVideo ? response.data.video : "",
+                                    ingredients: response.data.malzemeler,
+                                    instructions: response.data.hazirlanis,
+                                    nutritional_info: {
+                                        calories: response.data.kcal,
+                                        protein: response.data.protein,
+                                        carbs: response.data.karbonhidrat,
+                                        fat: response.data.yag
+                                    }
+                                };
+                                
+                                // Update recipeData state
+                                setRecipeData(prev => 
+                                    prev.map(recipe => 
+                                        recipe.id === selectedRecipe.id ? updatedRecipe : recipe
+                                    )
+                                );
+                                
+                                // Show success message
+                                setSuccessMessage(`"${editTitle}" tarifi başarıyla güncellendi.`);
+                                setShowSuccessPopup(true);
+                                
+                                // Reset saving state and close modal
+                                setIsSaving(false);
+                                setEditRecipeModal(false);
+                            })
+                            .catch(error => {
+                                console.error("Error updating recipe:", error);
+                                setErrorMessage("Tarif güncellenirken bir hata oluştu.");
+                                setShowErrorPopup(true);
+                                setIsSaving(false);
+                            });
                         }}
-                        disabled={!editTitle.trim() || !editCategoryId}
+                        disabled={!editTitle.trim() || !editCategoryId || isSaving}
                     >
                         {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                     </button>
@@ -1360,13 +1539,55 @@ export default function Tarifler() {
                     <button 
                         className="modal-btn delete-confirm-btn" 
                         onClick={() => {
-                            // Implement delete category functionality
-                            // Replace alert with toast message
-                            setSuccessMessage(`"${categoryToDelete?.name || categoryToDelete?.title}" kategorisi başarıyla silindi.`);
-                            setShowSuccessPopup(true);
-                            setDeleteCategoryConfirmModal(false);
-                            setCategoryToDelete(null);
-                            setAffectedRecipes([]);
+                            if (!categoryToDelete || !categoryToDelete.id) {
+                                setErrorMessage("Silinecek kategori bulunamadı.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            // Send DELETE request to API
+                            axios.delete(
+                                `${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`,
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                }
+                            )
+                            .then(response => {
+                                if (response.data.success) {
+                                    // Remove deleted category from state
+                                    setCategoryData(prevData => 
+                                        prevData.filter(category => category.id !== categoryToDelete.id)
+                                    );
+                                    
+                                    // Remove category from checked categories if it's there
+                                    setCheckedCategories(prev => 
+                                        prev.filter(id => id !== categoryToDelete.id)
+                                    );
+                                    
+                                    // Remove all recipes that belonged to this category from display
+                                    fetchRecipes();
+                                    
+                                    // Show success message
+                                    setSuccessMessage(`"${categoryToDelete.name}" kategorisi başarıyla silindi.`);
+                                    setShowSuccessPopup(true);
+                                } else {
+                                    // Show error if API returns success false
+                                    setErrorMessage("Kategori silinirken bir hata oluştu.");
+                                    setShowErrorPopup(true);
+                                }
+                                
+                                // Close modal and reset state
+                                setDeleteCategoryConfirmModal(false);
+                                setCategoryToDelete(null);
+                                setAffectedRecipes([]);
+                            })
+                            .catch(error => {
+                                console.error("Error deleting category:", error);
+                                setErrorMessage("Kategori silinirken bir hata oluştu.");
+                                setShowErrorPopup(true);
+                            });
                         }}
                     >
                         Sil
@@ -1418,12 +1639,76 @@ export default function Tarifler() {
                     <button 
                         className="modal-btn delete-confirm-btn" 
                         onClick={() => {
-                            // Implement multi-delete category functionality
-                            // Replace alert with toast message
-                            setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
-                            setShowSuccessPopup(true);
-                            setDeleteMultiCategoriesConfirmModal(false);
-                            setAffectedRecipes([]);
+                            if (checkedCategories.length === 0) {
+                                setErrorMessage("Silinecek kategori seçilmedi.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+                            
+                            // Create an array of promises for each category deletion
+                            const deletePromises = checkedCategories.map(categoryId => 
+                                axios.delete(
+                                    `${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`,
+                                    {
+                                        headers: {
+                                            Authorization: localStorage.getItem("token"),
+                                        },
+                                    }
+                                )
+                            );
+                            
+                            // Execute all deletion requests
+                            Promise.all(deletePromises)
+                                .then(responses => {
+                                    // Check if all deletions were successful
+                                    const allSuccessful = responses.every(response => response.data.success);
+                                    
+                                    if (allSuccessful) {
+                                        // Remove deleted categories from state
+                                        setCategoryData(prevData => 
+                                            prevData.filter(category => !checkedCategories.includes(category.id))
+                                        );
+                                        
+                                        // Clear checked categories
+                                        setCheckedCategories([]);
+                                        
+                                        // Refresh recipes
+                                        fetchRecipes();
+                                        
+                                        // Show success message
+                                        setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
+                                        setShowSuccessPopup(true);
+                                    } else {
+                                        // Some deletions failed
+                                        setErrorMessage("Bazı kategoriler silinemedi.");
+                                        setShowErrorPopup(true);
+                                        
+                                        // Refresh categories to get updated list
+                                        axios
+                                            .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
+                                                headers: {
+                                                    Authorization: localStorage.getItem("token"),
+                                                },
+                                            })
+                                            .then((response) => {
+                                                setCategoryData(response.data);
+                                                setCheckedCategories([]);
+                                            });
+                                    }
+                                    
+                                    // Close modal and reset state
+                                    setDeleteMultiCategoriesConfirmModal(false);
+                                    setAffectedRecipes([]);
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting categories:", error);
+                                    setErrorMessage("Kategoriler silinirken bir hata oluştu.");
+                                    setShowErrorPopup(true);
+                                    
+                                    // Close modal but don't clear checkedCategories
+                                    setDeleteMultiCategoriesConfirmModal(false);
+                                    setAffectedRecipes([]);
+                                });
                         }}
                     >
                         Sil
