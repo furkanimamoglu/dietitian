@@ -5,8 +5,7 @@
  */
 const Role = Object.freeze({
     CLIENT: "CLIENT",
-    DIETITIAN: "DIETITIAN",
-    ADMIN: "ADMIN"
+    DIETITIAN: "DIETITIAN"
 });
 
 module.exports = Role;

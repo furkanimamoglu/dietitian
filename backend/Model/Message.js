@@ -17,15 +17,21 @@ const Message = sequelize.define('Message', {
             type: DataTypes.BIGINT,
             allowNull: false
         },
+        sender: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         isRead: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
         },
         message: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false
         }
+    }, {
+        timestamps: true
     }
 );
 

@@ -157,6 +157,24 @@ Notes.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
+// Dietitian ve Message
+Dietitian.hasMany(Message, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+});
+Message.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
+});
+
+// Client ve Message
+Client.hasMany(Message, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+});
+Message.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
 // Tarifler ve Tarif Kategorisi
 RecipeCategory.hasMany(Recipe, {
     foreignKey: 'category_id',
