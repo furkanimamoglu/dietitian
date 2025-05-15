@@ -13,6 +13,10 @@ const Recipe = sequelize.define('Recipe', {
             type: DataTypes.STRING,
             allowNull: false
         },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         category_id: {
             type: DataTypes.INTEGER,
             allowNull: false,

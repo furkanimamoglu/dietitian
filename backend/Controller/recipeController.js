@@ -37,6 +37,7 @@ class recipeController {
 
             const {
                 name,
+                description,
                 category_id,
                 hasVideo,
                 video,
@@ -50,6 +51,7 @@ class recipeController {
 
             const result = await RecipeService.addRecipe(dietitian_id, {
                 name,
+                description,
                 category_id,
                 hasVideo,
                 video,
@@ -84,6 +86,7 @@ class recipeController {
             const {
                 recipe_id,
                 name,
+                description,
                 category_id,
                 hasVideo,
                 video,
@@ -97,6 +100,7 @@ class recipeController {
 
             const result = await RecipeService.updateRecipe(dietitian_id, recipe_id,{
                 name,
+                description,
                 category_id,
                 hasVideo,
                 video,

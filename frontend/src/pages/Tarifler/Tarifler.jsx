@@ -77,7 +77,7 @@ const generatePDF = (recipe) => {
     
     // Add description
     let yPosition = 60;
-    if (recipe.description) {
+    if (recipe.description && recipe.description.trim()) {
         doc.setFontSize(12);
         doc.setFont('Helvetica', 'italic');
         const descriptionLines = doc.splitTextToSize(recipe.description, doc.internal.pageSize.getWidth() - 40);
@@ -508,7 +508,7 @@ export default function Tarifler() {
                 const mappedRecipes = response.data.map(recipe => ({
                     id: recipe.id,
                     title: recipe.name,
-                    description: "",  // API doesn't provide description
+                    description: recipe.description || "",  // Map description field
                     category_id: recipe.category_id,
                     image: "/placeholder.png",  // API doesn't provide image
                     video_url: recipe.hasVideo ? recipe.video : "",
@@ -753,7 +753,9 @@ export default function Tarifler() {
                     )}
                     
                     <div className="recipe-detail-content">
-                        <p className="recipe-description">{detailItem?.description}</p>
+                        {detailItem?.description && (
+                            <p className="recipe-description">{detailItem.description}</p>
+                        )}
                         
                         {detailItem?.nutritional_info && (
                             <div className="recipe-detail-section nutritional-info-section">
@@ -1015,6 +1017,7 @@ export default function Tarifler() {
                             const recipeData = {
                                 category_id: parseInt(newRecipe.category_id),
                                 name: newRecipe.title,
+                                description: newRecipe.description,
                                 hasVideo: !!newRecipe.video_url,
                                 video: newRecipe.video_url || null,
                                 hazirlanis: newRecipe.instructions,
@@ -1425,6 +1428,7 @@ export default function Tarifler() {
                                 recipe_id: selectedRecipe.id,
                                 category_id: parseInt(editCategoryId),
                                 name: editTitle,
+                                description: editDescription,
                                 hasVideo: !!editVideoUrl,
                                 video: editVideoUrl || null,
                                 hazirlanis: editInstructions,
@@ -1450,7 +1454,7 @@ export default function Tarifler() {
                                 const updatedRecipe = {
                                     id: response.data.id,
                                     title: response.data.name,
-                                    description: "",  // API doesn't handle description
+                                    description: response.data.description || "",  // Map description field
                                     category_id: response.data.category_id,
                                     image: "/placeholder.png",  // API doesn't handle image
                                     video_url: response.data.hasVideo ? response.data.video : "",
