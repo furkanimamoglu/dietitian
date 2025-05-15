@@ -207,11 +207,14 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  z-index: 1;
 }
 
 .exercise-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  z-index: 2;
 }
 
 .card-image-container {
@@ -795,12 +798,16 @@ input[type="date"].text-input {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 5;
+  overflow: hidden;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  position: relative;
 }
 
 .filter-title {
@@ -827,11 +834,16 @@ input[type="date"].text-input {
   font-weight: 500;
   color: #757575;
   transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .difficulty-btn:hover {
   background-color: #e8eaf6;
   border-color: #c5cae9;
+  transform: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .difficulty-btn.active {
@@ -858,11 +870,16 @@ input[type="date"].text-input {
   font-weight: 500;
   color: #757575;
   transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .calorie-btn:hover {
   background-color: #e8f5e9;
   border-color: #c8e6c9;
+  transform: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .calorie-btn.active {
@@ -876,10 +893,12 @@ input[type="date"].text-input {
 @media (max-width: 768px) {
   .filters-container {
     padding: 0.75rem;
+    overflow: visible;
   }
   
   .filter-group {
     width: 100%;
+    overflow: hidden;
   }
   
   .difficulty-options,
@@ -889,12 +908,23 @@ input[type="date"].text-input {
     padding-bottom: 0.5rem;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
+    max-width: 100%;
+    padding-right: 5px;
   }
   
   .difficulty-btn,
   .calorie-btn {
     flex: 0 0 auto;
     white-space: nowrap;
+    transform: none !important;
+  }
+  
+  /* Prevent edge hover effects */
+  .difficulty-btn:hover,
+  .calorie-btn:hover,
+  .exercise-card:hover {
+    transform: none !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 }
 
