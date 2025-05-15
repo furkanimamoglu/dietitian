@@ -18,6 +18,8 @@ const appointmentRoutes = require('./Routes/appointmentRoutes');
 const systemRoutes = require('./Routes/systemRoutes');
 const invoiceRoutes = require('./Routes/invoiceRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
+const exerciseRoutes = require('./Routes/exerciseRoutes');
+
 app.use(bodyParser.json());
 
 app.use(cors({
@@ -37,6 +39,7 @@ app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
 app.use('/recipe', recipeRoutes);
+app.use('/exercise', exerciseRoutes);
 app.use('/invoice', invoiceRoutes);
 app.use('/system', systemRoutes);
 

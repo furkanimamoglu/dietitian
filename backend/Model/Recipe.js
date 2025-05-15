@@ -9,6 +9,14 @@ const Recipe = sequelize.define('Recipe', {
             allowNull: false,
             primaryKey: true
         },
+        dietitian_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Dietitians',
+                key: 'id'
+            }
+        },
         name: {
             type: DataTypes.STRING,
             allowNull: false

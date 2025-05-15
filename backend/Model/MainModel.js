@@ -2,6 +2,8 @@ const sequelize = require('../Utils/Database'); // Sequelize instance
 const Dietitian = require('./Dietitian');
 const Client = require('./Client');
 const Exercise = require('./Exercise');
+const ExerciseCategory = require('./ExerciseCategory');
+const ExerciseAssignment = require('./ExerciseAssignment');
 const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
 const AnamnesQuestion = require('./AnamnesQuestion');
@@ -146,7 +148,7 @@ Anamnes.belongsTo(AnamnesQuestion, {
     foreignKey: 'anamnes_question_id',
 });
 
-// 13. Dietitian ve Notes
+// Diyetisyen ve Notlar
 Dietitian.hasMany(Notes, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -155,7 +157,7 @@ Notes.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 14. Recipe ve Recipe Category
+// Tarifler ve Tarif Kategorisi
 RecipeCategory.hasMany(Recipe, {
     foreignKey: 'category_id',
     as: 'recipe',
@@ -167,7 +169,7 @@ Recipe.belongsTo(RecipeCategory, {
     as: 'category',
 });
 
-// 15. Dietitian ve Recipe Category
+// Diyetisyen ve Tarif Kategorisi
 Dietitian.hasMany(RecipeCategory, {
     foreignKey: 'dietitian_id',
     as: 'recipeCategories',
@@ -178,11 +180,55 @@ RecipeCategory.belongsTo(Dietitian, {
     as: 'dietitian',
 });
 
+// Egzersiz ve Egzersiz Kategorisi
+ExerciseCategory.hasMany(Exercise, {
+    foreignKey: 'category_id',
+    as: 'exercise',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+Exercise.belongsTo(ExerciseCategory, {
+    foreignKey: 'category_id',
+    as: 'category',
+});
+
+// Dietitian ve Exercise Category
+Dietitian.hasMany(ExerciseCategory, {
+    foreignKey: 'dietitian_id',
+    as: 'exerciseCategories',
+    onDelete: 'CASCADE',
+});
+ExerciseCategory.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
+    as: 'dietitian',
+});
+
+// Exercise and ExerciseAssignment relationship
+ExerciseAssignment.belongsTo(Exercise, {
+    foreignKey: 'exercise_id',
+    as: 'Exercise'
+});
+Exercise.hasMany(ExerciseAssignment, {
+    foreignKey: 'exercise_id',
+    as: 'assignments',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+
+// Client and ExerciseAssignment relationship
+Client.hasMany(ExerciseAssignment, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+    hooks: true,
+});
+ExerciseAssignment.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
 module.exports = {
     sequelize,
     Dietitian,
     Client,
-    Exercise,
     Appointment,
     Anamnes,
     AnamnesQuestion,
@@ -190,6 +236,9 @@ module.exports = {
     Invoice,
     Notification,
     Message,
+    Exercise,
+    ExerciseCategory,
+    ExerciseAssignment,
     NutritionPlan,
     NutritionCategory,
     NutritionAssignment,
