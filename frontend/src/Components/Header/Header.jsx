@@ -73,16 +73,6 @@ const SearchContainer = styled('div')(({ theme }) => ({
     },
 }));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-}));
-
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
     color: 'inherit',
     width: '100%',
@@ -210,9 +200,6 @@ export default function Header() {
                                 position: 'relative',
                             }}
                         >
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
                             <StyledInputBase
                                 placeholder="Arama yap..."
                                 inputProps={{ 'aria-label': 'search' }}

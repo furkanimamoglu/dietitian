@@ -394,8 +394,7 @@ class DietitianService {
             if (!user_id) {
                 throw new Error("Yetkisiz Erişim.");
             }
-            // TODO: Yalnızca diyetisyen rolüne sahip kişiler için doğrulama yapacağız.
-            // TODO: Rol kontrolü gelecek.
+
             const data = [
                 { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
                 { type: "page", name: "Randevularım", url: "/randevularim" },
@@ -426,7 +425,7 @@ class DietitianService {
             dietitian.Clients.forEach(client => {
                 data.push({
                     type: "danisan",
-                    name: `${client.name} ${client.surname}`,
+                    name: `${client.name}`,
                     url: `/danisan/${client.id}`,
                 });
             });

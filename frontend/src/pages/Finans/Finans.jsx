@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
+import axios from 'axios';
+import config from "../../config.js";
 import {
     Paper, Typography, Box, Grid, Tab, Tabs, TextField, Button,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton,
-    InputAdornment, MenuItem, Select, FormControl, InputLabel, Card,
-    CardContent, Divider, List, ListItem, ListItemIcon, ListItemText,
-    OutlinedInput, Pagination
+    Chip, InputAdornment, MenuItem, Select, FormControl, InputLabel,
+    Divider, List, ListItem, ListItemIcon, ListItemText, Pagination
 } from '@mui/material';
 import { 
     Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, 
@@ -19,13 +18,18 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
-// Custom Modal Component
 const CustomModal = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
 
+    const handleOverlayClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     return (
-        <div className="custom-modal-overlay" onClick={onClose}>
-            <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="custom-modal-overlay" onClick={handleOverlayClick}>
+            <div className="custom-modal">
                 <div className="custom-modal-header">
                     <h2>{title}</h2>
                     <button className="close-button" onClick={onClose}>&times;</button>
@@ -39,15 +43,23 @@ const CustomModal = ({ isOpen, onClose, title, children }) => {
 };
 
 // Custom Confirmation Dialog Component
-const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemName }) => {
+const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemName, isLoading }) => {
     if (!isOpen) return null;
 
+    // Handle clicking outside the modal
+    const handleOverlayClick = (e) => {
+        // Only close if not loading and the click is directly on the overlay
+        if (!isLoading && e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     return (
-        <div className="custom-modal-overlay" onClick={onClose}>
-            <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="custom-modal-overlay" onClick={handleOverlayClick}>
+            <div className="custom-modal">
                 <div className="custom-modal-header">
                     <h2>{title}</h2>
-                    <button className="close-button" onClick={onClose}>&times;</button>
+                    <button className="close-button" onClick={onClose} disabled={isLoading}>&times;</button>
                 </div>
                 <div className="custom-modal-content">
                     <div className="delete-confirm-modal">
@@ -64,6 +76,7 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemNa
                     <button 
                         className="modal-btn cancel-btn" 
                         onClick={onClose}
+                        disabled={isLoading}
                     >
                         Vazgeç
                     </button>
@@ -71,10 +84,13 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemNa
                         className="modal-btn delete-confirm-btn" 
                         onClick={() => {
                             onConfirm();
-                            onClose();
+                            if (!isLoading) {
+                                onClose();
+                            }
                         }}
+                        disabled={isLoading}
                     >
-                        Sil
+                        {isLoading ? 'Siliniyor...' : 'Sil'}
                     </button>
                 </div>
             </div>
@@ -85,49 +101,12 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemNa
 export default function Finans() {
     const [tabValue, setTabValue] = useState(0);
     
-    // Sample data for packages
-    const [packages, setPackages] = useState([
-        { 
-            id: 1, 
-            name: "Seanslık Paket", 
-            type: "Seanslık", 
-            price: 600, 
-            description: "Tek seans diyetisyen danışmanlığı", 
-            services: ["Bireysel beslenme planı", "1 görüşme", "1 adet takip"] 
-        },
-        { 
-            id: 2, 
-            name: "Aylık Takip", 
-            type: "Aylık", 
-            price: 1500, 
-            description: "1 aylık diyetisyen danışmanlık paketi", 
-            services: ["Kişiselleştirilmiş beslenme planı", "4 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği"] 
-        },
-        { 
-            id: 3, 
-            name: "3 Aylık Program", 
-            type: "3 Aylık", 
-            price: 3600, 
-            description: "3 aylık diyetisyen danışmanlık paketi", 
-            services: ["Kişiselleştirilmiş beslenme planı", "12 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği", "Vücut analizi"] 
-        },
-        { 
-            id: 4, 
-            name: "6 Aylık Program", 
-            type: "6 Aylık", 
-            price: 6000, 
-            description: "6 aylık diyetisyen danışmanlık paketi", 
-            services: ["Kişiselleştirilmiş beslenme planı", "24 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği", "Vücut analizi", "Tahlil yorumlama"] 
-        },
-        { 
-            id: 5, 
-            name: "Yıllık Program", 
-            type: "1 Yıllık", 
-            price: 10000, 
-            description: "1 yıllık diyetisyen danışmanlık paketi", 
-            services: ["Kişiselleştirilmiş beslenme planı", "52 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği", "Vücut analizi", "Tahlil yorumlama", "Yılsonu raporu"] 
-        }
-    ]);
+    // Packages state
+    const [packages, setPackages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Add clients state
+    const [clients, setClients] = useState([]);
 
     // Sample data for invoices
     const [invoices, setInvoices] = useState([
@@ -181,15 +160,92 @@ export default function Finans() {
         type: "Seanslık",
         price: 0,
         description: "",
-        services: [""]
+        services: [],
+        serviceItems: []
     });
+    
+    // Fetch packages on component mount
+    useEffect(() => {
+        fetchPackages();
+        fetchClients();
+        
+        // Initialize newPackage with an empty service
+        setNewPackage(prev => ({
+            ...prev,
+            services: [""]
+        }));
+    }, []);
+
+    // API Functions
+    const fetchPackages = async () => {
+        setIsLoading(true);
+        try {
+            // Ensure config is available and properly structured
+            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                ? `${config[config.environment].apiUrl}/package/getMyPackages`
+                : '/package/getMyPackages';
+
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            });
+            const packagesData = response.data;
+            
+            // Fetch services for each package
+            const packagesWithServices = await Promise.all(
+                packagesData.map(async (pkg) => {
+                    const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                        ? `${config[config.environment].apiUrl}/package/getPackageItemsFromPackage?package_id=${pkg.id}`
+                        : `/package/getPackageItemsFromPackage?package_id=${pkg.id}`;
+                        
+                    const servicesResponse = await axios.get(servicesUrl, {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                        },
+                    });
+                    const services = servicesResponse.data.map(item => item.name);
+                    return { ...pkg, services };
+                })
+            );
+            
+            setPackages(packagesWithServices);
+        } catch (error) {
+            console.error('Error fetching packages:', error);
+            toast.error('Paketler yüklenirken bir hata oluştu.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    // Add function to fetch clients
+    const fetchClients = async () => {
+        try {
+            // Ensure config is available and properly structured
+            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                ? `${config[config.environment].apiUrl}/dietitian/getAllMyClients`
+                : '/dietitian/getAllMyClients';
+
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            });
+            setClients(response.data);
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+            toast.error('Danışanlar yüklenirken bir hata oluştu.');
+        }
+    };
     
     // Invoice management state
     const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
     const [currentInvoice, setCurrentInvoice] = useState(null);
     const [newInvoice, setNewInvoice] = useState({
         clientName: "",
+        clientId: 0,
         packageId: 0,
+        packageName: "",
         amount: 0,
         status: "Beklemede",
         issueDate: new Date().toISOString().split('T')[0],
@@ -314,10 +370,41 @@ export default function Finans() {
     };
 
     // Package management handlers
-    const handleOpenPackageDialog = (pkg = null) => {
+    const handleOpenPackageDialog = async (pkg = null) => {
         if (pkg) {
             setCurrentPackage(pkg);
-            setNewPackage({...pkg});
+            
+            try {
+                // Ensure config is available and properly structured
+                const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                    ? `${config[config.environment].apiUrl}/package/getPackageItemsFromPackage?package_id=${pkg.id}`
+                    : `/package/getPackageItemsFromPackage?package_id=${pkg.id}`;
+                    
+                const servicesResponse = await axios.get(servicesUrl, {
+                    headers: {
+                        Authorization: localStorage.getItem("token"),
+                    },
+                });
+                
+                // Get service items and names
+                const serviceItems = servicesResponse.data;
+                const serviceNames = serviceItems.map(item => item.name);
+                
+                // If no services, add an empty service
+                if (serviceNames.length === 0) {
+                    serviceNames.push("");
+                }
+                
+                setNewPackage({
+                    ...pkg,
+                    services: serviceNames,
+                    serviceItems: serviceItems
+                });
+            } catch (error) {
+                console.error('Error fetching package items:', error);
+                toast.error('Paket hizmetleri yüklenirken bir hata oluştu.');
+                setNewPackage({...pkg, services: [""], serviceItems: []});
+            }
         } else {
             setCurrentPackage(null);
             setNewPackage({
@@ -325,7 +412,8 @@ export default function Finans() {
                 type: "Seanslık",
                 price: 0,
                 description: "",
-                services: [""]
+                services: [""],
+                serviceItems: []
             });
         }
         setPackageDialogOpen(true);
@@ -368,26 +456,140 @@ export default function Finans() {
         });
     };
 
-    const handleSavePackage = () => {
+    const handleSavePackage = async () => {
         if (!newPackage.name || !newPackage.type || newPackage.price <= 0) {
             toast.error("Lütfen tüm gerekli alanları doldurun.");
             return;
         }
 
-        if (currentPackage) {
-            // Update existing package
-            setPackages(packages.map(pkg => 
-                pkg.id === currentPackage.id ? {...newPackage, id: pkg.id} : pkg
-            ));
-            toast.success(`${newPackage.name} paketi güncellendi.`);
-        } else {
-            // Create new package
-            const newId = Math.max(...packages.map(pkg => pkg.id), 0) + 1;
-            setPackages([...packages, {...newPackage, id: newId}]);
-            toast.success(`${newPackage.name} paketi oluşturuldu.`);
+        setIsLoading(true);
+        try {
+            let savedPackage;
+            
+            // Get base API URL with safe access
+            const getApiUrl = (endpoint) => {
+                return config && config[config.environment] && config[config.environment].apiUrl 
+                    ? `${config[config.environment].apiUrl}${endpoint}`
+                    : endpoint;
+            };
+            
+            const authHeaders = {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            };
+            
+            if (currentPackage) {
+                // Update existing package
+                const packageData = {
+                    package_id: currentPackage.id,
+                    name: newPackage.name,
+                    description: newPackage.description,
+                    type: newPackage.type,
+                    price: parseInt(newPackage.price, 10) // Ensure price is sent as a number
+                };
+
+                const response = await axios.put(
+                    getApiUrl('/package/updatePackage'), 
+                    packageData, 
+                    authHeaders
+                );
+                savedPackage = response.data;
+                
+                // Get existing services for the package
+                const existingServicesResponse = await axios.get(
+                    getApiUrl(`/package/getPackageItemsFromPackage?package_id=${currentPackage.id}`),
+                    authHeaders
+                );
+                const existingServices = existingServicesResponse.data;
+                
+                // Track which services to delete
+                const servicesToRemove = existingServices.filter(
+                    existing => !newPackage.services.includes(existing.name)
+                );
+                
+                // Delete services that are no longer in the updated list
+                for (const serviceToRemove of servicesToRemove) {
+                    await axios.delete(
+                        getApiUrl(`/package/deletePackageItem?item_id=${serviceToRemove.id}`),
+                        authHeaders
+                    );
+                }
+                
+                // Update or add services
+                for (const serviceName of newPackage.services) {
+                    if (!serviceName.trim()) continue; // Skip empty services
+                    
+                    const existingService = existingServices.find(s => s.name === serviceName);
+                    
+                    if (existingService) {
+                        // Service exists but needs to be updated (only if name changed)
+                        if (existingService.name !== serviceName) {
+                            await axios.put(
+                                getApiUrl('/package/updatePackageItem'), 
+                                {
+                                    item_id: existingService.id,
+                                    name: serviceName
+                                }, 
+                                authHeaders
+                            );
+                        }
+                    } else {
+                        // Service is new, add it
+                        await axios.post(
+                            getApiUrl('/package/addPackageItem'), 
+                            {
+                                package_id: savedPackage.id,
+                                name: serviceName
+                            }, 
+                            authHeaders
+                        );
+                    }
+                }
+                
+                toast.success(`${newPackage.name} paketi güncellendi.`);
+            } else {
+                // Create new package
+                const packageData = {
+                    name: newPackage.name,
+                    description: newPackage.description,
+                    type: newPackage.type,
+                    price: parseInt(newPackage.price, 10) // Ensure price is sent as a number
+                };
+
+                const response = await axios.post(
+                    getApiUrl('/package/addPackage'), 
+                    packageData, 
+                    authHeaders
+                );
+                savedPackage = response.data;
+                
+                // Add services for the new package
+                for (const serviceName of newPackage.services) {
+                    if (serviceName.trim()) {
+                        await axios.post(
+                            getApiUrl('/package/addPackageItem'), 
+                            {
+                                package_id: savedPackage.id,
+                                name: serviceName
+                            }, 
+                            authHeaders
+                        );
+                    }
+                }
+                
+                toast.success(`${newPackage.name} paketi oluşturuldu.`);
+            }
+            
+            // Refresh packages after saving
+            await fetchPackages();
+        } catch (error) {
+            console.error('Error saving package:', error);
+            toast.error('Paket kaydedilirken bir hata oluştu.');
+        } finally {
+            setIsLoading(false);
+            handleClosePackageDialog();
         }
-        
-        handleClosePackageDialog();
     };
 
     const handleDeletePackage = (id) => {
@@ -412,15 +614,40 @@ export default function Finans() {
     };
 
     // Add the actual delete function that will be called after confirmation
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         const { itemId, itemType, itemName } = deleteConfirmation;
+        setIsLoading(true);
         
-        if (itemType === 'package') {
-            setPackages(packages.filter(pkg => pkg.id !== itemId));
-            toast.success(`"${itemName}" paketi silindi.`);
-        } else if (itemType === 'invoice') {
-            setInvoices(invoices.filter(invoice => invoice.id !== itemId));
-            toast.success(`"${itemName}" danışanının faturası silindi.`);
+        try {
+            // Get base API URL with safe access
+            const getApiUrl = (endpoint) => {
+                return config && config[config.environment] && config[config.environment].apiUrl 
+                    ? `${config[config.environment].apiUrl}${endpoint}`
+                    : endpoint;
+            };
+            
+            const authHeaders = {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            };
+            
+            if (itemType === 'package') {
+                await axios.delete(
+                    getApiUrl(`/package/deletePackage?package_id=${itemId}`),
+                    authHeaders
+                );
+                toast.success(`"${itemName}" paketi silindi.`);
+                await fetchPackages(); // Refresh packages list
+            } else if (itemType === 'invoice') {
+                setInvoices(invoices.filter(invoice => invoice.id !== itemId));
+                toast.success(`"${itemName}" danışanının faturası silindi.`);
+            }
+        } catch (error) {
+            console.error(`Error deleting ${itemType}:`, error);
+            toast.error(`${itemType === 'package' ? 'Paket' : 'Fatura'} silinirken bir hata oluştu.`);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -430,14 +657,28 @@ export default function Finans() {
             setCurrentInvoice(invoice);
             setNewInvoice({...invoice});
         } else {
+            // Get the first package if available
+            const firstPackage = packages.length > 0 ? packages[0] : null;
+            
+            // Calculate due date based on package type
+            let dueDate = new Date();
+            if (firstPackage) {
+                dueDate = calculateDueDateFromPackageType(new Date(), firstPackage.type);
+            } else {
+                // Default: current date + 7 days
+                dueDate.setDate(dueDate.getDate() + 7);
+            }
+            
             setCurrentInvoice(null);
             setNewInvoice({
-                clientName: "",
-                packageId: packages[0]?.id || 0,
-                amount: packages[0]?.price || 0,
+                clientName: clients.length > 0 ? clients[0].name : "",
+                clientId: clients.length > 0 ? clients[0].id : 0,
+                packageId: firstPackage ? firstPackage.id : 0,
+                packageName: firstPackage ? firstPackage.name : "",
+                amount: firstPackage ? Number(firstPackage.price) : 0,
                 status: "Beklemede",
                 issueDate: new Date().toISOString().split('T')[0],
-                dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                dueDate: dueDate.toISOString().split('T')[0]
             });
         }
         setInvoiceDialogOpen(true);
@@ -448,21 +689,89 @@ export default function Finans() {
         setCurrentInvoice(null);
     };
 
+    // Add helper function to calculate due date based on package type
+    const calculateDueDateFromPackageType = (issueDate, packageType) => {
+        const dueDate = new Date(issueDate);
+        
+        switch(packageType) {
+            case "Seanslık":
+                dueDate.setDate(dueDate.getDate() + 1); // +1 day
+                break;
+            case "Aylık":
+                dueDate.setMonth(dueDate.getMonth() + 1); // +1 month
+                break;
+            case "3 Aylık":
+                dueDate.setMonth(dueDate.getMonth() + 3); // +3 months
+                break;
+            case "6 Aylık":
+                dueDate.setMonth(dueDate.getMonth() + 6); // +6 months
+                break;
+            case "1 Yıllık":
+                dueDate.setFullYear(dueDate.getFullYear() + 1); // +1 year
+                break;
+            default:
+                dueDate.setDate(dueDate.getDate() + 7); // Default: +7 days
+        }
+        
+        return dueDate;
+    };
+
     const handleInvoiceChange = (field, value) => {
         setNewInvoice({
             ...newInvoice,
             [field]: value
         });
 
-        // Auto-update amount if package changes
-        if (field === 'packageId') {
-            const selectedPackage = packages.find(pkg => pkg.id === value);
-            if (selectedPackage) {
+        // Auto-update client name if client id changes
+        if (field === 'clientId') {
+            const selectedClient = clients.find(client => client.id === Number(value));
+            if (selectedClient) {
                 setNewInvoice(prev => ({
                     ...prev,
-                    packageId: value,
-                    amount: selectedPackage.price,
-                    packageName: selectedPackage.name
+                    clientId: Number(value),
+                    clientName: selectedClient.name
+                }));
+            }
+        }
+
+        // Auto-update amount and due date if package changes
+        if (field === 'packageId') {
+            const selectedPackage = packages.find(pkg => pkg.id === Number(value));
+            if (selectedPackage) {
+                // Calculate due date based on package type and current issue date
+                const issueDate = new Date(newInvoice.issueDate);
+                const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
+                
+                setNewInvoice(prev => ({
+                    ...prev,
+                    packageId: Number(value),
+                    amount: Number(selectedPackage.price),
+                    packageName: selectedPackage.name,
+                    dueDate: dueDate.toISOString().split('T')[0]
+                }));
+            }
+        }
+        
+        // Update due date when issue date changes based on selected package
+        if (field === 'issueDate') {
+            const issueDate = new Date(value);
+            const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+            
+            if (selectedPackage) {
+                const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
+                setNewInvoice(prev => ({
+                    ...prev,
+                    issueDate: value,
+                    dueDate: dueDate.toISOString().split('T')[0]
+                }));
+            } else {
+                // Default +7 days if no package is selected
+                const dueDate = new Date(issueDate);
+                dueDate.setDate(dueDate.getDate() + 7);
+                setNewInvoice(prev => ({
+                    ...prev,
+                    issueDate: value,
+                    dueDate: dueDate.toISOString().split('T')[0]
                 }));
             }
         }
@@ -729,6 +1038,7 @@ export default function Finans() {
                                     startIcon={<AddIcon />}
                                     onClick={() => handleOpenPackageDialog()}
                                     className="add-package-btn"
+                                    disabled={isLoading}
                                 >
                                     Yeni Paket Ekle
                                 </Button>
@@ -736,6 +1046,13 @@ export default function Finans() {
                         </Paper>
                         
                         <Box mt={4}>
+                            {isLoading ? (
+                                <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+                                    <Typography variant="h6" color="textSecondary">
+                                        Paketler yükleniyor...
+                                    </Typography>
+                                </Box>
+                            ) : (
                             <Grid container spacing={3}>
                                 {packages.map(pkg => (
                                     <Grid item xs={12} md={6} lg={4} key={pkg.id}>
@@ -758,7 +1075,7 @@ export default function Finans() {
                                                 </Typography>
                                                 
                                                 <Typography variant="h4" className="package-price" mt={3}>
-                                                    {pkg.price.toLocaleString()} ₺
+                                                    {Number(pkg.price).toLocaleString()} ₺
                                                 </Typography>
                                                 
                                                 <Divider sx={{ my: 2 }} />
@@ -768,14 +1085,18 @@ export default function Finans() {
                                                 </Typography>
                                                 
                                                 <List dense className="services-list">
-                                                    {pkg.services.map((service, index) => (
+                                                    {pkg.services && pkg.services.length > 0 ? pkg.services.map((service, index) => (
                                                         <ListItem key={index} disableGutters className="service-item">
                                                             <ListItemIcon style={{ minWidth: 28 }}>
                                                                 <CheckCircleIcon fontSize="small" color="success" />
                                                             </ListItemIcon>
                                                             <ListItemText primary={service} />
                                                         </ListItem>
-                                                    ))}
+                                                    )) : (
+                                                        <ListItem disableGutters>
+                                                            <ListItemText primary="Paket içeriği belirtilmemiş" />
+                                                        </ListItem>
+                                                    )}
                                                 </List>
                                                 
                                                 <Box className="package-card-footer-spacer" mt={5}></Box>
@@ -788,6 +1109,7 @@ export default function Finans() {
                                                         size="small"
                                                         startIcon={<EditIcon />}
                                                         onClick={() => handleOpenPackageDialog(pkg)}
+                                                        disabled={isLoading}
                                                     >
                                                         Düzenle
                                                     </Button>
@@ -797,6 +1119,7 @@ export default function Finans() {
                                                         size="small"
                                                         startIcon={<DeleteIcon />}
                                                         onClick={() => handleDeletePackage(pkg.id)}
+                                                        disabled={isLoading}
                                                     >
                                                         Sil
                                                     </Button>
@@ -806,7 +1129,7 @@ export default function Finans() {
                                     </Grid>
                                 ))}
                                 
-                                {packages.length === 0 && (
+                                {packages.length === 0 && !isLoading && (
                                     <Grid item xs={12}>
                                         <Paper elevation={3} className="empty-state">
                                             <Box p={4} textAlign="center">
@@ -825,6 +1148,7 @@ export default function Finans() {
                                                     startIcon={<AddIcon />}
                                                     onClick={() => handleOpenPackageDialog()}
                                                     sx={{ mt: 3 }}
+                                                    disabled={isLoading}
                                                 >
                                                     Paket Oluştur
                                                 </Button>
@@ -833,6 +1157,7 @@ export default function Finans() {
                                     </Grid>
                                 )}
                             </Grid>
+                            )}
                         </Box>
                     </Box>
                 );
@@ -1070,6 +1395,7 @@ export default function Finans() {
                                     value={newPackage.name}
                                     onChange={(e) => handlePackageChange('name', e.target.value)}
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                             
@@ -1079,6 +1405,7 @@ export default function Finans() {
                                     id="package-type"
                                     value={newPackage.type}
                                     onChange={(e) => handlePackageChange('type', e.target.value)}
+                                    disabled={isLoading}
                                 >
                                     <option value="Seanslık">Seanslık</option>
                                     <option value="Aylık">Aylık</option>
@@ -1100,6 +1427,7 @@ export default function Finans() {
                                         value={newPackage.price}
                                         onChange={(e) => handlePackageChange('price', Number(e.target.value))}
                                         required
+                                        disabled={isLoading}
                                     />
                                 </div>
                             </div>
@@ -1111,6 +1439,7 @@ export default function Finans() {
                                     type="text"
                                     value={newPackage.description}
                                     onChange={(e) => handlePackageChange('description', e.target.value)}
+                                    disabled={isLoading}
                                 />
                             </div>
                         </div>
@@ -1121,17 +1450,20 @@ export default function Finans() {
                             <div className="services-list-form">
                                 {newPackage.services.map((service, index) => (
                                     <div key={index} className="service-item-input">
+                                        <span className="service-item-number">{index + 1}.</span>
                                         <input
                                             type="text"
                                             placeholder={`Hizmet ${index + 1}`}
                                             value={service}
                                             onChange={(e) => handleServiceChange(index, e.target.value)}
+                                            disabled={isLoading}
                                         />
                                         <button 
                                             type="button"
                                             className="remove-button"
                                             onClick={() => handleRemoveService(index)}
-                                            disabled={newPackage.services.length <= 1}
+                                            disabled={newPackage.services.length <= 1 || isLoading}
+                                            title="Hizmeti Sil"
                                         >
                                             <DeleteIcon />
                                         </button>
@@ -1142,6 +1474,7 @@ export default function Finans() {
                                     type="button"
                                     className="add-button"
                                     onClick={handleAddService}
+                                    disabled={isLoading}
                                 >
                                     <AddIcon /> Hizmet Ekle
                                 </button>
@@ -1153,6 +1486,7 @@ export default function Finans() {
                                 type="button" 
                                 className="cancel-button"
                                 onClick={handleClosePackageDialog}
+                                disabled={isLoading}
                             >
                                 İptal
                             </button>
@@ -1160,8 +1494,9 @@ export default function Finans() {
                                 type="button" 
                                 className="save-button"
                                 onClick={handleSavePackage}
+                                disabled={isLoading}
                             >
-                                <SaveIcon /> Kaydet
+                                {isLoading ? 'Kaydediliyor...' : <><SaveIcon /> Kaydet</>}
                             </button>
                         </div>
                     </div>
@@ -1177,28 +1512,51 @@ export default function Finans() {
                         <div className="form-row">
                             <div className="form-group">
                                 <label htmlFor="client-name">Danışan Adı</label>
-                                <input
-                                    id="client-name"
-                                    type="text"
-                                    value={newInvoice.clientName}
-                                    onChange={(e) => handleInvoiceChange('clientName', e.target.value)}
-                                    required
-                                />
+                                {currentInvoice ? (
+                                    <input
+                                        id="client-name"
+                                        type="text"
+                                        value={newInvoice.clientName}
+                                        readOnly
+                                        className="readonly-input"
+                                    />
+                                ) : (
+                                    <select
+                                        id="client-select"
+                                        value={newInvoice.clientId || ""}
+                                        onChange={(e) => handleInvoiceChange('clientId', e.target.value ? Number(e.target.value) : 0)}
+                                        required
+                                    >
+                                        <option value="">Danışan Seçin</option>
+                                        {clients.map(client => (
+                                            <option key={client.id} value={client.id}>
+                                                {client.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
                             </div>
                             
                             <div className="form-group">
                                 <label htmlFor="package-select">Paket</label>
-                                <select
-                                    id="package-select"
-                                    value={newInvoice.packageId}
-                                    onChange={(e) => handleInvoiceChange('packageId', Number(e.target.value))}
-                                >
-                                    {packages.map(pkg => (
-                                        <option key={pkg.id} value={pkg.id}>
-                                            {pkg.name} - {pkg.price.toLocaleString()} ₺
-                                        </option>
-                                    ))}
-                                </select>
+                                {packages.length > 0 ? (
+                                    <select
+                                        id="package-select"
+                                        value={newInvoice.packageId || ""}
+                                        onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : 0)}
+                                    >
+                                        <option value="">Paket Seçin</option>
+                                        {packages.map(pkg => (
+                                            <option key={pkg.id} value={pkg.id}>
+                                                {pkg.name} - {Number(pkg.price).toLocaleString()} ₺
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <div className="no-packages-warning">
+                                        <p>Henüz paket bulunmuyor. Lütfen önce paket ekleyin.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         
@@ -1210,7 +1568,7 @@ export default function Finans() {
                                     <input
                                         id="invoice-amount"
                                         type="number"
-                                        value={newInvoice.amount}
+                                        value={newInvoice.amount || 0}
                                         onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
                                         required
                                     />
@@ -1288,6 +1646,7 @@ export default function Finans() {
                             ? `paketini silmek istediğinize emin misiniz?`
                             : `danışanının faturasını silmek istediğinize emin misiniz?`
                     }
+                    isLoading={isLoading}
                 />
             </div>
         </Default>

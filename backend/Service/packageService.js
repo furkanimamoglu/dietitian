@@ -86,7 +86,7 @@ class PackageService {
         }
 
         return await PackageItems.findAll({
-            where: { id: package_id }
+            where: { package_id: package_id }
         });
     }
 
