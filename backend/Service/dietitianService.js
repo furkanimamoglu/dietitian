@@ -399,7 +399,6 @@ class DietitianService {
                 { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
                 { type: "page", name: "Randevularım", url: "/randevularim" },
                 { type: "page", name: "Ayarlar", url: "/ayarlar" },
-                { type: "page", name: "Profil", url: "/profil" },
                 { type: "page", name: "Beslenme", url: "/beslenme" },
                 { type: "page", name: "Egzersiz", url: "/egzersiz" },
                 { type: "page", name: "Finans", url: "/finans" },
