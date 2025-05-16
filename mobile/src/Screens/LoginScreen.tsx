@@ -62,7 +62,7 @@ const LoginScreen = ({ navigation }: Props) => {
         >
           <View style={styles.logoContainer}>
             <Icon name="leaf" size={80} color="#F57C00" style={styles.logo} />
-            <Text variant="headlineMedium" style={styles.title}>Diyetisyen Uygulaması</Text>
+            <Text variant="headlineMedium" style={styles.title}>Diyetia</Text>
             <Text variant="bodyMedium" style={styles.subtitle}>Sağlıklı yaşam yolculuğunuz için</Text>
           </View>
           
@@ -142,7 +142,7 @@ const LoginScreen = ({ navigation }: Props) => {
           </Card>
           
           <View style={styles.footer}>
-            <Text style={styles.footerText}>© 2025 Diyetisyen Uygulaması</Text>
+            <Text style={styles.footerText}>© 2025 Diyetia.com</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

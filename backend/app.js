@@ -20,6 +20,7 @@ const invoiceRoutes = require('./Routes/invoiceRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
 const exerciseRoutes = require('./Routes/exerciseRoutes');
+const packageRoutes = require('./Routes/packageRoutes');
 
 app.use(bodyParser.json());
 
@@ -44,6 +45,7 @@ app.use('/recipe', recipeRoutes);
 app.use('/exercise', exerciseRoutes);
 app.use('/invoice', invoiceRoutes);
 app.use('/message', messageRoutes);
+app.use('/package', packageRoutes);
 app.use('/system', systemRoutes);
 
 // Working Directory

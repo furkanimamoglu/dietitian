@@ -7,7 +7,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton,
     InputAdornment, MenuItem, Select, FormControl, InputLabel, Card,
     CardContent, Divider, List, ListItem, ListItemIcon, ListItemText,
-    OutlinedInput
+    OutlinedInput, Pagination
 } from '@mui/material';
 import { 
     Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, 
@@ -15,7 +15,7 @@ import {
     Receipt as ReceiptIcon, Payments as PaymentsIcon, Save as SaveIcon,
     ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon,
     CheckCircle as CheckCircleIcon, Pending as PendingIcon,
-    Cancel as CancelIcon, Search as SearchIcon
+    Cancel as CancelIcon, Search as SearchIcon, Warning as WarningIcon
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
@@ -32,6 +32,50 @@ const CustomModal = ({ isOpen, onClose, title, children }) => {
                 </div>
                 <div className="custom-modal-content">
                     {children}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Custom Confirmation Dialog Component
+const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemName }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="custom-modal-overlay" onClick={onClose}>
+            <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="custom-modal-header">
+                    <h2>{title}</h2>
+                    <button className="close-button" onClick={onClose}>&times;</button>
+                </div>
+                <div className="custom-modal-content">
+                    <div className="delete-confirm-modal">
+                        <div className="delete-warning">
+                            <WarningIcon className="warning-icon" />
+                            <p className="warning-text">
+                                <strong>{itemName}</strong> {message}
+                            </p>
+                        </div>
+                        <p className="delete-note">Bu işlem geri alınamaz.</p>
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button 
+                        className="modal-btn cancel-btn" 
+                        onClick={onClose}
+                    >
+                        Vazgeç
+                    </button>
+                    <button 
+                        className="modal-btn delete-confirm-btn" 
+                        onClick={() => {
+                            onConfirm();
+                            onClose();
+                        }}
+                    >
+                        Sil
+                    </button>
                 </div>
             </div>
         </div>
@@ -154,6 +198,18 @@ export default function Finans() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
+    // Add these two new states for confirmation dialogs
+    const [deleteConfirmation, setDeleteConfirmation] = useState({
+        isOpen: false,
+        itemId: null,
+        itemType: null, // 'invoice' or 'package'
+        itemName: ''
+    });
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [invoicesPerPage] = useState(6);
+
     // Calculate financial statistics
     const currentMonthPaid = invoices
         .filter(invoice => {
@@ -182,6 +238,22 @@ export default function Finans() {
         const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
+    
+    // Pagination calculation
+    const indexOfLastInvoice = currentPage * invoicesPerPage;
+    const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
+    const currentInvoices = filteredInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
+    const totalPages = Math.ceil(filteredInvoices.length / invoicesPerPage);
+    
+    // Handle page change
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+        // Scroll to top of invoice list
+        const invoiceSection = document.getElementById('invoice-list');
+        if (invoiceSection) {
+            invoiceSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     // Tab change handler
     const handleTabChange = (event, newValue) => {
@@ -326,8 +398,30 @@ export default function Finans() {
             return;
         }
 
-        setPackages(packages.filter(pkg => pkg.id !== id));
-        toast.success("Paket silindi.");
+        // Get the package name for the confirmation message
+        const packageToDelete = packages.find(pkg => pkg.id === id);
+        if (!packageToDelete) return;
+
+        // Open confirmation dialog
+        setDeleteConfirmation({
+            isOpen: true,
+            itemId: id,
+            itemType: 'package',
+            itemName: packageToDelete.name
+        });
+    };
+
+    // Add the actual delete function that will be called after confirmation
+    const confirmDelete = () => {
+        const { itemId, itemType, itemName } = deleteConfirmation;
+        
+        if (itemType === 'package') {
+            setPackages(packages.filter(pkg => pkg.id !== itemId));
+            toast.success(`"${itemName}" paketi silindi.`);
+        } else if (itemType === 'invoice') {
+            setInvoices(invoices.filter(invoice => invoice.id !== itemId));
+            toast.success(`"${itemName}" danışanının faturası silindi.`);
+        }
     };
 
     // Invoice management handlers
@@ -403,8 +497,16 @@ export default function Finans() {
     };
 
     const handleDeleteInvoice = (id) => {
-        setInvoices(invoices.filter(invoice => invoice.id !== id));
-        toast.success("Fatura silindi.");
+        const invoiceToDelete = invoices.find(invoice => invoice.id === id);
+        if (!invoiceToDelete) return;
+        
+        // Open confirmation dialog
+        setDeleteConfirmation({
+            isOpen: true,
+            itemId: id,
+            itemType: 'invoice',
+            itemName: invoiceToDelete.clientName
+        });
     };
 
     const handleStatusChange = (id, newStatus) => {
@@ -676,23 +778,25 @@ export default function Finans() {
                                                     ))}
                                                 </List>
                                                 
-                                                <Box display="flex" justifyContent="flex-end" mt={2}>
+                                                <Box className="package-card-footer-spacer" mt={5}></Box>
+                                            </Box>
+                                            <Box className="package-card-footer">
+                                                <Box className="package-card-actions">
                                                     <Button
-                                                        startIcon={<EditIcon />}
+                                                        variant="contained"
                                                         color="primary"
-                                                        onClick={() => handleOpenPackageDialog(pkg)}
                                                         size="small"
-                                                        variant="outlined"
-                                                        sx={{ mr: 1 }}
+                                                        startIcon={<EditIcon />}
+                                                        onClick={() => handleOpenPackageDialog(pkg)}
                                                     >
                                                         Düzenle
                                                     </Button>
                                                     <Button
-                                                        startIcon={<DeleteIcon />}
+                                                        variant="contained"
                                                         color="error"
-                                                        onClick={() => handleDeletePackage(pkg.id)}
                                                         size="small"
-                                                        variant="outlined"
+                                                        startIcon={<DeleteIcon />}
+                                                        onClick={() => handleDeletePackage(pkg.id)}
                                                     >
                                                         Sil
                                                     </Button>
@@ -739,35 +843,41 @@ export default function Finans() {
                         <Paper elevation={3} className="filters-section">
                             <Box p={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
                                 <Box display="flex" alignItems="center" gap={2} className="search-filters" flexGrow={1}>
-                            <TextField
+                                    <TextField
                                         placeholder="Danışan veya paket ara..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            setCurrentPage(1); // Reset to first page on search
+                                        }}
                                         size="small"
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
                                         sx={{ minWidth: 250 }}
                                     />
                                     
                                     <FormControl size="small" sx={{ minWidth: 150 }}>
                                         <InputLabel>Durum</InputLabel>
-                                    <Select
+                                        <Select
                                             value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            onChange={(e) => {
+                                                setStatusFilter(e.target.value);
+                                                setCurrentPage(1); // Reset to first page on filter change
+                                            }}
                                             label="Durum"
-                                    >
-                                        <MenuItem value="all">Tüm Durumlar</MenuItem>
-                                        <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                        <MenuItem value="Beklemede">Beklemede</MenuItem>
-                                        <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
+                                        >
+                                            <MenuItem value="all">Tüm Durumlar</MenuItem>
+                                            <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                            <MenuItem value="Beklemede">Beklemede</MenuItem>
+                                            <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
                                 
                                 <Button 
                                     variant="contained" 
@@ -779,60 +889,61 @@ export default function Finans() {
                                 >
                                     Yeni Fatura
                                 </Button>
-                </Box>
+                            </Box>
                         </Paper>
                         
-                        <Box mt={4}>
+                        <Box mt={4} id="invoice-list">
                             <Grid container spacing={3}>
-                                {filteredInvoices.map(invoice => (
-                                    <Grid item xs={12} md={6} lg={4} key={invoice.id}>
-                                        <Paper elevation={3} className={`invoice-card status-${invoice.status.toLowerCase()}`}>
-                                            <Box position="relative" p={3}>
-                                                <Box className="invoice-header" mb={2} display="flex" justifyContent="space-between" alignItems="flex-start">
-                                                    <Box>
-                                                        <Typography variant="h6" className="client-name">{invoice.clientName}</Typography>
-                                                        <Typography variant="body2" color="textSecondary">{invoice.packageName}</Typography>
-                                                    </Box>
+                                {currentInvoices.length > 0 ? (
+                                    currentInvoices.map(invoice => (
+                                        <Grid item xs={12} md={6} lg={4} key={invoice.id}>
+                                            <Paper elevation={3} className={`invoice-card status-${invoice.status.toLowerCase()}`}>
+                                                <Box position="relative" p={3}>
+                                                    <Box className="invoice-header" mb={2} display="flex" justifyContent="space-between" alignItems="flex-start">
+                                                        <Box>
+                                                            <Typography variant="h6" className="client-name">{invoice.clientName}</Typography>
+                                                            <Typography variant="body2" color="textSecondary">{invoice.packageName}</Typography>
+                                                        </Box>
 
-                                        <Chip
-                                                        label={invoice.status} 
-                                            color={
-                                                            invoice.status === "Ödendi" ? "success" :
-                                                            invoice.status === "Beklemede" ? "warning" : "error"
-                                            }
-                                            size="small"
-                                                        className="status-chip"
-                                                    />
+                                                        <Chip
+                                                            label={invoice.status} 
+                                                            color={
+                                                                invoice.status === "Ödendi" ? "success" :
+                                                                invoice.status === "Beklemede" ? "warning" : "error"
+                                                            }
+                                                            size="small"
+                                                            className="status-chip"
+                                                        />
+                                                    </Box>
+                                                    
+                                                    <Typography variant="h5" className="invoice-amount" gutterBottom>
+                                                        {invoice.amount.toLocaleString()} ₺
+                                                    </Typography>
+                                                    
+                                                    <Divider sx={{ my: 2 }} />
+                                                    
+                                                    <Grid container spacing={2} className="invoice-dates">
+                                                        <Grid item xs={6}>
+                                                            <Typography variant="caption" color="textSecondary">
+                                                                Fatura Tarihi
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {new Date(invoice.issueDate).toLocaleDateString('tr-TR')}
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={6}>
+                                                            <Typography variant="caption" color="textSecondary">
+                                                                Son Ödeme
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {new Date(invoice.dueDate).toLocaleDateString('tr-TR')}
+                                                            </Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                    
+                                                    <Box className="invoice-card-footer-spacer" mt={5}></Box>
                                                 </Box>
-                                                
-                                                <Typography variant="h5" className="invoice-amount" gutterBottom>
-                                                    {invoice.amount.toLocaleString()} ₺
-                                                </Typography>
-                                                
-                                                <Divider sx={{ my: 2 }} />
-                                                
-                                                <Grid container spacing={2} className="invoice-dates">
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="caption" color="textSecondary">
-                                                            Fatura Tarihi
-                                                        </Typography>
-                                                        <Typography variant="body2">
-                                                            {new Date(invoice.issueDate).toLocaleDateString('tr-TR')}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="caption" color="textSecondary">
-                                                            Son Ödeme
-                                                        </Typography>
-                                                        <Typography variant="body2">
-                                                            {new Date(invoice.dueDate).toLocaleDateString('tr-TR')}
-                                                        </Typography>
-                                                    </Grid>
-                                                </Grid>
-                                                
-                                                <Divider sx={{ my: 2 }} />
-                                                
-                                                <Box display="flex" justifyContent="space-between" alignItems="center">
+                                                <Box className="invoice-card-footer">
                                                     <FormControl size="small" sx={{ minWidth: 130 }}>
                                                         <InputLabel>Durum</InputLabel>
                                                         <Select
@@ -846,55 +957,80 @@ export default function Finans() {
                                                         </Select>
                                                     </FormControl>
                                                     
-                                                    <Box>
-                                            <IconButton 
+                                                    <Box className="invoice-card-actions">
+                                                        <Button 
+                                                            variant="contained" 
                                                             color="primary" 
-                                                size="small" 
-                                                            onClick={() => handleOpenInvoiceDialog(invoice)}
-                                            >
-                                                <EditIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton 
-                                                color="error" 
                                                             size="small" 
+                                                            startIcon={<EditIcon />}
+                                                            onClick={() => handleOpenInvoiceDialog(invoice)}
+                                                        >
+                                                            Düzenle
+                                                        </Button>
+                                                        <Button 
+                                                            variant="contained" 
+                                                            color="error" 
+                                                            size="small" 
+                                                            startIcon={<DeleteIcon />}
                                                             onClick={() => handleDeleteInvoice(invoice.id)}
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
-                                        </Box>
+                                                        >
+                                                            Sil
+                                                        </Button>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        </Paper>
-                                    </Grid>
-                                ))}
-                                
-                                {filteredInvoices.length === 0 && (
+                                            </Paper>
+                                        </Grid>
+                                    ))
+                                ) : (
                                     <Grid item xs={12}>
                                         <Paper elevation={3} className="empty-state">
                                             <Box p={4} textAlign="center">
                                                 <Box className="empty-icon">
                                                     <ReceiptIcon style={{ fontSize: 64, opacity: 0.3 }} />
-                        </Box>
+                                                </Box>
                                                 <Typography variant="h6" color="textSecondary" gutterBottom>
                                                     Fatura Bulunamadı
-                            </Typography>
+                                                </Typography>
                                                 <Typography variant="body2" color="textSecondary">
                                                     Arama kriterlerinize uygun fatura bulunmuyor. Filtrelerinizi değiştirmeyi veya yeni fatura oluşturmayı deneyebilirsiniz.
-                            </Typography>
-                        <Button 
-                            variant="contained" 
+                                                </Typography>
+                                                <Button 
+                                                    variant="contained" 
                                                     color="primary" 
                                                     startIcon={<AddIcon />}
                                                     onClick={() => handleOpenInvoiceDialog()}
                                                     sx={{ mt: 3 }}
-                        >
+                                                >
                                                     Yeni Fatura Oluştur
-                        </Button>
+                                                </Button>
                                             </Box>
                                         </Paper>
                                     </Grid>
                                 )}
                             </Grid>
+                            
+                            {/* Pagination */}
+                            {filteredInvoices.length > invoicesPerPage && (
+                                <Box display="flex" justifyContent="center" mt={4} mb={2}>
+                                    <Pagination 
+                                        count={totalPages} 
+                                        page={currentPage}
+                                        onChange={handlePageChange}
+                                        color="primary"
+                                        showFirstButton
+                                        showLastButton
+                                        size="large"
+                                    />
+                                </Box>
+                            )}
+                            
+                            {/* Invoice count info */}
+                            <Box textAlign="center" mt={2} mb={4}>
+                                <Typography variant="body2" color="textSecondary">
+                                    Toplam {filteredInvoices.length} faturadan {indexOfFirstInvoice + 1}-
+                                    {Math.min(indexOfLastInvoice, filteredInvoices.length)} arası gösteriliyor
+                                </Typography>
+                            </Box>
                         </Box>
                     </Box>
                 );
@@ -907,11 +1043,7 @@ export default function Finans() {
     return (
         <Default>
             <div className="finans-container">
-                <Typography variant="h4" className="page-title">
-                    Finansal Yönetim
-                </Typography>
-
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Box sx={{ mb: 3 }}>
                     <Tabs value={tabValue} onChange={handleTabChange} 
                           variant="scrollable" scrollButtons="auto">
                         <Tab icon={<MonetizationOnIcon />} iconPosition="start" label="Genel Bakış" />
@@ -1143,6 +1275,20 @@ export default function Finans() {
                         </div>
                     </div>
                 </CustomModal>
+
+                {/* Confirmation Dialog */}
+                <ConfirmationDialog 
+                    isOpen={deleteConfirmation.isOpen}
+                    onClose={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
+                    onConfirm={confirmDelete}
+                    title="Silme İşlemi"
+                    itemName={deleteConfirmation.itemName}
+                    message={
+                        deleteConfirmation.itemType === 'package'
+                            ? `paketini silmek istediğinize emin misiniz?`
+                            : `danışanının faturasını silmek istediğinize emin misiniz?`
+                    }
+                />
             </div>
         </Default>
     );
