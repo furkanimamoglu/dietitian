@@ -11,11 +11,13 @@ class MessageService {
 
         if(user_role === DIETITIAN) {
             return await Message.findAll({
-                where: { dietitian_id: user_id, sender: user_role }
+                where: { dietitian_id: user_id, sender: user_role },
+                order: [['createdAt', 'ASC']]
             });
         } else if(user_role === CLIENT) {
             return await Message.findAll({
-                where: { client_id: user_id, sender: user_role }
+                where: { client_id: user_id, sender: user_role },
+                order: [['createdAt', 'ASC']]
             });
         } else {
             throw Exception("Yetkisiz Erişim", 401, true);

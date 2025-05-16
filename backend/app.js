@@ -20,7 +20,6 @@ const invoiceRoutes = require('./Routes/invoiceRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
 const exerciseRoutes = require('./Routes/exerciseRoutes');
-const messageRoutes = require('./Routes/messageRoutes');
 
 app.use(bodyParser.json());
 
