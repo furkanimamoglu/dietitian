@@ -117,8 +117,8 @@ export default function Finans() {
             packageName: "Aylık Takip", 
             amount: 1500, 
             status: "Ödendi", 
-            issueDate: "2023-05-10", 
-            dueDate: "2023-05-17" 
+            issueDate: "2025-05-10", 
+            dueDate: "2025-05-17" 
         },
         { 
             id: 2, 
@@ -127,8 +127,8 @@ export default function Finans() {
             packageName: "3 Aylık Program", 
             amount: 3600, 
             status: "Ödenmedi", 
-            issueDate: "2023-05-15", 
-            dueDate: "2023-05-22" 
+            issueDate: "2025-05-15", 
+            dueDate: "2025-02-22" 
         },
         { 
             id: 3, 
@@ -266,24 +266,83 @@ export default function Finans() {
     const [currentPage, setCurrentPage] = useState(1);
     const [invoicesPerPage] = useState(6);
 
+    // Add helper function to get package duration in months
+    const getPackageDurationInMonths = (packageType) => {
+        switch(packageType) {
+            case "Seanslık":
+                return 1; // Count full amount in the month of the session
+            case "Aylık":
+                return 1; // 1 month
+            case "3 Aylık":
+                return 3; // 3 months
+            case "6 Aylık":
+                return 6; // 6 months
+            case "1 Yıllık":
+                return 12; // 12 months
+            default:
+                return 1; // Default to 1 month
+        }
+    };
+
+    // Helper to determine if a package amount should be prorated
+    const shouldProrate = (packageType) => {
+        return packageType !== "Seanslık"; // Don't prorate session-based packages
+    };
+
     // Calculate financial statistics
     const currentMonthPaid = invoices
         .filter(invoice => {
-            const invoiceMonth = new Date(invoice.issueDate).getMonth();
-            const currentMonth = new Date().getMonth();
-            return invoiceMonth === currentMonth && invoice.status === "Ödendi";
+            const invoiceDate = new Date(invoice.issueDate);
+            const currentDate = new Date();
+            return invoiceDate.getMonth() === currentDate.getMonth() && 
+                   invoiceDate.getFullYear() === currentDate.getFullYear() && 
+                   invoice.status === "Ödendi";
         })
-        .reduce((total, invoice) => total + invoice.amount, 0);
+        .reduce((total, invoice) => {
+            // Find the package to get its type
+            const pkg = packages.find(p => p.id === invoice.packageId);
+            if (!pkg) return total + invoice.amount;
+            
+            // For session-based packages, count the full amount
+            // For subscription packages, prorate the amount
+            if (shouldProrate(pkg.type)) {
+                const durationInMonths = getPackageDurationInMonths(pkg.type);
+                const proratedAmount = invoice.amount / durationInMonths;
+                return total + proratedAmount;
+            } else {
+                return total + invoice.amount; // Full amount for sessions
+            }
+        }, 0);
 
     const currentMonthUnpaid = invoices
         .filter(invoice => {
-            const invoiceMonth = new Date(invoice.issueDate).getMonth();
-            const currentMonth = new Date().getMonth();
-            return invoiceMonth === currentMonth && invoice.status !== "Ödendi";
+            const invoiceDate = new Date(invoice.issueDate);
+            const currentDate = new Date();
+            return invoiceDate.getMonth() === currentDate.getMonth() && 
+                   invoiceDate.getFullYear() === currentDate.getFullYear() && 
+                   invoice.status !== "Ödendi";
         })
-        .reduce((total, invoice) => total + invoice.amount, 0);
+        .reduce((total, invoice) => {
+            // Find the package to get its type
+            const pkg = packages.find(p => p.id === invoice.packageId);
+            if (!pkg) return total + invoice.amount;
+            
+            // For session-based packages, count the full amount
+            // For subscription packages, prorate the amount
+            if (shouldProrate(pkg.type)) {
+                const durationInMonths = getPackageDurationInMonths(pkg.type);
+                const proratedAmount = invoice.amount / durationInMonths;
+                return total + proratedAmount;
+            } else {
+                return total + invoice.amount; // Full amount for sessions
+            }
+        }, 0);
 
-    const totalRevenue = invoices
+    // Total revenue for the current month (paid + pending)
+    const totalRevenue = currentMonthPaid + currentMonthUnpaid;
+
+    // All-time total paid revenue (kept for reference but not displayed)
+    const allTimeTotalRevenue = invoices
         .filter(invoice => invoice.status === "Ödendi")
         .reduce((total, invoice) => total + invoice.amount, 0);
 
@@ -318,16 +377,56 @@ export default function Finans() {
 
     // Calculate monthly comparison
     const getMonthlyComparison = () => {
-        const currentMonth = new Date().getMonth();
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
         const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
         
         const currentMonthTotal = invoices
-            .filter(invoice => new Date(invoice.issueDate).getMonth() === currentMonth)
-            .reduce((total, invoice) => total + invoice.amount, 0);
+            .filter(invoice => {
+                const invoiceDate = new Date(invoice.issueDate);
+                return invoiceDate.getMonth() === currentMonth && 
+                       invoiceDate.getFullYear() === currentYear;
+            })
+            .reduce((total, invoice) => {
+                // Find the package to get its type
+                const pkg = packages.find(p => p.id === invoice.packageId);
+                if (!pkg) return total + invoice.amount;
+                
+                // For session-based packages, count the full amount
+                // For subscription packages, prorate the amount
+                if (shouldProrate(pkg.type)) {
+                    const durationInMonths = getPackageDurationInMonths(pkg.type);
+                    const proratedAmount = invoice.amount / durationInMonths;
+                    return total + proratedAmount;
+                } else {
+                    return total + invoice.amount; // Full amount for sessions
+                }
+            }, 0);
         
         const lastMonthTotal = invoices
-            .filter(invoice => new Date(invoice.issueDate).getMonth() === lastMonth)
-            .reduce((total, invoice) => total + invoice.amount, 0);
+            .filter(invoice => {
+                const invoiceDate = new Date(invoice.issueDate);
+                return invoiceDate.getMonth() === lastMonth && 
+                       invoiceDate.getFullYear() === lastMonthYear;
+            })
+            .reduce((total, invoice) => {
+                // Find the package to get its type
+                const pkg = packages.find(p => p.id === invoice.packageId);
+                if (!pkg) return total + invoice.amount;
+                
+                // For session-based packages, count the full amount
+                // For subscription packages, prorate the amount
+                if (shouldProrate(pkg.type)) {
+                    const durationInMonths = getPackageDurationInMonths(pkg.type);
+                    const proratedAmount = invoice.amount / durationInMonths;
+                    return total + proratedAmount;
+                } else {
+                    return total + invoice.amount; // Full amount for sessions
+                }
+            }, 0);
         
         const difference = currentMonthTotal - lastMonthTotal;
         const percentChange = lastMonthTotal === 0 
@@ -651,6 +750,75 @@ export default function Finans() {
         }
     };
 
+    // Add helper function to validate date strings
+    const isValidDateString = (dateStr) => {
+        if (!dateStr) return false;
+        const date = new Date(dateStr);
+        return !isNaN(date.getTime());
+    };
+
+    // Add helper function to safely parse dates
+    const safelyParseDate = (dateStr) => {
+        try {
+            if (!isValidDateString(dateStr)) return new Date();
+            return new Date(dateStr);
+        } catch (error) {
+            console.error('Error parsing date:', error);
+            return new Date(); // Return current date as fallback
+        }
+    };
+
+    // Add helper function to safely format dates to ISO string
+    const safelyFormatDate = (date) => {
+        try {
+            if (!date || isNaN(date.getTime())) {
+                return new Date().toISOString().split('T')[0];
+            }
+            return date.toISOString().split('T')[0];
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return new Date().toISOString().split('T')[0];
+        }
+    };
+
+    // Update calculate due date function with better error handling
+    const calculateDueDateFromPackageType = (issueDate, packageType) => {
+        try {
+            // Ensure we have a valid date object
+            const dueDate = isValidDateString(issueDate) 
+                ? new Date(issueDate) 
+                : new Date();
+            
+            switch(packageType) {
+                case "Seanslık":
+                    dueDate.setDate(dueDate.getDate() + 1); // +1 day
+                    break;
+                case "Aylık":
+                    dueDate.setMonth(dueDate.getMonth() + 1); // +1 month
+                    break;
+                case "3 Aylık":
+                    dueDate.setMonth(dueDate.getMonth() + 3); // +3 months
+                    break;
+                case "6 Aylık":
+                    dueDate.setMonth(dueDate.getMonth() + 6); // +6 months
+                    break;
+                case "1 Yıllık":
+                    dueDate.setFullYear(dueDate.getFullYear() + 1); // +1 year
+                    break;
+                default:
+                    dueDate.setDate(dueDate.getDate() + 7); // Default: +7 days
+            }
+            
+            return dueDate;
+        } catch (error) {
+            console.error('Error calculating due date:', error);
+            // Return a safe default: current date + 7 days
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 7);
+            return defaultDate;
+        }
+    };
+
     // Invoice management handlers
     const handleOpenInvoiceDialog = (invoice = null) => {
         if (invoice) {
@@ -660,13 +828,17 @@ export default function Finans() {
             // Get the first package if available
             const firstPackage = packages.length > 0 ? packages[0] : null;
             
-            // Calculate due date based on package type
-            let dueDate = new Date();
+            // Format dates safely
+            const today = new Date();
+            
+            // Calculate due date only if a package is selected
+            let dueDate;
             if (firstPackage) {
-                dueDate = calculateDueDateFromPackageType(new Date(), firstPackage.type);
+                dueDate = calculateDueDateFromPackageType(today, firstPackage.type);
             } else {
-                // Default: current date + 7 days
-                dueDate.setDate(dueDate.getDate() + 7);
+                // If no package, set due date to blank to let user choose
+                dueDate = new Date(today);
+                dueDate.setDate(dueDate.getDate() + 7); // Default suggestion, but user can change
             }
             
             setCurrentInvoice(null);
@@ -677,8 +849,8 @@ export default function Finans() {
                 packageName: firstPackage ? firstPackage.name : "",
                 amount: firstPackage ? Number(firstPackage.price) : 0,
                 status: "Beklemede",
-                issueDate: new Date().toISOString().split('T')[0],
-                dueDate: dueDate.toISOString().split('T')[0]
+                issueDate: safelyFormatDate(today),
+                dueDate: safelyFormatDate(dueDate)
             });
         }
         setInvoiceDialogOpen(true);
@@ -687,33 +859,6 @@ export default function Finans() {
     const handleCloseInvoiceDialog = () => {
         setInvoiceDialogOpen(false);
         setCurrentInvoice(null);
-    };
-
-    // Add helper function to calculate due date based on package type
-    const calculateDueDateFromPackageType = (issueDate, packageType) => {
-        const dueDate = new Date(issueDate);
-        
-        switch(packageType) {
-            case "Seanslık":
-                dueDate.setDate(dueDate.getDate() + 1); // +1 day
-                break;
-            case "Aylık":
-                dueDate.setMonth(dueDate.getMonth() + 1); // +1 month
-                break;
-            case "3 Aylık":
-                dueDate.setMonth(dueDate.getMonth() + 3); // +3 months
-                break;
-            case "6 Aylık":
-                dueDate.setMonth(dueDate.getMonth() + 6); // +6 months
-                break;
-            case "1 Yıllık":
-                dueDate.setFullYear(dueDate.getFullYear() + 1); // +1 year
-                break;
-            default:
-                dueDate.setDate(dueDate.getDate() + 7); // Default: +7 days
-        }
-        
-        return dueDate;
     };
 
     const handleInvoiceChange = (field, value) => {
@@ -739,39 +884,67 @@ export default function Finans() {
             const selectedPackage = packages.find(pkg => pkg.id === Number(value));
             if (selectedPackage) {
                 // Calculate due date based on package type and current issue date
-                const issueDate = new Date(newInvoice.issueDate);
-                const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
-                
+                try {
+                    const issueDate = safelyParseDate(newInvoice.issueDate);
+                    const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
+                    
+                    setNewInvoice(prev => ({
+                        ...prev,
+                        packageId: Number(value),
+                        amount: Number(selectedPackage.price),
+                        packageName: selectedPackage.name,
+                        dueDate: safelyFormatDate(dueDate)
+                    }));
+                } catch (error) {
+                    console.error('Error updating due date:', error);
+                    // Still update other fields but use a safe default for dueDate
+                    setNewInvoice(prev => ({
+                        ...prev,
+                        packageId: Number(value),
+                        amount: Number(selectedPackage.price),
+                        packageName: selectedPackage.name
+                    }));
+                }
+            } else {
+                // If no package is selected (or package ID is 0), update packageId but don't auto-set dueDate
+                // This allows users to manually select their preferred due date
                 setNewInvoice(prev => ({
                     ...prev,
-                    packageId: Number(value),
-                    amount: Number(selectedPackage.price),
-                    packageName: selectedPackage.name,
-                    dueDate: dueDate.toISOString().split('T')[0]
+                    packageId: Number(value) || 0,
+                    packageName: "",
+                    amount: 0
                 }));
             }
         }
         
         // Update due date when issue date changes based on selected package
         if (field === 'issueDate') {
-            const issueDate = new Date(value);
-            const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
-            
-            if (selectedPackage) {
-                const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
+            try {
+                const issueDate = safelyParseDate(value);
+                const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+                
+                if (selectedPackage) {
+                    // Only auto-calculate due date if a package is selected
+                    const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
+                    setNewInvoice(prev => ({
+                        ...prev,
+                        issueDate: value,
+                        dueDate: safelyFormatDate(dueDate)
+                    }));
+                } else {
+                    // If no package is selected, don't change the due date
+                    // Let user set it manually
+                    setNewInvoice(prev => ({
+                        ...prev,
+                        issueDate: value
+                    }));
+                }
+            } catch (error) {
+                console.error('Error updating due date after issue date change:', error);
+                // Just update the issue date without changing the due date
                 setNewInvoice(prev => ({
                     ...prev,
-                    issueDate: value,
-                    dueDate: dueDate.toISOString().split('T')[0]
-                }));
-            } else {
-                // Default +7 days if no package is selected
-                const dueDate = new Date(issueDate);
-                dueDate.setDate(dueDate.getDate() + 7);
-                setNewInvoice(prev => ({
-                    ...prev,
-                    issueDate: value,
-                    dueDate: dueDate.toISOString().split('T')[0]
+                    issueDate: value
                 }));
             }
         }
@@ -784,6 +957,13 @@ export default function Finans() {
         }
 
         const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+        
+        // Check if selectedPackage exists
+        if (!selectedPackage) {
+            toast.error("Seçilen paket bulunamadı.");
+            return;
+        }
+        
         const invoiceData = {
             ...newInvoice,
             packageName: selectedPackage.name
@@ -886,7 +1066,7 @@ export default function Finans() {
                                             {totalRevenue.toLocaleString()} ₺
                                         </Typography>
                                         <Typography variant="body2" className="stat-description">
-                                            Tüm zamanlar
+                                            Bu ay toplam gelir
                                         </Typography>
                                 </Box>
                             </Paper>
@@ -1140,7 +1320,7 @@ export default function Finans() {
                                                     Henüz Paket Bulunmuyor
                                                 </Typography>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    İlk paketinizi oluşturarak başlayın. Paketleriniz danışanlarınıza sunabileceğiniz hizmetleri tanımlar.
+                                                    İlk paketinizi oluşturarak başlayın. Paketleriniz danışanlarınza sunabileceğiniz hizmetleri tanımlar.
                                                 </Typography>
                                                 <Button 
                                                     variant="contained" 

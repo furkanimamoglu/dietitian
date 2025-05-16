@@ -915,7 +915,7 @@
 }
 
 .invoice-card-footer-spacer {
-    height: 20px;
+    height: 0px;
 }
 
 /* Delete confirmation modal */
