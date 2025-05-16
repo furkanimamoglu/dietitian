@@ -1,122 +1,300 @@
 .finans-container {
     padding: 24px;
+    background-color: #f5f7fa;
+    min-height: 100vh;
 }
 
 .page-title {
-    margin-bottom: 24px;
+    font-weight: 700;
     color: #2c3e50;
-    font-weight: 600;
+    margin-bottom: 28px;
+    position: relative;
+    display: inline-block;
 }
 
-.stats-container {
-    margin-bottom: 32px;
+.page-title::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 3px;
+    background: #3498db;
+    bottom: -8px;
+    left: 0;
+    border-radius: 3px;
+}
+
+/* Tab styles */
+.MuiTabs-root {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+}
+
+.MuiTab-root {
+    text-transform: none;
+    font-weight: 600;
+    min-width: 120px;
+    padding: 12px 16px;
+}
+
+/* Stats cards */
+.stats-cards {
+    margin-bottom: 24px;
 }
 
 .stat-card {
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
+    border-radius: 12px;
     height: 100%;
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
 }
 
-.stat-icon {
+.stat-icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px;
-    border-radius: 50%;
-    margin-right: 16px;
-    background-color: rgba(0, 0, 0, 0.08);
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
 }
 
-.stat-content {
-    flex-grow: 1;
+.paid-income {
+    background-color: #fff;
 }
 
-.current-revenue {
-    background: linear-gradient(135deg, #d4ffea, #ffffff);
-    border-left: 4px solid #2ecc71;
-}
-
-.current-revenue .stat-icon {
+.paid-income .stat-icon-wrapper {
+    background-color: rgba(46, 204, 113, 0.15);
     color: #2ecc71;
 }
 
-.potential-revenue {
-    background: linear-gradient(135deg, #e0f7fa, #ffffff);
-    border-left: 4px solid #3498db;
+.paid-income .stat-amount {
+    color: #2ecc71;
 }
 
-.potential-revenue .stat-icon {
-    color: #3498db;
+.unpaid-income {
+    background-color: #fff;
 }
 
-.remaining-revenue {
-    background: linear-gradient(135deg, #fff5e6, #ffffff);
-    border-left: 4px solid #f39c12;
-}
-
-.remaining-revenue .stat-icon {
+.unpaid-income .stat-icon-wrapper {
+    background-color: rgba(243, 156, 18, 0.15);
     color: #f39c12;
 }
 
-.filters-container {
-    background-color: #f9f9f9;
-    padding: 16px;
-    border-radius: 8px;
+.unpaid-income .stat-amount {
+    color: #f39c12;
 }
 
-.table-header {
-    background-color: #f2f6fa;
+.total-revenue {
+    background-color: #fff;
 }
 
+.total-revenue .stat-icon-wrapper {
+    background-color: rgba(52, 152, 219, 0.15);
+    color: #3498db;
+}
+
+.total-revenue .stat-amount {
+    color: #3498db;
+}
+
+.stat-amount {
+    font-weight: 700;
+    font-size: 2.2rem;
+}
+
+.stat-description {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* Report section */
+.report-section {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #2c3e50;
+}
+
+/* Tables */
 .table-header th {
+    background-color: #f8fafc;
     font-weight: 600;
     color: #546e7a;
+    padding: 12px 16px;
 }
 
-.status-ödendi {
-    background-color: rgba(46, 204, 113, 0.05);
+.data-row:hover {
+    background-color: #f5f7fa;
 }
 
-.status-beklemede {
-    background-color: rgba(243, 156, 18, 0.05);
+.row-icon {
+    color: #7f8c8d;
+    margin-right: 8px;
 }
 
-.status-ödenmedi {
-    background-color: rgba(231, 76, 60, 0.05);
+/* Package cards */
+.package-management {
+    margin-top: 16px;
 }
 
+.package-card {
+    height: 100%;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.package-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.package-type-chip {
+    margin-top: 4px;
+}
+
+.package-price {
+    font-weight: 700;
+    color: #3498db;
+    margin: 12px 0;
+}
+
+.package-divider {
+    margin: 16px 0;
+}
+
+.services-title {
+    color: #546e7a;
+    font-weight: 600;
+}
+
+.services-list {
+    padding-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.services-list li {
+    margin-bottom: 6px;
+    color: #5d6d7e;
+}
+
+/* Invoice management */
+.invoice-management .filters-section {
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.invoice-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.invoice-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.invoice-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+}
+
+.status-ödendi::before {
+    background-color: #2ecc71;
+}
+
+.status-beklemede::before {
+    background-color: #f39c12;
+}
+
+.status-ödenmedi::before {
+    background-color: #e74c3c;
+}
+
+.client-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.invoice-amount {
+    font-weight: 700;
+    color: #3498db;
+    font-size: 1.8rem;
+}
+
+.status-chip {
+    margin-left: 8px;
+}
+
+.empty-state {
+    border-radius: 12px;
+    text-align: center;
+}
+
+.empty-icon {
+    margin-bottom: 24px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 960px) {
-    .stat-card {
-        margin-bottom: 16px;
+    .finans-container {
+        padding: 16px;
+    }
+    
+    .stats-cards {
+        margin-bottom: 24px;
+    }
+    
+    .MuiTab-root {
+        min-width: auto;
+    }
+    
+    .stat-amount {
+        font-size: 1.8rem;
+    }
+    
+    .invoice-amount {
+        font-size: 1.6rem;
+    }
+    
+    .search-filters {
+        flex-wrap: wrap;
+        gap: 16px;
     }
 }
 
-.date-range-wrapper {
-    display: flex;
-    align-items: center;
-    background-color: #fff;
-    border-radius: 4px;
-    padding: 0 8px;
-    border: 1px solid rgba(0, 0, 0, 0.23);
-}
-
-.date-range-picker {
-    border: none;
-    font-family: inherit;
-    padding: 8px 0;
-    width: 230px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.date-range-picker:focus {
-    outline: none;
+@media (max-width: 600px) {
+    .finans-container {
+        padding: 12px;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .stat-amount {
+        font-size: 1.6rem;
+    }
+    
+    .invoice-amount {
+        font-size: 1.4rem;
+    }
 }

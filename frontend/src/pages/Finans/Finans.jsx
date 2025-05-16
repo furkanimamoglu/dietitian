@@ -1,454 +1,916 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import {
-    Paper,
-    Typography,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Box,
-    Chip,
-    IconButton,
-    TextField,
-    InputAdornment,
-    FormControl,
-    Select,
-    MenuItem,
-    Button,
-    Grid,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions
+    Paper, Typography, Box, Grid, Tab, Tabs, TextField, Button,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Dialog, DialogTitle, DialogContent, DialogActions, Chip, IconButton,
+    InputAdornment, MenuItem, Select, FormControl, InputLabel, Card,
+    CardContent, Divider
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import CurrencyLiraIcon from '@mui/icons-material/CurrencyLira';
-import MoneyOffIcon from '@mui/icons-material/MoneyOff';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import PrintIcon from '@mui/icons-material/Print';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WarningIcon from '@mui/icons-material/Warning';
-import SaveIcon from '@mui/icons-material/Save';
+import { 
+    Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, 
+    CurrencyLira as CurrencyLiraIcon, MonetizationOn as MonetizationOnIcon,
+    Receipt as ReceiptIcon, Payments as PaymentsIcon, Save as SaveIcon,
+    ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon,
+    CheckCircle as CheckCircleIcon, Pending as PendingIcon,
+    Cancel as CancelIcon, Search as SearchIcon
+} from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
 export default function Finans() {
-    // Sample data - in a real app, this would come from your backend
-    const [clients, setClients] = useState([
-        { id: 1, name: "Ayşe Yılmaz", status: "Ödendi", amount: 1200, issueDate: "2025-04-01", dueDate: "2025-05-01", description: "Beslenme Danışmanlığı" },
-        { id: 2, name: "Mehmet Kaya", status: "Beklemede", amount: 800, issueDate: "2025-04-10", dueDate: "2025-05-10", description: "Kişisel Beslenme Planı" },
-        { id: 3, name: "Zeynep Demir", status: "Ödendi", amount: 1500, issueDate: "2025-03-28", dueDate: "2025-04-28", description: "Detox Programı" },
-        { id: 4, name: "Ali Öztürk", status: "Ödenmedi", amount: 1200, issueDate: "2025-03-15", dueDate: "2025-04-15", description: "Kilo Verme Programı" },
-        { id: 5, name: "Fatma Çelik", status: "Ödendi", amount: 500, issueDate: "2025-04-03", dueDate: "2025-05-03", description: "Beslenme Danışmanlığı" },
-        { id: 6, name: "Ahmet Şahin", status: "Ödenmedi", amount: 1500, issueDate: "2025-03-20", dueDate: "2025-04-20", description: "Sporcu Beslenmesi" },
-        { id: 7, name: "Selin Arslan", status: "Beklemede", amount: 800, issueDate: "2025-04-12", dueDate: "2025-05-12", description: "Kişisel Beslenme Planı" },
-        { id: 8, name: "Burak Yıldız", status: "Ödendi", amount: 1200, issueDate: "2025-03-25", dueDate: "2025-04-25", description: "Kilo Alma Programı" },
+    const [tabValue, setTabValue] = useState(0);
+    
+    // Sample data for packages
+    const [packages, setPackages] = useState([
+        { 
+            id: 1, 
+            name: "Seanslık Paket", 
+            type: "Seanslık", 
+            price: 600, 
+            description: "Tek seans diyetisyen danışmanlığı", 
+            services: ["Bireysel beslenme planı", "1 görüşme", "1 adet takip"] 
+        },
+        { 
+            id: 2, 
+            name: "Aylık Takip", 
+            type: "Aylık", 
+            price: 1500, 
+            description: "1 aylık diyetisyen danışmanlık paketi", 
+            services: ["Kişiselleştirilmiş beslenme planı", "4 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği"] 
+        },
+        { 
+            id: 3, 
+            name: "3 Aylık Program", 
+            type: "3 Aylık", 
+            price: 3600, 
+            description: "3 aylık diyetisyen danışmanlık paketi", 
+            services: ["Kişiselleştirilmiş beslenme planı", "12 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği", "Vücut analizi"] 
+        },
+        { 
+            id: 4, 
+            name: "6 Aylık Program", 
+            type: "6 Aylık", 
+            price: 6000, 
+            description: "6 aylık diyetisyen danışmanlık paketi", 
+            services: ["Kişiselleştirilmiş beslenme planı", "24 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği", "Vücut analizi", "Tahlil yorumlama"] 
+        },
+        { 
+            id: 5, 
+            name: "Yıllık Program", 
+            type: "1 Yıllık", 
+            price: 10000, 
+            description: "1 yıllık diyetisyen danışmanlık paketi", 
+            services: ["Kişiselleştirilmiş beslenme planı", "52 haftalık menü", "Haftalık takip", "Sınırsız WhatsApp desteği", "Vücut analizi", "Tahlil yorumlama", "Yılsonu raporu"] 
+        }
     ]);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
+    // Sample data for invoices
+    const [invoices, setInvoices] = useState([
+        { 
+            id: 1, 
+            clientName: "Ayşe Yılmaz", 
+            packageId: 2, 
+            packageName: "Aylık Takip", 
+            amount: 1500, 
+            status: "Ödendi", 
+            issueDate: "2023-05-10", 
+            dueDate: "2023-05-17" 
+        },
+        { 
+            id: 2, 
+            clientName: "Mehmet Kaya", 
+            packageId: 3, 
+            packageName: "3 Aylık Program", 
+            amount: 3600, 
+            status: "Ödenmedi", 
+            issueDate: "2023-05-15", 
+            dueDate: "2023-05-22" 
+        },
+        { 
+            id: 3, 
+            clientName: "Zeynep Demir", 
+            packageId: 1, 
+            packageName: "Seanslık Paket", 
+            amount: 600, 
+            status: "Ödendi", 
+            issueDate: "2023-05-03", 
+            dueDate: "2023-05-10" 
+        },
+        { 
+            id: 4, 
+            clientName: "Ali Can", 
+            packageId: 4, 
+            packageName: "6 Aylık Program", 
+            amount: 6000, 
+            status: "Beklemede", 
+            issueDate: "2023-05-18", 
+            dueDate: "2023-05-25" 
+        }
+    ]);
+
+    // Package management state
+    const [packageDialogOpen, setPackageDialogOpen] = useState(false);
+    const [currentPackage, setCurrentPackage] = useState(null);
+    const [newPackage, setNewPackage] = useState({
+        name: "",
+        type: "Seanslık",
+        price: 0,
+        description: "",
+        services: [""]
+    });
     
-    // Delete confirmation dialog
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [clientToDelete, setClientToDelete] = useState(null);
-
-    // Edit invoice dialog
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [editingClient, setEditingClient] = useState(null);
-    const [editedValues, setEditedValues] = useState({
-        name: '',
-        description: '',
+    // Invoice management state
+    const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+    const [currentInvoice, setCurrentInvoice] = useState(null);
+    const [newInvoice, setNewInvoice] = useState({
+        clientName: "",
+        packageId: 0,
         amount: 0,
-        issueDate: '',
-        dueDate: '',
-        status: ''
+        status: "Beklemede",
+        issueDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+
+    // Calculate financial statistics
+    const currentMonthPaid = invoices
+        .filter(invoice => {
+            const invoiceMonth = new Date(invoice.issueDate).getMonth();
+            const currentMonth = new Date().getMonth();
+            return invoiceMonth === currentMonth && invoice.status === "Ödendi";
+        })
+        .reduce((total, invoice) => total + invoice.amount, 0);
+
+    const currentMonthUnpaid = invoices
+        .filter(invoice => {
+            const invoiceMonth = new Date(invoice.issueDate).getMonth();
+            const currentMonth = new Date().getMonth();
+            return invoiceMonth === currentMonth && invoice.status !== "Ödendi";
+        })
+        .reduce((total, invoice) => total + invoice.amount, 0);
+
+    const totalRevenue = invoices
+        .filter(invoice => invoice.status === "Ödendi")
+        .reduce((total, invoice) => total + invoice.amount, 0);
+
+    // Filter invoices based on search and filter
+    const filteredInvoices = invoices.filter(invoice => {
+        const matchesSearch = invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              invoice.packageName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+        return matchesSearch && matchesStatus;
     });
 
-    // Calculate financial stats
-    const currentMonthRevenue = clients
-        .filter(client => client.status === "Ödendi" && 
-            (new Date(client.dueDate).getMonth() === new Date().getMonth() || 
-             new Date(client.issueDate).getMonth() === new Date().getMonth()))
-        .reduce((total, client) => total + client.amount, 0);
-
-    const potentialMonthlyRevenue = clients
-        .reduce((total, client) => total + client.amount, 0);
-
-    const remainingToCollect = clients
-        .filter(client => client.status !== "Ödendi")
-        .reduce((total, client) => total + client.amount, 0);
-
-    // Filter clients based on search and filter options
-    const filteredClients = clients.filter(client => {
-        // Search filter
-        const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              client.description.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        // Status filter
-        const matchesFilter = filterStatus === 'all' || client.status === filterStatus;
-        
-        return matchesSearch && matchesFilter;
-    });
-
-    // Handle payment status change
-    const handleStatusChange = (id, newStatus) => {
-        setClients(clients.map(client =>
-            client.id === id ? { ...client, status: newStatus } : client
-        ));
-        
-        const client = clients.find(c => c.id === id);
-        toast.success(`${client.name} için ödeme durumu "${newStatus}" olarak güncellendi.`);
+    // Tab change handler
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
     };
 
-    // Handle action buttons
-    const handlePrintInvoice = (client) => {
-        console.log("Printing invoice for:", client.name);
-        // Implement invoice printing logic
-        toast.success(`${client.name} için fatura yazdırılıyor...`);
+    // Package management handlers
+    const handleOpenPackageDialog = (pkg = null) => {
+        if (pkg) {
+            setCurrentPackage(pkg);
+            setNewPackage({...pkg});
+        } else {
+            setCurrentPackage(null);
+            setNewPackage({
+                name: "",
+                type: "Seanslık",
+                price: 0,
+                description: "",
+                services: [""]
+            });
+        }
+        setPackageDialogOpen(true);
     };
 
-    const handleEditInvoice = (client) => {
-        setEditingClient(client);
-        setEditedValues({
-            name: client.name,
-            description: client.description,
-            amount: client.amount,
-            issueDate: client.issueDate,
-            dueDate: client.dueDate,
-            status: client.status
-        });
-        setEditDialogOpen(true);
+    const handleClosePackageDialog = () => {
+        setPackageDialogOpen(false);
+        setCurrentPackage(null);
     };
 
-    const handleCloseEditDialog = () => {
-        setEditDialogOpen(false);
-        setEditingClient(null);
-    };
-
-    const handleSaveEdit = () => {
-        if (!editingClient) return;
-        
-        // Update client data
-        setClients(clients.map(client => 
-            client.id === editingClient.id 
-                ? { ...client, ...editedValues } 
-                : client
-        ));
-        
-        toast.success(`${editedValues.name} için fatura bilgileri güncellendi.`);
-        handleCloseEditDialog();
-    };
-
-    const handleEditFieldChange = (field, value) => {
-        setEditedValues({
-            ...editedValues,
+    const handlePackageChange = (field, value) => {
+        setNewPackage({
+            ...newPackage,
             [field]: value
         });
     };
 
-    const handleOpenDeleteConfirm = (client) => {
-        setClientToDelete(client);
-        setDeleteConfirmOpen(true);
+    const handleServiceChange = (index, value) => {
+        const updatedServices = [...newPackage.services];
+        updatedServices[index] = value;
+        setNewPackage({
+            ...newPackage,
+            services: updatedServices
+        });
     };
 
-    const handleCloseDeleteConfirm = () => {
-        setDeleteConfirmOpen(false);
-        setClientToDelete(null);
+    const handleAddService = () => {
+        setNewPackage({
+            ...newPackage,
+            services: [...newPackage.services, ""]
+        });
     };
 
-    const handleDeleteInvoice = () => {
-        if (!clientToDelete) return;
+    const handleRemoveService = (index) => {
+        const updatedServices = [...newPackage.services];
+        updatedServices.splice(index, 1);
+        setNewPackage({
+            ...newPackage,
+            services: updatedServices
+        });
+    };
+
+    const handleSavePackage = () => {
+        if (!newPackage.name || !newPackage.type || newPackage.price <= 0) {
+            toast.error("Lütfen tüm gerekli alanları doldurun.");
+            return;
+        }
+
+        if (currentPackage) {
+            // Update existing package
+            setPackages(packages.map(pkg => 
+                pkg.id === currentPackage.id ? {...newPackage, id: pkg.id} : pkg
+            ));
+            toast.success(`${newPackage.name} paketi güncellendi.`);
+        } else {
+            // Create new package
+            const newId = Math.max(...packages.map(pkg => pkg.id), 0) + 1;
+            setPackages([...packages, {...newPackage, id: newId}]);
+            toast.success(`${newPackage.name} paketi oluşturuldu.`);
+        }
         
-        // Implement delete functionality
-        setClients(clients.filter(c => c.id !== clientToDelete.id));
-        toast.success(`${clientToDelete.name} için fatura silindi.`);
-        handleCloseDeleteConfirm();
+        handleClosePackageDialog();
+    };
+
+    const handleDeletePackage = (id) => {
+        // Check if package is used in any invoices
+        const isUsed = invoices.some(invoice => invoice.packageId === id);
+        if (isUsed) {
+            toast.error("Bu paket faturalarda kullanıldığı için silinemez.");
+            return;
+        }
+
+        setPackages(packages.filter(pkg => pkg.id !== id));
+        toast.success("Paket silindi.");
+    };
+
+    // Invoice management handlers
+    const handleOpenInvoiceDialog = (invoice = null) => {
+        if (invoice) {
+            setCurrentInvoice(invoice);
+            setNewInvoice({...invoice});
+        } else {
+            setCurrentInvoice(null);
+            setNewInvoice({
+                clientName: "",
+                packageId: packages[0]?.id || 0,
+                amount: packages[0]?.price || 0,
+                status: "Beklemede",
+                issueDate: new Date().toISOString().split('T')[0],
+                dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            });
+        }
+        setInvoiceDialogOpen(true);
+    };
+
+    const handleCloseInvoiceDialog = () => {
+        setInvoiceDialogOpen(false);
+        setCurrentInvoice(null);
+    };
+
+    const handleInvoiceChange = (field, value) => {
+        setNewInvoice({
+            ...newInvoice,
+            [field]: value
+        });
+
+        // Auto-update amount if package changes
+        if (field === 'packageId') {
+            const selectedPackage = packages.find(pkg => pkg.id === value);
+            if (selectedPackage) {
+                setNewInvoice(prev => ({
+                    ...prev,
+                    packageId: value,
+                    amount: selectedPackage.price,
+                    packageName: selectedPackage.name
+                }));
+            }
+        }
+    };
+
+    const handleSaveInvoice = () => {
+        if (!newInvoice.clientName || !newInvoice.packageId || newInvoice.amount <= 0) {
+            toast.error("Lütfen tüm gerekli alanları doldurun.");
+            return;
+        }
+
+        const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+        const invoiceData = {
+            ...newInvoice,
+            packageName: selectedPackage.name
+        };
+
+        if (currentInvoice) {
+            // Update existing invoice
+            setInvoices(invoices.map(invoice => 
+                invoice.id === currentInvoice.id ? {...invoiceData, id: invoice.id} : invoice
+            ));
+            toast.success(`${invoiceData.clientName} için fatura güncellendi.`);
+        } else {
+            // Create new invoice
+            const newId = Math.max(...invoices.map(invoice => invoice.id), 0) + 1;
+            setInvoices([...invoices, {...invoiceData, id: newId}]);
+            toast.success(`${invoiceData.clientName} için yeni fatura oluşturuldu.`);
+        }
+        
+        handleCloseInvoiceDialog();
+    };
+
+    const handleDeleteInvoice = (id) => {
+        setInvoices(invoices.filter(invoice => invoice.id !== id));
+        toast.success("Fatura silindi.");
+    };
+
+    const handleStatusChange = (id, newStatus) => {
+        setInvoices(invoices.map(invoice =>
+            invoice.id === id ? {...invoice, status: newStatus} : invoice
+        ));
+        
+        const invoice = invoices.find(i => i.id === id);
+        toast.success(`${invoice.clientName} için ödeme durumu "${newStatus}" olarak güncellendi.`);
+    };
+
+    // Render the appropriate tab content
+    const renderTabContent = () => {
+        switch(tabValue) {
+            case 0: // Financial Overview
+                return (
+                    <Box className="finance-overview">
+                        <Grid container spacing={4} className="stats-cards">
+                            <Grid item xs={12} md={4}>
+                                <Paper elevation={3} className="stat-card paid-income">
+                                    <Box p={3} display="flex" flexDirection="column">
+                                        <Box display="flex" alignItems="center" mb={2}>
+                                            <Box className="stat-icon-wrapper">
+                                                <CheckCircleIcon />
+                                            </Box>
+                                            <Typography variant="h6" ml={2}>Bu Ay Ödenen</Typography>
+                                        </Box>
+                                        <Typography variant="h3" className="stat-amount" gutterBottom>
+                                            {currentMonthPaid.toLocaleString()} ₺
+                                        </Typography>
+                                        <Typography variant="body2" className="stat-description">
+                                            Tahsil edilen gelir
+                                        </Typography>
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Paper elevation={3} className="stat-card unpaid-income">
+                                    <Box p={3} display="flex" flexDirection="column">
+                                        <Box display="flex" alignItems="center" mb={2}>
+                                            <Box className="stat-icon-wrapper">
+                                                <PendingIcon />
+                                            </Box>
+                                            <Typography variant="h6" ml={2}>Bu Ay Bekleyen</Typography>
+                                        </Box>
+                                        <Typography variant="h3" className="stat-amount" gutterBottom>
+                                            {currentMonthUnpaid.toLocaleString()} ₺
+                                        </Typography>
+                                        <Typography variant="body2" className="stat-description">
+                                            Tahsil edilmemiş gelir
+                                        </Typography>
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
+                                <Paper elevation={3} className="stat-card total-revenue">
+                                    <Box p={3} display="flex" flexDirection="column">
+                                        <Box display="flex" alignItems="center" mb={2}>
+                                            <Box className="stat-icon-wrapper">
+                                                <MonetizationOnIcon />
+                                            </Box>
+                                            <Typography variant="h6" ml={2}>Toplam Gelir</Typography>
+                                        </Box>
+                                        <Typography variant="h3" className="stat-amount" gutterBottom>
+                                            {totalRevenue.toLocaleString()} ₺
+                                        </Typography>
+                                        <Typography variant="body2" className="stat-description">
+                                            Tüm zamanlar
+                                        </Typography>
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+
+                        <Box mt={5}>
+                            <Paper elevation={3} className="report-section">
+                                <Box p={3}>
+                                    <Typography variant="h6" gutterBottom className="section-title">
+                                        Paket Satışları
+                                    </Typography>
+                                    <Table>
+                                        <TableHead className="table-header">
+                                            <TableRow>
+                                                <TableCell>Paket Adı</TableCell>
+                                                <TableCell align="right">Fiyat</TableCell>
+                                                <TableCell align="right">Toplam Satış</TableCell>
+                                                <TableCell align="right">Toplam Gelir</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {packages.map(pkg => {
+                                                const packageInvoices = invoices.filter(
+                                                    invoice => invoice.packageId === pkg.id
+                                                );
+                                                const packageSales = packageInvoices.length;
+                                                const packageRevenue = packageInvoices.reduce(
+                                                    (total, invoice) => total + invoice.amount, 0
+                                                );
+                                                
+                                                return (
+                                                    <TableRow key={pkg.id} className="data-row">
+                                                        <TableCell>
+                                                            <Box display="flex" alignItems="center">
+                                                                <ReceiptIcon fontSize="small" className="row-icon" />
+                                                                <Typography ml={1}>{pkg.name}</Typography>
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell align="right">{pkg.price.toLocaleString()} ₺</TableCell>
+                                                        <TableCell align="right">{packageSales}</TableCell>
+                                                        <TableCell align="right">{packageRevenue.toLocaleString()} ₺</TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </Box>
+                            </Paper>
+                        </Box>
+                    </Box>
+                );
+            
+            case 1: // Package Management
+                return (
+                    <Box className="package-management">
+                        <Box display="flex" justifyContent="flex-end" mb={2}>
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                startIcon={<AddIcon />}
+                                onClick={() => handleOpenPackageDialog()}
+                            >
+                                Yeni Paket Ekle
+                            </Button>
+                        </Box>
+                        
+                        <Grid container spacing={3}>
+                            {packages.map(pkg => (
+                                <Grid item xs={12} md={6} lg={4} key={pkg.id}>
+                                    <Card className="package-card">
+                                        <CardContent>
+                                            <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+                                                <Typography variant="h6" gutterBottom>
+                                                    {pkg.name}
+                                                </Typography>
+                                                <Chip 
+                                                    label={pkg.type} 
+                                                    color="primary" 
+                                                    size="small" 
+                                                    className="package-type-chip"
+                                                />
+                                            </Box>
+                                            
+                                            <Typography variant="h5" className="package-price" gutterBottom>
+                                                {pkg.price} ₺
+                                            </Typography>
+                                            
+                                            <Typography variant="body2" color="textSecondary" paragraph>
+                                                {pkg.description}
+                                            </Typography>
+                                            
+                                            <Divider className="package-divider" />
+                                            
+                                            <Typography variant="subtitle2" gutterBottom className="services-title">
+                                                Hizmetler:
+                                            </Typography>
+                                            
+                                            <ul className="services-list">
+                                                {pkg.services.map((service, index) => (
+                                                    <li key={index}>{service}</li>
+                                                ))}
+                                            </ul>
+                                            
+                                            <Box display="flex" justifyContent="flex-end" mt={2}>
+                                                <IconButton 
+                                                    color="primary" 
+                                                    onClick={() => handleOpenPackageDialog(pkg)}
+                                                    size="small"
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                                <IconButton 
+                                                    color="error" 
+                                                    onClick={() => handleDeletePackage(pkg.id)}
+                                                    size="small"
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                );
+            
+            case 2: // Invoice Management
+                return (
+                    <Box className="invoice-management">
+                        <Paper elevation={3} className="filters-section">
+                            <Box p={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+                                <Box display="flex" alignItems="center" gap={2} className="search-filters" flexGrow={1}>
+                                    <TextField
+                                        placeholder="Danışan veya paket ara..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        size="small"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ minWidth: 250 }}
+                                    />
+                                    
+                                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                                        <InputLabel>Durum</InputLabel>
+                                        <Select
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            label="Durum"
+                                        >
+                                            <MenuItem value="all">Tüm Durumlar</MenuItem>
+                                            <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                            <MenuItem value="Beklemede">Beklemede</MenuItem>
+                                            <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    startIcon={<AddIcon />}
+                                    onClick={() => handleOpenInvoiceDialog()}
+                                    className="add-invoice-btn"
+                                    sx={{ mt: { xs: 2, md: 0 } }}
+                                >
+                                    Yeni Fatura
+                                </Button>
+                            </Box>
+                        </Paper>
+                        
+                        <Box mt={4}>
+                            <Grid container spacing={3}>
+                                {filteredInvoices.map(invoice => (
+                                    <Grid item xs={12} md={6} lg={4} key={invoice.id}>
+                                        <Paper elevation={3} className={`invoice-card status-${invoice.status.toLowerCase()}`}>
+                                            <Box position="relative" p={3}>
+                                                <Box className="invoice-header" mb={2} display="flex" justifyContent="space-between" alignItems="flex-start">
+                                                    <Box>
+                                                        <Typography variant="h6" className="client-name">{invoice.clientName}</Typography>
+                                                        <Typography variant="body2" color="textSecondary">{invoice.packageName}</Typography>
+                                                    </Box>
+                                                    
+                                                    <Chip 
+                                                        label={invoice.status} 
+                                                        color={
+                                                            invoice.status === "Ödendi" ? "success" :
+                                                            invoice.status === "Beklemede" ? "warning" : "error"
+                                                        }
+                                                        size="small"
+                                                        className="status-chip"
+                                                    />
+                                                </Box>
+                                                
+                                                <Typography variant="h5" className="invoice-amount" gutterBottom>
+                                                    {invoice.amount.toLocaleString()} ₺
+                                                </Typography>
+                                                
+                                                <Divider sx={{ my: 2 }} />
+                                                
+                                                <Grid container spacing={2} className="invoice-dates">
+                                                    <Grid item xs={6}>
+                                                        <Typography variant="caption" color="textSecondary">
+                                                            Fatura Tarihi
+                                                        </Typography>
+                                                        <Typography variant="body2">
+                                                            {new Date(invoice.issueDate).toLocaleDateString('tr-TR')}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <Typography variant="caption" color="textSecondary">
+                                                            Son Ödeme
+                                                        </Typography>
+                                                        <Typography variant="body2">
+                                                            {new Date(invoice.dueDate).toLocaleDateString('tr-TR')}
+                                                        </Typography>
+                                                    </Grid>
+                                                </Grid>
+                                                
+                                                <Divider sx={{ my: 2 }} />
+                                                
+                                                <Box display="flex" justifyContent="space-between" alignItems="center">
+                                                    <FormControl size="small" sx={{ minWidth: 130 }}>
+                                                        <InputLabel>Durum</InputLabel>
+                                                        <Select
+                                                            value={invoice.status}
+                                                            onChange={(e) => handleStatusChange(invoice.id, e.target.value)}
+                                                            label="Durum"
+                                                        >
+                                                            <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                                            <MenuItem value="Beklemede">Beklemede</MenuItem>
+                                                            <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                    
+                                                    <Box>
+                                                        <IconButton 
+                                                            color="primary" 
+                                                            size="small"
+                                                            onClick={() => handleOpenInvoiceDialog(invoice)}
+                                                        >
+                                                            <EditIcon fontSize="small" />
+                                                        </IconButton>
+                                                        <IconButton 
+                                                            color="error" 
+                                                            size="small"
+                                                            onClick={() => handleDeleteInvoice(invoice.id)}
+                                                        >
+                                                            <DeleteIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        </Paper>
+                                    </Grid>
+                                ))}
+                                
+                                {filteredInvoices.length === 0 && (
+                                    <Grid item xs={12}>
+                                        <Paper elevation={3} className="empty-state">
+                                            <Box p={4} textAlign="center">
+                                                <Box className="empty-icon">
+                                                    <ReceiptIcon style={{ fontSize: 64, opacity: 0.3 }} />
+                                                </Box>
+                                                <Typography variant="h6" color="textSecondary" gutterBottom>
+                                                    Fatura Bulunamadı
+                                                </Typography>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    Arama kriterlerinize uygun fatura bulunmuyor. Filtrelerinizi değiştirmeyi veya yeni fatura oluşturmayı deneyebilirsiniz.
+                                                </Typography>
+                                                <Button 
+                                                    variant="contained" 
+                                                    color="primary" 
+                                                    startIcon={<AddIcon />}
+                                                    onClick={() => handleOpenInvoiceDialog()}
+                                                    sx={{ mt: 3 }}
+                                                >
+                                                    Yeni Fatura Oluştur
+                                                </Button>
+                                            </Box>
+                                        </Paper>
+                                    </Grid>
+                                )}
+                            </Grid>
+                        </Box>
+                    </Box>
+                );
+            
+            default:
+                return null;
+        }
     };
 
     return (
         <Default>
             <div className="finans-container">
-                <Typography variant="h4" gutterBottom className="page-title">
-                    Finansal Takip
+                <Typography variant="h4" className="page-title">
+                    Finansal Yönetim
                 </Typography>
 
-                {/* Stats Cards */}
-                <Box className="stats-container">
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={4}>
-                            <Paper elevation={3} className="stat-card current-revenue">
-                                <Box className="stat-icon">
-                                    <CurrencyLiraIcon fontSize="large" />
-                                </Box>
-                                <Box className="stat-content">
-                                    <Typography variant="subtitle1">Aylık Mevcut Gelir</Typography>
-                                    <Typography variant="h4">{currentMonthRevenue} TL</Typography>
-                                </Box>
-                            </Paper>
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Paper elevation={3} className="stat-card potential-revenue">
-                                <Box className="stat-icon">
-                                    <TrendingUpIcon fontSize="large" />
-                                </Box>
-                                <Box className="stat-content">
-                                    <Typography variant="subtitle1">Aylık Potansiyel Gelir</Typography>
-                                    <Typography variant="h4">{potentialMonthlyRevenue} TL</Typography>
-                                </Box>
-                            </Paper>
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Paper elevation={3} className="stat-card remaining-revenue">
-                                <Box className="stat-icon">
-                                    <CurrencyLiraIcon fontSize="large" />
-                                </Box>
-                                <Box className="stat-content">
-                                    <Typography variant="subtitle1">Toplanacak Tutar</Typography>
-                                    <Typography variant="h4">{remainingToCollect} TL</Typography>
-                                </Box>
-                            </Paper>
-                        </Grid>
-                    </Grid>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                    <Tabs value={tabValue} onChange={handleTabChange} 
+                          variant="scrollable" scrollButtons="auto">
+                        <Tab icon={<MonetizationOnIcon />} iconPosition="start" label="Genel Bakış" />
+                        <Tab icon={<ReceiptIcon />} iconPosition="start" label="Paket Yönetimi" />
+                        <Tab icon={<PaymentsIcon />} iconPosition="start" label="Fatura Yönetimi" />
+                    </Tabs>
                 </Box>
 
-                {/* Search and Filter */}
-                <Box className="filters-container" mb={3} mt={4}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="Danışan Ara..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                variant="outlined"
-                                size="small"
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Box display="flex" alignItems="center">
-                                <FilterListIcon sx={{ mr: 1 }} />
-                                <FormControl variant="outlined" size="small" fullWidth>
-                                    <Select
-                                        value={filterStatus}
-                                        onChange={(e) => setFilterStatus(e.target.value)}
-                                        displayEmpty
-                                    >
-                                        <MenuItem value="all">Tüm Durumlar</MenuItem>
-                                        <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                        <MenuItem value="Beklemede">Beklemede</MenuItem>
-                                        <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box>
+                {renderTabContent()}
 
-                {/* Clients Table */}
-                <TableContainer component={Paper} elevation={3}>
-                    <Table>
-                        <TableHead>
-                            <TableRow className="table-header">
-                                <TableCell>Danışan Adı</TableCell>
-                                <TableCell>Açıklama</TableCell>
-                                <TableCell>Fatura Tarihi</TableCell>
-                                <TableCell>Son Ödeme Tarihi</TableCell>
-                                <TableCell>Tutar</TableCell>
-                                <TableCell>Durum</TableCell>
-                                <TableCell>İşlemler</TableCell>
-                                <TableCell>Ödeme Durumu</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {filteredClients.map((client) => (
-                                <TableRow key={client.id} className={`status-${client.status.toLowerCase()}`}>
-                                    <TableCell>{client.name}</TableCell>
-                                    <TableCell>{client.description}</TableCell>
-                                    <TableCell>{client.issueDate}</TableCell>
-                                    <TableCell>{client.dueDate}</TableCell>
-                                    <TableCell>{client.amount} TL</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={client.status}
-                                            color={
-                                                client.status === "Ödendi" ? "success" :
-                                                    client.status === "Beklemede" ? "warning" : "error"
-                                            }
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                            <IconButton 
-                                                size="small" 
-                                                color="primary" 
-                                                onClick={() => handlePrintInvoice(client)}
-                                                title="Fatura Yazdır"
-                                            >
-                                                <PrintIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton 
-                                                size="small" 
-                                                color="info" 
-                                                onClick={() => handleEditInvoice(client)}
-                                                title="Düzenle"
-                                            >
-                                                <EditIcon fontSize="small" />
-                                            </IconButton>
-                                            <IconButton 
-                                                size="small" 
-                                                color="error" 
-                                                onClick={() => handleOpenDeleteConfirm(client)}
-                                                title="Sil"
-                                            >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell>
-                                        <FormControl variant="outlined" size="small">
-                                            <Select
-                                                value={client.status}
-                                                onChange={(e) => handleStatusChange(client.id, e.target.value)}
-                                                displayEmpty
-                                                size="small"
-                                            >
-                                                <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                                <MenuItem value="Beklemede">Beklemede</MenuItem>
-                                                <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-
-                {/* Delete Confirmation Dialog */}
-                <Dialog
-                    open={deleteConfirmOpen}
-                    onClose={handleCloseDeleteConfirm}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <DialogTitle id="alert-dialog-title">
-                        <Box display="flex" alignItems="center" gap={1}>
-                            <WarningIcon color="warning" />
-                            <Typography variant="h6">Fatura Sil</Typography>
-                        </Box>
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
-                            <Typography variant="body1" fontWeight="bold">
-                                {clientToDelete?.name} adlı danışanın faturasını silmek istediğinize emin misiniz?
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" mt={1}>
-                                Bu işlem geri alınamaz.
-                            </Typography>
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseDeleteConfirm} color="primary">
-                            Vazgeç
-                        </Button>
-                        <Button 
-                            onClick={handleDeleteInvoice} 
-                            color="error" 
-                            variant="contained" 
-                            autoFocus
-                        >
-                            Sil
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* Edit Invoice Dialog */}
-                <Dialog
-                    open={editDialogOpen}
-                    onClose={handleCloseEditDialog}
-                    maxWidth="md"
+                {/* Package Edit Dialog */}
+                <Dialog 
+                    open={packageDialogOpen} 
+                    onClose={handleClosePackageDialog}
                     fullWidth
+                    maxWidth="md"
                 >
                     <DialogTitle>
-                        <Box display="flex" alignItems="center" gap={1}>
-                            <EditIcon color="info" />
-                            <Typography variant="h6">Fatura Düzenle</Typography>
-                        </Box>
+                        {currentPackage ? "Paketi Düzenle" : "Yeni Paket Oluştur"}
                     </DialogTitle>
                     <DialogContent dividers>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    label="Paket Adı"
                                     fullWidth
-                                    label="Danışan Adı"
-                                    value={editedValues.name}
-                                    onChange={(e) => handleEditFieldChange('name', e.target.value)}
+                                    value={newPackage.name}
+                                    onChange={(e) => handlePackageChange('name', e.target.value)}
+                                    required
                                     margin="normal"
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel>Paket Tipi</InputLabel>
+                                    <Select
+                                        value={newPackage.type}
+                                        onChange={(e) => handlePackageChange('type', e.target.value)}
+                                        label="Paket Tipi"
+                                    >
+                                        <MenuItem value="Seanslık">Seanslık</MenuItem>
+                                        <MenuItem value="Aylık">Aylık</MenuItem>
+                                        <MenuItem value="3 Aylık">3 Aylık</MenuItem>
+                                        <MenuItem value="6 Aylık">6 Aylık</MenuItem>
+                                        <MenuItem value="1 Yıllık">1 Yıllık</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
+                                    label="Fiyat (₺)"
                                     fullWidth
-                                    label="Tutar (TL)"
                                     type="number"
-                                    value={editedValues.amount}
-                                    onChange={(e) => handleEditFieldChange('amount', parseFloat(e.target.value))}
+                                    value={newPackage.price}
+                                    onChange={(e) => handlePackageChange('price', Number(e.target.value))}
+                                    required
                                     margin="normal"
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <CurrencyLiraIcon fontSize="small" />
+                                                <CurrencyLiraIcon />
                                             </InputAdornment>
                                         ),
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
-                                    fullWidth
                                     label="Açıklama"
-                                    value={editedValues.description}
-                                    onChange={(e) => handleEditFieldChange('description', e.target.value)}
+                                    fullWidth
+                                    value={newPackage.description}
+                                    onChange={(e) => handlePackageChange('description', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                    rows={1}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    Hizmetler
+                                </Typography>
+                                {newPackage.services.map((service, index) => (
+                                    <Box key={index} display="flex" alignItems="center" gap={1} mb={1}>
+                                        <TextField
+                                            fullWidth
+                                            placeholder={`Hizmet ${index + 1}`}
+                                            value={service}
+                                            onChange={(e) => handleServiceChange(index, e.target.value)}
+                                            size="small"
+                                        />
+                                        <IconButton 
+                                            color="error" 
+                                            onClick={() => handleRemoveService(index)}
+                                            disabled={newPackage.services.length <= 1}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                                <Button 
+                                    startIcon={<AddIcon />} 
+                                    onClick={handleAddService}
+                                    variant="outlined"
+                                    size="small"
+                                    sx={{ mt: 1 }}
+                                >
+                                    Hizmet Ekle
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClosePackageDialog}>
+                            İptal
+                        </Button>
+                        <Button 
+                            onClick={handleSavePackage} 
+                            variant="contained" 
+                            color="primary"
+                            startIcon={<SaveIcon />}
+                        >
+                            Kaydet
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Invoice Edit Dialog */}
+                <Dialog 
+                    open={invoiceDialogOpen} 
+                    onClose={handleCloseInvoiceDialog}
+                    fullWidth
+                    maxWidth="md"
+                >
+                    <DialogTitle>
+                        {currentInvoice ? "Faturayı Düzenle" : "Yeni Fatura Oluştur"}
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Danışan Adı"
+                                    fullWidth
+                                    value={newInvoice.clientName}
+                                    onChange={(e) => handleInvoiceChange('clientName', e.target.value)}
+                                    required
                                     margin="normal"
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel>Paket</InputLabel>
+                                    <Select
+                                        value={newInvoice.packageId}
+                                        onChange={(e) => handleInvoiceChange('packageId', e.target.value)}
+                                        label="Paket"
+                                    >
+                                        {packages.map(pkg => (
+                                            <MenuItem key={pkg.id} value={pkg.id}>
+                                                {pkg.name} - {pkg.price} ₺
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
                                 <TextField
+                                    label="Tutar (₺)"
                                     fullWidth
+                                    type="number"
+                                    value={newInvoice.amount}
+                                    onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
+                                    required
+                                    margin="normal"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <CurrencyLiraIcon />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <TextField
                                     label="Fatura Tarihi"
+                                    fullWidth
                                     type="date"
-                                    value={editedValues.issueDate}
-                                    onChange={(e) => handleEditFieldChange('issueDate', e.target.value)}
+                                    value={newInvoice.issueDate}
+                                    onChange={(e) => handleInvoiceChange('issueDate', e.target.value)}
+                                    required
                                     margin="normal"
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} sm={4}>
                                 <TextField
-                                    fullWidth
                                     label="Son Ödeme Tarihi"
+                                    fullWidth
                                     type="date"
-                                    value={editedValues.dueDate}
-                                    onChange={(e) => handleEditFieldChange('dueDate', e.target.value)}
+                                    value={newInvoice.dueDate}
+                                    onChange={(e) => handleInvoiceChange('dueDate', e.target.value)}
+                                    required
                                     margin="normal"
                                     InputLabelProps={{
                                         shrink: true,
@@ -457,12 +919,11 @@ export default function Finans() {
                             </Grid>
                             <Grid item xs={12}>
                                 <FormControl fullWidth margin="normal">
-                                    <Typography variant="body2" color="text.secondary" mb={1}>
-                                        Ödeme Durumu
-                                    </Typography>
+                                    <InputLabel>Ödeme Durumu</InputLabel>
                                     <Select
-                                        value={editedValues.status}
-                                        onChange={(e) => handleEditFieldChange('status', e.target.value)}
+                                        value={newInvoice.status}
+                                        onChange={(e) => handleInvoiceChange('status', e.target.value)}
+                                        label="Ödeme Durumu"
                                     >
                                         <MenuItem value="Ödendi">Ödendi</MenuItem>
                                         <MenuItem value="Beklemede">Beklemede</MenuItem>
@@ -473,13 +934,13 @@ export default function Finans() {
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseEditDialog} color="inherit">
+                        <Button onClick={handleCloseInvoiceDialog}>
                             İptal
                         </Button>
                         <Button 
-                            onClick={handleSaveEdit} 
-                            color="primary" 
-                            variant="contained"
+                            onClick={handleSaveInvoice} 
+                            variant="contained" 
+                            color="primary"
                             startIcon={<SaveIcon />}
                         >
                             Kaydet
