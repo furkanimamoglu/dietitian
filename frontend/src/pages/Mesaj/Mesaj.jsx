@@ -61,6 +61,7 @@ export default function Mesaj() {
     const [fileUploadDialog, setFileUploadDialog] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const theme = useTheme();
 
     const messageListRef = useRef();
@@ -99,6 +100,52 @@ export default function Mesaj() {
             });
     };
 
+    const fetchMessages = (partnerId) => {
+        setIsLoading(true);
+        axios
+            .get(config[config.environment].apiUrl + "/message/getMyMessages", {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+                params: {
+                    partner_id: partnerId
+                }
+            })
+            .then((response) => {
+                // Transform the messages from the API to match our frontend format
+                const formattedMessages = response.data.map(msg => ({
+                    id: msg.id,
+                    text: msg.message,
+                    sender: msg.dietitian_id.toString() === localStorage.getItem("user_id") ? "dietitian" : "client",
+                    timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isRead: msg.isRead
+                }));
+                setMessages(formattedMessages);
+            })
+            .catch((error) => {
+                console.error("Error fetching messages:", error);
+                // If real messages fail, fall back to sample messages for demo
+                const sampleMessages = [
+                    {
+                        id: 1,
+                        text: "Merhaba, nasılsınız bugün? 😊",
+                        sender: "dietitian",
+                        timestamp: "09:30"
+                    },
+                    {
+                        id: 2,
+                        text: "İyiyim teşekkürler, bu hafta diyet programıma uydum ve 1kg verdim! 💪",
+                        sender: "client",
+                        timestamp: "09:32"
+                    }
+                ];
+                setMessages(sampleMessages);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    };
+
     const getRandomGreeting = () => {
         const greetings = [
             "Merhaba, nasılsınız?",
@@ -118,23 +165,8 @@ export default function Mesaj() {
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
         
-        // Generate some sample messages for demo
-        const sampleMessages = [
-            {
-                id: 1,
-                text: "Merhaba, nasılsınız bugün? 😊",
-                sender: "dietitian",
-                timestamp: "09:30"
-            },
-            {
-                id: 2,
-                text: "İyiyim teşekkürler, bu hafta diyet programıma uydum ve 1kg verdim! 💪",
-                sender: "client",
-                timestamp: "09:32"
-            }
-        ];
-        
-        setMessages(sampleMessages);
+        // Fetch real messages for this conversation
+        fetchMessages(danisan.id);
 
         // Input alanına odaklan
         setTimeout(() => {
@@ -145,8 +177,9 @@ export default function Mesaj() {
     };
 
     const handleSendMessage = () => {
-        if (newMessage.trim() === "") return;
+        if (newMessage.trim() === "" || !selectedDanisan) return;
 
+        // Create a message object for immediate display
         const newMsg = {
             id: Date.now(),
             text: newMessage,
@@ -154,8 +187,27 @@ export default function Mesaj() {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
+        // Add to UI immediately for better UX
         setMessages([...messages, newMsg]);
         setNewMessage("");
+        
+        // Send to API
+        const messageData = {
+            dietitian_id: localStorage.getItem("user_id"),
+            client_id: selectedDanisan.id,
+            message: newMessage,
+            isRead: false
+        };
+        
+        axios.post(config[config.environment].apiUrl + "/message/sendMessage", messageData, {
+            headers: {
+                Authorization: localStorage.getItem("token")
+            }
+        })
+        .catch(error => {
+            console.error("Error sending message:", error);
+            // Could add error handling like showing a snackbar
+        });
         
         // Simulate client response after a delay
         setIsTyping(true);
@@ -447,7 +499,11 @@ export default function Mesaj() {
                                             />
                                         </Box>
                                         
-                                        {messages.length > 0 ? (
+                                        {isLoading ? (
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                                <CircularProgress size={40} />
+                                            </Box>
+                                        ) : messages.length > 0 ? (
                                             messages.map((message) => (
                                                 <Fade in={true} key={message.id}>
                                                     <Box

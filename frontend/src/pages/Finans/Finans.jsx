@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import {
     Paper,
     Typography,
@@ -37,8 +35,6 @@ import PrintIcon from '@mui/icons-material/Print';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import WarningIcon from '@mui/icons-material/Warning';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import ClearIcon from '@mui/icons-material/Clear';
 import SaveIcon from '@mui/icons-material/Save';
 import { toast } from 'react-hot-toast';
 
@@ -57,10 +53,6 @@ export default function Finans() {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
-    
-    // Date range filter
-    const [dateRange, setDateRange] = useState([null, null]);
-    const [startDate, endDate] = dateRange;
     
     // Delete confirmation dialog
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -92,7 +84,7 @@ export default function Finans() {
         .filter(client => client.status !== "Ödendi")
         .reduce((total, client) => total + client.amount, 0);
 
-    // Filter clients based on search, filter options, and date range
+    // Filter clients based on search and filter options
     const filteredClients = clients.filter(client => {
         // Search filter
         const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -101,12 +93,7 @@ export default function Finans() {
         // Status filter
         const matchesFilter = filterStatus === 'all' || client.status === filterStatus;
         
-        // Date range filter
-        const matchesDateRange = (!startDate || !endDate) ? true : 
-            (new Date(client.issueDate) >= startDate && 
-             new Date(client.issueDate) <= endDate);
-        
-        return matchesSearch && matchesFilter && matchesDateRange;
+        return matchesSearch && matchesFilter;
     });
 
     // Handle payment status change
@@ -184,12 +171,6 @@ export default function Finans() {
         handleCloseDeleteConfirm();
     };
 
-    // Reset date filter
-    const resetDateFilter = () => {
-        setDateRange([null, null]);
-        toast.success('Tarih filtresi sıfırlandı.');
-    };
-
     return (
         <Default>
             <div className="finans-container">
@@ -241,7 +222,7 @@ export default function Finans() {
                 {/* Search and Filter */}
                 <Box className="filters-container" mb={3} mt={4}>
                     <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={6}>
                             <TextField
                                 fullWidth
                                 placeholder="Danışan Ara..."
@@ -259,34 +240,6 @@ export default function Finans() {
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Box display="flex" alignItems="center" gap={1}>
-                                <div className="date-range-wrapper">
-                                    <CalendarTodayIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                                    <DatePicker
-                                        selectsRange={true}
-                                        startDate={startDate}
-                                        endDate={endDate}
-                                        onChange={(update) => {
-                                            setDateRange(update);
-                                        }}
-                                        isClearable={false}
-                                        placeholderText="Tarih Aralığı Seçin"
-                                        dateFormat="dd/MM/yyyy"
-                                        className="date-range-picker"
-                                    />
-                                    {(startDate || endDate) && (
-                                        <IconButton
-                                            size="small"
-                                            onClick={resetDateFilter}
-                                            sx={{ ml: 1 }}
-                                        >
-                                            <ClearIcon fontSize="small" />
-                                        </IconButton>
-                                    )}
-                                </div>
-                            </Box>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
                             <Box display="flex" alignItems="center">
                                 <FilterListIcon sx={{ mr: 1 }} />
                                 <FormControl variant="outlined" size="small" fullWidth>

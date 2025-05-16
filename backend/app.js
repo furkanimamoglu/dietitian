@@ -17,6 +17,7 @@ const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
 const systemRoutes = require('./Routes/systemRoutes');
 const invoiceRoutes = require('./Routes/invoiceRoutes');
+const messageRoutes = require('./Routes/messageRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
 const exerciseRoutes = require('./Routes/exerciseRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
@@ -39,6 +40,7 @@ app.use((req, res, next) => {
 app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
+app.use('/message', messageRoutes);
 app.use('/recipe', recipeRoutes);
 app.use('/exercise', exerciseRoutes);
 app.use('/invoice', invoiceRoutes);

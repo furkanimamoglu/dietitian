@@ -32,6 +32,7 @@ class DietitianService {
             const token = jwt.sign(
                 {
                     id: dietitianInfo.id,
+                    phoneNumber: dietitianInfo.phoneNumber,
                     role: dietitianInfo.role
                 },
                 config.secretkey,
@@ -65,6 +66,7 @@ class DietitianService {
             const token = jwt.sign(
                 {
                     id: dietitian.id,
+                    phoneNumber: dietitian.phoneNumber,
                     role: DIETITIAN
                 },
                 config.secretkey
