@@ -31,7 +31,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
 import HelpIcon from '@mui/icons-material/Help';
-import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import config from "../../config.js";
@@ -54,7 +53,6 @@ const getIconByType = (type) => {
 };
 
 const settings = [
-    { label: 'Profil', value: 'profil' },
     { label: 'Ayarlar', value: 'ayarlar' },
     { label: 'Çıkış Yap', value: 'cikisyap' },
 ];
@@ -71,16 +69,6 @@ const SearchContainer = styled('div')(({ theme }) => ({
     [theme.breakpoints.up('sm')]: {
         width: '250px',
     },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
@@ -119,8 +107,6 @@ export default function Header() {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
             navigate('/login');
-        } else if (value === 'profil') {
-            navigate('/profil');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
         } else {
@@ -210,9 +196,6 @@ export default function Header() {
                                 position: 'relative',
                             }}
                         >
-                            <SearchIconWrapper>
-                                <SearchIcon />
-                            </SearchIconWrapper>
                             <StyledInputBase
                                 placeholder="Arama yap..."
                                 inputProps={{ 'aria-label': 'search' }}
@@ -295,7 +278,7 @@ export default function Header() {
                         </Tooltip>
 
                         <Box sx={{ flexGrow: 0 }}>
-                            <Tooltip title="Profilim" arrow>
+                            <Tooltip title="Furkan" arrow>
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                     <Avatar alt="Furkan" src="/static/images/avatar/2.jpg" />
                                 </IconButton>

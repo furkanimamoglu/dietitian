@@ -11,7 +11,6 @@ import Beslenme from "../pages/Beslenme/Beslenme.jsx";
 import Danisan from "../pages/Danisan/Danisan.jsx";
 import Tarifler from "../pages/Tarifler/Tarifler.jsx";
 import Egzersizler from "../pages/Egzersizler/Egzersizler.jsx";
-import Profil from "../pages/Profil/Profil.jsx";
 import Ayarlar from "../pages/Ayarlar/Ayarlar.jsx";
 import Mesaj from "../pages/Mesaj/Mesaj.jsx";
 import Finans from "../pages/Finans/Finans.jsx";
@@ -21,7 +20,6 @@ export default function Routing() {
         <Routes>
                 {/* Diyetisyen Routes */}
                 <Route path="/dashboard/*" element={<Dashboard/>}/>
-                <Route path="/profil/*" element={<Profil/>}/>
                 <Route path="/ayarlar/*" element={<Ayarlar/>}/>
                 <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
                 <Route path="/danisan/:id" element={<Danisan/>}/>

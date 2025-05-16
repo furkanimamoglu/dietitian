@@ -17,6 +17,8 @@ const NutritionAssignment = require('./NutritionAssignment');
 const Recipe = require('./Recipe');
 const RecipeCategory = require('./RecipeCategory');
 const Notes = require('./Notes');
+const Package = require('./Package');
+const PackageItems = require('./PackageItems');
 
 // 1. Dietitian ve Client
 Dietitian.hasMany(Client, {
@@ -157,6 +159,24 @@ Notes.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
+// Dietitian ve Message
+Dietitian.hasMany(Message, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+});
+Message.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
+});
+
+// Client ve Message
+Client.hasMany(Message, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+});
+Message.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
 // Tarifler ve Tarif Kategorisi
 RecipeCategory.hasMany(Recipe, {
     foreignKey: 'category_id',
@@ -225,6 +245,15 @@ ExerciseAssignment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
+Package.hasMany(PackageItems, {
+    foreignKey: 'package_id',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+PackageItems.belongsTo(Package, {
+    foreignKey: 'package_id'
+});
+
 module.exports = {
     sequelize,
     Dietitian,
@@ -244,5 +273,7 @@ module.exports = {
     NutritionAssignment,
     Notes,
     Recipe,
-    RecipeCategory
+    RecipeCategory,
+    Package,
+    PackageItems
 };

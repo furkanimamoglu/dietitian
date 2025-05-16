@@ -1,8 +1,7 @@
-// Libraries
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
-const Message = sequelize.define('Message', {
+const Package = sequelize.define('Packages', {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -10,29 +9,29 @@ const Message = sequelize.define('Message', {
             primaryKey: true
         },
         dietitian_id: {
-            type: DataTypes.BIGINT,
+            type: DataTypes.INTEGER,
             allowNull: false
         },
-        client_id: {
-            type: DataTypes.BIGINT,
-            allowNull: false
-        },
-        sender: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        isRead: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
+        description: {
+            type: DataTypes.STRING,
+            allowNull: true
         },
-        message: {
-            type: DataTypes.TEXT,
+        type: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        price: {
+            type: DataTypes.STRING,
             allowNull: false
         }
-    }, {
-        timestamps: true
+    },
+    {
+        timestamps: false
     }
 );
 
-module.exports = Message;
+module.exports = Package;

@@ -61,6 +61,7 @@ export default function Mesaj() {
     const [fileUploadDialog, setFileUploadDialog] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const theme = useTheme();
 
     const messageListRef = useRef();
@@ -88,8 +89,7 @@ export default function Mesaj() {
                 // Add some mock data for demo purposes
                 const enhancedData = response.data.map(client => ({
                     ...client,
-                    lastMessage: client.lastMessage || getRandomGreeting(),
-                    lastActive: getRandomTimeAgo(),
+                    lastMessage: client.lastMessage || "",
                     unreadCount: Math.floor(Math.random() * 3)
                 }));
                 setDanisanList(enhancedData);
@@ -99,42 +99,40 @@ export default function Mesaj() {
             });
     };
 
-    const getRandomGreeting = () => {
-        const greetings = [
-            "Merhaba, nasılsınız?",
-            "Bugün diyet programımı uyguladım!",
-            "Yeni tarifler önerebilir misiniz?",
-            "Egzersiz programımı güncelleyebilir miyiz?",
-            "Teşekkür ederim, çok yardımcı oldunuz!"
-        ];
-        return greetings[Math.floor(Math.random() * greetings.length)];
-    };
-
-    const getRandomTimeAgo = () => {
-        const times = ["Az önce", "5 dk önce", "30 dk önce", "1 saat önce", "Dün"];
-        return times[Math.floor(Math.random() * times.length)];
+    const fetchMessages = (partnerId) => {
+        setIsLoading(true);
+        axios
+            .get(config[config.environment].apiUrl + "/message/getMyMessages", {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+                params: {
+                    partner_id: partnerId
+                }
+            })
+            .then((response) => {
+                const formattedMessages = response.data.map(msg => ({
+                    id: msg.id,
+                    text: msg.message,
+                    sender: msg.dietitian_id.toString() === localStorage.getItem("user_id") ? "DIETITIAN" : "CLIENT",
+                    timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isRead: msg.isRead
+                }));
+                setMessages(formattedMessages);
+            })
+            .catch((error) => {
+                console.error("Error fetching messages:", error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     };
 
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
         
-        // Generate some sample messages for demo
-        const sampleMessages = [
-            {
-                id: 1,
-                text: "Merhaba, nasılsınız bugün? 😊",
-                sender: "dietitian",
-                timestamp: "09:30"
-            },
-            {
-                id: 2,
-                text: "İyiyim teşekkürler, bu hafta diyet programıma uydum ve 1kg verdim! 💪",
-                sender: "client",
-                timestamp: "09:32"
-            }
-        ];
-        
-        setMessages(sampleMessages);
+        // Fetch real messages for this conversation
+        fetchMessages(danisan.id);
 
         // Input alanına odaklan
         setTimeout(() => {
@@ -145,42 +143,37 @@ export default function Mesaj() {
     };
 
     const handleSendMessage = () => {
-        if (newMessage.trim() === "") return;
+        if (newMessage.trim() === "" || !selectedDanisan) return;
 
+        // Create a message object for immediate display
         const newMsg = {
             id: Date.now(),
             text: newMessage,
-            sender: "dietitian",
+            sender: "DIETITIAN",
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
+        // Add to UI immediately for better UX
         setMessages([...messages, newMsg]);
         setNewMessage("");
         
-        // Simulate client response after a delay
-        setIsTyping(true);
-        setTimeout(() => {
-            const clientResponse = {
-                id: Date.now() + 1,
-                text: getRandomClientResponse(),
-                sender: "client",
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-            setMessages(prev => [...prev, clientResponse]);
-            setIsTyping(false);
-        }, 3000);
-    };
-
-    const getRandomClientResponse = () => {
-        const responses = [
-            "Teşekkür ederim! 😊",
-            "Anladım, deneyeceğim.",
-            "Bu hafta daha fazla egzersiz yapmaya çalışacağım 💪",
-            "Önerileriniz için teşekkürler, çok yardımcı oldu!",
-            "Peki, su tüketimimi nasıl artırabilirim? 🥤",
-            "Bugün 10.000 adım hedefimi tamamladım! 🚶‍♀️"
-        ];
-        return responses[Math.floor(Math.random() * responses.length)];
+        // Send to API
+        const messageData = {
+            dietitian_id: localStorage.getItem("user_id"),
+            client_id: selectedDanisan.id,
+            message: newMessage,
+            isRead: false
+        };
+        
+        axios.post(config[config.environment].apiUrl + "/message/sendMessage", messageData, {
+            headers: {
+                Authorization: localStorage.getItem("token")
+            }
+        })
+        .catch(error => {
+            console.error("Error sending message:", error);
+            // Could add error handling like showing a snackbar
+        });
     };
 
     const handleKeyPress = (e) => {
@@ -246,7 +239,7 @@ export default function Mesaj() {
             const newMsg = {
                 id: Date.now(),
                 text: isImage ? null : 'Dosya gönderildi: ' + file.name,
-                sender: "dietitian",
+                sender: "DIETITIAN",
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 file: {
                     url: fileUrl,
@@ -357,7 +350,6 @@ export default function Mesaj() {
                                                     <Badge
                                                         color="success"
                                                         variant="dot"
-                                                        invisible={danisan.lastActive !== "Az önce"}
                                                     >
                                                         <Avatar
                                                             sx={{ bgcolor: getAvatarColor(danisan.name || '') }}
@@ -371,9 +363,6 @@ export default function Mesaj() {
                                                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                                             <Typography variant="body1" noWrap>
                                                                 {danisan.name || ''} {danisan.surname || ''}
-                                                            </Typography>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {danisan.lastActive || ""}
                                                             </Typography>
                                                         </Box>
                                                     }
@@ -427,9 +416,6 @@ export default function Mesaj() {
                                             <Typography variant="h6">
                                                 {selectedDanisan.name || ''} {selectedDanisan.surname || ''}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {selectedDanisan.lastActive || "Çevrimiçi"}
-                                            </Typography>
                                         </Box>
                                         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
                                             {formatDate()}
@@ -447,21 +433,30 @@ export default function Mesaj() {
                                             />
                                         </Box>
                                         
-                                        {messages.length > 0 ? (
+                                        {isLoading ? (
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                                <CircularProgress size={40} />
+                                            </Box>
+                                        ) : messages.length > 0 ? (
                                             messages.map((message) => (
                                                 <Fade in={true} key={message.id}>
                                                     <Box
-                                                        className={`message ${message.sender === "dietitian" ? "sent" : "received"}`}
+                                                        className={`message ${message.sender === "DIETITIAN" ? "sent" : "received"}`}
                                                     >
-                                                        <Box className="message-content">
-                                                            {renderMessage(message)}
-                                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5 }}>
-                                                                <Typography variant="caption" className="message-time">
-                                                                    {message.timestamp}
-                                                                </Typography>
-                                                                {message.sender === "dietitian" && (
-                                                                    <CheckCircleIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
-                                                                )}
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: message.sender === "DIETITIAN" ? 'flex-end' : 'flex-start', width: '100%' }}>
+                                                            <Typography variant="caption" className="message-sender-label">
+                                                                {message.sender === "DIETITIAN" ? "Diyetisyen" : "Danışan"}
+                                                            </Typography>
+                                                            <Box className="message-content">
+                                                                {renderMessage(message)}
+                                                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5 }}>
+                                                                    <Typography variant="caption" className="message-time">
+                                                                        {message.timestamp}
+                                                                    </Typography>
+                                                                    {message.sender === "DIETITIAN" && (
+                                                                        <CheckCircleIcon sx={{ fontSize: 12, color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary' }} />
+                                                                    )}
+                                                                </Box>
                                                             </Box>
                                                         </Box>
                                                     </Box>

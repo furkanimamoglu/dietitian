@@ -32,6 +32,7 @@ class DietitianService {
             const token = jwt.sign(
                 {
                     id: dietitianInfo.id,
+                    phoneNumber: dietitianInfo.phoneNumber,
                     role: dietitianInfo.role
                 },
                 config.secretkey,
@@ -65,6 +66,7 @@ class DietitianService {
             const token = jwt.sign(
                 {
                     id: dietitian.id,
+                    phoneNumber: dietitian.phoneNumber,
                     role: DIETITIAN
                 },
                 config.secretkey
@@ -392,13 +394,11 @@ class DietitianService {
             if (!user_id) {
                 throw new Error("Yetkisiz Erişim.");
             }
-            // TODO: Yalnızca diyetisyen rolüne sahip kişiler için doğrulama yapacağız.
-            // TODO: Rol kontrolü gelecek.
+
             const data = [
                 { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
                 { type: "page", name: "Randevularım", url: "/randevularim" },
                 { type: "page", name: "Ayarlar", url: "/ayarlar" },
-                { type: "page", name: "Profil", url: "/profil" },
                 { type: "page", name: "Beslenme", url: "/beslenme" },
                 { type: "page", name: "Egzersiz", url: "/egzersiz" },
                 { type: "page", name: "Finans", url: "/finans" },
@@ -424,7 +424,7 @@ class DietitianService {
             dietitian.Clients.forEach(client => {
                 data.push({
                     type: "danisan",
-                    name: `${client.name} ${client.surname}`,
+                    name: `${client.name}`,
                     url: `/danisan/${client.id}`,
                 });
             });

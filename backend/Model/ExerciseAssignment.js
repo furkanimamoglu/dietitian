@@ -23,6 +23,10 @@ const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
             key: 'id'
         }
     },
+    exerciseData: {
+        type: DataTypes.JSON,
+        allowNull: false
+    },
     note: {
         type: DataTypes.TEXT,
         allowNull: true

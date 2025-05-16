@@ -32,7 +32,6 @@ function Login() {
 
     const handlePhoneNumberChange = (e) => {
         const value = e.target.value;
-        // Remove non-digit characters
         const digitsOnly = value.replace(/\D/g, '');
         setPhoneNumber(digitsOnly);
     };
