@@ -113,16 +113,53 @@
     font-size: 0.9rem;
 }
 
-/* Report section */
+/* Financial Overview Styles */
 .report-section {
     border-radius: 12px;
     overflow: hidden;
+    height: 100%;
+    background-color: #fff;
 }
 
 .section-title {
     font-weight: 600;
     margin-bottom: 16px;
     color: #2c3e50;
+}
+
+.monthly-comparison {
+    padding: 8px 0;
+}
+
+.current-month-value {
+    font-weight: 700;
+    color: #3498db;
+}
+
+.last-month-value {
+    color: #7f8c8d;
+}
+
+.comparison-chip {
+    height: 28px;
+    font-weight: 600;
+}
+
+.progress-wrapper {
+    overflow: hidden;
+    background-color: #edf2f7;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+.payment-status-breakdown {
+    padding: 8px 0;
+}
+
+.status-bars .progress-wrapper {
+    margin-bottom: 4px;
 }
 
 /* Tables */
@@ -142,25 +179,43 @@
     margin-right: 8px;
 }
 
-/* Package cards */
-.package-management {
-    margin-top: 16px;
+/* Package Management */
+.filters-section {
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+.add-package-btn, .add-invoice-btn {
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.25);
+    transition: all 0.3s ease;
+}
+
+.add-package-btn:hover, .add-invoice-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(52, 152, 219, 0.35);
 }
 
 .package-card {
     height: 100%;
     border-radius: 12px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
 }
 
 .package-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
+.package-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
 .package-type-chip {
-    margin-top: 4px;
+    font-weight: 600;
 }
 
 .package-price {
@@ -169,24 +224,19 @@
     margin: 12px 0;
 }
 
-.package-divider {
-    margin: 16px 0;
-}
-
 .services-title {
     color: #546e7a;
     font-weight: 600;
+    margin-top: 8px;
 }
 
 .services-list {
-    padding-left: 20px;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    padding: 0;
+    margin: 8px 0 16px 0;
 }
 
-.services-list li {
-    margin-bottom: 6px;
-    color: #5d6d7e;
+.service-item {
+    padding: 2px 0;
 }
 
 /* Invoice management */
@@ -195,12 +245,19 @@
     margin-bottom: 24px;
 }
 
+.search-filters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 .invoice-card {
     border-radius: 12px;
     transition: all 0.3s ease;
     height: 100%;
     position: relative;
     overflow: hidden;
+    background-color: #fff;
 }
 
 .invoice-card:hover {
@@ -247,10 +304,32 @@
 .empty-state {
     border-radius: 12px;
     text-align: center;
+    background-color: #fff;
+    padding: 24px;
 }
 
 .empty-icon {
     margin-bottom: 24px;
+}
+
+/* Dialog styles */
+.MuiDialog-paper {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.MuiDialogTitle-root {
+    background-color: #f8fafc;
+    padding: 16px 24px;
+}
+
+.MuiDialogContent-root {
+    padding: 24px;
+}
+
+.MuiDialogActions-root {
+    padding: 16px 24px;
+    background-color: #f8fafc;
 }
 
 /* Responsive adjustments */
@@ -279,6 +358,14 @@
         flex-wrap: wrap;
         gap: 16px;
     }
+
+    .current-month-value, .package-price {
+        font-size: 1.6rem;
+    }
+
+    .last-month-value {
+        font-size: 1.4rem;
+    }
 }
 
 @media (max-width: 600px) {
@@ -294,7 +381,15 @@
         font-size: 1.6rem;
     }
     
-    .invoice-amount {
+    .invoice-amount, .package-price {
         font-size: 1.4rem;
+    }
+
+    .current-month-value {
+        font-size: 1.4rem;
+    }
+
+    .last-month-value {
+        font-size: 1.2rem;
     }
 }
