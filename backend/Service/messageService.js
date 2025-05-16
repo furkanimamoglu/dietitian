@@ -1,27 +1,25 @@
 const Exception = require("../Exception/Exception");
 const {Message} = require("../Model/MainModel");
+const {DIETITIAN, CLIENT} =  require("../Enum/Role");
 
 class MessageService {
-    // Dietitian
-    static async getMyMessagesAsDietitian(dietitian_id) {
-        if (!dietitian_id) {
+
+    static async getMyMessages(user_id, user_role) {
+        if (!user_id || !user_role) {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
 
-        return await Message.findAll({
-            where: { dietitian_id }
-        });
-    }
-
-    // Client
-    static async getMyMessagesAsClient(client_id) {
-        if (!client_id) {
-            throw new Exception("Yetkisiz Erişim.", 401, true);
+        if(user_role === DIETITIAN) {
+            return await Message.findAll({
+                where: { dietitian_id: user_id, sender: user_role }
+            });
+        } else if(user_role === CLIENT) {
+            return await Message.findAll({
+                where: { client_id: user_id, sender: user_role }
+            });
+        } else {
+            throw Exception("Yetkisiz Erişim", 401, true);
         }
-
-        return await Message.findAll({
-            where: { client_id }
-        });
     }
 
 }

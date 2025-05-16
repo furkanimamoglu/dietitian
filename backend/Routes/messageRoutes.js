@@ -5,9 +5,6 @@ const router = express.Router();
 const messageController = require('../Controller/messageController');
 
 // Dietitian
-router.get('/getMyMessagesAsDietitian', messageController.getMyMessagesAsDietitian);
-
-// Client
-router.get('/getMyMessagesAsClient', messageController.getMyMessagesAsClient);
+router.get('/getMyMessages', messageController.getMyMessages);
 
 module.exports = router;
