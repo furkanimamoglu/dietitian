@@ -4,7 +4,7 @@ const Client = require('../Model/Client');
 const {Op} = require("sequelize");
 
 class AppointmentService {
-    static async getDietitianAppointments(user_id) {
+    static async fetchDietitianAppointments(user_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -23,6 +23,35 @@ class AppointmentService {
             throw new Exception(error.message, error.status || 500);
         }
     }
+
+    static async fetchClientAppointmentAsDietitian(dietitian_id, client_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        if (!client_id) {
+            throw new Exception("Danışan belirtilmedi.", 404, true);
+        }
+
+        const client = await Client.findOne({
+            where: {
+                id: client_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!client) {
+            throw new Exception("Bu danışan size ait değil veya bulunamadı.", 403, true);
+        }
+
+        return await Appointment.findAll({
+            where: {
+                client_id: client_id
+            },
+            order: [['start', 'DESC']]
+        });
+    }
+
 
     static async addAppointment(data) {
         const { title, start, end, client_id } = data;
