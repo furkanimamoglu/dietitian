@@ -164,6 +164,9 @@ export default function Finans() {
         serviceItems: []
     });
     
+    // Add search state for packages
+    const [packageSearchTerm, setPackageSearchTerm] = useState('');
+    
     // Fetch packages on component mount
     useEffect(() => {
         fetchPackages();
@@ -1208,10 +1211,33 @@ export default function Finans() {
                 );
             
             case 1: // Package Management
+                // Filter packages based on search term
+                const filteredPackages = packages.filter(pkg => 
+                    pkg.name.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
+                    pkg.type.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
+                    (pkg.description && pkg.description.toLowerCase().includes(packageSearchTerm.toLowerCase()))
+                );
+                
                 return (
                     <Box className="package-management">
                         <Paper elevation={3} className="filters-section">
-                            <Box p={3} display="flex" justifyContent="flex-end">
+                            <Box p={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+                                <Box display="flex" alignItems="center" gap={2} className="search-filters" flexGrow={1}>
+                                    <TextField
+                                        placeholder="Paket ara..."
+                                        value={packageSearchTerm}
+                                        onChange={(e) => setPackageSearchTerm(e.target.value)}
+                                        size="small"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ minWidth: 250 }}
+                                    />
+                                </Box>
                                 <Button 
                                     variant="contained" 
                                     color="primary" 
@@ -1234,7 +1260,7 @@ export default function Finans() {
                                 </Box>
                             ) : (
                             <Grid container spacing={3}>
-                                {packages.map(pkg => (
+                                {filteredPackages.map(pkg => (
                                     <Grid item xs={12} md={6} lg={4} key={pkg.id}>
                                         <Paper elevation={3} className="package-card">
                                             <Box p={3}>
@@ -1309,7 +1335,7 @@ export default function Finans() {
                                     </Grid>
                                 ))}
                                 
-                                {packages.length === 0 && !isLoading && (
+                                {filteredPackages.length === 0 && !isLoading && (
                                     <Grid item xs={12}>
                                         <Paper elevation={3} className="empty-state">
                                             <Box p={4} textAlign="center">
@@ -1317,20 +1343,23 @@ export default function Finans() {
                                                     <ReceiptIcon style={{ fontSize: 64, opacity: 0.3 }} />
                                                 </Box>
                                                 <Typography variant="h6" color="textSecondary" gutterBottom>
-                                                    Henüz Paket Bulunmuyor
+                                                    {packageSearchTerm ? "Arama kriterinizle eşleşen paket bulunamadı" : "Henüz Paket Bulunmuyor"}
                                                 </Typography>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    İlk paketinizi oluşturarak başlayın. Paketleriniz danışanlarınza sunabileceğiniz hizmetleri tanımlar.
+                                                    {packageSearchTerm 
+                                                        ? "Farklı anahtar kelimelerle tekrar arama yapmayı deneyin."
+                                                        : "İlk paketinizi oluşturarak başlayın. Paketleriniz danışanlarınza sunabileceğiniz hizmetleri tanımlar."
+                                                    }
                                                 </Typography>
                                                 <Button 
                                                     variant="contained" 
                                                     color="primary" 
-                                                    startIcon={<AddIcon />}
-                                                    onClick={() => handleOpenPackageDialog()}
+                                                    startIcon={packageSearchTerm ? <SearchIcon /> : <AddIcon />}
+                                                    onClick={() => packageSearchTerm ? setPackageSearchTerm('') : handleOpenPackageDialog()}
                                                     sx={{ mt: 3 }}
                                                     disabled={isLoading}
                                                 >
-                                                    Paket Oluştur
+                                                    {packageSearchTerm ? "Aramayı Temizle" : "Paket Oluştur"}
                                                 </Button>
                                             </Box>
                                         </Paper>
