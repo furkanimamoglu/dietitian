@@ -44,32 +44,29 @@ export default function Dashboard() {
     const [pendingAppointments, setPendingAppointments] = useState([]);
     const [approvedAppointments, setApprovedAppointments] = useState([]);
     
-    // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // State for pagination
     const [approvedLimit, setApprovedLimit] = useState(5);
     const [pendingLimit, setPendingLimit] = useState(5);
 
-    // Haftalık başarılar için mock veriler
     const weeklyStats = [
         {
             icon: <CheckCircleIcon sx={{ color: '#27ae60', fontSize: 32 }} />, // Onaylı randevu
             label: 'Onaylanan Randevu',
-            value: 7,
+            value: "-",
             color: '#27ae60',
         },
         {
             icon: <PeopleIcon sx={{ color: '#1976d2', fontSize: 32 }} />, // Yeni danışan
             label: 'Yeni Danışan',
-            value: 3,
+            value: "-",
             color: '#1976d2',
         },
         {
             icon: <EventIcon sx={{ color: '#ff9800', fontSize: 32 }} />, // Tamamlanan görüşme
             label: 'Tamamlanan Görüşme',
-            value: 12,
+            value: "-",
             color: '#ff9800',
         },
     ];
@@ -216,7 +213,6 @@ export default function Dashboard() {
         fetchDashboardData();
     }, []);
 
-    // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
@@ -244,7 +240,7 @@ export default function Dashboard() {
             
             // Find the appointment to get client name for success message
             const appointment = pendingAppointments.find(app => app.id === appointmentId);
-            const clientName = appointment ? `${appointment.Client.name} ${appointment.Client.surname}` : 'Danışan';
+            const clientName = appointment ? `${appointment.Client.name}` : 'Danışan';
             
             // Set success message based on action
             const actionText = action === 'approved' ? 'onaylandı' : 'reddedildi';

@@ -58,7 +58,7 @@ export default function Danisan() {
 
     const [danisan, setDanisan] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('genel');
+    const [activeTab, setActiveTab] = useState('anamnez');
     const [nutritionPlan, setNutritionPlan] = useState(null);
     const [nutritionPlanLoading, setNutritionPlanLoading] = useState(false);
     const [selectedPlanIndex, setSelectedPlanIndex] = useState(0);
@@ -144,9 +144,26 @@ export default function Danisan() {
                     height,
                     weight,
                     status,
+                    birthDate,
+                    job,
+                    maritalStatus,
+                    city,
                 } = response.data;
 
-                setDanisan({ name, surname, email, phoneNumber, gender, height, weight, status });
+                setDanisan({
+                    name,
+                    surname,
+                    email,
+                    phoneNumber,
+                    gender,
+                    height,
+                    weight,
+                    status,
+                    birthDate: birthDate || '-',
+                    job: job || '-',
+                    maritalStatus: maritalStatus || '-',
+                    city: city || '-',
+                });
             } catch (err) {
                 console.error("Hata:", err.message);
                 navigate('/404');
@@ -345,94 +362,11 @@ export default function Danisan() {
 
     const renderTabContent = () => {
         switch(activeTab) {
-            case 'genel':
-                return (
-                    <Box>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Genel Bilgiler
-                        </Typography>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <Card elevation={3} sx={{ height: '100%' }}>
-                                    <CardHeader 
-                                        title="Kişisel Bilgiler" 
-                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        action={
-                                            <IconButton aria-label="düzenle">
-                                                <EditIcon />
-                                            </IconButton>
-                                        }
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <WcIcon color="primary" />
-                                                <Typography><strong>Cinsiyet:</strong> {danisan.gender}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <HeightIcon color="primary" />
-                                                <Typography><strong>Boy:</strong> {danisan.height} cm</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <MonitorWeightIcon color="primary" />
-                                                <Typography><strong>Kilo:</strong> {danisan.weight} kg</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <InfoIcon color="primary" />
-                                                <Typography>
-                                                    <strong>BMI:</strong> {(danisan.weight / ((danisan.height/100) * (danisan.height/100))).toFixed(1)} kg/m²
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Card elevation={3} sx={{ height: '100%' }}>
-                                    <CardHeader 
-                                        title="İletişim Bilgileri" 
-                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        action={
-                                            <IconButton aria-label="düzenle">
-                                                <EditIcon />
-                                            </IconButton>
-                                        }
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <EmailIcon color="primary" />
-                                                <Typography><strong>E-posta:</strong> {danisan.email}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <PhoneIcon color="primary" />
-                                                <Typography><strong>Telefon:</strong> {danisan.phoneNumber}</Typography>
-                                            </Box>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                );
             case 'anamnez':
                 return (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                             <Typography variant="h5" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-                                Anamnez Formu
                             </Typography>
                             <Button 
                                 variant="contained" 
@@ -445,7 +379,7 @@ export default function Danisan() {
                         </Box>
                         
                         {/* Sağlık Bilgileri Akordiyonu */}
-                        <Accordion defaultExpanded elevation={3} sx={{ mb: 2 }}>
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 sx={{ 
@@ -453,28 +387,32 @@ export default function Danisan() {
                                     color: 'primary.contrastText',
                                 }}
                             >
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Sağlık Bilgileri
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Sağlık Bilgileri
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 15.05.2023" 
+                                            size="small" 
+                                            color="primary" 
+                                            sx={{ mr: 1 }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => alert('Sağlık bilgileri düzenleme formu açılacak')}
+                                            color="primary"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Chip 
-                                        label="Son Güncelleme: 15.05.2023" 
-                                        size="small" 
-                                        color="primary" 
-                                        sx={{ mr: 1 }} 
-                                    />
-                                    <Button 
-                                        variant="outlined" 
-                                        size="small" 
-                                        startIcon={<EditIcon />}
-                                        onClick={() => alert('Sağlık bilgileri düzenleme formu açılacak')}
-                                    >
-                                        Düzenle
-                                    </Button>
-                                </Box>
-                                
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} md={6}>
                                         <Card variant="outlined" sx={{ height: '100%' }}>
@@ -572,6 +510,56 @@ export default function Danisan() {
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
+                        {/* Kan Tahlili Akordiyonu */}
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: 'error.light', 
+                                    color: 'error.contrastText',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Kan Tahlili
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            color="error" 
+                                            sx={{ mr: 1, fontWeight: 'bold' }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => alert('Kan tahlili düzenleme formu açılacak')}
+                                            color="error"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center', 
+                                    height: 120, 
+                                    border: '1px dashed', 
+                                    borderColor: 'error.main',
+                                    borderRadius: 1
+                                }}>
+                                    <Typography color="text.secondary">
+                                        Henüz kan tahlili bilgisi eklenmemiş.
+                                    </Typography>
+                                </Box>
+                            </AccordionDetails>
+                        </Accordion>
                         
                         {/* Diyet Alışkanlıkları Akordiyonu */}
                         <Accordion elevation={3} sx={{ mb: 2 }}>
@@ -582,29 +570,32 @@ export default function Danisan() {
                                     color: 'warning.contrastText',
                                 }}
                             >
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Diyet Alışkanlıkları
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Diyet Alışkanlıkları
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 12.05.2023" 
+                                            size="small" 
+                                            color="warning" 
+                                            sx={{ mr: 1 }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => alert('Diyet alışkanlıkları düzenleme formu açılacak')}
+                                            color="warning"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Chip 
-                                        label="Son Güncelleme: 12.05.2023" 
-                                        size="small" 
-                                        color="warning" 
-                                        sx={{ mr: 1 }} 
-                                    />
-                                    <Button 
-                                        variant="outlined" 
-                                        size="small" 
-                                        startIcon={<EditIcon />}
-                                        onClick={() => alert('Diyet alışkanlıkları düzenleme formu açılacak')}
-                                        color="warning"
-                                    >
-                                        Düzenle
-                                    </Button>
-                                </Box>
-                                
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} md={6}>
                                         <Card variant="outlined" sx={{ height: '100%' }}>
@@ -710,29 +701,32 @@ export default function Danisan() {
                                     color: 'info.contrastText',
                                 }}
                             >
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Fiziksel Aktivite
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Fiziksel Aktivite
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            color="info" 
+                                            sx={{ mr: 1 }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => alert('Fiziksel aktivite düzenleme formu açılacak')}
+                                            color="info"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Chip 
-                                        label="Son Güncelleme: 10.05.2023" 
-                                        size="small" 
-                                        color="info" 
-                                        sx={{ mr: 1 }} 
-                                    />
-                                    <Button 
-                                        variant="outlined" 
-                                        size="small" 
-                                        startIcon={<EditIcon />}
-                                        onClick={() => alert('Fiziksel aktivite düzenleme formu açılacak')}
-                                        color="info"
-                                    >
-                                        Düzenle
-                                    </Button>
-                                </Box>
-                                
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} md={6}>
                                         <Card variant="outlined" sx={{ height: '100%' }}>
@@ -806,23 +800,32 @@ export default function Danisan() {
                                     color: 'success.contrastText',
                                 }}
                             >
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Uyku ve Stres Yönetimi
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Uyku ve Stres Yönetimi
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            color="success" 
+                                            sx={{ mr: 1, fontWeight: 'bold' }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => alert('Uyku ve stres bilgileri düzenleme formu açılacak')}
+                                            color="success"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Button 
-                                        variant="outlined" 
-                                        size="small" 
-                                        startIcon={<AddIcon />}
-                                        onClick={() => alert('Uyku ve stres bilgileri ekleme formu açılacak')}
-                                        color="success"
-                                    >
-                                        Ekle
-                                    </Button>
-                                </Box>
-                                
                                 <Box sx={{ 
                                     display: 'flex', 
                                     justifyContent: 'center', 
@@ -844,27 +847,34 @@ export default function Danisan() {
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 sx={{ 
-                                    bgcolor: 'secondary.light', 
-                                    color: 'secondary.contrastText',
+                                    bgcolor: '#7c4dff',
+                                    color: '#fff',
                                 }}
                             >
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Özel Notlar
-                                </Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Özel Notlar
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            sx={{ mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff' }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => alert('Notlar düzenleme formu açılacak')}
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1, bgcolor: '#9575cd', '&:hover': { bgcolor: '#5e35b1' } }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Button 
-                                        variant="outlined" 
-                                        size="small" 
-                                        startIcon={<EditIcon />}
-                                        onClick={() => alert('Notlar düzenleme formu açılacak')}
-                                        color="secondary"
-                                    >
-                                        Düzenle
-                                    </Button>
-                                </Box>
-                                
                                 <Paper variant="outlined" sx={{ p: 2 }}>
                                     <Typography variant="body2">
                                         Danışan iş hayatında yoğun stres yaşıyor. Akşamları geç saatlerde yemek yeme alışkanlığı var.
@@ -880,24 +890,22 @@ export default function Danisan() {
                 return (
                     <Box>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Ölçüm Takibi
                         </Typography>
-                        
                         <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Card elevation={3}>
+                            <Grid item xs={12} md={6}>
+                                <Card elevation={3} sx={{ height: '100%' }}>
                                     <CardHeader 
-                                        title="Kilo Takibi" 
+                                        title="Vücut Ölçümleri" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         action={
-                                            <Button 
-                                                variant="contained" 
-                                                size="small" 
-                                                startIcon={<EditIcon />}
-                                                sx={{ bgcolor: theme.palette.primary.main }}
-                                            >
-                                                Yeni Ölçüm
-                                            </Button>
+                                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<AddIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => alert('Vücut ölçümü ekleme formu açılacak')}>
+                                                    Ekle
+                                                </Button>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => alert('Vücut ölçümleri düzenleme formu açılacak')}>
+                                                    Düzenle
+                                                </Button>
+                                            </Box>
                                         }
                                         sx={{ 
                                             bgcolor: 'primary.light', 
@@ -907,224 +915,110 @@ export default function Danisan() {
                                         }}
                                     />
                                     <CardContent>
-                                        <Box sx={{ height: 250, p: 1, position: 'relative' }}>
-                                            <Box sx={{ 
-                                                position: 'absolute', 
-                                                left: 0, 
-                                                top: 0, 
-                                                bottom: 0, 
-                                                width: '60px', 
-                                                display: 'flex', 
-                                                flexDirection: 'column', 
-                                                justifyContent: 'space-between' 
-                                            }}>
-                                                <Typography variant="caption">85 kg</Typography>
-                                                <Typography variant="caption">80 kg</Typography>
-                                                <Typography variant="caption">75 kg</Typography>
-                                                <Typography variant="caption">70 kg</Typography>
-                                            </Box>
-                                            <Box sx={{ pl: '60px', height: '100%', display: 'flex', alignItems: 'flex-end' }}>
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'flex-end', 
-                                                    height: '100%',
-                                                    width: '100%',
-                                                    position: 'relative'
-                                                }}>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '0%',
-                                                        height: '80%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">15 Nisan</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '20%',
-                                                        height: '75%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">30 Nisan</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '40%',
-                                                        height: '65%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">15 Mayıs</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '60%',
-                                                        height: '50%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">31 Mayıs</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '80%',
-                                                        height: '40%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">15 Haziran</Typography>
-                                                    </Box>
-                                                    
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '80%',
-                                                        left: '6px',
-                                                        width: '10%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-10deg)'
-                                                    }} />
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '75%',
-                                                        left: '18%',
-                                                        width: '20%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-15deg)'
-                                                    }} />
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '65%',
-                                                        left: '40%',
-                                                        width: '18%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-20deg)'
-                                                    }} />
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '50%',
-                                                        left: '60%',
-                                                        width: '18%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-15deg)'
-                                                    }} />
-                                                </Box>
-                                            </Box>
+                                        <Box sx={{ maxHeight: 350, overflowY: 'auto', pr: 1,
+                                            '&::-webkit-scrollbar': { background: '#e8f5e9', width: 8 },
+                                            '&::-webkit-scrollbar-thumb': { background: '#81c784', borderRadius: 4 },
+                                            scrollbarColor: '#81c784 #e8f5e9',
+                                            scrollbarWidth: 'thin'
+                                        }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 1, background: '#e8f5e9' }}>
+                                                        <th style={{ padding: '8px', textAlign: 'left' }}>Tarih</th>
+                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Kilo (kg)</th>
+                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Bel (cm)</th>
+                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Kalça (cm)</th>
+                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Göğüs (cm)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                        <td style={{ padding: '8px' }}>15 Nisan 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>85</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>108</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>96</td>
+                                                    </tr>
+                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                        <td style={{ padding: '8px' }}>30 Nisan 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>90</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>106</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>95</td>
+                                                    </tr>
+                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                        <td style={{ padding: '8px' }}>15 Mayıs 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>83</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>88</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>104</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>94</td>
+                                                    </tr>
+                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                                                        <td style={{ padding: '8px' }}>31 Mayıs 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>82</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>86</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>102</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>93</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>81</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                            
-                            <Grid item xs={12} md={6}>
-                                <Card elevation={3} sx={{ height: '100%' }}>
-                                    <CardHeader 
-                                        title="Vücut Ölçümleri" 
-                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <th style={{ padding: '8px', textAlign: 'left' }}>Tarih</th>
-                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Bel (cm)</th>
-                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Kalça (cm)</th>
-                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Göğüs (cm)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>15 Nisan 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>108</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>96</td>
-                                                </tr>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>30 Nisan 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>90</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>106</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>95</td>
-                                                </tr>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>15 Mayıs 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>88</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>104</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>94</td>
-                                                </tr>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>31 Mayıs 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>86</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>102</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>93</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
                                     </CardContent>
                                 </Card>
                             </Grid>
@@ -1134,6 +1028,11 @@ export default function Danisan() {
                                     <CardHeader 
                                         title="Vücut Analizi" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        action={
+                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => alert('Vücut analizi düzenleme formu açılacak')}>
+                                                Düzenle
+                                            </Button>
+                                        }
                                         sx={{ 
                                             bgcolor: 'primary.light', 
                                             color: 'primary.contrastText',
@@ -1776,7 +1675,7 @@ export default function Danisan() {
                 return (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6">Randevu Geçmişi</Typography>
+                            <Typography variant="h6"></Typography>
                             <Button 
                                 variant="contained" 
                                 size="small" 
@@ -2023,7 +1922,6 @@ export default function Danisan() {
                 return (
                     <Paper elevation={2} sx={{ p: 3 }}>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Egzersiz Takip
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
                             Henüz egzersiz verisi bulunmamaktadır.
@@ -2047,9 +1945,6 @@ export default function Danisan() {
                 );
                 return (
                     <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Ödeme Takip
-                        </Typography>
                         {/* Aktif Invoice */}
                         {activeInvoice && (
                             <Card elevation={4} sx={{ mb: 3, border: '2px solid', borderColor: 'success.main', background: '#f6fff6' }}>
@@ -2191,49 +2086,51 @@ export default function Danisan() {
                             }}>
                             <Avatar
                                 alt={`${danisan.name} ${danisan.surname}`}
-                                    src="/placeholder_client.jpg"
+                                src="/placeholder_client.jpg"
                                 sx={{
                                     width: 150,
                                     height: 150,
                                     mb: 2,
-                                        border: '4px solid',
-                                        borderColor: 'primary.light',
-                                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+                                    border: '4px solid',
+                                    borderColor: 'primary.light',
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
                                     transition: 'transform 0.3s ease-in-out',
                                     '&:hover': {
                                         transform: 'scale(1.05)'
                                     }
                                 }}
                             />
-                                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-                            {danisan.name} {danisan.surname}
-                        </Typography>
-                                
-                                <Divider sx={{ width: '100%', my: 2 }} />
-                                
-                                <Box sx={{ width: '100%' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <EmailIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.email}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <PhoneIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.phoneNumber}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <WcIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.gender}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <HeightIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.height} cm</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <MonitorWeightIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.weight} kg</Typography>
-                                    </Box>
-                                </Box>
-                    </Box>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                {danisan.name} {danisan.surname}
+                            </Typography>
+                            <Divider sx={{ width: '100%', my: 2 }} />
+                            {/* Danışan Bilgileri Grid */}
+                            <Box sx={{ width: '100%', mb: 2 }}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Cinsiyet:</strong> {danisan.gender || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Doğum Tarihi:</strong> {danisan.birthDate || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Meslek:</strong> {danisan.job || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Medeni Durum:</strong> {danisan.maritalStatus || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>E-posta:</strong> {danisan.email || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Telefon:</strong> {danisan.phoneNumber || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Şehir:</strong> {danisan.city || '-'}</Typography>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                            </Box>
                         </Card>
                     </Grid>
 
@@ -2260,7 +2157,6 @@ export default function Danisan() {
                                         }
                                 }}
                             >
-                                <Tab label="Genel" value="genel" />
                                 <Tab label="Anamnez" value="anamnez" />
                                 <Tab label="Ölçümler" value="olcum" />
                                 <Tab label="Beslenme" value="beslenme" />

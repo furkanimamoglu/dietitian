@@ -183,9 +183,9 @@ export default function Mesaj() {
         }
     };
 
-    const getInitials = (name, surname) => {
-        if (!name || !surname) return '??';
-        return `${name.charAt(0)}${surname.charAt(0)}`.toUpperCase();
+    const getInitials = (name) => {
+        if (!name) return '??';
+        return `${name.charAt(0)}`.toUpperCase();
     };
 
     const getAvatarColor = (name) => {
@@ -200,7 +200,7 @@ export default function Mesaj() {
     };
 
     const filteredDanisanList = danisanList.filter((danisan) =>
-        `${danisan.name || ''} ${danisan.surname || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
+        `${danisan.name || ''} || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const formatDate = () => {
@@ -354,7 +354,7 @@ export default function Mesaj() {
                                                         <Avatar
                                                             sx={{ bgcolor: getAvatarColor(danisan.name || '') }}
                                                         >
-                                                            {getInitials(danisan.name || '', danisan.surname || '')}
+                                                            {getInitials(danisan.name || '')}
                                                         </Avatar>
                                                     </Badge>
                                                 </ListItemAvatar>
@@ -362,7 +362,7 @@ export default function Mesaj() {
                                                     primary={
                                                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                                             <Typography variant="body1" noWrap>
-                                                                {danisan.name || ''} {danisan.surname || ''}
+                                                                {danisan.name || ''}
                                                             </Typography>
                                                         </Box>
                                                     }
@@ -410,11 +410,11 @@ export default function Mesaj() {
                                         <Avatar
                                             sx={{ bgcolor: getAvatarColor(selectedDanisan.name || '') }}
                                         >
-                                            {getInitials(selectedDanisan.name || '', selectedDanisan.surname || '')}
+                                            {getInitials(selectedDanisan.name || '')}
                                         </Avatar>
                                         <Box ml={1} sx={{ flexGrow: 1 }}>
                                             <Typography variant="h6">
-                                                {selectedDanisan.name || ''} {selectedDanisan.surname || ''}
+                                                {selectedDanisan.name || ''}
                                             </Typography>
                                         </Box>
                                         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
@@ -568,10 +568,10 @@ export default function Mesaj() {
                                                 bgcolor: getAvatarColor(selectedDanisan.name || '')
                                             }}
                                         >
-                                            {getInitials(selectedDanisan.name || '', selectedDanisan.surname || '')}
+                                            {getInitials(selectedDanisan.name || '')}
                                         </Avatar>
                                         <Typography variant="h6" mt={2} align="center">
-                                            {selectedDanisan.name || ''} {selectedDanisan.surname || ''}
+                                            {selectedDanisan.name || ''}
                                         </Typography>
                                         <Chip
                                             label={selectedDanisan.status || "Aktif Danışan"}
