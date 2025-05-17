@@ -270,9 +270,6 @@ export default function Header() {
                             }}
                         >
                             <SearchContainer>
-                                <Box sx={{ position: 'absolute', height: '100%', display: 'flex', alignItems: 'center', pl: 2 }}>
-                                    <SearchIcon />
-                                </Box>
                                 <StyledInputBase
                                     placeholder="Arama yap..."
                                     inputProps={{ 'aria-label': 'search' }}
