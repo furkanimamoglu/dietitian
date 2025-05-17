@@ -4,6 +4,6 @@ const router = express.Router();
 
 const invoiceController = require('../Controller/invoiceController');
 
-router.get('/fetchAllInvoicesAsDietitian', invoiceController.fetchAllInvoicesAsDietitian);
+router.get('/getMyInvoices', invoiceController.getMyInvoices);
 
 module.exports = router;

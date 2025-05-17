@@ -3,7 +3,7 @@ const {Invoice} = require("../Model/MainModel");
 
 class InvoiceService {
 
-    async fetchAllInvoicesAsDietitian(dietitian_id) {
+    async getMyInvoices(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }

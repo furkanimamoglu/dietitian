@@ -1,6 +1,7 @@
 // Libraries
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
+const PackageType = require('../Enum/PackageType');
 
 const Invoice = sequelize.define('Invoice', {
         id: {
@@ -25,6 +26,11 @@ const Invoice = sequelize.define('Invoice', {
             type: DataTypes.ENUM('paid', 'unpaid', 'cancelled'),
             allowNull: false,
             defaultValue: 'unpaid'
+        },
+        packageType: {
+            type: DataTypes.ENUM(...Object.values(PackageType)),
+            allowNull: false,
+            defaultValue: PackageType.SEANS
         },
         issueDate: {
             type: DataTypes.DATE,
