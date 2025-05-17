@@ -15,7 +15,6 @@ const app = express();
 const dietitianRoutes = require('./Routes/dietitianRoutes');
 const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
-const systemRoutes = require('./Routes/systemRoutes');
 const invoiceRoutes = require('./Routes/invoiceRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
@@ -46,7 +45,6 @@ app.use('/exercise', exerciseRoutes);
 app.use('/invoice', invoiceRoutes);
 app.use('/message', messageRoutes);
 app.use('/package', packageRoutes);
-app.use('/system', systemRoutes);
 
 // Working Directory
 try {

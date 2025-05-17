@@ -5,7 +5,7 @@ const moment = require('moment');
 
 class ClientController {
 
-    async login(req, res) {
+    static async login(req, res) {
         try {
             const {phoneNumber, password} = req.body;
 
@@ -25,7 +25,7 @@ class ClientController {
         }
     }
 
-    async register(req, res) {
+    static async register(req, res) {
         try {
             const {phoneNumber, password, name, dietitian_id} = req.body;
             const ipAddress = req.ip;
@@ -58,7 +58,7 @@ class ClientController {
         }
     }
 
-    async getClientInfo(req, res) {
+    static async getClientInfo(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -78,7 +78,7 @@ class ClientController {
         }
     }
 
-    async getMyNotifications(req, res) {
+    static async getMyNotifications(req, res) {
         try {
             const token = req.headers.authorization;
             const phoneNumber = Security.getPhoneNumberFromToken(token);
@@ -97,7 +97,7 @@ class ClientController {
         }
     }
 
-    async readMyAllNotifications(req, res) {
+    static async readMyAllNotifications(req, res) {
         try {
             const token = req.headers.authorization;
             const phoneNumber = Security.getPhoneNumberFromToken(token);
@@ -116,7 +116,7 @@ class ClientController {
         }
     }
 
-    async getTodayMeal(req, res) {
+    static async getTodayMeal(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
@@ -140,7 +140,7 @@ class ClientController {
         }
     }
 
-    async updateMealPlan(req, res) {
+    static async updateMealPlan(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
@@ -171,7 +171,7 @@ class ClientController {
         }
     }
 
-    async getMyKVKKStatus(req, res) {
+    static async getMyKVKKStatus(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
@@ -193,7 +193,7 @@ class ClientController {
         }
     }
 
-    async approveKVKK(req, res) {
+    static async approveKVKK(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
@@ -217,4 +217,4 @@ class ClientController {
 
 }
 
-module.exports = new ClientController();
+module.exports = ClientController;

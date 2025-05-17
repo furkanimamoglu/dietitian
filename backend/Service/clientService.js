@@ -6,7 +6,7 @@ const {CLIENT} = require("../Enum/Role");
 const {Op} = require("sequelize");
 
 class ClientService {
-    async login(phoneNumber, password) {
+    static async login(phoneNumber, password) {
         try {
             const client = await Client.findOne({
                 where: {
@@ -41,7 +41,7 @@ class ClientService {
         }
     }
 
-    async register(dietitian_id, name, phoneNumber, password, ipAddress) {
+    static async register(dietitian_id, name, phoneNumber, password, ipAddress) {
         try {
             if (!dietitian_id) {
                 throw new Exception('Diyetisyen bulunamadı.', 400, true);
@@ -81,7 +81,7 @@ class ClientService {
         }
     }
 
-    async getClientInfo(user_id) {
+    static async getClientInfo(user_id) {
         try {
             if (!user_id) {
                 throw new Error("Yetkisiz Erişim.");
@@ -104,7 +104,7 @@ class ClientService {
         }
     }
 
-    async getMyNotifications(phoneNumber) {
+    static async getMyNotifications(phoneNumber) {
         try {
             if (!phoneNumber) {
                 throw new Error("Yetkisiz Erişim.");
@@ -124,7 +124,7 @@ class ClientService {
         }
     }
 
-    async readMyAllNotifications(phoneNumber) {
+    static async readMyAllNotifications(phoneNumber) {
         try {
             if (!phoneNumber) {
                 throw new Error("Yetkisiz Erişim.");
@@ -149,7 +149,7 @@ class ClientService {
         }
     }
 
-    async getTodayMeal(clientId, todayDate) {
+    static async getTodayMeal(clientId, todayDate) {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: clientId,
@@ -210,7 +210,7 @@ class ClientService {
         return assignment;
     }
 
-    async updateMealPlan(client_id, nutrition_plan_id, newMealPlan) {
+    static async updateMealPlan(client_id, nutrition_plan_id, newMealPlan) {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: client_id,
@@ -256,7 +256,7 @@ class ClientService {
         return assignment;
     }
 
-    async getMyKVKKStatus(client_id) {
+    static async getMyKVKKStatus(client_id) {
         try {
             const client = await Client.findOne({
                 where: { id: client_id },
@@ -277,7 +277,7 @@ class ClientService {
     }
 
 
-    async approveKVKK(client_id) {
+    static async approveKVKK(client_id) {
         try {
             const client = await Client.findByPk(client_id);
 
@@ -300,4 +300,4 @@ class ClientService {
 
 }
 
-module.exports = new ClientService();
+module.exports = ClientService;

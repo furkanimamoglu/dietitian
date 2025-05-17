@@ -3,7 +3,7 @@ const Security = require("../Utils/Security");
 
 class AppointmentController {
 
-    async fetchDietitianAppointments(req, res) {
+    static async fetchDietitianAppointments(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -23,7 +23,7 @@ class AppointmentController {
         }
     }
 
-    async addAppointmentAsDietitian(req, res) {
+    static async addAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -58,7 +58,7 @@ class AppointmentController {
         }
     }
 
-    async updateAppointmentAsDietitian(req, res) {
+    static async updateAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -96,7 +96,7 @@ class AppointmentController {
         }
     }
 
-    async fetchClientAppointments(req, res) {
+    static async fetchClientAppointments(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -116,7 +116,7 @@ class AppointmentController {
         }
     }
 
-    async deleteAppointmentAsDietitian(req, res) {
+    static async deleteAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -148,7 +148,7 @@ class AppointmentController {
         }
     }
 
-    async addAppointmentAsClient(req, res) {
+    static async addAppointmentAsClient(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -184,7 +184,7 @@ class AppointmentController {
         }
     }
 
-    async getTodayAppointmentCount(req, res) {
+    static async getTodayAppointmentCount(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -199,7 +199,7 @@ class AppointmentController {
         }
     }
 
-    async getRemainingTodayAppointmentCount(req, res) {
+    static async getRemainingTodayAppointmentCount(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -214,7 +214,7 @@ class AppointmentController {
         }
     }
 
-    async getPendingAppointmentCount(req, res) {
+   static async getPendingAppointmentCount(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -229,7 +229,7 @@ class AppointmentController {
         }
     }
 
-    async updateAppointmentStatus(req, res) {
+    static async updateAppointmentStatus(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -253,7 +253,7 @@ class AppointmentController {
         }
     }
 
-    async getPendingAppointments(req, res) {
+    static async getPendingAppointments(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -268,7 +268,7 @@ class AppointmentController {
         }
     }
 
-    async getTodayApprovedAppointments(req, res) {
+    static async getTodayApprovedAppointments(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -285,4 +285,4 @@ class AppointmentController {
 
 }
 
-module.exports = new AppointmentController();
+module.exports = AppointmentController;
