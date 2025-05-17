@@ -50,7 +50,7 @@ export default function Navbar() {
                     backgroundColor: scrolled ? "rgba(238,255,238,0.95)" : "rgb(238,255,238)",
                     display: { xs: "none", md: "flex" },
                     position: 'sticky',
-                    top: '65px', // Adjusted to leave space for Header
+                    top: '65px',
                     mt: scrolled ? 0 : "1rem",
                     boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 4px 6px rgba(0,0,0,0.1)",
                     transition: "all 0.3s ease",
