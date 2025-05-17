@@ -20,6 +20,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
+import { Autocomplete, TextField } from '@mui/material';
 
 // Days and meals constants
 const DAYS_OF_WEEK = [
@@ -315,12 +316,47 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
     const [selectedMainItem, setSelectedMainItem] = useState('');
     const [alternativeInput, setAlternativeInput] = useState('');
     const [showAlternatives, setShowAlternatives] = useState({});
+    const [recipes, setRecipes] = useState([]);
+    const [newMealInputs, setNewMealInputs] = useState({});
+    
+    // Fetch recipes when component mounts
+    useEffect(() => {
+        axios.get(`${config[config.environment].apiUrl}/recipe/getMyRecipes`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            setRecipes(response.data);
+        })
+        .catch(error => {
+            console.error("Error fetching recipes:", error);
+        });
+    }, []);
     
     // Toggle showing alternatives for a specific meal
     const toggleAlternatives = (meal) => {
         setShowAlternatives(prev => ({
             ...prev,
             [meal]: !prev[meal]
+        }));
+    };
+    
+    // Handle meal input change
+    const handleMealInputChange = (meal, newValue) => {
+        setNewMealInputs(prev => ({
+            ...prev,
+            [meal]: newValue
+        }));
+    };
+    
+    // Add meal when selecting or typing a value
+    const handleAddMealItem = (meal, value) => {
+        if (!value) return;
+        
+        addMainItem(selectedDay, meal, value);
+        // Clear the input after adding
+        setNewMealInputs(prev => ({
+            ...prev,
+            [meal]: ''
         }));
     };
     
@@ -375,26 +411,42 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
                                         ))}
                                     </div>
                                     
-                                    {/* Main meal input */}
+                                    {/* Main meal input with Autocomplete */}
                                     <div className="add-meal-item-container">
-                                        <input
-                                            type="text"
-                                            className="add-meal-input"
-                                            placeholder={`${meal} için yiyecek ekleyin...`}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && e.target.value.trim()) {
-                                                    addMainItem(selectedDay, meal, e.target.value.trim());
-                                                    e.target.value = '';
+                                        <Autocomplete
+                                            freeSolo
+                                            options={recipes.map(recipe => recipe.name)}
+                                            value={newMealInputs[meal] || ''}
+                                            onChange={(event, newValue) => {
+                                                if (newValue) {
+                                                    handleAddMealItem(meal, newValue);
                                                 }
                                             }}
+                                            onInputChange={(event, newInputValue) => {
+                                                handleMealInputChange(meal, newInputValue);
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField 
+                                                    {...params}
+                                                    placeholder={`${meal} için yiyecek ekleyin...`}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    fullWidth
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && newMealInputs[meal]?.trim()) {
+                                                            handleAddMealItem(meal, newMealInputs[meal].trim());
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                            className="recipe-autocomplete"
                                         />
                                         <button 
                                             className="add-meal-button"
-                                            onClick={(e) => {
-                                                const input = e.target.closest('.meal-input-container').querySelector('.add-meal-input');
-                                                if (input && input.value && input.value.trim()) {
-                                                    addMainItem(selectedDay, meal, input.value.trim());
-                                                    input.value = '';
+                                            onClick={() => {
+                                                if (newMealInputs[meal]?.trim()) {
+                                                    handleAddMealItem(meal, newMealInputs[meal].trim());
                                                 }
                                             }}
                                         >

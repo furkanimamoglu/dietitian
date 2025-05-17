@@ -654,6 +654,29 @@ input[type="date"].text-input {
   font-size: 1.1rem;
 }
 
+/* Recipe Autocomplete Styles */
+.recipe-autocomplete {
+  flex: 1;
+}
+
+.recipe-autocomplete .MuiOutlinedInput-root {
+  border-radius: 4px 0 0 4px;
+  font-size: 0.95rem;
+}
+
+.recipe-autocomplete .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #3f51b5;
+  border-width: 1px;
+}
+
+.recipe-autocomplete .MuiAutocomplete-inputRoot {
+  padding-right: 9px !important;
+}
+
+.recipe-autocomplete .MuiInputBase-root {
+  height: 42px;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .beslenme-container {
