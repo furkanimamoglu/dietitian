@@ -116,7 +116,9 @@ const MobileSearchIcon = styled(IconButton)(({ theme }) => ({
 }));
 
 // Logo container with enhanced styling for mobile
-const LogoContainer = styled(Box)(({ theme, isMobile }) => ({
+const LogoContainer = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'isMobile',
+})(({ theme, isMobile }) => ({
     display: 'flex', 
     alignItems: 'center',
     flexGrow: isMobile ? 1 : 0,
@@ -211,7 +213,6 @@ export default function Header() {
         }
     };
 
-    // Navigation items for drawer
     const navigationItems = [
         { name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{ color: "#2c8d32" }} /> },
         { name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{ color: "#ff6200" }} /> },
@@ -247,7 +248,7 @@ export default function Header() {
                     )}
 
                     {/* Logo / Marka Adı */}
-                    <LogoContainer isMobile={isMobile}>
+                    <LogoContainer isMobile={isMobile} sx={{ display: 'flex' }}>
                         <SpaIcon sx={{ 
                             display: 'flex', 
                             ml: { xs: 0, md: 4 }, 

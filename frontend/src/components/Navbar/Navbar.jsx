@@ -55,11 +55,9 @@ export default function Navbar() {
                     boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 4px 6px rgba(0,0,0,0.1)",
                     transition: "all 0.3s ease",
                     zIndex: 100,
-                    borderRadius: 50,
+                    borderRadius: 0,
                     justifyContent: "center",
-                    width: "95%",
-                    mx: "auto",
-                    mb: 2
+                    width: "100%"
                 }}
             >
                 <Box
