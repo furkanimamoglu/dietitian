@@ -19,16 +19,29 @@ import {
 import { toast } from 'react-hot-toast';
 
 const CustomModal = ({ isOpen, onClose, title, children }) => {
+    const overlayRef = React.useRef(null);
+    const [mouseDownTarget, setMouseDownTarget] = useState(null);
+
     if (!isOpen) return null;
 
-    const handleOverlayClick = (e) => {
-        if (e.target === e.currentTarget) {
+    const handleOverlayMouseDown = (e) => {
+        setMouseDownTarget(e.target);
+    };
+    const handleOverlayMouseUp = (e) => {
+        // Sadece mouse down ve mouse up aynı overlay ise ve loading değilse kapat
+        if (e.target === overlayRef.current && mouseDownTarget === overlayRef.current) {
             onClose();
         }
+        setMouseDownTarget(null);
     };
 
     return (
-        <div className="custom-modal-overlay" onClick={handleOverlayClick}>
+        <div
+            className="custom-modal-overlay"
+            ref={overlayRef}
+            onMouseDown={handleOverlayMouseDown}
+            onMouseUp={handleOverlayMouseUp}
+        >
             <div className="custom-modal">
                 <div className="custom-modal-header">
                     <h2>{title}</h2>
@@ -109,48 +122,7 @@ export default function Finans() {
     const [clients, setClients] = useState([]);
 
     // Sample data for invoices
-    const [invoices, setInvoices] = useState([
-        { 
-            id: 1, 
-            clientName: "Ayşe Yılmaz", 
-            packageId: 2, 
-            packageName: "Aylık Takip", 
-            amount: 1500, 
-            status: "Ödendi", 
-            issueDate: "2025-05-10", 
-            dueDate: "2025-05-17" 
-        },
-        { 
-            id: 2, 
-            clientName: "Mehmet Kaya", 
-            packageId: 3, 
-            packageName: "3 Aylık Program", 
-            amount: 3600, 
-            status: "Ödenmedi", 
-            issueDate: "2025-05-15", 
-            dueDate: "2025-02-22" 
-        },
-        { 
-            id: 3, 
-            clientName: "Zeynep Demir", 
-            packageId: 1, 
-            packageName: "Seanslık Paket", 
-            amount: 600, 
-            status: "Ödendi", 
-            issueDate: "2023-05-03", 
-            dueDate: "2023-05-10" 
-        },
-        { 
-            id: 4, 
-            clientName: "Ali Can", 
-            packageId: 4, 
-            packageName: "6 Aylık Program", 
-            amount: 6000, 
-            status: "Beklemede", 
-            issueDate: "2023-05-18", 
-            dueDate: "2023-05-25" 
-        }
-    ]);
+    const [invoices, setInvoices] = useState([]);
 
     // Package management state
     const [packageDialogOpen, setPackageDialogOpen] = useState(false);
@@ -171,8 +143,7 @@ export default function Finans() {
     useEffect(() => {
         fetchPackages();
         fetchClients();
-        
-        // Initialize newPackage with an empty service
+        fetchInvoices();
         setNewPackage(prev => ({
             ...prev,
             services: [""]
@@ -241,7 +212,40 @@ export default function Finans() {
         }
     };
     
-    // Invoice management state
+    // Fetch invoices from backend
+    const fetchInvoices = async () => {
+        setIsLoading(true);
+        try {
+            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                ? `${config[config.environment].apiUrl}/invoice/getMyInvoices`
+                : '/invoice/getMyInvoices';
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            });
+            // Adapt response to local state shape
+            const invoicesData = response.data.map(inv => ({
+                id: inv.id,
+                clientId: inv.client_id,
+                clientName: inv.Client?.name || '',
+                packageId: inv.package_id,
+                amount: Number(inv.amount),
+                status: inv.status === 'paid' ? 'Ödendi' : inv.status === 'unpaid' ? 'Beklemede' : inv.status === 'cancelled' ? 'Ödenmedi' : inv.status,
+                issueDate: inv.issueDate ? inv.issueDate.split('T')[0] : '',
+                dueDate: inv.dueDate ? inv.dueDate.split('T')[0] : '',
+                description: inv.description || '',
+            }));
+            setInvoices(invoicesData);
+        } catch (error) {
+            console.error('Error fetching invoices:', error);
+            toast.error('Faturalar yüklenirken bir hata oluştu.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Package management state
     const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
     const [currentInvoice, setCurrentInvoice] = useState(null);
     const [newInvoice, setNewInvoice] = useState({
@@ -252,7 +256,8 @@ export default function Finans() {
         amount: 0,
         status: "Beklemede",
         issueDate: new Date().toISOString().split('T')[0],
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        description: ""
     });
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -742,8 +747,9 @@ export default function Finans() {
                 toast.success(`"${itemName}" paketi silindi.`);
                 await fetchPackages(); // Refresh packages list
             } else if (itemType === 'invoice') {
-                setInvoices(invoices.filter(invoice => invoice.id !== itemId));
-                toast.success(`"${itemName}" danışanının faturası silindi.`);
+                await axios.delete(getApiUrl(`/invoice/deleteInvoice?invoice_id=${itemId}`), authHeaders);
+                toast.success(`Fatura silindi.`);
+                await fetchInvoices();
             }
         } catch (error) {
             console.error(`Error deleting ${itemType}:`, error);
@@ -826,24 +832,17 @@ export default function Finans() {
     const handleOpenInvoiceDialog = (invoice = null) => {
         if (invoice) {
             setCurrentInvoice(invoice);
-            setNewInvoice({...invoice});
+            setNewInvoice({ ...invoice });
         } else {
-            // Get the first package if available
             const firstPackage = packages.length > 0 ? packages[0] : null;
-            
-            // Format dates safely
             const today = new Date();
-            
-            // Calculate due date only if a package is selected
             let dueDate;
             if (firstPackage) {
                 dueDate = calculateDueDateFromPackageType(today, firstPackage.type);
             } else {
-                // If no package, set due date to blank to let user choose
                 dueDate = new Date(today);
-                dueDate.setDate(dueDate.getDate() + 7); // Default suggestion, but user can change
+                dueDate.setDate(dueDate.getDate() + 7);
             }
-            
             setCurrentInvoice(null);
             setNewInvoice({
                 clientName: clients.length > 0 ? clients[0].name : "",
@@ -853,7 +852,8 @@ export default function Finans() {
                 amount: firstPackage ? Number(firstPackage.price) : 0,
                 status: "Beklemede",
                 issueDate: safelyFormatDate(today),
-                dueDate: safelyFormatDate(dueDate)
+                dueDate: safelyFormatDate(dueDate),
+                description: ""
             });
         }
         setInvoiceDialogOpen(true);
@@ -953,39 +953,68 @@ export default function Finans() {
         }
     };
 
-    const handleSaveInvoice = () => {
-        if (!newInvoice.clientName || !newInvoice.packageId || newInvoice.amount <= 0) {
-            toast.error("Lütfen tüm gerekli alanları doldurun.");
+    // Status mapping fonksiyonu
+    const mapStatusToBackend = (status) => {
+        if (status === 'Ödendi') return 'paid';
+        if (status === 'Beklemede') return 'unpaid';
+        if (status === 'Ödenmedi') return 'cancelled';
+        return 'unpaid';
+    };
+
+    const handleSaveInvoice = async () => {
+        // Tutar boşsa hata ver, 0 kabul et
+        if (newInvoice.amount === '' || newInvoice.amount === null || isNaN(newInvoice.amount)) {
+            toast.error("Lütfen tutar alanını doldurun.");
             return;
         }
-
-        const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
-        
-        // Check if selectedPackage exists
-        if (!selectedPackage) {
-            toast.error("Seçilen paket bulunamadı.");
+        if (!newInvoice.clientId) {
+            toast.error("Lütfen danışan seçin.");
             return;
         }
-        
-        const invoiceData = {
-            ...newInvoice,
-            packageName: selectedPackage.name
-        };
-
-        if (currentInvoice) {
-            // Update existing invoice
-            setInvoices(invoices.map(invoice => 
-                invoice.id === currentInvoice.id ? {...invoiceData, id: invoice.id} : invoice
-            ));
-            toast.success(`${invoiceData.clientName} için fatura güncellendi.`);
-        } else {
-            // Create new invoice
-            const newId = Math.max(...invoices.map(invoice => invoice.id), 0) + 1;
-            setInvoices([...invoices, {...invoiceData, id: newId}]);
-            toast.success(`${invoiceData.clientName} için yeni fatura oluşturuldu.`);
+        setIsLoading(true);
+        try {
+            const getApiUrl = (endpoint) => {
+                return config && config[config.environment] && config[config.environment].apiUrl 
+                    ? `${config[config.environment].apiUrl}${endpoint}`
+                    : endpoint;
+            };
+            const authHeaders = {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            };
+            const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+            // Status mapping fonksiyonu kullan
+            const backendStatus = mapStatusToBackend(newInvoice.status);
+            const invoiceData = {
+                client_id: newInvoice.clientId,
+                amount: newInvoice.amount,
+                status: backendStatus,
+                package_id: newInvoice.packageId || null,
+                issueDate: newInvoice.issueDate,
+                dueDate: newInvoice.dueDate,
+                description: newInvoice.description || ""
+            };
+            if (currentInvoice) {
+                // Update
+                const response = await axios.put(getApiUrl('/invoice/updateInvoice'), {
+                    invoice_id: currentInvoice.id,
+                    ...invoiceData
+                }, authHeaders);
+                toast.success("Fatura güncellendi.");
+            } else {
+                // Create
+                await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
+                toast.success("Yeni fatura oluşturuldu.");
+            }
+            await fetchInvoices();
+            handleCloseInvoiceDialog();
+        } catch (error) {
+            console.error('Error saving invoice:', error);
+            toast.error('Fatura kaydedilirken bir hata oluştu.');
+        } finally {
+            setIsLoading(false);
         }
-        
-        handleCloseInvoiceDialog();
     };
 
     const handleDeleteInvoice = (id) => {
@@ -1001,13 +1030,42 @@ export default function Finans() {
         });
     };
 
-    const handleStatusChange = (id, newStatus) => {
-        setInvoices(invoices.map(invoice =>
-            invoice.id === id ? {...invoice, status: newStatus} : invoice
-        ));
-        
-        const invoice = invoices.find(i => i.id === id);
-        toast.success(`${invoice.clientName} için ödeme durumu "${newStatus}" olarak güncellendi.`);
+    const handleStatusChange = async (id, newStatus) => {
+        setIsLoading(true);
+        try {
+            const getApiUrl = (endpoint) => {
+                return config && config[config.environment] && config[config.environment].apiUrl 
+                    ? `${config[config.environment].apiUrl}${endpoint}`
+                    : endpoint;
+            };
+            const authHeaders = {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            };
+            // Status mapping fonksiyonu kullan
+            const backendStatus = mapStatusToBackend(newStatus);
+            // Faturayı bul
+            const invoice = invoices.find(i => i.id === id);
+            if (!invoice) throw new Error('Fatura bulunamadı');
+            await axios.put(getApiUrl('/invoice/updateInvoice'), {
+                invoice_id: id,
+                client_id: invoice.clientId,
+                amount: invoice.amount,
+                status: backendStatus,
+                package_id: invoice.packageId || null,
+                issueDate: invoice.issueDate,
+                dueDate: invoice.dueDate,
+                description: invoice.description || ""
+            }, authHeaders);
+            toast.success(`${invoice.clientName} için ödeme durumu güncellendi.`);
+            await fetchInvoices();
+        } catch (error) {
+            console.error('Status update error:', error);
+            toast.error('Durum güncellenirken bir hata oluştu.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Render the appropriate tab content
@@ -1748,24 +1806,18 @@ export default function Finans() {
                             
                             <div className="form-group">
                                 <label htmlFor="package-select">Paket</label>
-                                {packages.length > 0 ? (
-                                    <select
-                                        id="package-select"
-                                        value={newInvoice.packageId || ""}
-                                        onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : 0)}
-                                    >
-                                        <option value="">Paket Seçin</option>
-                                        {packages.map(pkg => (
-                                            <option key={pkg.id} value={pkg.id}>
-                                                {pkg.name} - {Number(pkg.price).toLocaleString()} ₺
-                                            </option>
-                                        ))}
-                                    </select>
-                                ) : (
-                                    <div className="no-packages-warning">
-                                        <p>Henüz paket bulunmuyor. Lütfen önce paket ekleyin.</p>
-                                    </div>
-                                )}
+                                <select
+                                    id="package-select"
+                                    value={newInvoice.packageId || ""}
+                                    onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : 0)}
+                                >
+                                    <option value="">Paket Seçin</option>
+                                    {packages.length > 0 && packages.map(pkg => (
+                                        <option key={pkg.id} value={pkg.id}>
+                                            {pkg.name} - {Number(pkg.price).toLocaleString()} ₺
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                         
@@ -1807,6 +1859,19 @@ export default function Finans() {
                             </div>
                         </div>
                         
+                        <div className="form-row">
+                            <div className="form-group full-width">
+                                <label htmlFor="invoice-description">Açıklama</label>
+                                <input
+                                    id="invoice-description"
+                                    type="text"
+                                    value={newInvoice.description || ''}
+                                    onChange={(e) => handleInvoiceChange('description', e.target.value)}
+                                    placeholder="Açıklama girin (isteğe bağlı)"
+                                />
+                            </div>
+                        </div>
+                        
                         <div className="form-group full-width">
                             <label htmlFor="payment-status">Ödeme Durumu</label>
                             <div className="status-select-wrapper">
@@ -1823,6 +1888,23 @@ export default function Finans() {
                                 <span className="status-indicator"></span>
                             </div>
                         </div>
+                        
+                        {(() => {
+                            const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+                            if (selectedPackage && selectedPackage.services && selectedPackage.services.length > 0) {
+                                return (
+                                    <div className="form-group full-width" style={{ marginTop: 8 }}>
+                                        <label>Paket Hizmetleri</label>
+                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
+                                            {selectedPackage.services.map((service, idx) => (
+                                                <li key={idx}>{service}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
                         
                         <div className="form-actions">
                             <button 

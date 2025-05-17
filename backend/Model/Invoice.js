@@ -1,7 +1,6 @@
 // Libraries
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
-const PackageType = require('../Enum/PackageType');
 
 const Invoice = sequelize.define('Invoice', {
         id: {
