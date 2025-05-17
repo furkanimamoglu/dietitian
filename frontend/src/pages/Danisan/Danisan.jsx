@@ -67,13 +67,15 @@ export default function Danisan() {
     const [currentInvoicePage, setCurrentInvoicePage] = useState(1);
     const invoicesPerPage = 4;
 
-    // Function to find the plan that covers today's date
+    const [appointments, setAppointments] = useState([]);
+    const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+
+
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
         
         const today = new Date();
         
-        // Try to find a plan where today falls between start_date and end_date
         for (let i = 0; i < plans.length; i++) {
             const plan = plans[i];
             if (plan.start_date && plan.end_date) {
@@ -86,7 +88,6 @@ export default function Danisan() {
             }
         }
         
-        // If no matching plan, try to find the most recent plan
         let mostRecentPlanIndex = 0;
         let mostRecentDate = null;
         
@@ -105,7 +106,6 @@ export default function Danisan() {
         return mostRecentPlanIndex;
     };
 
-    // First, add a function to check if a plan includes today's date
     const isActivePlan = (plan) => {
         if (!plan.start_date || !plan.end_date) return false;
         
@@ -164,7 +164,6 @@ export default function Danisan() {
         }
     }, [isLoading, danisan, navigate]);
 
-    // Fetch nutrition plan when beslenme tab is activated
     useEffect(() => {
         const fetchNutritionPlan = async () => {
             if (activeTab === 'beslenme' && id) {
@@ -185,7 +184,6 @@ export default function Danisan() {
                     
                     setNutritionPlan(response.data);
                     
-                    // Set the default selected plan to the one that includes today's date
                     if (response.data && response.data.length > 0) {
                         const currentPlanIndex = findCurrentPlan(response.data);
                         setSelectedPlanIndex(currentPlanIndex);
@@ -201,7 +199,6 @@ export default function Danisan() {
         fetchNutritionPlan();
     }, [activeTab, id]);
     
-    // Fetch client invoices when odeme tab is activated
     useEffect(() => {
         const fetchClientInvoices = async () => {
             if (activeTab === 'odeme' && id) {
@@ -230,6 +227,34 @@ export default function Danisan() {
         fetchClientInvoices();
     }, [activeTab, id]);
 
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            if (activeTab === 'randevu' && id) {
+                setAppointmentsLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/appointment/fetchClientAppointmentAsDietitian",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setAppointments(response.data);
+                } catch (err) {
+                    console.error("Randevular yüklenirken hata:", err.message);
+                    setAppointments([]);
+                } finally {
+                    setAppointmentsLoading(false);
+                }
+            }
+        };
+        fetchAppointments();
+    }, [activeTab, id]);
+
     if (isLoading) {
         return (
             <Default>
@@ -251,11 +276,9 @@ export default function Danisan() {
         setActiveTab(newValue);
     };
 
-    // Helper function to display meal items (works with both arrays and strings)
     const renderMealItems = (mealItems) => {
         if (!mealItems) return "Öğün girilmemiş.";
         
-        // New format with isim and yenildi fields
         if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
             return (
                 <>
@@ -282,7 +305,6 @@ export default function Danisan() {
             );
         }
         
-        // Handle old formats
         if (typeof mealItems === 'string') {
             return mealItems;
         }
@@ -294,7 +316,6 @@ export default function Danisan() {
         if (mealItems.main && Array.isArray(mealItems.main)) {
             const mainItems = mealItems.main.join(", ");
             
-            // Check if there are alternatives
             if (mealItems.alternatives && Object.keys(mealItems.alternatives).length > 0) {
                 let alternativesText = [];
                 
@@ -1748,6 +1769,10 @@ export default function Danisan() {
                     </Box>
                 );
             case 'randevu':
+                // Randevuları ayır
+                const now = new Date();
+                const upcomingAppointments = appointments.filter(app => app.status === 'pending' && new Date(app.start) > now);
+                const pastAppointments = appointments.filter(app => app.status === 'completed' || (app.status === 'pending' && new Date(app.start) <= now));
                 return (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -1761,7 +1786,6 @@ export default function Danisan() {
                                 Yeni Randevu
                             </Button>
                         </Box>
-                        
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={7}>
                                 {/* Yaklaşan Randevular */}
@@ -1776,99 +1800,67 @@ export default function Danisan() {
                                             borderColor: 'divider'
                                         }}
                                     />
-                                    <List>
-                                        <ListItem 
-                                            secondaryAction={
-                                                <Box>
-                                                    <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                    <IconButton edge="end" aria-label="delete">
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            }
-                                        >
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Beslenme Danışmanlığı
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Online" 
-                                                            size="small" 
-                                                            color="info" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            25 Haziran 2023, Salı - 14:30
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            Notlar: 3 aylık takip sonrası değerlendirme randevusu
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                        
-                                        <Divider variant="inset" component="li" />
-                                        
-                                        <ListItem 
-                                            secondaryAction={
-                                                <Box>
-                                                    <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                    <IconButton edge="end" aria-label="delete">
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            }
-                                        >
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Vücut Analizi
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Yüz yüze" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            10 Temmuz 2023, Pazartesi - 10:00
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            Notlar: Detaylı vücut ölçümleri için gelecek
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                    </List>
+                                    {appointmentsLoading ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : upcomingAppointments.length > 0 ? (
+                                        <List>
+                                            {upcomingAppointments.map(app => (
+                                                <ListItem 
+                                                    key={app.id}
+                                                    secondaryAction={
+                                                        <Box>
+                                                            <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                            <IconButton edge="end" aria-label="delete">
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Box>
+                                                    }
+                                                >
+                                                    <ListItemAvatar>
+                                                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                            <EventIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText 
+                                                        primary={
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                    {app.title || 'Randevu'}
+                                                                </Typography>
+                                                                <Chip 
+                                                                    label={app.status === 'pending' ? 'Yaklaşan' : app.status}
+                                                                    size="small" 
+                                                                    color="info" 
+                                                                    sx={{ ml: 1 }}
+                                                                />
+                                                            </Box>
+                                                        }
+                                                        secondary={
+                                                            <Box>
+                                                                <Typography variant="body2" component="span">
+                                                                    {app.start ? new Date(app.start).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' }) : ''}
+                                                                </Typography>
+                                                                {app.note && (
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Notlar: {app.note}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    ) : (
+                                        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+                                            Yaklaşan randevu bulunmamaktadır.
+                                        </Typography>
+                                    )}
                                 </Card>
-                                
                                 {/* Geçmiş Randevular */}
                                 <Card elevation={3}>
                                     <CardHeader 
@@ -1880,111 +1872,63 @@ export default function Danisan() {
                                             borderColor: 'divider'
                                         }}
                                     />
-                                    <List>
-                                        <ListItem>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Beslenme Danışmanlığı
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Tamamlandı" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            15 Mayıs 2023, Pazartesi - 14:30
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                        
-                                        <Divider variant="inset" component="li" />
-                                        
-                                        <ListItem>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            İlk Değerlendirme
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Tamamlandı" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            15 Nisan 2023, Çarşamba - 10:00
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                        
-                                        <Divider variant="inset" component="li" />
-                                        
-                                        <ListItem>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Tanışma Görüşmesi
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Tamamlandı" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            1 Nisan 2023, Cumartesi - 11:30
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                    </List>
+                                    {appointmentsLoading ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : pastAppointments.length > 0 ? (
+                                        <List>
+                                            {pastAppointments.map(app => (
+                                                <ListItem key={app.id}>
+                                                    <ListItemAvatar>
+                                                        <Avatar sx={{ bgcolor: 'grey.500' }}>
+                                                            <EventIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText 
+                                                        primary={
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                    {app.title || 'Randevu'}
+                                                                </Typography>
+                                                                <Chip 
+                                                                    label={app.status === 'completed' ? 'Tamamlandı' : 'Geçmiş'}
+                                                                    size="small" 
+                                                                    color="success" 
+                                                                    sx={{ ml: 1 }}
+                                                                />
+                                                            </Box>
+                                                        }
+                                                        secondary={
+                                                            <Box>
+                                                                <Typography variant="body2" component="span">
+                                                                    {app.start ? new Date(app.start).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' }) : ''}
+                                                                </Typography>
+                                                                {app.note && (
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Notlar: {app.note}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    ) : (
+                                        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+                                            Geçmiş randevu bulunmamaktadır.
+                                        </Typography>
+                                    )}
                                 </Card>
                             </Grid>
-                            
                             <Grid item xs={12} md={5}>
                                 {/* Randevu Notları */}
                                 <Card elevation={3} sx={{ mb: 3 }}>
                                     <CardHeader 
                                         title="Son Randevu Notları" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        subheader="15 Mayıs 2023"
+                                        subheader={pastAppointments.length > 0 && pastAppointments[0].start ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
                                         sx={{ 
                                             bgcolor: 'primary.light', 
                                             color: 'primary.contrastText',
@@ -1996,26 +1940,17 @@ export default function Danisan() {
                                         }}
                                     />
                                     <CardContent>
-                                        <Typography variant="body1" paragraph>
-                                            Danışan son 1 ayda 3 kg verdi. Ancak yağ oranında istenen düşüş yaşanmadı.
-                                        </Typography>
-                                        <Typography variant="body1" paragraph>
-                                            Önceki beslenme planında bazı değişiklikler yapıldı. Karbonhidrat miktarı azaltıldı, protein miktarı artırıldı.
-                                        </Typography>
-                                        <Typography variant="body1" paragraph>
-                                            Danışanın şeker tüketimi hala yüksek. Kendisine bununla ilgili tavsiyeler verildi.
-                                        </Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                            Yapılacaklar:
-                                        </Typography>
-                                        <ul>
-                                            <li>Yeni beslenme planı hazırlandı</li>
-                                            <li>3 günlük su içme hatırlatıcısı eklendi</li>
-                                            <li>Haftalık egzersiz programı güncellendi</li>
-                                        </ul>
+                                        {pastAppointments.length > 0 && pastAppointments[0].note ? (
+                                            <Typography variant="body1" paragraph>
+                                                {pastAppointments[0].note}
+                                            </Typography>
+                                        ) : (
+                                            <Typography variant="body2" color="text.secondary">
+                                                Henüz not eklenmemiş.
+                                            </Typography>
+                                        )}
                                     </CardContent>
                                 </Card>
-                                
                                 {/* İstatistikler */}
                                 <Card elevation={3}>
                                     <CardHeader 
@@ -2037,7 +1972,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>3</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{pastAppointments.filter(a => a.status === 'completed').length}</Typography>
                                                     <Typography variant="body2">Tamamlanan</Typography>
                                                 </Box>
                                             </Grid>
@@ -2049,7 +1984,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>2</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{upcomingAppointments.length}</Typography>
                                                     <Typography variant="body2">Yaklaşan</Typography>
                                                 </Box>
                                             </Grid>
@@ -2061,7 +1996,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>0</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{appointments.filter(a => a.status === 'cancelled').length}</Typography>
                                                     <Typography variant="body2">İptal Edilen</Typography>
                                                 </Box>
                                             </Grid>
@@ -2073,7 +2008,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>5</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{appointments.length}</Typography>
                                                     <Typography variant="body2">Toplam</Typography>
                                                 </Box>
                                             </Grid>
