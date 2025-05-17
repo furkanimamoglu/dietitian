@@ -27,10 +27,9 @@ const Invoice = sequelize.define('Invoice', {
             allowNull: false,
             defaultValue: 'unpaid'
         },
-        packageType: {
-            type: DataTypes.ENUM(...Object.values(PackageType)),
-            allowNull: false,
-            defaultValue: PackageType.SEANS
+        package_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         },
         issueDate: {
             type: DataTypes.DATE,

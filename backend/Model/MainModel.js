@@ -136,9 +136,19 @@ Anamnes.belongsTo(Client, {
 // 11. Client ve Invoice
 Client.hasMany(Invoice, {
     foreignKey: 'client_id',
+    onDelete: 'CASCADE',
 });
 Invoice.belongsTo(Client, {
     foreignKey: 'client_id',
+});
+
+// Dietitian ve Invoice
+Dietitian.hasMany(Invoice, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+});
+Invoice.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
 });
 
 // 12. AnamnesQuestion ve Anamnes
@@ -252,6 +262,22 @@ Package.hasMany(PackageItems, {
 });
 PackageItems.belongsTo(Package, {
     foreignKey: 'package_id'
+});
+
+Package.hasMany(Invoice, {
+    foreignKey: 'package_id',
+});
+Invoice.belongsTo(Package, {
+    foreignKey: 'package_id',
+});
+
+Dietitian.hasMany(Package, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+Package.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id'
 });
 
 module.exports = {
