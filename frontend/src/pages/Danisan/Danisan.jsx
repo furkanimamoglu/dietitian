@@ -36,7 +36,6 @@ import {
 
 // Icons
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import HeightIcon from '@mui/icons-material/Height';
@@ -2123,7 +2122,6 @@ export default function Danisan() {
                                     avatar={<Avatar sx={{ bgcolor: 'success.main' }}><ReceiptLongIcon /></Avatar>}
                                     title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'success.main' }}>Aktif Fatura: {activeInvoice.description || 'Açıklama yok'}</Typography>}
                                     subheader={<Typography variant="body2" color="text.secondary">Fatura No: {activeInvoice.id}</Typography>}
-                                    action={<Chip label="Aktif" color="success" size="small" />}
                                     sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.100' }}
                                 />
                                 <CardContent>
@@ -2135,9 +2133,6 @@ export default function Danisan() {
                                     </Typography>
                                     <Typography variant="body2" sx={{ mb: 1 }}>
                                         <strong>Son Ödeme Tarihi:</strong> {activeInvoice.dueDate ? new Date(activeInvoice.dueDate).toLocaleDateString('tr-TR') : '-'}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Oluşturulma: {activeInvoice.createdAt ? new Date(activeInvoice.createdAt).toLocaleString('tr-TR') : '-'}
                                     </Typography>
                                 </CardContent>
                             </Card>
@@ -2181,9 +2176,6 @@ export default function Danisan() {
                                                         </Typography>
                                                         <Typography variant="body2" sx={{ mb: 1 }}>
                                                             <strong>Son Ödeme Tarihi:</strong> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('tr-TR') : '-'}
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            Oluşturulma: {invoice.createdAt ? new Date(invoice.createdAt).toLocaleString('tr-TR') : '-'}
                                                         </Typography>
                                                     </CardContent>
                                                 </Card>
