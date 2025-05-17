@@ -52,6 +52,28 @@ export default function Dashboard() {
     const [approvedLimit, setApprovedLimit] = useState(5);
     const [pendingLimit, setPendingLimit] = useState(5);
 
+    // Haftalık başarılar için mock veriler
+    const weeklyStats = [
+        {
+            icon: <CheckCircleIcon sx={{ color: '#27ae60', fontSize: 32 }} />, // Onaylı randevu
+            label: 'Onaylanan Randevu',
+            value: 7,
+            color: '#27ae60',
+        },
+        {
+            icon: <PeopleIcon sx={{ color: '#1976d2', fontSize: 32 }} />, // Yeni danışan
+            label: 'Yeni Danışan',
+            value: 3,
+            color: '#1976d2',
+        },
+        {
+            icon: <EventIcon sx={{ color: '#ff9800', fontSize: 32 }} />, // Tamamlanan görüşme
+            label: 'Tamamlanan Görüşme',
+            value: 12,
+            color: '#ff9800',
+        },
+    ];
+
     useEffect(() => {
         const fetchDashboardData = async () => {
             setLoading(true);
@@ -605,13 +627,19 @@ export default function Dashboard() {
                         </Card>
                     </Grid>
 
-                    {/* Clients Card */}
+                    {/* Weekly Achievements Card (Bu Haftanın Başarıları) */}
                     <Grid item xs={12} md={6}>
                         <Card 
                             elevation={2} 
                             sx={{ 
                                 borderRadius: 2, 
                                 height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                bgcolor: '#f5f5ff',
                                 transition: 'transform 0.2s, box-shadow 0.2s',
                                 '&:hover': {
                                     transform: 'translateY(-3px)',
@@ -619,150 +647,27 @@ export default function Dashboard() {
                                 }
                             }}
                         >
-                            {/* TODO: Burada ahref bıraktım, sonradan navigate'e dönüştüreceğim */}
                             <CardHeader
-                                title="Günlük Danışan Beslenme Durumları"
-                                action={
-                                    <Button color="primary" size="small" href="/danisanlarim">
-                                    Tüm Danışanlar
-                                    </Button>
-                                }
-                                sx={{ pb: 1 }}
+                                title="Bu Haftanın Başarıları"
+                                sx={{ pb: 1, color: '#1976d2', fontWeight: 700, textAlign: 'center' }}
                             />
                             <Divider />
-                            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-                                <List>
-                                    <ListItem>
-                                        <Avatar sx={{ bgcolor: '#3498db', mr: 2 }}>AY</Avatar>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography variant="subtitle1">Ahmet Yılmaz</Typography>
-                                            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Kahvaltı" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Öğle" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<RadioButtonUncheckedIcon fontSize="small" />}
-                                                    label="Akşam" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    label="Su (4/8)" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                            </Stack>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <Avatar sx={{ bgcolor: '#9b59b6', mr: 2 }}>MK</Avatar>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography variant="subtitle1">Merve Koç</Typography>
-                                            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Kahvaltı" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Öğle" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Akşam" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    label="Su (7/8)" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                            </Stack>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <Avatar sx={{ bgcolor: '#e74c3c', mr: 2 }}>SD</Avatar>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography variant="subtitle1">Serkan Demir</Typography>
-                                            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Kahvaltı" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<RadioButtonUncheckedIcon fontSize="small" />}
-                                                    label="Öğle" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<RadioButtonUncheckedIcon fontSize="small" />}
-                                                    label="Akşam" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    label="Su (2/8)" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                            </Stack>
-                                        </Box>
-                                    </ListItem>
-                                    <Divider component="li" />
-                                    
-                                    <ListItem>
-                                        <Avatar sx={{ bgcolor: '#2ecc71', mr: 2 }}>EA</Avatar>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography variant="subtitle1">Elif Arslan</Typography>
-                                            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Kahvaltı" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<CheckCircleIcon fontSize="small" />}
-                                                    label="Öğle" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#d5f5e3', color: '#27ae60', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    icon={<RadioButtonUncheckedIcon fontSize="small" />}
-                                                    label="Akşam" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                                <Chip 
-                                                    label="Su (6/8)" 
-                                                    size="small" 
-                                                    sx={{ bgcolor: '#f1f2f6', color: '#7f8c8d', fontSize: '0.75rem' }} 
-                                                />
-                                            </Stack>
-                                        </Box>
-                                    </ListItem>
-                                </List>
+                            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                                <Grid container spacing={2} justifyContent="center" alignItems="center">
+                                    {weeklyStats.map((stat, idx) => (
+                                        <Grid item xs={12} sm={4} key={idx}>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 1 }}>
+                                                {stat.icon}
+                                                <Typography variant="h5" sx={{ fontWeight: 700, color: stat.color, mt: 1 }}>
+                                                    {stat.value}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                                                    {stat.label}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                    ))}
+                                </Grid>
                             </CardContent>
                         </Card>
                     </Grid>

@@ -68,48 +68,52 @@ export default function Navbar() {
                         justifyContent: "center",
                     }}
                 >
-                    {menu_items.map((page) => {
+                    {menu_items.map((page, idx) => {
                         const isActive = location.pathname === page.route;
                         return (
-                            <Button
-                                key={page.name}
-                                onClick={() => navigate(page.route)}
-                                className={`nav-button ${isActive ? "active" : ""}`}
-                                sx={{
-                                    my: 2,
-                                    mx: 1.5,
-                                    fontWeight: "bold",
-                                    color: "rgb(14,62,10)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: "8px 16px",
-                                    borderRadius: "30px",
-                                    backgroundColor: isActive
-                                        ? "rgba(71,145,64,0.25)"
-                                        : "transparent",
-                                    "&:hover": {
-                                        backgroundColor: "rgba(71,145,64,0.15)",
-                                    },
-                                    transition: "background-color 0.3s ease",
-                                    position: "relative",
-                                    overflow: "visible",
-                                    zIndex: 0,
-                                    "&::after": isActive ? {
-                                        content: '""',
-                                        position: "absolute",
-                                        bottom: "5px",
-                                        left: "15%",
-                                        width: "70%",
-                                        height: "3px",
-                                        backgroundColor: "rgb(71,145,64)",
-                                        borderRadius: "10px",
-                                        zIndex: -1,
-                                    } : {},
-                                }}
-                            >
-                                <Box sx={{ mr: 1 }}>{page.icon}</Box>
-                                {page.name}
-                            </Button>
+                            <React.Fragment key={page.name}>
+                                <Button
+                                    onClick={() => navigate(page.route)}
+                                    className={`nav-button ${isActive ? "active" : ""}`}
+                                    sx={{
+                                        my: 2,
+                                        mx: 1.5,
+                                        fontWeight: "bold",
+                                        color: "rgb(14,62,10)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "8px 16px",
+                                        borderRadius: "30px",
+                                        backgroundColor: isActive
+                                            ? "rgba(71,145,64,0.25)"
+                                            : "transparent",
+                                        "&:hover": {
+                                            backgroundColor: "rgba(71,145,64,0.15)",
+                                        },
+                                        transition: "background-color 0.3s ease",
+                                        position: "relative",
+                                        overflow: "visible",
+                                        zIndex: 0,
+                                        "&::after": isActive ? {
+                                            content: '""',
+                                            position: "absolute",
+                                            bottom: "5px",
+                                            left: "15%",
+                                            width: "70%",
+                                            height: "3px",
+                                            backgroundColor: "rgb(71,145,64)",
+                                            borderRadius: "10px",
+                                            zIndex: -1,
+                                        } : {},
+                                    }}
+                                >
+                                    <Box sx={{ mr: 1 }}>{page.icon}</Box>
+                                    {page.name}
+                                </Button>
+                                {idx !== menu_items.length - 1 && (
+                                    <span className="navbar-divider">|</span>
+                                )}
+                            </React.Fragment>
                         );
                     })}
                 </Box>

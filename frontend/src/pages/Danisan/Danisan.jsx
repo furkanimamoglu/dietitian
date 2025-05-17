@@ -49,6 +49,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EventIcon from '@mui/icons-material/Event';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 export default function Danisan() {
     const { id } = useParams();
@@ -62,6 +63,10 @@ export default function Danisan() {
     const [nutritionPlan, setNutritionPlan] = useState(null);
     const [nutritionPlanLoading, setNutritionPlanLoading] = useState(false);
     const [selectedPlanIndex, setSelectedPlanIndex] = useState(0);
+    const [clientInvoices, setClientInvoices] = useState([]);
+    const [clientInvoicesLoading, setClientInvoicesLoading] = useState(false);
+    const [currentInvoicePage, setCurrentInvoicePage] = useState(1);
+    const invoicesPerPage = 4;
 
     // Function to find the plan that covers today's date
     const findCurrentPlan = (plans) => {
@@ -197,6 +202,34 @@ export default function Danisan() {
         fetchNutritionPlan();
     }, [activeTab, id]);
     
+    // Fetch client invoices when odeme tab is activated
+    useEffect(() => {
+        const fetchClientInvoices = async () => {
+            if (activeTab === 'odeme' && id) {
+                setClientInvoicesLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/invoice/getClientInvoices",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setClientInvoices(response.data);
+                } catch (err) {
+                    console.error("Ödemeler yüklenirken hata:", err.message);
+                    setClientInvoices([]);
+                } finally {
+                    setClientInvoicesLoading(false);
+                }
+            }
+        };
+        fetchClientInvoices();
+    }, [activeTab, id]);
 
     if (isLoading) {
         return (
@@ -217,24 +250,6 @@ export default function Danisan() {
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
-    };
-
-    // Status chip color based on status
-    const getStatusColor = (status) => {
-        const allowedColors = ['default', 'primary', 'secondary', 'error', 'info', 'success', 'warning'];
-        if (!status || typeof status !== 'string') {
-            return 'default';
-        }
-        switch(status.toLowerCase()) {
-            case 'aktif':
-                return 'success';
-            case 'pasif':
-                return 'error';
-            case 'beklemede':
-                return 'warning';
-            default:
-                return 'default';
-        }
     };
 
     // Helper function to display meal items (works with both arrays and strings)
@@ -539,7 +554,7 @@ export default function Danisan() {
                         </Accordion>
                         
                         {/* Diyet Alışkanlıkları Akordiyonu */}
-                        <Accordion defaultExpanded elevation={3} sx={{ mb: 2 }}>
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 sx={{ 
@@ -1614,7 +1629,7 @@ export default function Danisan() {
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
+                                            </Grid>                                        
                                         </Grid>                                        
                                     </Box>
                                 </Box>
@@ -2082,14 +2097,131 @@ export default function Danisan() {
                     </Paper>
                 );
             case 'odeme':
+                // Aktif invoice'u bul
+                const today = new Date();
+                const activeInvoice = clientInvoices.find(inv => {
+                    if (!inv.issueDate || !inv.dueDate) return false;
+                    const start = new Date(inv.issueDate);
+                    const end = new Date(inv.dueDate);
+                    return today >= start && today <= end;
+                });
+                // Pagination hesaplamaları
+                const totalPages = Math.ceil(clientInvoices.length / invoicesPerPage);
+                const paginatedInvoices = clientInvoices.slice(
+                    (currentInvoicePage - 1) * invoicesPerPage,
+                    currentInvoicePage * invoicesPerPage
+                );
                 return (
                     <Paper elevation={2} sx={{ p: 3 }}>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
                             Ödeme Takip
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz ödeme bilgisi bulunmamaktadır.
-                        </Typography>
+                        {/* Aktif Invoice */}
+                        {activeInvoice && (
+                            <Card elevation={4} sx={{ mb: 3, border: '2px solid', borderColor: 'success.main', background: '#f6fff6' }}>
+                                <CardHeader
+                                    avatar={<Avatar sx={{ bgcolor: 'success.main' }}><ReceiptLongIcon /></Avatar>}
+                                    title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'success.main' }}>Aktif Fatura: {activeInvoice.description || 'Açıklama yok'}</Typography>}
+                                    subheader={<Typography variant="body2" color="text.secondary">Fatura No: {activeInvoice.id}</Typography>}
+                                    action={<Chip label="Aktif" color="success" size="small" />}
+                                    sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.100' }}
+                                />
+                                <CardContent>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Tutar:</strong> {Number(activeInvoice.amount).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Düzenleme Tarihi:</strong> {activeInvoice.issueDate ? new Date(activeInvoice.issueDate).toLocaleDateString('tr-TR') : '-'}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Son Ödeme Tarihi:</strong> {activeInvoice.dueDate ? new Date(activeInvoice.dueDate).toLocaleDateString('tr-TR') : '-'}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Oluşturulma: {activeInvoice.createdAt ? new Date(activeInvoice.createdAt).toLocaleString('tr-TR') : '-'}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        )}
+                        {clientInvoicesLoading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : clientInvoices && clientInvoices.length > 0 ? (
+                            <Box>
+                                <Grid container spacing={2}>
+                                    {paginatedInvoices.map((invoice) => {
+                                        let statusColor = 'default';
+                                        let statusLabel = '';
+                                        if (invoice.status === 'paid') {
+                                            statusColor = 'success';
+                                            statusLabel = 'Ödendi';
+                                        } else if (invoice.status === 'cancelled') {
+                                            statusColor = 'error';
+                                            statusLabel = 'İptal';
+                                        } else {
+                                            statusColor = 'warning';
+                                            statusLabel = 'Beklemede';
+                                        }
+                                        return (
+                                            <Grid item xs={12} md={6} key={invoice.id}>
+                                                <Card elevation={3}>
+                                                    <CardHeader
+                                                        avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><ReceiptLongIcon /></Avatar>}
+                                                        title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{invoice.description || 'Açıklama yok'}</Typography>}
+                                                        subheader={<Typography variant="body2" color="text.secondary">Fatura No: {invoice.id}</Typography>}
+                                                        action={<Chip label={statusLabel} color={statusColor} size="small" />}
+                                                        sx={{ bgcolor: 'grey.100', borderBottom: '1px solid', borderColor: 'divider' }}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                            <strong>Tutar:</strong> {Number(invoice.amount).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+                                                        </Typography>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                            <strong>Düzenleme Tarihi:</strong> {invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('tr-TR') : '-'}
+                                                        </Typography>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                            <strong>Son Ödeme Tarihi:</strong> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('tr-TR') : '-'}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Oluşturulma: {invoice.createdAt ? new Date(invoice.createdAt).toLocaleString('tr-TR') : '-'}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
+                                </Grid>
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={() => setCurrentInvoicePage(p => Math.max(1, p - 1))}
+                                            disabled={currentInvoicePage === 1}
+                                            sx={{ mr: 1 }}
+                                        >
+                                            Önceki
+                                        </Button>
+                                        <Typography variant="body2" sx={{ mx: 2, display: 'flex', alignItems: 'center' }}>
+                                            Sayfa {currentInvoicePage} / {totalPages}
+                                        </Typography>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={() => setCurrentInvoicePage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentInvoicePage === totalPages}
+                                        >
+                                            Sonraki
+                                        </Button>
+                                    </Box>
+                                )}
+                            </Box>
+                        ) : (
+                            <Typography variant="body1" color="text.secondary">
+                                Henüz ödeme bilgisi bulunmamaktadır.
+                            </Typography>
+                        )}
                     </Paper>
                 );
             default:
@@ -2122,19 +2254,6 @@ export default function Danisan() {
                                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
                                     Danışan Bilgileri
                                 </Typography>
-                                <Chip 
-                                label={danisan.status === true ? "Aktif" : danisan.status === false ? "Pasif" : "-"}
-                                color={getStatusColor(danisan.status)}
-                                size="small"
-                                icon={
-                                    danisan.status === true ? (
-                                    <CheckCircleIcon style={{ color: 'orange' }} />
-                                    ) : danisan.status === false ? (
-                                    <CancelIcon style={{ color: 'red' }} />
-                                    ) : null
-                                }
-                                sx={{ fontWeight: 'bold' }}
-                                />
                             </Box>
                             <Box sx={{ 
                                 display: 'flex', 

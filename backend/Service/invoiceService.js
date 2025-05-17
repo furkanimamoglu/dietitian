@@ -31,6 +31,25 @@ class InvoiceService {
         });
     }
 
+    static async getClientInvoices(dietitian_id, client_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        if (!client_id) {
+            throw new Exception("Danışan belirtilmedi.", 404, true);
+        }
+
+        const invoices = await Invoice.findAll({
+            where: {
+                dietitian_id,
+                client_id
+            }
+        });
+
+        return invoices;
+    }
+
     static async addInvoice(dietitian_id, invoiceData) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);

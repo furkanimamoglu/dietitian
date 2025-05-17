@@ -109,3 +109,15 @@
 .desktop-navbar.scrolled {
     transform: translateY(0);
 }
+
+.navbar-divider {
+    color: #b2b2b2;
+    font-size: 1.3rem;
+    margin: 0 0.5rem;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.7;
+    font-weight: 400;
+    letter-spacing: 0;
+}
