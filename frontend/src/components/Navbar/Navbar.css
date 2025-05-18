@@ -99,7 +99,7 @@
     }
 }
 
-/* Akıcı geçişler ve genteeler */
+/* Akıcı geçişler ve gölgeler */
 .desktop-navbar {
     transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
