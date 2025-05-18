@@ -48,7 +48,7 @@ class measurementController {
 
             const { client_id, boy, kilo, bel, kalca, gogus, yag, kas, su } = req.body;
 
-            if (!client_id, !boy, !kilo, !bel, !kalca, !gogus, !yag, !kas, !su) {
+            if (!client_id || !boy || !kilo || !bel || !kalca || !gogus || !yag || !kas || !su) {
                 return res.status(400).json({
                     message: "Tüm alanlar zorunludur."
                 });
