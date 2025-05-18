@@ -10,7 +10,7 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes, Measurement} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes} = require('../Model/MainModel');
 const {Op} = require("sequelize");
 
 class DietitianService {
