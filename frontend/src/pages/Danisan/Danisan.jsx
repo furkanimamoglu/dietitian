@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import './Danisan.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
@@ -99,6 +99,10 @@ export default function Danisan() {
     const [isAddAppointmentDialogOpen, setIsAddAppointmentDialogOpen] = useState(false);
     const [appointmentForm, setAppointmentForm] = useState({ title: '', start: '', end: '' });
 
+    // Ölçümler için state
+    const [measurements, setMeasurements] = useState([]);
+    const [measurementsLoading, setMeasurementsLoading] = useState(false);
+
     // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -189,6 +193,37 @@ export default function Danisan() {
         return today >= startDate && today <= endDate;
     };
 
+    const calculateBMI = useMemo(() => {
+        if (!measurements || measurements.length === 0) return null;
+        if (!danisan?.boy || !measurements[0]?.kilo) return null;
+
+        const heightInM = danisan.boy / 100;
+        const bmi = (measurements[0].kilo / (heightInM * heightInM)).toFixed(1);
+
+        // BMI kategorisi belirleme
+        let category = '';
+        let color = '';
+
+        if (bmi < 18.5) {
+            category = 'Zayıf';
+            color = 'info.main'; // Mavi
+        } else if (bmi >= 18.5 && bmi < 25) {
+            category = 'Normal Kilo';
+            color = 'success.main'; // Yeşil
+        } else if (bmi >= 25 && bmi < 30) {
+            category = 'Fazla Kilolu';
+            color = 'warning.main'; // Sarı
+        } else if (bmi >= 30 && bmi < 35) {
+            category = 'Hafif Obez';
+            color = 'orange'; // Turuncu
+        } else {
+            category = 'Obez';
+            color = 'error.main'; // Kırmızı
+        }
+
+        return { value: bmi, category, color };
+    }, [measurements, danisan]);
+
     useEffect(() => {
         const fetchDanisanInfo = async () => {
             try {
@@ -214,7 +249,7 @@ export default function Danisan() {
                     email,
                     phoneNumber,
                     gender,
-                    height,
+                    boy,
                     weight,
                     status,
                     birthDate,
@@ -229,7 +264,7 @@ export default function Danisan() {
                     email,
                     phoneNumber,
                     gender,
-                    height,
+                    boy,
                     weight,
                     status,
                     birthDate: birthDate || '-',
@@ -403,6 +438,33 @@ export default function Danisan() {
 
         fetchAvailableExercises();
     }, [isAssignExerciseDialogOpen]);
+
+    useEffect(() => {
+        const fetchMeasurements = async () => {
+            if (activeTab === 'olcum' && id) {
+                setMeasurementsLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/dietitian/getClientMeasurement",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setMeasurements(response.data);
+                } catch (err) {
+                    setMeasurements([]);
+                } finally {
+                    setMeasurementsLoading(false);
+                }
+            }
+        };
+        fetchMeasurements();
+    }, [activeTab, id]);
 
     if (isLoading) {
         return (
@@ -1068,159 +1130,60 @@ export default function Danisan() {
                                                             <TableCell align="center" sx={{ borderBottom: 'none' }}>Bel (cm)</TableCell>
                                                             <TableCell align="center" sx={{ borderBottom: 'none' }}>Kalça (cm)</TableCell>
                                                             <TableCell align="center" sx={{ borderBottom: 'none' }}>Göğüs (cm)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Değişim</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Yağ (%)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kas (%)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Su (%)</TableCell>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
-                                                        {/* Verileri girelim */}
-                                                        {[
-                                                            { date: '15 Nisan 2023', weight: 85, waist: 92, hip: 108, chest: 96 },
-                                                            { date: '30 Nisan 2023', weight: 84, waist: 90, hip: 106, chest: 95 },
-                                                            { date: '15 Mayıs 2023', weight: 83, waist: 88, hip: 104, chest: 94 },
-                                                            { date: '31 Mayıs 2023', weight: 82, waist: 86, hip: 102, chest: 93 },
-                                                            { date: '15 Haziran 2023', weight: 81, waist: 84, hip: 100, chest: 92 },
-                                                            { date: '30 Haziran 2023', weight: 80, waist: 82, hip: 98, chest: 91 },
-                                                            { date: '15 Temmuz 2023', weight: 78, waist: 80, hip: 96, chest: 90 },
-                                                            { date: '30 Temmuz 2023', weight: 77, waist: 78, hip: 94, chest: 89 }
-                                                        ].map((row, index, arr) => {
-                                                            // Önceki ölçümle karşılaştırma için
-                                                            const prevRow = index > 0 ? arr[index - 1] : null;
-
-                                                            // Değişimleri hesaplayalım (eğer önceki ölçüm varsa)
-                                                            const weightChange = prevRow ? row.weight - prevRow.weight : 0;
-                                                            const waistChange = prevRow ? row.waist - prevRow.waist : 0;
-                                                            const hipChange = prevRow ? row.hip - prevRow.hip : 0;
-                                                            const chestChange = prevRow ? row.chest - prevRow.chest : 0;
-
-                                                            // Satır için koşullu arka plan rengi
-                                                            const getBgColor = (index) => {
-                                                                return index % 2 === 0 ? 'rgba(232, 245, 233, 0.2)' : 'white';
-                                                            };
-
-                                                            return (
-                                                                <TableRow
-                                                                    key={row.date}
-                                                                    sx={{
-                                                                        bgcolor: getBgColor(index),
-                                                                        transition: 'background-color 0.2s',
-                                                                        '&:hover': {
-                                                                            bgcolor: 'rgba(129, 199, 132, 0.1)',
-                                                                            boxShadow: 'inset 0 0 0 1px rgba(129, 199, 132, 0.2)'
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', pl: 2 }}>
-                                                                        {row.date}
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                            <Typography variant="body2">
-                                                                                {row.weight}
-                                                                            </Typography>
-                                                                            {index > 0 && (
-                                                                                <Box component="span" sx={{
-                                                                                    ml: 1,
-                                                                                    color: weightChange < 0 ? 'success.main' : weightChange > 0 ? 'error.main' : 'text.secondary',
-                                                                                    display: 'flex',
-                                                                                    alignItems: 'center',
-                                                                                    fontSize: '0.7rem'
-                                                                                }}>
-                                                                                    {weightChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
-                                                                                     weightChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
-                                                                                    {Math.abs(weightChange) > 0 && Math.abs(weightChange)}
-                                                                                </Box>
-                                                                            )}
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                            <Typography variant="body2">
-                                                                                {row.waist}
-                                                                            </Typography>
-                                                                            {index > 0 && (
-                                                                                <Box component="span" sx={{
-                                                                                    ml: 1,
-                                                                                    color: waistChange < 0 ? 'success.main' : waistChange > 0 ? 'error.main' : 'text.secondary',
-                                                                                    display: 'flex',
-                                                                                    alignItems: 'center',
-                                                                                    fontSize: '0.7rem'
-                                                                                }}>
-                                                                                    {waistChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
-                                                                                     waistChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
-                                                                                    {Math.abs(waistChange) > 0 && Math.abs(waistChange)}
-                                                                                </Box>
-                                                                            )}
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                            <Typography variant="body2">
-                                                                                {row.hip}
-                                                                            </Typography>
-                                                                            {index > 0 && (
-                                                                                <Box component="span" sx={{
-                                                                                    ml: 1,
-                                                                                    color: hipChange < 0 ? 'success.main' : hipChange > 0 ? 'error.main' : 'text.secondary',
-                                                                                    display: 'flex',
-                                                                                    alignItems: 'center',
-                                                                                    fontSize: '0.7rem'
-                                                                                }}>
-                                                                                    {hipChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
-                                                                                     hipChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
-                                                                                    {Math.abs(hipChange) > 0 && Math.abs(hipChange)}
-                                                                                </Box>
-                                                                            )}
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                            <Typography variant="body2">
-                                                                                {row.chest}
-                                                                            </Typography>
-                                                                            {index > 0 && (
-                                                                                <Box component="span" sx={{
-                                                                                    ml: 1,
-                                                                                    color: chestChange < 0 ? 'success.main' : chestChange > 0 ? 'error.main' : 'text.secondary',
-                                                                                    display: 'flex',
-                                                                                    alignItems: 'center',
-                                                                                    fontSize: '0.7rem'
-                                                                                }}>
-                                                                                    {chestChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
-                                                                                     chestChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
-                                                                                    {Math.abs(chestChange) > 0 && Math.abs(chestChange)}
-                                                                                </Box>
-                                                                            )}
-                                                                        </Box>
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        {index > 0 && (
-                                                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                                                {/* Birleşik değişim göstergesi - azalan ölçümler olumlu */}
-                                                                                {weightChange + waistChange + hipChange + chestChange < 0 ? (
-                                                                                    <Chip
-                                                                                        icon={<TrendingDownIcon fontSize="small" />}
-                                                                                        label={Math.abs(weightChange + waistChange + hipChange + chestChange).toFixed(1)}
-                                                                                        color="success"
-                                                                                        size="small"
-                                                                                        variant="outlined"
-                                                                                        sx={{ minWidth: 70 }}
-                                                                                    />
-                                                                                ) : (
-                                                                                    <Chip
-                                                                                        icon={<TrendingFlatIcon fontSize="small" />}
-                                                                                        label={Math.abs(weightChange + waistChange + hipChange + chestChange).toFixed(1)}
-                                                                                        color={weightChange + waistChange + hipChange + chestChange > 0 ? "error" : "default"}
-                                                                                        size="small"
-                                                                                        variant="outlined"
-                                                                                        sx={{ minWidth: 70 }}
-                                                                                    />
-                                                                                )}
-                                                                            </Box>
-                                                                        )}
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            );
-                                                        })}
+                                                        {measurementsLoading ? (
+                                                            <TableRow>
+                                                                <TableCell colSpan={8} align="center">
+                                                                    <CircularProgress size={24} />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ) : measurements && measurements.length > 0 ? (
+                                                            measurements.map((row, index, arr) => {
+                                                                const prevRow = index > 0 ? arr[index - 1] : null;
+                                                                const weightChange = prevRow ? row.kilo - prevRow.kilo : 0;
+                                                                const waistChange = prevRow ? row.bel - prevRow.bel : 0;
+                                                                const hipChange = prevRow ? row.kalca - prevRow.kalca : 0;
+                                                                const chestChange = prevRow ? row.gogus - prevRow.gogus : 0;
+                                                                const getBgColor = (index) => {
+                                                                    return index % 2 === 0 ? 'rgba(232, 245, 233, 0.2)' : 'white';
+                                                                };
+                                                                return (
+                                                                    <TableRow
+                                                                        key={row.id}
+                                                                        sx={{
+                                                                            bgcolor: getBgColor(index),
+                                                                            transition: 'background-color 0.2s',
+                                                                            '&:hover': {
+                                                                                bgcolor: 'rgba(129, 199, 132, 0.1)',
+                                                                                boxShadow: 'inset 0 0 0 1px rgba(129, 199, 132, 0.2)'
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', pl: 2 }}>
+                                                                            {row.createdAt ? new Date(row.createdAt).toLocaleDateString('tr-TR') : '-'}
+                                                                        </TableCell>
+                                                                        <TableCell align="center">{row.kilo}</TableCell>
+                                                                        <TableCell align="center">{row.bel}</TableCell>
+                                                                        <TableCell align="center">{row.kalca}</TableCell>
+                                                                        <TableCell align="center">{row.gogus}</TableCell>
+                                                                        <TableCell align="center">{row.yag}</TableCell>
+                                                                        <TableCell align="center">{row.kas}</TableCell>
+                                                                        <TableCell align="center">{row.su}</TableCell>
+                                                                    </TableRow>
+                                                                );
+                                                            })
+                                                        ) : (
+                                                            <TableRow>
+                                                                <TableCell colSpan={8} align="center">
+                                                                    Ölçüm verisi bulunamadı.
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
                                                     </TableBody>
                                                 </Table>
                                             </TableContainer>
@@ -1228,7 +1191,7 @@ export default function Danisan() {
                                     </CardContent>
                                 </Card>
                             </Grid>
-                            
+                            {/* Vücut Analizi kartı aynı şekilde bırakılabilir veya ölçümlerden sonuncusu ile doldurulabilir */}
                             <Grid item xs={12} md={6}>
                                 <Card elevation={3} sx={{ height: '100%' }}>
                                     <CardHeader 
@@ -1248,85 +1211,91 @@ export default function Danisan() {
                                     />
                                     <CardContent>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            <Box>
-                                                <Typography variant="subtitle1" gutterBottom>Vücut Yağ Oranı</Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
-                                                        <Box 
-                                                            sx={{ 
-                                                                width: '32%', 
-                                                                bgcolor: theme.palette.primary.main, 
-                                                                height: '100%', 
-                                                                borderRadius: 5 
-                                                            }} 
-                                                        />
+                                            {/* Son ölçümden oranlar */}
+                                            {measurements && measurements.length > 0 ? (
+                                                <>
+                                                    <Box>
+                                                        <Typography variant="subtitle1" gutterBottom>Vücut Yağ Oranı</Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: `${measurements[0].yag || 0}%`,
+                                                                        bgcolor: theme.palette.primary.main,
+                                                                        height: '100%',
+                                                                        borderRadius: 5
+                                                                    }}
+                                                                />
+                                                            </Box>
+                                                            <Typography variant="body2">{measurements[0].yag || 0}%</Typography>
+                                                        </Box>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Hedef: 25-28% | Standart: 25-31%
+                                                        </Typography>
                                                     </Box>
-                                                    <Typography variant="body2">32%</Typography>
-                                                </Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    Hedef: 25-28% | Standart: 25-31%
-                                                </Typography>
-                                            </Box>
-                                            
-                                            <Box>
-                                                <Typography variant="subtitle1" gutterBottom>Kas Kütlesi</Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
-                                                        <Box 
-                                                            sx={{ 
-                                                                width: '28%', 
-                                                                bgcolor: theme.palette.info.main, 
-                                                                height: '100%', 
-                                                                borderRadius: 5 
-                                                            }} 
-                                                        />
+                                                    <Box>
+                                                        <Typography variant="subtitle1" gutterBottom>Kas Kütlesi</Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: `${measurements[0].kas || 0}%`,
+                                                                        bgcolor: theme.palette.info.main,
+                                                                        height: '100%',
+                                                                        borderRadius: 5
+                                                                    }}
+                                                                />
+                                                            </Box>
+                                                            <Typography variant="body2">{measurements[0].kas || 0}%</Typography>
+                                                        </Box>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Hedef: 30-35% | Standart: 30-35%
+                                                        </Typography>
                                                     </Box>
-                                                    <Typography variant="body2">28%</Typography>
-                                                </Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    Hedef: 30-35% | Standart: 30-35%
-                                                </Typography>
-                                            </Box>
-                                            
-                                            <Box>
-                                                <Typography variant="subtitle1" gutterBottom>Vücut Suyu</Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
-                                                        <Box 
-                                                            sx={{ 
-                                                                width: '45%', 
-                                                                bgcolor: theme.palette.info.light, 
-                                                                height: '100%', 
-                                                                borderRadius: 5 
-                                                            }} 
-                                                        />
+                                                    <Box>
+                                                        <Typography variant="subtitle1" gutterBottom>Vücut Suyu</Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: `${measurements[0].su || 0}%`,
+                                                                        bgcolor: theme.palette.info.light,
+                                                                        height: '100%',
+                                                                        borderRadius: 5
+                                                                    }}
+                                                                />
+                                                            </Box>
+                                                            <Typography variant="body2">{measurements[0].su || 0}%</Typography>
+                                                        </Box>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Hedef: 45-60% | Standart: 45-60%
+                                                        </Typography>
                                                     </Box>
-                                                    <Typography variant="body2">45%</Typography>
-                                                </Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    Hedef: 45-60% | Standart: 45-60%
-                                                </Typography>
-                                            </Box>
-                                            
-                                            <Box>
-                                                <Typography variant="subtitle1" gutterBottom>BMI</Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
-                                                        <Box 
-                                                            sx={{ 
-                                                                width: '80%', 
-                                                                bgcolor: theme.palette.warning.main, 
-                                                                height: '100%', 
-                                                                borderRadius: 5 
-                                                            }} 
-                                                        />
+                                                    <Box>
+                                                        <Typography variant="subtitle1" gutterBottom>BMI</Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', height: 10, borderRadius: 5 }}>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: '80%',
+                                                                        bgcolor: calculateBMI?.color || theme.palette.warning.main,
+                                                                        height: '100%',
+                                                                        borderRadius: 5
+                                                                    }}
+                                                                />
+                                                            </Box>
+                                                            <Typography variant="body2">{calculateBMI?.value || '-'}</Typography>
+                                                        </Box>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {calculateBMI?.category || 'Hedef: 18.5-25'}
+                                                        </Typography>
                                                     </Box>
-                                                    <Typography variant="body2">28.4</Typography>
-                                                </Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    Hedef: 18.5-25 | Şu an: Hafif Obez
+                                                </>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Analiz verisi bulunamadı.
                                                 </Typography>
-                                            </Box>
+                                            )}
                                         </Box>
                                     </CardContent>
                                 </Card>
@@ -1339,33 +1308,33 @@ export default function Danisan() {
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Box>
-                                {/*<Button 
-                                    variant="outlined" 
-                                    size="small" 
+                                {/*<Button
+                                    variant="outlined"
+                                    size="small"
                                     sx={{ mr: 1 }}
                                     startIcon={<PrintIcon />}
                                 >
                                     Yazdır
                                 </Button>
-                                <Button 
-                                    variant="contained" 
-                                    size="small" 
+                                <Button
+                                    variant="contained"
+                                    size="small"
                                     startIcon={<EditIcon />}
                                 >
                                     Düzenle
                                 </Button> */}
                             </Box>
                         </Box>
-                        
+
                         {nutritionPlanLoading ? (
                             <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                                 <CircularProgress />
                             </Box>
                         ) : (
                             <Paper elevation={3} sx={{ mb: 3 }}>
-                                <Box sx={{ 
-                                    p: 2, 
-                                    bgcolor: 'primary.main', 
+                                <Box sx={{
+                                    p: 2,
+                                    bgcolor: 'primary.main',
                                     color: 'white',
                                     borderTopLeftRadius: 4,
                                     borderTopRightRadius: 4,
@@ -1373,7 +1342,7 @@ export default function Danisan() {
                                     justifyContent: 'space-between'
                                 }}>
                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                        {nutritionPlan && nutritionPlan.length > 0 
+                                        {nutritionPlan && nutritionPlan.length > 0
                                             ? nutritionPlan[selectedPlanIndex]?.note || "İsim Girilmemiş Plan"
                                             : "İsim Girilmemiş Plan"}
                                     </Typography>
@@ -1385,9 +1354,9 @@ export default function Danisan() {
                                         İşaretli ve üzeri çizili öğeler, danışanın mobil uygulamada yedim olarak işaretlediği öğünlerdir.
                                     </Typography>
                                 </Box>
-                                
+
                                 <Divider />
-                                
+
                                 <Box sx={{ overflowX: 'auto' }}>
                                     <Box sx={{ minWidth: 900, p: 2 }}>
                                         <Grid container spacing={1}>
@@ -1436,16 +1405,16 @@ export default function Danisan() {
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                        
+
                                         <Divider sx={{ my: 1 }} />
-                                        
+
                                         {/* Kahvaltı */}
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
-                                                <Box sx={{ 
-                                                    bgcolor: 'primary.light', 
-                                                    color: 'primary.contrastText', 
-                                                    p: 1, 
+                                                <Box sx={{
+                                                    bgcolor: 'primary.light',
+                                                    color: 'primary.contrastText',
+                                                    p: 1,
                                                     borderRadius: 1,
                                                     height: '100%',
                                                     display: 'flex',
@@ -1459,7 +1428,7 @@ export default function Danisan() {
                                                 <Grid container spacing={1}>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1467,7 +1436,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1475,7 +1444,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1483,7 +1452,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1491,7 +1460,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1499,7 +1468,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1507,7 +1476,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Kahvaltı)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1516,16 +1485,16 @@ export default function Danisan() {
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                        
+
                                         <Divider sx={{ my: 1 }} />
-                                        
+
                                         {/* Öğle Yemeği */}
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
-                                                <Box sx={{ 
-                                                    bgcolor: 'warning.light', 
-                                                    color: 'warning.contrastText', 
-                                                    p: 1, 
+                                                <Box sx={{
+                                                    bgcolor: 'warning.light',
+                                                    color: 'warning.contrastText',
+                                                    p: 1,
                                                     borderRadius: 1,
                                                     height: '100%',
                                                     display: 'flex',
@@ -1539,7 +1508,7 @@ export default function Danisan() {
                                                 <Grid container spacing={1}>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1547,7 +1516,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1555,7 +1524,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1563,7 +1532,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1571,7 +1540,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1579,7 +1548,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1587,7 +1556,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Öğle Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1596,16 +1565,16 @@ export default function Danisan() {
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                        
+
                                         <Divider sx={{ my: 1 }} />
-                                        
+
                                         {/* Akşam Yemeği */}
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
-                                                <Box sx={{ 
-                                                    bgcolor: 'error.light', 
-                                                    color: 'error.contrastText', 
-                                                    p: 1, 
+                                                <Box sx={{
+                                                    bgcolor: 'error.light',
+                                                    color: 'error.contrastText',
+                                                    p: 1,
                                                     borderRadius: 1,
                                                     height: '100%',
                                                     display: 'flex',
@@ -1619,7 +1588,7 @@ export default function Danisan() {
                                                 <Grid container spacing={1}>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1627,7 +1596,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1635,7 +1604,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1643,7 +1612,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1651,7 +1620,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1659,7 +1628,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1667,7 +1636,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Akşam Yemeği"])
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1682,10 +1651,10 @@ export default function Danisan() {
                                         {/* Ara Öğün */}
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
-                                                <Box sx={{ 
-                                                    bgcolor: 'info.light', 
-                                                    color: 'info.contrastText', 
-                                                    p: 1, 
+                                                <Box sx={{
+                                                    bgcolor: 'info.light',
+                                                    color: 'info.contrastText',
+                                                    p: 1,
                                                     borderRadius: 1,
                                                     height: '100%',
                                                     display: 'flex',
@@ -1699,7 +1668,7 @@ export default function Danisan() {
                                                 <Grid container spacing={1}>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1707,7 +1676,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1715,7 +1684,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1723,7 +1692,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1731,7 +1700,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1739,7 +1708,7 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
@@ -1747,15 +1716,15 @@ export default function Danisan() {
                                                     </Grid>
                                                     <Grid item xs={1.7}>
                                                         <Paper elevation={1} sx={{ p: 1, height: '100%' }}>
-                                                            {nutritionPlan && nutritionPlan.length > 0 
+                                                            {nutritionPlan && nutritionPlan.length > 0
                                                                 ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Aparatif)
                                                                 : <Typography variant="body2">Öğün girilmemiş.</Typography>
                                                             }
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>                                        
-                                        </Grid>                                        
+                                            </Grid>
+                                        </Grid>
                                     </Box>
                                 </Box>
                                 <Divider />
@@ -1763,11 +1732,11 @@ export default function Danisan() {
                         )}
 
                         <Card elevation={3} sx={{ mb: 3 }}>
-                            <CardHeader 
-                                title="Atanmış Planlar" 
+                            <CardHeader
+                                title="Atanmış Planlar"
                                 titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                sx={{ 
-                                    bgcolor: 'primary.light', 
+                                sx={{
+                                    bgcolor: 'primary.light',
                                     color: 'primary.contrastText',
                                     borderBottom: '1px solid',
                                     borderColor: 'divider'
@@ -1783,7 +1752,7 @@ export default function Danisan() {
                                         // Calculate how many meals have been eaten in this plan
                                         let totalMeals = 0;
                                         let eatenMeals = 0;
-                                        
+
                                         if (plan.mealPlan) {
                                             Object.keys(plan.mealPlan).forEach(day => {
                                                 if (plan.mealPlan[day]) {
@@ -1803,12 +1772,12 @@ export default function Danisan() {
                                                 }
                                             });
                                         }
-                                        
+
                                         return (
                                             <React.Fragment key={plan.id || index}>
                                                 <ListItem
                                                     onClick={() => setSelectedPlanIndex(index)}
-                                                    sx={{ 
+                                                    sx={{
                                                         cursor: 'pointer',
                                                         bgcolor: selectedPlanIndex === index ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
                                                         '&:hover': {
@@ -1821,15 +1790,15 @@ export default function Danisan() {
                                                             <EventIcon />
                                                         </Avatar>
                                                     </ListItemAvatar>
-                                                    <ListItemText 
+                                                    <ListItemText
                                                         primary={
                                                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                                                 {plan.note || "Beslenme Planı"}
                                                                 {isActivePlan(plan) && (
-                                                                    <Chip 
-                                                                        label="Aktif Plan" 
-                                                                        size="small" 
-                                                                        color="success" 
+                                                                    <Chip
+                                                                        label="Aktif Plan"
+                                                                        size="small"
+                                                                        color="success"
                                                                         sx={{ ml: 1 }}
                                                                     />
                                                                 )}
@@ -1838,8 +1807,8 @@ export default function Danisan() {
                                                         secondary={
                                                             <>
                                                                 <Typography variant="body2" component="span">
-                                                                    {plan.start_date && plan.end_date 
-                                                                        ? `${new Date(plan.start_date).toLocaleDateString('tr-TR')} - ${new Date(plan.end_date).toLocaleDateString('tr-TR')}` 
+                                                                    {plan.start_date && plan.end_date
+                                                                        ? `${new Date(plan.start_date).toLocaleDateString('tr-TR')} - ${new Date(plan.end_date).toLocaleDateString('tr-TR')}`
                                                                         : "Tarih belirtilmemiş"}
                                                                 </Typography>
                                                                 <Typography variant="body2" color="text.secondary" display="block">
@@ -1863,7 +1832,7 @@ export default function Danisan() {
                                     })
                                 ) : (
                                     <ListItem>
-                                        <ListItemText 
+                                        <ListItemText
                                             primary="Atanmış beslenme planı bulunamadı"
                                             secondary="Danışana henüz bir beslenme planı atanmamış"
                                         />
@@ -1882,9 +1851,9 @@ export default function Danisan() {
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Typography variant="h6"></Typography>
-                            <Button 
-                                variant="contained" 
-                                size="small" 
+                            <Button
+                                variant="contained"
+                                size="small"
                                 startIcon={<AddIcon />}
                                 onClick={() => setIsAddAppointmentDialogOpen(true)}
                                 sx={{ bgcolor: theme.palette.primary.main }}
@@ -1896,11 +1865,11 @@ export default function Danisan() {
                             <Grid item xs={12} md={7}>
                                 {/* Yaklaşan Randevular */}
                                 <Card elevation={3} sx={{ mb: 3 }}>
-                                    <CardHeader 
-                                        title="Yaklaşan Randevular" 
+                                    <CardHeader
+                                        title="Yaklaşan Randevular"
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
+                                        sx={{
+                                            bgcolor: 'primary.light',
                                             color: 'primary.contrastText',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
@@ -1913,7 +1882,7 @@ export default function Danisan() {
                                     ) : upcomingAppointments.length > 0 ? (
                                         <List>
                                             {upcomingAppointments.map(app => (
-                                                <ListItem 
+                                                <ListItem
                                                     key={app.id}
                                                     secondaryAction={
                                                         <Box>
@@ -1931,16 +1900,16 @@ export default function Danisan() {
                                                             <EventIcon />
                                                         </Avatar>
                                                     </ListItemAvatar>
-                                                    <ListItemText 
+                                                    <ListItemText
                                                         primary={
                                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                                                     {app.title || 'Randevu'}
                                                                 </Typography>
-                                                                <Chip 
+                                                                <Chip
                                                                     label={app.status === 'pending' ? 'Yaklaşan' : app.status}
-                                                                    size="small" 
-                                                                    color="info" 
+                                                                    size="small"
+                                                                    color="info"
                                                                     sx={{ ml: 1 }}
                                                                 />
                                                             </Box>
@@ -1969,11 +1938,11 @@ export default function Danisan() {
                                 </Card>
                                 {/* Geçmiş Randevular */}
                                 <Card elevation={3}>
-                                    <CardHeader 
-                                        title="Geçmiş Randevular" 
+                                    <CardHeader
+                                        title="Geçmiş Randevular"
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        sx={{ 
-                                            bgcolor: 'grey.200', 
+                                        sx={{
+                                            bgcolor: 'grey.200',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -1991,7 +1960,7 @@ export default function Danisan() {
                                                             <EventIcon />
                                                         </Avatar>
                                                     </ListItemAvatar>
-                                                    <ListItemText 
+                                                    <ListItemText
                                                         primary={
                                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
@@ -2041,12 +2010,12 @@ export default function Danisan() {
                             <Grid item xs={12} md={5}>
                                 {/* Randevu Notları */}
                                 <Card elevation={3} sx={{ mb: 3 }}>
-                                    <CardHeader 
-                                        title="Son Randevu Notları" 
+                                    <CardHeader
+                                        title="Son Randevu Notları"
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         subheader={pastAppointments.length > 0 && pastAppointments[0].start ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
+                                        sx={{
+                                            bgcolor: 'primary.light',
                                             color: 'primary.contrastText',
                                             '& .MuiCardHeader-subheader': {
                                                 color: 'primary.contrastText'
@@ -2069,11 +2038,11 @@ export default function Danisan() {
                                 </Card>
                                 {/* İstatistikler */}
                                 <Card elevation={3}>
-                                    <CardHeader 
-                                        title="Randevu İstatistikleri" 
+                                    <CardHeader
+                                        title="Randevu İstatistikleri"
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        sx={{ 
-                                            bgcolor: 'grey.200', 
+                                        sx={{
+                                            bgcolor: 'grey.200',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -2081,9 +2050,9 @@ export default function Danisan() {
                                     <CardContent>
                                         <Grid container spacing={2}>
                                             <Grid item xs={6}>
-                                                <Box sx={{ 
-                                                    p: 2, 
-                                                    bgcolor: 'success.light', 
+                                                <Box sx={{
+                                                    p: 2,
+                                                    bgcolor: 'success.light',
                                                     color: 'success.contrastText',
                                                     borderRadius: 2,
                                                     textAlign: 'center'
@@ -2093,9 +2062,9 @@ export default function Danisan() {
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={6}>
-                                                <Box sx={{ 
-                                                    p: 2, 
-                                                    bgcolor: 'primary.light', 
+                                                <Box sx={{
+                                                    p: 2,
+                                                    bgcolor: 'primary.light',
                                                     color: 'primary.contrastText',
                                                     borderRadius: 2,
                                                     textAlign: 'center'
@@ -2105,9 +2074,9 @@ export default function Danisan() {
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={6}>
-                                                <Box sx={{ 
-                                                    p: 2, 
-                                                    bgcolor: 'warning.light', 
+                                                <Box sx={{
+                                                    p: 2,
+                                                    bgcolor: 'warning.light',
                                                     color: 'warning.contrastText',
                                                     borderRadius: 2,
                                                     textAlign: 'center'
@@ -2117,9 +2086,9 @@ export default function Danisan() {
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={6}>
-                                                <Box sx={{ 
-                                                    p: 2, 
-                                                    bgcolor: 'info.light', 
+                                                <Box sx={{
+                                                    p: 2,
+                                                    bgcolor: 'info.light',
                                                     color: 'info.contrastText',
                                                     borderRadius: 2,
                                                     textAlign: 'center'
@@ -2136,28 +2105,28 @@ export default function Danisan() {
                         <Dialog open={isAddAppointmentDialogOpen} onClose={() => setIsAddAppointmentDialogOpen(false)}>
                             <DialogTitle>Yeni Randevu Ekle</DialogTitle>
                             <DialogContent>
-                                <TextField 
-                                    label="Başlık" 
-                                    name="title" 
-                                    value={appointmentForm.title} 
-                                    onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})} 
-                                    fullWidth margin="normal" 
+                                <TextField
+                                    label="Başlık"
+                                    name="title"
+                                    value={appointmentForm.title}
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})}
+                                    fullWidth margin="normal"
                                 />
-                                <TextField 
-                                    label="Başlangıç" 
-                                    name="start" 
-                                    type="datetime-local" 
-                                    value={appointmentForm.start} 
-                                    onChange={(e) => setAppointmentForm({...appointmentForm, start: e.target.value})} 
-                                    fullWidth margin="normal" 
+                                <TextField
+                                    label="Başlangıç"
+                                    name="start"
+                                    type="datetime-local"
+                                    value={appointmentForm.start}
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, start: e.target.value})}
+                                    fullWidth margin="normal"
                                 />
-                                <TextField 
-                                    label="Bitiş" 
-                                    name="end" 
-                                    type="datetime-local" 
-                                    value={appointmentForm.end} 
-                                    onChange={(e) => setAppointmentForm({...appointmentForm, end: e.target.value})} 
-                                    fullWidth margin="normal" 
+                                <TextField
+                                    label="Bitiş"
+                                    name="end"
+                                    type="datetime-local"
+                                    value={appointmentForm.end}
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, end: e.target.value})}
+                                    fullWidth margin="normal"
                                 />
                             </DialogContent>
                             <DialogActions>
@@ -2563,8 +2532,8 @@ export default function Danisan() {
                                      <Grid container spacing={2}>
                                          {assignedExercises.map((ex, idx) => (
                                              <Grid item xs={12} md={6} key={ex.id || idx}>
-                                                 <Card 
-                                                     variant="outlined" 
+                                                 <Card
+                                                     variant="outlined"
                                                      sx={{
                                                          position: 'relative',
                                                          height: '100%',
@@ -2592,8 +2561,8 @@ export default function Danisan() {
                                                  >
                                                      <Box sx={{ p: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
                                                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                                             <Avatar 
-                                                                 sx={{ 
+                                                             <Avatar
+                                                                 sx={{
                                                                      bgcolor: new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? 'success.light' : 'grey.300',
                                                                      boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
                                                                  }}
@@ -2622,17 +2591,17 @@ export default function Danisan() {
                                                                          sx={{ height: 22, '& .MuiChip-label': { px: 1, py: 0 } }}
                                                                      />
                                                                      <Typography variant="caption" color="text.secondary">
-                                                                         {ex.start_date && ex.end_date ? 
-                                                                             `${new Date(ex.start_date).toLocaleDateString('tr-TR')} - ${new Date(ex.end_date).toLocaleDateString('tr-TR')}` : 
+                                                                         {ex.start_date && ex.end_date ?
+                                                                             `${new Date(ex.start_date).toLocaleDateString('tr-TR')} - ${new Date(ex.end_date).toLocaleDateString('tr-TR')}` :
                                                                              '-'}
                                                                      </Typography>
                                                                  </Box>
                                                              </Box>
                                                          </Box>
                                                          <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                             <IconButton 
-                                                                 size="small" 
-                                                                 sx={{ 
+                                                             <IconButton
+                                                                 size="small"
+                                                                 sx={{
                                                                      bgcolor: 'background.paper',
                                                                      boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
                                                                      '&:hover': { bgcolor: 'primary.light', color: 'white' }
@@ -2640,10 +2609,10 @@ export default function Danisan() {
                                                              >
                                                                  <EditIcon fontSize="small" />
                                                              </IconButton>
-                                                             <IconButton 
-                                                                 size="small" 
+                                                             <IconButton
+                                                                 size="small"
                                                                  color="error"
-                                                                 sx={{ 
+                                                                 sx={{
                                                                      bgcolor: 'background.paper',
                                                                      boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
                                                                      '&:hover': { bgcolor: 'error.light', color: 'white' }
@@ -2656,10 +2625,10 @@ export default function Danisan() {
                                                      <CardContent sx={{ p: 2, pb: 1 }}>
                                                          <Grid container spacing={2}>
                                                              <Grid item xs={12}>
-                                                                 <Box sx={{ 
-                                                                     p: 1.5, 
+                                                                 <Box sx={{
+                                                                     p: 1.5,
                                                                      mb: 1.5,
-                                                                     bgcolor: 'background.paper', 
+                                                                     bgcolor: 'background.paper',
                                                                      borderRadius: 2,
                                                                      boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
                                                                      height: '100%'
@@ -3164,10 +3133,10 @@ export default function Danisan() {
                     }
                 }
             );
-    
+
             setIsAddAppointmentDialogOpen(false);
             setAppointmentForm({ title: '', start: '', end: '' }); // Reset form
-            
+
             setAppointmentsLoading(true);
             const appointmentsResponse = await axios.get(
                 config[config.environment].apiUrl + "/appointment/fetchClientAppointmentAsDietitian",
@@ -3197,7 +3166,7 @@ export default function Danisan() {
                 <Grid container spacing={3}>
                 {/* Sol Panel - Danışanın Resmi ve Bilgileri */}
                     <Grid item xs={12} md={4}>
-                        <Card elevation={4} sx={{ 
+                        <Card elevation={4} sx={{
                             height: '100%',
                             borderRadius: 2,
                             overflow: 'hidden',
@@ -3206,9 +3175,9 @@ export default function Danisan() {
                                 boxShadow: 8
                             }
                         }}>
-                            <Box sx={{ 
-                                bgcolor: 'primary.main', 
-                                p: 2, 
+                            <Box sx={{
+                                bgcolor: 'primary.main',
+                                p: 2,
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center'
@@ -3217,10 +3186,10 @@ export default function Danisan() {
                                     Danışan Bilgileri
                                 </Typography>
                             </Box>
-                            <Box sx={{ 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                alignItems: 'center', 
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
                                 p: 3,
                                 bgcolor: 'background.paper'
                             }}>
@@ -3278,7 +3247,7 @@ export default function Danisan() {
                     <Grid item xs={12} md={8}>
                         <Card elevation={4} sx={{ borderRadius: 2, overflow: 'hidden' }}>
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                <Tabs 
+                                <Tabs
                                     value={activeTab}
                                     onChange={handleTabChange}
                                     variant={isMobile ? "scrollable" : "fullWidth"}
@@ -3334,3 +3303,4 @@ export default function Danisan() {
         </Default>
     );
 }
+

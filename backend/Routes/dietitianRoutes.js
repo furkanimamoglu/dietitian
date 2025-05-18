@@ -13,9 +13,6 @@ router.delete('/deleteClient', dietitianController.deleteClient);
 router.put('/updateClient', dietitianController.updateClient)
 router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
-router.get('/getClientMeasurement', dietitianController.getClientMeasurement);
-
-router.get('/getClientMeasurement', dietitianController.getClientMeasurement);
 
 router.get('/globalSearchbar', dietitianController.globalSearchbar);
 

@@ -12,6 +12,10 @@ const Measurement = sequelize.define('Measurement', {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        boy: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         kilo: {
             type: DataTypes.INTEGER,
             allowNull: false
