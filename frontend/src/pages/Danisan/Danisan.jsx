@@ -1886,10 +1886,20 @@ export default function Danisan() {
                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                                                     {app.title || 'Randevu'}
                                                                 </Typography>
-                                                                <Chip 
-                                                                    label={app.status === 'completed' ? 'Tamamlandı' : 'Geçmiş'}
-                                                                    size="small" 
-                                                                    color="success" 
+                                                                <Chip
+                                                                    label={
+                                                                        app.status === 'active' ? 'Yaklaşan' :
+                                                                            app.status === 'completed' ? 'Tamamlandı' :
+                                                                                app.status === 'cancelled' ? 'İptal Edildi' :
+                                                                                    'Bilinmeyen'
+                                                                    }
+                                                                    size="small"
+                                                                    color={
+                                                                        app.status === 'active' ? 'info' :
+                                                                            app.status === 'completed' ? 'success' :
+                                                                                app.status === 'cancelled' ? 'error' :
+                                                                                    'default'
+                                                                    }
                                                                     sx={{ ml: 1 }}
                                                                 />
                                                             </Box>
@@ -2453,9 +2463,19 @@ export default function Danisan() {
                                                                  </Typography>
                                                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                      <Chip
-                                                                         label={new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? "Aktif" : "Tamamlandı"}
+                                                                         label={
+                                                                             ex.status === 'active' ? 'Aktif' :
+                                                                                 ex.status === 'completed' ? 'Tamamlandı' :
+                                                                                     ex.status === 'cancelled' ? 'İptal Edildi' :
+                                                                                         'Bilinmeyen'
+                                                                         }
                                                                          size="small"
-                                                                         color={new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? "success" : "default"}
+                                                                         color={
+                                                                             ex.status === 'active' ? 'success' :
+                                                                                 ex.status === 'completed' ? 'default' :
+                                                                                     ex.status === 'cancelled' ? 'error' :
+                                                                                         'default'
+                                                                         }
                                                                          sx={{ height: 22, '& .MuiChip-label': { px: 1, py: 0 } }}
                                                                      />
                                                                      <Typography variant="caption" color="text.secondary">
