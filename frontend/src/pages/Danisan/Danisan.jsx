@@ -5,8 +5,7 @@ import axios from "axios";
 import config from "../../config.js";
 import { useParams, useNavigate } from "react-router-dom";
 
-// Material UI imports
-import { 
+import {
   Box, 
   Typography, 
   Avatar, 
@@ -47,13 +46,7 @@ import {
   TableRow
 } from "@mui/material";
 
-// Icons
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import EmailIcon from '@mui/icons-material/Email';
-import PhoneIcon from '@mui/icons-material/Phone';
-import HeightIcon from '@mui/icons-material/Height';
-import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
-import WcIcon from '@mui/icons-material/Wc';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
@@ -67,6 +60,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
+import ErrorIcon from "@mui/icons-material/Error";
 
 export default function Danisan() {
     const { id } = useParams();
@@ -104,6 +98,36 @@ export default function Danisan() {
 
     const [isAddAppointmentDialogOpen, setIsAddAppointmentDialogOpen] = useState(false);
     const [appointmentForm, setAppointmentForm] = useState({ title: '', start: '', end: '' });
+
+    // Success popup states
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+
+    // Error popup states
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    // Auto-hide success popup after 3 seconds
+    useEffect(() => {
+        if (showSuccessPopup) {
+            const timer = setTimeout(() => {
+                setShowSuccessPopup(false);
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessPopup]);
+
+    // Auto-hide error popup after 5 seconds
+    useEffect(() => {
+        if (showErrorPopup) {
+            const timer = setTimeout(() => {
+                setShowErrorPopup(false);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showErrorPopup]);
 
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
@@ -481,7 +505,10 @@ export default function Danisan() {
                                 variant="contained" 
                                 color="primary" 
                                 startIcon={<AddIcon />}
-                                onClick={() => toast.info('Yeni anamnez bilgisi ekleme formu açılacak')}
+                                onClick={() => {
+                                    setSuccessMessage(`Anamnez başarıyla eklendi.`);
+                                    setShowSuccessPopup(true);
+                                }}
                             >
                                 Yeni Anamnez
                             </Button>
@@ -512,7 +539,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => toast.info('Sağlık bilgileri düzenleme formu açılacak')}
+                                            onClick={() => {}}
                                             color="primary"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -644,7 +671,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => toast.info('Kan tahlili düzenleme formu açılacak')}
+                                            onClick={() => {}}
                                             color="error"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -695,7 +722,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => toast.info('Diyet alışkanlıkları düzenleme formu açılacak')}
+                                            onClick={() => {}}
                                             color="warning"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -826,7 +853,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => toast.info('Fiziksel aktivite düzenleme formu açılacak')}
+                                            onClick={() => {}}
                                             color="info"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -925,7 +952,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => toast.info('Uyku ve stres bilgileri düzenleme formu açılacak')}
+                                            onClick={() => {}}
                                             color="success"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -975,7 +1002,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => toast.info('Notlar düzenleme formu açılacak')}
+                                            onClick={() => {}}
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1, bgcolor: '#9575cd', '&:hover': { bgcolor: '#5e35b1' } }}
                                         >
                                             Düzenle
@@ -1008,10 +1035,10 @@ export default function Danisan() {
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         action={
                                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<AddIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut ölçümü ekleme formu açılacak')}>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<AddIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => {}}>
                                                     Ekle
                                                 </Button>
-                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut ölçümleri düzenleme formu açılacak')}>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => {}}>
                                                     Düzenle
                                                 </Button>
                                             </Box>
@@ -1209,7 +1236,7 @@ export default function Danisan() {
                                         title="Vücut Analizi" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         action={
-                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut analizi düzenleme formu açılacak')}>
+                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => {}}>
                                                 Düzenle
                                             </Button>
                                         }
@@ -3104,8 +3131,8 @@ export default function Danisan() {
             setAssignedExercises(response.data);
             handleCloseAssignExerciseDialog(); // Popup'ı kapat
         } catch (err) {
-            console.error("Egzersiz atama hatası:", err);
-            toast.error("Egzersiz atama başarısız: " + (err.response?.data?.message || err.message));
+            setErrorMessage(`Egzersiz atama hatası: ${err.message}`);
+            setShowErrorPopup(true);
         } finally {
             setAssignLoading(false);
             setAssignedExercisesLoading(false);
@@ -3124,7 +3151,7 @@ export default function Danisan() {
 
     const handleAddAppointment = async () => {
         try {
-            await axios.post(
+            const response = await axios.post(
                 config[config.environment].apiUrl + "/appointment/addAppointmentAsDietitian",
                 {
                     title: appointmentForm.title,
@@ -3138,9 +3165,12 @@ export default function Danisan() {
                     }
                 }
             );
+    
             setIsAddAppointmentDialogOpen(false);
+            setAppointmentForm({ title: '', start: '', end: '' }); // Reset form
+            
             setAppointmentsLoading(true);
-            const response = await axios.get(
+            const appointmentsResponse = await axios.get(
                 config[config.environment].apiUrl + "/appointment/fetchClientAppointmentAsDietitian",
                 {
                     headers: {
@@ -3151,11 +3181,14 @@ export default function Danisan() {
                     },
                 }
             );
-            setAppointments(response.data);
+            setAppointments(appointmentsResponse.data);
             setAppointmentsLoading(false);
+
+            setSuccessMessage(`Randevu başarıyla oluşturuldu.`);
+            setShowSuccessPopup(true);
         } catch (err) {
-            console.error("Randevu ekleme hatası:", err);
-            // Handle error as needed
+            setErrorMessage(err.response.data.message);
+            setShowErrorPopup(true);
         }
     };
 
@@ -3280,6 +3313,25 @@ export default function Danisan() {
                     </Grid>
                 </Grid>
             </Box>
+            {/* Success Popup */}
+            {showSuccessPopup && (
+                <div className="success-popup">
+                    <div className="success-popup-content">
+                        <CheckCircleIcon className="success-icon" />
+                        <p>{successMessage}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Popup */}
+            {showErrorPopup && (
+                <div className="error-popup">
+                    <div className="error-popup-content">
+                        <ErrorIcon className="error-icon" />
+                        <p>{errorMessage}</p>
+                    </div>
+                </div>
+            )}
         </Default>
     );
 }

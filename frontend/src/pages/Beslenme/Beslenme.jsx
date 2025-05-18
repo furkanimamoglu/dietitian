@@ -3,7 +3,6 @@ import './Beslenme.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
-import { toast } from 'react-hot-toast';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,7 +11,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -60,7 +58,6 @@ const CategoryItem = ({ category, isChecked, onCheck, onDelete }) => {
     );
 };
 
-// Nutrition Card Component
 const NutritionCard = ({ item, onAddToUser, onPrint, onEdit, onDelete, onView }) => {
     return (
         <div className="nutrition-card">
