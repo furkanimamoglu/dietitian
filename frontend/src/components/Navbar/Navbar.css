@@ -6,7 +6,6 @@
 }
 
 .nav-button {
-    letter-spacing: 0.5px;
     position: relative;
     overflow: hidden;
 }
@@ -55,7 +54,6 @@
     font-size: 1.2rem;
     margin: 0;
     font-weight: 600;
-    letter-spacing: 0.3px;
 }
 
 .mobile-logo {

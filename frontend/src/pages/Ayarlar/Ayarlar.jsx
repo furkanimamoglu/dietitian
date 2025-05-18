@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useState } from "react";
 import Default from "../../Components/Layouts/Default.jsx";
 import "./Ayarlar.css";
 import { 
@@ -25,8 +25,7 @@ import {
   InputLabel,
   Chip,
   Avatar,
-  Slider,
-  Tooltip
+  Slider
 } from "@mui/material";
 import { 
   Visibility, 
@@ -37,13 +36,10 @@ import {
   Person, 
   Edit as EditIcon, 
   Close as CloseIcon,
-  VolumeUp,
   Brightness4,
   Language,
   Notifications,
-  Schedule,
-  Lock as LockIcon,
-  ColorLens
+  Lock as LockIcon
 } from "@mui/icons-material";
 
 function TabPanel(props) {

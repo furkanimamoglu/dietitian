@@ -18,8 +18,8 @@ const RecipeCategory = require('./RecipeCategory');
 const Notes = require('./Notes');
 const Package = require('./Package');
 const PackageItems = require('./PackageItems');
+const Measurement = require('./Measurement');
 
-// 1. Dietitian ve Client
 Dietitian.hasMany(Client, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -28,7 +28,6 @@ Client.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 2. Dietitian ve Exercise
 Dietitian.hasMany(Exercise, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -37,7 +36,6 @@ Exercise.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 3. Dietitian ve Recipe
 Dietitian.hasMany(Recipe, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -46,7 +44,6 @@ Recipe.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 4. Dietitian ve Appointment
 Dietitian.hasMany(Appointment, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -55,7 +52,6 @@ Appointment.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 5. Dietitian ve NutritionPlan
 Dietitian.hasMany(NutritionPlan, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -64,7 +60,6 @@ NutritionPlan.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 6. Dietitian ve DietitianOption
 Dietitian.hasOne(DietitianOption, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -73,7 +68,6 @@ DietitianOption.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// 7. Dietitian ve NutritionCategory
 Dietitian.hasMany(NutritionCategory, {
     foreignKey: 'dietitian_id',
     as: 'categories',
@@ -84,7 +78,6 @@ NutritionCategory.belongsTo(Dietitian, {
     as: 'dietitian',
 });
 
-// 8. NutritionCategory ve NutritionPlan
 NutritionCategory.hasMany(NutritionPlan, {
     foreignKey: 'category_id',
     as: 'nutritionPlans',
@@ -116,7 +109,6 @@ NutritionAssignment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// 9. Client ve Appointment
 Client.hasMany(Appointment, {
     foreignKey: 'client_id',
 });
@@ -124,7 +116,6 @@ Appointment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// 10. Client ve Anamnes
 Client.hasMany(Anamnes, {
     foreignKey: 'client_id',
 });
@@ -132,7 +123,6 @@ Anamnes.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// 11. Client ve Invoice
 Client.hasMany(Invoice, {
     foreignKey: 'client_id',
     onDelete: 'CASCADE',
@@ -141,7 +131,6 @@ Invoice.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// Dietitian ve Invoice
 Dietitian.hasMany(Invoice, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -150,7 +139,6 @@ Invoice.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// Diyetisyen ve Notlar
 Dietitian.hasMany(Notes, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -159,7 +147,6 @@ Notes.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// Dietitian ve Message
 Dietitian.hasMany(Message, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -168,7 +155,6 @@ Message.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-// Client ve Message
 Client.hasMany(Message, {
     foreignKey: 'client_id',
     onDelete: 'CASCADE',
@@ -177,7 +163,6 @@ Message.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// Tarifler ve Tarif Kategorisi
 RecipeCategory.hasMany(Recipe, {
     foreignKey: 'category_id',
     as: 'recipe',
@@ -189,7 +174,6 @@ Recipe.belongsTo(RecipeCategory, {
     as: 'category',
 });
 
-// Diyetisyen ve Tarif Kategorisi
 Dietitian.hasMany(RecipeCategory, {
     foreignKey: 'dietitian_id',
     as: 'recipeCategories',
@@ -200,7 +184,6 @@ RecipeCategory.belongsTo(Dietitian, {
     as: 'dietitian',
 });
 
-// Egzersiz ve Egzersiz Kategorisi
 ExerciseCategory.hasMany(Exercise, {
     foreignKey: 'category_id',
     as: 'exercise',
@@ -212,7 +195,6 @@ Exercise.belongsTo(ExerciseCategory, {
     as: 'category',
 });
 
-// Dietitian ve Exercise Category
 Dietitian.hasMany(ExerciseCategory, {
     foreignKey: 'dietitian_id',
     as: 'exerciseCategories',
@@ -223,7 +205,6 @@ ExerciseCategory.belongsTo(Dietitian, {
     as: 'dietitian',
 });
 
-// Exercise and ExerciseAssignment relationship
 ExerciseAssignment.belongsTo(Exercise, {
     foreignKey: 'exercise_id',
     as: 'Exercise'
@@ -235,13 +216,20 @@ Exercise.hasMany(ExerciseAssignment, {
     hooks: true
 });
 
-// Client and ExerciseAssignment relationship
 Client.hasMany(ExerciseAssignment, {
     foreignKey: 'client_id',
     onDelete: 'CASCADE',
     hooks: true,
 });
 ExerciseAssignment.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
+Client.hasMany(Measurement, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+});
+Measurement.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
@@ -290,5 +278,6 @@ module.exports = {
     Recipe,
     RecipeCategory,
     Package,
-    PackageItems
+    PackageItems,
+    Measurement
 };

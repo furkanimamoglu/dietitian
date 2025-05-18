@@ -256,6 +256,18 @@ export default function Header() {
                             color: 'white',
                             fontSize: isMobile ? 22 : 24
                         }} />
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: isMobile ? '1rem' : '1.25rem',
+                                letterSpacing: 1,
+                                color: 'white',
+                                fontFamily: 'Montserrat, sans-serif'
+                            }}
+                        >
+                            Diyetia
+                        </Typography>
                     </LogoContainer>
 
                     {/* Desktop Search Bar */}
@@ -324,7 +336,7 @@ export default function Header() {
                                                                 fontWeight: "500",
                                                             }}
                                                         />
-                                                        {/* Type'a göre ikon */}
+                                                        {/* Type Based Icon */}
                                                         {getIconByType(result.type)}
                                                     </ListItemButton>
                                                 </ListItem>

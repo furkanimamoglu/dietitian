@@ -17,6 +17,7 @@ const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
 const invoiceRoutes = require('./Routes/invoiceRoutes');
 const messageRoutes = require('./Routes/messageRoutes');
+const measurementRoutes = require('./Routes/measurementRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
 const exerciseRoutes = require('./Routes/exerciseRoutes');
 const packageRoutes = require('./Routes/packageRoutes');
@@ -44,6 +45,7 @@ app.use('/recipe', recipeRoutes);
 app.use('/exercise', exerciseRoutes);
 app.use('/invoice', invoiceRoutes);
 app.use('/message', messageRoutes);
+app.use('/measurement', measurementRoutes);
 app.use('/package', packageRoutes);
 
 // Working Directory

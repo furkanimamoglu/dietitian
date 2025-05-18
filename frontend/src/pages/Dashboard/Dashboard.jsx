@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import { 
@@ -15,11 +14,9 @@ import {
   List, 
   ListItem, 
   ListItemText, 
-  Chip, 
-  Avatar, 
+  Avatar,
   IconButton, 
   TextField,
-  Stack
 } from '@mui/material';
 import { 
   People as PeopleIcon, 
@@ -28,7 +25,6 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
   CheckCircle as CheckCircleIcon,
-  RadioButtonUnchecked as RadioButtonUncheckedIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 import config from "../../config.js";
@@ -356,19 +352,12 @@ export default function Dashboard() {
         }
     ];
 
-    // Helper function to format appointment time
-    const formatAppointmentTime = (dateString) => {
-        return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    };
-
-    // Helper function to format appointment time range
     const formatTimeRange = (startDate, endDate) => {
         const start = new Date(startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const end = new Date(endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         return `${start}-${end}`;
     };
 
-    // Handle loading more appointments
     const handleLoadMoreApproved = () => {
         setApprovedLimit(prev => prev + 5);
     };
