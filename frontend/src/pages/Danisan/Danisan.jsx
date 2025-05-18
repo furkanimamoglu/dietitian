@@ -58,7 +58,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ErrorIcon from "@mui/icons-material/Error";
 
-export default function Danisan() {
+function Danisan() {
     const { id } = useParams();
     const navigate = useNavigate();
     const theme = useTheme();
@@ -109,25 +109,18 @@ export default function Danisan() {
 
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
+        let timer;
         if (showSuccessPopup) {
-            const timer = setTimeout(() => {
+            timer = setTimeout(() => {
                 setShowSuccessPopup(false);
             }, 3000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [showSuccessPopup]);
-
-    // Auto-hide error popup after 5 seconds
-    useEffect(() => {
-        if (showErrorPopup) {
-            const timer = setTimeout(() => {
+        } else if (showErrorPopup) {
+            timer = setTimeout(() => {
                 setShowErrorPopup(false);
             }, 5000);
-
-            return () => clearTimeout(timer);
         }
-    }, [showErrorPopup]);
+        return () => timer && clearTimeout(timer);
+    }, [showSuccessPopup, showErrorPopup]);
 
     // Danisan.jsx içerisinde state tanımlamalarını ekleyin (diğer state'lerin yanına)
     const [measurementForm, setMeasurementForm] = useState({
@@ -143,13 +136,11 @@ export default function Danisan() {
     const [isMeasurementDialogOpen, setIsMeasurementDialogOpen] = useState(false);
     const [createMeasurementLoading, setCreateMeasurementLoading] = useState(false);
 
-// Formun değişikliklerini takip eden fonksiyon
     const handleMeasurementFormChange = (e) => {
         const { name, value } = e.target;
         setMeasurementForm(prev => ({ ...prev, [name]: value }));
     };
 
-// Modal'ı açıp kapatan fonksiyonlar
     const handleOpenMeasurementDialog = () => {
         setIsMeasurementDialogOpen(true);
     };
@@ -197,10 +188,8 @@ export default function Danisan() {
                 }
             );
 
-            // Dialog'u kapat ve formu temizle
             handleCloseMeasurementDialog();
 
-            // Ölçümleri yeniden yükle
             setMeasurementsLoading(true);
             const response = await axios.get(
                 config[config.environment].apiUrl + "/measurement/getClientMeasurement",
@@ -216,7 +205,6 @@ export default function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            // Başarı mesajı göster
             setSuccessMessage("Yeni ölçüm başarıyla eklendi.");
             setShowSuccessPopup(true);
 
@@ -225,6 +213,106 @@ export default function Danisan() {
             setShowErrorPopup(true);
         } finally {
             setCreateMeasurementLoading(false);
+        }
+    };
+
+    const [isEditMeasurementDialogOpen, setIsEditMeasurementDialogOpen] = useState(false);
+    const [editMeasurementForm, setEditMeasurementForm] = useState({
+        boy: '',
+        kilo: '',
+        bel: '',
+        kalca: '',
+        gogus: '',
+        yag: '',
+        kas: '',
+        su: ''
+    });
+    const [selectedMeasurementId, setSelectedMeasurementId] = useState(null);
+    const [updateMeasurementLoading, setUpdateMeasurementLoading] = useState(false);
+
+    const handleEditMeasurementFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditMeasurementForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleOpenEditMeasurementDialog = (measurement) => {
+        setSelectedMeasurementId(measurement.id);
+        setEditMeasurementForm({
+            boy: measurement.boy || '',
+            kilo: measurement.kilo || '',
+            bel: measurement.bel || '',
+            kalca: measurement.kalca || '',
+            gogus: measurement.gogus || '',
+            yag: measurement.yag || '',
+            kas: measurement.kas || '',
+            su: measurement.su || ''
+        });
+        setIsEditMeasurementDialogOpen(true);
+    };
+
+    const handleCloseEditMeasurementDialog = () => {
+        setIsEditMeasurementDialogOpen(false);
+        setSelectedMeasurementId(null);
+    };
+
+    const handleUpdateMeasurement = async (e) => {
+        e.preventDefault();
+
+        // Yüzde toplamı kontrolü
+        const yag = parseFloat(editMeasurementForm.yag) || 0;
+        const kas = parseFloat(editMeasurementForm.kas) || 0;
+        const su = parseFloat(editMeasurementForm.su) || 0;
+        const toplam = yag + kas + su;
+
+        if (yag > 100 || kas > 100 || su > 100 || toplam > 100) {
+            setErrorMessage("Yağ, kas ve su yüzdelerinin toplamı %100'ü geçemez.");
+            setShowErrorPopup(true);
+            return;
+        }
+
+        setUpdateMeasurementLoading(true);
+
+        try {
+            await axios.put(
+                config[config.environment].apiUrl + "/measurement/updateMeasurement",
+                {
+                    measurement_id: selectedMeasurementId,
+                    client_id: id,
+                    ...editMeasurementForm
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+
+            handleCloseEditMeasurementDialog();
+
+            // Ölçümleri güncellemek için yeniden çek
+            setMeasurementsLoading(true);
+            const response = await axios.get(
+                config[config.environment].apiUrl + "/measurement/getClientMeasurement",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id,
+                    },
+                }
+            );
+            setMeasurements(response.data);
+            setMeasurementsLoading(false);
+
+            setSuccessMessage("Ölçüm başarıyla güncellendi.");
+            setShowSuccessPopup(true);
+
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || "Ölçüm güncellenirken bir hata oluştu.");
+            setShowErrorPopup(true);
+        } finally {
+            setUpdateMeasurementLoading(false);
         }
     };
 
@@ -1192,17 +1280,13 @@ export default function Danisan() {
                                         action={
                                             <Box sx={{ display: 'flex', gap: 1 }}>
                                                 <Button
-                                                    component="span"
                                                     variant="contained"
                                                     size="small"
-                                                    color="success"
+                                                    color="primary"
                                                     startIcon={<AddIcon />}
-                                                    sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
-                                                    onClick={handleOpenMeasurementDialog}>
+                                                    onClick={handleOpenMeasurementDialog}
+                                                >
                                                     Yeni Ölçüm
-                                                </Button>
-                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => {}}>
-                                                    Düzenle
                                                 </Button>
                                             </Box>
                                         }
@@ -1220,72 +1304,47 @@ export default function Danisan() {
                                             scrollbarColor: '#81c784 #e8f5e9',
                                             scrollbarWidth: 'thin'
                                         }}>
-                                            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-                                                <Table size="small" aria-label="vücut ölçümleri tablosu">
+                                            <TableContainer component={Paper} sx={{ mb: 4, mt: 2 }}>
+                                                <Table>
                                                     <TableHead>
-                                                        <TableRow sx={{
-                                                            background: 'linear-gradient(45deg, #4caf50, #81c784)',
-                                                            '& th': { color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }
-                                                        }}>
-                                                            <TableCell sx={{ borderBottom: 'none', pl: 2 }}>Tarih</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kilo (kg)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Bel (cm)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kalça (cm)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Göğüs (cm)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Yağ (%)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kas (%)</TableCell>
-                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Su (%)</TableCell>
+                                                        <TableRow>
+                                                            <TableCell>Tarih</TableCell>
+                                                            <TableCell align="right">Boy (cm)</TableCell>
+                                                            <TableCell align="right">Kilo (kg)</TableCell>
+                                                            <TableCell align="right">Bel (cm)</TableCell>
+                                                            <TableCell align="right">Kalça (cm)</TableCell>
+                                                            <TableCell align="right">Göğüs (cm)</TableCell>
+                                                            <TableCell align="right">Yağ (%)</TableCell>
+                                                            <TableCell align="right">Kas (%)</TableCell>
+                                                            <TableCell align="right">Su (%)</TableCell>
+                                                            <TableCell align="center">İşlemler</TableCell>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
-                                                        {measurementsLoading ? (
-                                                            <TableRow>
-                                                                <TableCell colSpan={8} align="center">
-                                                                    <CircularProgress size={24} />
+                                                        {measurements.map((measurement) => (
+                                                            <TableRow key={measurement.id}>
+                                                                <TableCell>
+                                                                    {new Date(measurement.createdAt).toLocaleDateString('tr-TR')}
                                                                 </TableCell>
-                                                            </TableRow>
-                                                        ) : measurements && measurements.length > 0 ? (
-                                                            measurements.map((row, index, arr) => {
-                                                                const prevRow = index > 0 ? arr[index - 1] : null;
-                                                                const weightChange = prevRow ? row.kilo - prevRow.kilo : 0;
-                                                                const waistChange = prevRow ? row.bel - prevRow.bel : 0;
-                                                                const hipChange = prevRow ? row.kalca - prevRow.kalca : 0;
-                                                                const chestChange = prevRow ? row.gogus - prevRow.gogus : 0;
-                                                                const getBgColor = (index) => {
-                                                                    return index % 2 === 0 ? 'rgba(232, 245, 233, 0.2)' : 'white';
-                                                                };
-                                                                return (
-                                                                    <TableRow
-                                                                        key={row.id}
-                                                                        sx={{
-                                                                            bgcolor: getBgColor(index),
-                                                                            transition: 'background-color 0.2s',
-                                                                            '&:hover': {
-                                                                                bgcolor: 'rgba(129, 199, 132, 0.1)',
-                                                                                boxShadow: 'inset 0 0 0 1px rgba(129, 199, 132, 0.2)'
-                                                                            }
-                                                                        }}
+                                                                <TableCell align="right">{measurement.boy || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.kilo || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.bel || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.kalca || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.gogus || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.yag || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.kas || '-'}</TableCell>
+                                                                <TableCell align="right">{measurement.su || '-'}</TableCell>
+                                                                <TableCell align="center">
+                                                                    <IconButton
+                                                                        color="primary"
+                                                                        size="small"
+                                                                        onClick={() => handleOpenEditMeasurementDialog(measurement)}
                                                                     >
-                                                                        <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', pl: 2 }}>
-                                                                            {row.createdAt ? new Date(row.createdAt).toLocaleDateString('tr-TR') : '-'}
-                                                                        </TableCell>
-                                                                        <TableCell align="center">{row.kilo}</TableCell>
-                                                                        <TableCell align="center">{row.bel}</TableCell>
-                                                                        <TableCell align="center">{row.kalca}</TableCell>
-                                                                        <TableCell align="center">{row.gogus}</TableCell>
-                                                                        <TableCell align="center">{row.yag}</TableCell>
-                                                                        <TableCell align="center">{row.kas}</TableCell>
-                                                                        <TableCell align="center">{row.su}</TableCell>
-                                                                    </TableRow>
-                                                                );
-                                                            })
-                                                        ) : (
-                                                            <TableRow>
-                                                                <TableCell colSpan={8} align="center">
-                                                                    Ölçüm verisi bulunamadı.
+                                                                        <EditIcon />
+                                                                    </IconButton>
                                                                 </TableCell>
                                                             </TableRow>
-                                                        )}
+                                                        ))}
                                                     </TableBody>
                                                 </Table>
                                             </TableContainer>
@@ -1423,7 +1482,15 @@ export default function Danisan() {
 
                         {nutritionPlanLoading ? (
                             <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-                                <CircularProgress />
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={2}>
+                                        <Skeleton variant="rectangular" height={400} animation="wave" />
+                                    </Grid>
+                                    <Grid item xs={12} md={10}>
+                                        <Skeleton variant="rectangular" height={80} animation="wave" sx={{ mb: 2 }} />
+                                        <Skeleton variant="rectangular" height={320} animation="wave" />
+                                    </Grid>
+                                </Grid>
                             </Box>
                         ) : (
                             <Paper elevation={3} sx={{ mb: 3 }}>
@@ -3192,7 +3259,7 @@ export default function Danisan() {
                 }
             );
             setAssignedExercises(response.data);
-            handleCloseAssignExerciseDialog(); // Popup'ı kapat
+            handleCloseAssignExerciseDialog();
         } catch (err) {
             setErrorMessage(`Egzersiz atama hatası: ${err.message}`);
             setShowErrorPopup(true);
@@ -3208,7 +3275,6 @@ export default function Danisan() {
 
     const handleCloseAssignExerciseDialog = () => {
         setIsAssignExerciseDialogOpen(false);
-        // Formu kapatırken state'i de sıfırlayabiliriz
         setAssignForm({ exercise_id: '', start_date: '', end_date: '', note: '' });
     };
 
@@ -3260,7 +3326,7 @@ export default function Danisan() {
             <Box sx={{ p: 2 }}>
                 <Grid container spacing={3}>
                 {/* Sol Panel - Danışanın Resmi ve Bilgileri */}
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={2}>
                         <Card elevation={4} sx={{
                             height: '100%',
                             borderRadius: 2,
@@ -3339,7 +3405,7 @@ export default function Danisan() {
                     </Grid>
 
                 {/* Sağ Panel - Tabs ve içerik */}
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} md={10}>
                         <Card elevation={4} sx={{ borderRadius: 2, overflow: 'hidden' }}>
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                                 <Tabs
@@ -3531,7 +3597,145 @@ export default function Danisan() {
                     </DialogActions>
                 </Box>
             </Dialog>
+
+            {/* Ölçüm Düzenleme Dialog */}
+            <Dialog open={isEditMeasurementDialogOpen} onClose={handleCloseEditMeasurementDialog} fullWidth maxWidth="md">
+                <DialogTitle>Ölçüm Düzenle</DialogTitle>
+                <Box component="form" onSubmit={handleUpdateMeasurement}>
+                    <DialogContent dividers>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Boy (cm)"
+                                    name="boy"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.boy}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kilo (kg)"
+                                    name="kilo"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.kilo}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">kg</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bel Çevresi"
+                                    name="bel"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.bel}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kalça Çevresi"
+                                    name="kalca"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.kalca}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Göğüs Çevresi"
+                                    name="gogus"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.gogus}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Yağ Oranı"
+                                    name="yag"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.yag}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kas Oranı"
+                                    name="kas"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.kas}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Su Oranı"
+                                    name="su"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.su}
+                                    onChange={handleEditMeasurementFormChange}
+                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseEditMeasurementDialog}>
+                            İptal
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            disabled={updateMeasurementLoading}
+                        >
+                            {updateMeasurementLoading ? <CircularProgress size={24} /> : "Güncelle"}
+                        </Button>
+                    </DialogActions>
+                </Box>
+            </Dialog>
         </Default>
     );
 }
+
+export default React.memo(Danisan);
 
