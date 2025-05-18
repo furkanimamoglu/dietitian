@@ -102,6 +102,9 @@ export default function Danisan() {
     const [availableExercises, setAvailableExercises] = useState([]);
     const [availableExercisesLoading, setAvailableExercisesLoading] = useState(false);
 
+    const [isAddAppointmentDialogOpen, setIsAddAppointmentDialogOpen] = useState(false);
+    const [appointmentForm, setAppointmentForm] = useState({ title: '', start: '', end: '' });
+
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
         
@@ -1857,6 +1860,7 @@ export default function Danisan() {
                                 variant="contained" 
                                 size="small" 
                                 startIcon={<AddIcon />}
+                                onClick={() => setIsAddAppointmentDialogOpen(true)}
                                 sx={{ bgcolor: theme.palette.primary.main }}
                             >
                                 Yeni Randevu
@@ -2103,6 +2107,38 @@ export default function Danisan() {
                                 </Card>
                             </Grid>
                         </Grid>
+                        <Dialog open={isAddAppointmentDialogOpen} onClose={() => setIsAddAppointmentDialogOpen(false)}>
+                            <DialogTitle>Yeni Randevu Ekle</DialogTitle>
+                            <DialogContent>
+                                <TextField 
+                                    label="Başlık" 
+                                    name="title" 
+                                    value={appointmentForm.title} 
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})} 
+                                    fullWidth margin="normal" 
+                                />
+                                <TextField 
+                                    label="Başlangıç" 
+                                    name="start" 
+                                    type="datetime-local" 
+                                    value={appointmentForm.start} 
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, start: e.target.value})} 
+                                    fullWidth margin="normal" 
+                                />
+                                <TextField 
+                                    label="Bitiş" 
+                                    name="end" 
+                                    type="datetime-local" 
+                                    value={appointmentForm.end} 
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, end: e.target.value})} 
+                                    fullWidth margin="normal" 
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>İptal</Button>
+                                <Button onClick={handleAddAppointment}>Ekle</Button>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
                 );
             case 'egzersiz':
@@ -3084,6 +3120,43 @@ export default function Danisan() {
         setIsAssignExerciseDialogOpen(false);
         // Formu kapatırken state'i de sıfırlayabiliriz
         setAssignForm({ exercise_id: '', start_date: '', end_date: '', note: '' });
+    };
+
+    const handleAddAppointment = async () => {
+        try {
+            await axios.post(
+                config[config.environment].apiUrl + "/appointment/addAppointmentAsDietitian",
+                {
+                    title: appointmentForm.title,
+                    start: appointmentForm.start,
+                    end: appointmentForm.end,
+                    client_id: id
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+            setIsAddAppointmentDialogOpen(false);
+            setAppointmentsLoading(true);
+            const response = await axios.get(
+                config[config.environment].apiUrl + "/appointment/fetchClientAppointmentAsDietitian",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id,
+                    },
+                }
+            );
+            setAppointments(response.data);
+            setAppointmentsLoading(false);
+        } catch (err) {
+            console.error("Randevu ekleme hatası:", err);
+            // Handle error as needed
+        }
     };
 
     return (
