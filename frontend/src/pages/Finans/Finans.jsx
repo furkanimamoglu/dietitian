@@ -28,7 +28,6 @@ const CustomModal = ({ isOpen, onClose, title, children }) => {
         setMouseDownTarget(e.target);
     };
     const handleOverlayMouseUp = (e) => {
-        // Sadece mouse down ve mouse up aynı overlay ise ve loading değilse kapat
         if (e.target === overlayRef.current && mouseDownTarget === overlayRef.current) {
             onClose();
         }

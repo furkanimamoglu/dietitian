@@ -18,7 +18,6 @@ import {
     Select,
     MenuItem,
     InputAdornment,
-    FormHelperText,
     Snackbar,
     Alert
 } from "@mui/material";
@@ -51,9 +50,6 @@ import { useNavigate } from "react-router-dom";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 
-// ---------------------------
-// Custom Toolbar with Search & Export
-// ---------------------------
 function QuickSearchToolbar() {
     return (
         <GridToolbarContainer sx={{ justifyContent: "space-between", py: 1 }}>
@@ -66,9 +62,6 @@ function QuickSearchToolbar() {
 export default function Danisanlarim() {
     const navigate = useNavigate();
 
-    // ---------------------------
-    // State
-    // ---------------------------
     const [clients, setClients] = useState([]);
     const [selectedClient, setSelectedClient] = useState(null);
 
@@ -79,7 +72,6 @@ export default function Danisanlarim() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
 
-    // Add these new states for form handling
     const [newClient, setNewClient] = useState({
         phoneNumber: "",
         password: "",
@@ -95,18 +87,12 @@ export default function Danisanlarim() {
         severity: "success"
     });
 
-    // ---------------------------
-    // İstatistikler
-    // ---------------------------
     const totalCount = clients.length;
     const activeCount = clients.filter(c => c.status === true).length;
     const inactiveCount = clients.filter(c => c.status === false).length;
     const maleCount = clients.filter(c => c.gender === "Erkek").length;
     const femaleCount = clients.filter(c => c.gender === "Kadın").length;
 
-    // ---------------------------
-    // Data Fetch
-    // ---------------------------
     useEffect(() => {
         axios
             .get(
@@ -119,9 +105,6 @@ export default function Danisanlarim() {
             .catch((err) => console.error("Error fetching clients:", err));
     }, []);
 
-    // ---------------------------
-    // CRUD Helpers
-    // ---------------------------
     const handleRowUpdate = useCallback(async (updatedRow, originalRow) => {
         // Değişiklikleri karşılaştır
         const changes = Object.keys(updatedRow).reduce((acc, key) => {
@@ -134,16 +117,13 @@ export default function Danisanlarim() {
             return acc;
         }, {});
 
-        // Eğer değişiklik yoksa direkt orijinal satırı döndür
         if (Object.keys(changes).length === 0) {
             return originalRow;
         }
 
-        // Değişiklikleri ve satırı sakla
         setPendingEdit({ updatedRow, originalRow, changes });
         setEditDialogOpen(true);
 
-        // Promise'i beklet
         return new Promise((resolve) => {
             const unsubscribe = () => {
                 const cleanup = () => {
@@ -151,14 +131,12 @@ export default function Danisanlarim() {
                     setEditDialogOpen(false);
                 };
 
-                // Onay event listener'ını kaldır
                 window.removeEventListener('editConfirmed', handleConfirm);
                 window.removeEventListener('editCancelled', handleCancel);
 
                 return cleanup;
             };
 
-            // Onay event listener'larını ekle
             const handleConfirm = async () => {
                 try {
                     const res = await axios.put(
@@ -336,6 +314,7 @@ export default function Danisanlarim() {
                 email: ""
             });
             closeCreateDialog();
+            navigate(`/danisan/${response.data.id}`);
             
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);

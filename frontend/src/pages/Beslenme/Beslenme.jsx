@@ -3,7 +3,6 @@ import './Beslenme.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
-import { toast } from 'react-hot-toast';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,7 +11,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -153,14 +151,6 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
         }
         
         return [];
-    };
-    
-    // Helper function to get alternatives for a specific item
-    const getAlternativesForItem = (mealData, itemName) => {
-        if (!mealData || !mealData.alternatives || !mealData.alternatives[itemName]) {
-            return [];
-        }
-        return mealData.alternatives[itemName];
     };
     
     // Helper function to add a main meal item
@@ -525,13 +515,10 @@ const MealPlanTable = ({ mealPlan, onMealChange, selectedDay, onDayChange }) => 
     );
 };
 
-// View Meal Plan Component
-const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
-    // Helper function to get meal items and their alternatives
+const ViewMealPlan = ({ mealPlan, programTitle, onExportPdf }) => {
     const getMealContent = (mealData) => {
         if (!mealData) return { mainItems: [], hasAlternatives: false };
         
-        // Handle array format (simple list of items)
         if (Array.isArray(mealData)) {
             return { 
                 mainItems: mealData,
@@ -539,7 +526,6 @@ const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
             };
         }
         
-        // Handle complex format with main and alternatives
         if (mealData.main && Array.isArray(mealData.main)) {
             return {
                 mainItems: mealData.main,
@@ -548,7 +534,6 @@ const ViewMealPlan = ({ mealPlan, onClose, programTitle, onExportPdf }) => {
             };
         }
         
-        // Handle string format (backward compatibility)
         if (typeof mealData === 'string') {
             const items = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
             return {
@@ -646,7 +631,7 @@ export default function Beslenme() {
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [editCategoryId, setEditCategoryId] = useState('');
-    
+
     // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -654,7 +639,7 @@ export default function Beslenme() {
     // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    
+
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
@@ -665,7 +650,7 @@ export default function Beslenme() {
             return () => clearTimeout(timer);
         }
     }, [showSuccessPopup]);
-    
+
     // Auto-hide error popup after 5 seconds
     useEffect(() => {
         if (showErrorPopup) {
@@ -770,12 +755,10 @@ export default function Beslenme() {
         fetchNutritionPlans();
     }, []);
 
-    // Filter categories based on search term
     const filteredCategories = categoryData?.filter(category =>
         (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Filter nutrition programs based on selected categories
     const filteredBeslenmeData = beslenmeData.filter(item => {
         // If no categories are checked, show all items
         if (checkedCategories.length === 0) {
@@ -949,12 +932,6 @@ export default function Beslenme() {
         });
     };
 
-    // Nutrition card handlers
-    const handleOpenDetailModal = (item) => {
-        setDetailItem(item);
-        setDetailModal(true);
-    };
-
     const handleOpenAddToUserModal = (item) => {
         setSelectedProgram(item);
         // Set default dates (today and a week from today)
@@ -992,18 +969,15 @@ export default function Beslenme() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
-            // Check if response has an error message
             if (response.data && response.data.message && !response.data.ok) {
                 setErrorMessage(response.data.message || "Bir hata oluştu.");
                 setShowErrorPopup(true);
                 return;
             }
             
-            // Success case - store info for success message
             const programName = selectedProgram.title;
             const userName = selectedUser.name;
             
-            // Close the modal and reset states
             setAddToUserModal(false);
             setSelectedProgram(null);
             setSelectedUser(null);
@@ -1011,13 +985,11 @@ export default function Beslenme() {
             setEndDate('');
             setAssignmentNote('');
             
-            // Show success popup
             setSuccessMessage(`"${programName}" programı "${userName}" danışanına başarıyla atandı. Danışanınız bu plana göre yediklerini işaretleyebilecek.`);
             setShowSuccessPopup(true);
         })
         .catch(error => {
             console.error("Error assigning plan to client:", error);
-            // Show error popup with specific message from API if available
             setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
             setShowErrorPopup(true);
         });
@@ -1025,67 +997,52 @@ export default function Beslenme() {
 
     const handlePrint = (item) => {
         console.log("Printing:", item);
-        // Use the same PDF export functionality
         generatePDF(item);
     };
 
-    // Shared PDF generation function
     const generatePDF = (program) => {
-        // Create a new PDF document with landscape orientation for better layout
         const doc = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
             format: 'a4'
         });
         
-        // Get dietitian name from localStorage or use a default
-        const dietitianName = "Dr. Ayşe Yılmaz"; // In a real app, get this from user profile
+        const dietitianName = "Dr. Ayşe Yılmaz";
         
-        // Set background color for header - using green theme
-        doc.setFillColor(76, 175, 80); // Green primary color
+        doc.setFillColor(76, 175, 80);
         doc.rect(0, 0, doc.internal.pageSize.getWidth(), 25, 'F');
         
-        // Add title with white text
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(18);
         doc.text(`${program.title} Beslenme Programi`, 14, 15);
         
-        // Reset text color to black
         doc.setTextColor(0, 0, 0);
         
-        // Add date and dietitian info
         doc.setFontSize(10);
         const today = new Date();
         const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
         doc.text(`Olusturulma Tarihi: ${dateStr}`, 14, 30);
         doc.text(`Diyetisyen: ${dietitianName}`, 14, 35);
         
-        // Add a decorative line
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.5);
         doc.line(14, 38, doc.internal.pageSize.getWidth() - 14, 38);
         
-        // Calculate dimensions for the grid layout - make sure all 7 days fit on one page
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 14;
         const usableWidth = pageWidth - (margin * 2);
         
-        // Optimize for single page - 7 days in a compact layout
-        const daysPerRow = 4; // First row has 4 days
-        const dayWidth = usableWidth / 4; // Width based on 4 columns
-        const dayHeight = 50; // Smaller height to fit on one page
+        const dayWidth = usableWidth / 4;
+        const dayHeight = 50;
         
-        // Start position
         let xPos = margin;
-        let yPos = 45; // Start after the header
+        let yPos = 45;
         let dayCount = 0;
         
-        // Helper function to extract meal items from different formats
         const getMealItems = (mealData) => {
             if (!mealData) return [];
             
-            // For complex format with main and alternatives
             if (mealData.main && Array.isArray(mealData.main)) {
                 return mealData.main;
             }
@@ -1203,7 +1160,7 @@ export default function Beslenme() {
         // Add dietitian contact info in footer
         doc.setFontSize(8);
         doc.setTextColor(76, 175, 80);
-        doc.text("Saglikli gunler dileriz!", margin, pageHeight - 10);
+        doc.text("Sağlıklı günler dileriz!", margin, pageHeight - 10);
         doc.setTextColor(255, 152, 0);
         doc.text("www.diyetisyen.com", pageWidth / 2 - 15, pageHeight - 10);
         
