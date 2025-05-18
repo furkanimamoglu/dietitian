@@ -10,9 +10,8 @@ const Exception = require('../Exception/Exception');
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 // Models
-const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes} = require('../Model/MainModel');
+const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes, Measurement} = require('../Model/MainModel');
 const {Op} = require("sequelize");
-const Security = require("../Utils/Security");
 
 class DietitianService {
 
@@ -387,6 +386,28 @@ class DietitianService {
             success: true,
             message: "Kategori başarıyla silindi."
         };
+    }
+
+    static async getClientMeasurement(dietitian_id, client_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        const client = await Client.findOne({
+            where: {
+                id: client_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!client) {
+            throw new Exception("Danışan bulunamadı.", 404, true);
+        }
+
+        return await Measurement.findAll({
+            where: { client_id },
+            order: [['createdAt', 'DESC']]
+        });
     }
 
     static async globalSearchbar(user_id, query) {
