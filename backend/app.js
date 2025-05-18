@@ -3,6 +3,7 @@ const express = require('express');
 const sequelize = require('./Utils/Database');
 const bodyParser = require('body-parser');
 const config = require('./config.json');
+const cors = require('cors');
 
 // Models
 require('./Model/MainModel');
@@ -14,9 +15,19 @@ const app = express();
 const dietitianRoutes = require('./Routes/dietitianRoutes');
 const clientRoutes = require('./Routes/clientRoutes');
 const appointmentRoutes = require('./Routes/appointmentRoutes');
-const systemRoutes = require('./Routes/systemRoutes');
+const invoiceRoutes = require('./Routes/invoiceRoutes');
+const messageRoutes = require('./Routes/messageRoutes');
+const measurementRoutes = require('./Routes/measurementRoutes');
+const recipeRoutes = require('./Routes/recipeRoutes');
+const exerciseRoutes = require('./Routes/exerciseRoutes');
+const packageRoutes = require('./Routes/packageRoutes');
 
 app.use(bodyParser.json());
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,7 +40,13 @@ app.use((req, res, next) => {
 app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
-app.use('/system', systemRoutes);
+app.use('/message', messageRoutes);
+app.use('/recipe', recipeRoutes);
+app.use('/exercise', exerciseRoutes);
+app.use('/invoice', invoiceRoutes);
+app.use('/message', messageRoutes);
+app.use('/measurement', measurementRoutes);
+app.use('/package', packageRoutes);
 
 // Working Directory
 try {
@@ -58,6 +75,7 @@ if (config.ddl === "create-drop") {
 } else if (config.ddl === "update") {
     sequelize.sync().then(() => {
         app.listen(config.server.port);
+        console.log(`INFO - Sunucu http://localhost:${config.server.port} portunda çalışıyor.`);
     }).catch(err => {
         console.log(err)
     });

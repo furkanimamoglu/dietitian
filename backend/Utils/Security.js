@@ -50,16 +50,37 @@ class Security {
             if (!token) {
                 return null;
             }
+
             token = token.replace('Bearer ', '');
 
-            let user = jwt.verify(token, config.secretkey);
+            let solvedToken = jwt.verify(token, config.secretkey);
 
-            return user.id;
+            return solvedToken.id;
         } catch (error) {
             return null;
         }
     }
 
+    /**
+     * Security - Resolving phoneNumber from Token.
+     * @params token - Token which starts with "Bearer ".
+     * @returns boolean
+     * @author Furkan İmamoğlu
+     */
+    getPhoneNumberFromToken(token) {
+        try {
+            if (!token) {
+                return null;
+            }
+            token = token.replace('Bearer ', '');
+
+            let solvedToken = jwt.verify(token, config.secretkey);
+
+            return solvedToken.phoneNumber;
+        } catch (error) {
+            return null;
+        }
+    }
 
 }
 

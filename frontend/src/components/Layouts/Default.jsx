@@ -17,7 +17,7 @@ export default function Default(props) {
                     overflowY: 'auto',
                     overflowX: 'auto',
                     padding: '1rem',
-                    mt: { xs: '3rem', sm: '8rem' },
+                    mt: { xs: '3rem', sm: '2rem' },
                 }}
             >
                 {props.children}

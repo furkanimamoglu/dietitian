@@ -2,15 +2,6 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
-const Client = require('./Client');
-const Exercise = require('./Exercise');
-const Recipe = require('./Recipe');
-const Appointment = require('./Appointment');
-const AnamnesQuestion = require('./AnamnesQuestion');
-const DietitianOption = require('./DietitianOption');
-const NutritionPlan = require('./NutritionPlan');
-const NutritionCategory = require('./NutritionCategory');
-
 const Dietitian = sequelize.define('Dietitian', {
         id: {
             type: DataTypes.INTEGER,
@@ -18,9 +9,20 @@ const Dietitian = sequelize.define('Dietitian', {
             allowNull: false,
             primaryKey: true
         },
+        phoneNumber: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            unique: {
+                msg: 'Bu telefon numarası zaten kullanılıyor.'
+            },
+            validate: {
+                isNumeric: {
+                    msg: 'Telefon numarası yalnızca rakamlardan oluşmalıdır.'
+                }
+            }
+        },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
             unique: {
                 msg: 'Bu e-posta zaten kullanılıyor.'
             },
@@ -40,15 +42,23 @@ const Dietitian = sequelize.define('Dietitian', {
                 }
             }
         },
-        role: DataTypes.STRING,
-        phoneNumber: DataTypes.STRING,
-        status: {
+        name: {
             type: DataTypes.STRING,
-            defaultValue: "true",
+            allowNull: true,
+            defaultValue: "İsimsiz Danışan"
+        },
+        role: {
+            type: DataTypes.STRING,
+            defaultValue: "DIETITIAN"
+        },
+        status: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
         },
         language: DataTypes.STRING,
         currency: {
             type: DataTypes.INTEGER,
+            allowNull: false,
             defaultValue: 0
         },
         gender: DataTypes.STRING,
@@ -62,6 +72,11 @@ const Dietitian = sequelize.define('Dietitian', {
             unique: {
                 msg: 'Bu token zaten mevcut.'
             },
+        },
+        kvkkApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }
 );

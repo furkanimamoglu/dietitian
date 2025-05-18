@@ -1,0 +1,121 @@
+/* Navbar.css */
+
+/* Genel stillemeler */
+.desktop-navbar.scrolled {
+    backdrop-filter: blur(10px);
+}
+
+.nav-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-button:hover {
+    box-shadow: 0 4px 8px rgba(71, 145, 64, 0.2);
+}
+
+.nav-button.active {
+    font-weight: 700;
+}
+
+/* Aktif menü için animasyon - removed pulsing animation that may cause issues */
+@keyframes subtle-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(71, 145, 64, 0.2); }
+    70% { box-shadow: 0 0 0 4px rgba(71, 145, 64, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(71, 145, 64, 0); }
+}
+
+.nav-button.active {
+    animation: subtle-pulse 2s infinite;
+}
+
+/* Fix for hover bug - replace hover pseudo element with simpler effect */
+.nav-button:before {
+    content: none; /* Remove the pseudo element that might cause flickering */
+}
+
+/* New hover effect - safer approach */
+.nav-button:hover {
+    background-color: rgba(71, 145, 64, 0.05);
+}
+
+/* İkon animasyonları - reduce scale effect to avoid flicker */
+.nav-button svg {
+    transition: transform 0.2s ease;
+}
+
+.nav-button:hover svg {
+    transform: scale(1.1);
+}
+
+/* Mobil görünüm stilleri */
+.mobile-title {
+    color: rgb(62, 39, 10);
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.mobile-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drawer-title {
+    color: rgb(14, 62, 10);
+    margin: 0;
+    font-weight: 600;
+}
+
+.active-mobile-item {
+    transition: background-color 0.3s ease;
+}
+
+.mobile-drawer {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsive ayarlamalar */
+@media (max-width: 960px) {
+    .mobile-navbar {
+        height: 50px;
+    }
+
+    .mobile-navbar .MuiToolbar-root {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    /* Menü swipe efekti */
+    .MuiDrawer-paper {
+        transition: transform 0.25s ease-out !important;
+    }
+
+    /* Kaydırma efekti için */
+    .MuiBackdrop-root {
+        transition: opacity 0.25s ease-out !important;
+    }
+}
+
+/* Akıcı geçişler ve gölgeler */
+.desktop-navbar {
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.desktop-navbar.scrolled {
+    transform: translateY(0);
+}
+
+.navbar-divider {
+    color: #b2b2b2;
+    font-size: 1.3rem;
+    margin: 0 0.5rem;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.7;
+    font-weight: 400;
+    letter-spacing: 0;
+}

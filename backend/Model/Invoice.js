@@ -9,9 +9,39 @@ const Invoice = sequelize.define('Invoice', {
             allowNull: false,
             primaryKey: true
         },
-        status: {
-            type: DataTypes.STRING,
+        dietitian_id: {
+            type: DataTypes.INTEGER,
             allowNull: false
+        },
+        client_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        amount: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false
+        },
+        status: {
+            type: DataTypes.ENUM('paid', 'unpaid', 'cancelled'),
+            allowNull: false,
+            defaultValue: 'unpaid'
+        },
+        package_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
+        issueDate: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW
+        },
+        dueDate: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     }
 );

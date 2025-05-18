@@ -2,10 +2,6 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
-const Appointment = require('./Appointment');
-const Anamnesis = require('./Anamnes');
-const Invoice = require('./Invoice');
-
 const Client = sequelize.define('Client', {
         id: {
             type: DataTypes.INTEGER,
@@ -17,36 +13,15 @@ const Client = sequelize.define('Client', {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                len: {
-                    args: [2, 50],
-                    msg: 'İsim en az 2, en fazla 50 karakter olmalıdır.'
-                }
-            }
-        },
-        surname: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                len: {
-                    args: [2, 50],
-                    msg: 'Soyisim en az 2, en fazla 50 karakter olmalıdır.'
-                }
-            }
-        },
-        email: {
-            type: DataTypes.STRING,
+        phoneNumber: {
+            type: DataTypes.BIGINT,
             allowNull: false,
             unique: {
-                msg: 'Bu e-posta zaten kullanılıyor.'
+                msg: 'Bu telefon numarası zaten kullanılıyor.'
             },
             validate: {
-                isEmail: {
-                    msg: 'E-posta adresi geçerli olmalıdır.'
-                }
+                min: 5000000000,
+                max: 5999999999
             }
         },
         password: {
@@ -59,15 +34,44 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
-        phoneNumber: DataTypes.STRING,
-        status: {
-            type: DataTypes.STRING,
-            defaultValue: "aktif",
+        token: {
+            type: DataTypes.STRING
         },
-        language: DataTypes.STRING,
-        gender: {
+        role: {
             type: DataTypes.STRING,
             allowNull: false,
+            defaultValue: "CLIENT"
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                len: {
+                    args: [2, 80],
+                    msg: 'İsim Soyisim en az 2, en fazla 80 karakter olmalıdır.'
+                }
+            }
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            validate: {
+                isEmail: {
+                    msg: 'E-posta adresi geçerli olmalıdır.'
+                }
+            }
+        },
+        status: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
+        },
+        language: {
+            type: DataTypes.STRING,
+            defaultValue: "TR",
+        },
+        gender: {
+            type: DataTypes.STRING,
             validate: {
                 isIn: {
                     args: [["Erkek", "Kadın"]],
@@ -94,8 +98,8 @@ const Client = sequelize.define('Client', {
             allowNull: true,
             validate: {
                 min: {
-                    args: 10,
-                    msg: 'Kilo 10 kg\'dan küçük olamaz.'
+                    args: 1,
+                    msg: 'Kilo 1 kg\'dan küçük olamaz.'
                 },
                 max: {
                     args: 500,
@@ -106,6 +110,11 @@ const Client = sequelize.define('Client', {
         ipAddress: {
             type: DataTypes.STRING,
             allowNull: true,
+        },
+        kvkkApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }
 );
