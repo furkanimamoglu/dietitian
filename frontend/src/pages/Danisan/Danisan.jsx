@@ -38,7 +38,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  MenuItem
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from "@mui/material";
 
 // Icons
@@ -57,6 +63,10 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 
 export default function Danisan() {
     const { id } = useParams();
@@ -1017,103 +1027,174 @@ export default function Danisan() {
                                             scrollbarColor: '#81c784 #e8f5e9',
                                             scrollbarWidth: 'thin'
                                         }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                <thead>
-                                                    <tr style={{ borderBottom: '1px solid #e0e0e0', position: 'sticky', top: 0, zIndex: 1, background: '#e8f5e9' }}>
-                                                        <th style={{ padding: '8px', textAlign: 'left' }}>Tarih</th>
-                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Kilo (kg)</th>
-                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Bel (cm)</th>
-                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Kalça (cm)</th>
-                                                        <th style={{ padding: '8px', textAlign: 'center' }}>Göğüs (cm)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                        <td style={{ padding: '8px' }}>15 Nisan 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>85</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>108</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>96</td>
-                                                    </tr>
-                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                        <td style={{ padding: '8px' }}>30 Nisan 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>90</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>106</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>95</td>
-                                                    </tr>
-                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                        <td style={{ padding: '8px' }}>15 Mayıs 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>83</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>88</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>104</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>94</td>
-                                                    </tr>
-                                                    <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                        <td style={{ padding: '8px' }}>31 Mayıs 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>82</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>86</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>102</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>93</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>81</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                        <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                                                <Table size="small" aria-label="vücut ölçümleri tablosu">
+                                                    <TableHead>
+                                                        <TableRow sx={{
+                                                            background: 'linear-gradient(45deg, #4caf50, #81c784)',
+                                                            '& th': { color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }
+                                                        }}>
+                                                            <TableCell sx={{ borderBottom: 'none', pl: 2 }}>Tarih</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kilo (kg)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Bel (cm)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kalça (cm)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Göğüs (cm)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Değişim</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {/* Verileri girelim */}
+                                                        {[
+                                                            { date: '15 Nisan 2023', weight: 85, waist: 92, hip: 108, chest: 96 },
+                                                            { date: '30 Nisan 2023', weight: 84, waist: 90, hip: 106, chest: 95 },
+                                                            { date: '15 Mayıs 2023', weight: 83, waist: 88, hip: 104, chest: 94 },
+                                                            { date: '31 Mayıs 2023', weight: 82, waist: 86, hip: 102, chest: 93 },
+                                                            { date: '15 Haziran 2023', weight: 81, waist: 84, hip: 100, chest: 92 },
+                                                            { date: '30 Haziran 2023', weight: 80, waist: 82, hip: 98, chest: 91 },
+                                                            { date: '15 Temmuz 2023', weight: 78, waist: 80, hip: 96, chest: 90 },
+                                                            { date: '30 Temmuz 2023', weight: 77, waist: 78, hip: 94, chest: 89 }
+                                                        ].map((row, index, arr) => {
+                                                            // Önceki ölçümle karşılaştırma için
+                                                            const prevRow = index > 0 ? arr[index - 1] : null;
+
+                                                            // Değişimleri hesaplayalım (eğer önceki ölçüm varsa)
+                                                            const weightChange = prevRow ? row.weight - prevRow.weight : 0;
+                                                            const waistChange = prevRow ? row.waist - prevRow.waist : 0;
+                                                            const hipChange = prevRow ? row.hip - prevRow.hip : 0;
+                                                            const chestChange = prevRow ? row.chest - prevRow.chest : 0;
+
+                                                            // Satır için koşullu arka plan rengi
+                                                            const getBgColor = (index) => {
+                                                                return index % 2 === 0 ? 'rgba(232, 245, 233, 0.2)' : 'white';
+                                                            };
+
+                                                            return (
+                                                                <TableRow
+                                                                    key={row.date}
+                                                                    sx={{
+                                                                        bgcolor: getBgColor(index),
+                                                                        transition: 'background-color 0.2s',
+                                                                        '&:hover': {
+                                                                            bgcolor: 'rgba(129, 199, 132, 0.1)',
+                                                                            boxShadow: 'inset 0 0 0 1px rgba(129, 199, 132, 0.2)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', pl: 2 }}>
+                                                                        {row.date}
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.weight}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: weightChange < 0 ? 'success.main' : weightChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {weightChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     weightChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(weightChange) > 0 && Math.abs(weightChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.waist}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: waistChange < 0 ? 'success.main' : waistChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {waistChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     waistChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(waistChange) > 0 && Math.abs(waistChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.hip}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: hipChange < 0 ? 'success.main' : hipChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {hipChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     hipChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(hipChange) > 0 && Math.abs(hipChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.chest}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: chestChange < 0 ? 'success.main' : chestChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {chestChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     chestChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(chestChange) > 0 && Math.abs(chestChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        {index > 0 && (
+                                                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                {/* Birleşik değişim göstergesi - azalan ölçümler olumlu */}
+                                                                                {weightChange + waistChange + hipChange + chestChange < 0 ? (
+                                                                                    <Chip
+                                                                                        icon={<TrendingDownIcon fontSize="small" />}
+                                                                                        label={Math.abs(weightChange + waistChange + hipChange + chestChange).toFixed(1)}
+                                                                                        color="success"
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        sx={{ minWidth: 70 }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <Chip
+                                                                                        icon={<TrendingFlatIcon fontSize="small" />}
+                                                                                        label={Math.abs(weightChange + waistChange + hipChange + chestChange).toFixed(1)}
+                                                                                        color={weightChange + waistChange + hipChange + chestChange > 0 ? "error" : "default"}
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        sx={{ minWidth: 70 }}
+                                                                                    />
+                                                                                )}
+                                                                            </Box>
+                                                                        )}
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
                                         </Box>
                                     </CardContent>
                                 </Card>
