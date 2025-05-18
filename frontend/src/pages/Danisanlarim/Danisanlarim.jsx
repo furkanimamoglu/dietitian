@@ -336,6 +336,7 @@ export default function Danisanlarim() {
                 email: ""
             });
             closeCreateDialog();
+            navigate(`/danisan/${response.data.id}`);
             
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
