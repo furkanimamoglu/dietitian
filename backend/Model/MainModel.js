@@ -225,7 +225,7 @@ ExerciseAssignment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-Client.hasOne(Measurement, {
+Client.hasMany(Measurement, {
     foreignKey: 'client_id',
     onDelete: 'CASCADE',
 });
