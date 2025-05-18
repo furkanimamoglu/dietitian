@@ -336,7 +336,7 @@ export default function Header() {
                                                                 fontWeight: "500",
                                                             }}
                                                         />
-                                                        {/* Type'a göre ikon */}
+                                                        {/* Type Based Icon */}
                                                         {getIconByType(result.type)}
                                                     </ListItemButton>
                                                 </ListItem>
