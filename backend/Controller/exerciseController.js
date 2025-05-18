@@ -154,6 +154,29 @@ class exerciseController {
         }
     }
 
+    static async deleteExerciseAssignment(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+
+            if (!token || !dietitian_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { exercise_assignment_id } = req.query;
+
+            const result = await ExerciseService.deleteExerciseAssignment(dietitian_id, exercise_assignment_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
     static async assignExercise(req, res) {
         try {
             const token = req.headers.authorization;

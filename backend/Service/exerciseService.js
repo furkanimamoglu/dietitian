@@ -49,6 +49,33 @@ class ExerciseService {
         });
     }
 
+    static async deleteExerciseAssignment(dietitian_id, exercise_assignment_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        const assignment = await ExerciseAssignment.findOne({
+            where: {
+                id: exercise_assignment_id,
+                '$Exercise.dietitian_id$': dietitian_id
+            },
+            include: [
+                {
+                    model: Exercise,
+                    as: 'Exercise'
+                }
+            ]
+        });
+
+        if (!assignment) {
+            throw new Exception("Egzersiz ataması bulunamadı veya yetkisiz erişim.", 404, true);
+        }
+
+        await assignment.destroy();
+
+        return { success: true, message: "Egzersiz ataması başarıyla silindi." };
+    }
+
     static async assignExercise(dietitian_id, exercise_id, client_id, start_date, end_date, note) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);

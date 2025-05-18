@@ -586,24 +586,32 @@ export default function Egzersizler() {
             note: assignmentNote
         };
         
-        // Mock implementation since API wasn't provided for this endpoint
-        console.log('Adding exercise to user:', addData);
-        
-        // Success case - store info for success message
-        const exerciseName = selectedExercise.exercise_name;
-        const userName = selectedUser.name;
-        
-        // Close the modal and reset states
-        setAddToUserModal(false);
-        setSelectedExercise(null);
-        setSelectedUser(null);
-        setStartDate('');
-        setEndDate('');
-        setAssignmentNote('');
-        
-        // Show success popup
-        setSuccessMessage(`"${exerciseName}" egzersiz programı "${userName}" danışanına başarıyla atandı.`);
-        setShowSuccessPopup(true);
+        setIsSaving(true);
+
+        axios.post(`${config[config.environment].apiUrl}/exercise/assignExercise`, addData, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+        .then(response => {
+            // Close the modal and reset states
+            setAddToUserModal(false);
+            setSelectedExercise(null);
+            setSelectedUser(null);
+            setStartDate('');
+            setEndDate('');
+            setAssignmentNote('');
+
+            // Show success popup
+            setSuccessMessage(`"${selectedExercise.exercise_name}" egzersiz programı "${selectedUser.name}" danışanına başarıyla atandı.`);
+            setShowSuccessPopup(true);
+        })
+        .catch(error => {
+            console.error("Error assigning exercise:", error);
+            setErrorMessage("Egzersiz atanırken bir hata oluştu.");
+            setShowErrorPopup(true);
+        })
+        .finally(() => {
+            setIsSaving(false);
+        });
     };
 
     // PDF generation for exercise details
@@ -1311,3 +1319,4 @@ export default function Egzersizler() {
         </Default>
     );
 }
+
