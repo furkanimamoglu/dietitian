@@ -755,12 +755,10 @@ export default function Beslenme() {
         fetchNutritionPlans();
     }, []);
 
-    // Filter categories based on search term
     const filteredCategories = categoryData?.filter(category =>
         (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Filter nutrition programs based on selected categories
     const filteredBeslenmeData = beslenmeData.filter(item => {
         // If no categories are checked, show all items
         if (checkedCategories.length === 0) {
