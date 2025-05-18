@@ -5,8 +5,7 @@ const moment = require("moment");
 const {Notes} = require("../Model/MainModel");
 
 class DietitianController {
-
-    async login(req, res) {
+    static async login(req, res) {
         try {
             const {phoneNumber, password} = req.body;
 
@@ -31,7 +30,7 @@ class DietitianController {
         }
     }
 
-    async register(req, res) {
+    static async register(req, res) {
         try {
             const {phoneNumber, password} = req.body;
             const ipAddress = req.ip;
@@ -57,7 +56,7 @@ class DietitianController {
         }
     }
 
-    async registerClient(req, res) {
+    static async registerClient(req, res) {
         try {
             const {name, email, password, phoneNumber, gender} = req.body;
 
@@ -88,7 +87,7 @@ class DietitianController {
         }
     }
 
-    async deleteClient(req, res) {
+    static async deleteClient(req, res) {
         const token = req.headers.authorization;
         const dietitian_id = Security.getUserIdFromToken(token);
         if (!token || !dietitian_id) {
@@ -118,7 +117,7 @@ class DietitianController {
         }
     }
 
-    async updateClient(req, res) {
+    static async updateClient(req, res) {
         const token = req.headers.authorization;
         const user_id = Security.getUserIdFromToken(token);
         if (!token || !user_id) {
@@ -149,7 +148,7 @@ class DietitianController {
         }
     }
 
-    async createMyQR(req, res) {
+    static async createMyQR(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -173,7 +172,7 @@ class DietitianController {
         }
     }
 
-    async getMyClient(req, res) {
+    static async getMyClient(req, res) {
         try {
             const token = req.headers.authorization;
             const { client_id } = req.query;
@@ -194,7 +193,7 @@ class DietitianController {
         }
     }
 
-    async getAllMyClients(req, res) {
+    static async getAllMyClients(req, res) {
         try {
             //TODO: Client olarak bearer tokenimle çektiğimde, verilerim geliyor? Bağlı olduğu diyetisyenin clientlerini çekemiyor olması gerekiyor.
             const token = req.headers.authorization;
@@ -214,7 +213,7 @@ class DietitianController {
         }
     }
 
-    async globalSearchbar(req, res) {
+    static async globalSearchbar(req, res) {
         try {
             const token = req.headers.authorization;
             const { search } = req.query;
@@ -237,7 +236,7 @@ class DietitianController {
         }
     }
 
-    async getDietitianInfo(req, res) {
+    static async getDietitianInfo(req, res) {
         try {
             const token = req.headers.authorization;
             const user_id = Security.getUserIdFromToken(token);
@@ -256,7 +255,7 @@ class DietitianController {
         }
     }
 
-    async getDietitianNameById(req, res) {
+    static async getDietitianNameById(req, res) {
         try {
             const { dietitian_id } = req.query;
             const result = await DietitianService.getDietitianNameById(dietitian_id);
@@ -269,7 +268,7 @@ class DietitianController {
         }
     }
 
-    async addNutritionCategory(req, res) {
+    static async addNutritionCategory(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -289,7 +288,7 @@ class DietitianController {
         }
     }
 
-    async getNutritionCategories(req, res) {
+    static async getNutritionCategories(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -309,7 +308,7 @@ class DietitianController {
         }
     }
 
-    async deleteNutritionCategory(req, res) {
+    static async deleteNutritionCategory(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -336,7 +335,7 @@ class DietitianController {
         }
     }
 
-    async assignNutritionPlanToClient(req, res) {
+    static async assignNutritionPlanToClient(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -368,7 +367,7 @@ class DietitianController {
         }
     }
 
-    async getNutritionPlans(req, res) {
+    static async getNutritionPlans(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -389,7 +388,7 @@ class DietitianController {
         }
     }
 
-    async deleteNutritionPlan(req, res) {
+    static async deleteNutritionPlan(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -411,7 +410,7 @@ class DietitianController {
         }
     }
 
-    async addNutritionPlan(req, res) {
+    static async addNutritionPlan(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -434,7 +433,7 @@ class DietitianController {
         }
     }
 
-    async updateNutritionPlan(req, res) {
+    static async updateNutritionPlan(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -455,7 +454,7 @@ class DietitianController {
         }
     }
 
-    async getMyActiveClientCount(req, res) {
+    static async getMyActiveClientCount(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -477,7 +476,7 @@ class DietitianController {
         }
     }
 
-    async getNutritionAssignmentPlanByClient(req, res) {
+    static async getNutritionAssignmentPlanByClient(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -532,7 +531,7 @@ class DietitianController {
         }
     }
 
-    async getMyNotes(req, res) {
+    static async getMyNotes(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -547,7 +546,7 @@ class DietitianController {
         }
     }
 
-    async addNote(req, res) {
+    static async addNote(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -579,7 +578,7 @@ class DietitianController {
         }
     }
 
-    async deleteNote(req, res) {
+    static async deleteNote(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -628,4 +627,4 @@ class DietitianController {
 
 }
 
-module.exports = new DietitianController();
+module.exports = DietitianController;

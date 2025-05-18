@@ -26,6 +26,10 @@ const Invoice = sequelize.define('Invoice', {
             allowNull: false,
             defaultValue: 'unpaid'
         },
+        package_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         issueDate: {
             type: DataTypes.DATE,
             allowNull: false,

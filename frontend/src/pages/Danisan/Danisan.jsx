@@ -28,12 +28,27 @@ import {
   ListItem,
   ListItemText,
   ListItemAvatar,
-  CircularProgress
+  CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from "@mui/material";
 
 // Icons
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import HeightIcon from '@mui/icons-material/Height';
@@ -45,6 +60,13 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EventIcon from '@mui/icons-material/Event';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 
 export default function Danisan() {
     const { id } = useParams();
@@ -54,18 +76,40 @@ export default function Danisan() {
 
     const [danisan, setDanisan] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('genel');
+    const [activeTab, setActiveTab] = useState('anamnez');
     const [nutritionPlan, setNutritionPlan] = useState(null);
     const [nutritionPlanLoading, setNutritionPlanLoading] = useState(false);
     const [selectedPlanIndex, setSelectedPlanIndex] = useState(0);
+    const [clientInvoices, setClientInvoices] = useState([]);
+    const [clientInvoicesLoading, setClientInvoicesLoading] = useState(false);
+    const [currentInvoicePage, setCurrentInvoicePage] = useState(1);
+    const invoicesPerPage = 4;
 
-    // Function to find the plan that covers today's date
+    const [appointments, setAppointments] = useState([]);
+    const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+
+    const [assignedExercises, setAssignedExercises] = useState([]);
+    const [assignedExercisesLoading, setAssignedExercisesLoading] = useState(false);
+    const [assignForm, setAssignForm] = useState({
+        exercise_id: '',
+        start_date: '',
+        end_date: '',
+        note: ''
+    });
+    const [assignLoading, setAssignLoading] = useState(false);
+    const [isAssignExerciseDialogOpen, setIsAssignExerciseDialogOpen] = useState(false);
+    const [activeExercise, setActiveExercise] = useState(null);
+    const [availableExercises, setAvailableExercises] = useState([]);
+    const [availableExercisesLoading, setAvailableExercisesLoading] = useState(false);
+
+    const [isAddAppointmentDialogOpen, setIsAddAppointmentDialogOpen] = useState(false);
+    const [appointmentForm, setAppointmentForm] = useState({ title: '', start: '', end: '' });
+
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
         
         const today = new Date();
         
-        // Try to find a plan where today falls between start_date and end_date
         for (let i = 0; i < plans.length; i++) {
             const plan = plans[i];
             if (plan.start_date && plan.end_date) {
@@ -78,7 +122,6 @@ export default function Danisan() {
             }
         }
         
-        // If no matching plan, try to find the most recent plan
         let mostRecentPlanIndex = 0;
         let mostRecentDate = null;
         
@@ -97,7 +140,6 @@ export default function Danisan() {
         return mostRecentPlanIndex;
     };
 
-    // First, add a function to check if a plan includes today's date
     const isActivePlan = (plan) => {
         if (!plan.start_date || !plan.end_date) return false;
         
@@ -105,6 +147,21 @@ export default function Danisan() {
         const startDate = new Date(plan.start_date);
         const endDate = new Date(plan.end_date);
         
+        return today >= startDate && today <= endDate;
+    };
+
+    const isActiveExercise = (exercise) => {
+        if (!exercise.start_date || !exercise.end_date) return false;
+
+        const today = new Date();
+        const startDate = new Date(exercise.start_date);
+        const endDate = new Date(exercise.end_date);
+
+        // Sadece tarihleri karşılaştırmak için saat, dakika, saniyeyi sıfırlayalım
+        today.setHours(0, 0, 0, 0);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+
         return today >= startDate && today <= endDate;
     };
 
@@ -136,9 +193,26 @@ export default function Danisan() {
                     height,
                     weight,
                     status,
+                    birthDate,
+                    job,
+                    maritalStatus,
+                    city,
                 } = response.data;
 
-                setDanisan({ name, surname, email, phoneNumber, gender, height, weight, status });
+                setDanisan({
+                    name,
+                    surname,
+                    email,
+                    phoneNumber,
+                    gender,
+                    height,
+                    weight,
+                    status,
+                    birthDate: birthDate || '-',
+                    job: job || '-',
+                    maritalStatus: maritalStatus || '-',
+                    city: city || '-',
+                });
             } catch (err) {
                 console.error("Hata:", err.message);
                 navigate('/404');
@@ -156,7 +230,6 @@ export default function Danisan() {
         }
     }, [isLoading, danisan, navigate]);
 
-    // Fetch nutrition plan when beslenme tab is activated
     useEffect(() => {
         const fetchNutritionPlan = async () => {
             if (activeTab === 'beslenme' && id) {
@@ -177,7 +250,6 @@ export default function Danisan() {
                     
                     setNutritionPlan(response.data);
                     
-                    // Set the default selected plan to the one that includes today's date
                     if (response.data && response.data.length > 0) {
                         const currentPlanIndex = findCurrentPlan(response.data);
                         setSelectedPlanIndex(currentPlanIndex);
@@ -193,6 +265,121 @@ export default function Danisan() {
         fetchNutritionPlan();
     }, [activeTab, id]);
     
+    useEffect(() => {
+        const fetchClientInvoices = async () => {
+            if (activeTab === 'odeme' && id) {
+                setClientInvoicesLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/invoice/getClientInvoices",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setClientInvoices(response.data);
+                } catch (err) {
+                    console.error("Ödemeler yüklenirken hata:", err.message);
+                    setClientInvoices([]);
+                } finally {
+                    setClientInvoicesLoading(false);
+                }
+            }
+        };
+        fetchClientInvoices();
+    }, [activeTab, id]);
+
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            if (activeTab === 'randevu' && id) {
+                setAppointmentsLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/appointment/fetchClientAppointmentAsDietitian",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setAppointments(response.data);
+                } catch (err) {
+                    console.error("Randevular yüklenirken hata:", err.message);
+                    setAppointments([]);
+                } finally {
+                    setAppointmentsLoading(false);
+                }
+            }
+        };
+        fetchAppointments();
+    }, [activeTab, id]);
+
+    useEffect(() => {
+        const fetchAssignedExercises = async () => {
+            if (activeTab === 'egzersiz' && id) {
+                setAssignedExercisesLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/exercise/getAssignedExercisesByClient",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setAssignedExercises(response.data);
+
+                    // Aktif egzersizi bul
+                    const currentActiveExercise = response.data.find(isActiveExercise);
+                    setActiveExercise(currentActiveExercise || null); // Bulunamazsa null set et
+
+                } catch (err) {
+                    console.error("Egzersizler yüklenirken hata:", err.message);
+                    setAssignedExercises([]);
+                    setActiveExercise(null); // Hata olursa aktif egzersizi de sıfırla
+                } finally {
+                    setAssignedExercisesLoading(false);
+                }
+            }
+        };
+        fetchAssignedExercises();
+    }, [activeTab, id]);
+
+    useEffect(() => {
+        const fetchAvailableExercises = async () => {
+            if (isAssignExerciseDialogOpen) {
+                setAvailableExercisesLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/exercise/getMyExercises",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            }
+                        }
+                    );
+                    setAvailableExercises(response.data);
+                } catch (err) {
+                    console.error("Egzersizler yüklenirken hata:", err.message);
+                    setAvailableExercises([]);
+                } finally {
+                    setAvailableExercisesLoading(false);
+                }
+            }
+        };
+
+        fetchAvailableExercises();
+    }, [isAssignExerciseDialogOpen]);
 
     if (isLoading) {
         return (
@@ -215,29 +402,9 @@ export default function Danisan() {
         setActiveTab(newValue);
     };
 
-    // Status chip color based on status
-    const getStatusColor = (status) => {
-        const allowedColors = ['default', 'primary', 'secondary', 'error', 'info', 'success', 'warning'];
-        if (!status || typeof status !== 'string') {
-            return 'default';
-        }
-        switch(status.toLowerCase()) {
-            case 'aktif':
-                return 'success';
-            case 'pasif':
-                return 'error';
-            case 'beklemede':
-                return 'warning';
-            default:
-                return 'default';
-        }
-    };
-
-    // Helper function to display meal items (works with both arrays and strings)
     const renderMealItems = (mealItems) => {
         if (!mealItems) return "Öğün girilmemiş.";
         
-        // New format with isim and yenildi fields
         if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
             return (
                 <>
@@ -264,7 +431,6 @@ export default function Danisan() {
             );
         }
         
-        // Handle old formats
         if (typeof mealItems === 'string') {
             return mealItems;
         }
@@ -276,7 +442,6 @@ export default function Danisan() {
         if (mealItems.main && Array.isArray(mealItems.main)) {
             const mainItems = mealItems.main.join(", ");
             
-            // Check if there are alternatives
             if (mealItems.alternatives && Object.keys(mealItems.alternatives).length > 0) {
                 let alternativesText = [];
                 
@@ -306,226 +471,550 @@ export default function Danisan() {
 
     const renderTabContent = () => {
         switch(activeTab) {
-            case 'genel':
-                return (
-                    <Box>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Genel Bilgiler
-                        </Typography>
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <Card elevation={3} sx={{ height: '100%' }}>
-                                    <CardHeader 
-                                        title="Kişisel Bilgiler" 
-                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        action={
-                                            <IconButton aria-label="düzenle">
-                                                <EditIcon />
-                                            </IconButton>
-                                        }
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <WcIcon color="primary" />
-                                                <Typography><strong>Cinsiyet:</strong> {danisan.gender}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <HeightIcon color="primary" />
-                                                <Typography><strong>Boy:</strong> {danisan.height} cm</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <MonitorWeightIcon color="primary" />
-                                                <Typography><strong>Kilo:</strong> {danisan.weight} kg</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <InfoIcon color="primary" />
-                                                <Typography>
-                                                    <strong>BMI:</strong> {(danisan.weight / ((danisan.height/100) * (danisan.height/100))).toFixed(1)} kg/m²
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Card elevation={3} sx={{ height: '100%' }}>
-                                    <CardHeader 
-                                        title="İletişim Bilgileri" 
-                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        action={
-                                            <IconButton aria-label="düzenle">
-                                                <EditIcon />
-                                            </IconButton>
-                                        }
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <EmailIcon color="primary" />
-                                                <Typography><strong>E-posta:</strong> {danisan.email}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <PhoneIcon color="primary" />
-                                                <Typography><strong>Telefon:</strong> {danisan.phoneNumber}</Typography>
-                                            </Box>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                );
             case 'anamnez':
                 return (
                     <Box>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Anamnez Formu
-                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+                            </Typography>
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                startIcon={<AddIcon />}
+                                onClick={() => toast.info('Yeni anamnez bilgisi ekleme formu açılacak')}
+                            >
+                                Yeni Anamnez
+                            </Button>
+                        </Box>
                         
-                        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Sağlık Bilgileri
-                                </Typography>
-                                <Chip label="Son Güncelleme: 15.05.2023" size="small" color="primary" />
-                            </Box>
-                            <Divider sx={{ mb: 2 }} />
-                            
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6}>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Kronik Hastalıklar</Typography>
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-                                            <Chip label="Hipertansiyon" size="small" color="primary" variant="outlined" />
-                                            <Chip label="Tip 2 Diyabet" size="small" color="primary" variant="outlined" />
-                                        </Box>
+                        {/* Sağlık Bilgileri Akordiyonu */}
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: 'primary.light', 
+                                    color: 'primary.contrastText',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Sağlık Bilgileri
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 15.05.2023" 
+                                            size="small" 
+                                            color="primary" 
+                                            sx={{ mr: 1 }} 
+                                        />
+                                        <Button 
+                                            component="span"    
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => toast.info('Sağlık bilgileri düzenleme formu açılacak')}
+                                            color="primary"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
                                     </Box>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Kronik Hastalıklar" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    <Chip label="Hipertansiyon" size="small" color="primary" variant="outlined" />
+                                                    <Chip label="Tip 2 Diyabet" size="small" color="primary" variant="outlined" />
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                     
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Alerjiler</Typography>
-                                        <Typography variant="body2" color="text.secondary">Laktoz intoleransı, Fındık alerjisi</Typography>
-                                    </Box>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Alerjiler" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Laktoz intoleransı, Fındık alerjisi
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                     
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>İlaç Kullanımı</Typography>
-                                        <Typography variant="body2" color="text.secondary">Metformin 500mg (günde 2 kez)</Typography>
-                                    </Box>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="İlaç Kullanımı" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Metformin 500mg (günde 2 kez)
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Geçmiş Ameliyatlar" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Apendektomi (2015)
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Aile Sağlık Geçmişi" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Anne: Hipertansiyon<br />
+                                                    Baba: Kalp hastalığı
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Kan Değerleri" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Son kontrol: 10.04.2023<br />
+                                                    HbA1c: 6.8%<br />
+                                                    Kolesterol: 210 mg/dL
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                 </Grid>
-                                
-                                <Grid item xs={12} md={6}>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Geçmiş Ameliyatlar</Typography>
-                                        <Typography variant="body2" color="text.secondary">Apendektomi (2015)</Typography>
+                            </AccordionDetails>
+                        </Accordion>
+                        {/* Kan Tahlili Akordiyonu */}
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: 'error.light', 
+                                    color: 'error.contrastText',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Kan Tahlili
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            color="error" 
+                                            sx={{ mr: 1, fontWeight: 'bold' }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => toast.info('Kan tahlili düzenleme formu açılacak')}
+                                            color="error"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
                                     </Box>
-                                    
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Aile Sağlık Geçmişi</Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Anne: Hipertansiyon<br />
-                                            Baba: Kalp hastalığı
-                                        </Typography>
-                                    </Box>
-                                    
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Kan Değerleri</Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Son kontrol: 10.04.2023<br />
-                                            HbA1c: 6.8%<br />
-                                            Kolesterol: 210 mg/dL
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </Paper>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center', 
+                                    height: 120, 
+                                    border: '1px dashed', 
+                                    borderColor: 'error.main',
+                                    borderRadius: 1
+                                }}>
+                                    <Typography color="text.secondary">
+                                        Henüz kan tahlili bilgisi eklenmemiş.
+                                    </Typography>
+                                </Box>
+                            </AccordionDetails>
+                        </Accordion>
                         
-                        <Paper elevation={3} sx={{ p: 3 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                    Diyet Alışkanlıkları
-                                </Typography>
-                                <IconButton aria-label="düzenle">
-                                    <EditIcon />
-                                </IconButton>
-                            </Box>
-                            <Divider sx={{ mb: 2 }} />
-                            
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6}>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Günlük Su Tüketimi</Typography>
-                                        <Typography variant="body2" color="text.secondary">4-5 bardak (yetersiz)</Typography>
+                        {/* Diyet Alışkanlıkları Akordiyonu */}
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: 'warning.light', 
+                                    color: 'warning.contrastText',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Diyet Alışkanlıkları
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 12.05.2023" 
+                                            size="small" 
+                                            color="warning" 
+                                            sx={{ mr: 1 }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => toast.info('Diyet alışkanlıkları düzenleme formu açılacak')}
+                                            color="warning"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
                                     </Box>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Günlük Su Tüketimi" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    4-5 bardak (yetersiz)
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                     
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Favori Yiyecekler</Typography>
-                                        <Typography variant="body2" color="text.secondary">Makarna, beyaz ekmek, şekerli içecekler</Typography>
-                                    </Box>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Öğün Düzeni" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Sabah: Genellikle atlanıyor<br />
+                                                    Öğle: Hafif yemek<br />
+                                                    Akşam: Ağır ve geç yemek
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                     
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Sevmediği Yiyecekler</Typography>
-                                        <Typography variant="body2" color="text.secondary">Brokoli, karnabahar, ıspanak</Typography>
-                                    </Box>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Favori Yiyecekler" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Makarna, beyaz ekmek, şekerli içecekler
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Sevmediği Yiyecekler" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Brokoli, karnabahar, ıspanak
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Atıştırmalık Alışkanlıkları" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Akşam TV izlerken tatlı ve cips tüketimi
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Dışarıda Yemek" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Haftada 3-4 kez fast-food tüketimi
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                 </Grid>
-                                
-                                <Grid item xs={12} md={6}>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Öğün Düzeni</Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Sabah: Genellikle atlanıyor<br />
-                                            Öğle: Hafif yemek<br />
-                                            Akşam: Ağır ve geç yemek
-                                        </Typography>
+                            </AccordionDetails>
+                        </Accordion>
+                        
+                        {/* Fiziksel Aktivite Akordiyonu */}
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: 'info.light', 
+                                    color: 'info.contrastText',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Fiziksel Aktivite
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            color="info" 
+                                            sx={{ mr: 1 }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => toast.info('Fiziksel aktivite düzenleme formu açılacak')}
+                                            color="info"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
                                     </Box>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Aktivite Seviyesi" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Sedanter (masa başı çalışma)
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                     
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Atıştırmalık Alışkanlıkları</Typography>
-                                        <Typography variant="body2" color="text.secondary">Akşam TV izlerken tatlı ve cips tüketimi</Typography>
-                                    </Box>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Egzersiz Alışkanlıkları" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Haftada 1 kez yürüyüş (30 dakika)
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                     
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Dışarıda Yemek</Typography>
-                                        <Typography variant="body2" color="text.secondary">Haftada 3-4 kez fast-food tüketimi</Typography>
-                                    </Box>
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Sevdiği Sporlar" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Yüzme, bisiklet
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                    
+                                    <Grid item xs={12} md={6}>
+                                        <Card variant="outlined" sx={{ height: '100%' }}>
+                                            <CardHeader 
+                                                title="Mesleği ve Aktivite Durumu" 
+                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                                                sx={{ bgcolor: 'grey.100', py: 1 }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2">
+                                                    Yazılım Geliştirici (8+ saat oturarak çalışma)
+                                                </Typography>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Paper>
+                            </AccordionDetails>
+                        </Accordion>
+                        
+                        {/* Uyku ve Stres Yönetimi */}
+                        <Accordion elevation={3} sx={{ mb: 2 }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: 'success.light', 
+                                    color: 'success.contrastText',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Uyku ve Stres Yönetimi
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            color="success" 
+                                            sx={{ mr: 1, fontWeight: 'bold' }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => toast.info('Uyku ve stres bilgileri düzenleme formu açılacak')}
+                                            color="success"
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center', 
+                                    height: 200, 
+                                    border: '1px dashed', 
+                                    borderColor: 'grey.400',
+                                    borderRadius: 1
+                                }}>
+                                    <Typography color="text.secondary">
+                                        Henüz uyku ve stres bilgisi eklenmemiş.
+                                    </Typography>
+                                </Box>
+                            </AccordionDetails>
+                        </Accordion>
+                        
+                        {/* Özel Notlar */}
+                        <Accordion elevation={3}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    bgcolor: '#7c4dff',
+                                    color: '#fff',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                        Özel Notlar
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Chip 
+                                            label="Son Güncelleme: 10.05.2023" 
+                                            size="small" 
+                                            sx={{ mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff' }} 
+                                        />
+                                        <Button 
+                                            component="span"
+                                            variant="contained" 
+                                            size="small" 
+                                            startIcon={<EditIcon />}
+                                            onClick={() => toast.info('Notlar düzenleme formu açılacak')}
+                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1, bgcolor: '#9575cd', '&:hover': { bgcolor: '#5e35b1' } }}
+                                        >
+                                            Düzenle
+                                        </Button>
+                                    </Box>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Paper variant="outlined" sx={{ p: 2 }}>
+                                    <Typography variant="body2">
+                                        Danışan iş hayatında yoğun stres yaşıyor. Akşamları geç saatlerde yemek yeme alışkanlığı var.
+                                        Diyetisyen randevularına düzenli geliyor ancak beslenme planına uyumda zaman zaman zorluklar yaşıyor.
+                                        Hafta sonları sosyal hayatında beslenme düzenini korumakta zorlanıyor.
+                                    </Typography>
+                                </Paper>
+                            </AccordionDetails>
+                        </Accordion>
                     </Box>
                 );
             case 'olcum':
                 return (
                     <Box>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Ölçüm Takibi
                         </Typography>
-                        
                         <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <Card elevation={3}>
+                            <Grid item xs={12} md={6}>
+                                <Card elevation={3} sx={{ height: '100%' }}>
                                     <CardHeader 
-                                        title="Kilo Takibi" 
+                                        title="Vücut Ölçümleri" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         action={
-                                            <Button 
-                                                variant="contained" 
-                                                size="small" 
-                                                startIcon={<EditIcon />}
-                                                sx={{ bgcolor: theme.palette.primary.main }}
-                                            >
-                                                Yeni Ölçüm
-                                            </Button>
+                                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<AddIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut ölçümü ekleme formu açılacak')}>
+                                                    Ekle
+                                                </Button>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut ölçümleri düzenleme formu açılacak')}>
+                                                    Düzenle
+                                                </Button>
+                                            </Box>
                                         }
                                         sx={{ 
                                             bgcolor: 'primary.light', 
@@ -535,224 +1024,181 @@ export default function Danisan() {
                                         }}
                                     />
                                     <CardContent>
-                                        <Box sx={{ height: 250, p: 1, position: 'relative' }}>
-                                            <Box sx={{ 
-                                                position: 'absolute', 
-                                                left: 0, 
-                                                top: 0, 
-                                                bottom: 0, 
-                                                width: '60px', 
-                                                display: 'flex', 
-                                                flexDirection: 'column', 
-                                                justifyContent: 'space-between' 
-                                            }}>
-                                                <Typography variant="caption">85 kg</Typography>
-                                                <Typography variant="caption">80 kg</Typography>
-                                                <Typography variant="caption">75 kg</Typography>
-                                                <Typography variant="caption">70 kg</Typography>
-                                            </Box>
-                                            <Box sx={{ pl: '60px', height: '100%', display: 'flex', alignItems: 'flex-end' }}>
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'flex-end', 
-                                                    height: '100%',
-                                                    width: '100%',
-                                                    position: 'relative'
-                                                }}>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '0%',
-                                                        height: '80%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">15 Nisan</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '20%',
-                                                        height: '75%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">30 Nisan</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '40%',
-                                                        height: '65%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">15 Mayıs</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '60%',
-                                                        height: '50%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">31 Mayıs</Typography>
-                                                    </Box>
-                                                    <Box sx={{ 
-                                                        width: '15%', 
-                                                        position: 'absolute', 
-                                                        left: '80%',
-                                                        height: '40%', 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'flex-end'
-                                                    }}>
-                                                        <Box sx={{ 
-                                                            width: 12, 
-                                                            height: 12, 
-                                                            borderRadius: '50%', 
-                                                            bgcolor: 'primary.main',
-                                                            mb: 1
-                                                        }} />
-                                                        <Typography variant="caption">15 Haziran</Typography>
-                                                    </Box>
-                                                    
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '80%',
-                                                        left: '6px',
-                                                        width: '10%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-10deg)'
-                                                    }} />
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '75%',
-                                                        left: '18%',
-                                                        width: '20%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-15deg)'
-                                                    }} />
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '65%',
-                                                        left: '40%',
-                                                        width: '18%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-20deg)'
-                                                    }} />
-                                                    <Box sx={{ 
-                                                        position: 'absolute',
-                                                        top: '50%',
-                                                        left: '60%',
-                                                        width: '18%',
-                                                        height: '2px',
-                                                        bgcolor: 'primary.main',
-                                                        transform: 'rotate(-15deg)'
-                                                    }} />
-                                                </Box>
-                                            </Box>
+                                        <Box sx={{ maxHeight: 350, overflowY: 'auto', pr: 1,
+                                            '&::-webkit-scrollbar': { background: '#e8f5e9', width: 8 },
+                                            '&::-webkit-scrollbar-thumb': { background: '#81c784', borderRadius: 4 },
+                                            scrollbarColor: '#81c784 #e8f5e9',
+                                            scrollbarWidth: 'thin'
+                                        }}>
+                                            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                                                <Table size="small" aria-label="vücut ölçümleri tablosu">
+                                                    <TableHead>
+                                                        <TableRow sx={{
+                                                            background: 'linear-gradient(45deg, #4caf50, #81c784)',
+                                                            '& th': { color: 'white', fontWeight: 'bold', fontSize: '0.875rem' }
+                                                        }}>
+                                                            <TableCell sx={{ borderBottom: 'none', pl: 2 }}>Tarih</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kilo (kg)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Bel (cm)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Kalça (cm)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Göğüs (cm)</TableCell>
+                                                            <TableCell align="center" sx={{ borderBottom: 'none' }}>Değişim</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {/* Verileri girelim */}
+                                                        {[
+                                                            { date: '15 Nisan 2023', weight: 85, waist: 92, hip: 108, chest: 96 },
+                                                            { date: '30 Nisan 2023', weight: 84, waist: 90, hip: 106, chest: 95 },
+                                                            { date: '15 Mayıs 2023', weight: 83, waist: 88, hip: 104, chest: 94 },
+                                                            { date: '31 Mayıs 2023', weight: 82, waist: 86, hip: 102, chest: 93 },
+                                                            { date: '15 Haziran 2023', weight: 81, waist: 84, hip: 100, chest: 92 },
+                                                            { date: '30 Haziran 2023', weight: 80, waist: 82, hip: 98, chest: 91 },
+                                                            { date: '15 Temmuz 2023', weight: 78, waist: 80, hip: 96, chest: 90 },
+                                                            { date: '30 Temmuz 2023', weight: 77, waist: 78, hip: 94, chest: 89 }
+                                                        ].map((row, index, arr) => {
+                                                            // Önceki ölçümle karşılaştırma için
+                                                            const prevRow = index > 0 ? arr[index - 1] : null;
+
+                                                            // Değişimleri hesaplayalım (eğer önceki ölçüm varsa)
+                                                            const weightChange = prevRow ? row.weight - prevRow.weight : 0;
+                                                            const waistChange = prevRow ? row.waist - prevRow.waist : 0;
+                                                            const hipChange = prevRow ? row.hip - prevRow.hip : 0;
+                                                            const chestChange = prevRow ? row.chest - prevRow.chest : 0;
+
+                                                            // Satır için koşullu arka plan rengi
+                                                            const getBgColor = (index) => {
+                                                                return index % 2 === 0 ? 'rgba(232, 245, 233, 0.2)' : 'white';
+                                                            };
+
+                                                            return (
+                                                                <TableRow
+                                                                    key={row.date}
+                                                                    sx={{
+                                                                        bgcolor: getBgColor(index),
+                                                                        transition: 'background-color 0.2s',
+                                                                        '&:hover': {
+                                                                            bgcolor: 'rgba(129, 199, 132, 0.1)',
+                                                                            boxShadow: 'inset 0 0 0 1px rgba(129, 199, 132, 0.2)'
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'medium', pl: 2 }}>
+                                                                        {row.date}
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.weight}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: weightChange < 0 ? 'success.main' : weightChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {weightChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     weightChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(weightChange) > 0 && Math.abs(weightChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.waist}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: waistChange < 0 ? 'success.main' : waistChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {waistChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     waistChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(waistChange) > 0 && Math.abs(waistChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.hip}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: hipChange < 0 ? 'success.main' : hipChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {hipChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     hipChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(hipChange) > 0 && Math.abs(hipChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                            <Typography variant="body2">
+                                                                                {row.chest}
+                                                                            </Typography>
+                                                                            {index > 0 && (
+                                                                                <Box component="span" sx={{
+                                                                                    ml: 1,
+                                                                                    color: chestChange < 0 ? 'success.main' : chestChange > 0 ? 'error.main' : 'text.secondary',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    fontSize: '0.7rem'
+                                                                                }}>
+                                                                                    {chestChange < 0 ? <ArrowDownwardIcon fontSize="inherit" /> :
+                                                                                     chestChange > 0 ? <ArrowUpwardIcon fontSize="inherit" /> : '–'}
+                                                                                    {Math.abs(chestChange) > 0 && Math.abs(chestChange)}
+                                                                                </Box>
+                                                                            )}
+                                                                        </Box>
+                                                                    </TableCell>
+                                                                    <TableCell align="center">
+                                                                        {index > 0 && (
+                                                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                                                {/* Birleşik değişim göstergesi - azalan ölçümler olumlu */}
+                                                                                {weightChange + waistChange + hipChange + chestChange < 0 ? (
+                                                                                    <Chip
+                                                                                        icon={<TrendingDownIcon fontSize="small" />}
+                                                                                        label={Math.abs(weightChange + waistChange + hipChange + chestChange).toFixed(1)}
+                                                                                        color="success"
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        sx={{ minWidth: 70 }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <Chip
+                                                                                        icon={<TrendingFlatIcon fontSize="small" />}
+                                                                                        label={Math.abs(weightChange + waistChange + hipChange + chestChange).toFixed(1)}
+                                                                                        color={weightChange + waistChange + hipChange + chestChange > 0 ? "error" : "default"}
+                                                                                        size="small"
+                                                                                        variant="outlined"
+                                                                                        sx={{ minWidth: 70 }}
+                                                                                    />
+                                                                                )}
+                                                                            </Box>
+                                                                        )}
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
                                         </Box>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                            
-                            <Grid item xs={12} md={6}>
-                                <Card elevation={3} sx={{ height: '100%' }}>
-                                    <CardHeader 
-                                        title="Vücut Ölçümleri" 
-                                        titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        sx={{ 
-                                            bgcolor: 'primary.light', 
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                            <thead>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <th style={{ padding: '8px', textAlign: 'left' }}>Tarih</th>
-                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Bel (cm)</th>
-                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Kalça (cm)</th>
-                                                    <th style={{ padding: '8px', textAlign: 'center' }}>Göğüs (cm)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>15 Nisan 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>108</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>96</td>
-                                                </tr>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>30 Nisan 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>90</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>106</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>95</td>
-                                                </tr>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>15 Mayıs 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>88</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>104</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>94</td>
-                                                </tr>
-                                                <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                                                    <td style={{ padding: '8px' }}>31 Mayıs 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>86</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>102</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>93</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style={{ padding: '8px' }}>15 Haziran 2023</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>84</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>100</td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>92</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
                                     </CardContent>
                                 </Card>
                             </Grid>
@@ -762,6 +1208,11 @@ export default function Danisan() {
                                     <CardHeader 
                                         title="Vücut Analizi" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                        action={
+                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut analizi düzenleme formu açılacak')}>
+                                                Düzenle
+                                            </Button>
+                                        }
                                         sx={{ 
                                             bgcolor: 'primary.light', 
                                             color: 'primary.contrastText',
@@ -1277,7 +1728,7 @@ export default function Danisan() {
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
+                                            </Grid>                                        
                                         </Grid>                                        
                                     </Box>
                                 </Box>
@@ -1397,20 +1848,24 @@ export default function Danisan() {
                     </Box>
                 );
             case 'randevu':
+                // Randevuları ayır
+                const now = new Date();
+                const upcomingAppointments = appointments.filter(app => app.status === 'pending' && new Date(app.start) > now);
+                const pastAppointments = appointments.filter(app => app.status === 'completed' || (app.status === 'pending' && new Date(app.start) <= now));
                 return (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6">Randevu Geçmişi</Typography>
+                            <Typography variant="h6"></Typography>
                             <Button 
                                 variant="contained" 
                                 size="small" 
                                 startIcon={<AddIcon />}
+                                onClick={() => setIsAddAppointmentDialogOpen(true)}
                                 sx={{ bgcolor: theme.palette.primary.main }}
                             >
                                 Yeni Randevu
                             </Button>
                         </Box>
-                        
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={7}>
                                 {/* Yaklaşan Randevular */}
@@ -1425,99 +1880,67 @@ export default function Danisan() {
                                             borderColor: 'divider'
                                         }}
                                     />
-                                    <List>
-                                        <ListItem 
-                                            secondaryAction={
-                                                <Box>
-                                                    <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                    <IconButton edge="end" aria-label="delete">
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            }
-                                        >
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Beslenme Danışmanlığı
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Online" 
-                                                            size="small" 
-                                                            color="info" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            25 Haziran 2023, Salı - 14:30
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            Notlar: 3 aylık takip sonrası değerlendirme randevusu
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                        
-                                        <Divider variant="inset" component="li" />
-                                        
-                                        <ListItem 
-                                            secondaryAction={
-                                                <Box>
-                                                    <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                    <IconButton edge="end" aria-label="delete">
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            }
-                                        >
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Vücut Analizi
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Yüz yüze" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            10 Temmuz 2023, Pazartesi - 10:00
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            Notlar: Detaylı vücut ölçümleri için gelecek
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                    </List>
+                                    {appointmentsLoading ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : upcomingAppointments.length > 0 ? (
+                                        <List>
+                                            {upcomingAppointments.map(app => (
+                                                <ListItem 
+                                                    key={app.id}
+                                                    secondaryAction={
+                                                        <Box>
+                                                            <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                            <IconButton edge="end" aria-label="delete">
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Box>
+                                                    }
+                                                >
+                                                    <ListItemAvatar>
+                                                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                            <EventIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText 
+                                                        primary={
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                    {app.title || 'Randevu'}
+                                                                </Typography>
+                                                                <Chip 
+                                                                    label={app.status === 'pending' ? 'Yaklaşan' : app.status}
+                                                                    size="small" 
+                                                                    color="info" 
+                                                                    sx={{ ml: 1 }}
+                                                                />
+                                                            </Box>
+                                                        }
+                                                        secondary={
+                                                            <Box>
+                                                                <Typography variant="body2" component="span">
+                                                                    {app.start ? new Date(app.start).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' }) : ''}
+                                                                </Typography>
+                                                                {app.note && (
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Notlar: {app.note}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    ) : (
+                                        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+                                            Yaklaşan randevu bulunmamaktadır.
+                                        </Typography>
+                                    )}
                                 </Card>
-                                
                                 {/* Geçmiş Randevular */}
                                 <Card elevation={3}>
                                     <CardHeader 
@@ -1529,111 +1952,73 @@ export default function Danisan() {
                                             borderColor: 'divider'
                                         }}
                                     />
-                                    <List>
-                                        <ListItem>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Beslenme Danışmanlığı
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Tamamlandı" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            15 Mayıs 2023, Pazartesi - 14:30
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                        
-                                        <Divider variant="inset" component="li" />
-                                        
-                                        <ListItem>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            İlk Değerlendirme
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Tamamlandı" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            15 Nisan 2023, Çarşamba - 10:00
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                        
-                                        <Divider variant="inset" component="li" />
-                                        
-                                        <ListItem>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: 'grey.500' }}>
-                                                    <EventIcon />
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText 
-                                                primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                            Tanışma Görüşmesi
-                                                        </Typography>
-                                                        <Chip 
-                                                            label="Tamamlandı" 
-                                                            size="small" 
-                                                            color="success" 
-                                                            sx={{ ml: 1 }}
-                                                        />
-                                                    </Box>
-                                                }
-                                                secondary={
-                                                    <Box>
-                                                        <Typography variant="body2" component="span">
-                                                            1 Nisan 2023, Cumartesi - 11:30
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </ListItem>
-                                    </List>
+                                    {appointmentsLoading ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : pastAppointments.length > 0 ? (
+                                        <List>
+                                            {pastAppointments.map(app => (
+                                                <ListItem key={app.id}>
+                                                    <ListItemAvatar>
+                                                        <Avatar sx={{ bgcolor: 'grey.500' }}>
+                                                            <EventIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText 
+                                                        primary={
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                    {app.title || 'Randevu'}
+                                                                </Typography>
+                                                                <Chip
+                                                                    label={
+                                                                        app.status === 'active' ? 'Yaklaşan' :
+                                                                            app.status === 'completed' ? 'Tamamlandı' :
+                                                                                app.status === 'cancelled' ? 'İptal Edildi' :
+                                                                                    'Bilinmeyen'
+                                                                    }
+                                                                    size="small"
+                                                                    color={
+                                                                        app.status === 'active' ? 'info' :
+                                                                            app.status === 'completed' ? 'success' :
+                                                                                app.status === 'cancelled' ? 'error' :
+                                                                                    'default'
+                                                                    }
+                                                                    sx={{ ml: 1 }}
+                                                                />
+                                                            </Box>
+                                                        }
+                                                        secondary={
+                                                            <Box>
+                                                                <Typography variant="body2" component="span">
+                                                                    {app.start ? new Date(app.start).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' }) : ''}
+                                                                </Typography>
+                                                                {app.note && (
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Notlar: {app.note}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    ) : (
+                                        <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+                                            Geçmiş randevu bulunmamaktadır.
+                                        </Typography>
+                                    )}
                                 </Card>
                             </Grid>
-                            
                             <Grid item xs={12} md={5}>
                                 {/* Randevu Notları */}
                                 <Card elevation={3} sx={{ mb: 3 }}>
                                     <CardHeader 
                                         title="Son Randevu Notları" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        subheader="15 Mayıs 2023"
+                                        subheader={pastAppointments.length > 0 && pastAppointments[0].start ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
                                         sx={{ 
                                             bgcolor: 'primary.light', 
                                             color: 'primary.contrastText',
@@ -1645,26 +2030,17 @@ export default function Danisan() {
                                         }}
                                     />
                                     <CardContent>
-                                        <Typography variant="body1" paragraph>
-                                            Danışan son 1 ayda 3 kg verdi. Ancak yağ oranında istenen düşüş yaşanmadı.
-                                        </Typography>
-                                        <Typography variant="body1" paragraph>
-                                            Önceki beslenme planında bazı değişiklikler yapıldı. Karbonhidrat miktarı azaltıldı, protein miktarı artırıldı.
-                                        </Typography>
-                                        <Typography variant="body1" paragraph>
-                                            Danışanın şeker tüketimi hala yüksek. Kendisine bununla ilgili tavsiyeler verildi.
-                                        </Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                                            Yapılacaklar:
-                                        </Typography>
-                                        <ul>
-                                            <li>Yeni beslenme planı hazırlandı</li>
-                                            <li>3 günlük su içme hatırlatıcısı eklendi</li>
-                                            <li>Haftalık egzersiz programı güncellendi</li>
-                                        </ul>
+                                        {pastAppointments.length > 0 && pastAppointments[0].note ? (
+                                            <Typography variant="body1" paragraph>
+                                                {pastAppointments[0].note}
+                                            </Typography>
+                                        ) : (
+                                            <Typography variant="body2" color="text.secondary">
+                                                Henüz not eklenmemiş.
+                                            </Typography>
+                                        )}
                                     </CardContent>
                                 </Card>
-                                
                                 {/* İstatistikler */}
                                 <Card elevation={3}>
                                     <CardHeader 
@@ -1686,7 +2062,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>3</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{pastAppointments.filter(a => a.status === 'completed').length}</Typography>
                                                     <Typography variant="body2">Tamamlanan</Typography>
                                                 </Box>
                                             </Grid>
@@ -1698,7 +2074,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>2</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{upcomingAppointments.length}</Typography>
                                                     <Typography variant="body2">Yaklaşan</Typography>
                                                 </Box>
                                             </Grid>
@@ -1710,7 +2086,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>0</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{appointments.filter(a => a.status === 'cancelled').length}</Typography>
                                                     <Typography variant="body2">İptal Edilen</Typography>
                                                 </Box>
                                             </Grid>
@@ -1722,7 +2098,7 @@ export default function Danisan() {
                                                     borderRadius: 2,
                                                     textAlign: 'center'
                                                 }}>
-                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>5</Typography>
+                                                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{appointments.length}</Typography>
                                                     <Typography variant="body2">Toplam</Typography>
                                                 </Box>
                                             </Grid>
@@ -1731,43 +2107,1055 @@ export default function Danisan() {
                                 </Card>
                             </Grid>
                         </Grid>
+                        <Dialog open={isAddAppointmentDialogOpen} onClose={() => setIsAddAppointmentDialogOpen(false)}>
+                            <DialogTitle>Yeni Randevu Ekle</DialogTitle>
+                            <DialogContent>
+                                <TextField 
+                                    label="Başlık" 
+                                    name="title" 
+                                    value={appointmentForm.title} 
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})} 
+                                    fullWidth margin="normal" 
+                                />
+                                <TextField 
+                                    label="Başlangıç" 
+                                    name="start" 
+                                    type="datetime-local" 
+                                    value={appointmentForm.start} 
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, start: e.target.value})} 
+                                    fullWidth margin="normal" 
+                                />
+                                <TextField 
+                                    label="Bitiş" 
+                                    name="end" 
+                                    type="datetime-local" 
+                                    value={appointmentForm.end} 
+                                    onChange={(e) => setAppointmentForm({...appointmentForm, end: e.target.value})} 
+                                    fullWidth margin="normal" 
+                                />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>İptal</Button>
+                                <Button onClick={handleAddAppointment}>Ekle</Button>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
-                );
-            case 'tarif':
-                return (
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Tarifler
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz tarif eklenmemiştir.
-                        </Typography>
-                    </Paper>
                 );
             case 'egzersiz':
                 return (
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Egzersiz Takip
+                    <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz egzersiz verisi bulunmamaktadır.
-                        </Typography>
-                    </Paper>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<AddIcon />}
+                                onClick={handleOpenAssignExerciseDialog} // Popup açma fonksiyonu
+                            >
+                                Yeni Egzersiz Ata
+                            </Button>
+                        </Box>
+
+                        {/* Aktif Egzersiz Alanı */}
+                        {assignedExercisesLoading ? (
+                             <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                 <CircularProgress />
+                             </Box>
+                        ) : activeExercise ? (
+                            <Card elevation={3} sx={{ mb: 3, overflow: 'hidden', borderRadius: 2 }}>
+                                <CardHeader
+                                    title="Aktif Egzersiz Programı"
+                                    titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                    sx={{
+                                        bgcolor: 'success.light',
+                                        color: 'success.contrastText',
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}
+                                />
+                                <Box sx={{ p: 2 }}>
+                                    <Card
+                                        variant="outlined"
+                                        sx={{
+                                            position: 'relative',
+                                            height: '100%',
+                                            transition: 'all 0.3s ease',
+                                            border: 'none',
+                                            borderRadius: 2,
+                                            background: 'linear-gradient(to right, #f0fff0, #ffffff)',
+                                            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                                            overflow: 'hidden',
+                                            '&:hover': {
+                                                transform: 'translateY(-5px)',
+                                                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)'
+                                            },
+                                            '&::before': {
+                                                content: '""',
+                                                position: 'absolute',
+                                                left: 0,
+                                                top: 0,
+                                                height: '100%',
+                                                width: '5px',
+                                                backgroundColor: 'success.main',
+                                                borderRadius: '4px 0 0 4px'
+                                            }
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            position: 'absolute',
+                                            top: 10,
+                                            right: 10,
+                                            display: 'flex',
+                                            gap: 1,
+                                            zIndex: 10
+                                        }}>
+                                            <IconButton
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: 'background.paper',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                                                    '&:hover': { bgcolor: 'success.light' }
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                sx={{
+                                                    bgcolor: 'background.paper',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                                                    '&:hover': { bgcolor: 'error.light', color: 'white' }
+                                                }}
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+
+                                        <Box sx={{
+                                            display: 'flex',
+                                            flexDirection: { xs: 'column', sm: 'row' },
+                                            alignItems: { xs: 'center', sm: 'flex-start' },
+                                            p: 2,
+                                            gap: 2
+                                        }}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                p: 2,
+                                                minWidth: { xs: '100%', sm: '200px' },
+                                                borderRight: { xs: 'none', sm: '1px dashed rgba(0,0,0,0.1)' },
+                                                borderBottom: { xs: '1px dashed rgba(0,0,0,0.1)', sm: 'none' },
+                                                mb: { xs: 2, sm: 0 }
+                                            }}>
+                                                <Avatar
+                                                    sx={{
+                                                        width: 80,
+                                                        height: 80,
+                                                        bgcolor: 'success.light',
+                                                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                                                        mb: 2
+                                                    }}
+                                                >
+                                                    <FitnessCenterIcon sx={{ fontSize: 40 }} />
+                                                </Avatar>
+                                                <Chip
+                                                    label="Aktif Egzersiz"
+                                                    color="success"
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        px: 1,
+                                                        borderRadius: '8px',
+                                                        boxShadow: '0 2px 5px rgba(0,0,0,0.08)',
+                                                        mb: 1.5
+                                                    }}
+                                                />
+                                                <Typography
+                                                    variant="h6"
+                                                    align="center"
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        color: 'text.primary',
+                                                        mb: 1
+                                                    }}
+                                                >
+                                                    {activeExercise.Exercise?.exercise_name || 'Egzersiz'}
+                                                </Typography>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    gap: 0.5
+                                                }}>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                        align="center"
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 0.5
+                                                        }}
+                                                    >
+                                                        <EventIcon fontSize="small" />
+                                                        {activeExercise.start_date ? new Date(activeExercise.start_date).toLocaleDateString('tr-TR') : '-'}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                        align="center"
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 0.5
+                                                        }}
+                                                    >
+                                                        <EventIcon fontSize="small" />
+                                                        {activeExercise.end_date ? new Date(activeExercise.end_date).toLocaleDateString('tr-TR') : '-'}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            <Box sx={{ flex: 1 }}>
+                                                <Grid container spacing={2}>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 0.5
+                                                                }}
+                                                            >
+                                                                <InfoIcon fontSize="small" />
+                                                                Açıklama
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.exercise_description || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 0.5
+                                                                }}
+                                                            >
+                                                                <InfoIcon fontSize="small" />
+                                                                Not
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.note || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Süre
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.duration ? `${activeExercise.Exercise.duration} dk` : '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Zorluk
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.difficulty || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Kategori
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.category || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Ekipman
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.equipment || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                </Grid>
+
+                                                {activeExercise.Exercise?.video && (
+                                                    <Box sx={{ mt: 2 }}>
+                                                        <Accordion
+                                                            variant="outlined"
+                                                            sx={{
+                                                                borderRadius: 2,
+                                                                overflow: 'hidden',
+                                                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                                '&:before': {
+                                                                    display: 'none'
+                                                                }
+                                                            }}
+                                                        >
+                                                            <AccordionSummary
+                                                                expandIcon={<ExpandMoreIcon />}
+                                                                sx={{
+                                                                    bgcolor: 'success.light',
+                                                                    color: 'success.contrastText'
+                                                                }}
+                                                            >
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Egzersiz Videosu</Typography>
+                                                            </AccordionSummary>
+                                                            <AccordionDetails>
+                                                                <Box sx={{ p: 1, bgcolor: '#000' }}>
+                                                                    <video width="100%" controls>
+                                                                        <source src={activeExercise.Exercise.video} type="video/mp4" />
+                                                                        Tarayıcınız video etiketini desteklemiyor.
+                                                                    </video>
+                                                                </Box>
+                                                            </AccordionDetails>
+                                                        </Accordion>
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Card>
+                                </Box>
+                            </Card>
+                        ) : (
+                             !assignedExercisesLoading && (
+                                 <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.100', borderRadius: 2, textAlign: 'center' }}>
+                                     <Typography variant="body2" color="text.secondary">
+                                         Bugün için atanmış aktif bir egzersiz programı bulunmamaktadır.
+                                     </Typography>
+                                 </Box>
+                             )
+                        )}
+
+                        {/* Atanmış Egzersizler Listesi */}
+                        <Card elevation={3}>
+                             <CardHeader
+                                 title="Tüm Atanmış Egzersizler"
+                                 titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                 sx={{
+                                     bgcolor: 'primary.light',
+                                     color: 'primary.contrastText',
+                                     borderBottom: '1px solid',
+                                     borderColor: 'divider'
+                                 }}
+                             />
+                             {assignedExercisesLoading ? (
+                                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                     <CircularProgress />
+                                 </Box>
+                             ) : assignedExercises && assignedExercises.length > 0 ? (
+                                 <Box sx={{ p: 2 }}>
+                                     <Grid container spacing={2}>
+                                         {assignedExercises.map((ex, idx) => (
+                                             <Grid item xs={12} md={6} key={ex.id || idx}>
+                                                 <Card 
+                                                     variant="outlined" 
+                                                     sx={{
+                                                         position: 'relative',
+                                                         height: '100%',
+                                                         transition: 'all 0.3s ease',
+                                                         border: 'none',
+                                                         borderRadius: 2,
+                                                         background: 'linear-gradient(to right, #f5f9ff, #ffffff)',
+                                                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                                                         overflow: 'hidden',
+                                                         '&:hover': {
+                                                             transform: 'translateY(-4px)',
+                                                             boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)'
+                                                         },
+                                                         '&::before': {
+                                                             content: '""',
+                                                             position: 'absolute',
+                                                             left: 0,
+                                                             top: 0,
+                                                             height: '100%',
+                                                             width: '5px',
+                                                             backgroundColor: new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? 'success.main' : 'grey.400',
+                                                             borderRadius: '4px 0 0 4px'
+                                                         }
+                                                     }}
+                                                 >
+                                                     <Box sx={{ p: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
+                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                                             <Avatar 
+                                                                 sx={{ 
+                                                                     bgcolor: new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? 'success.light' : 'grey.300',
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                                 }}
+                                                             >
+                                                                 <FitnessCenterIcon />
+                                                             </Avatar>
+                                                             <Box>
+                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                                                                     {ex.Exercise?.exercise_name || 'Egzersiz'}
+                                                                 </Typography>
+                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                     <Chip
+                                                                         label={
+                                                                             ex.status === 'active' ? 'Aktif' :
+                                                                                 ex.status === 'completed' ? 'Tamamlandı' :
+                                                                                     ex.status === 'cancelled' ? 'İptal Edildi' :
+                                                                                         'Bilinmeyen'
+                                                                         }
+                                                                         size="small"
+                                                                         color={
+                                                                             ex.status === 'active' ? 'success' :
+                                                                                 ex.status === 'completed' ? 'default' :
+                                                                                     ex.status === 'cancelled' ? 'error' :
+                                                                                         'default'
+                                                                         }
+                                                                         sx={{ height: 22, '& .MuiChip-label': { px: 1, py: 0 } }}
+                                                                     />
+                                                                     <Typography variant="caption" color="text.secondary">
+                                                                         {ex.start_date && ex.end_date ? 
+                                                                             `${new Date(ex.start_date).toLocaleDateString('tr-TR')} - ${new Date(ex.end_date).toLocaleDateString('tr-TR')}` : 
+                                                                             '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Box>
+                                                         </Box>
+                                                         <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                             <IconButton 
+                                                                 size="small" 
+                                                                 sx={{ 
+                                                                     bgcolor: 'background.paper',
+                                                                     boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                                                                     '&:hover': { bgcolor: 'primary.light', color: 'white' }
+                                                                 }}
+                                                             >
+                                                                 <EditIcon fontSize="small" />
+                                                             </IconButton>
+                                                             <IconButton 
+                                                                 size="small" 
+                                                                 color="error"
+                                                                 sx={{ 
+                                                                     bgcolor: 'background.paper',
+                                                                     boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                                                                     '&:hover': { bgcolor: 'error.light', color: 'white' }
+                                                                 }}
+                                                             >
+                                                                 <DeleteIcon fontSize="small" />
+                                                             </IconButton>
+                                                         </Box>
+                                                     </Box>
+                                                     <CardContent sx={{ p: 2, pb: 1 }}>
+                                                         <Grid container spacing={2}>
+                                                             <Grid item xs={12}>
+                                                                 <Box sx={{ 
+                                                                     p: 1.5, 
+                                                                     mb: 1.5,
+                                                                     bgcolor: 'background.paper', 
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5,
+                                                                             display: 'flex',
+                                                                             alignItems: 'center',
+                                                                             gap: 0.5
+                                                                         }}
+                                                                     >
+                                                                         <InfoIcon fontSize="small" />
+                                                                         Açıklama
+                                                                     </Typography>
+                                                                     <Typography variant="body2">
+                                                                         {ex.Exercise?.exercise_description || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Kategori
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.category || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Ekipman
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.equipment || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Süre
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.duration ? `${ex.Exercise.duration} dk` : '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Zorluk
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.difficulty || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+                                                         </Grid>
+
+                                                         {ex.note && (
+                                                             <Box
+                                                                 sx={{
+                                                                     mt: 2,
+                                                                     p: 1.5,
+                                                                     bgcolor: 'rgba(0, 0, 0, 0.02)',
+                                                                     borderRadius: 2,
+                                                                     borderLeft: '3px solid',
+                                                                     borderColor: 'info.light',
+                                                                 }}
+                                                             >
+                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'info.main', mb: 0.5 }}>Not</Typography>
+                                                                 <Typography variant="body2">{ex.note}</Typography>
+                                                             </Box>
+                                                         )}
+
+                                                         {ex.Exercise?.video && (
+                                                             <Box sx={{ mt: 2 }}>
+                                                                 <Accordion
+                                                                     variant="outlined"
+                                                                     sx={{
+                                                                         borderRadius: 2,
+                                                                         overflow: 'hidden',
+                                                                         boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                         '&:before': {
+                                                                             display: 'none'
+                                                                         }
+                                                                     }}
+                                                                 >
+                                                                     <AccordionSummary
+                                                                         expandIcon={<ExpandMoreIcon />}
+                                                                         sx={{
+                                                                             bgcolor: 'primary.light',
+                                                                             color: 'primary.contrastText'
+                                                                         }}
+                                                                     >
+                                                                         <Typography variant="subtitle2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                             <FitnessCenterIcon fontSize="small" /> Egzersiz Videosu
+                                                                         </Typography>
+                                                                     </AccordionSummary>
+                                                                     <AccordionDetails sx={{ p: 0 }}>
+                                                                         <Box sx={{ position: 'relative', pt: '56.25%', bgcolor: '#000' }}>
+                                                                             <Box
+                                                                                 component="video"
+                                                                                 sx={{
+                                                                                     position: 'absolute',
+                                                                                     top: 0,
+                                                                                     left: 0,
+                                                                                     width: '100%',
+                                                                                     height: '100%',
+                                                                                     objectFit: 'contain'
+                                                                                 }}
+                                                                                 controls
+                                                                             >
+                                                                                 <source src={ex.Exercise.video} type="video/mp4" />
+                                                                                 Tarayıcınız video etiketini desteklemiyor.
+                                                                             </Box>
+                                                                         </Box>
+                                                                     </AccordionDetails>
+                                                                 </Accordion>
+                                                             </Box>
+                                                         )}
+                                                     </CardContent>
+                                                 </Card>
+                                             </Grid>
+                                         ))}
+                                     </Grid>
+                                 </Box>
+                             ) : (
+                                 !assignedExercisesLoading && (
+                                     <Box sx={{
+                                         display: 'flex',
+                                         flexDirection: 'column',
+                                         alignItems: 'center',
+                                         justifyContent: 'center',
+                                         p: 4,
+                                         height: 200,
+                                         bgcolor: 'grey.50'
+                                     }}>
+                                         <FitnessCenterIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 2 }} />
+                                         <Typography variant="body1" color="text.secondary" align="center">
+                                             Danışana atanmış egzersiz bulunmamaktadır.
+                                         </Typography>
+                                     </Box>
+                                 )
+                             )}
+                        </Card>
+
+                        {/* Egzersiz Atama Popup'ı */}
+                        <Dialog open={isAssignExerciseDialogOpen} onClose={handleCloseAssignExerciseDialog}>
+                             <DialogTitle>Yeni Egzersiz Ata</DialogTitle>
+                                <Box component="form" onSubmit={handleAssignExercise}> {/* Form Dialog'u sarmalayacak */}
+                                    <DialogContent dividers> {/* İçeriği sınırlamak ve divider eklemek için */}
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <Typography variant="subtitle2" gutterBottom>Egzersiz Seçin</Typography>
+                                                {availableExercisesLoading ? (
+                                                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                                                        <CircularProgress size={24} />
+                                                    </Box>
+                                                ) : (
+                                                    <TextField
+                                                        select
+                                                        name="exercise_id"
+                                                        value={assignForm.exercise_id}
+                                                        onChange={handleAssignFormChange}
+                                                        fullWidth
+                                                        required
+                                                        size="small"
+                                                        placeholder="Egzersiz seçin"
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <FitnessCenterIcon fontSize="small" />
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        <MenuItem value="" disabled>Egzersiz seçin</MenuItem>
+                                                        {availableExercises.map((exercise) => (
+                                                            <MenuItem key={exercise.id} value={exercise.id}>
+                                                                {exercise.exercise_name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                )}
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                 <Typography variant="subtitle2" gutterBottom>Not</Typography>
+                                                 <TextField
+                                                     name="note"
+                                                     value={assignForm.note}
+                                                     onChange={handleAssignFormChange}
+                                                     fullWidth
+                                                     size="small"
+                                                     placeholder="Not (isteğe bağlı)"
+                                                     sx={{ mb: 2 }}
+                                                 />
+                                             </Grid>
+                                             <Grid item xs={12} sm={6}>
+                                                 <Typography variant="subtitle2" gutterBottom>Başlangıç Tarihi</Typography>
+                                                 <TextField
+                                                     name="start_date"
+                                                     value={assignForm.start_date}
+                                                     onChange={handleAssignFormChange}
+                                                     type="date"
+                                                     fullWidth
+                                                     required
+                                                     size="small"
+                                                     InputLabelProps={{ shrink: true }}
+                                                 />
+                                             </Grid>
+                                             <Grid item xs={12} sm={6}>
+                                                 <Typography variant="subtitle2" gutterBottom>Bitiş Tarihi</Typography>
+                                                 <TextField
+                                                     name="end_date"
+                                                     value={assignForm.end_date}
+                                                     onChange={handleAssignFormChange}
+                                                     type="date"
+                                                     fullWidth
+                                                     required
+                                                     size="small"
+                                                     InputLabelProps={{ shrink: true }}
+                                                 />
+                                             </Grid>
+                                        </Grid>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCloseAssignExerciseDialog} color="secondary">
+                                            İptal
+                                        </Button>
+                                        <Button type="submit" variant="contained" color="primary" disabled={assignLoading}>
+                                            {assignLoading ? <CircularProgress size={24} /> : "Egzersiz Ata"}
+                                        </Button>
+                                    </DialogActions>
+                                </Box> {/* Form sonu */}
+                        </Dialog>
+                    </Box>
                 );
             case 'odeme':
+                // Aktif invoice'u bul
+                const today = new Date();
+                const activeInvoice = clientInvoices.find(inv => {
+                    if (!inv.issueDate || !inv.dueDate) return false;
+                    const start = new Date(inv.issueDate);
+                    const end = new Date(inv.dueDate);
+                    return today >= start && today <= end;
+                });
+                // Pagination hesaplamaları
+                const totalPages = Math.ceil(clientInvoices.length / invoicesPerPage);
+                const paginatedInvoices = clientInvoices.slice(
+                    (currentInvoicePage - 1) * invoicesPerPage,
+                    currentInvoicePage * invoicesPerPage
+                );
                 return (
                     <Paper elevation={2} sx={{ p: 3 }}>
-                        <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            Ödeme Takip
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz ödeme bilgisi bulunmamaktadır.
-                        </Typography>
+                        {/* Aktif Invoice */}
+                        {activeInvoice && (
+                            <Card elevation={4} sx={{ mb: 3, border: '2px solid', borderColor: 'success.main', background: '#f6fff6' }}>
+                                <CardHeader
+                                    avatar={<Avatar sx={{ bgcolor: 'success.main' }}><ReceiptLongIcon /></Avatar>}
+                                    title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'success.main' }}>Aktif Fatura: {activeInvoice.description || 'Açıklama yok'}</Typography>}
+                                    subheader={<Typography variant="body2" color="text.secondary">Fatura No: {activeInvoice.id}</Typography>}
+                                    sx={{ borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.100' }}
+                                />
+                                <CardContent>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Tutar:</strong> {Number(activeInvoice.amount).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Düzenleme Tarihi:</strong> {activeInvoice.issueDate ? new Date(activeInvoice.issueDate).toLocaleDateString('tr-TR') : '-'}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <strong>Son Ödeme Tarihi:</strong> {activeInvoice.dueDate ? new Date(activeInvoice.dueDate).toLocaleDateString('tr-TR') : '-'}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        )}
+                        {clientInvoicesLoading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : clientInvoices && clientInvoices.length > 0 ? (
+                            <Box>
+                                <Grid container spacing={2}>
+                                    {paginatedInvoices.map((invoice) => {
+                                        let statusColor = 'default';
+                                        let statusLabel = '';
+                                        if (invoice.status === 'paid') {
+                                            statusColor = 'success';
+                                            statusLabel = 'Ödendi';
+                                        } else if (invoice.status === 'cancelled') {
+                                            statusColor = 'error';
+                                            statusLabel = 'İptal';
+                                        } else {
+                                            statusColor = 'warning';
+                                            statusLabel = 'Beklemede';
+                                        }
+                                        return (
+                                            <Grid item xs={12} md={6} key={invoice.id}>
+                                                <Card elevation={3}>
+                                                    <CardHeader
+                                                        avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><ReceiptLongIcon /></Avatar>}
+                                                        title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{invoice.description || 'Açıklama yok'}</Typography>}
+                                                        subheader={<Typography variant="body2" color="text.secondary">Fatura No: {invoice.id}</Typography>}
+                                                        action={<Chip label={statusLabel} color={statusColor} size="small" />}
+                                                        sx={{ bgcolor: 'grey.100', borderBottom: '1px solid', borderColor: 'divider' }}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                            <strong>Tutar:</strong> {Number(invoice.amount).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+                                                        </Typography>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                            <strong>Düzenleme Tarihi:</strong> {invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('tr-TR') : '-'}
+                                                        </Typography>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                                            <strong>Son Ödeme Tarihi:</strong> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('tr-TR') : '-'}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
+                                </Grid>
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={() => setCurrentInvoicePage(p => Math.max(1, p - 1))}
+                                            disabled={currentInvoicePage === 1}
+                                            sx={{ mr: 1 }}
+                                        >
+                                            Önceki
+                                        </Button>
+                                        <Typography variant="body2" sx={{ mx: 2, display: 'flex', alignItems: 'center' }}>
+                                            Sayfa {currentInvoicePage} / {totalPages}
+                                        </Typography>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={() => setCurrentInvoicePage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentInvoicePage === totalPages}
+                                        >
+                                            Sonraki
+                                        </Button>
+                                    </Box>
+                                )}
+                            </Box>
+                        ) : (
+                            <Typography variant="body1" color="text.secondary">
+                                Henüz ödeme bilgisi bulunmamaktadır.
+                            </Typography>
+                        )}
                     </Paper>
                 );
             default:
                 return null;
+        }
+    };
+
+    const handleAssignFormChange = (e) => {
+        const { name, value } = e.target;
+        setAssignForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAssignExercise = async (e) => {
+        e.preventDefault();
+        setAssignLoading(true);
+        try {
+            await axios.post(
+                config[config.environment].apiUrl + "/exercise/assignExercise",
+                {
+                    ...assignForm,
+                    client_id: id
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+            setAssignForm({ exercise_id: '', start_date: '', end_date: '', note: '' });
+            // Başarıyla atandıktan sonra egzersizleri tekrar çek
+            setAssignedExercisesLoading(true);
+            const response = await axios.get(
+                config[config.environment].apiUrl + "/exercise/getAssignedExercisesByClient",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id,
+                    },
+                }
+            );
+            setAssignedExercises(response.data);
+            handleCloseAssignExerciseDialog(); // Popup'ı kapat
+        } catch (err) {
+            console.error("Egzersiz atama hatası:", err);
+            toast.error("Egzersiz atama başarısız: " + (err.response?.data?.message || err.message));
+        } finally {
+            setAssignLoading(false);
+            setAssignedExercisesLoading(false);
+        }
+    };
+
+    const handleOpenAssignExerciseDialog = () => {
+        setIsAssignExerciseDialogOpen(true);
+    };
+
+    const handleCloseAssignExerciseDialog = () => {
+        setIsAssignExerciseDialogOpen(false);
+        // Formu kapatırken state'i de sıfırlayabiliriz
+        setAssignForm({ exercise_id: '', start_date: '', end_date: '', note: '' });
+    };
+
+    const handleAddAppointment = async () => {
+        try {
+            await axios.post(
+                config[config.environment].apiUrl + "/appointment/addAppointmentAsDietitian",
+                {
+                    title: appointmentForm.title,
+                    start: appointmentForm.start,
+                    end: appointmentForm.end,
+                    client_id: id
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+            setIsAddAppointmentDialogOpen(false);
+            setAppointmentsLoading(true);
+            const response = await axios.get(
+                config[config.environment].apiUrl + "/appointment/fetchClientAppointmentAsDietitian",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id,
+                    },
+                }
+            );
+            setAppointments(response.data);
+            setAppointmentsLoading(false);
+        } catch (err) {
+            console.error("Randevu ekleme hatası:", err);
+            // Handle error as needed
         }
     };
 
@@ -1796,19 +3184,6 @@ export default function Danisan() {
                                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
                                     Danışan Bilgileri
                                 </Typography>
-                                <Chip 
-                                label={danisan.status === true ? "Aktif" : danisan.status === false ? "Pasif" : "-"}
-                                color={getStatusColor(danisan.status)}
-                                size="small"
-                                icon={
-                                    danisan.status === true ? (
-                                    <CheckCircleIcon style={{ color: 'orange' }} />
-                                    ) : danisan.status === false ? (
-                                    <CancelIcon style={{ color: 'red' }} />
-                                    ) : null
-                                }
-                                sx={{ fontWeight: 'bold' }}
-                                />
                             </Box>
                             <Box sx={{ 
                                 display: 'flex', 
@@ -1819,49 +3194,51 @@ export default function Danisan() {
                             }}>
                             <Avatar
                                 alt={`${danisan.name} ${danisan.surname}`}
-                                    src="/placeholder_client.jpg"
+                                src="/placeholder_client.jpg"
                                 sx={{
                                     width: 150,
                                     height: 150,
                                     mb: 2,
-                                        border: '4px solid',
-                                        borderColor: 'primary.light',
-                                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+                                    border: '4px solid',
+                                    borderColor: 'primary.light',
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
                                     transition: 'transform 0.3s ease-in-out',
                                     '&:hover': {
                                         transform: 'scale(1.05)'
                                     }
                                 }}
                             />
-                                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-                            {danisan.name} {danisan.surname}
-                        </Typography>
-                                
-                                <Divider sx={{ width: '100%', my: 2 }} />
-                                
-                                <Box sx={{ width: '100%' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <EmailIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.email}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <PhoneIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.phoneNumber}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <WcIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.gender}</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                                        <HeightIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.height} cm</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <MonitorWeightIcon color="primary" fontSize="small" />
-                                        <Typography variant="body2">{danisan.weight} kg</Typography>
-                                    </Box>
-                                </Box>
-                    </Box>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                {danisan.name} {danisan.surname}
+                            </Typography>
+                            <Divider sx={{ width: '100%', my: 2 }} />
+                            {/* Danışan Bilgileri Grid */}
+                            <Box sx={{ width: '100%', mb: 2 }}>
+                                <Grid container spacing={1}>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Cinsiyet:</strong> {danisan.gender || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Doğum Tarihi:</strong> {danisan.birthDate || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Meslek:</strong> {danisan.job || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Medeni Durum:</strong> {danisan.maritalStatus || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>E-posta:</strong> {danisan.email || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Telefon:</strong> {danisan.phoneNumber || '-'}</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography variant="body2"><strong>Şehir:</strong> {danisan.city || '-'}</Typography>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                            </Box>
                         </Card>
                     </Grid>
 
@@ -1888,14 +3265,12 @@ export default function Danisan() {
                                         }
                                 }}
                             >
-                                <Tab label="Genel" value="genel" />
                                 <Tab label="Anamnez" value="anamnez" />
-                                {/* <Tab label="Ölçümler" value="olcum" /> */}
+                                <Tab label="Ölçümler" value="olcum" />
                                 <Tab label="Beslenme" value="beslenme" />
                                 <Tab label="Randevular" value="randevu" />
-                                {/* <Tab label="Tarifler" value="tarif" /> */}
-                                {/* <Tab label="Egzersizler" value="egzersiz" /> */}
-                                {/* <Tab label="Ödemeler" value="odeme" /> */}
+                                <Tab label="Egzersizler" value="egzersiz" />
+                                <Tab label="Ödemeler" value="odeme" />
                                 </Tabs>
                         </Box>
                             <Box sx={{ p: 3, minHeight: '50vh' }}>

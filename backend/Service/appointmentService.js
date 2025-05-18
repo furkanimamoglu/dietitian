@@ -4,7 +4,7 @@ const Client = require('../Model/Client');
 const {Op} = require("sequelize");
 
 class AppointmentService {
-    async getDietitianAppointments(user_id) {
+    static async fetchDietitianAppointments(user_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -24,7 +24,36 @@ class AppointmentService {
         }
     }
 
-    async addAppointment(data) {
+    static async fetchClientAppointmentAsDietitian(dietitian_id, client_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        if (!client_id) {
+            throw new Exception("Danışan belirtilmedi.", 404, true);
+        }
+
+        const client = await Client.findOne({
+            where: {
+                id: client_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!client) {
+            throw new Exception("Bu danışan size ait değil veya bulunamadı.", 403, true);
+        }
+
+        return await Appointment.findAll({
+            where: {
+                client_id: client_id
+            },
+            order: [['start', 'DESC']]
+        });
+    }
+
+
+    static async addAppointment(data) {
         const { title, start, end, client_id } = data;
 
         const client = await Client.findByPk(client_id);
@@ -79,7 +108,7 @@ class AppointmentService {
         }
     }
 
-    async updateAppointment(appointment_id, data) {
+    static async updateAppointment(appointment_id, data) {
         const { title, start, end, dietitian_id, client_id, status } = data;
 
         try {
@@ -136,7 +165,7 @@ class AppointmentService {
         }
     }
 
-    async getClientAppointments(client_id) {
+    static async getClientAppointments(client_id) {
         try {
             if (!client_id) {
                 throw new Error("Yetkisiz Erişim.");
@@ -156,7 +185,7 @@ class AppointmentService {
         }
     }
 
-    async approveAppointment(appointment_id, dietitian_id) {
+    static async approveAppointment(appointment_id, dietitian_id) {
         try {
             if (!appointment_id || !dietitian_id) {
                 throw new Error("Geçersiz randevu veya diyetisyen bilgisi.");
@@ -183,7 +212,7 @@ class AppointmentService {
         }
     }
 
-    async getTodayAppointmentCount(dietitian_id) {
+    static async getTodayAppointmentCount(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -204,7 +233,7 @@ class AppointmentService {
         return { count };
     }
 
-    async getRemainingTodayAppointmentCount(dietitian_id) {
+    static async getRemainingTodayAppointmentCount(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -225,7 +254,7 @@ class AppointmentService {
         return { count };
     }
 
-    async getPendingAppointmentCount(dietitian_id) {
+    static async getPendingAppointmentCount(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -240,7 +269,7 @@ class AppointmentService {
         return { count };
     }
 
-    async updateAppointmentStatus(dietitian_id, appointment_id, action) {
+    static async updateAppointmentStatus(dietitian_id, appointment_id, action) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -273,7 +302,7 @@ class AppointmentService {
         };
     }
 
-    async getPendingAppointments(dietitian_id) {
+    static async getPendingAppointments(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -293,7 +322,7 @@ class AppointmentService {
         });
     }
 
-    async getTodayApprovedAppointments(dietitian_id) {
+    static async getTodayApprovedAppointments(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -320,7 +349,7 @@ class AppointmentService {
         });
     }
 
-    async deleteAppointment(dietitian_id, appointment_id) {
+    static async deleteAppointment(dietitian_id, appointment_id) {
         if (!dietitian_id || !appointment_id) {
             throw {
                 status: 400,
@@ -349,4 +378,4 @@ class AppointmentService {
 
 }
 
-module.exports = new AppointmentService();
+module.exports = AppointmentService;

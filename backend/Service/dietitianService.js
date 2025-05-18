@@ -16,7 +16,7 @@ const Security = require("../Utils/Security");
 
 class DietitianService {
 
-    async login(phoneNumber, password) {
+    static async login(phoneNumber, password) {
         try {
             const dietitianInfo = await Dietitian.findOne({
                 where: {
@@ -50,7 +50,7 @@ class DietitianService {
         }
     }
 
-    async register(phoneNumber, password, ipAddress) {
+    static async register(phoneNumber, password, ipAddress) {
         try {
             if (!phoneNumber || !password) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
@@ -83,7 +83,7 @@ class DietitianService {
         }
     }
 
-    async delete(id) {
+    static async delete(id) {
         try {
             const dietitian = await Dietitian.findByPk(id);
 
@@ -97,7 +97,7 @@ class DietitianService {
         }
     }
 
-    async registerClient(user_id, name, email, password, phoneNumber, gender) {
+    static async registerClient(user_id, name, email, password, phoneNumber, gender) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -130,7 +130,7 @@ class DietitianService {
         }
     }
 
-    async deleteClient(user_id, client_id) {
+    static async deleteClient(user_id, client_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -155,7 +155,7 @@ class DietitianService {
         }
     }
 
-    async updateClient(user_id, client_id, updateData) {
+    static async updateClient(user_id, client_id, updateData) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz erişim.", 401);
@@ -180,7 +180,7 @@ class DietitianService {
         }
     }
 
-    async getMyClient(user_id, client_id) {
+    static async getMyClient(user_id, client_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401, true);
@@ -216,7 +216,7 @@ class DietitianService {
     }
 
 
-    async getMyAllClients(user_id) {
+    static async getMyAllClients(user_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -244,7 +244,7 @@ class DietitianService {
         }
     }
 
-    async getMyActiveClientCount(dietitian_id) {
+    static async getMyActiveClientCount(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -256,7 +256,7 @@ class DietitianService {
         return {count: result};
     }
 
-    async generateQrCode(user_id) {
+    static async generateQrCode(user_id) {
         if (!user_id) {
             const err = new Error('Diyetisyen ID gerekli.');
             err.status = 400;
@@ -276,7 +276,7 @@ class DietitianService {
         }
     }
 
-    async getDietitianInfo(user_id) {
+    static async getDietitianInfo(user_id) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401, true);
@@ -299,7 +299,7 @@ class DietitianService {
         }
     }
 
-    async getDietitianNameById(dietitian_id) {
+    static async getDietitianNameById(dietitian_id) {
         try {
             if (!dietitian_id) {
                 throw new Exception("Yetkisiz Erişim.", 401, true);
@@ -319,7 +319,7 @@ class DietitianService {
         }
     }
 
-    async addNutritionCategory(dietitian_id, category_name) {
+    static async addNutritionCategory(dietitian_id, category_name) {
         if (!dietitian_id) {
             throw {
                 status: 400,
@@ -342,7 +342,7 @@ class DietitianService {
         });
     }
 
-    async getNutritionCategories(dietitian_id) {
+    static async getNutritionCategories(dietitian_id) {
         if (!dietitian_id) {
             throw {
                 status: 401,
@@ -357,7 +357,7 @@ class DietitianService {
         });
     }
 
-    async deleteNutritionCategory(dietitian_id, category_id) {
+    static async deleteNutritionCategory(dietitian_id, category_id) {
         if (!dietitian_id || !category_id) {
             throw {
                 status: 400,
@@ -389,7 +389,7 @@ class DietitianService {
         };
     }
 
-    async globalSearchbar(user_id, query) {
+    static async globalSearchbar(user_id, query) {
         try {
             if (!user_id) {
                 throw new Error("Yetkisiz Erişim.");
@@ -439,7 +439,7 @@ class DietitianService {
         }
     }
 
-    async assignNutritionPlanToClient({ dietitian_id, client_id, nutrition_plan_id, start_date, end_date, note }) {
+    static async assignNutritionPlanToClient({ dietitian_id, client_id, nutrition_plan_id, start_date, end_date, note }) {
         const client = await Client.findOne({
             where: {
                 id: client_id,
@@ -527,7 +527,7 @@ class DietitianService {
     }
 
 
-    async getNutritionPlans(dietitian_id) {
+    static async getNutritionPlans(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
@@ -538,7 +538,7 @@ class DietitianService {
         });
     }
 
-    async deleteNutritionPlan(dietitian_id, nutrition_plan_id) {
+    static async deleteNutritionPlan(dietitian_id, nutrition_plan_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
@@ -559,7 +559,7 @@ class DietitianService {
         return { success: true, message: "Beslenme planı başarıyla silindi." };
     }
 
-    async addNutritionPlan(dietitian_id, { title, description, image, category_id, mealPlan }) {
+    static async addNutritionPlan(dietitian_id, { title, description, image, category_id, mealPlan }) {
         if (!dietitian_id || !title || !description || !category_id) {
             throw new Exception("Başlık, açıklama ve kategori zorunludur.", 400, true);
         }
@@ -600,7 +600,7 @@ class DietitianService {
         });
     }
 
-    async updateNutritionPlan(dietitian_id, nutrition_plan_id, updateData) {
+    static async updateNutritionPlan(dietitian_id, nutrition_plan_id, updateData) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
@@ -635,7 +635,7 @@ class DietitianService {
         return plan;
     }
 
-    async getNutritionAssignmentPlanByClient(dietitian_id, client_id, startDate, endDate) {
+    static async getNutritionAssignmentPlanByClient(dietitian_id, client_id, startDate, endDate) {
         return await NutritionAssignment.findAll({
             where: {
                 client_id,
@@ -648,7 +648,7 @@ class DietitianService {
         });
     }
 
-    async getMyNotes(dietitian_id) {
+    static async getMyNotes(dietitian_id) {
         try {
             return await Notes.findAll({
                 where: {
@@ -661,7 +661,7 @@ class DietitianService {
         }
     }
 
-    async addNote(dietitian_id, note) {
+    static async addNote(dietitian_id, note) {
         try {
             return await Notes.create({
                 dietitian_id,
@@ -674,4 +674,4 @@ class DietitianService {
 
 }
 
-module.exports = new DietitianService();
+module.exports = DietitianService;

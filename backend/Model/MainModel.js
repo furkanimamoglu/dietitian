@@ -6,7 +6,6 @@ const ExerciseCategory = require('./ExerciseCategory');
 const ExerciseAssignment = require('./ExerciseAssignment');
 const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
-const AnamnesQuestion = require('./AnamnesQuestion');
 const DietitianOption = require('./DietitianOption');
 const Invoice = require('./Invoice');
 const Notification = require('./Notification');
@@ -136,18 +135,19 @@ Anamnes.belongsTo(Client, {
 // 11. Client ve Invoice
 Client.hasMany(Invoice, {
     foreignKey: 'client_id',
+    onDelete: 'CASCADE',
 });
 Invoice.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// 12. AnamnesQuestion ve Anamnes
-AnamnesQuestion.hasMany(Anamnes, {
-    foreignKey: 'anamnes_question_id',
+// Dietitian ve Invoice
+Dietitian.hasMany(Invoice, {
+    foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
 });
-Anamnes.belongsTo(AnamnesQuestion, {
-    foreignKey: 'anamnes_question_id',
+Invoice.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
 });
 
 // Diyetisyen ve Notlar
@@ -254,13 +254,28 @@ PackageItems.belongsTo(Package, {
     foreignKey: 'package_id'
 });
 
+Package.hasMany(Invoice, {
+    foreignKey: 'package_id',
+});
+Invoice.belongsTo(Package, {
+    foreignKey: 'package_id',
+});
+
+Dietitian.hasMany(Package, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+Package.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id'
+});
+
 module.exports = {
     sequelize,
     Dietitian,
     Client,
     Appointment,
     Anamnes,
-    AnamnesQuestion,
     DietitianOption,
     Invoice,
     Notification,

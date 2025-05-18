@@ -146,14 +146,12 @@ class PackageService {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
 
-        // Find the service
         const item = await PackageItems.findByPk(item_id);
 
         if (!item) {
             throw new Exception("Servis bulunamadı.", 404, true);
         }
 
-        // Verify that the package belongs to the dietitian
         const packageExists = await Package.findOne({
             where: {
                 id: item.package_id,
