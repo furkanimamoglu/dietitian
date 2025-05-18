@@ -8,6 +8,8 @@ router.get('/getMyExercises', exerciseController.getMyExercises);
 router.post('/addExercise', exerciseController.addExercise);
 router.put('/updateExercise', exerciseController.updateExercise);
 router.delete('/deleteExercise', exerciseController.deleteExercise);
+router.post('/assignExercise', exerciseController.assignExercise);
+router.get('/getAssignedExercisesByClient', exerciseController.getAssignedExercisesByClient)
 
 router.get('/getMyExerciseCategories', exerciseController.getMyExerciseCategories);
 router.post('/addExerciseCategory', exerciseController.addExerciseCategory);
