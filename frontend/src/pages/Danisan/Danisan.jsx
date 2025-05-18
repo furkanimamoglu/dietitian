@@ -170,6 +170,17 @@ export default function Danisan() {
 
     const handleCreateMeasurement = async (e) => {
         e.preventDefault();
+
+        // Yüzde toplamı kontrolü
+        const yag = parseFloat(measurementForm.yag) || 0;
+        const kas = parseFloat(measurementForm.kas) || 0;
+        const su = parseFloat(measurementForm.su) || 0;
+        const toplam = yag + kas + su;
+        if (yag > 100 || kas > 100 || su > 100 || toplam > 100) {
+            setErrorMessage("Yağ, kas ve su yüzdelerinin toplamı %100'ü geçemez.");
+            setShowErrorPopup(true);
+            return;
+        }
         setCreateMeasurementLoading(true);
 
         try {
@@ -3530,6 +3541,4 @@ export default function Danisan() {
         </Default>
     );
 }
-
-
 
