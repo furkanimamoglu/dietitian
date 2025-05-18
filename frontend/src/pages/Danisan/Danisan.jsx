@@ -1293,17 +1293,11 @@ export default function Danisan() {
                                     </CardContent>
                                 </Card>
                             </Grid>
-                            {/* Vücut Analizi kartı aynı şekilde bırakılabilir veya ölçümlerden sonuncusu ile doldurulabilir */}
                             <Grid item xs={12} md={6}>
                                 <Card elevation={3} sx={{ height: '100%' }}>
                                     <CardHeader
                                         title="Vücut Analizi"
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                        action={
-                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => {}}>
-                                                Düzenle
-                                            </Button>
-                                        }
                                         sx={{
                                             bgcolor: 'primary.light',
                                             color: 'primary.contrastText',
@@ -1313,7 +1307,6 @@ export default function Danisan() {
                                     />
                                     <CardContent>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            {/* Son ölçümden oranlar */}
                                             {measurements && measurements.length > 0 ? (
                                                 <>
                                                     <Box>
