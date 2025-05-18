@@ -49,6 +49,7 @@ import EventIcon from '@mui/icons-material/Event';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 
 export default function Danisan() {
     const { id } = useParams();
@@ -70,6 +71,15 @@ export default function Danisan() {
     const [appointments, setAppointments] = useState([]);
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
 
+    const [assignedExercises, setAssignedExercises] = useState([]);
+    const [assignedExercisesLoading, setAssignedExercisesLoading] = useState(false);
+    const [assignForm, setAssignForm] = useState({
+        exercise_id: '',
+        start_date: '',
+        end_date: '',
+        note: ''
+    });
+    const [assignLoading, setAssignLoading] = useState(false);
 
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
@@ -270,6 +280,34 @@ export default function Danisan() {
             }
         };
         fetchAppointments();
+    }, [activeTab, id]);
+
+    useEffect(() => {
+        const fetchAssignedExercises = async () => {
+            if (activeTab === 'egzersiz' && id) {
+                setAssignedExercisesLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/exercise/getAssignedExercisesByClient",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            },
+                            params: {
+                                client_id: id,
+                            },
+                        }
+                    );
+                    setAssignedExercises(response.data);
+                } catch (err) {
+                    console.error("Egzersizler yüklenirken hata:", err.message);
+                    setAssignedExercises([]);
+                } finally {
+                    setAssignedExercisesLoading(false);
+                }
+            }
+        };
+        fetchAssignedExercises();
     }, [activeTab, id]);
 
     if (isLoading) {
@@ -1922,10 +1960,124 @@ export default function Danisan() {
                 return (
                     <Paper elevation={2} sx={{ p: 3 }}>
                         <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', color: theme.palette.primary.main }}>
+                            Atanmış Egzersizler
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Henüz egzersiz verisi bulunmamaktadır.
-                        </Typography>
+                        {/* Egzersiz Atama Formu */}
+                        <Box component="form" onSubmit={handleAssignExercise} sx={{ mb: 4, p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={12} md={3}>
+                                    <input
+                                        type="number"
+                                        name="exercise_id"
+                                        value={assignForm.exercise_id}
+                                        onChange={handleAssignFormChange}
+                                        placeholder="Egzersiz ID"
+                                        required
+                                        style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    <input
+                                        type="date"
+                                        name="start_date"
+                                        value={assignForm.start_date}
+                                        onChange={handleAssignFormChange}
+                                        required
+                                        style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    <input
+                                        type="date"
+                                        name="end_date"
+                                        value={assignForm.end_date}
+                                        onChange={handleAssignFormChange}
+                                        required
+                                        style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    <input
+                                        type="text"
+                                        name="note"
+                                        value={assignForm.note}
+                                        onChange={handleAssignFormChange}
+                                        placeholder="Not (isteğe bağlı)"
+                                        style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={assignLoading}
+                                        fullWidth
+                                    >
+                                        {assignLoading ? <CircularProgress size={24} /> : "Egzersiz Ata"}
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                        {/* Egzersiz Listesi */}
+                        {assignedExercisesLoading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : assignedExercises && assignedExercises.length > 0 ? (
+                            <Grid container spacing={2}>
+                                {assignedExercises.map((ex, idx) => (
+                                    <Grid item xs={12} md={6} key={ex.id || idx}>
+                                        <Card elevation={3}>
+                                            <CardHeader
+                                                avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><FitnessCenterIcon /></Avatar>}
+                                                title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{ex.Exercise?.exercise_name || 'Egzersiz'}</Typography>}
+                                                subheader={
+                                                    <>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Başlangıç: {ex.start_date ? new Date(ex.start_date).toLocaleDateString('tr-TR') : '-'}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Bitiş: {ex.end_date ? new Date(ex.end_date).toLocaleDateString('tr-TR') : '-'}
+                                                        </Typography>
+                                                    </>
+                                                }
+                                                sx={{ bgcolor: 'grey.100', borderBottom: '1px solid', borderColor: 'divider' }}
+                                            />
+                                            <CardContent>
+                                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                                    <strong>Açıklama:</strong> {ex.Exercise?.exercise_description || '-'}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                                    <strong>Not:</strong> {ex.note || '-'}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                                    <strong>Süre:</strong> {ex.Exercise?.duration ? `${ex.Exercise.duration} dk` : '-'}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                                    <strong>Zorluk:</strong> {ex.Exercise?.difficulty || '-'}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                                    <strong>Ekipman:</strong> {ex.Exercise?.equipment || '-'}
+                                                </Typography>
+                                                {ex.Exercise?.video && (
+                                                    <Box sx={{ mt: 2 }}>
+                                                        <video width="100%" controls>
+                                                            <source src={ex.Exercise.video} type="video/mp4" />
+                                                            Tarayıcınız video etiketini desteklemiyor.
+                                                        </video>
+                                                    </Box>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        ) : (
+                            <Typography variant="body1" color="text.secondary">
+                                Henüz egzersiz verisi bulunmamaktadır.
+                            </Typography>
+                        )}
                     </Paper>
                 );
             case 'odeme':
@@ -2048,6 +2200,52 @@ export default function Danisan() {
                 );
             default:
                 return null;
+        }
+    };
+
+    const handleAssignFormChange = (e) => {
+        const { name, value } = e.target;
+        setAssignForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAssignExercise = async (e) => {
+        e.preventDefault();
+        setAssignLoading(true);
+        try {
+            await axios.post(
+                config[config.environment].apiUrl + "/exercise/assignExercise",
+                {
+                    ...assignForm,
+                    client_id: id
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+            setAssignForm({ exercise_id: '', start_date: '', end_date: '', note: '' });
+            // Başarıyla atandıktan sonra egzersizleri tekrar çek
+            setAssignedExercisesLoading(true);
+            const response = await axios.get(
+                config[config.environment].apiUrl + "/exercise/getAssignedExercisesByClient",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id,
+                    },
+                }
+            );
+            setAssignedExercises(response.data);
+            alert('Egzersiz başarıyla atandı!');
+        } catch (err) {
+            console.error("Egzersiz atama hatası:", err);
+            alert("Egzersiz atama başarısız: " + (err.response?.data?.message || err.message));
+        } finally {
+            setAssignLoading(false);
+            setAssignedExercisesLoading(false);
         }
     };
 
