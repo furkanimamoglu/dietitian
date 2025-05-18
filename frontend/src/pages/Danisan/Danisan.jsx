@@ -33,7 +33,11 @@ import {
   AccordionSummary,
   AccordionDetails,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
 
 // Icons
@@ -82,6 +86,8 @@ export default function Danisan() {
         note: ''
     });
     const [assignLoading, setAssignLoading] = useState(false);
+    const [isAssignExerciseDialogOpen, setIsAssignExerciseDialogOpen] = useState(false);
+    const [activeExercise, setActiveExercise] = useState(null);
 
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
@@ -125,6 +131,21 @@ export default function Danisan() {
         const startDate = new Date(plan.start_date);
         const endDate = new Date(plan.end_date);
         
+        return today >= startDate && today <= endDate;
+    };
+
+    const isActiveExercise = (exercise) => {
+        if (!exercise.start_date || !exercise.end_date) return false;
+
+        const today = new Date();
+        const startDate = new Date(exercise.start_date);
+        const endDate = new Date(exercise.end_date);
+
+        // Sadece tarihleri karşılaştırmak için saat, dakika, saniyeyi sıfırlayalım
+        today.setHours(0, 0, 0, 0);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+
         return today >= startDate && today <= endDate;
     };
 
@@ -301,9 +322,15 @@ export default function Danisan() {
                         }
                     );
                     setAssignedExercises(response.data);
+
+                    // Aktif egzersizi bul
+                    const currentActiveExercise = response.data.find(isActiveExercise);
+                    setActiveExercise(currentActiveExercise || null); // Bulunamazsa null set et
+
                 } catch (err) {
                     console.error("Egzersizler yüklenirken hata:", err.message);
                     setAssignedExercises([]);
+                    setActiveExercise(null); // Hata olursa aktif egzersizi de sıfırla
                 } finally {
                     setAssignedExercisesLoading(false);
                 }
@@ -1963,264 +1990,778 @@ export default function Danisan() {
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                             <Typography variant="h5" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-                            </Typography>
+                        </Typography>
                             <Button
                                 variant="contained"
                                 color="primary"
                                 startIcon={<AddIcon />}
-                                onClick={() => alert('Yeni egzersiz atama formu açılacak')}
+                                onClick={handleOpenAssignExerciseDialog} // Popup açma fonksiyonu
                             >
                                 Yeni Egzersiz Ata
                             </Button>
                         </Box>
 
-                        {/* Egzersiz Atama Formu */}
-                        <Card elevation={3} sx={{ mb: 3 }}>
-                            <CardHeader
-                                title="Egzersiz Ata"
-                                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider'
-                                }}
-                            />
-                            <CardContent>
-                                <Box component="form" onSubmit={handleAssignExercise}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <Typography variant="subtitle2" gutterBottom>Egzersiz ID</Typography>
-                                            <TextField
-                                                name="exercise_id"
-                                                value={assignForm.exercise_id}
-                                                onChange={handleAssignFormChange}
-                                                type="number"
-                                                fullWidth
-                                                required
-                                                size="small"
-                                                placeholder="Egzersiz ID"
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <FitnessCenterIcon fontSize="small" />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <Typography variant="subtitle2" gutterBottom>Not</Typography>
-                                            <TextField
-                                                name="note"
-                                                value={assignForm.note}
-                                                onChange={handleAssignFormChange}
-                                                fullWidth
-                                                size="small"
-                                                placeholder="Not (isteğe bağlı)"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <Typography variant="subtitle2" gutterBottom>Başlangıç Tarihi</Typography>
-                                            <TextField
-                                                name="start_date"
-                                                value={assignForm.start_date}
-                                                onChange={handleAssignFormChange}
-                                                type="date"
-                                                fullWidth
-                                                required
-                                                size="small"
-                                                InputLabelProps={{ shrink: true }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <Typography variant="subtitle2" gutterBottom>Bitiş Tarihi</Typography>
-                                            <TextField
-                                                name="end_date"
-                                                value={assignForm.end_date}
-                                                onChange={handleAssignFormChange}
-                                                type="date"
-                                                fullWidth
-                                                required
-                                                size="small"
-                                                InputLabelProps={{ shrink: true }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Button
-                                                type="submit"
-                                                variant="contained"
-                                                color="primary"
-                                                disabled={assignLoading}
-                                                sx={{ mt: 1 }}
-                                            >
-                                                {assignLoading ? <CircularProgress size={24} /> : "Egzersiz Ata"}
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            </CardContent>
-                        </Card>
-
-                        {/* Atanmış Egzersizler */}
-                        <Card elevation={3}>
-                            <CardHeader
-                                title="Atanmış Egzersizler"
-                                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
-                                sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider'
-                                }}
-                            />
-                            {assignedExercisesLoading ? (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-                                    <CircularProgress />
-                                </Box>
-                            ) : assignedExercises && assignedExercises.length > 0 ? (
+                        {/* Aktif Egzersiz Alanı */}
+                        {assignedExercisesLoading ? (
+                             <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                 <CircularProgress />
+                             </Box>
+                        ) : activeExercise ? (
+                            <Card elevation={3} sx={{ mb: 3, overflow: 'hidden', borderRadius: 2 }}>
+                                <CardHeader
+                                    title="Aktif Egzersiz Programı"
+                                    titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                    sx={{
+                                        bgcolor: 'success.light',
+                                        color: 'success.contrastText',
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}
+                                />
                                 <Box sx={{ p: 2 }}>
-                                    <Grid container spacing={2}>
-                                        {assignedExercises.map((ex, idx) => (
-                                            <Grid item xs={12} md={6} key={ex.id || idx}>
-                                                <Card variant="outlined" sx={{
-                                                    height: '100%',
-                                                    transition: 'all 0.3s ease',
-                                                    '&:hover': {
-                                                        boxShadow: 3
-                                                    }
-                                                }}>
-                                                    <CardHeader
-                                                        avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><FitnessCenterIcon /></Avatar>}
-                                                        title={<Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{ex.Exercise?.exercise_name || 'Egzersiz'}</Typography>}
-                                                        subheader={
-                                                            <Box>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    Başlangıç: {ex.start_date ? new Date(ex.start_date).toLocaleDateString('tr-TR') : '-'}
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    Bitiş: {ex.end_date ? new Date(ex.end_date).toLocaleDateString('tr-TR') : '-'}
-                                                                </Typography>
-                                                            </Box>
-                                                        }
-                                                        action={
-                                                            <Box sx={{ display: 'flex' }}>
-                                                                <IconButton size="small" sx={{ mr: 1 }}>
-                                                                    <EditIcon fontSize="small" />
-                                                                </IconButton>
-                                                                <IconButton size="small" color="error">
-                                                                    <DeleteIcon fontSize="small" />
-                                                                </IconButton>
-                                                            </Box>
-                                                        }
-                                                        sx={{ bgcolor: 'grey.100', borderBottom: '1px solid', borderColor: 'divider' }}
-                                                    />
-                                                    <CardContent>
-                                                        <Grid container spacing={1}>
-                                                            <Grid item xs={6}>
-                                                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                                                    Açıklama:
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                    {ex.Exercise?.exercise_description || '-'}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                                                    Kategori:
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                    {ex.Exercise?.category || '-'}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                                                    Süre:
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                    {ex.Exercise?.duration ? `${ex.Exercise.duration} dk` : '-'}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={6}>
-                                                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                                                    Zorluk:
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                    {ex.Exercise?.difficulty || '-'}
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item xs={12}>
-                                                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                                                                    Not:
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                                                    {ex.note || '-'}
-                                                                </Typography>
-                                                            </Grid>
-                                                        </Grid>
+                                    <Card
+                                        variant="outlined"
+                                        sx={{
+                                            position: 'relative',
+                                            height: '100%',
+                                            transition: 'all 0.3s ease',
+                                            border: 'none',
+                                            borderRadius: 2,
+                                            background: 'linear-gradient(to right, #f0fff0, #ffffff)',
+                                            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                                            overflow: 'hidden',
+                                            '&:hover': {
+                                                transform: 'translateY(-5px)',
+                                                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)'
+                                            },
+                                            '&::before': {
+                                                content: '""',
+                                                position: 'absolute',
+                                                left: 0,
+                                                top: 0,
+                                                height: '100%',
+                                                width: '5px',
+                                                backgroundColor: 'success.main',
+                                                borderRadius: '4px 0 0 4px'
+                                            }
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            position: 'absolute',
+                                            top: 10,
+                                            right: 10,
+                                            display: 'flex',
+                                            gap: 1,
+                                            zIndex: 10
+                                        }}>
+                                            <IconButton
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: 'background.paper',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                                                    '&:hover': { bgcolor: 'success.light' }
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                sx={{
+                                                    bgcolor: 'background.paper',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                                                    '&:hover': { bgcolor: 'error.light', color: 'white' }
+                                                }}
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
 
-                                                        {ex.Exercise?.video && (
-                                                            <Box sx={{ mt: 2 }}>
-                                                                <Accordion variant="outlined">
-                                                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Video</Typography>
-                                                                    </AccordionSummary>
-                                                                    <AccordionDetails>
-                                                                        <video width="100%" controls>
-                                                                            <source src={ex.Exercise.video} type="video/mp4" />
-                                                                            Tarayıcınız video etiketini desteklemiyor.
-                                                                        </video>
-                                                                    </AccordionDetails>
-                                                                </Accordion>
-                                                            </Box>
-                                                        )}
-                                                    </CardContent>
-                                                    <Box sx={{
-                                                        p: 1,
-                                                        borderTop: '1px solid',
-                                                        borderColor: 'divider',
-                                                        bgcolor: 'grey.50',
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center'
-                                                    }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                            <FitnessCenterIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                Ekipman: {ex.Exercise?.equipment || '-'}
+                                        <Box sx={{
+                                            display: 'flex',
+                                            flexDirection: { xs: 'column', sm: 'row' },
+                                            alignItems: { xs: 'center', sm: 'flex-start' },
+                                            p: 2,
+                                            gap: 2
+                                        }}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                p: 2,
+                                                minWidth: { xs: '100%', sm: '200px' },
+                                                borderRight: { xs: 'none', sm: '1px dashed rgba(0,0,0,0.1)' },
+                                                borderBottom: { xs: '1px dashed rgba(0,0,0,0.1)', sm: 'none' },
+                                                mb: { xs: 2, sm: 0 }
+                                            }}>
+                                                <Avatar
+                                                    sx={{
+                                                        width: 80,
+                                                        height: 80,
+                                                        bgcolor: 'success.light',
+                                                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                                                        mb: 2
+                                                    }}
+                                                >
+                                                    <FitnessCenterIcon sx={{ fontSize: 40 }} />
+                                                </Avatar>
+                                                <Chip
+                                                    label="Aktif Egzersiz"
+                                                    color="success"
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        px: 1,
+                                                        borderRadius: '8px',
+                                                        boxShadow: '0 2px 5px rgba(0,0,0,0.08)',
+                                                        mb: 1.5
+                                                    }}
+                                                />
+                                                <Typography
+                                                    variant="h6"
+                                                    align="center"
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        color: 'text.primary',
+                                                        mb: 1
+                                                    }}
+                                                >
+                                                    {activeExercise.Exercise?.exercise_name || 'Egzersiz'}
+                                                </Typography>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    gap: 0.5
+                                                }}>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                        align="center"
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 0.5
+                                                        }}
+                                                    >
+                                                        <EventIcon fontSize="small" />
+                                                        {activeExercise.start_date ? new Date(activeExercise.start_date).toLocaleDateString('tr-TR') : '-'}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                        align="center"
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 0.5
+                                                        }}
+                                                    >
+                                                        <EventIcon fontSize="small" />
+                                                        {activeExercise.end_date ? new Date(activeExercise.end_date).toLocaleDateString('tr-TR') : '-'}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            <Box sx={{ flex: 1 }}>
+                                                <Grid container spacing={2}>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 0.5
+                                                                }}
+                                                            >
+                                                                <InfoIcon fontSize="small" />
+                                                                Açıklama
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.exercise_description || '-'}
                                                             </Typography>
                                                         </Box>
-                                                        <Chip
-                                                            label={new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? "Aktif" : "Pasif"}
-                                                            size="small"
-                                                            color={new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? "success" : "default"}
-                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 0.5
+                                                                }}
+                                                            >
+                                                                <InfoIcon fontSize="small" />
+                                                                Not
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.note || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Süre
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.duration ? `${activeExercise.Exercise.duration} dk` : '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Zorluk
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.difficulty || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Kategori
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.category || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} sm={3}>
+                                                        <Box sx={{
+                                                            p: 1.5,
+                                                            bgcolor: 'background.paper',
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                            height: '100%'
+                                                        }}>
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    mb: 1
+                                                                }}
+                                                            >
+                                                                Ekipman
+                                                            </Typography>
+                                                            <Typography variant="body2">
+                                                                {activeExercise.Exercise?.equipment || '-'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Grid>
+                                                </Grid>
+
+                                                {activeExercise.Exercise?.video && (
+                                                    <Box sx={{ mt: 2 }}>
+                                                        <Accordion
+                                                            variant="outlined"
+                                                            sx={{
+                                                                borderRadius: 2,
+                                                                overflow: 'hidden',
+                                                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                                                '&:before': {
+                                                                    display: 'none'
+                                                                }
+                                                            }}
+                                                        >
+                                                            <AccordionSummary
+                                                                expandIcon={<ExpandMoreIcon />}
+                                                                sx={{
+                                                                    bgcolor: 'success.light',
+                                                                    color: 'success.contrastText'
+                                                                }}
+                                                            >
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>Egzersiz Videosu</Typography>
+                                                            </AccordionSummary>
+                                                            <AccordionDetails>
+                                                                <Box sx={{ p: 1, bgcolor: '#000' }}>
+                                                                    <video width="100%" controls>
+                                                                        <source src={activeExercise.Exercise.video} type="video/mp4" />
+                                                                        Tarayıcınız video etiketini desteklemiyor.
+                                                                    </video>
+                                                                </Box>
+                                                            </AccordionDetails>
+                                                        </Accordion>
                                                     </Box>
-                                                </Card>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Card>
                                 </Box>
-                            ) : (
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    p: 4,
-                                    height: 200,
-                                    bgcolor: 'grey.50'
-                                }}>
-                                    <FitnessCenterIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 2 }} />
-                                    <Typography variant="body1" color="text.secondary" align="center">
-                                        Henüz egzersiz atanmamış.
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary" align="center">
-                                        Danışana egzersiz atamak için "Yeni Egzersiz Ata" butonunu kullanabilirsiniz.
-                                    </Typography>
-                                </Box>
-                            )}
+                            </Card>
+                        ) : (
+                             !assignedExercisesLoading && (
+                                 <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.100', borderRadius: 2, textAlign: 'center' }}>
+                                     <Typography variant="body2" color="text.secondary">
+                                         Bugün için atanmış aktif bir egzersiz programı bulunmamaktadır.
+                                     </Typography>
+                                 </Box>
+                             )
+                        )}
+
+                        {/* Atanmış Egzersizler Listesi */}
+                        <Card elevation={3}>
+                             <CardHeader
+                                 title="Tüm Atanmış Egzersizler"
+                                 titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                                 sx={{
+                                     bgcolor: 'primary.light',
+                                     color: 'primary.contrastText',
+                                     borderBottom: '1px solid',
+                                     borderColor: 'divider'
+                                 }}
+                             />
+                             {assignedExercisesLoading ? (
+                                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                     <CircularProgress />
+                                 </Box>
+                             ) : assignedExercises && assignedExercises.length > 0 ? (
+                                 <Box sx={{ p: 2 }}>
+                                     <Grid container spacing={2}>
+                                         {assignedExercises.map((ex, idx) => (
+                                             <Grid item xs={12} md={6} key={ex.id || idx}>
+                                                 <Card 
+                                                     variant="outlined" 
+                                                     sx={{
+                                                         position: 'relative',
+                                                         height: '100%',
+                                                         transition: 'all 0.3s ease',
+                                                         border: 'none',
+                                                         borderRadius: 2,
+                                                         background: 'linear-gradient(to right, #f5f9ff, #ffffff)',
+                                                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                                                         overflow: 'hidden',
+                                                         '&:hover': {
+                                                             transform: 'translateY(-4px)',
+                                                             boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)'
+                                                         },
+                                                         '&::before': {
+                                                             content: '""',
+                                                             position: 'absolute',
+                                                             left: 0,
+                                                             top: 0,
+                                                             height: '100%',
+                                                             width: '5px',
+                                                             backgroundColor: new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? 'success.main' : 'grey.400',
+                                                             borderRadius: '4px 0 0 4px'
+                                                         }
+                                                     }}
+                                                 >
+                                                     <Box sx={{ p: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
+                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                                             <Avatar 
+                                                                 sx={{ 
+                                                                     bgcolor: new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? 'success.light' : 'grey.300',
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                                                 }}
+                                                             >
+                                                                 <FitnessCenterIcon />
+                                                             </Avatar>
+                                                             <Box>
+                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                                                                     {ex.Exercise?.exercise_name || 'Egzersiz'}
+                                                                 </Typography>
+                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                     <Chip
+                                                                         label={new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? "Aktif" : "Tamamlandı"}
+                                                                         size="small"
+                                                                         color={new Date() >= new Date(ex.start_date) && new Date() <= new Date(ex.end_date) ? "success" : "default"}
+                                                                         sx={{ height: 22, '& .MuiChip-label': { px: 1, py: 0 } }}
+                                                                     />
+                                                                     <Typography variant="caption" color="text.secondary">
+                                                                         {ex.start_date && ex.end_date ? 
+                                                                             `${new Date(ex.start_date).toLocaleDateString('tr-TR')} - ${new Date(ex.end_date).toLocaleDateString('tr-TR')}` : 
+                                                                             '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Box>
+                                                         </Box>
+                                                         <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                             <IconButton 
+                                                                 size="small" 
+                                                                 sx={{ 
+                                                                     bgcolor: 'background.paper',
+                                                                     boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                                                                     '&:hover': { bgcolor: 'primary.light', color: 'white' }
+                                                                 }}
+                                                             >
+                                                                 <EditIcon fontSize="small" />
+                                                             </IconButton>
+                                                             <IconButton 
+                                                                 size="small" 
+                                                                 color="error"
+                                                                 sx={{ 
+                                                                     bgcolor: 'background.paper',
+                                                                     boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                                                                     '&:hover': { bgcolor: 'error.light', color: 'white' }
+                                                                 }}
+                                                             >
+                                                                 <DeleteIcon fontSize="small" />
+                                                             </IconButton>
+                                                         </Box>
+                                                     </Box>
+                                                     <CardContent sx={{ p: 2, pb: 1 }}>
+                                                         <Grid container spacing={2}>
+                                                             <Grid item xs={12}>
+                                                                 <Box sx={{ 
+                                                                     p: 1.5, 
+                                                                     mb: 1.5,
+                                                                     bgcolor: 'background.paper', 
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5,
+                                                                             display: 'flex',
+                                                                             alignItems: 'center',
+                                                                             gap: 0.5
+                                                                         }}
+                                                                     >
+                                                                         <InfoIcon fontSize="small" />
+                                                                         Açıklama
+                                                                     </Typography>
+                                                                     <Typography variant="body2">
+                                                                         {ex.Exercise?.exercise_description || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Kategori
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.category || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Ekipman
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.equipment || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Süre
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.duration ? `${ex.Exercise.duration} dk` : '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+
+                                                             <Grid item xs={6}>
+                                                                 <Box sx={{
+                                                                     p: 1.5,
+                                                                     bgcolor: 'background.paper',
+                                                                     borderRadius: 2,
+                                                                     boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                     height: '100%',
+                                                                     display: 'flex',
+                                                                     flexDirection: 'column'
+                                                                 }}>
+                                                                     <Typography
+                                                                         variant="subtitle2"
+                                                                         sx={{
+                                                                             fontWeight: 'bold',
+                                                                             color: 'primary.main',
+                                                                             mb: 0.5
+                                                                         }}
+                                                                     >
+                                                                         Zorluk
+                                                                     </Typography>
+                                                                     <Typography variant="body2" sx={{ flex: 1 }}>
+                                                                         {ex.Exercise?.difficulty || '-'}
+                                                                     </Typography>
+                                                                 </Box>
+                                                             </Grid>
+                                                         </Grid>
+
+                                                         {ex.note && (
+                                                             <Box
+                                                                 sx={{
+                                                                     mt: 2,
+                                                                     p: 1.5,
+                                                                     bgcolor: 'rgba(0, 0, 0, 0.02)',
+                                                                     borderRadius: 2,
+                                                                     borderLeft: '3px solid',
+                                                                     borderColor: 'info.light',
+                                                                 }}
+                                                             >
+                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'info.main', mb: 0.5 }}>Not</Typography>
+                                                                 <Typography variant="body2">{ex.note}</Typography>
+                                                             </Box>
+                                                         )}
+
+                                                         {ex.Exercise?.video && (
+                                                             <Box sx={{ mt: 2 }}>
+                                                                 <Accordion
+                                                                     variant="outlined"
+                                                                     sx={{
+                                                                         borderRadius: 2,
+                                                                         overflow: 'hidden',
+                                                                         boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
+                                                                         '&:before': {
+                                                                             display: 'none'
+                                                                         }
+                                                                     }}
+                                                                 >
+                                                                     <AccordionSummary
+                                                                         expandIcon={<ExpandMoreIcon />}
+                                                                         sx={{
+                                                                             bgcolor: 'primary.light',
+                                                                             color: 'primary.contrastText'
+                                                                         }}
+                                                                     >
+                                                                         <Typography variant="subtitle2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                             <FitnessCenterIcon fontSize="small" /> Egzersiz Videosu
+                                                                         </Typography>
+                                                                     </AccordionSummary>
+                                                                     <AccordionDetails sx={{ p: 0 }}>
+                                                                         <Box sx={{ position: 'relative', pt: '56.25%', bgcolor: '#000' }}>
+                                                                             <Box
+                                                                                 component="video"
+                                                                                 sx={{
+                                                                                     position: 'absolute',
+                                                                                     top: 0,
+                                                                                     left: 0,
+                                                                                     width: '100%',
+                                                                                     height: '100%',
+                                                                                     objectFit: 'contain'
+                                                                                 }}
+                                                                                 controls
+                                                                             >
+                                                                                 <source src={ex.Exercise.video} type="video/mp4" />
+                                                                                 Tarayıcınız video etiketini desteklemiyor.
+                                                                             </Box>
+                                                                         </Box>
+                                                                     </AccordionDetails>
+                                                                 </Accordion>
+                                                             </Box>
+                                                         )}
+                                                     </CardContent>
+                                                 </Card>
+                                             </Grid>
+                                         ))}
+                                     </Grid>
+                                 </Box>
+                             ) : (
+                                 !assignedExercisesLoading && (
+                                     <Box sx={{
+                                         display: 'flex',
+                                         flexDirection: 'column',
+                                         alignItems: 'center',
+                                         justifyContent: 'center',
+                                         p: 4,
+                                         height: 200,
+                                         bgcolor: 'grey.50'
+                                     }}>
+                                         <FitnessCenterIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 2 }} />
+                                         <Typography variant="body1" color="text.secondary" align="center">
+                                             Danışana atanmış egzersiz bulunmamaktadır.
+                                         </Typography>
+                                     </Box>
+                                 )
+                             )}
                         </Card>
+
+                        {/* Egzersiz Atama Popup'ı */}
+                        <Dialog open={isAssignExerciseDialogOpen} onClose={handleCloseAssignExerciseDialog}>
+                             <DialogTitle>Yeni Egzersiz Ata</DialogTitle>
+                                <Box component="form" onSubmit={handleAssignExercise}> {/* Form Dialog'u sarmalayacak */}
+                                    <DialogContent dividers> {/* İçeriği sınırlamak ve divider eklemek için */}
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <Typography variant="subtitle2" gutterBottom>Egzersiz ID</Typography>
+                                                <TextField
+                                                    name="exercise_id"
+                                                    value={assignForm.exercise_id}
+                                                    onChange={handleAssignFormChange}
+                                                    type="number"
+                                                    fullWidth
+                                                    required
+                                                    size="small"
+                                                    placeholder="Egzersiz ID"
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <FitnessCenterIcon fontSize="small" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                    sx={{ mb: 2 }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                 <Typography variant="subtitle2" gutterBottom>Not</Typography>
+                                                 <TextField
+                                                     name="note"
+                                                     value={assignForm.note}
+                                                     onChange={handleAssignFormChange}
+                                                     fullWidth
+                                                     size="small"
+                                                     placeholder="Not (isteğe bağlı)"
+                                                     sx={{ mb: 2 }}
+                                                 />
+                                             </Grid>
+                                             <Grid item xs={12} sm={6}>
+                                                 <Typography variant="subtitle2" gutterBottom>Başlangıç Tarihi</Typography>
+                                                 <TextField
+                                                     name="start_date"
+                                                     value={assignForm.start_date}
+                                                     onChange={handleAssignFormChange}
+                                                     type="date"
+                                                     fullWidth
+                                                     required
+                                                     size="small"
+                                                     InputLabelProps={{ shrink: true }}
+                                                 />
+                                             </Grid>
+                                             <Grid item xs={12} sm={6}>
+                                                 <Typography variant="subtitle2" gutterBottom>Bitiş Tarihi</Typography>
+                                                 <TextField
+                                                     name="end_date"
+                                                     value={assignForm.end_date}
+                                                     onChange={handleAssignFormChange}
+                                                     type="date"
+                                                     fullWidth
+                                                     required
+                                                     size="small"
+                                                     InputLabelProps={{ shrink: true }}
+                                                 />
+                                             </Grid>
+                                        </Grid>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCloseAssignExerciseDialog} color="secondary">
+                                            İptal
+                                        </Button>
+                                        <Button type="submit" variant="contained" color="primary" disabled={assignLoading}>
+                                            {assignLoading ? <CircularProgress size={24} /> : "Egzersiz Ata"}
+                                        </Button>
+                                    </DialogActions>
+                                </Box> {/* Form sonu */}
+                        </Dialog>
                     </Box>
                 );
             case 'odeme':
@@ -2383,6 +2924,7 @@ export default function Danisan() {
             );
             setAssignedExercises(response.data);
             alert('Egzersiz başarıyla atandı!');
+            handleCloseAssignExerciseDialog(); // Popup'ı kapat
         } catch (err) {
             console.error("Egzersiz atama hatası:", err);
             alert("Egzersiz atama başarısız: " + (err.response?.data?.message || err.message));
@@ -2390,6 +2932,16 @@ export default function Danisan() {
             setAssignLoading(false);
             setAssignedExercisesLoading(false);
         }
+    };
+
+    const handleOpenAssignExerciseDialog = () => {
+        setIsAssignExerciseDialogOpen(true);
+    };
+
+    const handleCloseAssignExerciseDialog = () => {
+        setIsAssignExerciseDialogOpen(false);
+        // Formu kapatırken state'i de sıfırlayabiliriz
+        setAssignForm({ exercise_id: '', start_date: '', end_date: '', note: '' });
     };
 
     return (
