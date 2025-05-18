@@ -37,7 +37,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  MenuItem
 } from "@mui/material";
 
 // Icons
@@ -88,6 +89,8 @@ export default function Danisan() {
     const [assignLoading, setAssignLoading] = useState(false);
     const [isAssignExerciseDialogOpen, setIsAssignExerciseDialogOpen] = useState(false);
     const [activeExercise, setActiveExercise] = useState(null);
+    const [availableExercises, setAvailableExercises] = useState([]);
+    const [availableExercisesLoading, setAvailableExercisesLoading] = useState(false);
 
     const findCurrentPlan = (plans) => {
         if (!plans || plans.length === 0) return 0;
@@ -339,6 +342,32 @@ export default function Danisan() {
         fetchAssignedExercises();
     }, [activeTab, id]);
 
+    useEffect(() => {
+        const fetchAvailableExercises = async () => {
+            if (isAssignExerciseDialogOpen) {
+                setAvailableExercisesLoading(true);
+                try {
+                    const response = await axios.get(
+                        config[config.environment].apiUrl + "/exercise/getMyExercises",
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem('token'),
+                            }
+                        }
+                    );
+                    setAvailableExercises(response.data);
+                } catch (err) {
+                    console.error("Egzersizler yüklenirken hata:", err.message);
+                    setAvailableExercises([]);
+                } finally {
+                    setAvailableExercisesLoading(false);
+                }
+            }
+        };
+
+        fetchAvailableExercises();
+    }, [isAssignExerciseDialogOpen]);
+
     if (isLoading) {
         return (
             <Default>
@@ -439,7 +468,7 @@ export default function Danisan() {
                                 variant="contained" 
                                 color="primary" 
                                 startIcon={<AddIcon />}
-                                onClick={() => alert('Yeni anamnez bilgisi ekleme formu açılacak')}
+                                onClick={() => toast.info('Yeni anamnez bilgisi ekleme formu açılacak')}
                             >
                                 Yeni Anamnez
                             </Button>
@@ -466,11 +495,11 @@ export default function Danisan() {
                                             sx={{ mr: 1 }} 
                                         />
                                         <Button 
-                                            component="span"
+                                            component="span"    
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => alert('Sağlık bilgileri düzenleme formu açılacak')}
+                                            onClick={() => toast.info('Sağlık bilgileri düzenleme formu açılacak')}
                                             color="primary"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -602,7 +631,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => alert('Kan tahlili düzenleme formu açılacak')}
+                                            onClick={() => toast.info('Kan tahlili düzenleme formu açılacak')}
                                             color="error"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -653,7 +682,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => alert('Diyet alışkanlıkları düzenleme formu açılacak')}
+                                            onClick={() => toast.info('Diyet alışkanlıkları düzenleme formu açılacak')}
                                             color="warning"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -784,7 +813,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => alert('Fiziksel aktivite düzenleme formu açılacak')}
+                                            onClick={() => toast.info('Fiziksel aktivite düzenleme formu açılacak')}
                                             color="info"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -883,7 +912,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => alert('Uyku ve stres bilgileri düzenleme formu açılacak')}
+                                            onClick={() => toast.info('Uyku ve stres bilgileri düzenleme formu açılacak')}
                                             color="success"
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
                                         >
@@ -933,7 +962,7 @@ export default function Danisan() {
                                             variant="contained" 
                                             size="small" 
                                             startIcon={<EditIcon />}
-                                            onClick={() => alert('Notlar düzenleme formu açılacak')}
+                                            onClick={() => toast.info('Notlar düzenleme formu açılacak')}
                                             sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1, bgcolor: '#9575cd', '&:hover': { bgcolor: '#5e35b1' } }}
                                         >
                                             Düzenle
@@ -966,10 +995,10 @@ export default function Danisan() {
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         action={
                                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<AddIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => alert('Vücut ölçümü ekleme formu açılacak')}>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<AddIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut ölçümü ekleme formu açılacak')}>
                                                     Ekle
                                                 </Button>
-                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => alert('Vücut ölçümleri düzenleme formu açılacak')}>
+                                                <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut ölçümleri düzenleme formu açılacak')}>
                                                     Düzenle
                                                 </Button>
                                             </Box>
@@ -1096,7 +1125,7 @@ export default function Danisan() {
                                         title="Vücut Analizi" 
                                         titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
                                         action={
-                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => alert('Vücut analizi düzenleme formu açılacak')}>
+                                            <Button component="span" variant="contained" size="small" color="success" startIcon={<EditIcon />} sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }} onClick={() => toast.info('Vücut analizi düzenleme formu açılacak')}>
                                                 Düzenle
                                             </Button>
                                         }
@@ -2692,25 +2721,38 @@ export default function Danisan() {
                                     <DialogContent dividers> {/* İçeriği sınırlamak ve divider eklemek için */}
                                         <Grid container spacing={2}>
                                             <Grid item xs={12}>
-                                                <Typography variant="subtitle2" gutterBottom>Egzersiz ID</Typography>
-                                                <TextField
-                                                    name="exercise_id"
-                                                    value={assignForm.exercise_id}
-                                                    onChange={handleAssignFormChange}
-                                                    type="number"
-                                                    fullWidth
-                                                    required
-                                                    size="small"
-                                                    placeholder="Egzersiz ID"
-                                                    InputProps={{
-                                                        startAdornment: (
-                                                            <InputAdornment position="start">
-                                                                <FitnessCenterIcon fontSize="small" />
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                    sx={{ mb: 2 }}
-                                                />
+                                                <Typography variant="subtitle2" gutterBottom>Egzersiz Seçin</Typography>
+                                                {availableExercisesLoading ? (
+                                                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                                                        <CircularProgress size={24} />
+                                                    </Box>
+                                                ) : (
+                                                    <TextField
+                                                        select
+                                                        name="exercise_id"
+                                                        value={assignForm.exercise_id}
+                                                        onChange={handleAssignFormChange}
+                                                        fullWidth
+                                                        required
+                                                        size="small"
+                                                        placeholder="Egzersiz seçin"
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <FitnessCenterIcon fontSize="small" />
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        <MenuItem value="" disabled>Egzersiz seçin</MenuItem>
+                                                        {availableExercises.map((exercise) => (
+                                                            <MenuItem key={exercise.id} value={exercise.id}>
+                                                                {exercise.exercise_name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                )}
                                             </Grid>
                                             <Grid item xs={12}>
                                                  <Typography variant="subtitle2" gutterBottom>Not</Typography>
@@ -2923,11 +2965,10 @@ export default function Danisan() {
                 }
             );
             setAssignedExercises(response.data);
-            alert('Egzersiz başarıyla atandı!');
             handleCloseAssignExerciseDialog(); // Popup'ı kapat
         } catch (err) {
             console.error("Egzersiz atama hatası:", err);
-            alert("Egzersiz atama başarısız: " + (err.response?.data?.message || err.message));
+            toast.error("Egzersiz atama başarısız: " + (err.response?.data?.message || err.message));
         } finally {
             setAssignLoading(false);
             setAssignedExercisesLoading(false);
