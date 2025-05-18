@@ -363,14 +363,13 @@ export default function Danisan() {
                     );
                     setAssignedExercises(response.data);
 
-                    // Aktif egzersizi bul
                     const currentActiveExercise = response.data.find(isActiveExercise);
-                    setActiveExercise(currentActiveExercise || null); // Bulunamazsa null set et
+                    setActiveExercise(currentActiveExercise || null);
 
                 } catch (err) {
                     console.error("Egzersizler yüklenirken hata:", err.message);
                     setAssignedExercises([]);
-                    setActiveExercise(null); // Hata olursa aktif egzersizi de sıfırla
+                    setActiveExercise(null);
                 } finally {
                     setAssignedExercisesLoading(false);
                 }

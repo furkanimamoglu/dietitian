@@ -3,7 +3,6 @@ import './Egzersizler.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
-import { toast } from 'react-hot-toast';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,9 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -174,7 +171,6 @@ export default function Egzersizler() {
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
-    const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
     const [affectedExercises, setAffectedExercises] = useState([]);
 
     // New exercise state
@@ -443,12 +439,10 @@ export default function Egzersizler() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then((response) => {
-            // Update local state after successful deletion
             setEgzersizData(prev => prev.filter(item => item.id !== itemToDelete.id));
             setDeleteConfirmModal(false);
             setItemToDelete(null);
             
-            // Show success message
             setSuccessMessage(`"${itemToDelete.exercise_name}" egzersizi başarıyla silindi.`);
             setShowSuccessPopup(true);
         })
@@ -592,7 +586,6 @@ export default function Egzersizler() {
             headers: { Authorization: localStorage.getItem("token") }
         })
         .then(response => {
-            // Close the modal and reset states
             setAddToUserModal(false);
             setSelectedExercise(null);
             setSelectedUser(null);
@@ -600,7 +593,6 @@ export default function Egzersizler() {
             setEndDate('');
             setAssignmentNote('');
 
-            // Show success popup
             setSuccessMessage(`"${selectedExercise.exercise_name}" egzersiz programı "${selectedUser.name}" danışanına başarıyla atandı.`);
             setShowSuccessPopup(true);
         })

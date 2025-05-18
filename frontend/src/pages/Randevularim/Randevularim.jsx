@@ -234,15 +234,11 @@ export default function Randevularim() {
 
             console.log("Randevu ekleme isteği başarılı:", response.data);
             
-            // API yanıt yapısını kontrol et
             let appointmentData;
             
-            // Apı cevabı farklı formatlarda olabilir, kontrol ediyoruz
             if (response.data && response.data.appointment) {
-                // {appointment: {...}} yapısı
                 appointmentData = response.data.appointment;
             } else if (response.data && response.data.id) {
-                // Doğrudan appointment verisi döndüren yapı
                 appointmentData = response.data;
             } else {
                 console.error("API yanıtı beklenen formatta değil:", response.data);
@@ -252,7 +248,6 @@ export default function Randevularim() {
             
             console.log("İşlenecek appointment verisi:", appointmentData);
             
-            // Yeni oluşturulan randevuyu API'den dönen verilerle ekle
             const newEvent = {
                 id: appointmentData.id,
                 title: appointmentData.title || eventData.title,
@@ -268,7 +263,6 @@ export default function Randevularim() {
             setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
             setRandevuEklePopup(false);
             
-            // Başarılı ekleme bildirimi
             toast.success('Randevu başarıyla oluşturuldu!');
         } catch (error) {
             console.error("Randevu eklenirken bir hata oluştu:", error);
