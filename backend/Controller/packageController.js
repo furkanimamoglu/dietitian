@@ -35,7 +35,7 @@ class packageController {
                 });
             }
 
-            const { name, description, type, price } = req.body;
+            const {name, description, type, price} = req.body;
 
             const result = await PackageService.addPackage(dietitian_id, {name, description, type, price});
 
@@ -59,7 +59,7 @@ class packageController {
                 });
             }
 
-            const { package_id , name, description, type, price } = req.body;
+            const {package_id, name, description, type, price} = req.body;
 
             const result = await PackageService.updatePackage(dietitian_id, package_id, {
                 name,
@@ -81,7 +81,7 @@ class packageController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { package_id } = req.query;
+            const {package_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -103,7 +103,7 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { package_id } = req.query;
+            const {package_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -132,9 +132,9 @@ class packageController {
                 });
             }
 
-            const { package_id, name } = req.body;
+            const {package_id, name} = req.body;
 
-            const result = await PackageService.addPackageItem(dietitian_id, package_id, { name });
+            const result = await PackageService.addPackageItem(dietitian_id, package_id, {name});
 
             res.status(200).json(result);
         } catch (error) {
@@ -156,9 +156,9 @@ class packageController {
                 });
             }
 
-            const { item_id, name } = req.body;
+            const {item_id, name} = req.body;
 
-            const result = await PackageService.updatePackageItem(dietitian_id, item_id, { name });
+            const result = await PackageService.updatePackageItem(dietitian_id, item_id, {name});
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -173,7 +173,7 @@ class packageController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { item_id } = req.query;
+            const {item_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({

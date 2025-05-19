@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
 const ExerciseCategory = sequelize.define('ExerciseCategory', {

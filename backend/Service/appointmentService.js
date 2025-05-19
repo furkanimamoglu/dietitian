@@ -54,7 +54,7 @@ class AppointmentService {
 
 
     static async addAppointment(data) {
-        const { title, start, end, client_id } = data;
+        const {title, start, end, client_id} = data;
 
         const client = await Client.findByPk(client_id);
         if (!client) {
@@ -84,8 +84,8 @@ class AppointmentService {
                         },
                         {
                             [Op.and]: [
-                                { start: { [Op.lte]: start } },
-                                { end: { [Op.gte]: end } },
+                                {start: {[Op.lte]: start}},
+                                {end: {[Op.gte]: end}},
                             ],
                         },
                     ],
@@ -109,7 +109,7 @@ class AppointmentService {
     }
 
     static async updateAppointment(appointment_id, data) {
-        const { title, start, end, dietitian_id, client_id, status } = data;
+        const {title, start, end, dietitian_id, client_id, status} = data;
 
         try {
             if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
@@ -123,7 +123,7 @@ class AppointmentService {
 
             const conflictingAppointments = await Appointment.findOne({
                 where: {
-                    id: { [Op.ne]: appointment_id },
+                    id: {[Op.ne]: appointment_id},
                     dietitian_id: dietitian_id,
                     [Op.or]: [
                         {
@@ -138,8 +138,8 @@ class AppointmentService {
                         },
                         {
                             [Op.and]: [
-                                { start: { [Op.lte]: start } },
-                                { end: { [Op.gte]: end } },
+                                {start: {[Op.lte]: start}},
+                                {end: {[Op.gte]: end}},
                             ],
                         },
                     ],
@@ -172,7 +172,7 @@ class AppointmentService {
             }
 
             const appointments = await Appointment.findAll({
-                where: { client_id: client_id }
+                where: {client_id: client_id}
             });
 
             if (!appointments || appointments.length === 0) {
@@ -230,7 +230,7 @@ class AppointmentService {
             }
         });
 
-        return { count };
+        return {count};
     }
 
     static async getRemainingTodayAppointmentCount(dietitian_id) {
@@ -251,7 +251,7 @@ class AppointmentService {
             }
         });
 
-        return { count };
+        return {count};
     }
 
     static async getPendingAppointmentCount(dietitian_id) {
@@ -266,7 +266,7 @@ class AppointmentService {
             }
         });
 
-        return { count };
+        return {count};
     }
 
     static async updateAppointmentStatus(dietitian_id, appointment_id, action) {
@@ -373,7 +373,7 @@ class AppointmentService {
 
         await appointment.destroy();
 
-        return { success: true };
+        return {success: true};
     }
 
 }

@@ -34,7 +34,7 @@ class exerciseController {
                     message: "Yetkisiz erişim."
                 });
             }
-            
+
             const {
                 category_id,
                 exercise_name,
@@ -76,7 +76,7 @@ class exerciseController {
                     message: "Yetkisiz erişim."
                 });
             }
-            
+
             const {
                 exercise_id,
                 exercise_name,
@@ -113,7 +113,7 @@ class exerciseController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { exercise_id } = req.query;
+            const {exercise_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -142,7 +142,7 @@ class exerciseController {
                 });
             }
 
-            const { client_id } = req.query;
+            const {client_id} = req.query;
 
             const result = await ExerciseService.getAssignedExercisesByClient(dietitian_id, client_id);
             res.status(200).json(result);
@@ -165,7 +165,7 @@ class exerciseController {
                 });
             }
 
-            const { exercise_assignment_id } = req.query;
+            const {exercise_assignment_id} = req.query;
 
             const result = await ExerciseService.deleteExerciseAssignment(dietitian_id, exercise_assignment_id);
             res.status(200).json(result);
@@ -188,7 +188,7 @@ class exerciseController {
                 });
             }
 
-            const { exercise_id , client_id , start_date , end_date , note } = req.body;
+            const {exercise_id, client_id, start_date, end_date, note} = req.body;
 
             const result = await ExerciseService.assignExercise(dietitian_id, exercise_id, client_id, start_date, end_date, note);
             res.status(200).json(result);
@@ -232,7 +232,7 @@ class exerciseController {
                 });
             }
 
-            const { exercise_category_name } = req.body;
+            const {exercise_category_name} = req.body;
 
             const result = await ExerciseService.addExerciseCategory(dietitian_id, exercise_category_name);
             res.status(200).json(result);
@@ -255,7 +255,7 @@ class exerciseController {
                 });
             }
 
-            const { exercise_category_id, exercise_category_name } = req.body;
+            const {exercise_category_id, exercise_category_name} = req.body;
 
             const result = await ExerciseService.updateExerciseCategory(dietitian_id, exercise_category_id, exercise_category_name);
             res.status(200).json(result);
@@ -272,7 +272,7 @@ class exerciseController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { exercise_category_id } = req.query;
+            const {exercise_category_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({

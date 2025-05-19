@@ -2,7 +2,7 @@ const MessageService = require("../Service/messageService");
 const Security = require("../Utils/Security");
 
 class messageController {
-    
+
     static async getMyMessages(req, res) {
         try {
             const token = req.headers.authorization;

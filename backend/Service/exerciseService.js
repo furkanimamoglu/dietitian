@@ -9,7 +9,7 @@ class ExerciseService {
         }
 
         return await Exercise.findAll({
-            where: { dietitian_id }
+            where: {dietitian_id}
         });
     }
 
@@ -38,12 +38,12 @@ class ExerciseService {
         }
 
         return await ExerciseAssignment.findAll({
-            where: { client_id },
+            where: {client_id},
             include: [
                 {
                     model: Exercise,
                     as: 'Exercise',
-                    where: { dietitian_id }
+                    where: {dietitian_id}
                 }
             ]
         });
@@ -73,7 +73,7 @@ class ExerciseService {
 
         await assignment.destroy();
 
-        return { success: true, message: "Egzersiz ataması başarıyla silindi." };
+        return {success: true, message: "Egzersiz ataması başarıyla silindi."};
     }
 
     static async assignExercise(dietitian_id, exercise_id, client_id, start_date, end_date, note) {
@@ -85,7 +85,7 @@ class ExerciseService {
             throw new Exception("Egzersiz ID veya Danışan ID eksik.", 400, true);
         }
 
-        if ( !start_date || !end_date) {
+        if (!start_date || !end_date) {
             throw new Exception("Başlangıç ve bitiş tarihleri gereklidir.", 400, true);
         }
 
@@ -147,7 +147,7 @@ class ExerciseService {
 
         await exercise.destroy();
 
-        return { success: true, message: "Egzersiz başarıyla silindi." };
+        return {success: true, message: "Egzersiz başarıyla silindi."};
     }
 
     static async getMyExerciseCategories(dietitian_id) {
@@ -156,7 +156,7 @@ class ExerciseService {
         }
 
         return await ExerciseCategory.findAll({
-            where: { dietitian_id }
+            where: {dietitian_id}
         });
     }
 
@@ -191,7 +191,7 @@ class ExerciseService {
             throw new Exception("Egzersiz Kategorisi bulunamadı veya yetkisiz erişim.", 404, true);
         }
 
-        await category.update({ name: exercise_category_name });
+        await category.update({name: exercise_category_name});
 
         return category;
     }
@@ -214,7 +214,7 @@ class ExerciseService {
 
         await category.destroy();
 
-        return { success: true, message: "Egzersiz Kategorisi başarıyla silindi." };
+        return {success: true, message: "Egzersiz Kategorisi başarıyla silindi."};
     }
 
 }

@@ -1,5 +1,5 @@
 const Exception = require("../Exception/Exception");
-const { Measurement, Client} = require("../Model/MainModel");
+const {Measurement, Client} = require("../Model/MainModel");
 
 class MeasurementService {
 
@@ -20,7 +20,7 @@ class MeasurementService {
         }
 
         return await Measurement.findAll({
-            where: { client_id },
+            where: {client_id},
             order: [['createdAt', 'DESC']]
         });
     }

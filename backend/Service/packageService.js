@@ -9,7 +9,7 @@ class PackageService {
         }
 
         return await Package.findAll({
-            where: { dietitian_id }
+            where: {dietitian_id}
         });
     }
 
@@ -66,7 +66,7 @@ class PackageService {
 
         await recipe.destroy();
 
-        return { success: true, message: "Paket başarıyla silindi." };
+        return {success: true, message: "Paket başarıyla silindi."};
     }
 
     static async getPackageItemsFromPackage(dietitian_id, package_id) {
@@ -86,7 +86,7 @@ class PackageService {
         }
 
         return await PackageItems.findAll({
-            where: { package_id: package_id }
+            where: {package_id: package_id}
         });
     }
 
@@ -165,7 +165,7 @@ class PackageService {
 
         await item.destroy();
 
-        return { success: true, message: "Paket Hizmeti başarıyla silindi." };
+        return {success: true, message: "Paket Hizmeti başarıyla silindi."};
     }
 }
 
