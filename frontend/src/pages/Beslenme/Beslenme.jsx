@@ -20,7 +20,10 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import { Autocomplete, TextField } from '@mui/material';
 
-// Days and meals constants
+import {DatePicker} from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 const DAYS_OF_WEEK = [
     "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
 ];
@@ -29,7 +32,6 @@ const MEALS = [
     "Kahvaltı", "Öğle Yemeği", "Akşam Yemeği", "Aparatif"
 ];
 
-// Category Item Component
 const CategoryItem = ({ category, isChecked, onCheck, onDelete }) => {
     return (
         <div 
@@ -1619,28 +1621,40 @@ export default function Beslenme() {
                             ))}
                         </select>
                     </div>
-                    <div className="date-inputs-container">
-                        <div className="input-container half-width">
-                            <label htmlFor="startDate">Başlangıç Tarihi</label>
-                            <input 
-                                type="date" 
-                                id="startDate"
-                                className="text-input" 
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                            />
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <div className="date-inputs-container">
+                            <div className="input-container half-width">
+                                <DatePicker
+                                    label="Başlangıç Tarihi"
+                                    value={startDate ? new Date(startDate) : null}
+                                    onChange={(newValue) => {
+                                        setStartDate(newValue ? newValue.toISOString().split('T')[0] : '');
+                                    }}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            className: "text-input"
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div className="input-container half-width">
+                                <DatePicker
+                                    label="Bitiş Tarihi"
+                                    value={endDate ? new Date(endDate) : null}
+                                    onChange={(newValue) => {
+                                        setEndDate(newValue ? newValue.toISOString().split('T')[0] : '');
+                                    }}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            className: "text-input"
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
-                        <div className="input-container half-width">
-                            <label htmlFor="endDate">Bitiş Tarihi</label>
-                            <input 
-                                type="date" 
-                                id="endDate"
-                                className="text-input" 
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                            />
-                        </div>
-                    </div>
+                    </LocalizationProvider>
                     <div className="input-container">
                         <label htmlFor="assignmentNote">Not (Opsiyonel)</label>
                         <textarea 
