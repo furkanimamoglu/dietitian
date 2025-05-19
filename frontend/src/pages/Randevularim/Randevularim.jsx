@@ -123,7 +123,10 @@ export default function Randevularim() {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
             const startDate = new Date(arg.dateStr);
-            const endDate = new Date(arg.dateStr);
+
+            startDate.setHours(startDate.getHours() + 3);
+
+            const endDate = new Date(startDate);
             endDate.setHours(endDate.getHours() + 1);
 
             setEventData((prev) => ({
