@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import Box from "@mui/material/Box";
-import { useNavigate, useLocation } from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 import Button from "@mui/material/Button";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
@@ -23,7 +23,7 @@ export default function Navbar() {
                 setScrolled(isScrolled);
             }
         };
-        
+
         window.addEventListener('scroll', handleScroll);
         return () => {
             window.removeEventListener('scroll', handleScroll);
@@ -31,13 +31,13 @@ export default function Navbar() {
     }, [scrolled]);
 
     const menu_items = [
-        { name: "ANA SAYFA", route: "/dashboard", icon: <HomeIcon /> },
-        { name: "DANIŞANLARIM", route: "/danisanlarim", icon: <PeopleIcon /> },
-        { name: "RANDEVULARIM", route: "/randevularim", icon: <EventNoteIcon /> },
-        { name: "BESLENME", route: "/beslenme", icon: <LocalDiningIcon /> },
-        { name: "TARİFLER", route: "/tarif", icon: <RestaurantMenuIcon /> },
-        { name: "EGZERSİZLER", route: "/egzersiz", icon: <FitnessCenterIcon /> },
-        { name: "FİNANS", route: "/finans", icon: <AccountBalanceWalletIcon /> },
+        {name: "ANA SAYFA", route: "/dashboard", icon: <HomeIcon/>},
+        {name: "DANIŞANLARIM", route: "/danisanlarim", icon: <PeopleIcon/>},
+        {name: "RANDEVULARIM", route: "/randevularim", icon: <EventNoteIcon/>},
+        {name: "BESLENME", route: "/beslenme", icon: <LocalDiningIcon/>},
+        {name: "TARİFLER", route: "/tarif", icon: <RestaurantMenuIcon/>},
+        {name: "EGZERSİZLER", route: "/egzersiz", icon: <FitnessCenterIcon/>},
+        {name: "FİNANS", route: "/finans", icon: <AccountBalanceWalletIcon/>},
     ];
 
     return (
@@ -47,7 +47,7 @@ export default function Navbar() {
                 className={`desktop-navbar ${scrolled ? "scrolled" : ""}`}
                 sx={{
                     backgroundColor: scrolled ? "rgba(238,255,238,0.95)" : "rgb(238,255,238)",
-                    display: { xs: "none", md: "flex" },
+                    display: {xs: "none", md: "flex"},
                     position: 'sticky',
                     top: '65px',
                     mt: scrolled ? 0 : "1rem",
@@ -107,7 +107,7 @@ export default function Navbar() {
                                         } : {},
                                     }}
                                 >
-                                    <Box sx={{ mr: 1, color: isActive ? "rgb(71,145,64)" : "inherit" }}>
+                                    <Box sx={{mr: 1, color: isActive ? "rgb(71,145,64)" : "inherit"}}>
                                         {page.icon}
                                     </Box>
                                     {page.name}

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import './Egzersizler.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -19,92 +19,95 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import { jsPDF } from "jspdf";
+import {jsPDF} from "jspdf";
 import 'jspdf-autotable';
 
 // Category Item Component
-const CategoryItem = ({ category, isChecked, onCheck, onDelete }) => {
+const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     return (
-        <div 
+        <div
             className={`category-item ${isChecked ? 'checked' : ''}`}
             onClick={onCheck}
         >
             <div className="category-checkbox">
-                <input 
-                    type="checkbox" 
+                <input
+                    type="checkbox"
                     checked={isChecked}
-                    onChange={() => {}}
+                    onChange={() => {
+                    }}
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
             <div className="category-title">{category.name}</div>
-            <button 
+            <button
                 className="category-delete-btn"
                 onClick={(e) => {
                     e.stopPropagation();
                     onDelete(category.id);
                 }}
             >
-                <DeleteIcon />
+                <DeleteIcon/>
             </button>
         </div>
     );
 };
 
 // Exercise Card Component
-const ExerciseCard = ({ item, onAddToUser, onPrint, onEdit, onDelete, onView }) => {
+const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
     return (
         <div className="exercise-card">
             <div className="card-image-container" onClick={() => onView(item)}>
                 {item.video ? (
                     <div className="video-placeholder">
-                        <FitnessCenterIcon className="exercise-icon" />
+                        <FitnessCenterIcon className="exercise-icon"/>
                         <span>Video Mevcut</span>
                     </div>
                 ) : (
                     <div className="video-placeholder">
-                        <FitnessCenterIcon className="exercise-icon" />
+                        <FitnessCenterIcon className="exercise-icon"/>
                         <span>Video Yok</span>
                     </div>
                 )}
             </div>
             <div className="card-content">
-                <h3 className="card-title" onClick={() => onView(item)} style={{ cursor: 'pointer' }}>{item.exercise_name}</h3>
-                <p className="card-description" onClick={() => onView(item)} style={{ cursor: 'pointer' }}>{item.exercise_description}</p>
+                <h3 className="card-title" onClick={() => onView(item)}
+                    style={{cursor: 'pointer'}}>{item.exercise_name}</h3>
+                <p className="card-description" onClick={() => onView(item)}
+                   style={{cursor: 'pointer'}}>{item.exercise_description}</p>
                 <div className="exercise-details">
                     {item.duration && <span>Süre: {item.duration} dk</span>}
                     {item.difficulty && <span>Zorluk: {item.difficulty}/5</span>}
                     {item.calories_burned && <span>Kalori: {item.calories_burned} kcal</span>}
                 </div>
-                
+
                 <div className="card-actions">
-                    <button 
-                        className="action-button add-user-btn" 
+                    <button
+                        className="action-button add-user-btn"
                         title="Danışana Ekle"
                         onClick={() => onAddToUser(item)}
                     >
-                        <PersonAddIcon />
+                        <PersonAddIcon/>
                     </button>
-                    <button 
-                        className="action-button print-btn" 
+                    <button
+                        className="action-button print-btn"
                         title="Yazdır"
                         onClick={() => onPrint(item)}
                     >
-                        <PrintIcon />
+                        <PrintIcon/>
                     </button>
-                    <button 
-                        className="action-button edit-btn" 
+                    <button
+                        className="action-button edit-btn"
                         title="Düzenle"
                         onClick={() => onEdit(item)}
                     >
-                        <EditIcon />
+                        <EditIcon/>
                     </button>
-                    <button 
-                        className="action-button delete-btn" 
+                    <button
+                        className="action-button delete-btn"
                         title="Sil"
                         onClick={() => onDelete(item)}
                     >
-                        <DeleteIcon />
+                        <DeleteIcon/>
                     </button>
                 </div>
             </div>
@@ -113,16 +116,16 @@ const ExerciseCard = ({ item, onAddToUser, onPrint, onEdit, onDelete, onView }) 
 };
 
 // Modal Component
-const Modal = ({ isOpen, title, onClose, children, fullWidth = false }) => {
+const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
-    
+
     return (
         <div className="modal-overlay">
             <div className={`modal-container ${fullWidth ? 'full-width' : ''}`}>
                 <div className="modal-header">
                     <h2>{title}</h2>
                     <button className="modal-close-btn" onClick={onClose}>
-                        <CloseIcon />
+                        <CloseIcon/>
                     </button>
                 </div>
                 <div className="modal-content">
@@ -141,13 +144,13 @@ export default function Egzersizler() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    
+
     // Add difficulty filter state
     const [difficultyFilter, setDifficultyFilter] = useState(0); // 0 means no filter, 1-5 for difficulty levels
-    
+
     // Add calorie filter state
     const [calorieFilter, setCalorieFilter] = useState(null); // null means no filter
-    
+
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
@@ -161,15 +164,15 @@ export default function Egzersizler() {
     const [assignmentNote, setAssignmentNote] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    
+
     // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    
+
     // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    
+
     // Delete confirmation modal states
     const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
@@ -188,7 +191,7 @@ export default function Egzersizler() {
         equipment: '',
         calories_burned: 0
     });
-    
+
     // Edit exercise states
     const [editExerciseData, setEditExerciseData] = useState({
         exercise_id: '',
@@ -201,25 +204,25 @@ export default function Egzersizler() {
         equipment: '',
         calories_burned: 0
     });
-    
+
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
                 setShowSuccessPopup(false);
             }, 3000);
-            
+
             return () => clearTimeout(timer);
         }
     }, [showSuccessPopup]);
-    
+
     // Auto-hide error popup after 5 seconds
     useEffect(() => {
         if (showErrorPopup) {
             const timer = setTimeout(() => {
                 setShowErrorPopup(false);
             }, 5000);
-            
+
             return () => clearTimeout(timer);
         }
     }, [showErrorPopup]);
@@ -290,16 +293,16 @@ export default function Egzersizler() {
     // Filter exercise programs based on selected categories, difficulty, and calories
     const filteredExerciseData = egzersizData.filter(item => {
         // First check category filter
-        const categoryMatch = checkedCategories.length === 0 || 
+        const categoryMatch = checkedCategories.length === 0 ||
             checkedCategories.some(id => {
                 // Handle both string and number comparisons
                 const itemCategoryId = String(item.category_id || '');
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
-        
+
         // Then check difficulty filter
         const difficultyMatch = difficultyFilter === 0 || item.difficulty === difficultyFilter;
-        
+
         // Check calorie filter
         let calorieMatch = true;
         if (calorieFilter !== null) {
@@ -327,16 +330,16 @@ export default function Egzersizler() {
                     calorieMatch = true;
             }
         }
-        
+
         // Item must match all filters
         return categoryMatch && difficultyMatch && calorieMatch;
     });
 
     // Category handlers
     const handleCategoryCheck = (categoryId) => {
-        setCheckedCategories(prev => 
-            prev.includes(categoryId) 
-                ? prev.filter(id => id !== categoryId) 
+        setCheckedCategories(prev =>
+            prev.includes(categoryId)
+                ? prev.filter(id => id !== categoryId)
                 : [...prev, categoryId]
         );
     };
@@ -344,10 +347,10 @@ export default function Egzersizler() {
     const handleOpenCategoryDeleteConfirm = (categoryId) => {
         const category = categoryData.find(cat => cat.id === categoryId);
         if (!category) return;
-        
+
         // Find exercises that would be affected by deleting this category
         const exercisesToDelete = egzersizData.filter(exercise => exercise.category_id === categoryId);
-        
+
         setCategoryToDelete(category);
         setAffectedExercises(exercisesToDelete);
         setDeleteCategoryConfirmModal(true);
@@ -355,30 +358,30 @@ export default function Egzersizler() {
 
     const handleAddCategory = () => {
         if (newCategoryTitle.trim() === '') return;
-        
+
         const newCategory = {
             exercise_category_name: newCategoryTitle.trim()
         };
-        
+
         // Make API call to add the category
         axios.post(`${config[config.environment].apiUrl}/exercise/addExerciseCategory`, newCategory, {
-            headers: { Authorization: localStorage.getItem("token") }
+            headers: {Authorization: localStorage.getItem("token")}
         })
-        .then(response => {
-            // Add the new category to the state
-            setCategoryData([...categoryData, response.data]);
-            setNewCategoryTitle('');
-            setAddCategoryModal(false);
-            
-            // Show success message
-            setSuccessMessage(`"${newCategory.exercise_category_name}" kategorisi başarıyla eklendi.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error adding category:", error);
-            setErrorMessage("Kategori eklenirken bir hata oluştu.");
-            setShowErrorPopup(true);
-        });
+            .then(response => {
+                // Add the new category to the state
+                setCategoryData([...categoryData, response.data]);
+                setNewCategoryTitle('');
+                setAddCategoryModal(false);
+
+                // Show success message
+                setSuccessMessage(`"${newCategory.exercise_category_name}" kategorisi başarıyla eklendi.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error adding category:", error);
+                setErrorMessage("Kategori eklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            });
     };
 
     // Exercise card handlers
@@ -392,14 +395,14 @@ export default function Egzersizler() {
         const today = new Date();
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7);
-        
+
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         };
-        
+
         setStartDate(formatDate(today));
         setEndDate(formatDate(nextWeek));
         setAssignmentNote('');
@@ -414,7 +417,7 @@ export default function Egzersizler() {
 
     const handleEdit = (item) => {
         setSelectedExercise(item);
-        
+
         // Set form fields with current values
         setEditExerciseData({
             exercise_id: item.id,
@@ -427,7 +430,7 @@ export default function Egzersizler() {
             equipment: item.equipment || '',
             calories_burned: item.calories_burned || 0
         });
-        
+
         setEditExerciseModal(true);
     };
 
@@ -438,144 +441,144 @@ export default function Egzersizler() {
 
     const handleDelete = () => {
         if (!itemToDelete) return;
-        
+
         axios.delete(`${config[config.environment].apiUrl}/exercise/deleteExercise?exercise_id=${itemToDelete.id}`, {
-            headers: { Authorization: localStorage.getItem("token") }
+            headers: {Authorization: localStorage.getItem("token")}
         })
-        .then((response) => {
-            setEgzersizData(prev => prev.filter(item => item.id !== itemToDelete.id));
-            setDeleteConfirmModal(false);
-            setItemToDelete(null);
-            
-            setSuccessMessage(`"${itemToDelete.exercise_name}" egzersizi başarıyla silindi.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error deleting exercise:", error);
-            setErrorMessage("Egzersiz silinirken bir hata oluştu.");
-            setShowErrorPopup(true);
-            setDeleteConfirmModal(false);
-            setItemToDelete(null);
-        });
+            .then((response) => {
+                setEgzersizData(prev => prev.filter(item => item.id !== itemToDelete.id));
+                setDeleteConfirmModal(false);
+                setItemToDelete(null);
+
+                setSuccessMessage(`"${itemToDelete.exercise_name}" egzersizi başarıyla silindi.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error deleting exercise:", error);
+                setErrorMessage("Egzersiz silinirken bir hata oluştu.");
+                setShowErrorPopup(true);
+                setDeleteConfirmModal(false);
+                setItemToDelete(null);
+            });
     };
 
     const handleSingleCategoryDelete = () => {
         if (!categoryToDelete) return;
-        
+
         axios.delete(`${config[config.environment].apiUrl}/exercise/deleteExerciseCategory?exercise_category_id=${categoryToDelete.id}`, {
-            headers: { Authorization: localStorage.getItem("token") }
+            headers: {Authorization: localStorage.getItem("token")}
         })
-        .then(() => {
-            // Update local state after successful deletion
-            setCategoryData(prev => prev.filter(cat => cat.id !== categoryToDelete.id));
-            setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
-            // Also remove any exercises that were in the deleted category
-            setEgzersizData(prev => prev.filter(exercise => exercise.category_id !== categoryToDelete.id));
-            setDeleteCategoryConfirmModal(false);
-            setCategoryToDelete(null);
-            setAffectedExercises([]);
-            
-            // Show success popup
-            setSuccessMessage(`"${categoryToDelete.name}" kategorisi başarıyla silindi.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error deleting category:", error);
-            setErrorMessage("Kategori silinirken bir hata oluştu.");
-            setShowErrorPopup(true);
-            setDeleteCategoryConfirmModal(false);
-            setCategoryToDelete(null);
-            setAffectedExercises([]);
-        });
+            .then(() => {
+                // Update local state after successful deletion
+                setCategoryData(prev => prev.filter(cat => cat.id !== categoryToDelete.id));
+                setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
+                // Also remove any exercises that were in the deleted category
+                setEgzersizData(prev => prev.filter(exercise => exercise.category_id !== categoryToDelete.id));
+                setDeleteCategoryConfirmModal(false);
+                setCategoryToDelete(null);
+                setAffectedExercises([]);
+
+                // Show success popup
+                setSuccessMessage(`"${categoryToDelete.name}" kategorisi başarıyla silindi.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error deleting category:", error);
+                setErrorMessage("Kategori silinirken bir hata oluştu.");
+                setShowErrorPopup(true);
+                setDeleteCategoryConfirmModal(false);
+                setCategoryToDelete(null);
+                setAffectedExercises([]);
+            });
     };
 
     const handleAddExercise = () => {
         if (!newExercise.exercise_name.trim() || !newExercise.category_id) return;
-        
+
         setIsSaving(true);
-        
+
         axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, newExercise, {
-            headers: { Authorization: localStorage.getItem("token") }
+            headers: {Authorization: localStorage.getItem("token")}
         })
-        .then(response => {
-            // Add the new exercise to the state
-            setEgzersizData([...egzersizData, response.data]);
-            
-            // Reset form
-            setNewExercise({
-                exercise_name: '',
-                exercise_description: '',
-                category_id: '',
-                video: '',
-                duration: 30,
-                difficulty: 3,
-                equipment: '',
-                calories_burned: 0
+            .then(response => {
+                // Add the new exercise to the state
+                setEgzersizData([...egzersizData, response.data]);
+
+                // Reset form
+                setNewExercise({
+                    exercise_name: '',
+                    exercise_description: '',
+                    category_id: '',
+                    video: '',
+                    duration: 30,
+                    difficulty: 3,
+                    equipment: '',
+                    calories_burned: 0
+                });
+                setAddExerciseModal(false);
+
+                // Show success message
+                setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error adding exercise:", error);
+                setErrorMessage("Egzersiz eklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setIsSaving(false);
             });
-            setAddExerciseModal(false);
-            
-            // Show success message
-            setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error adding exercise:", error);
-            setErrorMessage("Egzersiz eklenirken bir hata oluştu.");
-            setShowErrorPopup(true);
-        })
-        .finally(() => {
-            setIsSaving(false);
-        });
     };
 
     const handleSaveExercise = () => {
         if (!editExerciseData.exercise_name.trim() || !editExerciseData.category_id) return;
-        
+
         setIsSaving(true);
-        
+
         axios.put(`${config[config.environment].apiUrl}/exercise/updateExercise`, editExerciseData, {
-            headers: { Authorization: localStorage.getItem("token") }
+            headers: {Authorization: localStorage.getItem("token")}
         })
-        .then(response => {
-            // Update the exercise in the state
-            setEgzersizData(prev => 
-                prev.map(item => 
-                    item.id === editExerciseData.exercise_id ? response.data : item
-                )
-            );
-            
-            // Close modal and reset form
-            setEditExerciseModal(false);
-            setSelectedExercise(null);
-            setEditExerciseData({
-                exercise_id: '',
-                exercise_name: '',
-                exercise_description: '',
-                category_id: '',
-                video: '',
-                duration: 30,
-                difficulty: 3,
-                equipment: '',
-                calories_burned: 0
+            .then(response => {
+                // Update the exercise in the state
+                setEgzersizData(prev =>
+                    prev.map(item =>
+                        item.id === editExerciseData.exercise_id ? response.data : item
+                    )
+                );
+
+                // Close modal and reset form
+                setEditExerciseModal(false);
+                setSelectedExercise(null);
+                setEditExerciseData({
+                    exercise_id: '',
+                    exercise_name: '',
+                    exercise_description: '',
+                    category_id: '',
+                    video: '',
+                    duration: 30,
+                    difficulty: 3,
+                    equipment: '',
+                    calories_burned: 0
+                });
+
+                // Show success message
+                setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla güncellendi.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error updating exercise:", error);
+                setErrorMessage("Egzersiz güncellenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setIsSaving(false);
             });
-            
-            // Show success message
-            setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla güncellendi.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error updating exercise:", error);
-            setErrorMessage("Egzersiz güncellenirken bir hata oluştu.");
-            setShowErrorPopup(true);
-        })
-        .finally(() => {
-            setIsSaving(false);
-        });
     };
 
     const handleAddToUser = () => {
         if (!selectedExercise || !selectedUser || !startDate || !endDate) return;
-        
+
         const addData = {
             client_id: selectedUser.id,
             exercise_id: selectedExercise.id,
@@ -583,80 +586,80 @@ export default function Egzersizler() {
             end_date: endDate,
             note: assignmentNote
         };
-        
+
         setIsSaving(true);
 
         axios.post(`${config[config.environment].apiUrl}/exercise/assignExercise`, addData, {
-            headers: { Authorization: localStorage.getItem("token") }
+            headers: {Authorization: localStorage.getItem("token")}
         })
-        .then(response => {
-            setAddToUserModal(false);
-            setSelectedExercise(null);
-            setSelectedUser(null);
-            setStartDate('');
-            setEndDate('');
-            setAssignmentNote('');
+            .then(response => {
+                setAddToUserModal(false);
+                setSelectedExercise(null);
+                setSelectedUser(null);
+                setStartDate('');
+                setEndDate('');
+                setAssignmentNote('');
 
-            setSuccessMessage(`"${selectedExercise.exercise_name}" egzersiz programı "${selectedUser.name}" danışanına başarıyla atandı.`);
-            setShowSuccessPopup(true);
-        })
-        .catch(error => {
-            console.error("Error assigning exercise:", error);
-            setErrorMessage("Egzersiz atanırken bir hata oluştu.");
-            setShowErrorPopup(true);
-        })
-        .finally(() => {
-            setIsSaving(false);
-        });
+                setSuccessMessage(`"${selectedExercise.exercise_name}" egzersiz programı "${selectedUser.name}" danışanına başarıyla atandı.`);
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error assigning exercise:", error);
+                setErrorMessage("Egzersiz atanırken bir hata oluştu.");
+                setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setIsSaving(false);
+            });
     };
 
     // PDF generation for exercise details
     const generatePDF = (exercise) => {
         // Create a new PDF document
         const doc = new jsPDF();
-        
+
         // Add title
         doc.setFontSize(20);
         doc.text(exercise.exercise_name, 20, 20);
-        
+
         // Add details
         doc.setFontSize(12);
         doc.text("Egzersiz Detayları", 20, 30);
-        
+
         // Add content
         doc.setFontSize(10);
         let y = 40;
-        
+
         if (exercise.exercise_description) {
             doc.text("Açıklama:", 20, y);
             doc.text(exercise.exercise_description, 60, y);
             y += 10;
         }
-        
+
         if (exercise.equipment) {
             doc.text("Ekipman:", 20, y);
             doc.text(exercise.equipment, 60, y);
             y += 10;
         }
-        
+
         doc.text("Süre:", 20, y);
         doc.text(`${exercise.duration || 0} dakika`, 60, y);
         y += 10;
-        
+
         doc.text("Zorluk:", 20, y);
         doc.text(`${exercise.difficulty || 0}/5`, 60, y);
         y += 10;
-        
+
         doc.text("Yakılan Kalori:", 20, y);
         doc.text(`${exercise.calories_burned || 0} kcal`, 60, y);
         y += 10;
-        
+
         if (exercise.video) {
             doc.text("Video Linki:", 20, y);
             doc.text(exercise.video, 60, y);
             y += 10;
         }
-        
+
         // Save the PDF
         doc.save(`${exercise.exercise_name}_egzersiz.pdf`);
     };
@@ -668,9 +671,9 @@ export default function Egzersizler() {
                 <div className="categories-panel">
                     <div className="panel-header">
                         <div className="search-container">
-                            <SearchIcon className="search-icon" />
-                            <input 
-                                type="text" 
+                            <SearchIcon className="search-icon"/>
+                            <input
+                                type="text"
                                 className="search-input"
                                 placeholder="Ara..."
                                 value={searchTerm}
@@ -678,20 +681,20 @@ export default function Egzersizler() {
                             />
                         </div>
                         <div className="category-actions">
-                            <button 
-                                className="action-btn add-plan-btn" 
+                            <button
+                                className="action-btn add-plan-btn"
                                 title="Egzersiz Ekle"
                                 onClick={() => setAddExerciseModal(true)}
                             >
-                                <AddIcon />
+                                <AddIcon/>
                                 <span className="btn-text">Egzersiz Ekle</span>
                             </button>
-                            <button 
-                                className="action-btn add-btn" 
+                            <button
+                                className="action-btn add-btn"
                                 title="Kategori Ekle"
                                 onClick={() => setAddCategoryModal(true)}
                             >
-                                <AddIcon />
+                                <AddIcon/>
                                 <span className="btn-text">Kategori Ekle</span>
                             </button>
                         </div>
@@ -722,16 +725,16 @@ export default function Egzersizler() {
                         <div className="filter-group">
                             <h3 className="filter-title">Zorluk Seviyesi:</h3>
                             <div className="difficulty-options">
-                                <button 
-                                    className={`difficulty-btn ${difficultyFilter === 0 ? 'active' : ''}`} 
+                                <button
+                                    className={`difficulty-btn ${difficultyFilter === 0 ? 'active' : ''}`}
                                     onClick={() => setDifficultyFilter(0)}
                                 >
                                     Tümü
                                 </button>
                                 {[1, 2, 3, 4, 5].map(level => (
-                                    <button 
+                                    <button
                                         key={level}
-                                        className={`difficulty-btn ${difficultyFilter === level ? 'active' : ''}`} 
+                                        className={`difficulty-btn ${difficultyFilter === level ? 'active' : ''}`}
                                         onClick={() => setDifficultyFilter(level)}
                                     >
                                         {level}
@@ -744,16 +747,16 @@ export default function Egzersizler() {
                         <div className="filter-group">
                             <h3 className="filter-title">Kalori Aralığı:</h3>
                             <div className="calorie-options">
-                                <button 
-                                    className={`calorie-btn ${calorieFilter === null ? 'active' : ''}`} 
+                                <button
+                                    className={`calorie-btn ${calorieFilter === null ? 'active' : ''}`}
                                     onClick={() => setCalorieFilter(null)}
                                 >
                                     Tümü
                                 </button>
                                 {['0-50', '50-100', '100-200', '200-300', '300-500', '500+'].map(range => (
-                                    <button 
+                                    <button
                                         key={range}
-                                        className={`calorie-btn ${calorieFilter === range ? 'active' : ''}`} 
+                                        className={`calorie-btn ${calorieFilter === range ? 'active' : ''}`}
                                         onClick={() => setCalorieFilter(range)}
                                     >
                                         {range}
@@ -762,7 +765,7 @@ export default function Egzersizler() {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="exercise-cards-grid">
                         {loading ? (
                             <div className="loading-container">
@@ -771,7 +774,7 @@ export default function Egzersizler() {
                             </div>
                         ) : filteredExerciseData.length > 0 ? (
                             filteredExerciseData.map((item) => (
-                                <ExerciseCard 
+                                <ExerciseCard
                                     key={item.id}
                                     item={item}
                                     onAddToUser={handleOpenAddToUserModal}
@@ -791,18 +794,18 @@ export default function Egzersizler() {
             </div>
 
             {/* Add Category Modal */}
-            <Modal 
-                isOpen={addCategoryModal} 
-                title="Kategori Ekle" 
+            <Modal
+                isOpen={addCategoryModal}
+                title="Kategori Ekle"
                 onClose={() => setAddCategoryModal(false)}
             >
                 <div className="modal-body">
                     <div className="input-container">
                         <label htmlFor="categoryTitle">Kategori Adı</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="categoryTitle"
-                            className="text-input" 
+                            className="text-input"
                             value={newCategoryTitle}
                             onChange={(e) => setNewCategoryTitle(e.target.value)}
                             placeholder="Kategori adını giriniz"
@@ -810,14 +813,14 @@ export default function Egzersizler() {
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={() => setAddCategoryModal(false)}
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn confirm-btn" 
+                    <button
+                        className="modal-btn confirm-btn"
                         onClick={handleAddCategory}
                         disabled={!newCategoryTitle.trim()}
                     >
@@ -827,14 +830,14 @@ export default function Egzersizler() {
             </Modal>
 
             {/* Detail Modal */}
-            <Modal 
-                isOpen={detailModal} 
-                title={detailItem?.exercise_name} 
+            <Modal
+                isOpen={detailModal}
+                title={detailItem?.exercise_name}
                 onClose={() => setDetailModal(false)}
             >
                 <div className="detail-modal-content">
                     <p className="detail-description">{detailItem?.exercise_description}</p>
-                    
+
                     <div className="exercise-detail-info">
                         {detailItem?.equipment && (
                             <div className="detail-info-item">
@@ -857,7 +860,7 @@ export default function Egzersizler() {
                             </div>
                         )}
                     </div>
-                    
+
                     {detailItem?.video && (
                         <div className="video-link">
                             <a href={detailItem.video} target="_blank" rel="noopener noreferrer">
@@ -867,8 +870,8 @@ export default function Egzersizler() {
                     )}
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn close-btn" 
+                    <button
+                        className="modal-btn close-btn"
                         onClick={() => setDetailModal(false)}
                     >
                         Kapat
@@ -877,9 +880,9 @@ export default function Egzersizler() {
             </Modal>
 
             {/* Delete Confirmation Modal */}
-            <Modal 
-                isOpen={deleteConfirmModal} 
-                title="Egzersiz Programını Sil" 
+            <Modal
+                isOpen={deleteConfirmModal}
+                title="Egzersiz Programını Sil"
                 onClose={() => {
                     setDeleteConfirmModal(false);
                     setItemToDelete(null);
@@ -887,7 +890,7 @@ export default function Egzersizler() {
             >
                 <div className="modal-body delete-confirm-modal">
                     <div className="delete-warning">
-                        <WarningIcon className="warning-icon" />
+                        <WarningIcon className="warning-icon"/>
                         <p className="warning-text">
                             <strong>{itemToDelete?.exercise_name}</strong> egzersizini silmek istediğinize emin misiniz?
                         </p>
@@ -895,8 +898,8 @@ export default function Egzersizler() {
                     <p className="delete-note">Bu işlem geri alınamaz.</p>
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={() => {
                             setDeleteConfirmModal(false);
                             setItemToDelete(null);
@@ -904,8 +907,8 @@ export default function Egzersizler() {
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn delete-confirm-btn" 
+                    <button
+                        className="modal-btn delete-confirm-btn"
                         onClick={handleDelete}
                     >
                         Sil
@@ -914,9 +917,9 @@ export default function Egzersizler() {
             </Modal>
 
             {/* Delete Category Confirmation Modal */}
-            <Modal 
-                isOpen={deleteCategoryConfirmModal} 
-                title="Kategoriyi Sil" 
+            <Modal
+                isOpen={deleteCategoryConfirmModal}
+                title="Kategoriyi Sil"
                 onClose={() => {
                     setDeleteCategoryConfirmModal(false);
                     setCategoryToDelete(null);
@@ -924,29 +927,31 @@ export default function Egzersizler() {
             >
                 <div className="modal-body delete-confirm-modal">
                     <div className="delete-warning">
-                        <WarningIcon className="warning-icon" />
+                        <WarningIcon className="warning-icon"/>
                         <p className="warning-text">
                             <strong>{categoryToDelete?.name}</strong> kategorisini silmek istediğinize emin misiniz?
                         </p>
                     </div>
                     <p className="delete-note">Bu işlem geri alınamaz.</p>
-                    
+
                     {affectedExercises.length > 0 && (
                         <div className="affected-plans">
                             <p className="delete-note important">
-                                <strong>Önemli:</strong> Bu kategori ile ilişkili <strong>{affectedExercises.length}</strong> egzersiz silinecektir:
+                                <strong>Önemli:</strong> Bu kategori ile
+                                ilişkili <strong>{affectedExercises.length}</strong> egzersiz silinecektir:
                             </p>
                             <ul className="affected-plans-list">
                                 {affectedExercises.map(exercise => (
-                                    <li key={exercise.id}><span className="plan-title">{exercise.exercise_name}</span></li>
+                                    <li key={exercise.id}><span className="plan-title">{exercise.exercise_name}</span>
+                                    </li>
                                 ))}
                             </ul>
                         </div>
                     )}
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={() => {
                             setDeleteCategoryConfirmModal(false);
                             setCategoryToDelete(null);
@@ -954,8 +959,8 @@ export default function Egzersizler() {
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn delete-confirm-btn" 
+                    <button
+                        className="modal-btn delete-confirm-btn"
                         onClick={handleSingleCategoryDelete}
                     >
                         Sil
@@ -964,18 +969,18 @@ export default function Egzersizler() {
             </Modal>
 
             {/* Add Exercise Modal */}
-            <Modal 
-                isOpen={addExerciseModal} 
-                title="Egzersiz Ekle" 
+            <Modal
+                isOpen={addExerciseModal}
+                title="Egzersiz Ekle"
                 onClose={() => setAddExerciseModal(false)}
             >
                 <div className="modal-body">
                     <div className="input-container">
                         <label htmlFor="exerciseName">Egzersiz Adı</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="exerciseName"
-                            className="text-input" 
+                            className="text-input"
                             value={newExercise.exercise_name}
                             onChange={(e) => setNewExercise({...newExercise, exercise_name: e.target.value})}
                             placeholder="Egzersiz adını giriniz"
@@ -983,9 +988,9 @@ export default function Egzersizler() {
                     </div>
                     <div className="input-container">
                         <label htmlFor="exerciseDescription">Açıklama</label>
-                        <textarea 
+                        <textarea
                             id="exerciseDescription"
-                            className="text-input textarea" 
+                            className="text-input textarea"
                             value={newExercise.exercise_description}
                             onChange={(e) => setNewExercise({...newExercise, exercise_description: e.target.value})}
                             placeholder="Egzersiz açıklaması giriniz"
@@ -994,9 +999,9 @@ export default function Egzersizler() {
                     </div>
                     <div className="input-container">
                         <label htmlFor="exerciseCategory">Kategori</label>
-                        <select 
+                        <select
                             id="exerciseCategory"
-                            className="text-input" 
+                            className="text-input"
                             value={newExercise.category_id}
                             onChange={(e) => setNewExercise({...newExercise, category_id: e.target.value})}
                         >
@@ -1010,10 +1015,10 @@ export default function Egzersizler() {
                     </div>
                     <div className="input-container">
                         <label htmlFor="exerciseVideo">Video URL (Opsiyonel)</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="exerciseVideo"
-                            className="text-input" 
+                            className="text-input"
                             value={newExercise.video}
                             onChange={(e) => setNewExercise({...newExercise, video: e.target.value})}
                             placeholder="Video URL adresi giriniz"
@@ -1022,23 +1027,29 @@ export default function Egzersizler() {
                     <div className="exercise-details-row">
                         <div className="input-container half-width">
                             <label htmlFor="exerciseDuration">Süre (Dakika)</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 id="exerciseDuration"
-                                className="text-input" 
+                                className="text-input"
                                 value={newExercise.duration}
-                                onChange={(e) => setNewExercise({...newExercise, duration: parseInt(e.target.value) || 0})}
+                                onChange={(e) => setNewExercise({
+                                    ...newExercise,
+                                    duration: parseInt(e.target.value) || 0
+                                })}
                                 min="0"
                             />
                         </div>
                         <div className="input-container half-width">
                             <label htmlFor="exerciseDifficulty">Zorluk (1-5)</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 id="exerciseDifficulty"
-                                className="text-input" 
+                                className="text-input"
                                 value={newExercise.difficulty}
-                                onChange={(e) => setNewExercise({...newExercise, difficulty: parseInt(e.target.value) || 1})}
+                                onChange={(e) => setNewExercise({
+                                    ...newExercise,
+                                    difficulty: parseInt(e.target.value) || 1
+                                })}
                                 min="1"
                                 max="5"
                             />
@@ -1047,10 +1058,10 @@ export default function Egzersizler() {
                     <div className="exercise-details-row">
                         <div className="input-container half-width">
                             <label htmlFor="exerciseEquipment">Ekipman</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 id="exerciseEquipment"
-                                className="text-input" 
+                                className="text-input"
                                 value={newExercise.equipment}
                                 onChange={(e) => setNewExercise({...newExercise, equipment: e.target.value})}
                                 placeholder="Gerekli ekipman"
@@ -1058,26 +1069,29 @@ export default function Egzersizler() {
                         </div>
                         <div className="input-container half-width">
                             <label htmlFor="exerciseCalories">Yakılan Kalori</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 id="exerciseCalories"
-                                className="text-input" 
+                                className="text-input"
                                 value={newExercise.calories_burned}
-                                onChange={(e) => setNewExercise({...newExercise, calories_burned: parseInt(e.target.value) || 0})}
+                                onChange={(e) => setNewExercise({
+                                    ...newExercise,
+                                    calories_burned: parseInt(e.target.value) || 0
+                                })}
                                 min="0"
                             />
                         </div>
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={() => setAddExerciseModal(false)}
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn confirm-btn" 
+                    <button
+                        className="modal-btn confirm-btn"
                         onClick={handleAddExercise}
                         disabled={!newExercise.exercise_name.trim() || !newExercise.category_id || isSaving}
                     >
@@ -1087,18 +1101,18 @@ export default function Egzersizler() {
             </Modal>
 
             {/* Edit Exercise Modal */}
-            <Modal 
-                isOpen={editExerciseModal} 
-                title="Egzersiz Düzenle" 
+            <Modal
+                isOpen={editExerciseModal}
+                title="Egzersiz Düzenle"
                 onClose={() => setEditExerciseModal(false)}
             >
                 <div className="modal-body">
                     <div className="input-container">
                         <label htmlFor="editExerciseName">Egzersiz Adı</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="editExerciseName"
-                            className="text-input" 
+                            className="text-input"
                             value={editExerciseData.exercise_name}
                             onChange={(e) => setEditExerciseData({...editExerciseData, exercise_name: e.target.value})}
                             placeholder="Egzersiz adını giriniz"
@@ -1106,20 +1120,23 @@ export default function Egzersizler() {
                     </div>
                     <div className="input-container">
                         <label htmlFor="editExerciseDescription">Açıklama</label>
-                        <textarea 
+                        <textarea
                             id="editExerciseDescription"
-                            className="text-input textarea" 
+                            className="text-input textarea"
                             value={editExerciseData.exercise_description}
-                            onChange={(e) => setEditExerciseData({...editExerciseData, exercise_description: e.target.value})}
+                            onChange={(e) => setEditExerciseData({
+                                ...editExerciseData,
+                                exercise_description: e.target.value
+                            })}
                             placeholder="Egzersiz açıklaması giriniz"
                             rows={3}
                         />
                     </div>
                     <div className="input-container">
                         <label htmlFor="editExerciseCategory">Kategori</label>
-                        <select 
+                        <select
                             id="editExerciseCategory"
-                            className="text-input" 
+                            className="text-input"
                             value={editExerciseData.category_id}
                             onChange={(e) => setEditExerciseData({...editExerciseData, category_id: e.target.value})}
                         >
@@ -1133,10 +1150,10 @@ export default function Egzersizler() {
                     </div>
                     <div className="input-container">
                         <label htmlFor="editExerciseVideo">Video URL (Opsiyonel)</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             id="editExerciseVideo"
-                            className="text-input" 
+                            className="text-input"
                             value={editExerciseData.video}
                             onChange={(e) => setEditExerciseData({...editExerciseData, video: e.target.value})}
                             placeholder="Video URL adresi giriniz"
@@ -1145,23 +1162,29 @@ export default function Egzersizler() {
                     <div className="exercise-details-row">
                         <div className="input-container half-width">
                             <label htmlFor="editExerciseDuration">Süre (Dakika)</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 id="editExerciseDuration"
-                                className="text-input" 
+                                className="text-input"
                                 value={editExerciseData.duration}
-                                onChange={(e) => setEditExerciseData({...editExerciseData, duration: parseInt(e.target.value) || 0})}
+                                onChange={(e) => setEditExerciseData({
+                                    ...editExerciseData,
+                                    duration: parseInt(e.target.value) || 0
+                                })}
                                 min="0"
                             />
                         </div>
                         <div className="input-container half-width">
                             <label htmlFor="editExerciseDifficulty">Zorluk (1-5)</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 id="editExerciseDifficulty"
-                                className="text-input" 
+                                className="text-input"
                                 value={editExerciseData.difficulty}
-                                onChange={(e) => setEditExerciseData({...editExerciseData, difficulty: parseInt(e.target.value) || 1})}
+                                onChange={(e) => setEditExerciseData({
+                                    ...editExerciseData,
+                                    difficulty: parseInt(e.target.value) || 1
+                                })}
                                 min="1"
                                 max="5"
                             />
@@ -1170,10 +1193,10 @@ export default function Egzersizler() {
                     <div className="exercise-details-row">
                         <div className="input-container half-width">
                             <label htmlFor="editExerciseEquipment">Ekipman</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 id="editExerciseEquipment"
-                                className="text-input" 
+                                className="text-input"
                                 value={editExerciseData.equipment}
                                 onChange={(e) => setEditExerciseData({...editExerciseData, equipment: e.target.value})}
                                 placeholder="Gerekli ekipman"
@@ -1181,26 +1204,29 @@ export default function Egzersizler() {
                         </div>
                         <div className="input-container half-width">
                             <label htmlFor="editExerciseCalories">Yakılan Kalori</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 id="editExerciseCalories"
-                                className="text-input" 
+                                className="text-input"
                                 value={editExerciseData.calories_burned}
-                                onChange={(e) => setEditExerciseData({...editExerciseData, calories_burned: parseInt(e.target.value) || 0})}
+                                onChange={(e) => setEditExerciseData({
+                                    ...editExerciseData,
+                                    calories_burned: parseInt(e.target.value) || 0
+                                })}
                                 min="0"
                             />
                         </div>
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={() => setEditExerciseModal(false)}
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn confirm-btn" 
+                    <button
+                        className="modal-btn confirm-btn"
                         onClick={handleSaveExercise}
                         disabled={!editExerciseData.exercise_name.trim() || !editExerciseData.category_id || isSaving}
                     >
@@ -1210,9 +1236,9 @@ export default function Egzersizler() {
             </Modal>
 
             {/* Add to User Modal */}
-            <Modal 
-                isOpen={addToUserModal} 
-                title="Danışana Ekle" 
+            <Modal
+                isOpen={addToUserModal}
+                title="Danışana Ekle"
                 onClose={() => setAddToUserModal(false)}
             >
                 <div className="modal-body">
@@ -1220,11 +1246,12 @@ export default function Egzersizler() {
                         Seçilen egzersiz: <strong>{selectedExercise?.exercise_name}</strong>
                     </p>
                     <p className="assign-note">
-                        <strong>Not:</strong> Danışanınız bu egzersiz programını gerçekleştirdikçe, mobil uygulamada ilerleme kaydedebilecek.
+                        <strong>Not:</strong> Danışanınız bu egzersiz programını gerçekleştirdikçe, mobil uygulamada
+                        ilerleme kaydedebilecek.
                     </p>
                     <div className="input-container">
                         <label htmlFor="userSelect">Danışan Seçin</label>
-                        <select 
+                        <select
                             id="userSelect"
                             className="text-input"
                             value={selectedUser?.id || ''}
@@ -1278,9 +1305,9 @@ export default function Egzersizler() {
                     </div>
                     <div className="input-container">
                         <label htmlFor="assignmentNote">Not (Opsiyonel)</label>
-                        <textarea 
+                        <textarea
                             id="assignmentNote"
-                            className="text-input textarea" 
+                            className="text-input textarea"
                             value={assignmentNote}
                             onChange={(e) => setAssignmentNote(e.target.value)}
                             placeholder="Danışana özel notlar..."
@@ -1289,14 +1316,14 @@ export default function Egzersizler() {
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={() => setAddToUserModal(false)}
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn confirm-btn" 
+                    <button
+                        className="modal-btn confirm-btn"
                         onClick={handleAddToUser}
                         disabled={!selectedUser || !startDate || !endDate}
                     >
@@ -1309,7 +1336,7 @@ export default function Egzersizler() {
             {showSuccessPopup && (
                 <div className="success-popup">
                     <div className="success-popup-content">
-                        <CheckCircleIcon className="success-icon" />
+                        <CheckCircleIcon className="success-icon"/>
                         <p>{successMessage}</p>
                     </div>
                 </div>
@@ -1319,7 +1346,7 @@ export default function Egzersizler() {
             {showErrorPopup && (
                 <div className="error-popup">
                     <div className="error-popup-content">
-                        <ErrorIcon className="error-icon" />
+                        <ErrorIcon className="error-icon"/>
                         <p>{errorMessage}</p>
                     </div>
                 </div>

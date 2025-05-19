@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import Default from "../../Components/Layouts/Default.jsx";
 import {
     Avatar,
@@ -112,7 +112,7 @@ export default function Mesaj() {
                     id: msg.id,
                     text: msg.message,
                     sender: msg.dietitian_id.toString() === localStorage.getItem("user_id") ? "DIETITIAN" : "CLIENT",
-                    timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    timestamp: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
                     isRead: msg.isRead
                 }));
                 setMessages(formattedMessages);
@@ -127,7 +127,7 @@ export default function Mesaj() {
 
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
-        
+
         // Fetch real messages for this conversation
         fetchMessages(danisan.id);
 
@@ -147,13 +147,13 @@ export default function Mesaj() {
             id: Date.now(),
             text: newMessage,
             sender: "DIETITIAN",
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
         };
 
         // Add to UI immediately for better UX
         setMessages([...messages, newMsg]);
         setNewMessage("");
-        
+
         // Send to API
         const messageData = {
             dietitian_id: localStorage.getItem("user_id"),
@@ -161,16 +161,16 @@ export default function Mesaj() {
             message: newMessage,
             isRead: false
         };
-        
+
         axios.post(config[config.environment].apiUrl + "/message/sendMessage", messageData, {
             headers: {
                 Authorization: localStorage.getItem("token")
             }
         })
-        .catch(error => {
-            console.error("Error sending message:", error);
-            // Could add error handling like showing a snackbar
-        });
+            .catch(error => {
+                console.error("Error sending message:", error);
+                // Could add error handling like showing a snackbar
+            });
     };
 
     const handleKeyPress = (e) => {
@@ -202,7 +202,7 @@ export default function Mesaj() {
 
     const formatDate = () => {
         const today = new Date();
-        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        const options = {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'};
         return today.toLocaleDateString('tr-TR', options);
     };
 
@@ -237,7 +237,7 @@ export default function Mesaj() {
                 id: Date.now(),
                 text: isImage ? null : 'Dosya gönderildi: ' + file.name,
                 sender: "DIETITIAN",
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
                 file: {
                     url: fileUrl,
                     name: file.name,
@@ -274,25 +274,25 @@ export default function Mesaj() {
         if (message.file) {
             if (message.file.isImage) {
                 return (
-                    <Box sx={{ maxWidth: '300px', maxHeight: '300px', overflow: 'hidden', borderRadius: '8px' }}>
-                        <img 
-                            src={message.file.url} 
+                    <Box sx={{maxWidth: '300px', maxHeight: '300px', overflow: 'hidden', borderRadius: '8px'}}>
+                        <img
+                            src={message.file.url}
                             alt={message.file.name}
-                            style={{ width: '100%', height: 'auto', display: 'block' }}
+                            style={{width: '100%', height: 'auto', display: 'block'}}
                         />
                     </Box>
                 );
             } else {
                 return (
-                    <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: 1,
                         backgroundColor: 'rgba(0,0,0,0.04)',
                         padding: '8px',
                         borderRadius: '8px'
                     }}>
-                        <AttachFileIcon />
+                        <AttachFileIcon/>
                         <Typography variant="body2" component="a" href={message.file.url} download={message.file.name}>
                             {message.file.name}
                         </Typography>
@@ -325,19 +325,21 @@ export default function Mesaj() {
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <SearchIcon color="action" />
+                                                <SearchIcon color="action"/>
                                             </InputAdornment>
                                         ),
                                     }}
                                 />
                             </Box>
 
-                            <Divider />
+                            <Divider/>
 
                             <List className="danisan-list">
                                 {filteredDanisanList && filteredDanisanList.length > 0 ? (
                                     filteredDanisanList.map((danisan) => (
-                                        <Zoom in={true} style={{ transitionDelay: `${filteredDanisanList.indexOf(danisan) * 100}ms` }} key={danisan.id}>
+                                        <Zoom in={true}
+                                              style={{transitionDelay: `${filteredDanisanList.indexOf(danisan) * 100}ms`}}
+                                              key={danisan.id}>
                                             <ListItemButton
                                                 onClick={() => handleDanisanSelect(danisan)}
                                                 selected={selectedDanisan?.id === danisan.id}
@@ -349,7 +351,7 @@ export default function Mesaj() {
                                                         variant="dot"
                                                     >
                                                         <Avatar
-                                                            sx={{ bgcolor: getAvatarColor(danisan.name || '') }}
+                                                            sx={{bgcolor: getAvatarColor(danisan.name || '')}}
                                                         >
                                                             {getInitials(danisan.name || '')}
                                                         </Avatar>
@@ -357,26 +359,30 @@ export default function Mesaj() {
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     primary={
-                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                        <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                                                             <Typography variant="body1" noWrap>
                                                                 {danisan.name || ''}
                                                             </Typography>
                                                         </Box>
                                                     }
                                                     secondary={
-                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                            <Typography 
-                                                                variant="body2" 
-                                                                color="text.secondary" 
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center'
+                                                        }}>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
                                                                 noWrap
-                                                                sx={{ maxWidth: '80%' }}
+                                                                sx={{maxWidth: '80%'}}
                                                             >
                                                                 {danisan.lastMessage || "Yeni danışan"}
                                                             </Typography>
                                                             {danisan.unreadCount > 0 && (
-                                                                <Badge 
-                                                                    badgeContent={danisan.unreadCount} 
-                                                                    color="primary" 
+                                                                <Badge
+                                                                    badgeContent={danisan.unreadCount}
+                                                                    color="primary"
                                                                     size="small"
                                                                 />
                                                             )}
@@ -390,7 +396,7 @@ export default function Mesaj() {
                                     <ListItemButton>
                                         <ListItemText
                                             primary="Danışan bulunamadı"
-                                            primaryTypographyProps={{ align: 'center', color: 'text.secondary' }}
+                                            primaryTypographyProps={{align: 'center', color: 'text.secondary'}}
                                         />
                                     </ListItemButton>
                                 )}
@@ -405,34 +411,39 @@ export default function Mesaj() {
                                 <>
                                     <Box className="chat-header">
                                         <Avatar
-                                            sx={{ bgcolor: getAvatarColor(selectedDanisan.name || '') }}
+                                            sx={{bgcolor: getAvatarColor(selectedDanisan.name || '')}}
                                         >
                                             {getInitials(selectedDanisan.name || '')}
                                         </Avatar>
-                                        <Box ml={1} sx={{ flexGrow: 1 }}>
+                                        <Box ml={1} sx={{flexGrow: 1}}>
                                             <Typography variant="h6">
                                                 {selectedDanisan.name || ''}
                                             </Typography>
                                         </Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{fontWeight: 'bold'}}>
                                             {formatDate()}
                                         </Typography>
                                     </Box>
 
-                                    <Divider />
+                                    <Divider/>
 
                                     <Box className="messages-container" ref={messageListRef}>
-                                        <Box sx={{ p: 2, textAlign: 'center' }}>
-                                            <Chip 
-                                                label={`Sohbet başladı - ${formatDate()}`} 
-                                                variant="outlined" 
-                                                size="small" 
+                                        <Box sx={{p: 2, textAlign: 'center'}}>
+                                            <Chip
+                                                label={`Sohbet başladı - ${formatDate()}`}
+                                                variant="outlined"
+                                                size="small"
                                             />
                                         </Box>
-                                        
+
                                         {isLoading ? (
-                                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                                                <CircularProgress size={40} />
+                                            <Box sx={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                height: '100%'
+                                            }}>
+                                                <CircularProgress size={40}/>
                                             </Box>
                                         ) : messages.length > 0 ? (
                                             messages.map((message) => (
@@ -440,18 +451,33 @@ export default function Mesaj() {
                                                     <Box
                                                         className={`message ${message.sender === "DIETITIAN" ? "sent" : "received"}`}
                                                     >
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: message.sender === "DIETITIAN" ? 'flex-end' : 'flex-start', width: '100%' }}>
-                                                            <Typography variant="caption" className="message-sender-label">
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: message.sender === "DIETITIAN" ? 'flex-end' : 'flex-start',
+                                                            width: '100%'
+                                                        }}>
+                                                            <Typography variant="caption"
+                                                                        className="message-sender-label">
                                                                 {message.sender === "DIETITIAN" ? "Diyetisyen" : "Danışan"}
                                                             </Typography>
                                                             <Box className="message-content">
                                                                 {renderMessage(message)}
-                                                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5 }}>
-                                                                    <Typography variant="caption" className="message-time">
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'flex-end',
+                                                                    alignItems: 'center',
+                                                                    gap: 0.5
+                                                                }}>
+                                                                    <Typography variant="caption"
+                                                                                className="message-time">
                                                                         {message.timestamp}
                                                                     </Typography>
                                                                     {message.sender === "DIETITIAN" && (
-                                                                        <CheckCircleIcon sx={{ fontSize: 12, color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary' }} />
+                                                                        <CheckCircleIcon sx={{
+                                                                            fontSize: 12,
+                                                                            color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary'
+                                                                        }}/>
                                                                     )}
                                                                 </Box>
                                                             </Box>
@@ -466,11 +492,11 @@ export default function Mesaj() {
                                                 </Typography>
                                             </Box>
                                         )}
-                                        
+
                                         {isTyping && (
                                             <Box className="message received typing-indicator">
                                                 <Box className="message-content">
-                                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                                    <Box sx={{display: 'flex', gap: 1}}>
                                                         <span className="typing-dot"></span>
                                                         <span className="typing-dot"></span>
                                                         <span className="typing-dot"></span>
@@ -496,21 +522,21 @@ export default function Mesaj() {
                                                 startAdornment: (
                                                     <InputAdornment position="start">
                                                         <Tooltip title="Emoji ekle">
-                                                            <IconButton 
-                                                                size="small" 
+                                                            <IconButton
+                                                                size="small"
                                                                 color="primary"
                                                                 onClick={(e) => setEmojiPickerAnchor(e.currentTarget)}
                                                             >
-                                                                <EmojiEmotionsIcon />
+                                                                <EmojiEmotionsIcon/>
                                                             </IconButton>
                                                         </Tooltip>
                                                         <Tooltip title="Dosya/Resim ekle">
-                                                            <IconButton 
-                                                                size="small" 
+                                                            <IconButton
+                                                                size="small"
                                                                 color="primary"
                                                                 onClick={() => setFileUploadDialog(true)}
                                                             >
-                                                                <AttachFileIcon />
+                                                                <AttachFileIcon/>
                                                             </IconButton>
                                                         </Tooltip>
                                                     </InputAdornment>
@@ -530,7 +556,7 @@ export default function Mesaj() {
                                                                     }
                                                                 }}
                                                             >
-                                                                <SendIcon />
+                                                                <SendIcon/>
                                                             </IconButton>
                                                         </Tooltip>
                                                     </InputAdornment>
@@ -544,7 +570,7 @@ export default function Mesaj() {
                                     <Typography variant="h6" color="text.secondary">
                                         Sohbete başlamak için bir danışan seçin
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                    <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
                                         Danışanlarınızla mesajlaşmaya başlayın 💬
                                     </Typography>
                                 </Box>
@@ -574,17 +600,17 @@ export default function Mesaj() {
                                             label={selectedDanisan.status || "Aktif Danışan"}
                                             color="primary"
                                             size="small"
-                                            sx={{ mt: 1 }}
+                                            sx={{mt: 1}}
                                         />
                                     </Box>
 
-                                    <Divider sx={{ my: 2 }} />
+                                    <Divider sx={{my: 2}}/>
 
                                     <List dense className="danisan-info-list">
                                         <ListItemButton>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
-                                                    <WcIcon />
+                                                <Avatar sx={{bgcolor: theme.palette.primary.light}}>
+                                                    <WcIcon/>
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
@@ -595,8 +621,8 @@ export default function Mesaj() {
 
                                         <ListItemButton>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
-                                                    <EmailIcon />
+                                                <Avatar sx={{bgcolor: theme.palette.primary.light}}>
+                                                    <EmailIcon/>
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
@@ -607,8 +633,8 @@ export default function Mesaj() {
 
                                         <ListItemButton>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: theme.palette.primary.light }}>
-                                                    <PhoneIcon />
+                                                <Avatar sx={{bgcolor: theme.palette.primary.light}}>
+                                                    <PhoneIcon/>
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
@@ -617,12 +643,12 @@ export default function Mesaj() {
                                             />
                                         </ListItemButton>
 
-                                        <Divider sx={{ my: 1 }} />
+                                        <Divider sx={{my: 1}}/>
 
                                         <ListItemButton>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: theme.palette.success.light }}>
-                                                    <HeightIcon />
+                                                <Avatar sx={{bgcolor: theme.palette.success.light}}>
+                                                    <HeightIcon/>
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
@@ -633,8 +659,8 @@ export default function Mesaj() {
 
                                         <ListItemButton>
                                             <ListItemAvatar>
-                                                <Avatar sx={{ bgcolor: theme.palette.success.light }}>
-                                                    <FitnessCenterIcon />
+                                                <Avatar sx={{bgcolor: theme.palette.success.light}}>
+                                                    <FitnessCenterIcon/>
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
@@ -646,8 +672,8 @@ export default function Mesaj() {
                                         {selectedDanisan.bmi && (
                                             <ListItemButton>
                                                 <ListItemAvatar>
-                                                    <Avatar sx={{ bgcolor: theme.palette.success.light }}>
-                                                        <InfoIcon />
+                                                    <Avatar sx={{bgcolor: theme.palette.success.light}}>
+                                                        <InfoIcon/>
                                                     </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText
@@ -660,7 +686,7 @@ export default function Mesaj() {
                                 </>
                             ) : (
                                 <Box className="no-danisan-selected">
-                                    <PersonIcon sx={{ fontSize: 60, color: 'text.secondary', opacity: 0.3 }} />
+                                    <PersonIcon sx={{fontSize: 60, color: 'text.secondary', opacity: 0.3}}/>
                                     <Typography variant="body1" color="text.secondary" mt={2}>
                                         Danışan seçildiğinde bilgileri burada görünecek
                                     </Typography>
@@ -685,9 +711,9 @@ export default function Mesaj() {
                     horizontal: 'left',
                 }}
             >
-                <Box sx={{ p: 1 }}>
-                    <Picker 
-                        data={data} 
+                <Box sx={{p: 1}}>
+                    <Picker
+                        data={data}
                         onEmojiSelect={handleEmojiSelect}
                         theme={theme.palette.mode}
                     />
@@ -713,37 +739,37 @@ export default function Mesaj() {
                                 top: 8,
                             }}
                         >
-                            <CloseIcon />
+                            <CloseIcon/>
                         </IconButton>
                     )}
                 </DialogTitle>
                 <DialogContent>
                     {isUploading ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 3 }}>
-                            <CircularProgress variant="determinate" value={uploadProgress} />
+                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 3}}>
+                            <CircularProgress variant="determinate" value={uploadProgress}/>
                             <Typography variant="body2" color="text.secondary">
                                 Yükleniyor... {uploadProgress}%
                             </Typography>
                         </Box>
                     ) : (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 2 }}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, py: 2}}>
                             <input
                                 type="file"
                                 ref={fileInputRef}
-                                style={{ display: 'none' }}
+                                style={{display: 'none'}}
                                 onChange={handleFileSelect}
                                 accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
                             />
                             <Button
                                 variant="outlined"
-                                startIcon={<ImageIcon />}
+                                startIcon={<ImageIcon/>}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 Resim Seç
                             </Button>
                             <Button
                                 variant="outlined"
-                                startIcon={<AttachFileIcon />}
+                                startIcon={<AttachFileIcon/>}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 Dosya Seç
