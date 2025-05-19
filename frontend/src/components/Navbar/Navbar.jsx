@@ -16,7 +16,6 @@ export default function Navbar() {
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
 
-    // Add scroll event listener
     React.useEffect(() => {
         const handleScroll = () => {
             const isScrolled = window.scrollY > 10;
@@ -78,19 +77,20 @@ export default function Navbar() {
                                     sx={{
                                         my: 2,
                                         mx: 1.5,
-                                        fontWeight: "bold",
-                                        color: "rgb(14,62,10)",
+                                        fontWeight: isActive ? "600" : "500",
+                                        color: isActive ? "rgb(10,50,8)" : "rgb(14,62,10)",
                                         display: "flex",
                                         alignItems: "center",
                                         padding: "8px 16px",
                                         borderRadius: "30px",
                                         backgroundColor: isActive
-                                            ? "rgba(71,145,64,0.25)"
+                                            ? "rgba(71,145,64,0.2)"
                                             : "transparent",
                                         "&:hover": {
-                                            backgroundColor: "rgba(71,145,64,0.15)",
+                                            backgroundColor: "rgba(71,145,64,0.1)",
+                                            boxShadow: "0 4px 8px rgba(71,145,64,0.15)",
                                         },
-                                        transition: "background-color 0.3s ease",
+                                        transition: "all 0.3s ease",
                                         position: "relative",
                                         overflow: "visible",
                                         zIndex: 0,
@@ -107,7 +107,9 @@ export default function Navbar() {
                                         } : {},
                                     }}
                                 >
-                                    <Box sx={{ mr: 1 }}>{page.icon}</Box>
+                                    <Box sx={{ mr: 1, color: isActive ? "rgb(71,145,64)" : "inherit" }}>
+                                        {page.icon}
+                                    </Box>
                                     {page.name}
                                 </Button>
                                 {idx !== menu_items.length - 1 && (
