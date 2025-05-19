@@ -107,6 +107,51 @@ function Danisan() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
+    const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+
+    const handleDeleteAppointmentConfirmation = (appointment) => {
+        setAppointmentToDelete(appointment);
+        setDeleteConfirmDialogOpen(true);
+    };
+
+    const handleDeleteAppointment = async () => {
+        if (!appointmentToDelete) return;
+
+        try {
+            await axios.delete(
+                `${config[config.environment].apiUrl}/appointment/deleteAppointmentAsDietitian`,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        appointment_id: appointmentToDelete.id
+                    }
+                }
+            );
+
+            // Başarılı silme sonrası state'i güncelle
+            setAppointments(prevAppointments =>
+                prevAppointments.filter(appointment => appointment.id !== appointmentToDelete.id)
+            );
+
+            // Dialogu kapat
+            setDeleteConfirmDialogOpen(false);
+
+            // Başarı mesajını göster
+            setSuccessMessage("Randevu başarıyla silindi.");
+            setShowSuccessPopup(true);
+        } catch (error) {
+            // Hata durumunda hata mesajını göster
+            setErrorMessage(error.response?.data?.message || "Randevu silinirken bir hata oluştu.");
+            setShowErrorPopup(true);
+        } finally {
+            // Silme işlemi sonrası state'i temizle
+            setAppointmentToDelete(null);
+        }
+    };
+
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
         let timer;
@@ -2048,10 +2093,7 @@ function Danisan() {
                                                     key={app.id}
                                                     secondaryAction={
                                                         <Box>
-                                                            <IconButton edge="end" aria-label="edit" sx={{ mr: 1 }}>
-                                                                <EditIcon />
-                                                            </IconButton>
-                                                            <IconButton edge="end" aria-label="delete">
+                                                            <IconButton color="error" onClick={() => handleDeleteAppointmentConfirmation(app)} edge="end" aria-label="delete">
                                                                 <DeleteIcon />
                                                             </IconButton>
                                                         </Box>
@@ -3732,6 +3774,37 @@ function Danisan() {
                         </Button>
                     </DialogActions>
                 </Box>
+            </Dialog>
+
+            <Dialog
+                open={deleteConfirmDialogOpen}
+                onClose={() => setDeleteConfirmDialogOpen(false)}
+                aria-labelledby="delete-appointment-dialog-title"
+                aria-describedby="delete-appointment-dialog-description"
+            >
+                <DialogTitle id="delete-appointment-dialog-title">
+                    {"Randevu Silme Onayı"}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="delete-appointment-dialog-description">
+                        {`${appointmentToDelete?.title} randevusunu silmek istediğinizden emin misiniz?`}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setDeleteConfirmDialogOpen(false)}
+                        color="primary"
+                    >
+                        İptal
+                    </Button>
+                    <Button
+                        onClick={handleDeleteAppointment}
+                        color="error"
+                        autoFocus
+                    >
+                        Sil
+                    </Button>
+                </DialogActions>
             </Dialog>
         </Default>
     );
