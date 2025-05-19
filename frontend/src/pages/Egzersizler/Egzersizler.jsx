@@ -4,6 +4,10 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
+import {DatePicker} from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrintIcon from '@mui/icons-material/Print';
@@ -1239,26 +1243,38 @@ export default function Egzersizler() {
                         </select>
                     </div>
                     <div className="date-inputs-container">
-                        <div className="input-container half-width">
-                            <label htmlFor="startDate">Başlangıç Tarihi</label>
-                            <input 
-                                type="date" 
-                                id="startDate"
-                                className="text-input" 
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                            />
-                        </div>
-                        <div className="input-container half-width">
-                            <label htmlFor="endDate">Bitiş Tarihi</label>
-                            <input 
-                                type="date" 
-                                id="endDate"
-                                className="text-input" 
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                            />
-                        </div>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <div className="input-container half-width">
+                                <DatePicker
+                                    label="Başlangıç Tarihi"
+                                    value={startDate ? new Date(startDate) : null}
+                                    onChange={(newValue) => {
+                                        setStartDate(newValue ? newValue.toISOString().split('T')[0] : '');
+                                    }}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            className: "text-input"
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div className="input-container half-width">
+                                <DatePicker
+                                    label="Bitiş Tarihi"
+                                    value={endDate ? new Date(endDate) : null}
+                                    onChange={(newValue) => {
+                                        setEndDate(newValue ? newValue.toISOString().split('T')[0] : '');
+                                    }}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            className: "text-input"
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </LocalizationProvider>
                     </div>
                     <div className="input-container">
                         <label htmlFor="assignmentNote">Not (Opsiyonel)</label>
