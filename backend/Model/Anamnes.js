@@ -10,16 +10,15 @@ const Anamnes = sequelize.define('Anamnes', {
             allowNull: false,
             primaryKey: true
         },
+        dietitian_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         client_id: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
         saglik_bilgileri: {
-            type: DataTypes.JSON,
-            allowNull: true,
-            defaultValue: {}
-        },
-        kan_tahlili: {
             type: DataTypes.JSON,
             allowNull: true,
             defaultValue: {}
@@ -30,11 +29,6 @@ const Anamnes = sequelize.define('Anamnes', {
             defaultValue: {}
         },
         fiziksel_aktivite: {
-            type: DataTypes.JSON,
-            allowNull: true,
-            defaultValue: {}
-        },
-        uyku_stres_yonetimi: {
             type: DataTypes.JSON,
             allowNull: true,
             defaultValue: {}
