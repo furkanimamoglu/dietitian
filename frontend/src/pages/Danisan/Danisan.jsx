@@ -2057,8 +2057,8 @@ function Danisan() {
                     new Date(app.start) > now
                 );
                 const pastAppointments = appointments.filter(app =>
-                    (app.status !== 'pending') ||
-                    (app.status !== 'canceled') ||
+                    (app.status !== 'pending') &&
+                    (app.status !== 'canceled') &&
                     (new Date(app.start) <= now)
                 );
                 return (
