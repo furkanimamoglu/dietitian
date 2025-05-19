@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import './Danisan.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
@@ -43,8 +43,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Tooltip
+  TableRow
 } from "@mui/material";
 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -63,6 +62,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ErrorIcon from "@mui/icons-material/Error";
+import CloseIcon from "@mui/icons-material/Close";
+import Visibility from "@mui/icons-material/Visibility";
 
 function Danisan() {
     const { id } = useParams();
@@ -105,6 +106,23 @@ function Danisan() {
     const [measurements, setMeasurements] = useState([]);
     const [measurementsLoading, setMeasurementsLoading] = useState(false);
 
+    // Kan Tahlili PDF dosyaları için state
+    const [bloodTestFiles, setBloodTestFiles] = useState([]);
+    const [isPdfViewOpen, setIsPdfViewOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    
+    // PDF görüntüleme fonksiyonu
+    const handleViewBloodTestFile = (file) => {
+        setSelectedFile(file);
+        setIsPdfViewOpen(true);
+    };
+    
+    // PDF görüntüleme modalını kapatma fonksiyonu
+    const handleClosePdfView = () => {
+        setIsPdfViewOpen(false);
+        setSelectedFile(null);
+    };
+    
     // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -157,6 +175,73 @@ function Danisan() {
             setAppointmentToDelete(null);
         }
     };
+    
+    // Kan Tahlili PDF Yükleme İşlevi
+    const handleBloodTestFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        if (file.type !== 'application/pdf') {
+            setErrorMessage("Lütfen sadece PDF dosyaları yükleyin.");
+            setShowErrorPopup(true);
+            return;
+        }
+        
+        const newFile = {
+            file: file,
+            fileName: file.name,
+            fileSize: file.size,
+            uploadDate: new Date().toISOString(),
+            fileUrl: URL.createObjectURL(file)
+        };
+        
+        // Sadece state'i güncelliyoruz
+        setBloodTestFiles(prevFiles => [newFile, ...prevFiles]);
+        setSuccessMessage("Kan tahlili dosyası başarıyla yüklendi.");
+        setShowSuccessPopup(true);
+        
+        // Burada API çağrısı ile sunucuya dosyayı gönderebilirsiniz 
+        // Örnek: saveBloodTestFileToServer(file, id);
+    };
+    
+    // Kan Tahlili PDF Silme İşlevi
+    const handleDeleteBloodTestFile = (index) => {
+        const updatedFiles = [...bloodTestFiles];
+        // URL.revokeObjectURL kullanarak oluşturulan URL'i temizle
+        if (updatedFiles[index].fileUrl) {
+            URL.revokeObjectURL(updatedFiles[index].fileUrl);
+        }
+        
+        // Silinen dosyanın bilgilerini kaydedelim (gerekirse sunucudan silmek için)
+        const fileToDelete = updatedFiles[index];
+        updatedFiles.splice(index, 1);
+        
+        // Sadece state güncelleniyor
+        setBloodTestFiles(updatedFiles);
+        
+        // Burada sunucudan silme işlemi yapabilirsiniz
+        // Örnek: deleteBloodTestFileFromServer(fileToDelete.id);
+        
+        setSuccessMessage("Kan tahlili dosyası başarıyla silindi.");
+        setShowSuccessPopup(true);
+    };
+    
+    // Kan tahlili dosyalarını yüklemek için API çağrısı yapabilirsiniz
+    useEffect(() => {
+        // Burada API'den kan tahlili verilerini çekebilirsiniz
+        // Örnek: 
+        // const fetchBloodTests = async () => {
+        //     try {
+        //         const response = await axios.get(`${config[config.environment].apiUrl}/bloodtests/${id}`, {
+        //             headers: { Authorization: localStorage.getItem('token') }
+        //         });
+        //         setBloodTestFiles(response.data);
+        //     } catch (error) {
+        //         console.error("Kan tahlili dosyaları yüklenirken hata oluştu:", error);
+        //     }
+        // };
+        // fetchBloodTests();
+    }, [id]);
 
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
@@ -280,7 +365,7 @@ function Danisan() {
     });
     const [selectedMeasurementId, setSelectedMeasurementId] = useState(null);
     const [updateMeasurementLoading, setUpdateMeasurementLoading] = useState(false);
-
+    
     const handleEditMeasurementFormChange = (e) => {
         const { name, value } = e.target;
         setEditMeasurementForm(prev => ({ ...prev, [name]: value }));
@@ -938,42 +1023,130 @@ function Danisan() {
                                         Kan Tahlili
                                     </Typography>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Chip
-                                            label="Son Güncelleme: 10.05.2023"
-                                            size="small"
-                                            color="error"
-                                            sx={{ mr: 1, fontWeight: 'bold' }}
-                                        />
-                                        <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<EditIcon />}
-                                            onClick={() => {}}
-                                            color="error"
-                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
-                                        >
-                                            Düzenle
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    height: 120,
-                                    border: '1px dashed',
-                                    borderColor: 'error.main',
-                                    borderRadius: 1
-                                }}>
-                                    <Typography color="text.secondary">
-                                        Henüz kan tahlili bilgisi eklenmemiş.
-                                    </Typography>
-                                </Box>
-                            </AccordionDetails>
-                        </Accordion>
+                                                                {bloodTestFiles && bloodTestFiles.length > 0 && (
+                                                                    <Chip
+                                                                        label={`Son Yükleme: ${new Date(bloodTestFiles[0].uploadDate).toLocaleDateString('tr-TR')}`}
+                                                                        size="small"
+                                                                        color="error"
+                                                                        sx={{ mr: 1, fontWeight: 'bold' }}
+                                                                    />
+                                                                )}
+                                                                <Button
+                                                                    component="label"
+                                                                    variant="contained"
+                                                                    size="small"
+                                                                    startIcon={<AddIcon />}
+                                                                    color="error"
+                                                                    sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
+                                                                >
+                                                                    Yükle
+                                                                    <input
+                                                                        type="file"
+                                                                        accept="application/pdf"
+                                                                        hidden
+                                                                        onChange={handleBloodTestFileUpload}
+                                                                    />
+                                                                </Button>
+                                                            </Box>
+                                                        </Box>
+                                                    </AccordionSummary>
+                                                    <AccordionDetails>
+                                                        {bloodTestFiles && bloodTestFiles.length > 0 ? (
+                                                            <Box sx={{ mt: 2 }}>
+                                                                <List>
+                                                                    {bloodTestFiles.map((file, index) => (
+                                                                        <Paper 
+                                                                            key={index} 
+                                                                            elevation={1} 
+                                                                            sx={{ 
+                                                                                mb: 2, 
+                                                                                p: 2, 
+                                                                                borderLeft: '4px solid',
+                                                                                borderColor: 'error.main'
+                                                                            }}
+                                                                        >
+                                                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                                    <ReceiptLongIcon sx={{ color: 'error.main', mr: 2 }} />
+                                                                                    <Box>
+                                                                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                                                                            Kan Tahlili - {new Date(file.uploadDate).toLocaleDateString('tr-TR')}
+                                                                                        </Typography>
+                                                                                        <Typography variant="caption" color="text.secondary">
+                                                                                            {file.fileName || 'Tahlil Dosyası'}
+                                                                                        </Typography>
+                                                                                    </Box>
+                                                                                </Box>
+                                                                                <Box>
+                                                                                    <IconButton
+                                                                                        color="primary"
+                                                                                        onClick={() => handleViewBloodTestFile(file)}
+                                                                                        size="small"
+                                                                                    >
+                                                                                        <Visibility />
+                                                                                    </IconButton>
+                                                                                    <IconButton
+                                                                                        color="error"
+                                                                                        onClick={() => handleDeleteBloodTestFile(index)}
+                                                                                        size="small"
+                                                                                    >
+                                                                                        <DeleteIcon />
+                                                                                    </IconButton>
+                                                                                </Box>
+                                                                            </Box>
+                                                                        </Paper>
+                                                                    ))}
+                                                                </List>
+                                                            </Box>
+                                                        ) : (
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                justifyContent: 'center',
+                                                                alignItems: 'center',
+                                                                height: 120,
+                                                                border: '1px dashed',
+                                                                borderColor: 'error.main',
+                                                                borderRadius: 1
+                                                            }}>
+                                                                <Typography color="text.secondary">
+                                                                    Henüz kan tahlili dosyası eklenmemiş.
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </AccordionDetails>
+                                                </Accordion>
+                        
+                                                {/* Kan Tahlili PDF Görüntüleme Dialog */}
+                                                <Dialog
+                                                    open={isPdfViewOpen}
+                                                    onClose={() => setIsPdfViewOpen(false)}
+                                                    maxWidth="md"
+                                                    fullWidth
+                                                >
+                                                    <DialogTitle>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <Typography variant="h6">
+                                                                {selectedFile ? `Kan Tahlili - ${new Date(selectedFile.uploadDate).toLocaleDateString('tr-TR')}` : 'Kan Tahlili'}
+                                                            </Typography>
+                                                            <IconButton onClick={() => setIsPdfViewOpen(false)}>
+                                                                <CloseIcon />
+                                                            </IconButton>
+                                                        </Box>
+                                                    </DialogTitle>
+                                                    <DialogContent>
+                                                        {selectedFile && (
+                                                            <Box sx={{ height: '70vh', width: '100%' }}>
+                                                                <iframe
+                                                                    src={selectedFile.fileUrl || URL.createObjectURL(selectedFile.file)}
+                                                                    width="100%"
+                                                                    height="100%"
+                                                                    title="PDF Görüntüleyici"
+                                                                    style={{ border: 'none' }}
+                                                                />
+                                                            </Box>
+                                                        )}
+                                                    </DialogContent>
+                                                </Dialog>
 
                         {/* Diyet Alışkanlıkları Akordiyonu */}
                         <Accordion elevation={3} sx={{ mb: 2 }}>
@@ -1248,26 +1421,6 @@ function Danisan() {
                             </AccordionDetails>
                         </Accordion>
                     </Box>
-                );
-            case 'kantahlili':
-                // Kan tahlili verileri
-                const kanTahlilData = [
-                    { name: 'Hemoglobin', value: 14.2, minValue: 12.0, maxValue: 16.0, unit: 'g/dL' },
-                    { name: 'Lökosit', value: 11.5, minValue: 4.0, maxValue: 10.0, unit: '10³/µL' },
-                    { name: 'Trombosit', value: 280, minValue: 150, maxValue: 450, unit: '10³/µL' },
-                    { name: 'Hematokrit', value: 38, minValue: 36.0, maxValue: 46.0, unit: '%' },
-                    { name: 'MCV', value: 82, minValue: 80.0, maxValue: 100.0, unit: 'fL' },
-                    { name: 'Glukoz', value: 118, minValue: 70, maxValue: 100, unit: 'mg/dL' },
-                    { name: 'Üre', value: 25, minValue: 17, maxValue: 43, unit: 'mg/dL' },
-                    { name: 'Kreatinin', value: 0.7, minValue: 0.6, maxValue: 1.2, unit: 'mg/dL' },
-                    { name: 'AST', value: 45, minValue: 0, maxValue: 35, unit: 'U/L' },
-                    { name: 'ALT', value: 52, minValue: 0, maxValue: 45, unit: 'U/L' }
-                ];
-
-                return (
-                    <div className="kan-tahlili-container">
-
-                    </div>
                 );
             case 'olcum':
                 return (
@@ -3477,7 +3630,6 @@ function Danisan() {
                                 }}
                             >
                                 <Tab label="Anamnez" value="anamnez" />
-                                <Tab label="Kan Tahlili" value="kantahlili" />
                                 <Tab label="Ölçümler" value="olcum" />
                                 <Tab label="Beslenme" value="beslenme" />
                                 <Tab label="Randevular" value="randevu" />
