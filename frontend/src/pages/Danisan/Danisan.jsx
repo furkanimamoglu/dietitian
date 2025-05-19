@@ -43,7 +43,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Tooltip
 } from "@mui/material";
 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -920,23 +921,6 @@ function Danisan() {
                                             </CardContent>
                                         </Card>
                                     </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{ height: '100%' }}>
-                                            <CardHeader
-                                                title="Kan Değerleri"
-                                                titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
-                                                sx={{ bgcolor: 'grey.100', py: 1 }}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Son kontrol: 10.04.2023<br />
-                                                    HbA1c: 6.8%<br />
-                                                    Kolesterol: 210 mg/dL
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
@@ -1221,57 +1205,6 @@ function Danisan() {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Uyku ve Stres Yönetimi */}
-                        <Accordion elevation={3} sx={{ mb: 2 }}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon />}
-                                sx={{
-                                    bgcolor: 'success.light',
-                                    color: 'success.contrastText',
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                        Uyku ve Stres Yönetimi
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Chip
-                                            label="Son Güncelleme: 10.05.2023"
-                                            size="small"
-                                            color="success"
-                                            sx={{ mr: 1, fontWeight: 'bold' }}
-                                        />
-                                        <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<EditIcon />}
-                                            onClick={() => {}}
-                                            color="success"
-                                            sx={{ fontWeight: 'bold', color: 'white', boxShadow: 1 }}
-                                        >
-                                            Düzenle
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    height: 200,
-                                    border: '1px dashed',
-                                    borderColor: 'grey.400',
-                                    borderRadius: 1
-                                }}>
-                                    <Typography color="text.secondary">
-                                        Henüz uyku ve stres bilgisi eklenmemiş.
-                                    </Typography>
-                                </Box>
-                            </AccordionDetails>
-                        </Accordion>
-
                         {/* Özel Notlar */}
                         <Accordion elevation={3}>
                             <AccordionSummary
@@ -1315,6 +1248,26 @@ function Danisan() {
                             </AccordionDetails>
                         </Accordion>
                     </Box>
+                );
+            case 'kantahlili':
+                // Kan tahlili verileri
+                const kanTahlilData = [
+                    { name: 'Hemoglobin', value: 14.2, minValue: 12.0, maxValue: 16.0, unit: 'g/dL' },
+                    { name: 'Lökosit', value: 11.5, minValue: 4.0, maxValue: 10.0, unit: '10³/µL' },
+                    { name: 'Trombosit', value: 280, minValue: 150, maxValue: 450, unit: '10³/µL' },
+                    { name: 'Hematokrit', value: 38, minValue: 36.0, maxValue: 46.0, unit: '%' },
+                    { name: 'MCV', value: 82, minValue: 80.0, maxValue: 100.0, unit: 'fL' },
+                    { name: 'Glukoz', value: 118, minValue: 70, maxValue: 100, unit: 'mg/dL' },
+                    { name: 'Üre', value: 25, minValue: 17, maxValue: 43, unit: 'mg/dL' },
+                    { name: 'Kreatinin', value: 0.7, minValue: 0.6, maxValue: 1.2, unit: 'mg/dL' },
+                    { name: 'AST', value: 45, minValue: 0, maxValue: 35, unit: 'U/L' },
+                    { name: 'ALT', value: 52, minValue: 0, maxValue: 45, unit: 'U/L' }
+                ];
+
+                return (
+                    <div className="kan-tahlili-container">
+
+                    </div>
                 );
             case 'olcum':
                 return (
@@ -3524,6 +3477,7 @@ function Danisan() {
                                 }}
                             >
                                 <Tab label="Anamnez" value="anamnez" />
+                                <Tab label="Kan Tahlili" value="kantahlili" />
                                 <Tab label="Ölçümler" value="olcum" />
                                 <Tab label="Beslenme" value="beslenme" />
                                 <Tab label="Randevular" value="randevu" />

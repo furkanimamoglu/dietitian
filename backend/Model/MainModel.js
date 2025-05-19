@@ -116,8 +116,9 @@ Appointment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-Client.hasMany(Anamnes, {
+Client.hasOne(Anamnes, {
     foreignKey: 'client_id',
+    onDelete: 'CASCADE',
 });
 Anamnes.belongsTo(Client, {
     foreignKey: 'client_id',

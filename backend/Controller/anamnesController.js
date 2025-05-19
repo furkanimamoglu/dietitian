@@ -3,7 +3,7 @@ const Security = require("../Utils/Security");
 
 class anamnesController {
 
-    static async getClientAnamnes(req, res) {
+    static async getAnamnes(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
