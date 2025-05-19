@@ -2050,10 +2050,17 @@ function Danisan() {
                     </Box>
                 );
             case 'randevu':
-                // Randevuları ayır
                 const now = new Date();
-                const upcomingAppointments = appointments.filter(app => app.status === 'pending' && new Date(app.start) > now);
-                const pastAppointments = appointments.filter(app => app.status === 'completed' || (app.status === 'pending' && new Date(app.start) <= now));
+                const upcomingAppointments = appointments.filter(app =>
+                    ['pending', 'approved'].includes(app.status) &&
+                    new Date(app.start) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) &&
+                    new Date(app.start) > now
+                );
+                const pastAppointments = appointments.filter(app =>
+                    (app.status !== 'pending') ||
+                    (app.status !== 'canceled') ||
+                    (new Date(app.start) <= now)
+                );
                 return (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
