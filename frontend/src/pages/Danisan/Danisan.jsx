@@ -2118,9 +2118,19 @@ function Danisan() {
                                                                     {app.title || 'Randevu'}
                                                                 </Typography>
                                                                 <Chip
-                                                                    label={app.status === 'pending' ? 'Yaklaşan' : app.status}
+                                                                    label={
+                                                                        app.status === 'pending' ? 'Beklemede' :
+                                                                            app.status === 'approved' ? 'Onaylandı' :
+                                                                                app.status === 'cancelled' ? 'İptal Edildi' :
+                                                                                    app.status
+                                                                    }
                                                                     size="small"
-                                                                    color="info"
+                                                                    color={
+                                                                        app.status === 'pending' ? 'warning' :
+                                                                            app.status === 'approved' ? 'success' :
+                                                                                app.status === 'cancelled' ? 'error' :
+                                                                                    'info'
+                                                                    }
                                                                     sx={{ ml: 1 }}
                                                                 />
                                                             </Box>
@@ -2179,17 +2189,17 @@ function Danisan() {
                                                                 </Typography>
                                                                 <Chip
                                                                     label={
-                                                                        app.status === 'active' ? 'Yaklaşan' :
-                                                                            app.status === 'completed' ? 'Tamamlandı' :
-                                                                                app.status === 'cancelled' ? 'İptal Edildi' :
-                                                                                    'Bilinmeyen'
+                                                                        app.status === 'pending' ? 'Beklemede' : 
+                                                                        app.status === 'approved' ? 'Onaylandı' : 
+                                                                        app.status === 'cancelled' ? 'İptal Edildi' : 
+                                                                        app.status
                                                                     }
                                                                     size="small"
                                                                     color={
-                                                                        app.status === 'active' ? 'info' :
-                                                                            app.status === 'completed' ? 'success' :
-                                                                                app.status === 'cancelled' ? 'error' :
-                                                                                    'default'
+                                                                        app.status === 'pending' ? 'warning' : 
+                                                                        app.status === 'approved' ? 'success' : 
+                                                                        app.status === 'cancelled' ? 'error' : 
+                                                                        'info'
                                                                     }
                                                                     sx={{ ml: 1 }}
                                                                 />
