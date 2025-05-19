@@ -16,6 +16,9 @@ import {
     CheckCircle as CheckCircleIcon, Pending as PendingIcon,
     Cancel as CancelIcon, Search as SearchIcon, Warning as WarningIcon
 } from '@mui/icons-material';
+import {DatePicker} from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { toast } from 'react-hot-toast';
 
 const CustomModal = ({ isOpen, onClose, title, children }) => {
@@ -1834,28 +1837,40 @@ export default function Finans() {
                                     />
                                 </div>
                             </div>
-                            
-                            <div className="form-group">
-                                <label htmlFor="issue-date">Fatura Tarihi</label>
-                                <input
-                                    id="issue-date"
-                                    type="date"
-                                    value={newInvoice.issueDate}
-                                    onChange={(e) => handleInvoiceChange('issueDate', e.target.value)}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label htmlFor="due-date">Son Ödeme Tarihi</label>
-                                <input
-                                    id="due-date"
-                                    type="date"
-                                    value={newInvoice.dueDate}
-                                    onChange={(e) => handleInvoiceChange('dueDate', e.target.value)}
-                                    required
-                                />
-                            </div>
+
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <div className="form-group">
+                                    <DatePicker
+                                        label="Fatura Tarihi"
+                                        value={newInvoice.issueDate ? new Date(newInvoice.issueDate) : null}
+                                        onChange={(newValue) => {
+                                            handleInvoiceChange('issueDate', newValue ? newValue.toISOString().split('T')[0] : '');
+                                        }}
+                                        slotProps={{
+                                            textField: {
+                                                required: true,
+                                                fullWidth: true
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <DatePicker
+                                        label="Son Ödeme Tarihi"
+                                        value={newInvoice.dueDate ? new Date(newInvoice.dueDate) : null}
+                                        onChange={(newValue) => {
+                                            handleInvoiceChange('dueDate', newValue ? newValue.toISOString().split('T')[0] : '');
+                                        }}
+                                        slotProps={{
+                                            textField: {
+                                                required: true,
+                                                fullWidth: true
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </LocalizationProvider>
                         </div>
                         
                         <div className="form-row">
