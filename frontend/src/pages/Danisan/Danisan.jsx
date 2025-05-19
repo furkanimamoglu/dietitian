@@ -46,6 +46,11 @@ import {
   TableRow
 } from "@mui/material";
 
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
@@ -2333,22 +2338,36 @@ function Danisan() {
                                     onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})}
                                     fullWidth margin="normal"
                                 />
-                                <TextField
-                                    label="Başlangıç"
-                                    name="start"
-                                    type="datetime-local"
-                                    value={appointmentForm.start}
-                                    onChange={(e) => setAppointmentForm({...appointmentForm, start: e.target.value})}
-                                    fullWidth margin="normal"
-                                />
-                                <TextField
-                                    label="Bitiş"
-                                    name="end"
-                                    type="datetime-local"
-                                    value={appointmentForm.end}
-                                    onChange={(e) => setAppointmentForm({...appointmentForm, end: e.target.value})}
-                                    fullWidth margin="normal"
-                                />
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <DateTimePicker
+                                        label="Başlangıç"
+                                        ampm={false}
+                                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                                        value={appointmentForm.start ? new Date(appointmentForm.start) : null}
+                                        onChange={(newValue) => {
+                                            setAppointmentForm({
+                                                ...appointmentForm,
+                                                start: newValue ? newValue.toISOString() : null
+                                            })
+                                        }}
+                                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                                    />
+                                </LocalizationProvider>
+                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <DateTimePicker
+                                        label="Bitiş"
+                                        ampm={false}
+                                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                                        value={appointmentForm.end ? new Date(appointmentForm.end) : null}
+                                        onChange={(newValue) => {
+                                            setAppointmentForm({
+                                                ...appointmentForm,
+                                                end: newValue ? newValue.toISOString() : null
+                                            })
+                                        }}
+                                        renderInput={(params) => <TextField {...params} fullWidth margin="normal" />}
+                                    />
+                                </LocalizationProvider>
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>İptal</Button>
@@ -3119,32 +3138,50 @@ function Danisan() {
                                                      sx={{ mb: 2 }}
                                                  />
                                              </Grid>
-                                             <Grid item xs={12} sm={6}>
-                                                 <Typography variant="subtitle2" gutterBottom>Başlangıç Tarihi</Typography>
-                                                 <TextField
-                                                     name="start_date"
-                                                     value={assignForm.start_date}
-                                                     onChange={handleAssignFormChange}
-                                                     type="date"
-                                                     fullWidth
-                                                     required
-                                                     size="small"
-                                                     InputLabelProps={{ shrink: true }}
-                                                 />
-                                             </Grid>
-                                             <Grid item xs={12} sm={6}>
-                                                 <Typography variant="subtitle2" gutterBottom>Bitiş Tarihi</Typography>
-                                                 <TextField
-                                                     name="end_date"
-                                                     value={assignForm.end_date}
-                                                     onChange={handleAssignFormChange}
-                                                     type="date"
-                                                     fullWidth
-                                                     required
-                                                     size="small"
-                                                     InputLabelProps={{ shrink: true }}
-                                                 />
-                                             </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                    <DatePicker
+                                                        label="Başlangıç Tarihi"
+                                                        name="start_date"
+                                                        value={assignForm.start_date ? new Date(assignForm.start_date) : null}
+                                                        onChange={(newValue) => {
+                                                            setAssignForm(prev => ({
+                                                                ...prev,
+                                                                start_date: newValue ? newValue.toISOString().split('T')[0] : ''
+                                                            }))
+                                                        }}
+                                                        slotProps={{
+                                                            textField: {
+                                                                fullWidth: true,
+                                                                required: true,
+                                                                size: "small"
+                                                            }
+                                                        }}
+                                                    />
+                                                </LocalizationProvider>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                    <DatePicker
+                                                        label="Bitiş Tarihi"
+                                                        name="end_date"
+                                                        value={assignForm.end_date ? new Date(assignForm.end_date) : null}
+                                                        onChange={(newValue) => {
+                                                            setAssignForm(prev => ({
+                                                                ...prev,
+                                                                end_date: newValue ? newValue.toISOString().split('T')[0] : ''
+                                                            }))
+                                                        }}
+                                                        slotProps={{
+                                                            textField: {
+                                                                fullWidth: true,
+                                                                required: true,
+                                                                size: "small"
+                                                            }
+                                                        }}
+                                                    />
+                                                </LocalizationProvider>
+                                            </Grid>
                                         </Grid>
                                     </DialogContent>
                                     <DialogActions>

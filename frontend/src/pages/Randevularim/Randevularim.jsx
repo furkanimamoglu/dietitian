@@ -27,6 +27,12 @@ import {
     InputLabel,
     Autocomplete
 } from '@mui/material';
+
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 import config from "../../config.js";
 import {Close, Delete} from "@mui/icons-material";
 
@@ -492,30 +498,44 @@ export default function Randevularim() {
                         error={!eventData.title}
                         helperText={!eventData.title ? "Bu alan zorunludur" : ""}
                     />
-                    <TextField
-                        label="Başlangıç Tarihi:"
-                        value={eventData.start}
-                        onChange={(e) => handleEventChange("start", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.start}
-                        helperText={!eventData.start ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                    <TextField
-                        label="Bitiş Tarihi:"
-                        value={eventData.end}
-                        onChange={(e) => handleEventChange("end", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.end}
-                        helperText={!eventData.end ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DateTimePicker
+                        label="Başlangıç Tarihi"
+                        value={eventData.start ? new Date(eventData.start) : null}
+                        onChange={(newValue) => {
+                          handleEventChange("start", newValue ? newValue.toISOString() : '')
+                        }}
+                        ampm={false}
+                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            margin: "normal",
+                            required: true,
+                            error: !eventData.start,
+                            helperText: !eventData.start ? "Bu alan zorunludur" : ""
+                          }
+                        }}
+                      />
+                      <DateTimePicker
+                        label="Bitiş Tarihi"
+                        value={eventData.end ? new Date(eventData.end) : null}
+                        onChange={(newValue) => {
+                          handleEventChange("end", newValue ? newValue.toISOString() : '')
+                        }}
+                        ampm={false}
+                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            margin: "normal",
+                            required: true,
+                            error: !eventData.end,
+                            helperText: !eventData.end ? "Bu alan zorunludur" : ""
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
                     <Autocomplete
                         options={clients}
                         getOptionLabel={(option) => option.name}
@@ -593,30 +613,44 @@ export default function Randevularim() {
                         error={!eventData.title}
                         helperText={!eventData.title ? "Bu alan zorunludur" : ""}
                     />
-                    <TextField
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DateTimePicker
                         label="Başlangıç Tarihi"
-                        value={eventData.start}
-                        onChange={(e) => handleEventChange("start", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.start}
-                        helperText={!eventData.start ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                    <TextField
+                        value={eventData.start ? new Date(eventData.start) : null}
+                        onChange={(newValue) => {
+                          handleEventChange("start", newValue ? newValue.toISOString() : '')
+                        }}
+                        ampm={false} // 24 saat formatı için
+                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            margin: "normal",
+                            required: true,
+                            error: !eventData.start,
+                            helperText: !eventData.start ? "Bu alan zorunludur" : ""
+                          }
+                        }}
+                      />
+                      <DateTimePicker
                         label="Bitiş Tarihi"
-                        value={eventData.end}
-                        onChange={(e) => handleEventChange("end", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.end}
-                        helperText={!eventData.end ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
+                        value={eventData.end ? new Date(eventData.end) : null}
+                        onChange={(newValue) => {
+                          handleEventChange("end", newValue ? newValue.toISOString() : '')
+                        }}
+                        ampm={false} // 24 saat formatı için
+                        views={['year', 'month', 'day', 'hours', 'minutes']}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            margin: "normal",
+                            required: true,
+                            error: !eventData.end,
+                            helperText: !eventData.end ? "Bu alan zorunludur" : ""
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
                     <Autocomplete
                         options={clients}
                         getOptionLabel={(option) => option.name}
