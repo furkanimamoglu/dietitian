@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './ForgotPassword.css';
 import {
     Avatar,
@@ -32,14 +32,14 @@ function ForgotPassword() {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        
+
         // Validate phone number format
         if (!/^\d{10}$/.test(phoneNumber)) {
             setMessage('Telefon numarası 10 haneli olmalıdır (5XXXXXXXXX)');
             setLoading(false);
             return;
         }
-        
+
         // Implement password reset functionality here
         setTimeout(() => {
             setMessage('Şifre sıfırlama bağlantısı telefonunuza gönderildi.');
@@ -58,7 +58,7 @@ function ForgotPassword() {
                         Endişelenmeyin, Yardımcı Oluyoruz
                     </Typography>
                 </Box>
-                
+
                 <Container component="main" maxWidth="xs" className="forgot-password-container">
                     <Paper
                         elevation={3}
@@ -76,42 +76,42 @@ function ForgotPassword() {
                             zIndex: 1
                         }}
                     >
-                        <Avatar sx={{ 
-                            width: 56, 
-                            height: 56, 
-                            mb: 2, 
+                        <Avatar sx={{
+                            width: 56,
+                            height: 56,
+                            mb: 2,
                             background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
-                            boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)" 
+                            boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)"
                         }}>
-                            <LockResetIcon fontSize="large" />
+                            <LockResetIcon fontSize="large"/>
                         </Avatar>
-                        
-                        <Typography variant="h4" gutterBottom sx={{ fontWeight: "500" }}>
+
+                        <Typography variant="h4" gutterBottom sx={{fontWeight: "500"}}>
                             Şifremi Unuttum
                         </Typography>
-                        
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: "center" }}>
+
+                        <Typography variant="body2" color="text.secondary" sx={{mb: 3, textAlign: "center"}}>
                             Şifrenizi sıfırlamak için telefon numaranızı girin
                         </Typography>
-                        
-                        <Divider flexItem sx={{ width: "100%", mb: 3 }} />
-                        
-                        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+
+                        <Divider flexItem sx={{width: "100%", mb: 3}}/>
+
+                        <form onSubmit={handleSubmit} style={{width: '100%'}}>
                             <TextField
                                 label="Telefon Numarası"
                                 variant="outlined"
                                 fullWidth
                                 required
-                                sx={{ mb: 3 }}
+                                sx={{mb: 3}}
                                 value={phoneNumber}
                                 onChange={handlePhoneNumberChange}
                                 placeholder="5XXXXXXXXX"
-                                inputProps={{ maxLength: 10 }}
+                                inputProps={{maxLength: 10}}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <PhoneIcon color="action" />
-                                            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                            <PhoneIcon color="action"/>
+                                            <Typography variant="body2" color="text.secondary" sx={{ml: 1}}>
                                                 +90
                                             </Typography>
                                         </InputAdornment>
@@ -119,7 +119,7 @@ function ForgotPassword() {
                                 }}
                                 helperText="Örnek: 5075280653"
                             />
-                            
+
                             <Button
                                 type="submit"
                                 variant="contained"
@@ -138,22 +138,23 @@ function ForgotPassword() {
                                     fontWeight: "bold"
                                 }}
                             >
-                                {loading ? <CircularProgress size={24} color="inherit" /> : "Şifremi Sıfırla"}
+                                {loading ? <CircularProgress size={24} color="inherit"/> : "Şifremi Sıfırla"}
                             </Button>
                         </form>
-                        
+
                         {message && (
                             <Typography
                                 variant="body2"
                                 color={message.includes('gönderildi') ? 'success.main' : 'error.main'}
-                                sx={{ my: 2, textAlign: "center", fontWeight: "medium" }}
+                                sx={{my: 2, textAlign: "center", fontWeight: "medium"}}
                             >
                                 {message}
                             </Typography>
                         )}
-                        
-                        <Typography variant="body2" sx={{ mt: 1 }}>
-                            <Link href="/login" sx={{ textDecoration: "none", color: "primary.main", fontWeight: "medium" }}>
+
+                        <Typography variant="body2" sx={{mt: 1}}>
+                            <Link href="/login"
+                                  sx={{textDecoration: "none", color: "primary.main", fontWeight: "medium"}}>
                                 Giriş sayfasına dön
                             </Link>
                         </Typography>

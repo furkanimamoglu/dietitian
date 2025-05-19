@@ -9,7 +9,7 @@ class RecipeService {
         }
 
         return await Recipe.findAll({
-            where: { dietitian_id }
+            where: {dietitian_id}
         });
     }
 
@@ -66,7 +66,7 @@ class RecipeService {
 
         await recipe.destroy();
 
-        return { success: true, message: "Tarif başarıyla silindi." };
+        return {success: true, message: "Tarif başarıyla silindi."};
     }
 
     static async getMyRecipeCategories(dietitian_id) {
@@ -75,7 +75,7 @@ class RecipeService {
         }
 
         return await RecipeCategory.findAll({
-            where: { dietitian_id }
+            where: {dietitian_id}
         });
     }
 
@@ -110,7 +110,7 @@ class RecipeService {
             throw new Exception("Tarif Kategorisi bulunamadı veya yetkisiz erişim.", 404, true);
         }
 
-        await recipe.update({ name: recipe_category_name });
+        await recipe.update({name: recipe_category_name});
 
         return recipe;
     }
@@ -133,7 +133,7 @@ class RecipeService {
 
         await recipe.destroy();
 
-        return { success: true, message: "Tarif Kategorisi başarıyla silindi." };
+        return {success: true, message: "Tarif Kategorisi başarıyla silindi."};
     }
 
 }

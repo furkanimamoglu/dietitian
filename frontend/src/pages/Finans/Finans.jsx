@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from 'axios';
@@ -8,8 +8,8 @@ import {
     Chip, InputAdornment, MenuItem, Select, FormControl, InputLabel,
     Divider, List, ListItem, ListItemIcon, ListItemText, Pagination
 } from '@mui/material';
-import { 
-    Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, 
+import {
+    Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon,
     CurrencyLira as CurrencyLiraIcon, MonetizationOn as MonetizationOnIcon,
     Receipt as ReceiptIcon, Payments as PaymentsIcon, Save as SaveIcon,
     ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon,
@@ -17,11 +17,11 @@ import {
     Cancel as CancelIcon, Search as SearchIcon, Warning as WarningIcon
 } from '@mui/icons-material';
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { toast } from 'react-hot-toast';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {toast} from 'react-hot-toast';
 
-const CustomModal = ({ isOpen, onClose, title, children }) => {
+const CustomModal = ({isOpen, onClose, title, children}) => {
     const overlayRef = React.useRef(null);
     const [mouseDownTarget, setMouseDownTarget] = useState(null);
 
@@ -58,7 +58,7 @@ const CustomModal = ({ isOpen, onClose, title, children }) => {
 };
 
 // Custom Confirmation Dialog Component
-const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemName, isLoading }) => {
+const ConfirmationDialog = ({isOpen, onClose, onConfirm, title, message, itemName, isLoading}) => {
     if (!isOpen) return null;
 
     // Handle clicking outside the modal
@@ -79,7 +79,7 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemNa
                 <div className="custom-modal-content">
                     <div className="delete-confirm-modal">
                         <div className="delete-warning">
-                            <WarningIcon className="warning-icon" />
+                            <WarningIcon className="warning-icon"/>
                             <p className="warning-text">
                                 <strong>{itemName}</strong> {message}
                             </p>
@@ -88,15 +88,15 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemNa
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button 
-                        className="modal-btn cancel-btn" 
+                    <button
+                        className="modal-btn cancel-btn"
                         onClick={onClose}
                         disabled={isLoading}
                     >
                         Vazgeç
                     </button>
-                    <button 
-                        className="modal-btn delete-confirm-btn" 
+                    <button
+                        className="modal-btn delete-confirm-btn"
                         onClick={() => {
                             onConfirm();
                             if (!isLoading) {
@@ -115,7 +115,7 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm, title, message, itemNa
 
 export default function Finans() {
     const [tabValue, setTabValue] = useState(0);
-    
+
     // Packages state
     const [packages, setPackages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -137,10 +137,10 @@ export default function Finans() {
         services: [],
         serviceItems: []
     });
-    
+
     // Add search state for packages
     const [packageSearchTerm, setPackageSearchTerm] = useState('');
-    
+
     // Fetch packages on component mount
     useEffect(() => {
         fetchPackages();
@@ -157,7 +157,7 @@ export default function Finans() {
         setIsLoading(true);
         try {
             // Ensure config is available and properly structured
-            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl 
+            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl
                 ? `${config[config.environment].apiUrl}/package/getMyPackages`
                 : '/package/getMyPackages';
 
@@ -167,24 +167,24 @@ export default function Finans() {
                 },
             });
             const packagesData = response.data;
-            
+
             // Fetch services for each package
             const packagesWithServices = await Promise.all(
                 packagesData.map(async (pkg) => {
-                    const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                    const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl
                         ? `${config[config.environment].apiUrl}/package/getPackageItemsFromPackage?package_id=${pkg.id}`
                         : `/package/getPackageItemsFromPackage?package_id=${pkg.id}`;
-                        
+
                     const servicesResponse = await axios.get(servicesUrl, {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                         },
                     });
                     const services = servicesResponse.data.map(item => item.name);
-                    return { ...pkg, services };
+                    return {...pkg, services};
                 })
             );
-            
+
             setPackages(packagesWithServices);
         } catch (error) {
             console.error('Error fetching packages:', error);
@@ -193,12 +193,12 @@ export default function Finans() {
             setIsLoading(false);
         }
     };
-    
+
     // Add function to fetch clients
     const fetchClients = async () => {
         try {
             // Ensure config is available and properly structured
-            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl 
+            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl
                 ? `${config[config.environment].apiUrl}/dietitian/getAllMyClients`
                 : '/dietitian/getAllMyClients';
 
@@ -213,12 +213,12 @@ export default function Finans() {
             toast.error('Danışanlar yüklenirken bir hata oluştu.');
         }
     };
-    
+
     // Fetch invoices from backend
     const fetchInvoices = async () => {
         setIsLoading(true);
         try {
-            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl 
+            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl
                 ? `${config[config.environment].apiUrl}/invoice/getMyInvoices`
                 : '/invoice/getMyInvoices';
             const response = await axios.get(apiUrl, {
@@ -278,7 +278,7 @@ export default function Finans() {
 
     // Add helper function to get package duration in months
     const getPackageDurationInMonths = (packageType) => {
-        switch(packageType) {
+        switch (packageType) {
             case "Seanslık":
                 return 1; // Count full amount in the month of the session
             case "Aylık":
@@ -304,15 +304,15 @@ export default function Finans() {
         .filter(invoice => {
             const invoiceDate = new Date(invoice.issueDate);
             const currentDate = new Date();
-            return invoiceDate.getMonth() === currentDate.getMonth() && 
-                   invoiceDate.getFullYear() === currentDate.getFullYear() && 
-                   invoice.status === "Ödendi";
+            return invoiceDate.getMonth() === currentDate.getMonth() &&
+                invoiceDate.getFullYear() === currentDate.getFullYear() &&
+                invoice.status === "Ödendi";
         })
         .reduce((total, invoice) => {
             // Find the package to get its type
             const pkg = packages.find(p => p.id === invoice.packageId);
             if (!pkg) return total + invoice.amount;
-            
+
             // For session-based packages, count the full amount
             // For subscription packages, prorate the amount
             if (shouldProrate(pkg.type)) {
@@ -328,15 +328,15 @@ export default function Finans() {
         .filter(invoice => {
             const invoiceDate = new Date(invoice.issueDate);
             const currentDate = new Date();
-            return invoiceDate.getMonth() === currentDate.getMonth() && 
-                   invoiceDate.getFullYear() === currentDate.getFullYear() && 
-                   invoice.status !== "Ödendi";
+            return invoiceDate.getMonth() === currentDate.getMonth() &&
+                invoiceDate.getFullYear() === currentDate.getFullYear() &&
+                invoice.status !== "Ödendi";
         })
         .reduce((total, invoice) => {
             // Find the package to get its type
             const pkg = packages.find(p => p.id === invoice.packageId);
             if (!pkg) return total + invoice.amount;
-            
+
             // For session-based packages, count the full amount
             // For subscription packages, prorate the amount
             if (shouldProrate(pkg.type)) {
@@ -359,24 +359,24 @@ export default function Finans() {
     // Filter invoices based on search and filter
     const filteredInvoices = invoices.filter(invoice => {
         const matchesSearch = invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              invoice.packageName.toLowerCase().includes(searchTerm.toLowerCase());
+            invoice.packageName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
-    
+
     // Pagination calculation
     const indexOfLastInvoice = currentPage * invoicesPerPage;
     const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
     const currentInvoices = filteredInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
     const totalPages = Math.ceil(filteredInvoices.length / invoicesPerPage);
-    
+
     // Handle page change
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
         // Scroll to top of invoice list
         const invoiceSection = document.getElementById('invoice-list');
         if (invoiceSection) {
-            invoiceSection.scrollIntoView({ behavior: 'smooth' });
+            invoiceSection.scrollIntoView({behavior: 'smooth'});
         }
     };
 
@@ -390,21 +390,21 @@ export default function Finans() {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
-        
+
         const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-        
+
         const currentMonthTotal = invoices
             .filter(invoice => {
                 const invoiceDate = new Date(invoice.issueDate);
-                return invoiceDate.getMonth() === currentMonth && 
-                       invoiceDate.getFullYear() === currentYear;
+                return invoiceDate.getMonth() === currentMonth &&
+                    invoiceDate.getFullYear() === currentYear;
             })
             .reduce((total, invoice) => {
                 // Find the package to get its type
                 const pkg = packages.find(p => p.id === invoice.packageId);
                 if (!pkg) return total + invoice.amount;
-                
+
                 // For session-based packages, count the full amount
                 // For subscription packages, prorate the amount
                 if (shouldProrate(pkg.type)) {
@@ -415,18 +415,18 @@ export default function Finans() {
                     return total + invoice.amount; // Full amount for sessions
                 }
             }, 0);
-        
+
         const lastMonthTotal = invoices
             .filter(invoice => {
                 const invoiceDate = new Date(invoice.issueDate);
-                return invoiceDate.getMonth() === lastMonth && 
-                       invoiceDate.getFullYear() === lastMonthYear;
+                return invoiceDate.getMonth() === lastMonth &&
+                    invoiceDate.getFullYear() === lastMonthYear;
             })
             .reduce((total, invoice) => {
                 // Find the package to get its type
                 const pkg = packages.find(p => p.id === invoice.packageId);
                 if (!pkg) return total + invoice.amount;
-                
+
                 // For session-based packages, count the full amount
                 // For subscription packages, prorate the amount
                 if (shouldProrate(pkg.type)) {
@@ -437,12 +437,12 @@ export default function Finans() {
                     return total + invoice.amount; // Full amount for sessions
                 }
             }, 0);
-        
+
         const difference = currentMonthTotal - lastMonthTotal;
-        const percentChange = lastMonthTotal === 0 
-            ? 100 
+        const percentChange = lastMonthTotal === 0
+            ? 100
             : Math.round((difference / lastMonthTotal) * 100);
-        
+
         return {
             current: currentMonthTotal,
             last: lastMonthTotal,
@@ -455,19 +455,19 @@ export default function Finans() {
     // Get payment status breakdown 
     const getPaymentStatusBreakdown = () => {
         const total = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
-        
+
         const paid = invoices
             .filter(invoice => invoice.status === "Ödendi")
             .reduce((sum, invoice) => sum + invoice.amount, 0);
-        
+
         const pending = invoices
             .filter(invoice => invoice.status === "Beklemede")
             .reduce((sum, invoice) => sum + invoice.amount, 0);
-        
+
         const unpaid = invoices
             .filter(invoice => invoice.status === "Ödenmedi")
             .reduce((sum, invoice) => sum + invoice.amount, 0);
-        
+
         return {
             paid,
             pending,
@@ -482,28 +482,28 @@ export default function Finans() {
     const handleOpenPackageDialog = async (pkg = null) => {
         if (pkg) {
             setCurrentPackage(pkg);
-            
+
             try {
                 // Ensure config is available and properly structured
-                const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl 
+                const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}/package/getPackageItemsFromPackage?package_id=${pkg.id}`
                     : `/package/getPackageItemsFromPackage?package_id=${pkg.id}`;
-                    
+
                 const servicesResponse = await axios.get(servicesUrl, {
                     headers: {
                         Authorization: localStorage.getItem("token"),
                     },
                 });
-                
+
                 // Get service items and names
                 const serviceItems = servicesResponse.data;
                 const serviceNames = serviceItems.map(item => item.name);
-                
+
                 // If no services, add an empty service
                 if (serviceNames.length === 0) {
                     serviceNames.push("");
                 }
-                
+
                 setNewPackage({
                     ...pkg,
                     services: serviceNames,
@@ -574,20 +574,20 @@ export default function Finans() {
         setIsLoading(true);
         try {
             let savedPackage;
-            
+
             // Get base API URL with safe access
             const getApiUrl = (endpoint) => {
-                return config && config[config.environment] && config[config.environment].apiUrl 
+                return config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}${endpoint}`
                     : endpoint;
             };
-            
+
             const authHeaders = {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
             };
-            
+
             if (currentPackage) {
                 // Update existing package
                 const packageData = {
@@ -599,24 +599,24 @@ export default function Finans() {
                 };
 
                 const response = await axios.put(
-                    getApiUrl('/package/updatePackage'), 
-                    packageData, 
+                    getApiUrl('/package/updatePackage'),
+                    packageData,
                     authHeaders
                 );
                 savedPackage = response.data;
-                
+
                 // Get existing services for the package
                 const existingServicesResponse = await axios.get(
                     getApiUrl(`/package/getPackageItemsFromPackage?package_id=${currentPackage.id}`),
                     authHeaders
                 );
                 const existingServices = existingServicesResponse.data;
-                
+
                 // Track which services to delete
                 const servicesToRemove = existingServices.filter(
                     existing => !newPackage.services.includes(existing.name)
                 );
-                
+
                 // Delete services that are no longer in the updated list
                 for (const serviceToRemove of servicesToRemove) {
                     await axios.delete(
@@ -624,38 +624,38 @@ export default function Finans() {
                         authHeaders
                     );
                 }
-                
+
                 // Update or add services
                 for (const serviceName of newPackage.services) {
                     if (!serviceName.trim()) continue; // Skip empty services
-                    
+
                     const existingService = existingServices.find(s => s.name === serviceName);
-                    
+
                     if (existingService) {
                         // Service exists but needs to be updated (only if name changed)
                         if (existingService.name !== serviceName) {
                             await axios.put(
-                                getApiUrl('/package/updatePackageItem'), 
+                                getApiUrl('/package/updatePackageItem'),
                                 {
                                     item_id: existingService.id,
                                     name: serviceName
-                                }, 
+                                },
                                 authHeaders
                             );
                         }
                     } else {
                         // Service is new, add it
                         await axios.post(
-                            getApiUrl('/package/addPackageItem'), 
+                            getApiUrl('/package/addPackageItem'),
                             {
                                 package_id: savedPackage.id,
                                 name: serviceName
-                            }, 
+                            },
                             authHeaders
                         );
                     }
                 }
-                
+
                 toast.success(`${newPackage.name} paketi güncellendi.`);
             } else {
                 // Create new package
@@ -667,29 +667,29 @@ export default function Finans() {
                 };
 
                 const response = await axios.post(
-                    getApiUrl('/package/addPackage'), 
-                    packageData, 
+                    getApiUrl('/package/addPackage'),
+                    packageData,
                     authHeaders
                 );
                 savedPackage = response.data;
-                
+
                 // Add services for the new package
                 for (const serviceName of newPackage.services) {
                     if (serviceName.trim()) {
                         await axios.post(
-                            getApiUrl('/package/addPackageItem'), 
+                            getApiUrl('/package/addPackageItem'),
                             {
                                 package_id: savedPackage.id,
                                 name: serviceName
-                            }, 
+                            },
                             authHeaders
                         );
                     }
                 }
-                
+
                 toast.success(`${newPackage.name} paketi oluşturuldu.`);
             }
-            
+
             // Refresh packages after saving
             await fetchPackages();
         } catch (error) {
@@ -724,23 +724,23 @@ export default function Finans() {
 
     // Add the actual delete function that will be called after confirmation
     const confirmDelete = async () => {
-        const { itemId, itemType, itemName } = deleteConfirmation;
+        const {itemId, itemType, itemName} = deleteConfirmation;
         setIsLoading(true);
-        
+
         try {
             // Get base API URL with safe access
             const getApiUrl = (endpoint) => {
-                return config && config[config.environment] && config[config.environment].apiUrl 
+                return config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}${endpoint}`
                     : endpoint;
             };
-            
+
             const authHeaders = {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
             };
-            
+
             if (itemType === 'package') {
                 await axios.delete(
                     getApiUrl(`/package/deletePackage?package_id=${itemId}`),
@@ -796,11 +796,11 @@ export default function Finans() {
     const calculateDueDateFromPackageType = (issueDate, packageType) => {
         try {
             // Ensure we have a valid date object
-            const dueDate = isValidDateString(issueDate) 
-                ? new Date(issueDate) 
+            const dueDate = isValidDateString(issueDate)
+                ? new Date(issueDate)
                 : new Date();
-            
-            switch(packageType) {
+
+            switch (packageType) {
                 case "Seanslık":
                     dueDate.setDate(dueDate.getDate() + 1); // +1 day
                     break;
@@ -819,7 +819,7 @@ export default function Finans() {
                 default:
                     dueDate.setDate(dueDate.getDate() + 7); // Default: +7 days
             }
-            
+
             return dueDate;
         } catch (error) {
             console.error('Error calculating due date:', error);
@@ -834,7 +834,7 @@ export default function Finans() {
     const handleOpenInvoiceDialog = (invoice = null) => {
         if (invoice) {
             setCurrentInvoice(invoice);
-            setNewInvoice({ ...invoice });
+            setNewInvoice({...invoice});
         } else {
             const firstPackage = packages.length > 0 ? packages[0] : null;
             const today = new Date();
@@ -892,7 +892,7 @@ export default function Finans() {
                 try {
                     const issueDate = safelyParseDate(newInvoice.issueDate);
                     const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
-                    
+
                     setNewInvoice(prev => ({
                         ...prev,
                         packageId: Number(value),
@@ -921,13 +921,13 @@ export default function Finans() {
                 }));
             }
         }
-        
+
         // Update due date when issue date changes based on selected package
         if (field === 'issueDate') {
             try {
                 const issueDate = safelyParseDate(value);
                 const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
-                
+
                 if (selectedPackage) {
                     // Only auto-calculate due date if a package is selected
                     const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
@@ -976,7 +976,7 @@ export default function Finans() {
         setIsLoading(true);
         try {
             const getApiUrl = (endpoint) => {
-                return config && config[config.environment] && config[config.environment].apiUrl 
+                return config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}${endpoint}`
                     : endpoint;
             };
@@ -1022,7 +1022,7 @@ export default function Finans() {
     const handleDeleteInvoice = (id) => {
         const invoiceToDelete = invoices.find(invoice => invoice.id === id);
         if (!invoiceToDelete) return;
-        
+
         // Open confirmation dialog
         setDeleteConfirmation({
             isOpen: true,
@@ -1036,7 +1036,7 @@ export default function Finans() {
         setIsLoading(true);
         try {
             const getApiUrl = (endpoint) => {
-                return config && config[config.environment] && config[config.environment].apiUrl 
+                return config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}${endpoint}`
                     : endpoint;
             };
@@ -1072,21 +1072,21 @@ export default function Finans() {
 
     // Render the appropriate tab content
     const renderTabContent = () => {
-        switch(tabValue) {
+        switch (tabValue) {
             case 0: // Financial Overview
                 const comparison = getMonthlyComparison();
                 const statusBreakdown = getPaymentStatusBreakdown();
-                
+
                 return (
                     <Box className="finance-overview">
                         <Grid container spacing={4} className="stats-cards">
-                        <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={4}>
                                 <Paper elevation={3} className="stat-card paid-income">
                                     <Box p={3} display="flex" flexDirection="column">
                                         <Box display="flex" alignItems="center" mb={2}>
                                             <Box className="stat-icon-wrapper">
-                                                <CheckCircleIcon />
-                                </Box>
+                                                <CheckCircleIcon/>
+                                            </Box>
                                             <Typography variant="h6" ml={2}>Bu Ay Ödenen</Typography>
                                         </Box>
                                         <Typography variant="h3" className="stat-amount" gutterBottom>
@@ -1095,16 +1095,16 @@ export default function Finans() {
                                         <Typography variant="body2" className="stat-description">
                                             Tahsil edilen gelir
                                         </Typography>
-                                </Box>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
                                 <Paper elevation={3} className="stat-card unpaid-income">
                                     <Box p={3} display="flex" flexDirection="column">
                                         <Box display="flex" alignItems="center" mb={2}>
                                             <Box className="stat-icon-wrapper">
-                                                <PendingIcon />
-                                </Box>
+                                                <PendingIcon/>
+                                            </Box>
                                             <Typography variant="h6" ml={2}>Bu Ay Bekleyen</Typography>
                                         </Box>
                                         <Typography variant="h3" className="stat-amount" gutterBottom>
@@ -1113,16 +1113,16 @@ export default function Finans() {
                                         <Typography variant="body2" className="stat-description">
                                             Tahsil edilmemiş gelir
                                         </Typography>
-                                </Box>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} md={4}>
                                 <Paper elevation={3} className="stat-card total-revenue">
                                     <Box p={3} display="flex" flexDirection="column">
                                         <Box display="flex" alignItems="center" mb={2}>
                                             <Box className="stat-icon-wrapper">
-                                                <MonetizationOnIcon />
-                                </Box>
+                                                <MonetizationOnIcon/>
+                                            </Box>
                                             <Typography variant="h6" ml={2}>Toplam Gelir</Typography>
                                         </Box>
                                         <Typography variant="h3" className="stat-amount" gutterBottom>
@@ -1131,10 +1131,10 @@ export default function Finans() {
                                         <Typography variant="body2" className="stat-description">
                                             Bu ay toplam gelir
                                         </Typography>
-                                </Box>
-                            </Paper>
+                                    </Box>
+                                </Paper>
+                            </Grid>
                         </Grid>
-                    </Grid>
 
                         <Grid container spacing={4} mt={3}>
                             <Grid item xs={12} md={6}>
@@ -1143,9 +1143,10 @@ export default function Finans() {
                                         <Typography variant="h6" gutterBottom className="section-title">
                                             Aylık Karşılaştırma
                                         </Typography>
-                                        
+
                                         <Box className="monthly-comparison">
-                                            <Box display="flex" justifyContent="space-between" alignItems="flex-end" mb={2}>
+                                            <Box display="flex" justifyContent="space-between" alignItems="flex-end"
+                                                 mb={2}>
                                                 <Box>
                                                     <Typography variant="body2" color="textSecondary">
                                                         Bu Ay
@@ -1153,7 +1154,7 @@ export default function Finans() {
                                                     <Typography variant="h4" className="current-month-value">
                                                         {comparison.current.toLocaleString()} ₺
                                                     </Typography>
-                </Box>
+                                                </Box>
 
                                                 <Box>
                                                     <Typography variant="body2" color="textSecondary">
@@ -1163,26 +1164,28 @@ export default function Finans() {
                                                         {comparison.last.toLocaleString()} ₺
                                                     </Typography>
                                                 </Box>
-                                                
-                                                <Chip 
-                                                    icon={comparison.increased ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+
+                                                <Chip
+                                                    icon={comparison.increased ? <ArrowUpwardIcon/> :
+                                                        <ArrowDownwardIcon/>}
                                                     label={`${comparison.increased ? '+' : ''}${comparison.percentChange}%`}
                                                     color={comparison.increased ? "success" : "error"}
                                                     className="comparison-chip"
                                                 />
                                             </Box>
-                                            
+
                                             <Box className="comparison-progress" mt={3}>
                                                 <Typography variant="body2" color="textSecondary" mb={1}>
                                                     Büyüme Eğilimi
                                                 </Typography>
-                                                
-                                                <Box className="progress-wrapper" position="relative" height={8} bgcolor="#edf2f7" borderRadius={4}>
-                                                    <Box 
+
+                                                <Box className="progress-wrapper" position="relative" height={8}
+                                                     bgcolor="#edf2f7" borderRadius={4}>
+                                                    <Box
                                                         className="progress-bar"
                                                         position="absolute"
                                                         height="100%"
-                                                        width={`${Math.min(Math.max(50 + comparison.percentChange/2, 5), 100)}%`}
+                                                        width={`${Math.min(Math.max(50 + comparison.percentChange / 2, 5), 100)}%`}
                                                         borderRadius={4}
                                                         bgcolor={comparison.increased ? "#2ecc71" : "#e74c3c"}
                                                     />
@@ -1192,23 +1195,25 @@ export default function Finans() {
                                     </Box>
                                 </Paper>
                             </Grid>
-                            
-                        <Grid item xs={12} md={6}>
+
+                            <Grid item xs={12} md={6}>
                                 <Paper elevation={3} className="report-section">
                                     <Box p={3}>
                                         <Typography variant="h6" gutterBottom className="section-title">
                                             Ödeme Durumu Dağılımı
                                         </Typography>
-                                        
+
                                         <Box className="payment-status-breakdown">
                                             <Box className="status-bars">
                                                 <Box mb={3}>
                                                     <Box display="flex" justifyContent="space-between" mb={1}>
                                                         <Typography variant="body2">Ödendi</Typography>
-                                                        <Typography variant="body2" fontWeight="bold">{statusBreakdown.paidPercent}%</Typography>
+                                                        <Typography variant="body2"
+                                                                    fontWeight="bold">{statusBreakdown.paidPercent}%</Typography>
                                                     </Box>
-                                                    <Box className="progress-wrapper" position="relative" height={10} bgcolor="#edf2f7" borderRadius={4}>
-                                                        <Box 
+                                                    <Box className="progress-wrapper" position="relative" height={10}
+                                                         bgcolor="#edf2f7" borderRadius={4}>
+                                                        <Box
                                                             className="progress-bar"
                                                             position="absolute"
                                                             height="100%"
@@ -1221,14 +1226,16 @@ export default function Finans() {
                                                         {statusBreakdown.paid.toLocaleString()} ₺
                                                     </Typography>
                                                 </Box>
-                                                
+
                                                 <Box mb={3}>
                                                     <Box display="flex" justifyContent="space-between" mb={1}>
                                                         <Typography variant="body2">Beklemede</Typography>
-                                                        <Typography variant="body2" fontWeight="bold">{statusBreakdown.pendingPercent}%</Typography>
+                                                        <Typography variant="body2"
+                                                                    fontWeight="bold">{statusBreakdown.pendingPercent}%</Typography>
                                                     </Box>
-                                                    <Box className="progress-wrapper" position="relative" height={10} bgcolor="#edf2f7" borderRadius={4}>
-                                                        <Box 
+                                                    <Box className="progress-wrapper" position="relative" height={10}
+                                                         bgcolor="#edf2f7" borderRadius={4}>
+                                                        <Box
                                                             className="progress-bar"
                                                             position="absolute"
                                                             height="100%"
@@ -1241,14 +1248,16 @@ export default function Finans() {
                                                         {statusBreakdown.pending.toLocaleString()} ₺
                                                     </Typography>
                                                 </Box>
-                                                
+
                                                 <Box>
                                                     <Box display="flex" justifyContent="space-between" mb={1}>
                                                         <Typography variant="body2">Ödenmedi</Typography>
-                                                        <Typography variant="body2" fontWeight="bold">{statusBreakdown.unpaidPercent}%</Typography>
+                                                        <Typography variant="body2"
+                                                                    fontWeight="bold">{statusBreakdown.unpaidPercent}%</Typography>
                                                     </Box>
-                                                    <Box className="progress-wrapper" position="relative" height={10} bgcolor="#edf2f7" borderRadius={4}>
-                                                        <Box 
+                                                    <Box className="progress-wrapper" position="relative" height={10}
+                                                         bgcolor="#edf2f7" borderRadius={4}>
+                                                        <Box
                                                             className="progress-bar"
                                                             position="absolute"
                                                             height="100%"
@@ -1269,19 +1278,20 @@ export default function Finans() {
                         </Grid>
                     </Box>
                 );
-            
+
             case 1: // Package Management
                 // Filter packages based on search term
-                const filteredPackages = packages.filter(pkg => 
+                const filteredPackages = packages.filter(pkg =>
                     pkg.name.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
                     pkg.type.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
                     (pkg.description && pkg.description.toLowerCase().includes(packageSearchTerm.toLowerCase()))
                 );
-                
+
                 return (
                     <Box className="package-management">
                         <Paper elevation={3} className="filters-section">
-                            <Box p={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+                            <Box p={3} display="flex" justifyContent="space-between" alignItems="center"
+                                 flexWrap="wrap">
                                 <Box display="flex" alignItems="center" gap={2} className="search-filters" flexGrow={1}>
                                     <TextField
                                         placeholder="Paket ara..."
@@ -1291,17 +1301,17 @@ export default function Finans() {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <SearchIcon />
+                                                    <SearchIcon/>
                                                 </InputAdornment>
                                             ),
                                         }}
-                                        sx={{ minWidth: 250 }}
+                                        sx={{minWidth: 250}}
                                     />
                                 </Box>
-                                <Button 
-                                    variant="contained" 
-                                    color="primary" 
-                                    startIcon={<AddIcon />}
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    startIcon={<AddIcon/>}
                                     onClick={() => handleOpenPackageDialog()}
                                     className="add-package-btn"
                                     disabled={isLoading}
@@ -1310,7 +1320,7 @@ export default function Finans() {
                                 </Button>
                             </Box>
                         </Paper>
-                        
+
                         <Box mt={4}>
                             {isLoading ? (
                                 <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
@@ -1319,123 +1329,127 @@ export default function Finans() {
                                     </Typography>
                                 </Box>
                             ) : (
-                            <Grid container spacing={3}>
-                                {filteredPackages.map(pkg => (
-                                    <Grid item xs={12} md={6} lg={4} key={pkg.id}>
-                                        <Paper elevation={3} className="package-card">
-                                            <Box p={3}>
-                                                <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                                                    <Typography variant="h6" className="package-name">
-                                                        {pkg.name}
+                                <Grid container spacing={3}>
+                                    {filteredPackages.map(pkg => (
+                                        <Grid item xs={12} md={6} lg={4} key={pkg.id}>
+                                            <Paper elevation={3} className="package-card">
+                                                <Box p={3}>
+                                                    <Box display="flex" justifyContent="space-between"
+                                                         alignItems="flex-start" mb={1}>
+                                                        <Typography variant="h6" className="package-name">
+                                                            {pkg.name}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={pkg.type}
+                                                            color="primary"
+                                                            size="small"
+                                                            className="package-type-chip"
+                                                        />
+                                                    </Box>
+
+                                                    <Typography variant="body2" color="textSecondary" paragraph>
+                                                        {pkg.description}
                                                     </Typography>
-                                                    <Chip 
-                                                        label={pkg.type} 
-                                                        color="primary" 
-                                                        size="small" 
-                                                        className="package-type-chip"
-                                                    />
+
+                                                    <Typography variant="h4" className="package-price" mt={3}>
+                                                        {Number(pkg.price).toLocaleString()} ₺
+                                                    </Typography>
+
+                                                    <Divider sx={{my: 2}}/>
+
+                                                    <Typography variant="subtitle2" className="services-title"
+                                                                gutterBottom>
+                                                        Paket İçeriği
+                                                    </Typography>
+
+                                                    <List dense className="services-list">
+                                                        {pkg.services && pkg.services.length > 0 ? pkg.services.map((service, index) => (
+                                                            <ListItem key={index} disableGutters
+                                                                      className="service-item">
+                                                                <ListItemIcon style={{minWidth: 28}}>
+                                                                    <CheckCircleIcon fontSize="small" color="success"/>
+                                                                </ListItemIcon>
+                                                                <ListItemText primary={service}/>
+                                                            </ListItem>
+                                                        )) : (
+                                                            <ListItem disableGutters>
+                                                                <ListItemText primary="Paket içeriği belirtilmemiş"/>
+                                                            </ListItem>
+                                                        )}
+                                                    </List>
+
+                                                    <Box className="package-card-footer-spacer" mt={5}></Box>
                                                 </Box>
-                                                
-                                                <Typography variant="body2" color="textSecondary" paragraph>
-                                                    {pkg.description}
-                                                </Typography>
-                                                
-                                                <Typography variant="h4" className="package-price" mt={3}>
-                                                    {Number(pkg.price).toLocaleString()} ₺
-                                                </Typography>
-                                                
-                                                <Divider sx={{ my: 2 }} />
-                                                
-                                                <Typography variant="subtitle2" className="services-title" gutterBottom>
-                                                    Paket İçeriği
-                                                </Typography>
-                                                
-                                                <List dense className="services-list">
-                                                    {pkg.services && pkg.services.length > 0 ? pkg.services.map((service, index) => (
-                                                        <ListItem key={index} disableGutters className="service-item">
-                                                            <ListItemIcon style={{ minWidth: 28 }}>
-                                                                <CheckCircleIcon fontSize="small" color="success" />
-                                                            </ListItemIcon>
-                                                            <ListItemText primary={service} />
-                                                        </ListItem>
-                                                    )) : (
-                                                        <ListItem disableGutters>
-                                                            <ListItemText primary="Paket içeriği belirtilmemiş" />
-                                                        </ListItem>
-                                                    )}
-                                                </List>
-                                                
-                                                <Box className="package-card-footer-spacer" mt={5}></Box>
-                                            </Box>
-                                            <Box className="package-card-footer">
-                                                <Box className="package-card-actions">
+                                                <Box className="package-card-footer">
+                                                    <Box className="package-card-actions">
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            size="small"
+                                                            startIcon={<EditIcon/>}
+                                                            onClick={() => handleOpenPackageDialog(pkg)}
+                                                            disabled={isLoading}
+                                                        >
+                                                            Düzenle
+                                                        </Button>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="error"
+                                                            size="small"
+                                                            startIcon={<DeleteIcon/>}
+                                                            onClick={() => handleDeletePackage(pkg.id)}
+                                                            disabled={isLoading}
+                                                        >
+                                                            Sil
+                                                        </Button>
+                                                    </Box>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+                                    ))}
+
+                                    {filteredPackages.length === 0 && !isLoading && (
+                                        <Grid item xs={12}>
+                                            <Paper elevation={3} className="empty-state">
+                                                <Box p={4} textAlign="center">
+                                                    <Box className="empty-icon">
+                                                        <ReceiptIcon style={{fontSize: 64, opacity: 0.3}}/>
+                                                    </Box>
+                                                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                                                        {packageSearchTerm ? "Arama kriterinizle eşleşen paket bulunamadı" : "Henüz Paket Bulunmuyor"}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {packageSearchTerm
+                                                            ? "Farklı anahtar kelimelerle tekrar arama yapmayı deneyin."
+                                                            : "İlk paketinizi oluşturarak başlayın. Paketleriniz danışanlarınza sunabileceğiniz hizmetleri tanımlar."
+                                                        }
+                                                    </Typography>
                                                     <Button
                                                         variant="contained"
                                                         color="primary"
-                                                        size="small"
-                                                        startIcon={<EditIcon />}
-                                                        onClick={() => handleOpenPackageDialog(pkg)}
+                                                        startIcon={packageSearchTerm ? <SearchIcon/> : <AddIcon/>}
+                                                        onClick={() => packageSearchTerm ? setPackageSearchTerm('') : handleOpenPackageDialog()}
+                                                        sx={{mt: 3}}
                                                         disabled={isLoading}
                                                     >
-                                                        Düzenle
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="error"
-                                                        size="small"
-                                                        startIcon={<DeleteIcon />}
-                                                        onClick={() => handleDeletePackage(pkg.id)}
-                                                        disabled={isLoading}
-                                                    >
-                                                        Sil
+                                                        {packageSearchTerm ? "Aramayı Temizle" : "Paket Oluştur"}
                                                     </Button>
                                                 </Box>
-                                            </Box>
-                                        </Paper>
-                                    </Grid>
-                                ))}
-                                
-                                {filteredPackages.length === 0 && !isLoading && (
-                                    <Grid item xs={12}>
-                                        <Paper elevation={3} className="empty-state">
-                                            <Box p={4} textAlign="center">
-                                                <Box className="empty-icon">
-                                                    <ReceiptIcon style={{ fontSize: 64, opacity: 0.3 }} />
-                                                </Box>
-                                                <Typography variant="h6" color="textSecondary" gutterBottom>
-                                                    {packageSearchTerm ? "Arama kriterinizle eşleşen paket bulunamadı" : "Henüz Paket Bulunmuyor"}
-                                                </Typography>
-                                                <Typography variant="body2" color="textSecondary">
-                                                    {packageSearchTerm 
-                                                        ? "Farklı anahtar kelimelerle tekrar arama yapmayı deneyin."
-                                                        : "İlk paketinizi oluşturarak başlayın. Paketleriniz danışanlarınza sunabileceğiniz hizmetleri tanımlar."
-                                                    }
-                                                </Typography>
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="primary" 
-                                                    startIcon={packageSearchTerm ? <SearchIcon /> : <AddIcon />}
-                                                    onClick={() => packageSearchTerm ? setPackageSearchTerm('') : handleOpenPackageDialog()}
-                                                    sx={{ mt: 3 }}
-                                                    disabled={isLoading}
-                                                >
-                                                    {packageSearchTerm ? "Aramayı Temizle" : "Paket Oluştur"}
-                                                </Button>
-                                            </Box>
-                                        </Paper>
-                                    </Grid>
-                                )}
-                            </Grid>
+                                            </Paper>
+                                        </Grid>
+                                    )}
+                                </Grid>
                             )}
                         </Box>
                     </Box>
                 );
-            
+
             case 2: // Invoice Management
                 return (
                     <Box className="invoice-management">
                         <Paper elevation={3} className="filters-section">
-                            <Box p={3} display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
+                            <Box p={3} display="flex" justifyContent="space-between" alignItems="center"
+                                 flexWrap="wrap">
                                 <Box display="flex" alignItems="center" gap={2} className="search-filters" flexGrow={1}>
                                     <TextField
                                         placeholder="Danışan veya paket ara..."
@@ -1448,14 +1462,14 @@ export default function Finans() {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <SearchIcon />
+                                                    <SearchIcon/>
                                                 </InputAdornment>
                                             ),
                                         }}
-                                        sx={{ minWidth: 250 }}
+                                        sx={{minWidth: 250}}
                                     />
-                                    
-                                    <FormControl size="small" sx={{ minWidth: 150 }}>
+
+                                    <FormControl size="small" sx={{minWidth: 150}}>
                                         <InputLabel>Durum</InputLabel>
                                         <Select
                                             value={statusFilter}
@@ -1472,50 +1486,54 @@ export default function Finans() {
                                         </Select>
                                     </FormControl>
                                 </Box>
-                                
-                                <Button 
-                                    variant="contained" 
-                                    color="primary" 
-                                    startIcon={<AddIcon />}
+
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    startIcon={<AddIcon/>}
                                     onClick={() => handleOpenInvoiceDialog()}
                                     className="add-invoice-btn"
-                                    sx={{ mt: { xs: 2, md: 0 } }}
+                                    sx={{mt: {xs: 2, md: 0}}}
                                 >
                                     Yeni Fatura
                                 </Button>
                             </Box>
                         </Paper>
-                        
+
                         <Box mt={4} id="invoice-list">
                             <Grid container spacing={3}>
                                 {currentInvoices.length > 0 ? (
                                     currentInvoices.map(invoice => (
                                         <Grid item xs={12} md={6} lg={4} key={invoice.id}>
-                                            <Paper elevation={3} className={`invoice-card status-${invoice.status.toLowerCase()}`}>
+                                            <Paper elevation={3}
+                                                   className={`invoice-card status-${invoice.status.toLowerCase()}`}>
                                                 <Box position="relative" p={3}>
-                                                    <Box className="invoice-header" mb={2} display="flex" justifyContent="space-between" alignItems="flex-start">
+                                                    <Box className="invoice-header" mb={2} display="flex"
+                                                         justifyContent="space-between" alignItems="flex-start">
                                                         <Box>
-                                                            <Typography variant="h6" className="client-name">{invoice.clientName}</Typography>
-                                                            <Typography variant="body2" color="textSecondary">{invoice.packageName}</Typography>
+                                                            <Typography variant="h6"
+                                                                        className="client-name">{invoice.clientName}</Typography>
+                                                            <Typography variant="body2"
+                                                                        color="textSecondary">{invoice.packageName}</Typography>
                                                         </Box>
 
                                                         <Chip
-                                                            label={invoice.status} 
+                                                            label={invoice.status}
                                                             color={
                                                                 invoice.status === "Ödendi" ? "success" :
-                                                                invoice.status === "Beklemede" ? "warning" : "error"
+                                                                    invoice.status === "Beklemede" ? "warning" : "error"
                                                             }
                                                             size="small"
                                                             className="status-chip"
                                                         />
                                                     </Box>
-                                                    
+
                                                     <Typography variant="h5" className="invoice-amount" gutterBottom>
                                                         {invoice.amount.toLocaleString()} ₺
                                                     </Typography>
-                                                    
-                                                    <Divider sx={{ my: 2 }} />
-                                                    
+
+                                                    <Divider sx={{my: 2}}/>
+
                                                     <Grid container spacing={2} className="invoice-dates">
                                                         <Grid item xs={6}>
                                                             <Typography variant="caption" color="textSecondary">
@@ -1534,11 +1552,11 @@ export default function Finans() {
                                                             </Typography>
                                                         </Grid>
                                                     </Grid>
-                                                    
+
                                                     <Box className="invoice-card-footer-spacer" mt={5}></Box>
                                                 </Box>
                                                 <Box className="invoice-card-footer">
-                                                    <FormControl size="small" sx={{ minWidth: 130 }}>
+                                                    <FormControl size="small" sx={{minWidth: 130}}>
                                                         <InputLabel>Durum</InputLabel>
                                                         <Select
                                                             value={invoice.status}
@@ -1550,22 +1568,22 @@ export default function Finans() {
                                                             <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
                                                         </Select>
                                                     </FormControl>
-                                                    
+
                                                     <Box className="invoice-card-actions">
-                                                        <Button 
-                                                            variant="contained" 
-                                                            color="primary" 
-                                                            size="small" 
-                                                            startIcon={<EditIcon />}
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            size="small"
+                                                            startIcon={<EditIcon/>}
                                                             onClick={() => handleOpenInvoiceDialog(invoice)}
                                                         >
                                                             Düzenle
                                                         </Button>
-                                                        <Button 
-                                                            variant="contained" 
-                                                            color="error" 
-                                                            size="small" 
-                                                            startIcon={<DeleteIcon />}
+                                                        <Button
+                                                            variant="contained"
+                                                            color="error"
+                                                            size="small"
+                                                            startIcon={<DeleteIcon/>}
                                                             onClick={() => handleDeleteInvoice(invoice.id)}
                                                         >
                                                             Sil
@@ -1580,20 +1598,21 @@ export default function Finans() {
                                         <Paper elevation={3} className="empty-state">
                                             <Box p={4} textAlign="center">
                                                 <Box className="empty-icon">
-                                                    <ReceiptIcon style={{ fontSize: 64, opacity: 0.3 }} />
+                                                    <ReceiptIcon style={{fontSize: 64, opacity: 0.3}}/>
                                                 </Box>
                                                 <Typography variant="h6" color="textSecondary" gutterBottom>
                                                     Fatura Bulunamadı
                                                 </Typography>
                                                 <Typography variant="body2" color="textSecondary">
-                                                    Arama kriterlerinize uygun fatura bulunmuyor. Filtrelerinizi değiştirmeyi veya yeni fatura oluşturmayı deneyebilirsiniz.
+                                                    Arama kriterlerinize uygun fatura bulunmuyor. Filtrelerinizi
+                                                    değiştirmeyi veya yeni fatura oluşturmayı deneyebilirsiniz.
                                                 </Typography>
-                                                <Button 
-                                                    variant="contained" 
-                                                    color="primary" 
-                                                    startIcon={<AddIcon />}
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    startIcon={<AddIcon/>}
                                                     onClick={() => handleOpenInvoiceDialog()}
-                                                    sx={{ mt: 3 }}
+                                                    sx={{mt: 3}}
                                                 >
                                                     Yeni Fatura Oluştur
                                                 </Button>
@@ -1602,12 +1621,12 @@ export default function Finans() {
                                     </Grid>
                                 )}
                             </Grid>
-                            
+
                             {/* Pagination */}
                             {filteredInvoices.length > invoicesPerPage && (
                                 <Box display="flex" justifyContent="center" mt={4} mb={2}>
-                                    <Pagination 
-                                        count={totalPages} 
+                                    <Pagination
+                                        count={totalPages}
                                         page={currentPage}
                                         onChange={handlePageChange}
                                         color="primary"
@@ -1617,7 +1636,7 @@ export default function Finans() {
                                     />
                                 </Box>
                             )}
-                            
+
                             {/* Invoice count info */}
                             <Box textAlign="center" mt={2} mb={4}>
                                 <Typography variant="body2" color="textSecondary">
@@ -1628,7 +1647,7 @@ export default function Finans() {
                         </Box>
                     </Box>
                 );
-            
+
             default:
                 return null;
         }
@@ -1637,19 +1656,19 @@ export default function Finans() {
     return (
         <Default>
             <div className="finans-container">
-                <Box sx={{ mb: 3 }}>
-                    <Tabs value={tabValue} onChange={handleTabChange} 
+                <Box sx={{mb: 3}}>
+                    <Tabs value={tabValue} onChange={handleTabChange}
                           variant="scrollable" scrollButtons="auto">
-                        <Tab icon={<MonetizationOnIcon />} iconPosition="start" label="Genel Bakış" />
-                        <Tab icon={<ReceiptIcon />} iconPosition="start" label="Paket Yönetimi" />
-                        <Tab icon={<PaymentsIcon />} iconPosition="start" label="Fatura Yönetimi" />
+                        <Tab icon={<MonetizationOnIcon/>} iconPosition="start" label="Genel Bakış"/>
+                        <Tab icon={<ReceiptIcon/>} iconPosition="start" label="Paket Yönetimi"/>
+                        <Tab icon={<PaymentsIcon/>} iconPosition="start" label="Fatura Yönetimi"/>
                     </Tabs>
                 </Box>
 
                 {renderTabContent()}
 
                 {/* Custom Package Modal */}
-                <CustomModal 
+                <CustomModal
                     isOpen={packageDialogOpen}
                     onClose={handleClosePackageDialog}
                     title={currentPackage ? "Paketi Düzenle" : "Yeni Paket Oluştur"}
@@ -1667,7 +1686,7 @@ export default function Finans() {
                                     disabled={isLoading}
                                 />
                             </div>
-                            
+
                             <div className="form-group">
                                 <label htmlFor="package-type">Paket Tipi</label>
                                 <select
@@ -1700,7 +1719,7 @@ export default function Finans() {
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="form-group">
                                 <label htmlFor="package-description">Açıklama</label>
                                 <input
@@ -1715,7 +1734,7 @@ export default function Finans() {
 
                         <div className="form-group full-width">
                             <label>Paket İçeriği</label>
-                            
+
                             <div className="services-list-form">
                                 {newPackage.services.map((service, index) => (
                                     <div key={index} className="service-item-input">
@@ -1727,52 +1746,52 @@ export default function Finans() {
                                             onChange={(e) => handleServiceChange(index, e.target.value)}
                                             disabled={isLoading}
                                         />
-                                        <button 
+                                        <button
                                             type="button"
                                             className="remove-button"
                                             onClick={() => handleRemoveService(index)}
                                             disabled={newPackage.services.length <= 1 || isLoading}
                                             title="Hizmeti Sil"
                                         >
-                                            <DeleteIcon />
+                                            <DeleteIcon/>
                                         </button>
                                     </div>
                                 ))}
-                                
-                                <button 
+
+                                <button
                                     type="button"
                                     className="add-button"
                                     onClick={handleAddService}
                                     disabled={isLoading}
                                 >
-                                    <AddIcon /> Hizmet Ekle
+                                    <AddIcon/> Hizmet Ekle
                                 </button>
                             </div>
                         </div>
 
                         <div className="form-actions">
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="cancel-button"
                                 onClick={handleClosePackageDialog}
                                 disabled={isLoading}
                             >
                                 İptal
                             </button>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="save-button"
                                 onClick={handleSavePackage}
                                 disabled={isLoading}
                             >
-                                {isLoading ? 'Kaydediliyor...' : <><SaveIcon /> Kaydet</>}
+                                {isLoading ? 'Kaydediliyor...' : <><SaveIcon/> Kaydet</>}
                             </button>
                         </div>
                     </div>
                 </CustomModal>
 
                 {/* Custom Invoice Modal */}
-                <CustomModal 
+                <CustomModal
                     isOpen={invoiceDialogOpen}
                     onClose={handleCloseInvoiceDialog}
                     title={currentInvoice ? "Faturayı Düzenle" : "Yeni Fatura Oluştur"}
@@ -1805,7 +1824,7 @@ export default function Finans() {
                                     </select>
                                 )}
                             </div>
-                            
+
                             <div className="form-group">
                                 <label htmlFor="package-select">Paket</label>
                                 <select
@@ -1822,7 +1841,7 @@ export default function Finans() {
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div className="form-row">
                             <div className="form-group">
                                 <label htmlFor="invoice-amount">Tutar (₺)</label>
@@ -1872,7 +1891,7 @@ export default function Finans() {
                                 </div>
                             </LocalizationProvider>
                         </div>
-                        
+
                         <div className="form-row">
                             <div className="form-group full-width">
                                 <label htmlFor="invoice-description">Açıklama</label>
@@ -1885,7 +1904,7 @@ export default function Finans() {
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="form-group full-width">
                             <label htmlFor="payment-status">Ödeme Durumu</label>
                             <div className="status-select-wrapper">
@@ -1902,14 +1921,14 @@ export default function Finans() {
                                 <span className="status-indicator"></span>
                             </div>
                         </div>
-                        
+
                         {(() => {
                             const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
                             if (selectedPackage && selectedPackage.services && selectedPackage.services.length > 0) {
                                 return (
-                                    <div className="form-group full-width" style={{ marginTop: 8 }}>
+                                    <div className="form-group full-width" style={{marginTop: 8}}>
                                         <label>Paket Hizmetleri</label>
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
+                                        <ul style={{margin: 0, paddingLeft: 20}}>
                                             {selectedPackage.services.map((service, idx) => (
                                                 <li key={idx}>{service}</li>
                                             ))}
@@ -1919,30 +1938,30 @@ export default function Finans() {
                             }
                             return null;
                         })()}
-                        
+
                         <div className="form-actions">
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="cancel-button"
                                 onClick={handleCloseInvoiceDialog}
                             >
                                 İptal
                             </button>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className="save-button"
                                 onClick={handleSaveInvoice}
                             >
-                                <SaveIcon /> Kaydet
+                                <SaveIcon/> Kaydet
                             </button>
                         </div>
                     </div>
                 </CustomModal>
 
                 {/* Confirmation Dialog */}
-                <ConfirmationDialog 
+                <ConfirmationDialog
                     isOpen={deleteConfirmation.isOpen}
-                    onClose={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
+                    onClose={() => setDeleteConfirmation(prev => ({...prev, isOpen: false}))}
                     onConfirm={confirmDelete}
                     title="Silme İşlemi"
                     itemName={deleteConfirmation.itemName}

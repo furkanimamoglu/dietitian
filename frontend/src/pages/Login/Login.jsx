@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import './Login.css';
 import config from "../../config.js";
 import {
-  Avatar,
-  Box,
-  Button,
-  Link,
-  Paper,
-  TextField,
-  Typography,
-  Container,
-  InputAdornment,
-  IconButton,
-  Divider,
-  CircularProgress
+    Avatar,
+    Box,
+    Button,
+    Link,
+    Paper,
+    TextField,
+    Typography,
+    Container,
+    InputAdornment,
+    IconButton,
+    Divider,
+    CircularProgress
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -39,7 +39,7 @@ function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        
+
         // Validate phone number format
         if (!/^\d{10}$/.test(phoneNumber)) {
             setMessage('Telefon numarası 10 haneli olmalıdır (5XXXXXXXXX)');
@@ -92,7 +92,7 @@ function Login() {
                         Diyetia.com
                     </Typography>
                 </Box>
-                
+
                 <Container component="main" maxWidth="xs" className="login-container">
                     <Paper
                         elevation={3}
@@ -110,42 +110,42 @@ function Login() {
                             zIndex: 1
                         }}
                     >
-                        <Avatar sx={{ 
-                            width: 56, 
-                            height: 56, 
-                            mb: 2, 
+                        <Avatar sx={{
+                            width: 56,
+                            height: 56,
+                            mb: 2,
                             background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
-                            boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)" 
+                            boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)"
                         }}>
-                            <LockOutlinedIcon fontSize="large" />
+                            <LockOutlinedIcon fontSize="large"/>
                         </Avatar>
-                        
-                        <Typography variant="h4" gutterBottom sx={{ fontWeight: "500" }}>
+
+                        <Typography variant="h4" gutterBottom sx={{fontWeight: "500"}}>
                             Giriş Yap
                         </Typography>
-                        
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+
+                        <Typography variant="body2" color="text.secondary" sx={{mb: 3}}>
                             Hesabınıza erişim için giriş yapın
                         </Typography>
-                        
-                        <Divider flexItem sx={{ width: "100%", mb: 3 }} />
-                        
-                        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+
+                        <Divider flexItem sx={{width: "100%", mb: 3}}/>
+
+                        <form onSubmit={handleSubmit} style={{width: '100%'}}>
                             <TextField
                                 label="Telefon Numarası"
                                 variant="outlined"
                                 fullWidth
                                 required
-                                sx={{ mb: 3 }}
+                                sx={{mb: 3}}
                                 value={phoneNumber}
                                 onChange={handlePhoneNumberChange}
                                 placeholder="5XXXXXXXXX"
-                                inputProps={{ maxLength: 10 }}
+                                inputProps={{maxLength: 10}}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <PhoneIcon color="action" />
-                                            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                            <PhoneIcon color="action"/>
+                                            <Typography variant="body2" color="text.secondary" sx={{ml: 1}}>
                                                 +90
                                             </Typography>
                                         </InputAdornment>
@@ -153,27 +153,27 @@ function Login() {
                                 }}
                                 helperText="Örnek: 5075280653"
                             />
-                            
+
                             <TextField
                                 label="Şifre"
                                 type={showPassword ? "text" : "password"}
                                 variant="outlined"
                                 required
                                 fullWidth
-                                sx={{ mb: 3 }}
+                                sx={{mb: 3}}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
                                             <IconButton onClick={toggleShowPassword} edge="end">
-                                                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                                {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
                                             </IconButton>
                                         </InputAdornment>
                                     ),
                                 }}
                             />
-                            
+
                             <Button
                                 type="submit"
                                 variant="contained"
@@ -192,29 +192,29 @@ function Login() {
                                     fontWeight: "bold"
                                 }}
                             >
-                                {loading ? <CircularProgress size={24} color="inherit" /> : "Giriş Yap"}
+                                {loading ? <CircularProgress size={24} color="inherit"/> : "Giriş Yap"}
                             </Button>
                         </form>
-                        
+
                         {message && (
                             <Typography
                                 variant="body2"
                                 color={message.includes('başarılı') ? 'success.main' : 'error.main'}
-                                sx={{ my: 2, textAlign: "center", fontWeight: "medium" }}
+                                sx={{my: 2, textAlign: "center", fontWeight: "medium"}}
                             >
                                 {message}
                             </Typography>
                         )}
-                        
-                        <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%", mt: 1 }}>
+
+                        <Box sx={{display: "flex", justifyContent: "space-between", width: "100%", mt: 1}}>
                             <Typography variant="body2">
-                                <Link href="/forgotpassword" sx={{ textDecoration: "none", color: "primary.main" }}>
+                                <Link href="/forgotpassword" sx={{textDecoration: "none", color: "primary.main"}}>
                                     Şifremi Unuttum
                                 </Link>
                             </Typography>
-                            
+
                             <Typography variant="body2">
-                                <Link href="/register" sx={{ textDecoration: "none", color: "primary.main" }}>
+                                <Link href="/register" sx={{textDecoration: "none", color: "primary.main"}}>
                                     Hesap Oluştur
                                 </Link>
                             </Typography>

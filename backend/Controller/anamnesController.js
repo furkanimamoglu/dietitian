@@ -14,7 +14,7 @@ class anamnesController {
                 });
             }
 
-            const { client_id } = req.query;
+            const {client_id} = req.query;
 
             const result = await AnamnesService.getClientAnamnes(dietitian_id, client_id);
             res.status(200).json(result);

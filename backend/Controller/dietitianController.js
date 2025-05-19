@@ -97,7 +97,7 @@ class DietitianController {
         }
 
         try {
-            const { client_id } = req.body;
+            const {client_id} = req.body;
 
             if (!client_id) {
                 return res.status(400).json({
@@ -127,7 +127,7 @@ class DietitianController {
         }
 
         try {
-            const { id, name, email, phoneNumber, gender, status } = req.body;
+            const {id, name, email, phoneNumber, gender, status} = req.body;
 
             if (!id || !name || !phoneNumber || !status) {
                 return res.status(400).json({
@@ -136,7 +136,7 @@ class DietitianController {
                 });
             }
 
-            const updateData = { name, email, phoneNumber, gender, status };
+            const updateData = {name, email, phoneNumber, gender, status};
 
             const result = await DietitianService.updateClient(user_id, id, updateData);
             res.status(200).json(result);
@@ -175,7 +175,7 @@ class DietitianController {
     static async getMyClient(req, res) {
         try {
             const token = req.headers.authorization;
-            const { client_id } = req.query;
+            const {client_id} = req.query;
             const user_id = Security.getUserIdFromToken(token);
 
             if (!token || !user_id) {
@@ -216,7 +216,7 @@ class DietitianController {
     static async globalSearchbar(req, res) {
         try {
             const token = req.headers.authorization;
-            const { search } = req.query;
+            const {search} = req.query;
             const user_id = Security.getUserIdFromToken(token);
 
             if (!token || !user_id) {
@@ -257,7 +257,7 @@ class DietitianController {
 
     static async getDietitianNameById(req, res) {
         try {
-            const { dietitian_id } = req.query;
+            const {dietitian_id} = req.query;
             const result = await DietitianService.getDietitianNameById(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
@@ -272,7 +272,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { category_name } = req.body;
+            const {category_name} = req.body;
             if (!token || !dietitian_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
@@ -292,7 +292,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { category_name } = req.body;
+            const {category_name} = req.body;
             if (!token || !dietitian_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
@@ -312,7 +312,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { category_id } = req.query;
+            const {category_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -320,7 +320,7 @@ class DietitianController {
                 });
             }
 
-            if(!category_id) {
+            if (!category_id) {
                 return res.status(400).json({
                     message: "Geçersiz istek. Kategori id eksik."
                 });
@@ -339,7 +339,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { client_id, nutrition_plan_id, start_date, end_date, note } = req.body;
+            const {client_id, nutrition_plan_id, start_date, end_date, note} = req.body;
 
             if (!dietitian_id || !client_id || !nutrition_plan_id || !start_date || !end_date) {
                 return res.status(400).json({
@@ -392,7 +392,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { nutrition_plan_id } = req.query;
+            const {nutrition_plan_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -414,7 +414,7 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { title, description, image, category_id, mealPlan } = req.body;
+            const {title, description, image, category_id, mealPlan} = req.body;
 
             const result = await DietitianService.addNutritionPlan(dietitian_id, {
                 title,
@@ -437,12 +437,12 @@ class DietitianController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { nutrition_plan_id, title, description, image, category_id, mealPlan } = req.body;
+            const {nutrition_plan_id, title, description, image, category_id, mealPlan} = req.body;
 
             const result = await DietitianService.updateNutritionPlan(
                 dietitian_id,
                 nutrition_plan_id,
-                { title, description, image, category_id, mealPlan }
+                {title, description, image, category_id, mealPlan}
             );
 
             res.status(200).json(result);
@@ -481,14 +481,14 @@ class DietitianController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { client_id, range } = req.body;
+            const {client_id, range} = req.body;
 
             if (!token || !dietitian_id) {
-                return res.status(401).json({ message: "Yetkisiz erişim." });
+                return res.status(401).json({message: "Yetkisiz erişim."});
             }
 
             if (!client_id || !range) {
-                return res.status(400).json({ message: "client_id ve range zorunludur." });
+                return res.status(400).json({message: "client_id ve range zorunludur."});
             }
 
             let startDate, endDate;
@@ -512,7 +512,7 @@ class DietitianController {
                     endDate = null;
                     break;
                 default:
-                    return res.status(400).json({ message: "Geçersiz range: 'day', 'week' veya 'month' olmalı." });
+                    return res.status(400).json({message: "Geçersiz range: 'day', 'week' veya 'month' olmalı."});
             }
 
             const plans = await DietitianService.getNutritionAssignmentPlanByClient(
@@ -538,7 +538,7 @@ class DietitianController {
 
             const result = await DietitianService.getMyNotes(dietitian_id);
             return res.status(200).json(result);
-        } catch(error) {
+        } catch (error) {
             return res.status(error.status || 500).json({
                 message: error.message || "Bir hata oluştu.",
                 showOnScreen: error.showOnScreen ?? true
@@ -558,9 +558,9 @@ class DietitianController {
                 });
             }
 
-            const { note } = req.body
+            const {note} = req.body
 
-            if(!note) {
+            if (!note) {
                 return res.status(401).json({
                     showOnScreen: true,
                     message: "Note içeriği girilmedi."
@@ -570,7 +570,7 @@ class DietitianController {
             const result = await DietitianService.addNote(dietitian_id, note);
 
             return res.status(200).json(result);
-        } catch(error) {
+        } catch (error) {
             return res.status(error.status || 500).json({
                 message: error.message || "Bir hata oluştu.",
                 showOnScreen: error.showOnScreen ?? true
@@ -590,7 +590,7 @@ class DietitianController {
                 });
             }
 
-            const { note_id } = req.query;
+            const {note_id} = req.query;
 
             if (!note_id) {
                 return res.status(400).json({

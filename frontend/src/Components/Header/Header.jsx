@@ -41,30 +41,30 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
 import HelpIcon from '@mui/icons-material/Help';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from "../../config.js";
 
 const getIconByType = (type) => {
     switch (type) {
         case "page":
-            return <FindInPageIcon sx={{ color: "#4caf50" }} />;
+            return <FindInPageIcon sx={{color: "#4caf50"}}/>;
         case "randevu":
-            return <EventIcon sx={{ color: "#e8dd00" }} />;
+            return <EventIcon sx={{color: "#e8dd00"}}/>;
         case "exercise":
-            return <SportsGymnasticsIcon sx={{ color: "#3f51b5" }} />;
+            return <SportsGymnasticsIcon sx={{color: "#3f51b5"}}/>;
         case "tarif":
-            return <AssignmentIcon sx={{ color: "#6c07d6" }} />;
+            return <AssignmentIcon sx={{color: "#6c07d6"}}/>;
         case "danisan":
-            return <PersonIcon sx={{ color: "#ff6200" }} />;
+            return <PersonIcon sx={{color: "#ff6200"}}/>;
         default:
             return null;
     }
 };
 
 const settings = [
-    { label: 'Ayarlar', value: 'ayarlar' },
-    { label: 'Çıkış Yap', value: 'cikisyap' },
+    {label: 'Ayarlar', value: 'ayarlar'},
+    {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
 // Updated color scheme
@@ -72,7 +72,7 @@ const mobilePrimaryColor = '#2c8d32';
 const mobileGradient = 'linear-gradient(to right, #2c8d32, #40b548)';
 const mobileDrawerHeaderBg = 'linear-gradient(45deg, #2c8d32 30%, #40b548 90%)';
 
-const SearchContainer = styled('div')(({ theme }) => ({
+const SearchContainer = styled('div')(({theme}) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -91,7 +91,7 @@ const SearchContainer = styled('div')(({ theme }) => ({
     },
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+const StyledInputBase = styled(InputBase)(({theme}) => ({
     color: 'inherit',
     width: '100%',
     '& .MuiInputBase-input': {
@@ -101,14 +101,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-const MobileMenuToggle = styled(IconButton)(({ theme }) => ({
+const MobileMenuToggle = styled(IconButton)(({theme}) => ({
     marginRight: theme.spacing(1),
     [theme.breakpoints.up('md')]: {
         display: 'none',
     },
 }));
 
-const MobileSearchIcon = styled(IconButton)(({ theme }) => ({
+const MobileSearchIcon = styled(IconButton)(({theme}) => ({
     padding: '8px',
     [theme.breakpoints.up('md')]: {
         display: 'none',
@@ -118,8 +118,8 @@ const MobileSearchIcon = styled(IconButton)(({ theme }) => ({
 // Logo container with enhanced styling for mobile
 const LogoContainer = styled(Box, {
     shouldForwardProp: (prop) => prop !== 'isMobile',
-})(({ theme, isMobile }) => ({
-    display: 'flex', 
+})(({theme, isMobile}) => ({
+    display: 'flex',
     alignItems: 'center',
     flexGrow: isMobile ? 1 : 0,
     padding: isMobile ? theme.spacing(0.7, 1) : 0,
@@ -172,11 +172,11 @@ export default function Header() {
 
         if (query.length > 2) {
             try {
-                const response = await axios.get(config[config.environment].apiUrl+`/dietitian/globalSearchbar`, {
+                const response = await axios.get(config[config.environment].apiUrl + `/dietitian/globalSearchbar`, {
                     headers: {
                         Authorization: localStorage.getItem('token')
                     },
-                    params: { search: query },
+                    params: {search: query},
                 });
 
                 if (Array.isArray(response.data)) {
@@ -214,15 +214,15 @@ export default function Header() {
     };
 
     const navigationItems = [
-        { name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{ color: "#2c8d32" }} /> },
-        { name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{ color: "#ff6200" }} /> },
-        { name: "Randevularım", route: "/randevularim", icon: <EventIcon sx={{ color: "#e8dd00" }} /> },
-        { name: "Beslenme", route: "/beslenme", icon: <LocalDiningIcon sx={{ color: "#4caf50" }} /> },
-        { name: "Tarifler", route: "/tarif", icon: <RestaurantMenuIcon sx={{ color: "#6c07d6" }} /> },
-        { name: "Egzersizler", route: "/egzersiz", icon: <SportsGymnasticsIcon sx={{ color: "#3f51b5" }} /> },
-        { name: "Finans", route: "/finans", icon: <AccountBalanceWalletIcon sx={{ color: "#2c8d32" }} /> },
-        { name: "Mesajlar", route: "/mesaj", icon: <MailIcon sx={{ color: mobilePrimaryColor }} /> },
-        { name: "Yardım", route: "/yardim", icon: <HelpIcon sx={{ color: mobilePrimaryColor }} /> }
+        {name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
+        {name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},
+        {name: "Randevularım", route: "/randevularim", icon: <EventIcon sx={{color: "#e8dd00"}}/>},
+        {name: "Beslenme", route: "/beslenme", icon: <LocalDiningIcon sx={{color: "#4caf50"}}/>},
+        {name: "Tarifler", route: "/tarif", icon: <RestaurantMenuIcon sx={{color: "#6c07d6"}}/>},
+        {name: "Egzersizler", route: "/egzersiz", icon: <SportsGymnasticsIcon sx={{color: "#3f51b5"}}/>},
+        {name: "Finans", route: "/finans", icon: <AccountBalanceWalletIcon sx={{color: "#2c8d32"}}/>},
+        {name: "Mesajlar", route: "/mesaj", icon: <MailIcon sx={{color: mobilePrimaryColor}}/>},
+        {name: "Yardım", route: "/yardim", icon: <HelpIcon sx={{color: mobilePrimaryColor}}/>}
     ];
 
     return (
@@ -234,7 +234,7 @@ export default function Header() {
             }}
         >
             <Container maxWidth={false} disableGutters>
-                <Toolbar sx={{ minHeight: { xs: '64px' } }}>
+                <Toolbar sx={{minHeight: {xs: '64px'}}}>
                     {/* Mobile Menu Toggle */}
                     {isMobile && (
                         <MobileMenuToggle
@@ -243,19 +243,19 @@ export default function Header() {
                             color="inherit"
                             onClick={toggleMobileMenu}
                         >
-                            <MenuIcon />
+                            <MenuIcon/>
                         </MobileMenuToggle>
                     )}
 
                     {/* Logo / Marka Adı */}
-                    <LogoContainer isMobile={isMobile} sx={{ display: 'flex' }}>
-                        <SpaIcon sx={{ 
-                            display: 'flex', 
-                            ml: { xs: 0, md: 4 }, 
+                    <LogoContainer isMobile={isMobile} sx={{display: 'flex'}}>
+                        <SpaIcon sx={{
+                            display: 'flex',
+                            ml: {xs: 0, md: 4},
                             mr: 1,
                             color: 'white',
                             fontSize: isMobile ? 22 : 24
-                        }} />
+                        }}/>
                         <Typography
                             variant="h6"
                             sx={{
@@ -275,8 +275,8 @@ export default function Header() {
                         <Box
                             sx={{
                                 flexGrow: 1,
-                                ml: { xs: 1, md: 4 },
-                                mr: { xs: 1, md: 4 },
+                                ml: {xs: 1, md: 4},
+                                mr: {xs: 1, md: 4},
                                 display: 'flex',
                                 justifyContent: 'flex-end',
                             }}
@@ -284,7 +284,7 @@ export default function Header() {
                             <SearchContainer>
                                 <StyledInputBase
                                     placeholder="Arama yap..."
-                                    inputProps={{ 'aria-label': 'search' }}
+                                    inputProps={{'aria-label': 'search'}}
                                     value={searchQuery}
                                     onChange={handleSearch}
                                 />
@@ -350,40 +350,40 @@ export default function Header() {
 
                     {/* Mobile Search Icon */}
                     {isMobile && (
-                        <MobileSearchIcon 
-                            color="inherit" 
+                        <MobileSearchIcon
+                            color="inherit"
                             onClick={toggleMobileSearch}
-                            sx={{ mr: 1 }}
+                            sx={{mr: 1}}
                         >
-                            <SearchIcon />
+                            <SearchIcon/>
                         </MobileSearchIcon>
                     )}
 
                     {/* Desktop Icons */}
                     {!isMobile && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mr: { xs: 2, md: 4 } }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mr: {xs: 2, md: 4}}}>
                             <Tooltip title="Mesajlar" arrow>
                                 <IconButton onClick={() => navigate('/mesaj')} color="inherit">
                                     <Badge badgeContent={1} color="warning">
-                                        <MailIcon sx={{ color: 'white' }} />
+                                        <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
                                 </IconButton>
                             </Tooltip>
 
                             <Tooltip title="Yardım" arrow>
                                 <IconButton color="inherit">
-                                    <HelpIcon sx={{ color: 'white' }} />
+                                    <HelpIcon sx={{color: 'white'}}/>
                                 </IconButton>
                             </Tooltip>
 
-                            <Box sx={{ flexGrow: 0 }}>
+                            <Box sx={{flexGrow: 0}}>
                                 <Tooltip title="Furkan" arrow>
-                                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar alt="Furkan" src="/static/images/avatar/2.jpg" />
+                                    <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                                        <Avatar alt="Furkan" src="/static/images/avatar/2.jpg"/>
                                     </IconButton>
                                 </Tooltip>
                                 <Menu
-                                    sx={{ mt: '3rem' }}
+                                    sx={{mt: '3rem'}}
                                     id="menu-appbar"
                                     anchorEl={anchorElUser}
                                     anchorOrigin={{
@@ -403,7 +403,7 @@ export default function Header() {
                                                 <Typography textAlign="center">{item.label}</Typography>
                                             </MenuItem>
                                         ))}
-                                        <Divider />
+                                        <Divider/>
                                         <MenuItem onClick={handleCloseUserMenu}>
                                             <Typography variant="body2" color="text.secondary">
                                                 Sürüm: 0.0.1
@@ -417,11 +417,11 @@ export default function Header() {
 
                     {/* Profile Icon always visible */}
                     {isMobile && (
-                        <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                            <Avatar 
-                                alt="Furkan" 
+                        <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                            <Avatar
+                                alt="Furkan"
                                 src="/static/images/avatar/2.jpg"
-                                sx={{ width: 32, height: 32 }}
+                                sx={{width: 32, height: 32}}
                             />
                         </IconButton>
                     )}
@@ -429,29 +429,35 @@ export default function Header() {
 
                 {/* Mobile Search Bar */}
                 {isMobile && mobileSearchOpen && (
-                    <Box sx={{ p: 2, backgroundColor: 'rgba(44, 141, 50, 0.9)' }}>
+                    <Box sx={{p: 2, backgroundColor: 'rgba(44, 141, 50, 0.9)'}}>
                         <SearchContainer>
-                            <Box sx={{ position: 'absolute', height: '100%', display: 'flex', alignItems: 'center', pl: 2 }}>
-                                <SearchIcon />
+                            <Box sx={{
+                                position: 'absolute',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                pl: 2
+                            }}>
+                                <SearchIcon/>
                             </Box>
                             <StyledInputBase
                                 placeholder="Arama yap..."
-                                inputProps={{ 'aria-label': 'search' }}
+                                inputProps={{'aria-label': 'search'}}
                                 value={searchQuery}
                                 onChange={handleSearch}
                                 autoFocus
                             />
-                            <IconButton 
-                                sx={{ 
-                                    position: 'absolute', 
-                                    right: 0, 
-                                    top: 0, 
+                            <IconButton
+                                sx={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: 0,
                                     height: '100%',
                                     color: 'white'
                                 }}
                                 onClick={toggleMobileSearch}
                             >
-                                <CloseIcon />
+                                <CloseIcon/>
                             </IconButton>
                         </SearchContainer>
                         {Array.isArray(searchResults) && searchResults.length > 0 && (
@@ -516,26 +522,26 @@ export default function Header() {
                 open={mobileMenuOpen}
                 onClose={toggleMobileMenu}
                 sx={{
-                    '& .MuiDrawer-paper': { 
-                        width: '75%', 
+                    '& .MuiDrawer-paper': {
+                        width: '75%',
                         maxWidth: '320px',
                         backgroundColor: '#f8fff8',
                     },
                 }}
             >
-                <Box sx={{ 
+                <Box sx={{
                     background: mobileDrawerHeaderBg,
-                    p: 2.5, 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                    p: 2.5,
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     borderBottom: '1px solid rgba(255,255,255,0.1)',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <SpaIcon sx={{ color: 'white', mr: 1.5, fontSize: 24 }} />
-                        <Typography variant="h6" sx={{ 
-                            fontWeight: 700, 
+                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                        <SpaIcon sx={{color: 'white', mr: 1.5, fontSize: 24}}/>
+                        <Typography variant="h6" sx={{
+                            fontWeight: 700,
                             color: 'white',
                             fontFamily: '"Segoe UI", Roboto, sans-serif',
                             letterSpacing: '0.5px',
@@ -544,41 +550,44 @@ export default function Header() {
                             Diyetia
                         </Typography>
                     </Box>
-                    <IconButton onClick={toggleMobileMenu} sx={{ color: 'white' }}>
-                        <CloseIcon />
+                    <IconButton onClick={toggleMobileMenu} sx={{color: 'white'}}>
+                        <CloseIcon/>
                     </IconButton>
                 </Box>
-                
-                <List sx={{ pt: 1 }}>
+
+                <List sx={{pt: 1}}>
                     {navigationItems.map((item) => (
                         <ListItem key={item.name} disablePadding>
-                            <ListItemButton 
-                                onClick={() => { navigate(item.route); toggleMobileMenu(); }}
+                            <ListItemButton
+                                onClick={() => {
+                                    navigate(item.route);
+                                    toggleMobileMenu();
+                                }}
                                 sx={{
                                     borderLeft: location.pathname === item.route ? '4px solid #2c8d32' : '4px solid transparent',
                                     backgroundColor: location.pathname === item.route ? 'rgba(44, 141, 50, 0.1)' : 'transparent'
                                 }}
                             >
-                                <Box sx={{ mr: 2 }}>{item.icon}</Box>
-                                <ListItemText primary={item.name} />
+                                <Box sx={{mr: 2}}>{item.icon}</Box>
+                                <ListItemText primary={item.name}/>
                             </ListItemButton>
                         </ListItem>
                     ))}
                 </List>
-                
-                <Divider sx={{ my: 2 }} />
-                
+
+                <Divider sx={{my: 2}}/>
+
                 <List>
                     {settings.map((item) => (
                         <ListItem key={item.value} disablePadding>
                             <ListItemButton onClick={() => handleMenuItemClick(item.value)}>
-                                <ListItemText primary={item.label} />
+                                <ListItemText primary={item.label}/>
                             </ListItemButton>
                         </ListItem>
                     ))}
                 </List>
-                
-                <Box sx={{ mt: 'auto', p: 2, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+
+                <Box sx={{mt: 'auto', p: 2, borderTop: '1px solid rgba(0,0,0,0.08)'}}>
                     <Typography variant="body2" color="text.secondary" align="center">
                         Sürüm: 0.0.1
                     </Typography>

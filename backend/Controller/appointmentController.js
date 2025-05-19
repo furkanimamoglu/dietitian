@@ -33,7 +33,7 @@ class AppointmentController {
                 });
             }
 
-            const { client_id } = req.query;
+            const {client_id} = req.query;
 
             const result = await AppointmentService.fetchClientAppointmentAsDietitian(dietitian_id, client_id);
             res.status(200).json(result);
@@ -55,7 +55,7 @@ class AppointmentController {
                 });
             }
 
-            const { title, start, end, client_id } = req.body;
+            const {title, start, end, client_id} = req.body;
 
             if (!title || !start || !end || !client_id) {
                 return res.status(400).json({
@@ -90,7 +90,7 @@ class AppointmentController {
                 });
             }
 
-            const { appointment_id, title, start, end, client_id, status } = req.body;
+            const {appointment_id, title, start, end, client_id, status} = req.body;
 
             if (!appointment_id || !title || !start || !end || !client_id || !status) {
                 return res.status(400).json({
@@ -148,7 +148,7 @@ class AppointmentController {
                 });
             }
 
-            const { appointment_id } = req.query;
+            const {appointment_id} = req.query;
 
             if (!appointment_id) {
                 return res.status(400).json({
@@ -156,7 +156,7 @@ class AppointmentController {
                 });
             }
 
-            await AppointmentService.deleteAppointment(dietitian_id,appointment_id);
+            await AppointmentService.deleteAppointment(dietitian_id, appointment_id);
 
             res.status(200).json({
                 message: "Randevu başarıyla silindi."
@@ -180,7 +180,7 @@ class AppointmentController {
                 });
             }
 
-            const { title, start, end } = req.body;
+            const {title, start, end} = req.body;
 
             if (!title || !start || !end) {
                 return res.status(400).json({
@@ -236,7 +236,7 @@ class AppointmentController {
         }
     }
 
-   static async getPendingAppointmentCount(req, res) {
+    static async getPendingAppointmentCount(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -255,7 +255,7 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const { appointment_id, action } = req.body;
+            const {appointment_id, action} = req.body;
 
             if (!appointment_id || !action) {
                 return res.status(400).json({

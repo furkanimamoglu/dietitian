@@ -30,7 +30,7 @@ class ClientController {
             const {phoneNumber, password, name, dietitian_id} = req.body;
             const ipAddress = req.ip;
 
-            if(!dietitian_id){
+            if (!dietitian_id) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Bağlı olunan bir diyetisyen bulunamadı.'
@@ -144,7 +144,7 @@ class ClientController {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
-            const { nutrition_plan_id, mealPlan } = req.body;
+            const {nutrition_plan_id, mealPlan} = req.body;
 
             if (!token || !client_id) {
                 return res.status(401).json({
@@ -185,7 +185,7 @@ class ClientController {
             const result = await ClientService.getMyKVKKStatus(client_id);
 
             return res.status(200).json(result);
-        } catch ( error) {
+        } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -207,7 +207,7 @@ class ClientController {
             const result = await ClientService.approveKVKK(client_id);
 
             return res.status(200).json(result);
-        } catch ( error) {
+        } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
