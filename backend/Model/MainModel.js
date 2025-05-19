@@ -8,7 +8,7 @@ const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
 const DietitianOption = require('./DietitianOption');
 const Invoice = require('./Invoice');
-// Removed unused Notification import
+const Notification = require('./Notification');
 const Message = require('./Message');
 const NutritionPlan = require('./NutritionPlan');
 const NutritionCategory = require('./NutritionCategory');
