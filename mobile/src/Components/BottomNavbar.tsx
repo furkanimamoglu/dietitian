@@ -374,10 +374,10 @@ const BottomNav = ({navigation}: Props) => {
                     <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.replace('Randevu')}
-                                  style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
-                    <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
+                <TouchableOpacity onPress={() => navigation.replace('Beslenme')}
+                                  style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
+                    <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
                 </TouchableOpacity>
 
                 {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
@@ -385,10 +385,10 @@ const BottomNav = ({navigation}: Props) => {
                     <Text style={styles.plusText}>+</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.replace('Beslenme')}
-                                  style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
-                    <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
+                <TouchableOpacity onPress={() => navigation.replace('Randevu')}
+                                  style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
+                    <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.replace('AnaSayfa')}
                                   style={[styles.navItem, isActive('AnaSayfa') && styles.activeNavItem]}>
