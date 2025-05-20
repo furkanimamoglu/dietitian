@@ -77,7 +77,7 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const fetchClientInfo = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
+            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

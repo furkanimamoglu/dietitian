@@ -9,7 +9,6 @@ const Egzersiz = ({navigation}) => {
     const [selectedEgzersiz, setSelectedEgzersiz] = useState(null);
     const [sure, setSure] = useState('');
 
-    // Predefined exercise options
     const egzersizSecenekleri = useMemo(() => [
         {id: '1', isim: 'Koşu', icon: 'run'},
         {id: '2', isim: 'Yürüyüş', icon: 'walk'},
@@ -23,7 +22,6 @@ const Egzersiz = ({navigation}) => {
         {id: '10', isim: 'Tenis', icon: 'tennis'}
     ], []);
 
-    // Example exercise data
     const [egzersizler, setEgzersizler] = useState([
         {
             id: '1',
@@ -77,7 +75,6 @@ const Egzersiz = ({navigation}) => {
         setEgzersizler([yeniEgzersiz, ...egzersizler]);
         setModalVisible(false);
 
-        // Form alanlarını temizle
         setSelectedEgzersiz(null);
         setSure('');
     }, [selectedEgzersiz, sure, egzersizler, egzersizSecenekleri]);
@@ -86,7 +83,6 @@ const Egzersiz = ({navigation}) => {
         setEgzersizler(prevEgzersizler => prevEgzersizler.filter(egzersiz => egzersiz.id !== id));
     }, []);
 
-    // Haftalık toplam süre hesaplama (dakika)
     const toplamSure = useMemo(() => {
         return egzersizler.reduce((sum, egzersiz) => {
             const sureStr = egzersiz.sure;
@@ -95,7 +91,6 @@ const Egzersiz = ({navigation}) => {
         }, 0);
     }, [egzersizler]);
 
-    // Render egzersiz kartı
     const renderEgzersizKart = useCallback(({item}) => (
         <View style={styles.egzersizCard}>
             <View style={styles.cardContent}>
