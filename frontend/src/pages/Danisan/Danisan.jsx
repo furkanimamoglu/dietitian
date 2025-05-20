@@ -1259,7 +1259,7 @@ function Danisan() {
                                 </Accordion>
 
                                 {/* Özel Notlar */}
-                                <Accordion elevation={3}>
+                                <Accordion elevation={3} sx={{mb: 2}}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon/>}
                                         sx={{
