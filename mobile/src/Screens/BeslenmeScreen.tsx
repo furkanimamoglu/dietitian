@@ -2,7 +2,6 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {
     View,
     StyleSheet,
-    ScrollView,
     TextInput,
     TouchableOpacity,
     ActivityIndicator,
@@ -659,6 +658,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 contentContainerStyle={loading || error || isEmpty ? styles.centeredContent : styles.content}
                 showsVerticalScrollIndicator={false}
             />
+
         );
     };
 
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5'
     },
     content: {
-        flex: 1,
+        flexGrow: 1,
         padding: 16
     },
     centeredContent: {
