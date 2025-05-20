@@ -22,125 +22,31 @@ class AnamnesService {
         }
     }
 
-    static async updateAnamnesSaglik(dietitian_id, client_id, saglikData) {
+    static async updateAnamnes(dietitian_id, client_id, anamnesData) {
         try {
-            let anamnes = await Anamnes.findOne({
+            let existingAnamnes = await Anamnes.findOne({
                 where: {
                     dietitian_id,
                     client_id
                 }
             });
 
-            if (!anamnes) {
-                anamnes = await Anamnes.create({
-                    dietitian_id,
-                    client_id,
-                    saglik_bilgileri: saglikData
-                });
 
-                return {
-                    message: "Yeni anamnez kaydı oluşturuldu.",
-                    data: anamnes.saglik_bilgileri
-                };
-            }
-
-            await anamnes.update({ saglik_bilgileri: saglikData });
-
-            return anamnes.saglik_bilgileri;
-        } catch (error) {
-            throw new Exception(error.message || "Sağlık bilgileri işlenirken bir hata oluştu.", 400, true);
-        }
-    }
-
-    static async updateAnamnesDiyetAliskanlik(dietitian_id, client_id, diyetData) {
-        try {
-            let anamnes = await Anamnes.findOne({
-                where: {
+            if (!existingAnamnes) {
+                existingAnamnes = new Anamnes({
                     dietitian_id,
                     client_id
-                }
-            });
-
-            if (!anamnes) {
-                anamnes = await Anamnes.create({
-                    dietitian_id,
-                    client_id,
-                    diyet_aliskanliklari: diyetData
                 });
-
-                return {
-                    message: "Yeni anamnez kaydı oluşturuldu.",
-                    data: anamnes.diyet_aliskanliklari
-                };
             }
 
-            await anamnes.update({ diyet_aliskanliklari: diyetData });
+            existingAnamnes.saglik_bilgileri = anamnesData.saglik_bilgileri;
+            existingAnamnes.diyet_aliskanliklari = anamnesData.diyet_aliskanliklari;
+            existingAnamnes.fiziksel_aktivite = anamnesData.fiziksel_aktivite;
+            existingAnamnes.ozel_notlar = anamnesData.ozel_notlar;
 
-            return anamnes.diyet_aliskanliklari;
+            return await existingAnamnes.save();
         } catch (error) {
-            throw new Exception(error.message || "Diyet Alışkanlıkları işlenirken bir hata oluştu.", 400, true);
-        }
-    }
-
-    static async updateAnamnesFizikselAktivite(dietitian_id, client_id, fizikselData) {
-        try {
-            let anamnes = await Anamnes.findOne({
-                where: {
-                    dietitian_id,
-                    client_id
-                }
-            });
-
-            if (!anamnes) {
-                anamnes = await Anamnes.create({
-                    dietitian_id,
-                    client_id,
-                    fiziksel_aktivite: fizikselData
-                });
-
-                return {
-                    message: "Yeni anamnez kaydı oluşturuldu.",
-                    data: anamnes.fiziksel_aktivite
-                };
-            }
-
-            await anamnes.update({ fiziksel_aktivite: fizikselData });
-
-            return anamnes.fiziksel_aktivite;
-        } catch (error) {
-            throw new Exception(error.message || "Fiziksel Aktivite işlenirken bir hata oluştu.", 400, true);
-        }
-    }
-
-    static async updateAnamnesOzelNotlar(dietitian_id, client_id, ozel_not) {
-        try {
-            let anamnes = await Anamnes.findOne({
-                where: {
-                    dietitian_id,
-                    client_id
-                }
-            });
-
-            if (!anamnes) {
-                anamnes = await Anamnes.create({
-                    dietitian_id,
-                    client_id,
-                    ozel_notlar: ozel_not
-                });
-
-                return {
-                    message: "Yeni anamnez kaydı oluşturuldu.",
-                    data: anamnes.ozel_notlar
-                };
-            }
-
-            await anamnes.update({ ozel_notlar: ozel_not });
-
-            return {
-                ozel_notlar: anamnes.ozel_notlar
-            };
-        } catch (error) {
-            throw new Exception(error.message || "Fiziksel Aktivite işlenirken bir hata oluştu.", 400, true);
+            throw new Exception(error.message || "Anamnez verileri işlenirken bir hata oluştu.", 400, true);
         }
     }
 

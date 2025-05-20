@@ -218,6 +218,63 @@ function Danisan() {
         setShowSuccessPopup(true);
     };
 
+    // Anamnez dialogs için state tanımlamaları
+    const [isAnamnezDialogOpen, setIsAnamnezDialogOpen] = useState(false);
+    const [anamnezForm, setAnamnezForm] = useState({
+        saglik_bilgileri: {
+            kronik_hastaliklar: "",
+            alerjiler: "",
+            ilac_kullanimi: "",
+            gecmis_ameliyatlar: "",
+            aile_saglik_gecmisi: "",
+            uyku: ""
+        },
+        diyet_aliskanliklari: {
+            gunluk_su_tuketimi: "",
+            ogun_duzeni: "",
+            favori_yiyecekler: "",
+            sevilmeyen_yiyecekler: "",
+            atistirmalik_aliskanliklari: "",
+            disarida_yemek: ""
+        },
+        fiziksel_aktivite: {
+            aktivite_seviyesi: "",
+            egzersiz_aliskanliklari: "",
+            sevdigi_sporlar: "",
+            meslek_ve_aktivite_durumu: ""
+        },
+        ozel_notlar: ""
+    });
+
+    // Anamnez düzenleme dialogunu açma fonksiyonu
+    const handleOpenAnamnezDialog = () => {
+        // Eğer mevcut anamnez verileri varsa, formu bu verilerle dolduralım
+        if (anamnezData) {
+            setAnamnezForm(anamnezData);
+        }
+        setIsAnamnezDialogOpen(true);
+    };
+
+    // Anamnez form alanlarındaki değişiklikleri yakalar (üst seviye alanlar için)
+    const handleAnamnezFormChange = (e) => {
+        const { name, value } = e.target;
+        setAnamnezForm(prevForm => ({
+            ...prevForm,
+            [name]: value
+        }));
+    };
+
+    // İç içe geçmiş form alanları için değişiklikleri yakalar (sağlık bilgileri, diyet alışkanlıkları, vb.)
+    const handleNestedAnamnezFormChange = (category, field, value) => {
+        setAnamnezForm(prevForm => ({
+            ...prevForm,
+            [category]: {
+                ...prevForm[category],
+                [field]: value
+            }
+        }));
+    };
+
     const fetchAnamnezData = async () => {
         try {
             setAnamnezLoading(true);
@@ -239,6 +296,34 @@ function Danisan() {
             setShowErrorPopup(true);
         } finally {
             setAnamnezLoading(false);
+        }
+    };
+
+    // Anamnez formunu kaydeder
+    const handleSaveAnamnez = async () => {
+        try {
+            const response = await axios.put(
+                `${config[config.environment].apiUrl}/anamnes/updateAnamnes?client_id=${id}`,
+                {
+                    ...anamnezForm
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+
+            // Verileri güncelleyelim
+            fetchAnamnezData();
+            setIsAnamnezDialogOpen(false);
+
+            setSuccessMessage("Anamnez bilgileri başarıyla kaydedildi.");
+            setShowSuccessPopup(true);
+        } catch (error) {
+            console.error("Anamnez kaydedilirken hata oluştu:", error);
+            setErrorMessage(error.response?.data?.message || "Anamnez kaydedilirken bir hata oluştu.");
+            setShowErrorPopup(true);
         }
     };
 
@@ -526,7 +611,6 @@ function Danisan() {
         const startDate = new Date(exercise.start_date);
         const endDate = new Date(exercise.end_date);
 
-        // Sadece tarihleri karşılaştırmak için saat, dakika, saniyeyi sıfırlayalım
         today.setHours(0, 0, 0, 0);
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(0, 0, 0, 0);
@@ -908,6 +992,15 @@ function Danisan() {
                         ) : anamnezData ? (
                             <>
                                 {/* Sağlık Bilgileri Akordiyonu */}
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleOpenAnamnezDialog}
+                                    >
+                                        Anamnez Düzenle
+                                    </Button>
+                                </Box>
                                 <Accordion elevation={3} sx={{mb: 2}} defaultExpanded>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon/>}
@@ -943,18 +1036,6 @@ function Danisan() {
                                                         title="Kronik Hastalıklar"
                                                         titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
-                                                        action={
-                                                            <IconButton
-                                                                size="small"
-                                                                color="primary"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleOpenEditAnamnezDialog();
-                                                                }}
-                                                            >
-                                                                <EditIcon fontSize="small" />
-                                                            </IconButton>
-                                                        }
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -4149,6 +4230,226 @@ function Danisan() {
                         autoFocus
                     >
                         Sil
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Anamnez Düzenleme Dialugu */}
+            <Dialog
+                open={isAnamnezDialogOpen}
+                onClose={() => setIsAnamnezDialogOpen(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    Anamnez Bilgilerini Düzenle
+                    <IconButton
+                        style={{ position: 'absolute', right: 8, top: 8 }}
+                        onClick={() => setIsAnamnezDialogOpen(false)}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    <Box sx={{ mb: 3 }}>
+                        <Typography variant="h6" gutterBottom>Sağlık Bilgileri</Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Kronik Hastalıklar"
+                                    value={anamnezForm.saglik_bilgileri?.kronik_hastaliklar || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('saglik_bilgileri', 'kronik_hastaliklar', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Alerjiler"
+                                    value={anamnezForm.saglik_bilgileri?.alerjiler || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('saglik_bilgileri', 'alerjiler', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="İlaç Kullanımı"
+                                    value={anamnezForm.saglik_bilgileri?.ilac_kullanimi || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('saglik_bilgileri', 'ilac_kullanimi', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Geçmiş Ameliyatlar"
+                                    value={anamnezForm.saglik_bilgileri?.gecmis_ameliyatlar || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('saglik_bilgileri', 'gecmis_ameliyatlar', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Aile Sağlık Geçmişi"
+                                    value={anamnezForm.saglik_bilgileri?.aile_saglik_gecmisi || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('saglik_bilgileri', 'aile_saglik_gecmisi', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Uyku Düzeni"
+                                    value={anamnezForm.saglik_bilgileri?.uyku || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('saglik_bilgileri', 'uyku', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                        </Grid>
+                    </Box>
+
+                    <Box sx={{ mb: 3 }}>
+                        <Typography variant="h6" gutterBottom>Diyet Alışkanlıkları</Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Günlük Su Tüketimi"
+                                    value={anamnezForm.diyet_aliskanliklari?.gunluk_su_tuketimi || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'gunluk_su_tuketimi', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Öğün Düzeni"
+                                    value={anamnezForm.diyet_aliskanliklari?.ogun_duzeni || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'ogun_duzeni', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Favori Yiyecekler"
+                                    value={anamnezForm.diyet_aliskanliklari?.favori_yiyecekler || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'favori_yiyecekler', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Sevilmeyen Yiyecekler"
+                                    value={anamnezForm.diyet_aliskanliklari?.sevilmeyen_yiyecekler || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'sevilmeyen_yiyecekler', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Atıştırmalık Alışkanlıkları"
+                                    value={anamnezForm.diyet_aliskanliklari?.atistirmalik_aliskanliklari || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'atistirmalik_aliskanliklari', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Dışarıda Yemek"
+                                    value={anamnezForm.diyet_aliskanliklari?.disarida_yemek || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'disarida_yemek', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                        </Grid>
+                    </Box>
+
+                    <Box sx={{ mb: 3 }}>
+                        <Typography variant="h6" gutterBottom>Fiziksel Aktivite</Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Aktivite Seviyesi"
+                                    value={anamnezForm.fiziksel_aktivite?.aktivite_seviyesi || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('fiziksel_aktivite', 'aktivite_seviyesi', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Egzersiz Alışkanlıkları"
+                                    value={anamnezForm.fiziksel_aktivite?.egzersiz_aliskanliklari || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('fiziksel_aktivite', 'egzersiz_aliskanliklari', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Sevdiği Sporlar"
+                                    value={anamnezForm.fiziksel_aktivite?.sevdigi_sporlar || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('fiziksel_aktivite', 'sevdigi_sporlar', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    fullWidth
+                                    label="Meslek ve Aktivite Durumu"
+                                    value={anamnezForm.fiziksel_aktivite?.meslek_ve_aktivite_durumu || ''}
+                                    onChange={(e) => handleNestedAnamnezFormChange('fiziksel_aktivite', 'meslek_ve_aktivite_durumu', e.target.value)}
+                                    margin="normal"
+                                    multiline
+                                />
+                            </Grid>
+                        </Grid>
+                    </Box>
+
+                    <Box>
+                        <Typography variant="h6" gutterBottom>Özel Notlar</Typography>
+                        <TextField
+                            fullWidth
+                            multiline
+                            name="ozel_notlar"
+                            value={anamnezForm.ozel_notlar || ''}
+                            onChange={handleAnamnezFormChange}
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsAnamnezDialogOpen(false)} color="inherit">
+                        İptal
+                    </Button>
+                    <Button
+                        onClick={handleSaveAnamnez}
+                        variant="contained"
+                        color="primary"
+                    >
+                        Kaydet
                     </Button>
                 </DialogActions>
             </Dialog>
