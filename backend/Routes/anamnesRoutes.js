@@ -4,6 +4,7 @@ const router = express.Router();
 
 const anamnesController = require('../Controller/anamnesController');
 
-router.get('/getClientAnamnes', anamnesController.getClientAnamnes);
+router.get('/getAnamnes', anamnesController.getAnamnes);
+router.put('/updateAnamnes', anamnesController.updateAnamnes);
 
 module.exports = router;

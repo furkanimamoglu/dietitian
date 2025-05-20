@@ -8,7 +8,7 @@ const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
 const DietitianOption = require('./DietitianOption');
 const Invoice = require('./Invoice');
-// Removed unused Notification import
+const Notification = require('./Notification');
 const Message = require('./Message');
 const NutritionPlan = require('./NutritionPlan');
 const NutritionCategory = require('./NutritionCategory');
@@ -116,8 +116,9 @@ Appointment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-Client.hasMany(Anamnes, {
+Client.hasOne(Anamnes, {
     foreignKey: 'client_id',
+    onDelete: 'CASCADE',
 });
 Anamnes.belongsTo(Client, {
     foreignKey: 'client_id',

@@ -1,7 +1,7 @@
 import React from 'react';
 import './ExceptionPage.css';
-import { green } from "@mui/material/colors";
-import { Box, Button, Paper, Typography } from "@mui/material";
+import {green} from "@mui/material/colors";
+import {Box, Button, Paper, Typography} from "@mui/material";
 import DefaultExcept from "../../Components/Layouts/DefaultExcept.jsx";
 
 const errorMessages = {
@@ -70,10 +70,10 @@ export default function ExceptionPage(statusCode) {
                         alignItems: "center",
                     }}
                 >
-                    <Typography variant="h4" sx={{ textAlign: "center", fontWeight: "bold", color: green[600], mb: 2}}>
+                    <Typography variant="h4" sx={{textAlign: "center", fontWeight: "bold", color: green[600], mb: 2}}>
                         {error.title}
                     </Typography>
-                    <Typography sx={{ textAlign: "center", color: "gray", mb: 4 }}>
+                    <Typography sx={{textAlign: "center", color: "gray", mb: 4}}>
                         {error.message}
                     </Typography>
                     {error.isBackButton && (

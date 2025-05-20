@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import axios from "axios";
 import {
     Box,
@@ -27,7 +27,7 @@ import {
     GridToolbarContainer,
     GridToolbarExport
 } from "@mui/x-data-grid";
-import { trTR } from "@mui/x-data-grid/locales";
+import {trTR} from "@mui/x-data-grid/locales";
 import {
     Cancel,
     CheckCircle,
@@ -45,16 +45,16 @@ import {
     Autorenew as AutorenewIcon,
     VisibilityOff,
 } from "@mui/icons-material";
-import { green, red, blue, pink } from "@mui/material/colors";
-import { useNavigate } from "react-router-dom";
+import {green, red, blue, pink} from "@mui/material/colors";
+import {useNavigate} from "react-router-dom";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 
 function QuickSearchToolbar() {
     return (
-        <GridToolbarContainer sx={{ justifyContent: "space-between", py: 1 }}>
-            <GridToolbarQuickFilter placeholder="Danışan Ara" />
-            <GridToolbarExport csvOptions={{ utf8WithBom: true }} />
+        <GridToolbarContainer sx={{justifyContent: "space-between", py: 1}}>
+            <GridToolbarQuickFilter placeholder="Danışan Ara"/>
+            <GridToolbarExport csvOptions={{utf8WithBom: true}}/>
         </GridToolbarContainer>
     );
 }
@@ -97,7 +97,7 @@ export default function Danisanlarim() {
         axios
             .get(
                 `${config[config.environment].apiUrl}/dietitian/getAllMyClients`,
-                { headers: { Authorization: localStorage.getItem("token") } }
+                {headers: {Authorization: localStorage.getItem("token")}}
             )
             .then((res) => {
                 setClients(res.data);
@@ -121,7 +121,7 @@ export default function Danisanlarim() {
             return originalRow;
         }
 
-        setPendingEdit({ updatedRow, originalRow, changes });
+        setPendingEdit({updatedRow, originalRow, changes});
         setEditDialogOpen(true);
 
         return new Promise((resolve) => {
@@ -142,7 +142,7 @@ export default function Danisanlarim() {
                     const res = await axios.put(
                         `${config[config.environment].apiUrl}/dietitian/updateClient`,
                         updatedRow,
-                        { headers: { Authorization: localStorage.getItem("token") } }
+                        {headers: {Authorization: localStorage.getItem("token")}}
                     );
                     setEditDialogOpen(false);
                     resolve(res.data);
@@ -179,11 +179,11 @@ export default function Danisanlarim() {
         try {
             console.log("Deleting client with ID:", id);
             const requestConfig = {
-                headers: { Authorization: localStorage.getItem("token") },
-                data: { client_id: id },
+                headers: {Authorization: localStorage.getItem("token")},
+                data: {client_id: id},
             };
             console.log("Request configuration:", requestConfig);
-            
+
             await axios.delete(
                 `${config[config.environment].apiUrl}/dietitian/deleteClient`,
                 requestConfig
@@ -220,9 +220,9 @@ export default function Danisanlarim() {
 
     const fetchQR = async () => {
         try {
-            const { data } = await axios.get(
+            const {data} = await axios.get(
                 `${config[config.environment].apiUrl}/dietitian/getDietitianQR`,
-                { headers: { Authorization: localStorage.getItem("token") } }
+                {headers: {Authorization: localStorage.getItem("token")}}
             );
             setQrData(data.qrData);
             setQrDialogOpen(true);
@@ -239,7 +239,7 @@ export default function Danisanlarim() {
         for (let i = 0; i < 8; i++) {
             password += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-        setNewClient(prev => ({ ...prev, password }));
+        setNewClient(prev => ({...prev, password}));
     };
 
     // Validate form before submission
@@ -247,22 +247,22 @@ export default function Danisanlarim() {
         const errors = {};
         if (!newClient.phoneNumber) errors.phoneNumber = "Telefon numarası zorunludur";
         else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
-        
+
         if (!newClient.password) errors.password = "Şifre zorunludur";
         if (!newClient.name) errors.name = "İsim zorunludur";
-        
+
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
     // Handle form input changes
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewClient(prev => ({ ...prev, [name]: value }));
-        
+        const {name, value} = e.target;
+        setNewClient(prev => ({...prev, [name]: value}));
+
         // Clear the error when user types
         if (formErrors[name]) {
-            setFormErrors(prev => ({ ...prev, [name]: "" }));
+            setFormErrors(prev => ({...prev, [name]: ""}));
         }
     };
 
@@ -275,36 +275,36 @@ export default function Danisanlarim() {
         if (value.length > 10) {
             value = value.slice(0, 10);
         }
-        setNewClient(prev => ({ ...prev, phoneNumber: value }));
-        
+        setNewClient(prev => ({...prev, phoneNumber: value}));
+
         if (formErrors.phoneNumber) {
-            setFormErrors(prev => ({ ...prev, phoneNumber: "" }));
+            setFormErrors(prev => ({...prev, phoneNumber: ""}));
         }
     };
 
     // Update the existing handleCreateSubmit function
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) return;
-        
+
         try {
             const response = await axios.post(
                 `${config[config.environment].apiUrl}/dietitian/registerClient`,
                 newClient,
-                { headers: { Authorization: localStorage.getItem("token") } }
+                {headers: {Authorization: localStorage.getItem("token")}}
             );
-            
+
             // Add the new client to the list
             setClients(prev => [...prev, response.data]);
-            
+
             // Show success message
             setSnackbar({
                 open: true,
                 message: "Danışan başarıyla eklendi",
                 severity: "success"
             });
-            
+
             // Reset form and close dialog
             setNewClient({
                 phoneNumber: "",
@@ -315,7 +315,7 @@ export default function Danisanlarim() {
             });
             closeCreateDialog();
             navigate(`/danisan/${response.data.id}`);
-            
+
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
             setSnackbar({
@@ -328,7 +328,7 @@ export default function Danisanlarim() {
 
     // Handle snackbar close
     const handleSnackbarClose = () => {
-        setSnackbar(prev => ({ ...prev, open: false }));
+        setSnackbar(prev => ({...prev, open: false}));
     };
 
     // Toggle password visibility
@@ -340,10 +340,10 @@ export default function Danisanlarim() {
     // DataGrid Column Definitions
     // ---------------------------
     const columns = [
-        { field: "id", headerName: "ID", width: 70 },
-        { field: "name", headerName: "İsim", flex: 1, editable: true },
-        { field: "email", headerName: "Email", flex: 1.2, editable: true },
-        { field: "phoneNumber", headerName: "Telefon", flex: 1, editable: true },
+        {field: "id", headerName: "ID", width: 70},
+        {field: "name", headerName: "İsim", flex: 1, editable: true},
+        {field: "email", headerName: "Email", flex: 1.2, editable: true},
+        {field: "phoneNumber", headerName: "Telefon", flex: 1, editable: true},
         {
             field: "status",
             headerName: "Durum",
@@ -353,9 +353,9 @@ export default function Danisanlarim() {
             editable: true,
             renderCell: (params) =>
                 params.row.status ? (
-                    <CheckCircle sx={{ color: green[500] }} />
+                    <CheckCircle sx={{color: green[500]}}/>
                 ) : (
-                    <Cancel sx={{ color: red[500] }} />
+                    <Cancel sx={{color: red[500]}}/>
                 ),
         },
         {
@@ -367,9 +367,9 @@ export default function Danisanlarim() {
             editable: true,
             renderCell: (params) =>
                 params.value === "Erkek" ? (
-                    <MaleIcon sx={{ color: blue[500] }} />
+                    <MaleIcon sx={{color: blue[500]}}/>
                 ) : (
-                    <FemaleIcon sx={{ color: pink[500] }} />
+                    <FemaleIcon sx={{color: pink[500]}}/>
                 ),
         },
         {
@@ -384,7 +384,7 @@ export default function Danisanlarim() {
                         variant="outlined"
                         onClick={() => navigate(`/danisan/${params.row.id}`)}
                     >
-                        <Visibility fontSize="small" />
+                        <Visibility fontSize="small"/>
                     </Button>
                     <Button
                         size="small"
@@ -392,7 +392,7 @@ export default function Danisanlarim() {
                         color="error"
                         onClick={() => openDeleteDialog(params.row)}
                     >
-                        <DeleteIcon fontSize="small" />
+                        <DeleteIcon fontSize="small"/>
                     </Button>
                 </Stack>
             ),
@@ -404,12 +404,12 @@ export default function Danisanlarim() {
     // ---------------------------
     return (
         <Default>
-            <Stack spacing={2} sx={{ mt: "15px" }}>
+            <Stack spacing={2} sx={{mt: "15px"}}>
                 {/* Action Buttons */}
                 <Stack direction="row" spacing={2}>
                     <Button
                         variant="contained"
-                        startIcon={<GroupAdd />}
+                        startIcon={<GroupAdd/>}
                         onClick={openCreateDialog}
                         sx={{
                             borderRadius: 10,
@@ -422,7 +422,7 @@ export default function Danisanlarim() {
 
                     <Button
                         variant="contained"
-                        startIcon={<QrCodeIcon />}
+                        startIcon={<QrCodeIcon/>}
                         onClick={fetchQR}
                         sx={{
                             borderRadius: 10,
@@ -435,7 +435,7 @@ export default function Danisanlarim() {
                 </Stack>
 
                 {/* İstatistik Kartları */}
-                <Box sx={{ mb: 4, mt: 2 }}>
+                <Box sx={{mb: 4, mt: 2}}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={6} md={2.4}>
                             <Paper
@@ -463,12 +463,12 @@ export default function Danisanlarim() {
                                     }
                                 }}
                             >
-                                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                    <GroupIcon sx={{ fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2 }} />
-                                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 0.5 }}>
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <GroupIcon sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
                                         {totalCount}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         Toplam Danışan
                                     </Typography>
                                 </Box>
@@ -501,12 +501,12 @@ export default function Danisanlarim() {
                                     }
                                 }}
                             >
-                                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                    <CheckCircle sx={{ fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2 }} />
-                                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 0.5 }}>
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <CheckCircle sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
                                         {activeCount}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         Aktif Danışan
                                     </Typography>
                                 </Box>
@@ -539,12 +539,12 @@ export default function Danisanlarim() {
                                     }
                                 }}
                             >
-                                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                    <Cancel sx={{ fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2 }} />
-                                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 0.5 }}>
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <Cancel sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
                                         {inactiveCount}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         İnaktif Danışan
                                     </Typography>
                                 </Box>
@@ -577,12 +577,12 @@ export default function Danisanlarim() {
                                     }
                                 }}
                             >
-                                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                    <FemaleIcon sx={{ fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2 }} />
-                                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 0.5 }}>
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <FemaleIcon sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
                                         {femaleCount}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         Kadın Danışan
                                     </Typography>
                                 </Box>
@@ -615,12 +615,12 @@ export default function Danisanlarim() {
                                     }
                                 }}
                             >
-                                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                    <MaleIcon sx={{ fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2 }} />
-                                    <Typography variant="h4" sx={{ color: '#fff', fontWeight: 700, mb: 0.5 }}>
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <MaleIcon sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
                                         {maleCount}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         Erkek Danışan
                                     </Typography>
                                 </Box>
@@ -630,7 +630,7 @@ export default function Danisanlarim() {
                 </Box>
 
                 {/* Data Grid */}
-                <Paper elevation={2} sx={{ height: "65vh", width: "100%" }}>
+                <Paper elevation={2} sx={{height: "65vh", width: "100%"}}>
                     <DataGrid
                         localeText={trTR.components.MuiDataGrid.defaultProps.localeText}
                         rows={clients}
@@ -640,7 +640,7 @@ export default function Danisanlarim() {
                         disableSelectionOnClick
                         processRowUpdate={handleRowUpdate}
                         onProcessRowUpdateError={(error) => console.error(error)}
-                        slots={{ toolbar: QuickSearchToolbar }}
+                        slots={{toolbar: QuickSearchToolbar}}
                         getRowId={(row) => row.id}
                         sx={{
                             "& .MuiDataGrid-columnHeaders": {
@@ -673,8 +673,8 @@ export default function Danisanlarim() {
             </Dialog>
 
             {/* Edit Confirmation Dialog */}
-            <Dialog 
-                open={editDialogOpen} 
+            <Dialog
+                open={editDialogOpen}
                 onClose={handleEditCancel}
                 PaperProps={{
                     sx: {
@@ -684,7 +684,7 @@ export default function Danisanlarim() {
                     }
                 }}
             >
-                <DialogTitle sx={{ 
+                <DialogTitle sx={{
                     background: 'linear-gradient(135deg, #6B8DD6 0%, #4B6CB7 100%)',
                     color: 'white',
                     py: 2,
@@ -693,18 +693,18 @@ export default function Danisanlarim() {
                     alignItems: 'center',
                     gap: 1
                 }}>
-                    <EditIcon sx={{ fontSize: 28 }} />
+                    <EditIcon sx={{fontSize: 28}}/>
                     <Typography variant="h6" component="span">
                         Düzenleme Onayı
                     </Typography>
                 </DialogTitle>
-                <DialogContent sx={{ p: 0 }}>
-                    <Box sx={{ p: 3 }}>
-                        <Typography variant="subtitle1" sx={{ mb: 2, color: 'text.secondary' }}>
+                <DialogContent sx={{p: 0}}>
+                    <Box sx={{p: 3}}>
+                        <Typography variant="subtitle1" sx={{mb: 2, color: 'text.secondary'}}>
                             Aşağıdaki değişiklikleri onaylıyor musunuz?
                         </Typography>
                         {pendingEdit && (
-                            <Box sx={{ 
+                            <Box sx={{
                                 mt: 2,
                                 '& > :not(:last-child)': {
                                     borderBottom: '1px solid',
@@ -715,9 +715,9 @@ export default function Danisanlarim() {
                             }}>
                                 {Object.entries(pendingEdit.changes).map(([field, values]) => (
                                     <Box key={field}>
-                                        <Typography 
-                                            variant="body2" 
-                                            sx={{ 
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
                                                 color: 'text.secondary',
                                                 fontWeight: 500,
                                                 mb: 1
@@ -725,13 +725,13 @@ export default function Danisanlarim() {
                                         >
                                             {field}
                                         </Typography>
-                                        <Box sx={{ 
+                                        <Box sx={{
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 2
                                         }}>
-                                            <Paper 
-                                                sx={{ 
+                                            <Paper
+                                                sx={{
                                                     flex: 1,
                                                     p: 1.5,
                                                     background: '#fff5f5',
@@ -743,9 +743,9 @@ export default function Danisanlarim() {
                                                     {values.old || '(boş)'}
                                                 </Typography>
                                             </Paper>
-                                            <ArrowForward sx={{ color: 'text.secondary' }} />
-                                            <Paper 
-                                                sx={{ 
+                                            <ArrowForward sx={{color: 'text.secondary'}}/>
+                                            <Paper
+                                                sx={{
                                                     flex: 1,
                                                     p: 1.5,
                                                     background: '#f0f7f0',
@@ -764,29 +764,29 @@ export default function Danisanlarim() {
                         )}
                     </Box>
                 </DialogContent>
-                <DialogActions sx={{ 
+                <DialogActions sx={{
                     p: 3,
                     pt: 2,
                     borderTop: '1px solid',
                     borderColor: 'divider'
                 }}>
-                    <Button 
+                    <Button
                         onClick={handleEditCancel}
                         variant="outlined"
                         color="inherit"
-                        startIcon={<CloseIcon />}
-                        sx={{ 
+                        startIcon={<CloseIcon/>}
+                        sx={{
                             borderRadius: 2,
                             px: 3
                         }}
                     >
                         Vazgeç
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleEditConfirm}
                         variant="contained"
-                        startIcon={<CheckCircleOutline />}
-                        sx={{ 
+                        startIcon={<CheckCircleOutline/>}
+                        sx={{
                             borderRadius: 2,
                             px: 3,
                             background: 'linear-gradient(135deg, #23B6E6 0%, #02A4D3 100%)',
@@ -803,9 +803,9 @@ export default function Danisanlarim() {
             {/* QR Dialog */}
             <Dialog open={qrDialogOpen} onClose={closeQrDialog} maxWidth="xs" fullWidth>
                 <DialogTitle>QR Kodunuz</DialogTitle>
-                <DialogContent dividers sx={{ display: "flex", justifyContent: "center" }}>
+                <DialogContent dividers sx={{display: "flex", justifyContent: "center"}}>
                     {qrData ? (
-                        <img src={qrData} alt="Dietisyen QR" style={{ maxWidth: "100%" }} />
+                        <img src={qrData} alt="Dietisyen QR" style={{maxWidth: "100%"}}/>
                     ) : (
                         <Typography>Yükleniyor…</Typography>
                     )}
@@ -821,35 +821,35 @@ export default function Danisanlarim() {
             </Dialog>
 
             {/* Create Client Dialog */}
-            <Dialog 
-                open={createDialogOpen} 
+            <Dialog
+                open={createDialogOpen}
                 onClose={closeCreateDialog}
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle sx={{ 
-                    backgroundColor: 'primary.main', 
+                <DialogTitle sx={{
+                    backgroundColor: 'primary.main',
                     color: 'white',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <GroupAdd />
+                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <GroupAdd/>
                         <Typography variant="h6">Yeni Danışan Ekle</Typography>
                     </Box>
-                    <IconButton 
-                        edge="end" 
-                        color="inherit" 
+                    <IconButton
+                        edge="end"
+                        color="inherit"
                         onClick={closeCreateDialog}
                         aria-label="close"
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
                 <form onSubmit={handleCreateSubmit}>
                     <DialogContent dividers>
-                        <Stack spacing={3} sx={{ mt: 1 }}>
+                        <Stack spacing={3} sx={{mt: 1}}>
                             <TextField
                                 label="İsim Soyisim"
                                 name="name"
@@ -862,7 +862,7 @@ export default function Danisanlarim() {
                                 placeholder="Danışanın adı ve soyadı"
                                 variant="outlined"
                             />
-                            
+
                             <TextField
                                 label="Telefon Numarası"
                                 name="phoneNumber"
@@ -880,7 +880,7 @@ export default function Danisanlarim() {
                                     ),
                                 }}
                             />
-                            
+
                             <TextField
                                 label="Şifre"
                                 name="password"
@@ -899,7 +899,7 @@ export default function Danisanlarim() {
                                                 onClick={togglePasswordVisibility}
                                                 edge="end"
                                             >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                {showPassword ? <VisibilityOff/> : <Visibility/>}
                                             </IconButton>
                                             <IconButton
                                                 onClick={generatePassword}
@@ -907,13 +907,13 @@ export default function Danisanlarim() {
                                                 color="primary"
                                                 title="Otomatik şifre oluştur"
                                             >
-                                                <AutorenewIcon />
+                                                <AutorenewIcon/>
                                             </IconButton>
                                         </InputAdornment>
                                     ),
                                 }}
                             />
-                            
+
                             <TextField
                                 label="E-posta Adresi"
                                 name="email"
@@ -926,7 +926,7 @@ export default function Danisanlarim() {
                                 placeholder="ornek@domain.com"
                                 variant="outlined"
                             />
-                            
+
                             <FormControl fullWidth>
                                 <InputLabel id="gender-label">Cinsiyet</InputLabel>
                                 <Select
@@ -942,18 +942,18 @@ export default function Danisanlarim() {
                             </FormControl>
                         </Stack>
                     </DialogContent>
-                    <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
-                        <Button 
-                            onClick={closeCreateDialog} 
+                    <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
+                        <Button
+                            onClick={closeCreateDialog}
                             variant="outlined"
-                            startIcon={<CloseIcon />}
+                            startIcon={<CloseIcon/>}
                         >
                             İptal
                         </Button>
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             variant="contained"
-                            startIcon={<GroupAdd />}
+                            startIcon={<GroupAdd/>}
                         >
                             Danışan Ekle
                         </Button>
@@ -962,16 +962,16 @@ export default function Danisanlarim() {
             </Dialog>
 
             {/* Success/Error Notification */}
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={6000} 
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
                 onClose={handleSnackbarClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
             >
-                <Alert 
-                    onClose={handleSnackbarClose} 
+                <Alert
+                    onClose={handleSnackbarClose}
                     severity={snackbar.severity}
-                    sx={{ width: '100%' }}
+                    sx={{width: '100%'}}
                 >
                     {snackbar.message}
                 </Alert>

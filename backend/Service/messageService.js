@@ -1,6 +1,6 @@
 const Exception = require("../Exception/Exception");
 const {Message} = require("../Model/MainModel");
-const {DIETITIAN, CLIENT} =  require("../Enum/Role");
+const {DIETITIAN, CLIENT} = require("../Enum/Role");
 
 class MessageService {
 
@@ -9,14 +9,14 @@ class MessageService {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
 
-        if(user_role === DIETITIAN) {
+        if (user_role === DIETITIAN) {
             return await Message.findAll({
-                where: { dietitian_id: user_id, sender: user_role },
+                where: {dietitian_id: user_id, sender: user_role},
                 order: [['createdAt', 'ASC']]
             });
-        } else if(user_role === CLIENT) {
+        } else if (user_role === CLIENT) {
             return await Message.findAll({
-                where: { client_id: user_id, sender: user_role },
+                where: {client_id: user_id, sender: user_role},
                 order: [['createdAt', 'ASC']]
             });
         } else {

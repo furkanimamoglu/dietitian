@@ -1,6 +1,6 @@
 const Exception = require("../Exception/Exception");
 const {Invoice, Recipe, Client} = require("../Model/MainModel");
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 
 class InvoiceService {
 
@@ -12,7 +12,7 @@ class InvoiceService {
         const now = new Date();
 
         await Invoice.update(
-            { status: 'cancelled' },
+            {status: 'cancelled'},
             {
                 where: {
                     dietitian_id,
@@ -25,8 +25,8 @@ class InvoiceService {
         );
 
         return await Invoice.findAll({
-            where: { dietitian_id },
-            include: [{ model: Client, attributes: ['name'] }],
+            where: {dietitian_id},
+            include: [{model: Client, attributes: ['name']}],
             order: [['dueDate', 'DESC']]
         });
     }
@@ -102,7 +102,7 @@ class InvoiceService {
 
         await invoice.destroy();
 
-        return { success: true, message: "Fatura başarıyla silindi." };
+        return {success: true, message: "Fatura başarıyla silindi."};
     }
 
 }

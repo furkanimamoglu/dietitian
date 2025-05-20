@@ -27,10 +27,10 @@ class ClientService {
                     phoneNumber: client.phoneNumber,
                 },
                 config.secretkey,
-                { expiresIn: '24h' }
+                {expiresIn: '24h'}
             );
 
-            await client.update({ token });
+            await client.update({token});
 
             return {
                 ...client.dataValues,
@@ -70,7 +70,7 @@ class ClientService {
                 config.secretkey
             );
 
-            await client.update({ token });
+            await client.update({token});
 
             return {
                 ...client.dataValues,
@@ -88,7 +88,7 @@ class ClientService {
             }
 
             const client = await Client.findOne({
-                where: { id: user_id },
+                where: {id: user_id},
                 attributes: {
                     exclude: ["password", "createdAt", "updatedAt"]
                 }
@@ -111,7 +111,7 @@ class ClientService {
             }
 
             const notifications = await Notification.findAll({
-                where: { phoneNumber: phoneNumber }
+                where: {phoneNumber: phoneNumber}
             });
 
             if (!notifications || notifications.length === 0) {
@@ -131,9 +131,9 @@ class ClientService {
             }
 
             const [affectedRows] = await Notification.update(
-                { isRead: true },
+                {isRead: true},
                 {
-                    where: { phoneNumber: phoneNumber, isRead: false }
+                    where: {phoneNumber: phoneNumber, isRead: false}
                 }
             );
 
@@ -153,8 +153,8 @@ class ClientService {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: clientId,
-                start_date: { [Op.lte]: todayDate },
-                end_date: { [Op.gte]: todayDate }
+                start_date: {[Op.lte]: todayDate},
+                end_date: {[Op.gte]: todayDate}
             },
             include: [
                 {
@@ -179,15 +179,15 @@ class ClientService {
                         // Get the meal items based on the format
                         let mealItems = [];
                         const mealData = assignment.NutritionPlan.mealPlan[day][mealType];
-                        
+
                         // Handle complex format with main and alternatives
                         if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
                             mealItems = [...mealData.main];
-                        } 
+                        }
                         // Handle simple array format
                         else if (Array.isArray(mealData)) {
                             mealItems = [...mealData];
-                        } 
+                        }
                         // Handle string format (backward compatibility)
                         else if (typeof mealData === 'string') {
                             mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
@@ -200,7 +200,7 @@ class ClientService {
                         }));
                     });
                 });
-                
+
                 // Update the assignment with the new format
                 assignment.mealPlan = transformedMealPlan;
                 await assignment.save();
@@ -226,21 +226,21 @@ class ClientService {
         if (newMealPlan) {
             Object.keys(newMealPlan).forEach(day => {
                 if (!newMealPlan[day]) return;
-                
+
                 Object.keys(newMealPlan[day]).forEach(mealType => {
                     const meals = newMealPlan[day][mealType];
-                    
+
                     // Check if it's using the new format with 'isim' and 'yenildi' fields
                     if (Array.isArray(meals) && meals.length > 0) {
                         if (!meals.every(meal => meal.hasOwnProperty('isim') && meal.hasOwnProperty('yenildi'))) {
                             // Transform to new format if using old format
                             newMealPlan[day][mealType] = meals.map(meal => {
                                 if (typeof meal === 'string') {
-                                    return { isim: meal, yenildi: false };
+                                    return {isim: meal, yenildi: false};
                                 } else if (typeof meal === 'object' && !meal.hasOwnProperty('isim')) {
                                     // If it's an object but doesn't have the right structure
                                     const key = Object.keys(meal)[0] || '';
-                                    return { isim: key || meal.toString(), yenildi: false };
+                                    return {isim: key || meal.toString(), yenildi: false};
                                 }
                                 return meal;
                             });
@@ -259,7 +259,7 @@ class ClientService {
     static async getMyKVKKStatus(client_id) {
         try {
             const client = await Client.findOne({
-                where: { id: client_id },
+                where: {id: client_id},
                 attributes: ['kvkkApproval']
             });
 

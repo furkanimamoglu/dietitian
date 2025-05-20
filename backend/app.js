@@ -20,6 +20,7 @@ const messageRoutes = require('./Routes/messageRoutes');
 const measurementRoutes = require('./Routes/measurementRoutes');
 const recipeRoutes = require('./Routes/recipeRoutes');
 const exerciseRoutes = require('./Routes/exerciseRoutes');
+const anamnesRoutes = require('./Routes/anamnesRoutes');
 const packageRoutes = require('./Routes/packageRoutes');
 
 app.use(bodyParser.json());
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 app.use('/dietitian', dietitianRoutes);
 app.use('/client', clientRoutes);
 app.use('/appointment', appointmentRoutes);
+app.use('/anamnes', anamnesRoutes);
 app.use('/message', messageRoutes);
 app.use('/recipe', recipeRoutes);
 app.use('/exercise', exerciseRoutes);

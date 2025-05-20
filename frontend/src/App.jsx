@@ -10,7 +10,7 @@ import {BrowserRouter as Router} from 'react-router-dom'
 import Routing from './routes/Routing'
 
 // Toast notifications
-import { Toaster } from 'react-hot-toast';
+import {Toaster} from 'react-hot-toast';
 
 export default function App() {
     return (
@@ -18,7 +18,7 @@ export default function App() {
             <Box display="flex" flexDirection="column" minHeight="100vh">
                 <CssBaseline/>
                 <Routing/>
-                <Toaster 
+                <Toaster
                     position="bottom-right"
                     toastOptions={{
                         success: {

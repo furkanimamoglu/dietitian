@@ -10,43 +10,34 @@ const Anamnes = sequelize.define('Anamnes', {
             allowNull: false,
             primaryKey: true
         },
-        client_id: DataTypes.INTEGER,
-        kronik_hastaliklar: {
-            type: DataTypes.STRING,
-            allowNull: true
+        dietitian_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         },
-        alerjiler: {
-            type: DataTypes.STRING,
-            allowNull: true
+        client_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         },
-        ilac_kullanimi: {
-            type: DataTypes.STRING,
-            allowNull: true
+        saglik_bilgileri: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: {}
         },
-        ameliyatlar: {
-            type: DataTypes.STRING,
-            allowNull: true
+        diyet_aliskanliklari: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: {}
         },
-        aile_saglik_gecmisi: {
-            type: DataTypes.STRING,
-            allowNull: true
+        fiziksel_aktivite: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: {}
         },
-        kan_degerleri: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        gunluk_su_tuketimi: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        ogun_duzeni: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        favori_yiyecekler: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
+        ozel_notlar: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: {}
+        }
     }
 );
 

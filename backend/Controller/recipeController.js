@@ -98,7 +98,7 @@ class recipeController {
                 yag
             } = req.body;
 
-            const result = await RecipeService.updateRecipe(dietitian_id, recipe_id,{
+            const result = await RecipeService.updateRecipe(dietitian_id, recipe_id, {
                 name,
                 description,
                 category_id,
@@ -125,7 +125,7 @@ class recipeController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { recipe_id } = req.query;
+            const {recipe_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -175,7 +175,7 @@ class recipeController {
                 });
             }
 
-            const { recipe_category_name } = req.body;
+            const {recipe_category_name} = req.body;
 
             const result = await RecipeService.addRecipeCategory(dietitian_id, recipe_category_name);
             res.status(200).json(result);
@@ -198,7 +198,7 @@ class recipeController {
                 });
             }
 
-            const { recipe_category_id, recipe_category_name } = req.body;
+            const {recipe_category_id, recipe_category_name} = req.body;
 
             const result = await RecipeService.updateRecipeCategory(dietitian_id, recipe_category_id, recipe_category_name);
             res.status(200).json(result);
@@ -215,7 +215,7 @@ class recipeController {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
 
-            const { recipe_category_id } = req.query;
+            const {recipe_category_id} = req.query;
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({

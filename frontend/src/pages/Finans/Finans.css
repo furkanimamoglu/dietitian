@@ -407,23 +407,23 @@
     .finans-container {
         padding: 16px;
     }
-    
+
     .stats-cards {
         margin-bottom: 24px;
     }
-    
+
     .MuiTab-root {
         min-width: auto;
     }
-    
+
     .stat-amount {
         font-size: 1.8rem;
     }
-    
+
     .invoice-amount {
         font-size: 1.6rem;
     }
-    
+
     .search-filters {
         flex-wrap: wrap;
         gap: 16px;
@@ -442,15 +442,15 @@
     .finans-container {
         padding: 12px;
     }
-    
+
     .page-title {
         font-size: 1.5rem;
     }
-    
+
     .stat-amount {
         font-size: 1.6rem;
     }
-    
+
     .invoice-amount, .package-price {
         font-size: 1.4rem;
     }
@@ -813,11 +813,11 @@
         flex-direction: column;
         gap: 16px;
     }
-    
+
     .form-group {
         width: 100%;
     }
-    
+
     .custom-modal {
         width: 95%;
         max-height: 95vh;
