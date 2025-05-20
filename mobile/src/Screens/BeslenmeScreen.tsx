@@ -23,14 +23,12 @@ import {
     Surface,
     Chip,
     Divider,
-    Avatar,
-    Badge
+    Avatar
 } from 'react-native-paper';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
 import config from '../../config.js';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface MealItem {
     item: string;
