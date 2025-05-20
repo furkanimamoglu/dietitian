@@ -85,6 +85,9 @@ function Danisan() {
     const [appointments, setAppointments] = useState([]);
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
 
+    const [anamnezData, setAnamnezData] = useState(null);
+    const [anamnezLoading, setAnamnezLoading] = useState(false);
+
     const [assignedExercises, setAssignedExercises] = useState([]);
     const [assignedExercisesLoading, setAssignedExercisesLoading] = useState(false);
     const [assignForm, setAssignForm] = useState({
@@ -214,6 +217,37 @@ function Danisan() {
         setSuccessMessage("Kan tahlili dosyası başarıyla silindi.");
         setShowSuccessPopup(true);
     };
+
+    const fetchAnamnezData = async () => {
+        try {
+            setAnamnezLoading(true);
+            const response = await axios.get(
+                `${config[config.environment].apiUrl}/anamnes/getAnamnes`,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id
+                    }
+                }
+            );
+            setAnamnezData(response.data);
+        } catch (error) {
+            console.error("Anamnez verileri yüklenirken hata oluştu:", error);
+            setErrorMessage("Anamnez verileri yüklenirken bir hata oluştu.");
+            setShowErrorPopup(true);
+        } finally {
+            setAnamnezLoading(false);
+        }
+    };
+
+    // useEffect içerisinde anamnez verilerini çekelim
+    useEffect(() => {
+        if (activeTab === 'anamnez' && id) {
+            fetchAnamnezData();
+        }
+    }, [activeTab, id]);
 
     useEffect(() => {
         // Burada API'den kan tahlili verilerini çekebilirsiniz
@@ -867,145 +901,418 @@ function Danisan() {
             case 'anamnez':
                 return (
                     <Box>
-                        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
-                            <Typography variant="h5" sx={{fontWeight: 'bold', color: theme.palette.primary.main}}>
-                            </Typography>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<AddIcon/>}
-                                onClick={() => {
-                                    setSuccessMessage(`Anamnez başarıyla eklendi.`);
-                                    setShowSuccessPopup(true);
-                                }}
-                            >
-                                Yeni Anamnez
-                            </Button>
-                        </Box>
+                        {anamnezLoading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : anamnezData ? (
+                            <>
+                                {/* Sağlık Bilgileri Akordiyonu */}
+                                <Accordion elevation={3} sx={{mb: 2}} defaultExpanded>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon/>}
+                                        sx={{
+                                            bgcolor: 'primary.light',
+                                            color: 'primary.contrastText',
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: '100%'
+                                        }}>
+                                            <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                                                Sağlık Bilgileri
+                                            </Typography>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                <Chip
+                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
+                                                    size="small"
+                                                    color="primary"
+                                                    sx={{mr: 1}}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Kronik Hastalıklar"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        action={
+                                                            <IconButton
+                                                                size="small"
+                                                                color="primary"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleOpenEditAnamnezDialog();
+                                                                }}
+                                                            >
+                                                                <EditIcon fontSize="small" />
+                                                            </IconButton>
+                                                        }
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.saglik_bilgileri.kronik_hastaliklar || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
 
-                        {/* Sağlık Bilgileri Akordiyonu */}
-                        <Accordion elevation={3} sx={{mb: 2}}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon/>}
-                                sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    width: '100%'
-                                }}>
-                                    <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-                                        Sağlık Bilgileri
-                                    </Typography>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                        <Chip
-                                            label="Son Güncelleme: 15.05.2023"
-                                            size="small"
-                                            color="primary"
-                                            sx={{mr: 1}}
-                                        />
-                                        <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<EditIcon/>}
-                                            onClick={() => {
-                                            }}
-                                            color="primary"
-                                            sx={{fontWeight: 'bold', color: 'white', boxShadow: 1}}
-                                        >
-                                            Düzenle
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Kronik Hastalıklar"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
-                                                    <Chip label="Hipertansiyon" size="small" color="primary"
-                                                          variant="outlined"/>
-                                                    <Chip label="Tip 2 Diyabet" size="small" color="primary"
-                                                          variant="outlined"/>
-                                                </Box>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Alerjiler"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.saglik_bilgileri.alerjiler || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
 
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Alerjiler"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Laktoz intoleransı, Fındık alerjisi
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="İlaç Kullanımı"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.saglik_bilgileri.ilac_kullanimi || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
 
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="İlaç Kullanımı"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Metformin 500mg (günde 2 kez)
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Geçmiş Ameliyatlar"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.saglik_bilgileri.gecmis_ameliyatlar || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
 
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Geçmiş Ameliyatlar"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Apendektomi (2015)
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Aile Sağlık Geçmişi"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.saglik_bilgileri.aile_saglik_gecmisi || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
 
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Aile Sağlık Geçmişi"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Anne: Hipertansiyon<br/>
-                                                    Baba: Kalp hastalığı
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </AccordionDetails>
-                        </Accordion>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Uyku"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.saglik_bilgileri.uyku || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Accordion>
+
+                                {/* Diyet Alışkanlıkları Akordiyonu */}
+                                <Accordion elevation={3} sx={{mb: 2}}>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon/>}
+                                        sx={{
+                                            bgcolor: 'warning.light',
+                                            color: 'warning.contrastText',
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: '100%'
+                                        }}>
+                                            <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                                                Diyet Alışkanlıkları
+                                            </Typography>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                <Chip
+                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
+                                                    size="small"
+                                                    color="warning"
+                                                    sx={{mr: 1}}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Günlük Su Tüketimi"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.diyet_aliskanliklari.gunluk_su_tuketimi || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Öğün Düzeni"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                                                            {anamnezData.diyet_aliskanliklari.ogun_duzeni || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Favori Yiyecekler"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.diyet_aliskanliklari.favori_yiyecekler || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Sevmediği Yiyecekler"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.diyet_aliskanliklari.sevilmeyen_yiyecekler || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Atıştırmalık Alışkanlıkları"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.diyet_aliskanliklari.atistirmalik_aliskanliklari || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Dışarıda Yemek"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.diyet_aliskanliklari.disarida_yemek || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Accordion>
+
+                                {/* Fiziksel Aktivite Akordiyonu */}
+                                <Accordion elevation={3} sx={{mb: 2}}>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon/>}
+                                        sx={{
+                                            bgcolor: 'info.light',
+                                            color: 'info.contrastText',
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: '100%'
+                                        }}>
+                                            <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                                                Fiziksel Aktivite
+                                            </Typography>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                <Chip
+                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
+                                                    size="small"
+                                                    color="info"
+                                                    sx={{mr: 1}}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Aktivite Seviyesi"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.fiziksel_aktivite.aktivite_seviyesi || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Egzersiz Alışkanlıkları"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.fiziksel_aktivite.egzersiz_aliskanliklari || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Sevdiği Sporlar"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.fiziksel_aktivite.sevdigi_sporlar || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Card variant="outlined" sx={{height: '100%'}}>
+                                                    <CardHeader
+                                                        title="Mesleği ve Aktivite Durumu"
+                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                    />
+                                                    <CardContent>
+                                                        <Typography variant="body2">
+                                                            {anamnezData.fiziksel_aktivite.meslek_ve_aktivite_durumu || "Belirtilmemiş"}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        </Grid>
+                                    </AccordionDetails>
+                                </Accordion>
+
+                                {/* Özel Notlar */}
+                                <Accordion elevation={3}>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon/>}
+                                        sx={{
+                                            bgcolor: '#7c4dff',
+                                            color: '#fff',
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: '100%'
+                                        }}>
+                                            <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                                                Özel Notlar
+                                            </Typography>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                <Chip
+                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
+                                                    size="small"
+                                                    sx={{mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff'}}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        <Paper variant="outlined" sx={{p: 2}}>
+                                            <Typography variant="body2">
+                                                {anamnezData.ozel_notlar || "Özel not bulunmuyor."}
+                                            </Typography>
+                                        </Paper>
+                                    </AccordionDetails>
+                                </Accordion>
+                            </>
+                        ) : (
+                            <Box sx={{ textAlign: 'center', mt: 4 }}>
+                                <Typography variant="h6" color="text.secondary">
+                                    Bu danışan için anamnez verisi bulunamadı.
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    sx={{ mt: 2 }}
+                                    onClick={() => {
+                                        // Anamnez ekleme fonksiyonu burada olacak
+                                    }}
+                                >
+                                    <AddIcon sx={{ mr: 1 }} />
+                                    Anamnez Ekle
+                                </Button>
+                            </Box>
+                        )}
+
                         {/* Kan Tahlili Akordiyonu */}
                         <Accordion elevation={3} sx={{mb: 2}}>
                             <AccordionSummary
@@ -1038,6 +1345,7 @@ function Danisan() {
                                             variant="contained"
                                             size="small"
                                             startIcon={<AddIcon/>}
+                                            onClick={(e) => e.stopPropagation()}
                                             color="error"
                                             sx={{fontWeight: 'bold', color: 'white', boxShadow: 1}}
                                         >
@@ -1121,337 +1429,6 @@ function Danisan() {
                                         </Typography>
                                     </Box>
                                 )}
-                            </AccordionDetails>
-                        </Accordion>
-
-                        {/* Kan Tahlili PDF Görüntüleme Dialog */}
-                        <Dialog
-                            open={isPdfViewOpen}
-                            onClose={() => setIsPdfViewOpen(false)}
-                            maxWidth="md"
-                            fullWidth
-                        >
-                            <DialogTitle>
-                                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                                    <Typography variant="h6">
-                                        {selectedFile ? `Kan Tahlili - ${new Date(selectedFile.uploadDate).toLocaleDateString('tr-TR')}` : 'Kan Tahlili'}
-                                    </Typography>
-                                    <IconButton onClick={() => setIsPdfViewOpen(false)}>
-                                        <CloseIcon/>
-                                    </IconButton>
-                                </Box>
-                            </DialogTitle>
-                            <DialogContent>
-                                {selectedFile && (
-                                    <Box sx={{height: '70vh', width: '100%'}}>
-                                        <iframe
-                                            src={selectedFile.fileUrl || URL.createObjectURL(selectedFile.file)}
-                                            width="100%"
-                                            height="100%"
-                                            title="PDF Görüntüleyici"
-                                            style={{border: 'none'}}
-                                        />
-                                    </Box>
-                                )}
-                            </DialogContent>
-                        </Dialog>
-
-                        {/* Diyet Alışkanlıkları Akordiyonu */}
-                        <Accordion elevation={3} sx={{mb: 2}}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon/>}
-                                sx={{
-                                    bgcolor: 'warning.light',
-                                    color: 'warning.contrastText',
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    width: '100%'
-                                }}>
-                                    <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-                                        Diyet Alışkanlıkları
-                                    </Typography>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                        <Chip
-                                            label="Son Güncelleme: 12.05.2023"
-                                            size="small"
-                                            color="warning"
-                                            sx={{mr: 1}}
-                                        />
-                                        <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<EditIcon/>}
-                                            onClick={() => {
-                                            }}
-                                            color="warning"
-                                            sx={{fontWeight: 'bold', color: 'white', boxShadow: 1}}
-                                        >
-                                            Düzenle
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Günlük Su Tüketimi"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    4-5 bardak (yetersiz)
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Öğün Düzeni"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Sabah: Genellikle atlanıyor<br/>
-                                                    Öğle: Hafif yemek<br/>
-                                                    Akşam: Ağır ve geç yemek
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Favori Yiyecekler"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Makarna, beyaz ekmek, şekerli içecekler
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Sevmediği Yiyecekler"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Brokoli, karnabahar, ıspanak
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Atıştırmalık Alışkanlıkları"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Akşam TV izlerken tatlı ve cips tüketimi
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Dışarıda Yemek"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Haftada 3-4 kez fast-food tüketimi
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </AccordionDetails>
-                        </Accordion>
-
-                        {/* Fiziksel Aktivite Akordiyonu */}
-                        <Accordion elevation={3} sx={{mb: 2}}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon/>}
-                                sx={{
-                                    bgcolor: 'info.light',
-                                    color: 'info.contrastText',
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    width: '100%'
-                                }}>
-                                    <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-                                        Fiziksel Aktivite
-                                    </Typography>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                        <Chip
-                                            label="Son Güncelleme: 10.05.2023"
-                                            size="small"
-                                            color="info"
-                                            sx={{mr: 1}}
-                                        />
-                                        <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<EditIcon/>}
-                                            onClick={() => {
-                                            }}
-                                            color="info"
-                                            sx={{fontWeight: 'bold', color: 'white', boxShadow: 1}}
-                                        >
-                                            Düzenle
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Aktivite Seviyesi"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Sedanter (masa başı çalışma)
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Egzersiz Alışkanlıkları"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Haftada 1 kez yürüyüş (30 dakika)
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Sevdiği Sporlar"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Yüzme, bisiklet
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
-                                            <CardHeader
-                                                title="Mesleği ve Aktivite Durumu"
-                                                titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
-                                                sx={{bgcolor: 'grey.100', py: 1}}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="body2">
-                                                    Yazılım Geliştirici (8+ saat oturarak çalışma)
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </AccordionDetails>
-                        </Accordion>
-
-                        {/* Özel Notlar */}
-                        <Accordion elevation={3}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon/>}
-                                sx={{
-                                    bgcolor: '#7c4dff',
-                                    color: '#fff',
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    width: '100%'
-                                }}>
-                                    <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-                                        Özel Notlar
-                                    </Typography>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                        <Chip
-                                            label="Son Güncelleme: 10.05.2023"
-                                            size="small"
-                                            sx={{mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff'}}
-                                        />
-                                        <Button
-                                            component="span"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<EditIcon/>}
-                                            onClick={() => {
-                                            }}
-                                            sx={{
-                                                fontWeight: 'bold',
-                                                color: 'white',
-                                                boxShadow: 1,
-                                                bgcolor: '#9575cd',
-                                                '&:hover': {bgcolor: '#5e35b1'}
-                                            }}
-                                        >
-                                            Düzenle
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Paper variant="outlined" sx={{p: 2}}>
-                                    <Typography variant="body2">
-                                        Danışan iş hayatında yoğun stres yaşıyor. Akşamları geç saatlerde yemek yeme
-                                        alışkanlığı var.
-                                        Diyetisyen randevularına düzenli geliyor ancak beslenme planına uyumda zaman
-                                        zaman zorluklar yaşıyor.
-                                        Hafta sonları sosyal hayatında beslenme düzenini korumakta zorlanıyor.
-                                    </Typography>
-                                </Paper>
                             </AccordionDetails>
                         </Accordion>
                     </Box>

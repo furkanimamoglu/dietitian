@@ -5,7 +5,7 @@ class AnamnesService {
 
     static async getAnamnes(dietitian_id, client_id) {
         try {
-            const anamnes = await Anamnes.findAll({
+            const anamnes = await Anamnes.findOne({
                 where: {
                     dietitian_id: dietitian_id,
                     client_id: client_id
