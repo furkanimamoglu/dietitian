@@ -13,7 +13,7 @@ class AnamnesService {
             });
 
             if (!anamnes) {
-                throw new Exception('Anamnes bulunamadı.', 404, true);
+                return null;
             }
 
             return anamnes;

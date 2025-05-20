@@ -120,7 +120,6 @@ function Danisan() {
         setIsPdfViewOpen(true);
     };
 
-    // PDF görüntüleme modalını kapatma fonksiyonu
     const handleClosePdfView = () => {
         setIsPdfViewOpen(false);
         setSelectedFile(null);
@@ -1384,9 +1383,7 @@ function Danisan() {
                                     variant="contained"
                                     color="primary"
                                     sx={{ mt: 2 }}
-                                    onClick={() => {
-                                        // Anamnez ekleme fonksiyonu burada olacak
-                                    }}
+                                    onClick={handleOpenAnamnezDialog}
                                 >
                                     <AddIcon sx={{ mr: 1 }} />
                                     Anamnez Ekle
