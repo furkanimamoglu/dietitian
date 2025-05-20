@@ -1,4 +1,4 @@
-const {Client, Dietitian, Notification, NutritionAssignment, NutritionPlan} = require("../Model/MainModel");
+const {Client, Dietitian, Notification, NutritionAssignment, NutritionPlan, Measurement} = require("../Model/MainModel");
 const Exception = require("../Exception/Exception");
 const jwt = require("jsonwebtoken");
 const config = require("../config.json");
@@ -84,7 +84,7 @@ class ClientService {
     static async getClientInfo(user_id) {
         try {
             if (!user_id) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const client = await Client.findOne({
@@ -95,7 +95,7 @@ class ClientService {
             });
 
             if (!client) {
-                throw new Error("Diyetisyen bulunamadı.");
+                throw new Exception("Diyetisyen bulunamadı.");
             }
 
             return client;
@@ -107,7 +107,7 @@ class ClientService {
     static async getMyNotifications(phoneNumber) {
         try {
             if (!phoneNumber) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const notifications = await Notification.findAll({
@@ -115,7 +115,7 @@ class ClientService {
             });
 
             if (!notifications || notifications.length === 0) {
-                throw new Error("Bildiriminiz yok.");
+                throw new Exception("Bildiriminiz yok.");
             }
 
             return notifications;
@@ -127,7 +127,7 @@ class ClientService {
     static async readMyAllNotifications(phoneNumber) {
         try {
             if (!phoneNumber) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const [affectedRows] = await Notification.update(
@@ -138,12 +138,33 @@ class ClientService {
             );
 
             if (affectedRows === 0) {
-                throw new Error("Okunmamış bildiriminiz yok.");
+                throw new Exception("Okunmamış bildiriminiz yok.");
             }
 
             return {
                 message: "Basarili"
             };
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    static async getMyLatestMeasurement(client_id) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
+            }
+
+            const measurement = await Measurement.findOne({
+                where: { client_id },
+                order: [['createdAt', 'DESC']]
+            });
+
+            if (!measurement) {
+                throw new Exception("Ölçüm verisi bulunamadı.");
+            }
+
+            return measurement;
         } catch (error) {
             throw new Exception(error.message, 400);
         }

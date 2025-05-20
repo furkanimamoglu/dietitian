@@ -16,6 +16,12 @@ const {width} = Dimensions.get('window');
 const AnaSayfa = ({navigation}: Props) => {
 
     const [userName, setUserName] = useState<string>('Yükleniyor...');
+    const [measurementInfo, setMeasurementInfo] = useState<{
+      kilo: number;
+      yag: number;
+      kas: number;
+      su: number;
+    } | null>(null);
     const [closestAppointment, setClosestAppointment] = useState<Date | null>(null);
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
 
@@ -89,6 +95,32 @@ const AnaSayfa = ({navigation}: Props) => {
         }
     };
 
+    const fetchMeasurementInfo = async () => {
+        try {
+            const response = await fetch(`${config.apiUrl}/client/getMyLatestMeasurement`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            const data = await response.json();
+            console.log(data);
+            if (response.ok) {
+                setMeasurementInfo({
+                    kilo: data.kilo,
+                    yag: data.yag,
+                    kas: data.kas,
+                    su: data.su
+                });
+            } else {
+                console.log('Ölçüm bilgisi alınamadı:', data.message);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    };
+
     const fetchAppointmentInfo = async () => {
         try {
             const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
@@ -119,16 +151,10 @@ const AnaSayfa = ({navigation}: Props) => {
 
     useEffect(() => {
         fetchAppointmentInfo();
+        fetchMeasurementInfo();
         fetchClientInfo();
         checkKVKKStatus();
     }, []);
-
-    const healthData = {
-        weight: 70,
-        muscleRate: 40,
-        fatRate: 20,
-        waterRate: 60
-    };
 
     const todayDate = new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'});
 
@@ -165,7 +191,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#e8f5e9'}]}>
                             <Icon name="weight-kilogram" size={22} color="#2e7d32"/>
                         </View>
-                        <Text style={styles.statValue}>{healthData.weight} kg</Text>
+                        <Text style={styles.statValue}>{measurementInfo?.kilo ?? '-'} kg</Text>
                         <Text style={styles.statLabel}>Ağırlık</Text>
                     </View>
 
@@ -173,7 +199,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#e3f2fd'}]}>
                             <Icon name="arm-flex" size={22} color="#1976d2"/>
                         </View>
-                        <Text style={styles.statValue}>%{healthData.muscleRate}</Text>
+                        <Text style={styles.statValue}>%{measurementInfo?.kas ?? '-'}</Text>
                         <Text style={styles.statLabel}>Kas</Text>
                     </View>
 
@@ -181,7 +207,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#fff3e0'}]}>
                             <Icon name="chart-bell-curve" size={22} color="#f57c00"/>
                         </View>
-                        <Text style={styles.statValue}>%{healthData.fatRate}</Text>
+                        <Text style={styles.statValue}>%{measurementInfo?.yag ?? '-'}</Text>
                         <Text style={styles.statLabel}>Yağ</Text>
                     </View>
 
@@ -189,7 +215,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#e0f7fa'}]}>
                             <Icon name="water-percent" size={22} color="#0288d1"/>
                         </View>
-                        <Text style={styles.statValue}>%{healthData.waterRate}</Text>
+                        <Text style={styles.statValue}>%{measurementInfo?.su ?? '-'}</Text>
                         <Text style={styles.statLabel}>Su</Text>
                     </View>
                 </Surface>
