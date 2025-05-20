@@ -17,4 +17,5 @@ const BloodTest = sequelize.define('BloodTest', {
     }
 );
 
+BloodTest.belongsTo(Client, { foreignKey: 'client_id' });
 module.exports = BloodTest;
