@@ -122,13 +122,13 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            if (!token || !client_id) {
                 return res.status(401).json({
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const result = await AppointmentService.getClientAppointments(client_id);
+            const result = await AppointmentService.fetchClientAppointments(client_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({

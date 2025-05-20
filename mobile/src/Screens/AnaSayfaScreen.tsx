@@ -16,6 +16,7 @@ const {width} = Dimensions.get('window');
 const AnaSayfa = ({navigation}: Props) => {
 
     const [userName, setUserName] = useState<string>('Yükleniyor...');
+    const [closestAppointment, setClosestAppointment] = useState<Date | null>(null);
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
 
     const checkKVKKStatus = async () => {
@@ -68,40 +69,67 @@ const AnaSayfa = ({navigation}: Props) => {
         }
     };
 
-    useEffect(() => {
-        const fetchClientInfo = async () => {
-            try {
-                const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': await AsyncStorage.getItem('token') || ''
-                    }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setUserName(data.name || 'Bilinmiyor');
-                } else {
-                    console.log('Kullanıcı bilgisi alınamadı:', data.message);
+    const fetchClientInfo = async () => {
+        try {
+            const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
                 }
-            } catch (error) {
-                console.error('Hata:', error);
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUserName(data.name || 'Bilinmiyor');
+            } else {
+                console.log('Kullanıcı bilgisi alınamadı:', data.message);
             }
-        };
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    };
 
+    const fetchAppointmentInfo = async () => {
+        try {
+            const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const approvedAppointments = data.filter(appt => appt.status === 'approved');
+
+                if (approvedAppointments.length > 0 && approvedAppointments[0].start) {
+                    setClosestAppointment(new Date(approvedAppointments[0].start));
+                } else {
+                    setClosestAppointment(null);
+                }
+            } else {
+                console.log('Kullanıcı bilgisi alınamadı:', data.message);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAppointmentInfo();
         fetchClientInfo();
         checkKVKKStatus();
     }, []);
 
     const healthData = {
-        weight: '70 kg',
-        muscleRate: '%40',
-        fatRate: '%20',
-        waterRate: '%60',
-        waterAmount: '1.5L / 2.5L'
+        weight: 70,
+        muscleRate: 40,
+        fatRate: 20,
+        waterRate: 60
     };
 
-    const waterPercentage = parseInt(healthData.waterRate.replace('%', ''));
     const todayDate = new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'});
 
     const weeklyProgress = [
@@ -137,7 +165,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#e8f5e9'}]}>
                             <Icon name="weight-kilogram" size={22} color="#2e7d32"/>
                         </View>
-                        <Text style={styles.statValue}>{healthData.weight}</Text>
+                        <Text style={styles.statValue}>{healthData.weight} kg</Text>
                         <Text style={styles.statLabel}>Ağırlık</Text>
                     </View>
 
@@ -145,7 +173,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#e3f2fd'}]}>
                             <Icon name="arm-flex" size={22} color="#1976d2"/>
                         </View>
-                        <Text style={styles.statValue}>{healthData.muscleRate}</Text>
+                        <Text style={styles.statValue}>%{healthData.muscleRate}</Text>
                         <Text style={styles.statLabel}>Kas</Text>
                     </View>
 
@@ -153,7 +181,7 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#fff3e0'}]}>
                             <Icon name="chart-bell-curve" size={22} color="#f57c00"/>
                         </View>
-                        <Text style={styles.statValue}>{healthData.fatRate}</Text>
+                        <Text style={styles.statValue}>%{healthData.fatRate}</Text>
                         <Text style={styles.statLabel}>Yağ</Text>
                     </View>
 
@@ -161,19 +189,30 @@ const AnaSayfa = ({navigation}: Props) => {
                         <View style={[styles.statIconContainer, {backgroundColor: '#e0f7fa'}]}>
                             <Icon name="water-percent" size={22} color="#0288d1"/>
                         </View>
-                        <Text style={styles.statValue}>{healthData.waterRate}</Text>
+                        <Text style={styles.statValue}>%{healthData.waterRate}</Text>
                         <Text style={styles.statLabel}>Su</Text>
                     </View>
                 </Surface>
 
                 <Card style={styles.card}>
-                    <Card.Title title="Gelecek Randevu Tarihiniz"/>
+                    <Card.Title title="Gelecek Randevu Tarihiniz" />
                     <Card.Content>
                         <View style={styles.randevuBilgi}>
-                            <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon}/>
+                            <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon} />
                             <View style={styles.randevuDetay}>
-                                <Text style={styles.randevuTarih}>25.05.2025</Text>
-                                <Text style={styles.randevuSaat}>14:30</Text>
+                                <Text style={styles.randevuTarih}>
+                                    {closestAppointment
+                                        ? closestAppointment.toLocaleDateString('tr-TR')
+                                        : 'Tarih yok'}
+                                </Text>
+                                <Text style={styles.randevuSaat}>
+                                    {closestAppointment
+                                        ? closestAppointment.toLocaleTimeString('tr-TR', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })
+                                        : 'Saat yok'}
+                                </Text>
                             </View>
                         </View>
                     </Card.Content>

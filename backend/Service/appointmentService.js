@@ -65,7 +65,7 @@ class AppointmentService {
 
         try {
             if (!title || !start || !end || !dietitian_id || !client_id) {
-                throw new Error("Tüm alanları doldurmanız gerekmektedir.");
+                throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
             const conflictingAppointments = await Appointment.findOne({
@@ -93,7 +93,7 @@ class AppointmentService {
             });
 
             if (conflictingAppointments) {
-                throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
+                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
             return await Appointment.create({
@@ -104,7 +104,7 @@ class AppointmentService {
                 client_id,
             });
         } catch (error) {
-            throw new Error(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
+            throw new Exception(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
     }
 
@@ -113,12 +113,12 @@ class AppointmentService {
 
         try {
             if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
-                throw new Error("Tüm alanları doldurmanız gerekmektedir.");
+                throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
             const existingAppointment = await Appointment.findByPk(appointment_id);
             if (!existingAppointment) {
-                throw new Error("Güncellemek istediğiniz randevu bulunamadı.");
+                throw new Exception("Güncellemek istediğiniz randevu bulunamadı.");
             }
 
             const conflictingAppointments = await Appointment.findOne({
@@ -147,7 +147,7 @@ class AppointmentService {
             });
 
             if (conflictingAppointments) {
-                throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
+                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
             await existingAppointment.update({
@@ -161,22 +161,23 @@ class AppointmentService {
 
             return existingAppointment;
         } catch (error) {
-            throw new Error(error.message || "Randevu güncellenirken bir hata meydana geldi.");
+            throw new Exception(error.message || "Randevu güncellenirken bir hata meydana geldi.");
         }
     }
 
-    static async getClientAppointments(client_id) {
+    static async fetchClientAppointments(client_id) {
         try {
             if (!client_id) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const appointments = await Appointment.findAll({
-                where: {client_id: client_id}
+                where: { client_id: client_id },
+                order: [['start', 'ASC']]
             });
 
             if (!appointments || appointments.length === 0) {
-                throw new Error("Şu anda herhangi bir randevu bulunmamaktadır.");
+                throw new Exception("Şu anda herhangi bir randevu bulunmamaktadır.");
             }
 
             return appointments;
@@ -185,10 +186,11 @@ class AppointmentService {
         }
     }
 
+
     static async approveAppointment(appointment_id, dietitian_id) {
         try {
             if (!appointment_id || !dietitian_id) {
-                throw new Error("Geçersiz randevu veya diyetisyen bilgisi.");
+                throw new Exception("Geçersiz randevu veya diyetisyen bilgisi.");
             }
 
             const appointment = await Appointment.findOne({
@@ -199,7 +201,7 @@ class AppointmentService {
             });
 
             if (!appointment) {
-                throw new Error("Randevu bulunamadı veya bu randevuyu onaylama yetkiniz yok.");
+                throw new Exception("Randevu bulunamadı veya bu randevuyu onaylama yetkiniz yok.");
             }
 
             await appointment.update({
@@ -208,7 +210,7 @@ class AppointmentService {
 
             return appointment;
         } catch (error) {
-            throw new Error(error.message || "Randevu onaylanırken bir hata meydana geldi.");
+            throw new Exception(error.message || "Randevu onaylanırken bir hata meydana geldi.");
         }
     }
 
