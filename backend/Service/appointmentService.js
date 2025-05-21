@@ -96,7 +96,7 @@ class AppointmentService {
     }
 
     static async updateAppointment(appointment_id, data) {
-        const {title, start, end, dietitian_id, client_id, status} = data;
+        const { title, start, end, dietitian_id, client_id, status } = data;
 
         try {
             if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
@@ -110,27 +110,13 @@ class AppointmentService {
 
             const conflictingAppointments = await Appointment.findOne({
                 where: {
-                    id: {[Op.ne]: appointment_id},
+                    id: { [Op.ne]: appointment_id },
                     dietitian_id: dietitian_id,
-                    [Op.or]: [
-                        {
-                            start: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            end: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            [Op.and]: [
-                                {start: {[Op.lte]: start}},
-                                {end: {[Op.gte]: end}},
-                            ],
-                        },
-                    ],
-                },
+                    [Op.and]: [
+                        { start: { [Op.lt]: end } },  // diğer randevu senin bitişinden önce başlamışsa
+                        { end: { [Op.gt]: start } }   // ve senin başlangıcından sonra bitiyorsa => çakışma var
+                    ]
+                }
             });
 
             if (conflictingAppointments) {
