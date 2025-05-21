@@ -23,4 +23,7 @@ router.get('/getMyLatestMeasurement', clientController.getMyLatestMeasurement);
 
 router.post('/updateMealPlan', clientController.updateMealPlan);
 
+router.get('/getMyDailyExercises', clientController.getMyDailyExercises);
+router.put('/updateMyExercise', clientController.updateMyExercise);
+
 module.exports = router;

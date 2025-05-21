@@ -1,4 +1,4 @@
-const {Client, Dietitian, Notification, NutritionAssignment, NutritionPlan, Measurement} = require("../Model/MainModel");
+const {Client, ExerciseAssignment, Exercise, Notification, NutritionAssignment, NutritionPlan, Measurement} = require("../Model/MainModel");
 const Exception = require("../Exception/Exception");
 const jwt = require("jsonwebtoken");
 const config = require("../config.json");
@@ -315,6 +315,79 @@ class ClientService {
             };
         } catch (error) {
             throw new Exception(error.message, 400);
+        }
+    }
+
+    static async getMyDailyExercises(client_id) {
+        if (!client_id) {
+            throw new Exception("Yetkisiz Erişim.", 400, true);
+        }
+
+        const {ExerciseAssignment, Exercise} = require("../Model/MainModel");
+        const {Op} = require("sequelize");
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const exercises = await ExerciseAssignment.findAll({
+            where: {
+                client_id,
+                start_date: {[Op.lte]: today},
+                end_date: {[Op.gte]: today},
+                status: {
+                    [Op.in]: ['active', 'completed']
+                },
+            },
+            include: [
+                {
+                    model: Exercise,
+                    as: 'Exercise',
+                    attributes: {exclude: ['createdAt', 'updatedAt']}
+                }
+            ],
+            order: [['start_date', 'ASC']]
+        });
+
+        if (!exercises || exercises.length === 0) {
+            throw new Exception("Bugün için atanmış egzersiz bulunamadı.", 404, true);
+        }
+
+        return exercises;
+    }
+
+    static async updateMyExercise(client_id, exercise_id, status) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 400, true);
+            }
+
+            if (!exercise_id) {
+                throw new Exception("Egzersiz seçimi gereklidir.", 400, true);
+            }
+
+            const existingExercise = await ExerciseAssignment.findOne({
+                where: {
+                    id: exercise_id,
+                    client_id: client_id
+                }
+            });
+
+            if (!existingExercise) {
+                throw new Exception("Egzersiz bulunamadı veya bu egzersiz size ait değil.", 404, true);
+            }
+
+            const updated = await existingExercise.update({
+                status: status,
+                completed_at: status === 'completed' ? new Date() : existingExercise.completed_at
+            });
+
+            if (!updated) {
+                throw new Exception("Egzersiz durumu güncellenemedi.", 500, true);
+            }
+
+            return updated;
+        } catch (error) {
+            throw new Exception(error.message, error.statusCode || 400);
         }
     }
 

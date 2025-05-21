@@ -236,6 +236,52 @@ class ClientController {
         }
     }
 
+    static async getMyDailyExercises(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+
+            if (!token || !client_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.getMyDailyExercises(client_id);
+
+            return res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async updateMyExercise(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+
+            if (!token || !client_id) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {exercise_id, status} = req.body;
+
+            const result = await ClientService.updateMyExercise(client_id, exercise_id, status);
+
+            return res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
 }
 
 module.exports = ClientController;
