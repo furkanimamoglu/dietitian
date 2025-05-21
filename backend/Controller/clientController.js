@@ -269,9 +269,9 @@ class ClientController {
                 });
             }
 
-            const {exercise_id, status} = req.body;
+            const {exercise_id, status, duration} = req.body;
 
-            const result = await ClientService.updateMyExercise(client_id, exercise_id, status);
+            const result = await ClientService.updateMyExercise(client_id, exercise_id, status, duration);
 
             return res.status(200).json(result);
         } catch (error) {

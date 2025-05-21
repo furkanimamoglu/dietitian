@@ -355,7 +355,7 @@ class ClientService {
         return exercises;
     }
 
-    static async updateMyExercise(client_id, exercise_id, status) {
+    static async updateMyExercise(client_id, exercise_id, status, duration) {
         try {
             if (!client_id) {
                 throw new Exception("Yetkisiz Erişim.", 400, true);
@@ -378,7 +378,7 @@ class ClientService {
 
             const updated = await existingExercise.update({
                 status: status,
-                completed_at: status === 'completed' ? new Date() : existingExercise.completed_at
+                duration: duration,
             });
 
             if (!updated) {
@@ -390,6 +390,7 @@ class ClientService {
             throw new Exception(error.message, error.statusCode || 400);
         }
     }
+
 
 }
 

@@ -24,7 +24,7 @@ const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
         }
     },
     status: {
-        type: DataTypes.ENUM('active', 'completed', 'cancelled'),
+        type: DataTypes.ENUM('active', 'completed', 'pending', 'cancelled'),
         allowNull: false,
         defaultValue: 'active'
     },
