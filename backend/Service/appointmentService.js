@@ -54,7 +54,7 @@ class AppointmentService {
 
 
     static async addAppointment(data) {
-        const {title, start, end, client_id} = data;
+        const { title, start, end, client_id } = data;
 
         const client = await Client.findByPk(client_id);
         if (!client) {
@@ -70,26 +70,12 @@ class AppointmentService {
 
             const conflictingAppointments = await Appointment.findOne({
                 where: {
-                    dietitian_id: dietitian_id,
-                    [Op.or]: [
-                        {
-                            start: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            end: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            [Op.and]: [
-                                {start: {[Op.lte]: start}},
-                                {end: {[Op.gte]: end}},
-                            ],
-                        },
-                    ],
-                },
+                    dietitian_id,
+                    [Op.and]: [
+                        { start: { [Op.lt]: end } },
+                        { end: { [Op.gt]: start } }
+                    ]
+                }
             });
 
             if (conflictingAppointments) {
@@ -103,6 +89,7 @@ class AppointmentService {
                 dietitian_id,
                 client_id,
             });
+
         } catch (error) {
             throw new Exception(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }

@@ -110,13 +110,16 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         return slots;
     }, []);
 
-    // Dolu saatleri kontrol et (performans için useMemo)
     const busySlots = useMemo(() => {
-        return appointments.map(app => ({
-            date: new Date(app.start).toISOString().split('T')[0],
-            time: new Date(app.start).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})
-        }));
+        return appointments.map(app => {
+            const utcDate = new Date(app.start);
+            return {
+                date: utcDate.toISOString().split('T')[0],
+                time: utcDate.toISOString().split('T')[1].substring(0, 5)
+            };
+        });
     }, [appointments]);
+
 
     // Dialog İşlemleri
     const openDialog = () => {
