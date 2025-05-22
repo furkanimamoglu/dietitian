@@ -10,6 +10,7 @@ const appointmentController = require('../Controller/appointmentController');
 router.get('/fetchDietitianAppointments', appointmentController.fetchDietitianAppointments);
 router.get('/fetchClientAppointmentAsDietitian', appointmentController.fetchClientAppointmentAsDietitian);
 router.delete('/deleteAppointmentAsDietitian', appointmentController.deleteAppointmentAsDietitian);
+router.delete('/deleteAppointmentAsClient', appointmentController.deleteAppointmentAsClient);
 router.post('/addAppointmentAsDietitian', appointmentController.addAppointmentAsDietitian);
 router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian)
 router.put('/updateAppointmentStatus', appointmentController.updateAppointmentStatus);

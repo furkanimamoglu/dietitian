@@ -189,6 +189,41 @@ class AppointmentController {
         }
     }
 
+    static async deleteAppointmentAsClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {appointment_id} = req.query;
+
+            if (!appointment_id) {
+                return res.status(400).json({
+                    message: "Randevu ID'si gerekli."
+                });
+            }
+
+            await AppointmentService.deleteAppointmentAsClient(client_id, appointment_id);
+
+            res.status(200).json({
+                message: "Randevu başarıyla silindi."
+            });
+
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: true,
+                message: error.message,
+            });
+        }
+    }
+
     static async addAppointmentAsClient(req, res) {
         try {
             const token = req.headers.authorization;
