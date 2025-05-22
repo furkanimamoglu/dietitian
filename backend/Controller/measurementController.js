@@ -1,5 +1,6 @@
 const measurementService = require("../Service/measurementService");
 const Security = require("../Utils/Security");
+const {DIETITIAN} = require("../Enum/Role");
 
 class measurementController {
 
@@ -7,10 +8,11 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -38,10 +40,11 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -78,10 +81,11 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -118,10 +122,11 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }

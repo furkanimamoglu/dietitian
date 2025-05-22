@@ -104,14 +104,14 @@ class ClientService {
         }
     }
 
-    static async getMyNotifications(phoneNumber) {
+    static async getMyNotifications(client_id) {
         try {
-            if (!phoneNumber) {
+            if (!client_id) {
                 throw new Exception("Yetkisiz Erişim.");
             }
 
             const notifications = await Notification.findAll({
-                where: {phoneNumber: phoneNumber}
+                where: {client_id: client_id}
             });
 
             if (!notifications || notifications.length === 0) {
@@ -124,16 +124,16 @@ class ClientService {
         }
     }
 
-    static async readMyAllNotifications(phoneNumber) {
+    static async readMyAllNotifications(client_id) {
         try {
-            if (!phoneNumber) {
+            if (!client_id) {
                 throw new Exception("Yetkisiz Erişim.");
             }
 
             const [affectedRows] = await Notification.update(
                 {isRead: true},
                 {
-                    where: {phoneNumber: phoneNumber, isRead: false}
+                    where: {client_id: client_id, isRead: false}
                 }
             );
 

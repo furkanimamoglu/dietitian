@@ -1,7 +1,6 @@
 const InvoiceService = require("../Service/invoiceService");
 const Security = require("../Utils/Security");
-const Exception = require("../Exception/Exception");
-const {Invoice} = require("../Model/MainModel");
+const {DIETITIAN} = require("../Enum/Role");
 
 class invoiceController {
 
@@ -53,14 +52,16 @@ class invoiceController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            const {invoice_id} = req.query;
-
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
+
+            const {invoice_id} = req.query;
 
             const result = await InvoiceService.deleteInvoice(dietitian_id, invoice_id);
             res.status(200).json(result);
@@ -76,9 +77,11 @@ class invoiceController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -112,9 +115,11 @@ class invoiceController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }

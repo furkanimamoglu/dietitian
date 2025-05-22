@@ -40,6 +40,18 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+    const [visible, setVisible] = useState(false);
+
+    const showDialog = (appointmentId) => {
+        setSelectedAppointmentId(appointmentId);
+        setVisible(true);
+    };
+
+    const hideDialog = () => {
+        setVisible(false);
+        setSelectedAppointmentId(null);
+    };
 
     const fetchAppointments = async () => {
         try {
@@ -75,6 +87,33 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         } finally {
             setLoading(false);
             setRefreshing(false);
+        }
+    };
+
+    const handleDeleteAppointment = async (appointmentId) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token bulunamadı.');
+                return;
+            }
+
+            const response = await fetch(`${config.apiUrl}/appointment/deleteAppointmentAsClient?appointment_id=${appointmentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                fetchAppointments();
+            } else {
+                const errorData = await response.json();
+                console.error('Silme başarısız:', errorData.message);
+            }
+        } catch (error) {
+            console.error('Randevu silinirken hata oluştu:', error);
         }
     };
 
@@ -120,8 +159,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         });
     }, [appointments]);
 
-
-    // Dialog İşlemleri
     const openDialog = () => {
         setDialogVisible(true);
         setSelectedDate(new Date());
@@ -143,9 +180,8 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     return;
                 }
 
-                // start ve end zamanlarını oluştur
                 const startDateTime = new Date(`${formatDate(selectedDate)}T${selectedTime}`);
-                const endDateTime = new Date(startDateTime.getTime() + 30 * 60000); // 30 dakika ekle
+                const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
                 const response = await fetch(`${config.apiUrl}/appointment/addAppointmentAsClient`, {
                     method: 'POST',
@@ -174,13 +210,11 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         }
     };
 
-    // Date picker işlemleri
     const onChangeDate = (_: any, date?: Date) => {
         setShowDatePicker(false);
         if (date) setSelectedDate(date);
     };
 
-    // Filtreleme işlemleri
     const filteredAppointments = useMemo(() => {
         if (filterStatus === 'all') return appointments;
         return appointments.filter(app =>
@@ -188,7 +222,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         );
     }, [appointments, filterStatus]);
 
-    // Tarihe göre sıralama - en yakın tarihler önce
     const sortedAppointments = useMemo(() => {
         return [...filteredAppointments].sort((a, b) => {
             const dateA = new Date(a.start);
@@ -197,7 +230,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         });
     }, [filteredAppointments]);
 
-    // Tarih formatını daha okunabilir yap (10 Mayıs 2025 gibi)
     const formatDisplayDate = useCallback((dateStr: string) => {
         const date = new Date(dateStr);
         const options: Intl.DateTimeFormatOptions = {
@@ -209,21 +241,17 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         return date.toLocaleDateString('tr-TR', options);
     }, []);
 
-    // Saat formatını düzenle
     const formatTime = useCallback((dateStr: string) => {
-        // Backend'den gelen tarih string'ini parse et
         const date = new Date(dateStr);
 
-        // Backend'den gelen saati olduğu gibi kullan, timezone dönüşümü yapma
         return date.toLocaleTimeString('tr-TR', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
-            timeZone: 'UTC' // UTC olarak işle, böylece backend'den gelen saat değişmez
+            timeZone: 'UTC'
         });
     }, []);
 
-    // Liste öğesi render fonksiyonu - performans için useCallback
     const renderItem = useCallback(({item}: { item: Appointment }) => {
         const isToday = new Date(item.start).toISOString().split('T')[0] === formatDate(new Date());
 
@@ -266,9 +294,9 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                             </Chip>
 
                             <IconButton
-                                icon="dots-vertical"
-                                size={20}
-                                onPress={() => console.log('Options')}
+                                icon="delete"
+                                size={25}
+                                onPress={() => showDialog(item.id)}
                             />
                         </View>
                     </Card.Content>
@@ -277,13 +305,11 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
         );
     }, [formatDisplayDate, formatDate, formatTime]);
 
-    // Ana Sayfa Render
     return (
         <Provider>
             <View style={styles.container}>
                 <Header navigation={navigation}/>
 
-                {/* Filtre Seçenekleri */}
                 <View style={styles.filterContainer}>
                     <View style={styles.chipContainer}>
                         <Chip
@@ -313,7 +339,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     </View>
                 </View>
 
-                {/* Randevu Listesi */}
                 <FlatList
                     data={sortedAppointments}
                     keyExtractor={item => item.id.toString()}
@@ -344,7 +369,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
 
                 <BottomNavbar navigation={navigation}/>
 
-                {/* Yeni Randevu FAB */}
                 <FAB
                     style={styles.fab}
                     icon="plus"
@@ -352,12 +376,10 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     onPress={openDialog}
                 />
 
-                {/* Yeni Randevu Dialog */}
                 <Portal>
                     <Dialog visible={dialogVisible} onDismiss={closeDialog} style={styles.dialog}>
                         <Dialog.Title style={styles.dialogTitle}>Yeni Randevu Oluştur</Dialog.Title>
                         <Dialog.Content>
-                            {/* Tarih Seçici */}
                             <Button
                                 mode="outlined"
                                 icon="calendar"
@@ -378,7 +400,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                                 />
                             )}
 
-                            {/* Saat Seçici - Chip formatında */}
                             <Text style={styles.timeLabel}>Saat Seçin:</Text>
                             <View style={styles.timeChipContainer}>
                                 {timeSlots.map(time => {
@@ -406,7 +427,6 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                                 })}
                             </View>
 
-                            {/* Açıklama */}
                             <TextInput
                                 label="Randevu Detayı"
                                 value={description}
@@ -428,6 +448,26 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                                 color="#4CAF50"
                             >
                                 Randevu Oluştur
+                            </Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+
+                <Portal>
+                    <Dialog visible={visible} onDismiss={hideDialog}>
+                        <Dialog.Title>Randevuyu Sil</Dialog.Title>
+                        <Dialog.Content>
+                            <Text>Bu randevuyu silmek istediğinize emin misiniz?</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={hideDialog}>Vazgeç</Button>
+                            <Button
+                                onPress={() => {
+                                    handleDeleteAppointment(selectedAppointmentId);
+                                    hideDialog();
+                                }}
+                            >
+                                Sil
                             </Button>
                         </Dialog.Actions>
                     </Dialog>
