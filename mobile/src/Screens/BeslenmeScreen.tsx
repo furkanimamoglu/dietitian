@@ -94,7 +94,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             setLoading(true);
             setError(null);
 
-            console.log('Fetching meal plan from:', `${config.apiUrl}/client/getTodayMeal`);
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');

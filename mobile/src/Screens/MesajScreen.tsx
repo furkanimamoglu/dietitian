@@ -16,20 +16,82 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Header from '../Components/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../../config';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 const Mesaj = ({navigation}) => {
-    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [clientInfo, setClientInfo] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
     const [modalImageUri, setModalImageUri] = useState(null);
     const [loading, setLoading] = useState(false);
 
     const flatListRef = useRef(null);
 
+    const fetchMessages = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config.apiUrl}/message/getMyMessages`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 500) {
+                setMessages([]);
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data && Array.isArray(data)) {
+                setMessages(data);
+            } else {
+                setAppointments([]);
+            }
+        } catch (err) {
+            console.error('Error: fetchMessages ', err);
+            setMessages([]);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
+
+    const fetchClientInfo = async () => {
+        try {
+            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setClientInfo(data);
+            } else {
+                console.log('Kullanıcı bilgisi alınamadı:', data.message);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    };
+
     useEffect(() => {
-        requestCameraPermission();
+        fetchClientInfo().then(response => {});
+        fetchMessages().then(response => {});
+        requestCameraPermission().then(response => {});
     }, []);
 
     useEffect(() => {
@@ -60,18 +122,48 @@ const Mesaj = ({navigation}) => {
         }
     };
 
-    const sendMessage = useCallback(() => {
+    const sendMessage = useCallback(async () => {
         if (input.trim() === '') return;
+
+        const messageText = input.trim();
 
         const newMessage = {
             id: Date.now().toString(),
-            from: 'user',
-            text: input.trim(),
-            timestamp: getCurrentTime()
+            sender: 'CLIENT',
+            message: messageText,
+            isRead: true,
+            createdAt: getCurrentTime()
         };
 
         setMessages(prev => [...prev, newMessage]);
         setInput('');
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config.apiUrl}/message/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    receiver_id: clientInfo.dietitian_id,
+                    message: messageText
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API Hatası: ${response.status}`, errorText);
+            }
+        } catch (err) {
+            console.error('Mesaj gönderme hatası:', err);
+        }
     }, [input]);
 
     const openCamera = useCallback(() => {
@@ -148,14 +240,14 @@ const Mesaj = ({navigation}) => {
     };
 
     const renderMessageItem = useCallback(({item}) => {
-        const isUser = item.from === 'user';
+        const isUser = item.sender === 'CLIENT';
 
         return (
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
-                    {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+                    {item.message && <Text style={styles.messageText}>{item.message}</Text>}
 
-                    {item.image && (
+                    {/* item.image && (
                         <TouchableOpacity onPress={() => handleImagePress(item.image)} activeOpacity={0.8}>
                             <Image
                                 source={{uri: item.image}}
@@ -163,10 +255,10 @@ const Mesaj = ({navigation}) => {
                                 resizeMode="cover"
                             />
                         </TouchableOpacity>
-                    )}
+                    ) */}
 
                     <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.diyetisyenTimestamp]}>
-                        {item.timestamp}
+                        {item.createdAt}
                     </Text>
                 </View>
             </View>
