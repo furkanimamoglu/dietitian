@@ -1,5 +1,7 @@
-const {Anamnes} = require("../Model/MainModel");
-const Exception = require("../Exception/Exception");
+const path = require('path');
+
+const {Anamnes} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 
 class AnamnesService {
 

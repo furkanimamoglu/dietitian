@@ -1,8 +1,9 @@
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-const packageController = require('../Controller/packageController');
+const packageController = require(path.join(__dirname, '..', 'Controller', 'packageController'));
 
 router.get('/getMyPackages', packageController.getMyPackages);
 router.post('/addPackage', packageController.addPackage);

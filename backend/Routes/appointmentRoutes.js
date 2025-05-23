@@ -1,18 +1,16 @@
-//Library
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-//Controller
-const appointmentController = require('../Controller/appointmentController');
+const appointmentController = require(path.join(__dirname, '..', 'Controller', 'appointmentController'));
 
-//Routes
 router.get('/fetchDietitianAppointments', appointmentController.fetchDietitianAppointments);
 router.get('/fetchClientAppointmentAsDietitian', appointmentController.fetchClientAppointmentAsDietitian);
 router.delete('/deleteAppointmentAsDietitian', appointmentController.deleteAppointmentAsDietitian);
 router.delete('/deleteAppointmentAsClient', appointmentController.deleteAppointmentAsClient);
 router.post('/addAppointmentAsDietitian', appointmentController.addAppointmentAsDietitian);
-router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian)
+router.put('/updateAppointmentAsDietitian', appointmentController.updateAppointmentAsDietitian);
 router.put('/updateAppointmentStatus', appointmentController.updateAppointmentStatus);
 router.get('/getPendingAppointments', appointmentController.getPendingAppointments);
 router.get('/getTodayApprovedAppointments', appointmentController.getTodayApprovedAppointments);

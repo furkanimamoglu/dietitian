@@ -1,5 +1,6 @@
 const {Sequelize} = require('sequelize');
-const config = require('../config.json');
+const path = require('path');
+const config = require(path.join(__dirname, '..', 'config.json'));
 
 const sequelize = new Sequelize(
     config.database_connection.database,

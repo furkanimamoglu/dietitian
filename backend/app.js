@@ -1,27 +1,31 @@
 // Library
 const express = require('express');
-const sequelize = require('./Utils/Database');
 const bodyParser = require('body-parser');
-const config = require('./config.json');
 const cors = require('cors');
+const path = require("path");
+
+const config = require(path.join(__dirname, 'config.json'));
+const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
+
 
 // Models
-require('./Model/MainModel');
+require(path.join(__dirname, 'Model', 'MainModel'));
+
 
 // Express App
 const app = express();
 
 // Routes
-const dietitianRoutes = require('./Routes/dietitianRoutes');
-const clientRoutes = require('./Routes/clientRoutes');
-const appointmentRoutes = require('./Routes/appointmentRoutes');
-const invoiceRoutes = require('./Routes/invoiceRoutes');
-const messageRoutes = require('./Routes/messageRoutes');
-const measurementRoutes = require('./Routes/measurementRoutes');
-const recipeRoutes = require('./Routes/recipeRoutes');
-const exerciseRoutes = require('./Routes/exerciseRoutes');
-const anamnesRoutes = require('./Routes/anamnesRoutes');
-const packageRoutes = require('./Routes/packageRoutes');
+const dietitianRoutes = require(path.join(__dirname, "Routes", "dietitianRoutes"));
+const clientRoutes = require(path.join(__dirname, "Routes", "clientRoutes"));
+const appointmentRoutes = require(path.join(__dirname, "Routes", "appointmentRoutes"));
+const invoiceRoutes = require(path.join(__dirname, "Routes", "invoiceRoutes"));
+const messageRoutes = require(path.join(__dirname, "Routes", "messageRoutes"));
+const measurementRoutes = require(path.join(__dirname, "Routes", "measurementRoutes"));
+const recipeRoutes = require(path.join(__dirname, "Routes", "recipeRoutes"));
+const exerciseRoutes = require(path.join(__dirname, "Routes", "exerciseRoutes"));
+const anamnesRoutes = require(path.join(__dirname, "Routes", "anamnesRoutes"));
+const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
 
 app.use(bodyParser.json());
 

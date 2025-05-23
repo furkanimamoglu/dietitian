@@ -9,7 +9,7 @@ const config = {
     },
 
     prod: {
-        apiUrl: 'http://164.92.252.201:3000',
+        apiUrl: 'http://164.92.252.201:3000/api/',
         websiteName: "Diyetisyenim",
         footerText: "2024 Diyetisyen Uygulaması"
     }

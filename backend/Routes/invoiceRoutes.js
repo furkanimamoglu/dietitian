@@ -1,8 +1,9 @@
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-const invoiceController = require('../Controller/invoiceController');
+const invoiceController = require(path.join(__dirname, '..', 'Controller', 'invoiceController'));
 
 router.get('/getMyInvoices', invoiceController.getMyInvoices);
 router.get('/getClientInvoices', invoiceController.getClientInvoices);

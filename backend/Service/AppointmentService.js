@@ -1,7 +1,8 @@
-const Exception = require("../Exception/Exception");
-const Appointment = require('../Model/Appointment');
-const Client = require('../Model/Client');
-const {Op} = require("sequelize");
+const path = require('path');
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
+const Appointment = require(path.join(__dirname, '..', 'Model', 'Appointment'));
+const Client = require(path.join(__dirname, '..', 'Model', 'Client'));
+const { Op } = require('sequelize');
 
 class AppointmentService {
     static async fetchDietitianAppointments(user_id) {
