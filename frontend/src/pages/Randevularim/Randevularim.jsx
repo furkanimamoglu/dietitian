@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from "react";
 import axios from "axios";
 import "./Randevularim.css";
-import { toast } from 'react-hot-toast';
+import {toast} from 'react-hot-toast';
 
 import FullCalendar from "@fullcalendar/react";
 import "@fullcalendar/core";
@@ -27,6 +27,11 @@ import {
     InputLabel,
     Autocomplete
 } from '@mui/material';
+
+import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+
 import config from "../../config.js";
 import {Close, Delete} from "@mui/icons-material";
 
@@ -53,7 +58,7 @@ export default function Randevularim() {
         const fetchAppointments = async () => {
             try {
                 const response = await axios.get(
-                    config[config.environment].apiUrl+"/appointment/fetchDietitianAppointments",
+                    config[config.environment].apiUrl + "/appointment/fetchDietitianAppointments",
                     {
                         headers: {
                             Authorization: localStorage.getItem('token')
@@ -123,7 +128,10 @@ export default function Randevularim() {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
             const startDate = new Date(arg.dateStr);
-            const endDate = new Date(arg.dateStr);
+
+            startDate.setHours(startDate.getHours() + 3);
+
+            const endDate = new Date(startDate);
             endDate.setHours(endDate.getHours() + 1);
 
             setEventData((prev) => ({
@@ -145,7 +153,7 @@ export default function Randevularim() {
             title: event.title,
             extendedProps: event.extendedProps
         });
-        
+
         setEventData({
             id: event.id,
             title: event.title,
@@ -233,9 +241,9 @@ export default function Randevularim() {
             );
 
             console.log("Randevu ekleme isteği başarılı:", response.data);
-            
+
             let appointmentData;
-            
+
             if (response.data && response.data.appointment) {
                 appointmentData = response.data.appointment;
             } else if (response.data && response.data.id) {
@@ -245,9 +253,9 @@ export default function Randevularim() {
                 toast.error('Sunucu yanıtı beklenmeyen formatta. Yöneticinize başvurun.');
                 return;
             }
-            
+
             console.log("İşlenecek appointment verisi:", appointmentData);
-            
+
             const newEvent = {
                 id: appointmentData.id,
                 title: appointmentData.title || eventData.title,
@@ -262,7 +270,7 @@ export default function Randevularim() {
 
             setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
             setRandevuEklePopup(false);
-            
+
             toast.success('Randevu başarıyla oluşturuldu!');
         } catch (error) {
             console.error("Randevu eklenirken bir hata oluştu:", error);
@@ -342,7 +350,7 @@ export default function Randevularim() {
             // Get the appointment ID and log it to make sure it's correct
             const appointmentId = eventData.id;
             console.log("Silinecek randevu ID:", appointmentId);
-            
+
             // Use a properly formatted query parameter
             const response = await axios.delete(
                 `${config[config.environment].apiUrl}/appointment/deleteAppointmentAsDietitian`,
@@ -355,21 +363,21 @@ export default function Randevularim() {
                     }
                 }
             );
-            
+
             console.log("Randevu silme başarılı:", response.data);
-            
+
             // Randevu listesinden sil
-            setRandevular((prevRandevular) => 
+            setRandevular((prevRandevular) =>
                 prevRandevular.filter((randevu) => String(randevu.id) !== String(appointmentId))
             );
-            
+
             // Toast bildirim göster
             toast.success('Randevu başarıyla silindi!');
-            
+
             // Dialogları kapat
             setConfirmDialogOpen(false);
             handleDialogClose();
-            
+
         } catch (error) {
             console.error("Randevu silinirken bir hata oluştu:", error);
             toast.error('Randevu silinirken bir hata oluştu!');
@@ -383,8 +391,8 @@ export default function Randevularim() {
 
     return (
         <Default>
-            <Grid2 container sx={{ height: "100%", width: "100%" }}>
-                <Box sx={{ width: "100%", height: "100%" }}>
+            <Grid2 container sx={{height: "100%", width: "100%"}}>
+                <Box sx={{width: "100%", height: "100%"}}>
                     <FullCalendar
                         ref={calendarRef}
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
@@ -420,20 +428,20 @@ export default function Randevularim() {
                         views={{
                             timeGridDay: {
                                 buttonText: "Günlük",
-                                dayHeaderFormat: { weekday: 'long' }
+                                dayHeaderFormat: {weekday: 'long'}
                             },
                             timeGridWeek: {
                                 buttonText: "Haftalık",
                                 weekNumbers: true,
-                                dayHeaderFormat: { weekday: 'long' }
+                                dayHeaderFormat: {weekday: 'long'}
                             },
                             dayGridMonth: {
                                 buttonText: "Aylık",
-                                dayHeaderFormat: { weekday: 'long' }
+                                dayHeaderFormat: {weekday: 'long'}
                             },
                             dayGridYear: {
                                 buttonText: "Yıllık",
-                                dayHeaderFormat: { weekday: 'long' }
+                                dayHeaderFormat: {weekday: 'long'}
                             }
                         }}
                         weekNumberFormat={{
@@ -475,7 +483,7 @@ export default function Randevularim() {
                             color: (theme) => theme.palette.grey[500],
                         }}
                     >
-                        <Close />
+                        <Close/>
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
@@ -489,30 +497,44 @@ export default function Randevularim() {
                         error={!eventData.title}
                         helperText={!eventData.title ? "Bu alan zorunludur" : ""}
                     />
-                    <TextField
-                        label="Başlangıç Tarihi:"
-                        value={eventData.start}
-                        onChange={(e) => handleEventChange("start", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.start}
-                        helperText={!eventData.start ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                    <TextField
-                        label="Bitiş Tarihi:"
-                        value={eventData.end}
-                        onChange={(e) => handleEventChange("end", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.end}
-                        helperText={!eventData.end ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DateTimePicker
+                            label="Başlangıç Tarihi"
+                            value={eventData.start ? new Date(eventData.start) : null}
+                            onChange={(newValue) => {
+                                handleEventChange("start", newValue ? newValue.toISOString() : '')
+                            }}
+                            ampm={false}
+                            views={['year', 'month', 'day', 'hours', 'minutes']}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    margin: "normal",
+                                    required: true,
+                                    error: !eventData.start,
+                                    helperText: !eventData.start ? "Bu alan zorunludur" : ""
+                                }
+                            }}
+                        />
+                        <DateTimePicker
+                            label="Bitiş Tarihi"
+                            value={eventData.end ? new Date(eventData.end) : null}
+                            onChange={(newValue) => {
+                                handleEventChange("end", newValue ? newValue.toISOString() : '')
+                            }}
+                            ampm={false}
+                            views={['year', 'month', 'day', 'hours', 'minutes']}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    margin: "normal",
+                                    required: true,
+                                    error: !eventData.end,
+                                    helperText: !eventData.end ? "Bu alan zorunludur" : ""
+                                }
+                            }}
+                        />
+                    </LocalizationProvider>
                     <Autocomplete
                         options={clients}
                         getOptionLabel={(option) => option.name}
@@ -576,7 +598,7 @@ export default function Randevularim() {
                             color: (theme) => theme.palette.grey[500],
                         }}
                     >
-                        <Close />
+                        <Close/>
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
@@ -590,30 +612,44 @@ export default function Randevularim() {
                         error={!eventData.title}
                         helperText={!eventData.title ? "Bu alan zorunludur" : ""}
                     />
-                    <TextField
-                        label="Başlangıç Tarihi"
-                        value={eventData.start}
-                        onChange={(e) => handleEventChange("start", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.start}
-                        helperText={!eventData.start ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
-                    <TextField
-                        label="Bitiş Tarihi"
-                        value={eventData.end}
-                        onChange={(e) => handleEventChange("end", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        type="datetime-local"
-                        required
-                        error={!eventData.end}
-                        helperText={!eventData.end ? "Bu alan zorunludur" : ""}
-                        slotProps={{ inputLabel: { shrink: true } }}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DateTimePicker
+                            label="Başlangıç Tarihi"
+                            value={eventData.start ? new Date(eventData.start) : null}
+                            onChange={(newValue) => {
+                                handleEventChange("start", newValue ? newValue.toISOString() : '')
+                            }}
+                            ampm={false} // 24 saat formatı için
+                            views={['year', 'month', 'day', 'hours', 'minutes']}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    margin: "normal",
+                                    required: true,
+                                    error: !eventData.start,
+                                    helperText: !eventData.start ? "Bu alan zorunludur" : ""
+                                }
+                            }}
+                        />
+                        <DateTimePicker
+                            label="Bitiş Tarihi"
+                            value={eventData.end ? new Date(eventData.end) : null}
+                            onChange={(newValue) => {
+                                handleEventChange("end", newValue ? newValue.toISOString() : '')
+                            }}
+                            ampm={false} // 24 saat formatı için
+                            views={['year', 'month', 'day', 'hours', 'minutes']}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    margin: "normal",
+                                    required: true,
+                                    error: !eventData.end,
+                                    helperText: !eventData.end ? "Bu alan zorunludur" : ""
+                                }
+                            }}
+                        />
+                    </LocalizationProvider>
                     <Autocomplete
                         options={clients}
                         getOptionLabel={(option) => option.name}
@@ -648,10 +684,10 @@ export default function Randevularim() {
                     </FormControl>
                 </DialogContent>
                 <DialogActions>
-                    <Button 
-                        onClick={handleDeleteClick} 
-                        color="error" 
-                        startIcon={<Delete />}
+                    <Button
+                        onClick={handleDeleteClick}
+                        color="error"
+                        startIcon={<Delete/>}
                     >
                         Sil
                     </Button>
@@ -681,9 +717,9 @@ export default function Randevularim() {
                     }
                 }}
             >
-                <DialogTitle 
+                <DialogTitle
                     id="alert-dialog-title"
-                    sx={{ 
+                    sx={{
                         backgroundColor: '#f8f9fa',
                         borderBottom: '1px solid #e9ecef',
                         padding: '16px 24px',
@@ -694,36 +730,36 @@ export default function Randevularim() {
                         gap: 1
                     }}
                 >
-                    <Delete color="error" />
+                    <Delete color="error"/>
                     Randevu Silme Onayı
                 </DialogTitle>
-                <DialogContent sx={{ padding: '24px', paddingTop: '24px !important' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <Box sx={{ fontWeight: 'medium', fontSize: '16px' }}>
+                <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                        <Box sx={{fontWeight: 'medium', fontSize: '16px'}}>
                             "{eventData.title}" randevusunu silmek istediğinize emin misiniz?
                         </Box>
-                        <Box sx={{ color: 'text.secondary', fontSize: '14px' }}>
+                        <Box sx={{color: 'text.secondary', fontSize: '14px'}}>
                             Bu işlem geri alınamaz. Randevu kalıcı olarak silinecektir.
                         </Box>
                     </Box>
                 </DialogContent>
-                <DialogActions sx={{ padding: '16px 24px', borderTop: '1px solid #e9ecef' }}>
-                    <Button 
-                        onClick={() => setConfirmDialogOpen(false)} 
+                <DialogActions sx={{padding: '16px 24px', borderTop: '1px solid #e9ecef'}}>
+                    <Button
+                        onClick={() => setConfirmDialogOpen(false)}
                         color="inherit"
-                        sx={{ fontWeight: 'medium' }}
+                        sx={{fontWeight: 'medium'}}
                     >
                         Vazgeç
                     </Button>
-                    <Button 
-                        onClick={handleEventDelete} 
-                        color="error" 
+                    <Button
+                        onClick={handleEventDelete}
+                        color="error"
                         variant="contained"
                         autoFocus
-                        sx={{ 
+                        sx={{
                             fontWeight: 'medium',
                             boxShadow: 'none',
-                            '&:hover': { boxShadow: 'none' }
+                            '&:hover': {boxShadow: 'none'}
                         }}
                     >
                         Sil

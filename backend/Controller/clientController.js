@@ -1,6 +1,7 @@
 const ClientService = require("../Service/clientService");
 const Security = require("../Utils/Security");
 const moment = require('moment');
+const {CLIENT} = require("../Enum/Role");
 
 
 class ClientController {
@@ -30,7 +31,7 @@ class ClientController {
             const {phoneNumber, password, name, dietitian_id} = req.body;
             const ipAddress = req.ip;
 
-            if(!dietitian_id){
+            if (!dietitian_id) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Bağlı olunan bir diyetisyen bulunamadı.'
@@ -61,14 +62,17 @@ class ClientController {
     static async getClientInfo(req, res) {
         try {
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
 
-            if (!token || !user_id) {
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
-            const result = await ClientService.getClientInfo(user_id);
+
+            const result = await ClientService.getClientInfo(client_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -81,13 +85,18 @@ class ClientController {
     static async getMyNotifications(req, res) {
         try {
             const token = req.headers.authorization;
-            const phoneNumber = Security.getPhoneNumberFromToken(token);
-            if (!token || !phoneNumber) {
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
-            const result = await ClientService.getMyNotifications(phoneNumber);
+
+            const result = await ClientService.getMyNotifications(client_id);
+
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -100,13 +109,18 @@ class ClientController {
     static async readMyAllNotifications(req, res) {
         try {
             const token = req.headers.authorization;
-            const phoneNumber = Security.getPhoneNumberFromToken(token);
-            if (!token || !phoneNumber) {
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
-            const result = await ClientService.readMyAllNotifications(phoneNumber);
+
+            const result = await ClientService.readMyAllNotifications(client_id);
+
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -120,9 +134,11 @@ class ClientController {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
 
-            if (!token || !client_id) {
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -140,17 +156,44 @@ class ClientController {
         }
     }
 
+    static async getMyLatestMeasurement(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.getMyLatestMeasurement(client_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
     static async updateMealPlan(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
-            const { nutrition_plan_id, mealPlan } = req.body;
+            const permission = Security.checkUserPermission(token, CLIENT);
 
-            if (!token || !client_id) {
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
+
+            const {nutrition_plan_id, mealPlan} = req.body;
 
             if (!nutrition_plan_id || !mealPlan) {
                 return res.status(400).json({
@@ -162,7 +205,6 @@ class ClientController {
             const result = await ClientService.updateMealPlan(client_id, nutrition_plan_id, mealPlan);
 
             return res.status(200).json(result);
-
         } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
@@ -175,9 +217,11 @@ class ClientController {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
 
-            if (!token || !client_id) {
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -185,7 +229,7 @@ class ClientController {
             const result = await ClientService.getMyKVKKStatus(client_id);
 
             return res.status(200).json(result);
-        } catch ( error) {
+        } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -197,9 +241,11 @@ class ClientController {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
 
-            if (!token || !client_id) {
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -207,7 +253,57 @@ class ClientController {
             const result = await ClientService.approveKVKK(client_id);
 
             return res.status(200).json(result);
-        } catch ( error) {
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async getMyDailyExercises(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.getMyDailyExercises(client_id);
+
+            return res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async updateMyExercise(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {exercise_id, status, duration} = req.body;
+
+            const result = await ClientService.updateMyExercise(client_id, exercise_id, status, duration);
+
+            return res.status(200).json(result);
+        } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message

@@ -1,4 +1,4 @@
-const {Client, Dietitian, Notification, NutritionAssignment, NutritionPlan} = require("../Model/MainModel");
+const {Client, ExerciseAssignment, Exercise, Notification, NutritionAssignment, NutritionPlan, Measurement} = require("../Model/MainModel");
 const Exception = require("../Exception/Exception");
 const jwt = require("jsonwebtoken");
 const config = require("../config.json");
@@ -27,10 +27,10 @@ class ClientService {
                     phoneNumber: client.phoneNumber,
                 },
                 config.secretkey,
-                { expiresIn: '24h' }
+                {expiresIn: '24h'}
             );
 
-            await client.update({ token });
+            await client.update({token});
 
             return {
                 ...client.dataValues,
@@ -70,7 +70,7 @@ class ClientService {
                 config.secretkey
             );
 
-            await client.update({ token });
+            await client.update({token});
 
             return {
                 ...client.dataValues,
@@ -84,18 +84,18 @@ class ClientService {
     static async getClientInfo(user_id) {
         try {
             if (!user_id) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const client = await Client.findOne({
-                where: { id: user_id },
+                where: {id: user_id},
                 attributes: {
                     exclude: ["password", "createdAt", "updatedAt"]
                 }
             });
 
             if (!client) {
-                throw new Error("Diyetisyen bulunamadı.");
+                throw new Exception("Diyetisyen bulunamadı.");
             }
 
             return client;
@@ -104,18 +104,18 @@ class ClientService {
         }
     }
 
-    static async getMyNotifications(phoneNumber) {
+    static async getMyNotifications(client_id) {
         try {
-            if (!phoneNumber) {
-                throw new Error("Yetkisiz Erişim.");
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const notifications = await Notification.findAll({
-                where: { phoneNumber: phoneNumber }
+                where: {client_id: client_id}
             });
 
             if (!notifications || notifications.length === 0) {
-                throw new Error("Bildiriminiz yok.");
+                throw new Exception("Bildiriminiz yok.");
             }
 
             return notifications;
@@ -124,21 +124,21 @@ class ClientService {
         }
     }
 
-    static async readMyAllNotifications(phoneNumber) {
+    static async readMyAllNotifications(client_id) {
         try {
-            if (!phoneNumber) {
-                throw new Error("Yetkisiz Erişim.");
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const [affectedRows] = await Notification.update(
-                { isRead: true },
+                {isRead: true},
                 {
-                    where: { phoneNumber: phoneNumber, isRead: false }
+                    where: {client_id: client_id, isRead: false}
                 }
             );
 
             if (affectedRows === 0) {
-                throw new Error("Okunmamış bildiriminiz yok.");
+                throw new Exception("Okunmamış bildiriminiz yok.");
             }
 
             return {
@@ -149,12 +149,33 @@ class ClientService {
         }
     }
 
+    static async getMyLatestMeasurement(client_id) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
+            }
+
+            const measurement = await Measurement.findOne({
+                where: { client_id },
+                order: [['createdAt', 'DESC']]
+            });
+
+            if (!measurement) {
+                throw new Exception("Ölçüm verisi bulunamadı.");
+            }
+
+            return measurement;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
     static async getTodayMeal(clientId, todayDate) {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: clientId,
-                start_date: { [Op.lte]: todayDate },
-                end_date: { [Op.gte]: todayDate }
+                start_date: {[Op.lte]: todayDate},
+                end_date: {[Op.gte]: todayDate}
             },
             include: [
                 {
@@ -179,15 +200,15 @@ class ClientService {
                         // Get the meal items based on the format
                         let mealItems = [];
                         const mealData = assignment.NutritionPlan.mealPlan[day][mealType];
-                        
+
                         // Handle complex format with main and alternatives
                         if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
                             mealItems = [...mealData.main];
-                        } 
+                        }
                         // Handle simple array format
                         else if (Array.isArray(mealData)) {
                             mealItems = [...mealData];
-                        } 
+                        }
                         // Handle string format (backward compatibility)
                         else if (typeof mealData === 'string') {
                             mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
@@ -200,7 +221,7 @@ class ClientService {
                         }));
                     });
                 });
-                
+
                 // Update the assignment with the new format
                 assignment.mealPlan = transformedMealPlan;
                 await assignment.save();
@@ -226,21 +247,21 @@ class ClientService {
         if (newMealPlan) {
             Object.keys(newMealPlan).forEach(day => {
                 if (!newMealPlan[day]) return;
-                
+
                 Object.keys(newMealPlan[day]).forEach(mealType => {
                     const meals = newMealPlan[day][mealType];
-                    
+
                     // Check if it's using the new format with 'isim' and 'yenildi' fields
                     if (Array.isArray(meals) && meals.length > 0) {
                         if (!meals.every(meal => meal.hasOwnProperty('isim') && meal.hasOwnProperty('yenildi'))) {
                             // Transform to new format if using old format
                             newMealPlan[day][mealType] = meals.map(meal => {
                                 if (typeof meal === 'string') {
-                                    return { isim: meal, yenildi: false };
+                                    return {isim: meal, yenildi: false};
                                 } else if (typeof meal === 'object' && !meal.hasOwnProperty('isim')) {
                                     // If it's an object but doesn't have the right structure
                                     const key = Object.keys(meal)[0] || '';
-                                    return { isim: key || meal.toString(), yenildi: false };
+                                    return {isim: key || meal.toString(), yenildi: false};
                                 }
                                 return meal;
                             });
@@ -259,7 +280,7 @@ class ClientService {
     static async getMyKVKKStatus(client_id) {
         try {
             const client = await Client.findOne({
-                where: { id: client_id },
+                where: {id: client_id},
                 attributes: ['kvkkApproval']
             });
 
@@ -296,6 +317,80 @@ class ClientService {
             throw new Exception(error.message, 400);
         }
     }
+
+    static async getMyDailyExercises(client_id) {
+        if (!client_id) {
+            throw new Exception("Yetkisiz Erişim.", 400, true);
+        }
+
+        const {ExerciseAssignment, Exercise} = require("../Model/MainModel");
+        const {Op} = require("sequelize");
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const exercises = await ExerciseAssignment.findAll({
+            where: {
+                client_id,
+                start_date: {[Op.lte]: today},
+                end_date: {[Op.gte]: today},
+                status: {
+                    [Op.in]: ['active', 'completed']
+                },
+            },
+            include: [
+                {
+                    model: Exercise,
+                    as: 'Exercise',
+                    attributes: {exclude: ['createdAt', 'updatedAt']}
+                }
+            ],
+            order: [['start_date', 'ASC']]
+        });
+
+        if (!exercises || exercises.length === 0) {
+            throw new Exception("Bugün için atanmış egzersiz bulunamadı.", 404, true);
+        }
+
+        return exercises;
+    }
+
+    static async updateMyExercise(client_id, exercise_id, status, duration) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 400, true);
+            }
+
+            if (!exercise_id) {
+                throw new Exception("Egzersiz seçimi gereklidir.", 400, true);
+            }
+
+            const existingExercise = await ExerciseAssignment.findOne({
+                where: {
+                    id: exercise_id,
+                    client_id: client_id
+                }
+            });
+
+            if (!existingExercise) {
+                throw new Exception("Egzersiz bulunamadı veya bu egzersiz size ait değil.", 404, true);
+            }
+
+            const updated = await existingExercise.update({
+                status: status,
+                duration: duration,
+            });
+
+            if (!updated) {
+                throw new Exception("Egzersiz durumu güncellenemedi.", 500, true);
+            }
+
+            return updated;
+        } catch (error) {
+            throw new Exception(error.message, error.statusCode || 400);
+        }
+    }
+
 
 }
 

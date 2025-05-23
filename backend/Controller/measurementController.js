@@ -1,5 +1,6 @@
 const measurementService = require("../Service/measurementService");
 const Security = require("../Utils/Security");
+const {DIETITIAN} = require("../Enum/Role");
 
 class measurementController {
 
@@ -7,15 +8,16 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const { client_id } = req.query;
+            const {client_id} = req.query;
 
             if (!client_id) {
                 return res.status(400).json({
@@ -38,15 +40,16 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const { client_id, boy, kilo, bel, kalca, gogus, yag, kas, su } = req.body;
+            const {client_id, boy, kilo, bel, kalca, gogus, yag, kas, su} = req.body;
 
             if (!client_id || !boy || !kilo || !bel || !kalca || !gogus || !yag || !kas || !su) {
                 return res.status(400).json({
@@ -54,7 +57,16 @@ class measurementController {
                 });
             }
 
-            const result = await measurementService.createMeasurement(dietitian_id, client_id, {boy, kilo, bel, kalca, gogus, yag, kas, su});
+            const result = await measurementService.createMeasurement(dietitian_id, client_id, {
+                boy,
+                kilo,
+                bel,
+                kalca,
+                gogus,
+                yag,
+                kas,
+                su
+            });
 
             res.status(200).json(result);
         } catch (error) {
@@ -69,15 +81,16 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const { measurement_id, client_id, boy, kilo, bel, kalca, gogus, yag, kas, su } = req.body;
+            const {measurement_id, client_id, boy, kilo, bel, kalca, gogus, yag, kas, su} = req.body;
 
             if (!measurement_id || !client_id || !boy || !kilo || !bel || !kalca || !gogus || !yag || !kas || !su) {
                 return res.status(400).json({
@@ -86,7 +99,16 @@ class measurementController {
                 });
             }
 
-            const result = await measurementService.updateMeasurement(dietitian_id, measurement_id, client_id, {boy, kilo, bel, kalca, gogus, yag, kas, su});
+            const result = await measurementService.updateMeasurement(dietitian_id, measurement_id, client_id, {
+                boy,
+                kilo,
+                bel,
+                kalca,
+                gogus,
+                yag,
+                kas,
+                su
+            });
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -100,15 +122,16 @@ class measurementController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.getPermissionFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id && permission !== "DIETITIAN") {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const { measurement_id } = req.query;
+            const {measurement_id} = req.query;
 
             if (!measurement_id) {
                 return res.status(400).json({

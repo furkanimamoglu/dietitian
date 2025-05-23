@@ -6,8 +6,8 @@ import './main.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     //<React.StrictMode> {/* 2 kere istek atılmasına neden oluyor, kaldırırsan düzelir. */}
-        <AppThemeProvider>
-            <App/>
-        </AppThemeProvider>
+    <AppThemeProvider>
+        <App/>
+    </AppThemeProvider>
     //</React.StrictMode>,
 );

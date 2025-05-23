@@ -6,9 +6,8 @@ const ExerciseCategory = require('./ExerciseCategory');
 const ExerciseAssignment = require('./ExerciseAssignment');
 const Appointment = require('./Appointment');
 const Anamnes = require('./Anamnes');
-const DietitianOption = require('./DietitianOption');
 const Invoice = require('./Invoice');
-// Removed unused Notification import
+const Notification = require('./Notification');
 const Message = require('./Message');
 const NutritionPlan = require('./NutritionPlan');
 const NutritionCategory = require('./NutritionCategory');
@@ -60,14 +59,6 @@ NutritionPlan.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
-Dietitian.hasOne(DietitianOption, {
-    foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE',
-});
-DietitianOption.belongsTo(Dietitian, {
-    foreignKey: 'dietitian_id',
-});
-
 Dietitian.hasMany(NutritionCategory, {
     foreignKey: 'dietitian_id',
     as: 'categories',
@@ -116,8 +107,9 @@ Appointment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-Client.hasMany(Anamnes, {
+Client.hasOne(Anamnes, {
     foreignKey: 'client_id',
+    onDelete: 'CASCADE',
 });
 Anamnes.belongsTo(Client, {
     foreignKey: 'client_id',
@@ -264,7 +256,6 @@ module.exports = {
     Client,
     Appointment,
     Anamnes,
-    DietitianOption,
     Invoice,
     Notification,
     Message,

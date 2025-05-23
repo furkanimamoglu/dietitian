@@ -1,7 +1,6 @@
 {
   "base_url": "http://localhost:3000",
   "app_scheme": "diyetia",
-
   "database_connection": {
     "host": "localhost",
     "database": "dietitian_db",

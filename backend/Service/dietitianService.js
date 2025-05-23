@@ -35,10 +35,10 @@ class DietitianService {
                     role: dietitianInfo.role
                 },
                 config.secretkey,
-                { expiresIn: '24h' }
+                {expiresIn: '24h'}
             );
 
-            await dietitianInfo.update({ token });
+            await dietitianInfo.update({token});
 
             return {
                 ...dietitianInfo.dataValues,
@@ -71,7 +71,7 @@ class DietitianService {
                 config.secretkey
             );
 
-            await dietitian.update({ token });
+            await dietitian.update({token});
 
             return {
                 role: dietitian.role,
@@ -249,7 +249,7 @@ class DietitianService {
         }
 
         const result = await Client.count({
-            where: { dietitian_id }
+            where: {dietitian_id}
         });
 
         return {count: result};
@@ -282,7 +282,7 @@ class DietitianService {
             }
 
             const dietitian = await Dietitian.findOne({
-                where: { id: user_id },
+                where: {id: user_id},
                 attributes: {
                     exclude: ["password", "createdAt", "updatedAt"]
                 }
@@ -305,7 +305,7 @@ class DietitianService {
             }
 
             const dietitian = await Dietitian.findOne({
-                where: { id: dietitian_id }
+                where: {id: dietitian_id}
             });
 
             if (!dietitian) {
@@ -395,19 +395,19 @@ class DietitianService {
             }
 
             const data = [
-                { type: "page", name: "Danışanlarım", url: "/danisanlarim" },
-                { type: "page", name: "Randevularım", url: "/randevularim" },
-                { type: "page", name: "Ayarlar", url: "/ayarlar" },
-                { type: "page", name: "Beslenme", url: "/beslenme" },
-                { type: "page", name: "Egzersiz", url: "/egzersiz" },
-                { type: "page", name: "Finans", url: "/finans" },
-                { type: "page", name: "Tarif", url: "/tarif" },
-                { type: "page", name: "Egzersiz", url: "/egzersiz" },
-                { type: "page", name: "Mesaj", url: "/mesaj" }
+                {type: "page", name: "Danışanlarım", url: "/danisanlarim"},
+                {type: "page", name: "Randevularım", url: "/randevularim"},
+                {type: "page", name: "Ayarlar", url: "/ayarlar"},
+                {type: "page", name: "Beslenme", url: "/beslenme"},
+                {type: "page", name: "Egzersiz", url: "/egzersiz"},
+                {type: "page", name: "Finans", url: "/finans"},
+                {type: "page", name: "Tarif", url: "/tarif"},
+                {type: "page", name: "Egzersiz", url: "/egzersiz"},
+                {type: "page", name: "Mesaj", url: "/mesaj"}
             ];
 
             const dietitian = await Dietitian.findOne({
-                where: { id: user_id },
+                where: {id: user_id},
                 include: [
                     {
                         model: Client,
@@ -438,7 +438,7 @@ class DietitianService {
         }
     }
 
-    static async assignNutritionPlanToClient({ dietitian_id, client_id, nutrition_plan_id, start_date, end_date, note }) {
+    static async assignNutritionPlanToClient({dietitian_id, client_id, nutrition_plan_id, start_date, end_date, note}) {
         const client = await Client.findOne({
             where: {
                 id: client_id,
@@ -466,14 +466,14 @@ class DietitianService {
                 client_id,
                 [Op.or]: [
                     {
-                        start_date: { [Op.between]: [start_date, end_date] }
+                        start_date: {[Op.between]: [start_date, end_date]}
                     },
                     {
-                        end_date: { [Op.between]: [start_date, end_date] }
+                        end_date: {[Op.between]: [start_date, end_date]}
                     },
                     {
-                        start_date: { [Op.lte]: start_date },
-                        end_date: { [Op.gte]: end_date }
+                        start_date: {[Op.lte]: start_date},
+                        end_date: {[Op.gte]: end_date}
                     }
                 ]
             }
@@ -492,15 +492,15 @@ class DietitianService {
                     // Get the meal items based on the format
                     let mealItems = [];
                     const mealData = plan.mealPlan[day][mealType];
-                    
+
                     // Handle complex format with main and alternatives
                     if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
                         mealItems = [...mealData.main];
-                    } 
+                    }
                     // Handle simple array format
                     else if (Array.isArray(mealData)) {
                         mealItems = [...mealData];
-                    } 
+                    }
                     // Handle string format (backward compatibility)
                     else if (typeof mealData === 'string') {
                         mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
@@ -555,10 +555,10 @@ class DietitianService {
 
         await plan.destroy();
 
-        return { success: true, message: "Beslenme planı başarıyla silindi." };
+        return {success: true, message: "Beslenme planı başarıyla silindi."};
     }
 
-    static async addNutritionPlan(dietitian_id, { title, description, image, category_id, mealPlan }) {
+    static async addNutritionPlan(dietitian_id, {title, description, image, category_id, mealPlan}) {
         if (!dietitian_id || !title || !description || !category_id) {
             throw new Exception("Başlık, açıklama ve kategori zorunludur.", 400, true);
         }
@@ -604,7 +604,7 @@ class DietitianService {
             throw new Exception("Yetkisiz erişim.", 401, true);
         }
 
-        const { title, description, image, category_id, mealPlan } = updateData;
+        const {title, description, image, category_id, mealPlan} = updateData;
 
         const plan = await NutritionPlan.findOne({
             where: {
@@ -639,8 +639,8 @@ class DietitianService {
             where: {
                 client_id,
                 ...(startDate && endDate && {
-                    start_date: { [Op.lte]: endDate },
-                    end_date: { [Op.gte]: startDate }
+                    start_date: {[Op.lte]: endDate},
+                    end_date: {[Op.gte]: startDate}
                 })
             },
             order: [['start_date', 'ASC']]
