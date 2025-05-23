@@ -524,6 +524,7 @@ export default function Mesaj() {
                                                                 <EmojiEmotionsIcon/>
                                                             </IconButton>
                                                         </Tooltip>
+                                                        {/*
                                                         <Tooltip title="Dosya/Resim ekle">
                                                             <IconButton
                                                                 size="small"
@@ -533,6 +534,7 @@ export default function Mesaj() {
                                                                 <AttachFileIcon/>
                                                             </IconButton>
                                                         </Tooltip>
+                                                        */}
                                                     </InputAdornment>
                                                 ),
                                                 endAdornment: (
