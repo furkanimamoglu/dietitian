@@ -67,7 +67,6 @@ const settings = [
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
-// Updated color scheme
 const mobilePrimaryColor = '#2c8d32';
 const mobileGradient = 'linear-gradient(to right, #2c8d32, #40b548)';
 const mobileDrawerHeaderBg = 'linear-gradient(45deg, #2c8d32 30%, #40b548 90%)';

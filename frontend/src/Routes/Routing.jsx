@@ -14,10 +14,12 @@ import Egzersizler from "../pages/Egzersizler/Egzersizler.jsx";
 import Ayarlar from "../pages/Ayarlar/Ayarlar.jsx";
 import Mesaj from "../pages/Mesaj/Mesaj.jsx";
 import Finans from "../pages/Finans/Finans.jsx";
+import LandingPage from "../pages/LandingPage/LandingPage.jsx";
 
 export default function Routing() {
     return (
         <Routes>
+            <Route path="/*" element={<LandingPage/>}/>
             {/* Diyetisyen Routes */}
             <Route path="/dashboard/*" element={<Dashboard/>}/>
             <Route path="/ayarlar/*" element={<Ayarlar/>}/>
