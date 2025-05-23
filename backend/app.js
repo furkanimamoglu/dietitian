@@ -5,9 +5,6 @@ const bodyParser = require('body-parser');
 const config = require('./config.json');
 const cors = require('cors');
 
-const http = require('http');
-const { Server } = require('socket.io');
-
 // Models
 require('./Model/MainModel');
 
@@ -25,7 +22,6 @@ const recipeRoutes = require('./Routes/recipeRoutes');
 const exerciseRoutes = require('./Routes/exerciseRoutes');
 const anamnesRoutes = require('./Routes/anamnesRoutes');
 const packageRoutes = require('./Routes/packageRoutes');
-const MessageService = require("./Service/messageService");
 
 app.use(bodyParser.json());
 
@@ -89,40 +85,3 @@ if (config.ddl === "create-drop") {
 } else {
     console.log("ERROR - config.js dosyasını kontrol edin.");
 }
-
-// Socket.IO Server
-const ioServer = http.createServer();
-const io = new Server(ioServer, {
-    cors: {
-        origin: 'http://localhost:5173',
-        methods: ['GET', 'POST'],
-        credentials: true
-    }
-});
-
-io.on('connection', (socket) => {
-    console.log('Client Connected: ' + socket.id);
-
-    socket.on('send_message', async (token, partner_id, message, callback) => {
-        try {
-            console.log('Message Sent - Partner ID:', partner_id, "Message:", message);
-
-            const result = await MessageService.sendMessage(token, partner_id, message);
-
-            callback({ status: 'ok', result });
-
-        } catch (error) {
-            console.error('Mesaj gönderme hatası:', error);
-
-            callback({ status: 'error', message: error.message || 'Bilinmeyen hata' });
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Client Disconnected: ' + socket.id);
-    });
-});
-
-ioServer.listen(4000, () => {
-    console.log('✅ Socket.IO sunucusu 4000 portunda çalışıyor.');
-});

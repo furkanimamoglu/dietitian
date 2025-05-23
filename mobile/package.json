@@ -24,8 +24,7 @@
     "react-native-screens": "^4.10.0",
     "react-native-svg-charts": "^5.4.0",
     "react-native-swiper": "^1.6.0",
-    "react-native-vector-icons": "^10.2.0",
-    "socket.io-client": "^4.8.1"
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
