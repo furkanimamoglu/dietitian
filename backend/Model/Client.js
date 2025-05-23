@@ -74,8 +74,8 @@ const Client = sequelize.define('Client', {
             type: DataTypes.STRING,
             validate: {
                 isIn: {
-                    args: [["Erkek", "Kadın"]],
-                    msg: 'Cinsiyet yalnızca "Erkek" veya "Kadın" olabilir.'
+                    args: [["Erkek", "Kadın", "Diğer"]],
+                    msg: 'Cinsiyet yalnızca "Erkek", "Kadın" veya "Diğer" olabilir.'
                 }
             }
         },
@@ -85,11 +85,11 @@ const Client = sequelize.define('Client', {
             validate: {
                 min: {
                     args: 50,
-                    msg: 'Boy 50 cmden küçük olamaz.'
+                    msg: 'Boy 50 cm\'den küçük olamaz.'
                 },
                 max: {
                     args: 300,
-                    msg: 'Boy 300 cmden büyük olamaz.'
+                    msg: 'Boy 300 cm\'den büyük olamaz.'
                 }
             }
         },

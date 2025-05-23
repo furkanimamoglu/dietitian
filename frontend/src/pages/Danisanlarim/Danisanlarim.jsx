@@ -49,6 +49,7 @@ import {green, red, blue, pink} from "@mui/material/colors";
 import {useNavigate} from "react-router-dom";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
+import PersonIcon from "@mui/icons-material/Person";
 
 function QuickSearchToolbar() {
     return (
@@ -92,6 +93,7 @@ export default function Danisanlarim() {
     const inactiveCount = clients.filter(c => c.status === false).length;
     const maleCount = clients.filter(c => c.gender === "Erkek").length;
     const femaleCount = clients.filter(c => c.gender === "Kadın").length;
+    const otherCount = clients.filter(c => c.gender === "Diğer").length;
 
     useEffect(() => {
         axios
@@ -363,13 +365,15 @@ export default function Danisanlarim() {
             headerName: "Cinsiyet",
             width: 90,
             type: "singleSelect",
-            valueOptions: ["Erkek", "Kadın"],
+            valueOptions: ["Erkek", "Kadın", "Diğer"],
             editable: true,
             renderCell: (params) =>
                 params.value === "Erkek" ? (
                     <MaleIcon sx={{color: blue[500]}}/>
-                ) : (
+                ) : params.value === "Kadın" ? (
                     <FemaleIcon sx={{color: pink[500]}}/>
+                ) : (
+                    <PersonIcon sx={{color: purple[500]}}/>
                 ),
         },
         {
@@ -437,7 +441,7 @@ export default function Danisanlarim() {
                 {/* İstatistik Kartları */}
                 <Box sx={{mb: 4, mt: 2}}>
                     <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -475,7 +479,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -513,7 +517,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -551,7 +555,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -589,7 +593,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -622,6 +626,44 @@ export default function Danisanlarim() {
                                     </Typography>
                                     <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         Erkek Danışan
+                                    </Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+
+                        <Grid item xs={12} sm={6} md={2}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 3,
+                                    height: '100%',
+                                    background: 'linear-gradient(135deg, #A1A1A1 0%, #6C63FF 100%)',
+                                    borderRadius: '20px',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'translateY(-5px)',
+                                        boxShadow: '0 8px 25px rgba(108, 99, 255, 0.35)',
+                                    },
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 60%)',
+                                    }
+                                }}
+                            >
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <PersonIcon sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
+                                        {otherCount}
+                                    </Typography>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
+                                        Diğer Danışan
                                     </Typography>
                                 </Box>
                             </Paper>
@@ -836,7 +878,9 @@ export default function Danisanlarim() {
                 }}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <GroupAdd/>
-                        <Typography variant="h6">Yeni Danışan Ekle</Typography>
+                        <Typography variant="h6" color="primary.main" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
+                            Yeni Danışan Ekle
+                        </Typography>
                     </Box>
                     <IconButton
                         edge="end"
@@ -851,7 +895,7 @@ export default function Danisanlarim() {
                     <DialogContent dividers>
                         <Stack spacing={3} sx={{mt: 1}}>
                             <TextField
-                                label="İsim Soyisim"
+                                label="Adı Soyadı"
                                 name="name"
                                 fullWidth
                                 required
@@ -859,7 +903,7 @@ export default function Danisanlarim() {
                                 onChange={handleInputChange}
                                 error={!!formErrors.name}
                                 helperText={formErrors.name}
-                                placeholder="Danışanın adı ve soyadı"
+                                placeholder="Danışanın Adı ve Soyadı"
                                 variant="outlined"
                             />
 
@@ -931,13 +975,21 @@ export default function Danisanlarim() {
                                 <InputLabel id="gender-label">Cinsiyet</InputLabel>
                                 <Select
                                     labelId="gender-label"
+                                    id="gender-select"
                                     name="gender"
                                     value={newClient.gender}
                                     label="Cinsiyet"
                                     onChange={handleInputChange}
+                                    variant="outlined"
+                                    fullWidth
+                                    required
+                                    displayEmpty
+                                    sx={{ mb: 2 }}
                                 >
+                                    <MenuItem value="" disabled>Cinsiyet Seçiniz</MenuItem>
                                     <MenuItem value="Erkek">Erkek</MenuItem>
                                     <MenuItem value="Kadın">Kadın</MenuItem>
+                                    <MenuItem value="Diğer">Diğer</MenuItem>
                                 </Select>
                             </FormControl>
                         </Stack>
