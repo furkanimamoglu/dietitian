@@ -176,11 +176,11 @@ export default function Header({navigation}: Props) {
                             <TouchableOpacity onPress={() => navigation.navigate('Mesaj')}
                                               style={styles.notificationWrapper}>
                                 <Icon name="message-outline" size={24} color="#ffffff" style={styles.icon}/>
-                                {messageCount > 0 && (
+                                { /* messageCount > 0 && (
                                     <View style={styles.notificationBadge}>
-                                        <Text style={styles.notificationText}>{messageCount}</Text>
+                                        <Text style={styles.notificationText}>0</Text>
                                     </View>
-                                )}
+                                ) */}
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={openDrawer} style={styles.notificationWrapper}>

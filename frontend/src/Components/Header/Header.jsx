@@ -364,7 +364,7 @@ export default function Header() {
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mr: {xs: 2, md: 4}}}>
                             <Tooltip title="Mesajlar" arrow>
                                 <IconButton onClick={() => navigate('/mesaj')} color="inherit">
-                                    <Badge badgeContent={1} color="warning">
+                                    <Badge /* badgeContent={1} */ color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
                                 </IconButton>
