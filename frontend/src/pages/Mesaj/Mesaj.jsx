@@ -87,7 +87,7 @@ export default function Mesaj() {
                 const enhancedData = response.data.map(client => ({
                     ...client,
                     lastMessage: client.lastMessage || "",
-                    unreadCount: Math.floor(Math.random() * 3)
+                    unreadCount: 0
                 }));
                 setDanisanList(enhancedData);
             })
@@ -345,16 +345,11 @@ export default function Mesaj() {
                                                 className={selectedDanisan?.id === danisan.id ? "danisan-item-selected" : "danisan-item"}
                                             >
                                                 <ListItemAvatar>
-                                                    <Badge
-                                                        color="success"
-                                                        variant="dot"
+                                                    <Avatar
+                                                        sx={{bgcolor: getAvatarColor(danisan.name || '')}}
                                                     >
-                                                        <Avatar
-                                                            sx={{bgcolor: getAvatarColor(danisan.name || '')}}
-                                                        >
-                                                            {getInitials(danisan.name || '')}
-                                                        </Avatar>
-                                                    </Badge>
+                                                        {getInitials(danisan.name || '')}
+                                                    </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     primary={
