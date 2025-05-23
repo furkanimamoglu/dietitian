@@ -99,20 +99,23 @@ export default function Mesaj() {
     const fetchMessages = (partnerId) => {
         setIsLoading(true);
         axios
-            .get(config[config.environment].apiUrl + "/message/getMyMessages", {
+            .get(config[config.environment].apiUrl + `/message/getMyMessages?partner_id=${partnerId}`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
-                },
-                params: {
-                    partner_id: partnerId
                 }
             })
             .then((response) => {
                 const formattedMessages = response.data.map(msg => ({
                     id: msg.id,
                     text: msg.message,
-                    sender: msg.dietitian_id.toString() === localStorage.getItem("user_id") ? "DIETITIAN" : "CLIENT",
-                    timestamp: new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
+                    sender: msg.sender,
+                    timestamp: new Date(msg.createdAt).toLocaleString('tr-TR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
                     isRead: msg.isRead
                 }));
                 setMessages(formattedMessages);
@@ -128,10 +131,8 @@ export default function Mesaj() {
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
 
-        // Fetch real messages for this conversation
         fetchMessages(danisan.id);
 
-        // Input alanına odaklan
         setTimeout(() => {
             if (messageInputRef.current) {
                 messageInputRef.current.focus();
@@ -142,7 +143,6 @@ export default function Mesaj() {
     const handleSendMessage = () => {
         if (newMessage.trim() === "" || !selectedDanisan) return;
 
-        // Create a message object for immediate display
         const newMsg = {
             id: Date.now(),
             text: newMessage,
@@ -150,26 +150,24 @@ export default function Mesaj() {
             timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
         };
 
-        // Add to UI immediately for better UX
         setMessages([...messages, newMsg]);
         setNewMessage("");
 
-        // Send to API
         const messageData = {
-            dietitian_id: localStorage.getItem("user_id"),
-            client_id: selectedDanisan.id,
+            receiver_id: selectedDanisan.id,
             message: newMessage,
             isRead: false
         };
 
-        axios.post(config[config.environment].apiUrl + "/message/sendMessage", messageData, {
+        axios.post(config[config.environment].apiUrl + "/message/sendMessage",
+            messageData,
+        {
             headers: {
                 Authorization: localStorage.getItem("token")
             }
         })
             .catch(error => {
                 console.error("Error sending message:", error);
-                // Could add error handling like showing a snackbar
             });
     };
 

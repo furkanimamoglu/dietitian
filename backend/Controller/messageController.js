@@ -15,7 +15,28 @@ class messageController {
                 });
             }
 
-            const result = await MessageService.getMyMessages(user_id, user_role);
+            const {partner_id} = req.query;
+
+            const result = await MessageService.getMyMessages(user_id, user_role, partner_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async sendMessage(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const sender_id = Security.getUserIdFromToken(token);
+            const sender_role = Security.getPermissionFromToken(token);
+
+            const {receiver_id, message} = req.body;
+
+            const result = await MessageService.sendMessage(receiver_id, sender_id, sender_role, message);
 
             res.status(200).json(result);
         } catch (error) {

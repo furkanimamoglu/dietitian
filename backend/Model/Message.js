@@ -1,4 +1,3 @@
-// Libraries
 const {DataTypes} = require('sequelize');
 const sequelize = require('../Utils/Database');
 
