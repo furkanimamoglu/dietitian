@@ -30,6 +30,7 @@ const Mesaj = ({navigation}) => {
     const [loading, setLoading] = useState(false);
 
     const flatListRef = useRef(null);
+    const intervalRef = useRef(null);
 
     const fetchMessages = async () => {
         try {
@@ -57,14 +58,54 @@ const Mesaj = ({navigation}) => {
             if (data && Array.isArray(data)) {
                 setMessages(data);
             } else {
-                setAppointments([]);
+                setMessages([]);
             }
         } catch (err) {
             console.error('Error: fetchMessages ', err);
             setMessages([]);
         } finally {
             setLoading(false);
-            setRefreshing(false);
+        }
+    };
+
+    const checkForNewMessages = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config.apiUrl}/message/getMyMessages`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 500) {
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data && Array.isArray(data)) {
+                setMessages(prevMessages => {
+                    const currentMessageIds = new Set(prevMessages.map(msg => msg.id));
+
+                    const newMessages = data.filter(msg => !currentMessageIds.has(msg.id));
+
+                    if (newMessages.length > 0) {
+                        console.log(`${newMessages.length} yeni mesaj bulundu`);
+                        return [...prevMessages, ...newMessages];
+                    }
+
+                    return prevMessages;
+                });
+            }
+        } catch (err) {
+            console.error('Error: checkForNewMessages ', err);
         }
     };
 
@@ -92,6 +133,16 @@ const Mesaj = ({navigation}) => {
         fetchClientInfo().then(response => {});
         fetchMessages().then(response => {});
         requestCameraPermission().then(response => {});
+
+        intervalRef.current = setInterval(() => {
+            fetchMessages();
+        }, 5000);
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
     }, []);
 
     useEffect(() => {
@@ -164,7 +215,7 @@ const Mesaj = ({navigation}) => {
         } catch (err) {
             console.error('Mesaj gönderme hatası:', err);
         }
-    }, [input]);
+    }, [input, clientInfo.dietitian_id]);
 
     const openCamera = useCallback(() => {
         setLoading(true);
