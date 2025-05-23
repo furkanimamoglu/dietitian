@@ -127,48 +127,57 @@ function Login() {
                             Hesabınıza erişim için giriş yapın
                         </Typography>
 
-                        <Divider flexItem sx={{width: "100%", mb: 3}}/>
+                        <Divider flexItem sx={{width: "100%", mb: 1}}/>
 
                         <form onSubmit={handleSubmit} style={{width: '100%'}}>
+                            <Typography variant="subtitle1" gutterBottom sx={{ mb: 1, fontWeight: 'medium' }}>
+                                Telefon Numarası:
+                            </Typography>
                             <TextField
-                                label="Telefon Numarası"
                                 variant="outlined"
                                 fullWidth
                                 required
-                                sx={{mb: 3}}
                                 value={phoneNumber}
                                 onChange={handlePhoneNumberChange}
                                 placeholder="5XXXXXXXXX"
-                                inputProps={{maxLength: 10}}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <PhoneIcon color="action"/>
-                                            <Typography variant="body2" color="text.secondary" sx={{ml: 1}}>
-                                                +90
-                                            </Typography>
-                                        </InputAdornment>
-                                    ),
+                                slotProps={{
+                                    input: {
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <PhoneIcon color="action"/>
+                                                <Typography variant="body2" color="text.secondary" sx={{ml: 1}}>
+                                                    +90
+                                                </Typography>
+                                            </InputAdornment>
+                                        )
+                                    },
+                                    htmlInput: {
+                                        maxLength: 10
+                                    }
                                 }}
                             />
 
+                            <Typography variant="subtitle1" gutterBottom sx={{ mt: 1, mb: 1, fontWeight: 'medium' }}>
+                                Şifre:
+                            </Typography>
                             <TextField
-                                label="Şifre"
                                 type={showPassword ? "text" : "password"}
-                                variant="outlined"
+                                variant="standard"
                                 required
                                 fullWidth
                                 sx={{mb: 3}}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton onClick={toggleShowPassword} edge="end">
-                                                {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton onClick={toggleShowPassword} edge="end">
+                                                    {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }
                                 }}
                             />
 
