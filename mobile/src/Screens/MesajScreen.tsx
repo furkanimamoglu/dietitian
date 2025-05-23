@@ -20,9 +20,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import io from 'socket.io-client';
 
 const Mesaj = ({navigation}) => {
     const [input, setInput] = useState('');
+    const [socket, setSocket] = useState(null);
+    const [isConnected, setIsConnected] = useState(false);
     const [messages, setMessages] = useState([]);
     const [clientInfo, setClientInfo] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
@@ -30,6 +33,62 @@ const Mesaj = ({navigation}) => {
     const [loading, setLoading] = useState(false);
 
     const flatListRef = useRef(null);
+
+    useEffect(() => {
+        const token = AsyncStorage.getItem("token");
+        if (!token) return;
+
+        const newSocket = io(config.socketUrl, {
+            auth: {
+                token: token
+            },
+            transports: ['websocket']
+        });
+
+        newSocket.on('connect', () => {
+            console.log('Socket bağlantısı kuruldu');
+            setIsConnected(true);
+        });
+
+        newSocket.on('disconnect', () => {
+            console.log('Socket bağlantısı kesildi');
+            setIsConnected(false);
+        });
+
+        newSocket.on('error', (error) => {
+            console.error('Socket hatası:', error);
+        });
+
+        newSocket.on('newMessage', (message) => {
+            console.log('Yeni mesaj alındı:', message);
+
+            const formattedMessage = {
+                id: message.id,
+                text: message.message,
+                sender: message.sender,
+                timestamp: new Date(message.createdAt).toLocaleString('tr-TR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                isRead: message.isRead
+            };
+
+            setMessages(prevMessages => [...prevMessages, formattedMessage]);
+
+        });
+
+        setSocket(newSocket);
+
+        return () => {
+            if (newSocket) {
+                newSocket.disconnect();
+            }
+        };
+    }, []);
+
 
     const fetchMessages = async () => {
         try {
@@ -135,9 +194,6 @@ const Mesaj = ({navigation}) => {
             createdAt: getCurrentTime()
         };
 
-        setMessages(prev => [...prev, newMessage]);
-        setInput('');
-
         try {
             const token = await AsyncStorage.getItem('token');
             if (!token) {
@@ -145,22 +201,16 @@ const Mesaj = ({navigation}) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/message/sendMessage`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    receiver_id: clientInfo.dietitian_id,
-                    message: messageText
-                })
+            socket.emit('send_message', token, clientInfo.dietitian_id, messageText, (response: { status: 'ok' | 'error', message?: string }) => {
+                if (response.status === 'ok') {
+                    console.log('✅ Mesaj başarıyla sunucuya ulaştı.');
+                    setMessages(prev => [...prev, newMessage]);
+                    setInput('');
+                } else {
+                    console.error('❌ Sunucu mesajı işleyemedi:', response.message);
+                    setInput('');
+                }
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`API Hatası: ${response.status}`, errorText);
-            }
         } catch (err) {
             console.error('Mesaj gönderme hatası:', err);
         }

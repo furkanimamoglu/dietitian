@@ -31,12 +31,10 @@ class messageController {
     static async sendMessage(req, res) {
         try {
             const token = req.headers.authorization;
-            const sender_id = Security.getUserIdFromToken(token);
-            const sender_role = Security.getPermissionFromToken(token);
 
             const {receiver_id, message} = req.body;
 
-            const result = await MessageService.sendMessage(receiver_id, sender_id, sender_role, message);
+            const result = await MessageService.sendMessage(token, receiver_id, message);
 
             res.status(200).json(result);
         } catch (error) {

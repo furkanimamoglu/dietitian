@@ -1,6 +1,7 @@
 const Exception = require("../Exception/Exception");
 const {Message} = require("../Model/MainModel");
 const {DIETITIAN, CLIENT} = require("../Enum/Role");
+const Security = require("../Utils/Security");
 
 class MessageService {
 
@@ -24,8 +25,11 @@ class MessageService {
         }
     }
 
-    static async sendMessage(receiver_id, sender_id, sender_role, message) {
+    static async sendMessage(token, receiver_id, message) {
         try {
+            const sender_id = Security.getUserIdFromToken(token);
+            const sender_role = Security.getPermissionFromToken(token);
+
             let dietitian_id, client_id;
 
             if (sender_role === DIETITIAN) {
