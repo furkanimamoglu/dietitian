@@ -20,42 +20,18 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 const Mesaj = ({navigation}) => {
-    // Örnek avatar URL'leri - gerçek projenizde bunlar kullanıcı profillerinden gelmeli
-    const DIYETISYEN_AVATAR = 'https://i.pravatar.cc/101';
-    const USER_AVATAR = 'https://i.pravatar.cc/102';
-
-    // State tanımlamaları
-    const [messages, setMessages] = useState([
-        {id: '1', from: 'diyetisyen', text: 'Merhaba, bugün nasılsınız?', timestamp: '09:10'},
-        {id: '2', from: 'user', text: 'Merhaba hocam, gayet iyiyim. Siz nasılsınız?', timestamp: '09:12'},
-        {
-            id: '3',
-            from: 'diyetisyen',
-            text: 'Ben de iyiyim teşekkür ederim. Geçen hafta verdiğim diyet programını uyguladınız mı?',
-            timestamp: '09:13'
-        },
-        {
-            id: '4',
-            from: 'user',
-            text: 'Evet, büyük ölçüde uyguladım. Sadece Pazar günü dışarıda yemek yediğimde biraz program dışına çıktım.',
-            timestamp: '09:15'
-        },
-    ]);
-
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [modalImageUri, setModalImageUri] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Otomatik scroll için ref
     const flatListRef = useRef(null);
 
-    // Komponent yüklendiğinde kamera izinlerini sor
     useEffect(() => {
         requestCameraPermission();
     }, []);
 
-    // Yeni mesaj geldiğinde en alta kaydır
     useEffect(() => {
         if (flatListRef.current && messages.length > 0) {
             setTimeout(() => {
@@ -64,7 +40,6 @@ const Mesaj = ({navigation}) => {
         }
     }, [messages]);
 
-    // Kamera izinlerini iste
     const requestCameraPermission = async () => {
         try {
             const granted = await PermissionsAndroid.request(
@@ -97,19 +72,8 @@ const Mesaj = ({navigation}) => {
 
         setMessages(prev => [...prev, newMessage]);
         setInput('');
-
-//     setTimeout(() => {
-//       const replyMessage = {
-//         id: (Date.now() + 1).toString(),
-//         from: 'diyetisyen',
-//         text: 'Mesajınızı aldım, teşekkürler! En kısa sürede dönüş yapacağım.',
-//         timestamp: getCurrentTime()
-//       };
-//       setMessages(prev => [...prev, replyMessage]);
-//     }, 1000);
     }, [input]);
 
-    // Kamera aç
     const openCamera = useCallback(() => {
         setLoading(true);
         launchCamera(
@@ -142,7 +106,6 @@ const Mesaj = ({navigation}) => {
         );
     }, []);
 
-    // Galeri aç
     const openGallery = useCallback(() => {
         setLoading(true);
         launchImageLibrary(
@@ -174,31 +137,21 @@ const Mesaj = ({navigation}) => {
         );
     }, []);
 
-    // Resim modalını aç
     const handleImagePress = useCallback((uri) => {
         setModalImageUri(uri);
         setModalVisible(true);
     }, []);
 
-    // Geçerli saati al
     const getCurrentTime = () => {
         const now = new Date();
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     };
 
-    // Mesaj balonu render - optimize edilmiş
     const renderMessageItem = useCallback(({item}) => {
         const isUser = item.from === 'user';
 
         return (
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
-                {!isUser && (
-                    <Image
-                        source={{uri: DIYETISYEN_AVATAR}}
-                        style={styles.avatar}
-                    />
-                )}
-
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
                     {item.text && <Text style={styles.messageText}>{item.text}</Text>}
 
@@ -216,25 +169,16 @@ const Mesaj = ({navigation}) => {
                         {item.timestamp}
                     </Text>
                 </View>
-
-                {isUser && (
-                    <Image
-                        source={{uri: USER_AVATAR}}
-                        style={styles.avatar}
-                    />
-                )}
             </View>
         );
     }, [handleImagePress]);
 
-    // Mesaj listesi için header
     const ListHeaderComponent = useMemo(() => (
         <View style={styles.dateHeader}>
             <Text style={styles.dateHeaderText}>Bugün</Text>
         </View>
     ), []);
 
-    // Render - KeyboardAvoidingView ile klavye açılınca kaymayı önlüyoruz
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#f57c00" barStyle="light-content"/>
@@ -269,7 +213,7 @@ const Mesaj = ({navigation}) => {
                             style={styles.input}
                             multiline
                         />
-
+                        {/*
                         <View style={styles.inputActions}>
                             <TouchableOpacity style={styles.iconButton} onPress={openCamera} disabled={loading}>
                                 <Icon name="camera" size={24} color={loading ? "#ccc" : "#555"}/>
@@ -279,6 +223,7 @@ const Mesaj = ({navigation}) => {
                                 <Icon name="image" size={24} color={loading ? "#ccc" : "#555"}/>
                             </TouchableOpacity>
                         </View>
+                        */}
                     </View>
 
                     <TouchableOpacity

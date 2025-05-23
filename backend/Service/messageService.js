@@ -9,14 +9,18 @@ class MessageService {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
 
+        if(!partner_id){
+            partner_id = user_id;
+        }
+
         if (user_role === DIETITIAN) {
             return await Message.findAll({
-                where: {dietitian_id: user_id, client_id: partner_id, sender: user_role},
+                where: {dietitian_id: user_id, client_id: partner_id},
                 order: [['createdAt', 'ASC']]
             });
         } else if (user_role === CLIENT) {
             return await Message.findAll({
-                where: {client_id: user_id, dietitian_id: partner_id, sender: user_role},
+                where: {client_id: user_id, dietitian_id: partner_id},
                 order: [['createdAt', 'ASC']]
             });
         } else {

@@ -229,7 +229,7 @@ const AnaSayfa = ({navigation}: Props) => {
                                 <Text style={styles.randevuTarih}>
                                     {closestAppointment
                                         ? closestAppointment.toLocaleDateString('tr-TR')
-                                        : 'Tarih yok'}
+                                        : 'Randevunuz bulunmamaktadır.'}
                                 </Text>
                                 <Text style={styles.randevuSaat}>
                                     {closestAppointment
@@ -237,7 +237,7 @@ const AnaSayfa = ({navigation}: Props) => {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                         })
-                                        : 'Saat yok'}
+                                        : ' '}
                                 </Text>
                             </View>
                         </View>

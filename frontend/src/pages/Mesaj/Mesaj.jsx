@@ -98,6 +98,7 @@ export default function Mesaj() {
 
     const fetchMessages = (partnerId) => {
         setIsLoading(true);
+        debugger;
         axios
             .get(config[config.environment].apiUrl + `/message/getMyMessages?partner_id=${partnerId}`, {
                 headers: {
@@ -594,12 +595,6 @@ export default function Mesaj() {
                                         <Typography variant="h6" mt={2} align="center">
                                             {selectedDanisan.name || ''}
                                         </Typography>
-                                        <Chip
-                                            label={selectedDanisan.status || "Aktif Danışan"}
-                                            color="primary"
-                                            size="small"
-                                            sx={{mt: 1}}
-                                        />
                                     </Box>
 
                                     <Divider sx={{my: 2}}/>
