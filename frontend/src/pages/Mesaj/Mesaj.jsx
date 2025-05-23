@@ -1,4 +1,4 @@
-import React, {useRef, useEffect, useState} from 'react';
+import React, {useRef, useEffect, useState, useCallback} from 'react';
 import Default from "../../Components/Layouts/Default.jsx";
 import {
     Avatar,
@@ -57,6 +57,7 @@ export default function Mesaj() {
     const [emojiPickerAnchor, setEmojiPickerAnchor] = useState(null);
     const [fileUploadDialog, setFileUploadDialog] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [lastMessageId, setLastMessageId] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const theme = useTheme();
@@ -64,12 +65,104 @@ export default function Mesaj() {
     const messageListRef = useRef();
     const messageInputRef = useRef();
     const fileInputRef = useRef();
+    const intervalRef = useRef();
 
     useEffect(() => {
         if (messageListRef.current) {
             messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
         }
     }, [messages]);
+
+    // Yeni mesajları kontrol etme fonksiyonu - optimize edilmiş
+    const checkNewMessages = useCallback(async (partnerId) => {
+        if (!partnerId) return;
+
+        try {
+            const response = await axios.get(
+                config[config.environment].apiUrl + `/message/getMyMessages?partner_id=${partnerId}`,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem("token"),
+                    }
+                }
+            );
+
+            // Eğer hiç mesaj yoksa işlemi sonlandır
+            if (!response.data || response.data.length === 0) {
+                return;
+            }
+
+            const formattedMessages = response.data.map(msg => ({
+                id: msg.id,
+                text: msg.message,
+                sender: msg.sender,
+                timestamp: new Date(msg.createdAt).toLocaleString('tr-TR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                isRead: msg.isRead
+            }));
+
+            // En yüksek mesaj ID'sini bul
+            const latestMessageId = Math.max(...formattedMessages.map(msg => msg.id));
+
+            // İlk yükleme değilse ve yeni mesaj yoksa işlem yapma
+            if (lastMessageId !== null && latestMessageId <= lastMessageId) {
+                return;
+            }
+
+            // Sadece yeni mesajları filtrele
+            const newMessages = formattedMessages.filter(msg =>
+                lastMessageId === null || msg.id > lastMessageId
+            );
+
+            if (newMessages.length > 0) {
+                console.log(`${newMessages.length} yeni mesaj alındı`);
+
+                // İlk yükleme ise tüm mesajları set et, değilse sadece yeni mesajları ekle
+                if (lastMessageId === null) {
+                    setMessages(formattedMessages);
+                } else {
+                    setMessages(prevMessages => [...prevMessages, ...newMessages]);
+                }
+
+                setLastMessageId(latestMessageId);
+            }
+
+        } catch (error) {
+            console.error("Yeni mesajları kontrol ederken hata:", error);
+        }
+    }, [lastMessageId]);
+
+    // Mesaj yenileme interval'ı - optimize edilmiş
+    useEffect(() => {
+        // Önceki interval'ı temizle
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+
+        if (!selectedDanisan) {
+            return;
+        }
+
+        // İlk mesajları yükle
+        checkNewMessages(selectedDanisan.id);
+
+        // 10 saniyede bir yeni mesajları kontrol et
+        intervalRef.current = setInterval(() => {
+            checkNewMessages(selectedDanisan.id);
+        }, 10000);
+
+        // Cleanup function
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, [selectedDanisan?.id, checkNewMessages]);
 
     useEffect(() => {
         fetchDanisanList();
@@ -83,7 +176,6 @@ export default function Mesaj() {
                 },
             })
             .then((response) => {
-                // Add some mock data for demo purposes
                 const enhancedData = response.data.map(client => ({
                     ...client,
                     lastMessage: client.lastMessage || "",
@@ -96,43 +188,11 @@ export default function Mesaj() {
             });
     };
 
-    const fetchMessages = (partnerId) => {
-        setIsLoading(true);
-        debugger;
-        axios
-            .get(config[config.environment].apiUrl + `/message/getMyMessages?partner_id=${partnerId}`, {
-                headers: {
-                    Authorization: localStorage.getItem("token"),
-                }
-            })
-            .then((response) => {
-                const formattedMessages = response.data.map(msg => ({
-                    id: msg.id,
-                    text: msg.message,
-                    sender: msg.sender,
-                    timestamp: new Date(msg.createdAt).toLocaleString('tr-TR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    isRead: msg.isRead
-                }));
-                setMessages(formattedMessages);
-            })
-            .catch((error) => {
-                console.error("Error fetching messages:", error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    };
-
+    // fetchMessages fonksiyonunu kaldırdık çünkü artık checkNewMessages kullanıyoruz
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
-
-        fetchMessages(danisan.id);
+        setMessages([]); // Mesajları temizle
+        setLastMessageId(null); // Son mesaj ID'sini sıfırla
 
         setTimeout(() => {
             if (messageInputRef.current) {
@@ -141,17 +201,26 @@ export default function Mesaj() {
         }, 100);
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (newMessage.trim() === "" || !selectedDanisan) return;
 
+        const tempId = Date.now();
         const newMsg = {
-            id: Date.now(),
+            id: tempId,
             text: newMessage,
             sender: "DIETITIAN",
-            timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+            timestamp: new Date().toLocaleString('tr-TR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            isRead: false
         };
 
-        setMessages([...messages, newMsg]);
+        // Mesajı hemen UI'a ekle
+        setMessages(prev => [...prev, newMsg]);
         setNewMessage("");
 
         const messageData = {
@@ -160,16 +229,35 @@ export default function Mesaj() {
             isRead: false
         };
 
-        axios.post(config[config.environment].apiUrl + "/message/sendMessage",
-            messageData,
-        {
-            headers: {
-                Authorization: localStorage.getItem("token")
+        try {
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/message/sendMessage",
+                messageData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem("token")
+                    }
+                }
+            );
+
+            // Başarılı gönderimden sonra gerçek mesaj ID'sini güncelle
+            if (response.data && response.data.id) {
+                setMessages(prev =>
+                    prev.map(msg =>
+                        msg.id === tempId
+                            ? { ...msg, id: response.data.id }
+                            : msg
+                    )
+                );
+
+                // LastMessageId'yi güncelle
+                setLastMessageId(response.data.id);
             }
-        })
-            .catch(error => {
-                console.error("Error sending message:", error);
-            });
+        } catch (error) {
+            console.error("Error sending message:", error);
+            // Hata durumunda mesajı kaldır veya hata durumunu göster
+            setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        }
     };
 
     const handleKeyPress = (e) => {
@@ -185,7 +273,7 @@ export default function Mesaj() {
     };
 
     const getAvatarColor = (name) => {
-        if (!name) return '#1976d2'; // default color
+        if (!name) return '#1976d2';
         const colors = [
             '#1976d2', '#388e3c', '#d32f2f', '#7b1fa2',
             '#c2185b', '#f57c00', '#0288d1', '#689f38'
@@ -196,7 +284,7 @@ export default function Mesaj() {
     };
 
     const filteredDanisanList = danisanList.filter((danisan) =>
-        `${danisan.name || ''} || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
+        `${danisan.name || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const formatDate = () => {
@@ -226,7 +314,6 @@ export default function Mesaj() {
         setUploadProgress(0);
 
         try {
-            // Simüle edilmiş dosya yükleme
             await simulateFileUpload(file, (progress) => {
                 setUploadProgress(progress);
             });
@@ -524,17 +611,6 @@ export default function Mesaj() {
                                                                 <EmojiEmotionsIcon/>
                                                             </IconButton>
                                                         </Tooltip>
-                                                        {/*
-                                                        <Tooltip title="Dosya/Resim ekle">
-                                                            <IconButton
-                                                                size="small"
-                                                                color="primary"
-                                                                onClick={() => setFileUploadDialog(true)}
-                                                            >
-                                                                <AttachFileIcon/>
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        */}
                                                     </InputAdornment>
                                                 ),
                                                 endAdornment: (
