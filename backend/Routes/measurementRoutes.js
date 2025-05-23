@@ -1,8 +1,9 @@
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-const measurementController = require('../Controller/measurementController');
+const measurementController = require(path.join(__dirname, '..', 'Controller', 'measurementController'));
 
 router.get('/getClientMeasurement', measurementController.getClientMeasurement);
 router.post('/createMeasurement', measurementController.createMeasurement);

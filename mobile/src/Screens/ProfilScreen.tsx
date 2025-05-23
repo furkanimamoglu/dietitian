@@ -67,6 +67,8 @@ const Profil = ({navigation}) => {
                     <Card.Content>
                         <Button onPress={() => console.log('Profili Düzenle')} mode="outlined" style={styles.button}>Profili
                             Düzenle</Button>
+                        <Button onPress={() => console.log('Ödemelerim')} mode="outlined" style={styles.button}>
+                                                    Ödemelerim</Button>
                         <Button onPress={() => console.log('Şifreyi Değiştir')} mode="outlined" style={styles.button}>Şifreyi
                             Değiştir</Button>
                         <Button onPress={() => console.log('Ayarlar')} mode="outlined"

@@ -1,5 +1,6 @@
-const {DataTypes} = require('sequelize');
-const sequelize = require('../Utils/Database');
+const path = require('path');
+const { DataTypes } = require('sequelize');
+const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
     id: {
@@ -24,7 +25,7 @@ const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
         }
     },
     status: {
-        type: DataTypes.ENUM('active', 'completed', 'cancelled'),
+        type: DataTypes.ENUM('active', 'completed', 'pending', 'cancelled'),
         allowNull: false,
         defaultValue: 'active'
     },

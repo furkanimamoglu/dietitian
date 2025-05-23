@@ -2,7 +2,6 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {
     View,
     StyleSheet,
-    ScrollView,
     TextInput,
     TouchableOpacity,
     ActivityIndicator,
@@ -24,14 +23,12 @@ import {
     Surface,
     Chip,
     Divider,
-    Avatar,
-    Badge
+    Avatar
 } from 'react-native-paper';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
 import config from '../../config.js';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface MealItem {
     item: string;
@@ -97,7 +94,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             setLoading(true);
             setError(null);
 
-            console.log('Fetching meal plan from:', `${config.apiUrl}/client/getTodayMeal`);
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
@@ -659,6 +655,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 contentContainerStyle={loading || error || isEmpty ? styles.centeredContent : styles.content}
                 showsVerticalScrollIndicator={false}
             />
+
         );
     };
 
@@ -730,7 +727,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5'
     },
     content: {
-        flex: 1,
+        flexGrow: 1,
         padding: 16
     },
     centeredContent: {

@@ -1,24 +1,25 @@
-const sequelize = require('../Utils/Database'); // Sequelize instance
-const Dietitian = require('./Dietitian');
-const Client = require('./Client');
-const Exercise = require('./Exercise');
-const ExerciseCategory = require('./ExerciseCategory');
-const ExerciseAssignment = require('./ExerciseAssignment');
-const Appointment = require('./Appointment');
-const Anamnes = require('./Anamnes');
-const DietitianOption = require('./DietitianOption');
-const Invoice = require('./Invoice');
-const Notification = require('./Notification');
-const Message = require('./Message');
-const NutritionPlan = require('./NutritionPlan');
-const NutritionCategory = require('./NutritionCategory');
-const NutritionAssignment = require('./NutritionAssignment');
-const Recipe = require('./Recipe');
-const RecipeCategory = require('./RecipeCategory');
-const Notes = require('./Notes');
-const Package = require('./Package');
-const PackageItems = require('./PackageItems');
-const Measurement = require('./Measurement');
+const path = require('path');
+const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
+
+const Dietitian = require(path.join(__dirname, 'Dietitian'));
+const Client = require(path.join(__dirname, 'Client'));
+const Exercise = require(path.join(__dirname, 'Exercise'));
+const ExerciseCategory = require(path.join(__dirname, 'ExerciseCategory'));
+const ExerciseAssignment = require(path.join(__dirname, 'ExerciseAssignment'));
+const Appointment = require(path.join(__dirname, 'Appointment'));
+const Anamnes = require(path.join(__dirname, 'Anamnes'));
+const Invoice = require(path.join(__dirname, 'Invoice'));
+const Notification = require(path.join(__dirname, 'Notification'));
+const Message = require(path.join(__dirname, 'Message'));
+const NutritionPlan = require(path.join(__dirname, 'NutritionPlan'));
+const NutritionCategory = require(path.join(__dirname, 'NutritionCategory'));
+const NutritionAssignment = require(path.join(__dirname, 'NutritionAssignment'));
+const Recipe = require(path.join(__dirname, 'Recipe'));
+const RecipeCategory = require(path.join(__dirname, 'RecipeCategory'));
+const Notes = require(path.join(__dirname, 'Notes'));
+const Package = require(path.join(__dirname, 'Package'));
+const PackageItems = require(path.join(__dirname, 'PackageItems'));
+const Measurement = require(path.join(__dirname, 'Measurement'));
 
 Dietitian.hasMany(Client, {
     foreignKey: 'dietitian_id',
@@ -57,14 +58,6 @@ Dietitian.hasMany(NutritionPlan, {
     onDelete: 'CASCADE',
 });
 NutritionPlan.belongsTo(Dietitian, {
-    foreignKey: 'dietitian_id',
-});
-
-Dietitian.hasOne(DietitianOption, {
-    foreignKey: 'dietitian_id',
-    onDelete: 'CASCADE',
-});
-DietitianOption.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id',
 });
 
@@ -265,7 +258,6 @@ module.exports = {
     Client,
     Appointment,
     Anamnes,
-    DietitianOption,
     Invoice,
     Notification,
     Message,

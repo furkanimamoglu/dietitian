@@ -16,46 +16,135 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Header from '../Components/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../../config';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 const Mesaj = ({navigation}) => {
-    // Örnek avatar URL'leri - gerçek projenizde bunlar kullanıcı profillerinden gelmeli
-    const DIYETISYEN_AVATAR = 'https://i.pravatar.cc/101';
-    const USER_AVATAR = 'https://i.pravatar.cc/102';
-
-    // State tanımlamaları
-    const [messages, setMessages] = useState([
-        {id: '1', from: 'diyetisyen', text: 'Merhaba, bugün nasılsınız?', timestamp: '09:10'},
-        {id: '2', from: 'user', text: 'Merhaba hocam, gayet iyiyim. Siz nasılsınız?', timestamp: '09:12'},
-        {
-            id: '3',
-            from: 'diyetisyen',
-            text: 'Ben de iyiyim teşekkür ederim. Geçen hafta verdiğim diyet programını uyguladınız mı?',
-            timestamp: '09:13'
-        },
-        {
-            id: '4',
-            from: 'user',
-            text: 'Evet, büyük ölçüde uyguladım. Sadece Pazar günü dışarıda yemek yediğimde biraz program dışına çıktım.',
-            timestamp: '09:15'
-        },
-    ]);
-
     const [input, setInput] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [clientInfo, setClientInfo] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
     const [modalImageUri, setModalImageUri] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Otomatik scroll için ref
     const flatListRef = useRef(null);
+    const intervalRef = useRef(null);
 
-    // Komponent yüklendiğinde kamera izinlerini sor
+    const fetchMessages = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config.apiUrl}/message/getMyMessages`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 500) {
+                setMessages([]);
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data && Array.isArray(data)) {
+                setMessages(data);
+            } else {
+                setMessages([]);
+            }
+        } catch (err) {
+            console.error('Error: fetchMessages ', err);
+            setMessages([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const checkForNewMessages = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config.apiUrl}/message/getMyMessages`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 500) {
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data && Array.isArray(data)) {
+                setMessages(prevMessages => {
+                    const currentMessageIds = new Set(prevMessages.map(msg => msg.id));
+
+                    const newMessages = data.filter(msg => !currentMessageIds.has(msg.id));
+
+                    if (newMessages.length > 0) {
+                        console.log(`${newMessages.length} yeni mesaj bulundu`);
+                        return [...prevMessages, ...newMessages];
+                    }
+
+                    return prevMessages;
+                });
+            }
+        } catch (err) {
+            console.error('Error: checkForNewMessages ', err);
+        }
+    };
+
+    const fetchClientInfo = async () => {
+        try {
+            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setClientInfo(data);
+            } else {
+                console.log('Kullanıcı bilgisi alınamadı:', data.message);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    };
+
     useEffect(() => {
-        requestCameraPermission();
+        fetchClientInfo().then(response => {});
+        fetchMessages().then(response => {});
+        requestCameraPermission().then(response => {});
+
+        intervalRef.current = setInterval(() => {
+            fetchMessages();
+        }, 5000);
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
     }, []);
 
-    // Yeni mesaj geldiğinde en alta kaydır
     useEffect(() => {
         if (flatListRef.current && messages.length > 0) {
             setTimeout(() => {
@@ -64,7 +153,6 @@ const Mesaj = ({navigation}) => {
         }
     }, [messages]);
 
-    // Kamera izinlerini iste
     const requestCameraPermission = async () => {
         try {
             const granted = await PermissionsAndroid.request(
@@ -85,31 +173,50 @@ const Mesaj = ({navigation}) => {
         }
     };
 
-    const sendMessage = useCallback(() => {
+    const sendMessage = useCallback(async () => {
         if (input.trim() === '') return;
+
+        const messageText = input.trim();
 
         const newMessage = {
             id: Date.now().toString(),
-            from: 'user',
-            text: input.trim(),
-            timestamp: getCurrentTime()
+            sender: 'CLIENT',
+            message: messageText,
+            isRead: true,
+            createdAt: getCurrentTime()
         };
 
         setMessages(prev => [...prev, newMessage]);
         setInput('');
 
-//     setTimeout(() => {
-//       const replyMessage = {
-//         id: (Date.now() + 1).toString(),
-//         from: 'diyetisyen',
-//         text: 'Mesajınızı aldım, teşekkürler! En kısa sürede dönüş yapacağım.',
-//         timestamp: getCurrentTime()
-//       };
-//       setMessages(prev => [...prev, replyMessage]);
-//     }, 1000);
-    }, [input]);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token bulunamadı');
+                return;
+            }
 
-    // Kamera aç
+            const response = await fetch(`${config.apiUrl}/message/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    receiver_id: clientInfo.dietitian_id,
+                    message: messageText
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API Hatası: ${response.status}`, errorText);
+            }
+        } catch (err) {
+            console.error('Mesaj gönderme hatası:', err);
+        }
+    }, [input, clientInfo.dietitian_id]);
+
     const openCamera = useCallback(() => {
         setLoading(true);
         launchCamera(
@@ -142,7 +249,6 @@ const Mesaj = ({navigation}) => {
         );
     }, []);
 
-    // Galeri aç
     const openGallery = useCallback(() => {
         setLoading(true);
         launchImageLibrary(
@@ -174,35 +280,25 @@ const Mesaj = ({navigation}) => {
         );
     }, []);
 
-    // Resim modalını aç
     const handleImagePress = useCallback((uri) => {
         setModalImageUri(uri);
         setModalVisible(true);
     }, []);
 
-    // Geçerli saati al
     const getCurrentTime = () => {
         const now = new Date();
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     };
 
-    // Mesaj balonu render - optimize edilmiş
     const renderMessageItem = useCallback(({item}) => {
-        const isUser = item.from === 'user';
+        const isUser = item.sender === 'CLIENT';
 
         return (
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
-                {!isUser && (
-                    <Image
-                        source={{uri: DIYETISYEN_AVATAR}}
-                        style={styles.avatar}
-                    />
-                )}
-
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
-                    {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+                    {item.message && <Text style={styles.messageText}>{item.message}</Text>}
 
-                    {item.image && (
+                    {/* item.image && (
                         <TouchableOpacity onPress={() => handleImagePress(item.image)} activeOpacity={0.8}>
                             <Image
                                 source={{uri: item.image}}
@@ -210,31 +306,22 @@ const Mesaj = ({navigation}) => {
                                 resizeMode="cover"
                             />
                         </TouchableOpacity>
-                    )}
+                    ) */}
 
                     <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.diyetisyenTimestamp]}>
-                        {item.timestamp}
+                        {item.createdAt}
                     </Text>
                 </View>
-
-                {isUser && (
-                    <Image
-                        source={{uri: USER_AVATAR}}
-                        style={styles.avatar}
-                    />
-                )}
             </View>
         );
     }, [handleImagePress]);
 
-    // Mesaj listesi için header
     const ListHeaderComponent = useMemo(() => (
         <View style={styles.dateHeader}>
             <Text style={styles.dateHeaderText}>Bugün</Text>
         </View>
     ), []);
 
-    // Render - KeyboardAvoidingView ile klavye açılınca kaymayı önlüyoruz
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#f57c00" barStyle="light-content"/>
@@ -269,7 +356,7 @@ const Mesaj = ({navigation}) => {
                             style={styles.input}
                             multiline
                         />
-
+                        {/*
                         <View style={styles.inputActions}>
                             <TouchableOpacity style={styles.iconButton} onPress={openCamera} disabled={loading}>
                                 <Icon name="camera" size={24} color={loading ? "#ccc" : "#555"}/>
@@ -279,6 +366,7 @@ const Mesaj = ({navigation}) => {
                                 <Icon name="image" size={24} color={loading ? "#ccc" : "#555"}/>
                             </TouchableOpacity>
                         </View>
+                        */}
                     </View>
 
                     <TouchableOpacity

@@ -1,6 +1,6 @@
-// Libraries
-const {DataTypes} = require('sequelize');
-const sequelize = require('../Utils/Database');
+const path = require('path');
+const { DataTypes } = require('sequelize');
+const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Client = sequelize.define('Client', {
         id: {

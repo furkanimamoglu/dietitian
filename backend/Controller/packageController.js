@@ -1,5 +1,8 @@
-const PackageService = require("../Service/packageService");
-const Security = require("../Utils/Security");
+const path = require("path");
+
+const PackageService = require(path.join(__dirname, "..", "Service", "PackageService"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
+const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class packageController {
 
@@ -7,6 +10,14 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
 
             if (!token || !dietitian_id) {
                 return res.status(401).json({
@@ -28,9 +39,11 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -52,9 +65,11 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -80,14 +95,16 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            const {package_id} = req.query;
-
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
+
+            const {package_id} = req.query;
 
             const result = await PackageService.deletePackage(dietitian_id, package_id);
             res.status(200).json(result);
@@ -103,13 +120,16 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            const {package_id} = req.query;
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
+
+            const {package_id} = req.query;
 
             const result = await PackageService.getPackageItemsFromPackage(dietitian_id, package_id);
             res.status(200).json(result);
@@ -125,9 +145,11 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -149,9 +171,11 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -172,14 +196,16 @@ class packageController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
 
-            const {item_id} = req.query;
-
-            if (!token || !dietitian_id) {
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
+
+            const {item_id} = req.query;
 
             const result = await PackageService.deletePackageItem(dietitian_id, item_id);
             res.status(200).json(result);

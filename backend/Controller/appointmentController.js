@@ -1,19 +1,25 @@
-const AppointmentService = require("../Service/appointmentService");
-const Security = require("../Utils/Security");
+const path = require("path");
+
+const AppointmentService = require(path.join(__dirname, "..", "Service", "AppointmentService"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
+const { DIETITIAN, CLIENT } = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class AppointmentController {
 
     static async fetchDietitianAppointments(req, res) {
         try {
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const result = await AppointmentService.fetchDietitianAppointments(user_id);
+            const result = await AppointmentService.fetchDietitianAppointments(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -27,8 +33,11 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            if (!token || !dietitian_id) {
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -48,9 +57,12 @@ class AppointmentController {
     static async addAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -67,7 +79,7 @@ class AppointmentController {
                 title,
                 start,
                 end,
-                dietitian_id: user_id,
+                dietitian_id,
                 client_id,
             });
 
@@ -83,9 +95,12 @@ class AppointmentController {
     static async updateAppointmentAsDietitian(req, res) {
         try {
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -102,7 +117,7 @@ class AppointmentController {
                 title,
                 start,
                 end,
-                dietitian_id: user_id,
+                dietitian_id,
                 client_id,
                 status,
             });
@@ -122,13 +137,16 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const result = await AppointmentService.getClientAppointments(client_id);
+            const result = await AppointmentService.fetchClientAppointments(client_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
@@ -142,8 +160,11 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
-            if (!token || !dietitian_id) {
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -170,12 +191,50 @@ class AppointmentController {
         }
     }
 
+    static async deleteAppointmentAsClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {appointment_id} = req.query;
+
+            if (!appointment_id) {
+                return res.status(400).json({
+                    message: "Randevu ID'si gerekli."
+                });
+            }
+
+            await AppointmentService.deleteAppointmentAsClient(client_id, appointment_id);
+
+            res.status(200).json({
+                message: "Randevu başarıyla silindi."
+            });
+
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: true,
+                message: error.message,
+            });
+        }
+    }
+
     static async addAppointmentAsClient(req, res) {
         try {
             const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            if (!token || !user_id) {
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
                 return res.status(401).json({
+                    showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
@@ -192,7 +251,7 @@ class AppointmentController {
                 title,
                 start,
                 end,
-                client_id: user_id,
+                client_id,
             });
 
             res.status(201).json({
@@ -210,6 +269,14 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
 
             const result = await AppointmentService.getTodayAppointmentCount(dietitian_id);
             res.status(200).json(result);
@@ -225,6 +292,14 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
 
             const result = await AppointmentService.getRemainingTodayAppointmentCount(dietitian_id);
             res.status(200).json(result);
@@ -240,6 +315,14 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
 
             const result = await AppointmentService.getPendingAppointmentCount(dietitian_id);
             res.status(200).json(result);
@@ -255,6 +338,15 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
             const {appointment_id, action} = req.body;
 
             if (!appointment_id || !action) {
@@ -279,6 +371,14 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
 
             const result = await AppointmentService.getPendingAppointments(dietitian_id);
             res.status(200).json(result);
@@ -294,6 +394,14 @@ class AppointmentController {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
 
             const result = await AppointmentService.getTodayApprovedAppointments(dietitian_id);
             res.status(200).json(result);

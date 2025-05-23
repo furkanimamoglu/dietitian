@@ -38,7 +38,6 @@ export default function Header({navigation}: Props) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerAnim] = useState(new Animated.Value(screenWidth));
-
     const [userName, setUserName] = useState<string>('Yükleniyor...');
     const [userProfile, setUserProfile] = useState<string>('');
 
@@ -62,45 +61,45 @@ export default function Header({navigation}: Props) {
         }
     };
 
-    useEffect(() => {
-        const checkToken = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                if (!token) {
-                    console.log('Token bulunamadı, giriş ekranına yönlendiriliyor...');
-                    navigation.reset({
-                        index: 0,
-                        routes: [{name: 'Login'}],
-                    });
-                    return;
-                } else {
-                    console.log('Token bulundu, kontrol başarılı.');
-                }
-            } catch (error) {
-                console.error('Hata:', error);
-            }
-        }
-
-        const fetchClientInfo = async () => {
-            try {
-                const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': await AsyncStorage.getItem('token') || ''
-                    }
+    const checkToken = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.log('Token bulunamadı, giriş ekranına yönlendiriliyor...');
+                navigation.reset({
+                    index: 0,
+                    routes: [{name: 'Login'}],
                 });
-                const data = await response.json();
-                if (response.ok) {
-                    setUserName(data.name || 'Bilinmiyor');
-                } else {
-                    console.log('Kullanıcı bilgisi alınamadı:', data.message);
-                }
-            } catch (error) {
-                console.error('Hata:', error);
+                return;
+            } else {
+                console.log('Token bulundu, kontrol başarılı.');
             }
-        };
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    }
 
+    const fetchClientInfo = async () => {
+        try {
+            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setUserName(data.name || 'Bilinmiyor');
+            } else {
+                console.log('Kullanıcı bilgisi alınamadı:', data.message);
+            }
+        } catch (error) {
+            console.error('Hata:', error);
+        }
+    };
+
+    useEffect(() => {
         fetchClientInfo();
         checkToken();
         fetchNotifications();
@@ -177,11 +176,11 @@ export default function Header({navigation}: Props) {
                             <TouchableOpacity onPress={() => navigation.navigate('Mesaj')}
                                               style={styles.notificationWrapper}>
                                 <Icon name="message-outline" size={24} color="#ffffff" style={styles.icon}/>
-                                {messageCount > 0 && (
+                                { /* messageCount > 0 && (
                                     <View style={styles.notificationBadge}>
-                                        <Text style={styles.notificationText}>{messageCount}</Text>
+                                        <Text style={styles.notificationText}>0</Text>
                                     </View>
-                                )}
+                                ) */}
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={openDrawer} style={styles.notificationWrapper}>

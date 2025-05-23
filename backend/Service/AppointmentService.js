@@ -1,7 +1,8 @@
-const Exception = require("../Exception/Exception");
-const Appointment = require('../Model/Appointment');
-const Client = require('../Model/Client');
-const {Op} = require("sequelize");
+const path = require('path');
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
+const Appointment = require(path.join(__dirname, '..', 'Model', 'Appointment'));
+const Client = require(path.join(__dirname, '..', 'Model', 'Client'));
+const { Op } = require('sequelize');
 
 class AppointmentService {
     static async fetchDietitianAppointments(user_id) {
@@ -54,7 +55,7 @@ class AppointmentService {
 
 
     static async addAppointment(data) {
-        const {title, start, end, client_id} = data;
+        const { title, start, end, client_id } = data;
 
         const client = await Client.findByPk(client_id);
         if (!client) {
@@ -65,35 +66,21 @@ class AppointmentService {
 
         try {
             if (!title || !start || !end || !dietitian_id || !client_id) {
-                throw new Error("Tüm alanları doldurmanız gerekmektedir.");
+                throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
             const conflictingAppointments = await Appointment.findOne({
                 where: {
-                    dietitian_id: dietitian_id,
-                    [Op.or]: [
-                        {
-                            start: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            end: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            [Op.and]: [
-                                {start: {[Op.lte]: start}},
-                                {end: {[Op.gte]: end}},
-                            ],
-                        },
-                    ],
-                },
+                    dietitian_id,
+                    [Op.and]: [
+                        { start: { [Op.lt]: end } },
+                        { end: { [Op.gt]: start } }
+                    ]
+                }
             });
 
             if (conflictingAppointments) {
-                throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
+                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
             return await Appointment.create({
@@ -103,51 +90,38 @@ class AppointmentService {
                 dietitian_id,
                 client_id,
             });
+
         } catch (error) {
-            throw new Error(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
+            throw new Exception(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
     }
 
     static async updateAppointment(appointment_id, data) {
-        const {title, start, end, dietitian_id, client_id, status} = data;
+        const { title, start, end, dietitian_id, client_id, status } = data;
 
         try {
             if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
-                throw new Error("Tüm alanları doldurmanız gerekmektedir.");
+                throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
             const existingAppointment = await Appointment.findByPk(appointment_id);
             if (!existingAppointment) {
-                throw new Error("Güncellemek istediğiniz randevu bulunamadı.");
+                throw new Exception("Güncellemek istediğiniz randevu bulunamadı.");
             }
 
             const conflictingAppointments = await Appointment.findOne({
                 where: {
-                    id: {[Op.ne]: appointment_id},
+                    id: { [Op.ne]: appointment_id },
                     dietitian_id: dietitian_id,
-                    [Op.or]: [
-                        {
-                            start: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            end: {
-                                [Op.between]: [start, end],
-                            },
-                        },
-                        {
-                            [Op.and]: [
-                                {start: {[Op.lte]: start}},
-                                {end: {[Op.gte]: end}},
-                            ],
-                        },
-                    ],
-                },
+                    [Op.and]: [
+                        { start: { [Op.lt]: end } },  // diğer randevu senin bitişinden önce başlamışsa
+                        { end: { [Op.gt]: start } }   // ve senin başlangıcından sonra bitiyorsa => çakışma var
+                    ]
+                }
             });
 
             if (conflictingAppointments) {
-                throw new Error("Bu zaman aralığında başka bir randevu bulunmaktadır.");
+                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
             await existingAppointment.update({
@@ -161,22 +135,23 @@ class AppointmentService {
 
             return existingAppointment;
         } catch (error) {
-            throw new Error(error.message || "Randevu güncellenirken bir hata meydana geldi.");
+            throw new Exception(error.message || "Randevu güncellenirken bir hata meydana geldi.");
         }
     }
 
-    static async getClientAppointments(client_id) {
+    static async fetchClientAppointments(client_id) {
         try {
             if (!client_id) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const appointments = await Appointment.findAll({
-                where: {client_id: client_id}
+                where: { client_id: client_id },
+                order: [['start', 'ASC']]
             });
 
             if (!appointments || appointments.length === 0) {
-                throw new Error("Şu anda herhangi bir randevu bulunmamaktadır.");
+                throw new Exception("Şu anda herhangi bir randevu bulunmamaktadır.");
             }
 
             return appointments;
@@ -185,10 +160,11 @@ class AppointmentService {
         }
     }
 
+
     static async approveAppointment(appointment_id, dietitian_id) {
         try {
             if (!appointment_id || !dietitian_id) {
-                throw new Error("Geçersiz randevu veya diyetisyen bilgisi.");
+                throw new Exception("Geçersiz randevu veya diyetisyen bilgisi.");
             }
 
             const appointment = await Appointment.findOne({
@@ -199,7 +175,7 @@ class AppointmentService {
             });
 
             if (!appointment) {
-                throw new Error("Randevu bulunamadı veya bu randevuyu onaylama yetkiniz yok.");
+                throw new Exception("Randevu bulunamadı veya bu randevuyu onaylama yetkiniz yok.");
             }
 
             await appointment.update({
@@ -208,7 +184,7 @@ class AppointmentService {
 
             return appointment;
         } catch (error) {
-            throw new Error(error.message || "Randevu onaylanırken bir hata meydana geldi.");
+            throw new Exception(error.message || "Randevu onaylanırken bir hata meydana geldi.");
         }
     }
 
@@ -361,6 +337,33 @@ class AppointmentService {
             where: {
                 id: appointment_id,
                 dietitian_id: dietitian_id
+            }
+        });
+
+        if (!appointment) {
+            throw {
+                status: 404,
+                message: "Bu randevu bulunamadı veya size ait değil."
+            };
+        }
+
+        await appointment.destroy();
+
+        return {success: true};
+    }
+
+    static async deleteAppointmentAsClient(client_id, appointment_id) {
+        if (!client_id || !appointment_id) {
+            throw {
+                status: 400,
+                message: "Diyetisyen ID ve randevu ID gereklidir."
+            };
+        }
+
+        const appointment = await Appointment.findOne({
+            where: {
+                id: appointment_id,
+                client_id: client_id
             }
         });
 

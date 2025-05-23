@@ -110,7 +110,7 @@ export default function Navbar() {
                                     <Box sx={{mr: 1, color: isActive ? "rgb(71,145,64)" : "inherit"}}>
                                         {page.icon}
                                     </Box>
-                                    {page.name}
+                                    <Box sx={{fontWeight: "bold"}}>{page.name}</Box>
                                 </Button>
                                 {idx !== menu_items.length - 1 && (
                                     <span className="navbar-divider">|</span>

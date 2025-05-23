@@ -67,7 +67,6 @@ const settings = [
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
-// Updated color scheme
 const mobilePrimaryColor = '#2c8d32';
 const mobileGradient = 'linear-gradient(to right, #2c8d32, #40b548)';
 const mobileDrawerHeaderBg = 'linear-gradient(45deg, #2c8d32 30%, #40b548 90%)';
@@ -364,7 +363,7 @@ export default function Header() {
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mr: {xs: 2, md: 4}}}>
                             <Tooltip title="Mesajlar" arrow>
                                 <IconButton onClick={() => navigate('/mesaj')} color="inherit">
-                                    <Badge badgeContent={1} color="warning">
+                                    <Badge /* badgeContent={1} */ color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
                                 </IconButton>
@@ -377,9 +376,9 @@ export default function Header() {
                             </Tooltip>
 
                             <Box sx={{flexGrow: 0}}>
-                                <Tooltip title="Furkan" arrow>
+                                <Tooltip title="Diyetisyen" arrow>
                                     <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                        <Avatar alt="Furkan" src="/static/images/avatar/2.jpg"/>
+                                        <Avatar alt="Diyetisyen" src="/static/images/avatar/2.jpg"/>
                                     </IconButton>
                                 </Tooltip>
                                 <Menu

@@ -1,5 +1,7 @@
-const Exception = require("../Exception/Exception");
-const {Package, PackageItems} = require("../Model/MainModel");
+const path = require('path');
+
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
+const { Package, PackageItems } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 
 class PackageService {
 

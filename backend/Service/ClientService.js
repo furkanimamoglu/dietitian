@@ -1,9 +1,11 @@
-const {Client, Dietitian, Notification, NutritionAssignment, NutritionPlan} = require("../Model/MainModel");
-const Exception = require("../Exception/Exception");
-const jwt = require("jsonwebtoken");
-const config = require("../config.json");
-const {CLIENT} = require("../Enum/Role");
-const {Op} = require("sequelize");
+const path = require('path');
+
+const { Client, ExerciseAssignment, Exercise, Notification, NutritionAssignment, NutritionPlan, Measurement } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
+const jwt = require('jsonwebtoken');
+const config = require(path.join(__dirname, '..', 'config.json'));
+const { CLIENT } = require(path.join(__dirname, '..', 'Enum', 'Role'));
+const { Op } = require('sequelize');
 
 class ClientService {
     static async login(phoneNumber, password) {
@@ -84,7 +86,7 @@ class ClientService {
     static async getClientInfo(user_id) {
         try {
             if (!user_id) {
-                throw new Error("Yetkisiz Erişim.");
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const client = await Client.findOne({
@@ -95,7 +97,7 @@ class ClientService {
             });
 
             if (!client) {
-                throw new Error("Diyetisyen bulunamadı.");
+                throw new Exception("Diyetisyen bulunamadı.");
             }
 
             return client;
@@ -104,18 +106,18 @@ class ClientService {
         }
     }
 
-    static async getMyNotifications(phoneNumber) {
+    static async getMyNotifications(client_id) {
         try {
-            if (!phoneNumber) {
-                throw new Error("Yetkisiz Erişim.");
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const notifications = await Notification.findAll({
-                where: {phoneNumber: phoneNumber}
+                where: {client_id: client_id}
             });
 
             if (!notifications || notifications.length === 0) {
-                throw new Error("Bildiriminiz yok.");
+                throw new Exception("Bildiriminiz yok.");
             }
 
             return notifications;
@@ -124,26 +126,47 @@ class ClientService {
         }
     }
 
-    static async readMyAllNotifications(phoneNumber) {
+    static async readMyAllNotifications(client_id) {
         try {
-            if (!phoneNumber) {
-                throw new Error("Yetkisiz Erişim.");
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
             }
 
             const [affectedRows] = await Notification.update(
                 {isRead: true},
                 {
-                    where: {phoneNumber: phoneNumber, isRead: false}
+                    where: {client_id: client_id, isRead: false}
                 }
             );
 
             if (affectedRows === 0) {
-                throw new Error("Okunmamış bildiriminiz yok.");
+                throw new Exception("Okunmamış bildiriminiz yok.");
             }
 
             return {
                 message: "Basarili"
             };
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    static async getMyLatestMeasurement(client_id) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.");
+            }
+
+            const measurement = await Measurement.findOne({
+                where: { client_id },
+                order: [['createdAt', 'DESC']]
+            });
+
+            if (!measurement) {
+                throw new Exception("Ölçüm verisi bulunamadı.");
+            }
+
+            return measurement;
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -296,6 +319,80 @@ class ClientService {
             throw new Exception(error.message, 400);
         }
     }
+
+    static async getMyDailyExercises(client_id) {
+        if (!client_id) {
+            throw new Exception("Yetkisiz Erişim.", 400, true);
+        }
+
+        const {ExerciseAssignment, Exercise} = require("../Model/MainModel");
+        const {Op} = require("sequelize");
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const exercises = await ExerciseAssignment.findAll({
+            where: {
+                client_id,
+                start_date: {[Op.lte]: today},
+                end_date: {[Op.gte]: today},
+                status: {
+                    [Op.in]: ['active', 'completed']
+                },
+            },
+            include: [
+                {
+                    model: Exercise,
+                    as: 'Exercise',
+                    attributes: {exclude: ['createdAt', 'updatedAt']}
+                }
+            ],
+            order: [['start_date', 'ASC']]
+        });
+
+        if (!exercises || exercises.length === 0) {
+            throw new Exception("Bugün için atanmış egzersiz bulunamadı.", 404, true);
+        }
+
+        return exercises;
+    }
+
+    static async updateMyExercise(client_id, exercise_id, status, duration) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 400, true);
+            }
+
+            if (!exercise_id) {
+                throw new Exception("Egzersiz seçimi gereklidir.", 400, true);
+            }
+
+            const existingExercise = await ExerciseAssignment.findOne({
+                where: {
+                    id: exercise_id,
+                    client_id: client_id
+                }
+            });
+
+            if (!existingExercise) {
+                throw new Exception("Egzersiz bulunamadı veya bu egzersiz size ait değil.", 404, true);
+            }
+
+            const updated = await existingExercise.update({
+                status: status,
+                duration: duration,
+            });
+
+            if (!updated) {
+                throw new Exception("Egzersiz durumu güncellenemedi.", 500, true);
+            }
+
+            return updated;
+        } catch (error) {
+            throw new Exception(error.message, error.statusCode || 400);
+        }
+    }
+
 
 }
 
