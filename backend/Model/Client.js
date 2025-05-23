@@ -55,6 +55,9 @@ const Client = sequelize.define('Client', {
         email: {
             type: DataTypes.STRING,
             allowNull: true,
+            unique: {
+                msg: 'Bu mail adresi zaten kullanılıyor.'
+            },
             validate: {
                 isEmail: {
                     msg: 'E-posta adresi geçerli olmalıdır.'

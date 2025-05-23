@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, ScrollView, Text as RNText, Dimensions, Modal, TouchableOpacity} from 'react-native';
-import {Avatar, Card, Text, Surface, ProgressBar, Button} from 'react-native-paper';
+import {View, StyleSheet, ScrollView, Dimensions, Modal} from 'react-native';
+import {Avatar, Card, Text, Surface, Button} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
 import Header from '../Components/Header';
@@ -134,7 +134,7 @@ const AnaSayfa = ({navigation}: Props) => {
             const data = await response.json();
 
             if (response.ok) {
-                const approvedAppointments = data.filter(appt => appt.status === 'approved');
+                const approvedAppointments = data.filter((appt: { status: string; }) => appt.status === 'approved');
 
                 if (approvedAppointments.length > 0 && approvedAppointments[0].start) {
                     setClosestAppointment(new Date(approvedAppointments[0].start));

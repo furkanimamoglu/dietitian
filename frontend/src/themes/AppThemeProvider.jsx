@@ -11,7 +11,7 @@ function AppThemeProvider({children}) {
                     main: '#3d8a3d',
                 },
                 secondary: {
-                    main: '#e8f5e9',
+                    main: '#ff9e31',
                 },
                 Ink: {
                     Darkest: '#000000',

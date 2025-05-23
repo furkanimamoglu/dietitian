@@ -146,6 +146,18 @@ export default function Danisanlarim() {
                         updatedRow,
                         {headers: {Authorization: localStorage.getItem("token")}}
                     );
+                    setNewClient({
+                        phoneNumber: "",
+                        password: "",
+                        name: "",
+                        gender: "",
+                        email: ""
+                    });
+
+                    setFormErrors({});
+
+                    setShowPassword(false);
+
                     setEditDialogOpen(false);
                     resolve(res.data);
                     unsubscribe();
@@ -169,10 +181,34 @@ export default function Danisanlarim() {
     }, []);
 
     const handleEditConfirm = () => {
+        setNewClient({
+            phoneNumber: "",
+            password: "",
+            name: "",
+            gender: "",
+            email: ""
+        });
+
+        setFormErrors({});
+
+        setShowPassword(false);
+
         window.dispatchEvent(new Event('editConfirmed'));
     };
 
     const handleEditCancel = () => {
+        setNewClient({
+            phoneNumber: "",
+            password: "",
+            name: "",
+            gender: "",
+            email: ""
+        });
+
+        setFormErrors({});
+
+        setShowPassword(false);
+
         setEditDialogOpen(false);
         window.dispatchEvent(new Event('editCancelled'));
     };
@@ -196,11 +232,22 @@ export default function Danisanlarim() {
         }
     };
 
-    // ---------------------------
-    // Dialog Handlers
-    // ---------------------------
     const openCreateDialog = () => setCreateDialogOpen(true);
-    const closeCreateDialog = () => setCreateDialogOpen(false);
+    const closeCreateDialog = () => {
+        setNewClient({
+            phoneNumber: "",
+            password: "",
+            name: "",
+            gender: "",
+            email: ""
+        });
+
+        setFormErrors({});
+
+        setShowPassword(false);
+
+        setCreateDialogOpen(false);
+    }
 
     const openDeleteDialog = (client) => {
         console.log("Opening delete dialog for client:", client);
@@ -234,7 +281,6 @@ export default function Danisanlarim() {
     };
     const closeQrDialog = () => setQrDialogOpen(false);
 
-    // Function to generate a random password
     const generatePassword = () => {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let password = "";
@@ -244,7 +290,6 @@ export default function Danisanlarim() {
         setNewClient(prev => ({...prev, password}));
     };
 
-    // Validate form before submission
     const validateForm = () => {
         const errors = {};
         if (!newClient.phoneNumber) errors.phoneNumber = "Telefon numarası zorunludur";
@@ -257,12 +302,10 @@ export default function Danisanlarim() {
         return Object.keys(errors).length === 0;
     };
 
-    // Handle form input changes
     const handleInputChange = (e) => {
         const {name, value} = e.target;
         setNewClient(prev => ({...prev, [name]: value}));
 
-        // Clear the error when user types
         if (formErrors[name]) {
             setFormErrors(prev => ({...prev, [name]: ""}));
         }
@@ -284,7 +327,6 @@ export default function Danisanlarim() {
         }
     };
 
-    // Update the existing handleCreateSubmit function
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
 
@@ -297,17 +339,14 @@ export default function Danisanlarim() {
                 {headers: {Authorization: localStorage.getItem("token")}}
             );
 
-            // Add the new client to the list
             setClients(prev => [...prev, response.data]);
 
-            // Show success message
             setSnackbar({
                 open: true,
                 message: "Danışan başarıyla eklendi",
                 severity: "success"
             });
 
-            // Reset form and close dialog
             setNewClient({
                 phoneNumber: "",
                 password: "",
@@ -316,8 +355,6 @@ export default function Danisanlarim() {
                 email: ""
             });
             closeCreateDialog();
-            navigate(`/danisan/${response.data.id}`);
-
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
             setSnackbar({
@@ -328,19 +365,14 @@ export default function Danisanlarim() {
         }
     };
 
-    // Handle snackbar close
     const handleSnackbarClose = () => {
         setSnackbar(prev => ({...prev, open: false}));
     };
 
-    // Toggle password visibility
     const togglePasswordVisibility = () => {
         setShowPassword(prev => !prev);
     };
 
-    // ---------------------------
-    // DataGrid Column Definitions
-    // ---------------------------
     const columns = [
         {field: "id", headerName: "ID", width: 70},
         {field: "name", headerName: "İsim", flex: 1, editable: true},
