@@ -1,5 +1,7 @@
-const Exception = require("../Exception/Exception");
-const {Recipe, RecipeCategory} = require("../Model/MainModel");
+const path = require('path');
+
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
+const { Recipe, RecipeCategory } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 
 class RecipeService {
 

@@ -1,10 +1,9 @@
-//Library
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-//Controller
-const clientController = require('../Controller/clientController');
+const clientController = require(path.join(__dirname, '..', 'Controller', 'clientController'));
 
 //Routes
 router.post('/login', clientController.login);

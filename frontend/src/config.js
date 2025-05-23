@@ -1,17 +1,12 @@
-// config.js
 const config = {
     environment: "dev",
 
     dev: {
-        apiUrl: 'http://localhost:3000',
-        websiteName: "Diyetisyenim",
-        footerText: "2024 Diyetisyenim"
+        apiUrl: 'http://localhost:3000'
     },
 
     prod: {
-        apiUrl: 'http://164.92.252.201:3000',
-        websiteName: "Diyetisyenim",
-        footerText: "2024 Diyetisyen Uygulaması"
+        apiUrl: 'http://diyetia.com/api'
     }
 };
 

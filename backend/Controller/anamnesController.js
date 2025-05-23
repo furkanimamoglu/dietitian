@@ -1,6 +1,9 @@
-const AnamnesService = require("../Service/anamnesService");
-const Security = require("../Utils/Security");
-const {DIETITIAN} = require("../Enum/Role");
+const path = require("path");
+
+const AnamnesService = require(path.join(__dirname, "..", "Service", "AnamnesService"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
+const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+
 
 class anamnesController {
 

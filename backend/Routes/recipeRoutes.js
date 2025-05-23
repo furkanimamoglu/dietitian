@@ -1,8 +1,9 @@
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-const recipeController = require('../Controller/recipeController');
+const recipeController = require(path.join(__dirname, '..', 'Controller', 'recipeController'));
 
 router.get('/getMyRecipes', recipeController.getMyRecipes);
 router.post('/addRecipe', recipeController.addRecipe);

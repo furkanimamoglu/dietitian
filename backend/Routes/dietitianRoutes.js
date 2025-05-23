@@ -1,16 +1,17 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
 
-const dietitianController = require('../Controller/dietitianController');
+const dietitianController = require(path.join(__dirname, '..', 'Controller', 'dietitianController'));
 
 router.post('/login', dietitianController.login);
 router.post('/register', dietitianController.register);
 
-router.get('/getDietitianInfo', dietitianController.getDietitianInfo)
+router.get('/getDietitianInfo', dietitianController.getDietitianInfo);
 
 router.post('/registerClient', dietitianController.registerClient);
 router.delete('/deleteClient', dietitianController.deleteClient);
-router.put('/updateClient', dietitianController.updateClient)
+router.put('/updateClient', dietitianController.updateClient);
 router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
 router.get('/getMyActiveClientCount', dietitianController.getMyActiveClientCount);

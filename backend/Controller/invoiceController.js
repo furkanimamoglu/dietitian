@@ -1,6 +1,8 @@
-const InvoiceService = require("../Service/invoiceService");
-const Security = require("../Utils/Security");
-const {DIETITIAN} = require("../Enum/Role");
+const path = require("path");
+
+const InvoiceService = require(path.join(__dirname, "..", "Service", "InvoiceService"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
+const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class invoiceController {
 

@@ -1,5 +1,7 @@
-const MessageService = require("../Service/messageService");
-const Security = require("../Utils/Security");
+const path = require("path");
+
+const MessageService = require(path.join(__dirname, "..", "Service", "MessageService"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
 
 class messageController {
 

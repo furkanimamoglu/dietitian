@@ -1,6 +1,8 @@
-const AppointmentService = require("../Service/appointmentService");
-const Security = require("../Utils/Security");
-const {DIETITIAN, CLIENT} = require("../Enum/Role");
+const path = require("path");
+
+const AppointmentService = require(path.join(__dirname, "..", "Service", "AppointmentService"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
+const { DIETITIAN, CLIENT } = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class AppointmentController {
 

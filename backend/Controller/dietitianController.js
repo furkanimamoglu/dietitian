@@ -1,9 +1,13 @@
-const DietitianService = require("../Service/dietitianService");
-require("../Exception/Exception");
-const Security = require("../Utils/Security");
+const path = require("path");
+
+const DietitianService = require(path.join(__dirname, "..", "Service", "DietitianService"));
+const Exception = require(path.join(__dirname, "..", "Exception", "Exception"));
+const Security = require(path.join(__dirname, "..", "Utils", "Security"));
+const { Notes } = require(path.join(__dirname, "..", "Model", "MainModel"));
+const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+
 const moment = require("moment");
-const {Notes} = require("../Model/MainModel");
-const {DIETITIAN} = require("../Enum/Role");
+
 
 class DietitianController {
     static async login(req, res) {

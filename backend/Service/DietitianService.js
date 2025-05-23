@@ -1,17 +1,16 @@
-// Libraries
-const config = require('../config.json');
+const path = require('path');
+
+const config = require(path.join(__dirname, '..', 'config.json'));
 const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
 
-// Imports
-const Exception = require('../Exception/Exception');
+const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 
-// Enums
-const {DIETITIAN, CLIENT} = require("../Enum/Role");
+const { DIETITIAN, CLIENT } = require(path.join(__dirname, '..', 'Enum', 'Role'));
 
-// Models
-const {Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes} = require('../Model/MainModel');
-const {Op} = require("sequelize");
+const { Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const { Op } = require('sequelize');
+
 
 class DietitianService {
 

@@ -1,8 +1,9 @@
+const path = require('path');
 const express = require('express');
 
 const router = express.Router();
 
-const exerciseController = require('../Controller/exerciseController');
+const exerciseController = require(path.join(__dirname, '..', 'Controller', 'exerciseController'));
 
 router.get('/getMyExercises', exerciseController.getMyExercises);
 router.post('/addExercise', exerciseController.addExercise);

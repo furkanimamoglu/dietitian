@@ -40,7 +40,6 @@ function Login() {
         e.preventDefault();
         setLoading(true);
 
-        // Validate phone number format
         if (!/^\d{10}$/.test(phoneNumber)) {
             setMessage('Telefon numarası 10 haneli olmalıdır (5XXXXXXXXX)');
             setLoading(false);
@@ -151,7 +150,6 @@ function Login() {
                                         </InputAdornment>
                                     ),
                                 }}
-                                helperText="Örnek: 5075280653"
                             />
 
                             <TextField
