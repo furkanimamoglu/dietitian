@@ -5,6 +5,8 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 const NutritionAssignment = sequelize.define('NutritionAssignment', {
     id: {
         type: DataTypes.INTEGER,
+        unique: true,
+        allowNull: false,
         autoIncrement: true,
         primaryKey: true
     },
@@ -14,6 +16,14 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
         references: {
             model: 'Clients',
             key: 'id'
+        },
+        validate: {
+            notNull: {
+                msg: 'Danışan ID gereklidir'
+            },
+            isInt: {
+                msg: 'Danışan ID geçerli bir sayı olmalıdır'
+            }
         }
     },
     nutrition_plan_id: {
@@ -22,6 +32,14 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
         references: {
             model: 'NutritionPlans',
             key: 'id'
+        },
+        validate: {
+            notNull: {
+                msg: 'Beslenme planı ID gereklidir'
+            },
+            isInt: {
+                msg: 'Beslenme planı ID geçerli bir sayı olmalıdır'
+            }
         }
     },
     mealPlan: {
@@ -30,15 +48,37 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
     },
     note: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: true,
+        validate: {
+            len: {
+                args: [0, 5000],
+                msg: 'Not en fazla 5000 karakter olabilir'
+            }
+        }
     },
     start_date: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notNull: {
+                msg: 'Başlangıç tarihi gereklidir'
+            },
+            isDate: {
+                msg: 'Geçerli bir başlangıç tarihi giriniz'
+            }
+        }
     },
     end_date: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notNull: {
+                msg: 'Bitiş tarihi gereklidir'
+            },
+            isDate: {
+                msg: 'Geçerli bir bitiş tarihi giriniz'
+            }
+        }
     }
 }, {
     tableName: 'NutritionAssignments',

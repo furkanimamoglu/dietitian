@@ -5,13 +5,19 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 const Client = sequelize.define('Client', {
         id: {
             type: DataTypes.INTEGER,
+            unique: true,
             autoIncrement: true,
             allowNull: false,
             primaryKey: true
         },
         dietitian_id: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            validate: {
+                notNull: {
+                    msg: 'Diyetisyen ID alanı boş bırakılamaz.'
+                }
+            }
         },
         phoneNumber: {
             type: DataTypes.BIGINT,
@@ -20,14 +26,26 @@ const Client = sequelize.define('Client', {
                 msg: 'Bu telefon numarası zaten kullanılıyor.'
             },
             validate: {
-                min: 5000000000,
-                max: 5999999999
+                notNull: {
+                    msg: 'Telefon numarası alanı boş bırakılamaz.'
+                },
+                min: {
+                    args: 5000000000,
+                    msg: 'Geçerli bir telefon numarası giriniz (5XXXXXXXXX formatında).'
+                },
+                max: {
+                    args: 5999999999,
+                    msg: 'Geçerli bir telefon numarası giriniz (5XXXXXXXXX formatında).'
+                }
             }
         },
         password: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
+                notNull: {
+                    msg: 'Şifre alanı boş bırakılamaz.'
+                },
                 len: {
                     args: [4, 21],
                     msg: 'Şifre 4 ile 21 karakter arasında olmak zorundadır.'
@@ -40,15 +58,23 @@ const Client = sequelize.define('Client', {
         role: {
             type: DataTypes.STRING,
             allowNull: false,
-            defaultValue: "CLIENT"
+            defaultValue: "CLIENT",
+            validate: {
+                notNull: {
+                    msg: 'Rol alanı boş bırakılamaz.'
+                }
+            }
         },
         name: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
+                notNull: {
+                    msg: 'İsim alanı boş bırakılamaz.'
+                },
                 len: {
-                    args: [2, 80],
-                    msg: 'İsim Soyisim en az 2, en fazla 80 karakter olmalıdır.'
+                    args: [2, 50],
+                    msg: 'İsim Soyisim en az 2, en fazla 50 karakter olmalıdır.'
                 }
             }
         },
@@ -67,11 +93,12 @@ const Client = sequelize.define('Client', {
         status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: true
-        },
-        language: {
-            type: DataTypes.STRING,
-            defaultValue: "TR",
+            defaultValue: true,
+            validate: {
+                notNull: {
+                    msg: 'Durum alanı boş bırakılamaz.'
+                }
+            }
         },
         gender: {
             type: DataTypes.STRING,
@@ -82,34 +109,6 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
-        height: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            validate: {
-                min: {
-                    args: 50,
-                    msg: 'Boy 50 cm\'den küçük olamaz.'
-                },
-                max: {
-                    args: 300,
-                    msg: 'Boy 300 cm\'den büyük olamaz.'
-                }
-            }
-        },
-        weight: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-            validate: {
-                min: {
-                    args: 1,
-                    msg: 'Kilo 1 kg\'dan küçük olamaz.'
-                },
-                max: {
-                    args: 500,
-                    msg: 'Kilo 500 kg\'dan büyük olamaz.'
-                }
-            }
-        },
         ipAddress: {
             type: DataTypes.STRING,
             allowNull: true,
@@ -117,7 +116,12 @@ const Client = sequelize.define('Client', {
         kvkkApproval: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: false
+            defaultValue: false,
+            validate: {
+                notNull: {
+                    msg: 'KVKK onayı alanı boş bırakılamaz.'
+                }
+            }
         }
     }
 );

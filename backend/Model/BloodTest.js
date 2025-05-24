@@ -12,10 +12,17 @@ const BloodTest = sequelize.define('BloodTest', {
         },
         client_id: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            validate: {
+                notNull: {
+                    msg: 'Danışan ID alanı boş bırakılamaz.'
+                },
+                isInt: {
+                    msg: 'Danışan ID sayısal bir değer olmalıdır.'
+                }
+            }
         }
     }
 );
 
-BloodTest.belongsTo(Client, { foreignKey: 'client_id' });
 module.exports = BloodTest;
