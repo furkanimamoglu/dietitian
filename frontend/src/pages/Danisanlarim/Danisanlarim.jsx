@@ -41,7 +41,7 @@ import {
     Visibility,
     VisibilityOff,
 } from "@mui/icons-material";
-import {blue, green, pink, red} from "@mui/material/colors";
+import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 import PersonIcon from "@mui/icons-material/Person";
@@ -922,102 +922,81 @@ export default function Danisanlarim() {
                     <DialogContent dividers>
                         <Stack spacing={3} sx={{mt: 1}}>
                             <TextField
+                                fullWidth
                                 label="Adı Soyadı"
                                 name="name"
-                                fullWidth
-                                required
                                 value={newClient.name}
                                 onChange={handleInputChange}
+                                margin="normal"
                                 error={!!formErrors.name}
                                 helperText={formErrors.name}
-                                placeholder="Danışanın Adı ve Soyadı"
-                                variant="outlined"
                             />
 
+
                             <TextField
+                                fullWidth
                                 label="Telefon Numarası"
                                 name="phoneNumber"
-                                fullWidth
-                                required
                                 value={newClient.phoneNumber}
                                 onChange={handlePhoneChange}
+                                margin="normal"
                                 error={!!formErrors.phoneNumber}
-                                helperText={formErrors.phoneNumber || "Başında 0 olmadan 10 haneli numara (5XX...)"}
-                                placeholder="5XXXXXXXXX"
-                                variant="outlined"
+                                helperText={formErrors.phoneNumber}
                                 InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">+90</InputAdornment>
-                                    ),
+                                    startAdornment: <InputAdornment position="start">+90</InputAdornment>,
                                 }}
                             />
 
                             <TextField
+                                fullWidth
                                 label="Şifre"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
-                                fullWidth
-                                required
                                 value={newClient.password}
                                 onChange={handleInputChange}
+                                margin="normal"
                                 error={!!formErrors.password}
                                 helperText={formErrors.password}
-                                variant="outlined"
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
                                             <IconButton
-                                                onClick={togglePasswordVisibility}
+                                                onClick={() => setShowPassword(!showPassword)}
                                                 edge="end"
                                             >
-                                                {showPassword ? <VisibilityOff/> : <Visibility/>}
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={generatePassword}
-                                                edge="end"
-                                                color="primary"
-                                                title="Otomatik şifre oluştur"
-                                            >
-                                                <AutorenewIcon/>
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
                                     ),
                                 }}
                             />
 
+
                             <TextField
-                                label="E-posta Adresi"
-                                name="email"
-                                type="email"
                                 fullWidth
+                                label="E-posta"
+                                name="email"
                                 value={newClient.email}
                                 onChange={handleInputChange}
+                                margin="normal"
                                 error={!!formErrors.email}
                                 helperText={formErrors.email}
-                                placeholder="ornek@domain.com"
-                                variant="outlined"
                             />
 
-                            <FormControl fullWidth>
-                                <InputLabel id="gender-label">Cinsiyet</InputLabel>
+
+                            <FormControl fullWidth margin="normal" error={!!formErrors.gender}>
+                                <InputLabel>Cinsiyet</InputLabel>
                                 <Select
-                                    labelId="gender-label"
-                                    id="gender-select"
                                     name="gender"
                                     value={newClient.gender}
-                                    label="Cinsiyet"
                                     onChange={handleInputChange}
-                                    variant="outlined"
-                                    fullWidth
-                                    required
-                                    displayEmpty
-                                    sx={{mb: 2}}
+                                    label="Cinsiyet"
                                 >
-                                    <MenuItem value="" disabled>Cinsiyet Seçiniz</MenuItem>
                                     <MenuItem value="Erkek">Erkek</MenuItem>
                                     <MenuItem value="Kadın">Kadın</MenuItem>
                                     <MenuItem value="Diğer">Diğer</MenuItem>
                                 </Select>
+                                {formErrors.gender && <Typography color="error" variant="caption">{formErrors.gender}</Typography>}
                             </FormControl>
                         </Stack>
                     </DialogContent>
