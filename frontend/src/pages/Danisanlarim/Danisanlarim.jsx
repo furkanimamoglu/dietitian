@@ -76,7 +76,7 @@ export default function Danisanlarim() {
         email: ""
     });
     const [formErrors, setFormErrors] = useState({});
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(true);
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
