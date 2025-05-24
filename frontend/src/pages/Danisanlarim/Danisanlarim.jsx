@@ -38,7 +38,7 @@ import {
     Male as MaleIcon,
     QrCode as QrCodeIcon,
     Visibility,
-    VisibilityOff,
+    VisibilityOff, VpnKey,
 } from "@mui/icons-material";
 import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
@@ -273,6 +273,11 @@ export default function Danisanlarim() {
             console.error("QR fetch hatası:", err);
         }
     };
+
+    const printQR = async () => {
+
+    }
+
     const closeQrDialog = () => setQrDialogOpen(false);
 
     const generatePassword = () => {
@@ -883,7 +888,7 @@ export default function Danisanlarim() {
                     <Button onClick={closeQrDialog} variant="outlined" color="secondary">
                         Kapat
                     </Button>
-                    <Button onClick={() => window.print()} variant="contained" color="primary">
+                    <Button onClick={printQR} variant="contained" color="primary">
                         Yazdır
                     </Button>
                 </DialogActions>
@@ -911,7 +916,7 @@ export default function Danisanlarim() {
                     </Box>
                     <IconButton
                         edge="end"
-                        color="inherit"
+                        color="primary.secondary"
                         onClick={closeCreateDialog}
                         aria-label="close"
                     >
@@ -965,6 +970,13 @@ export default function Danisanlarim() {
                                                 edge="end"
                                             >
                                                 {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={generatePassword}
+                                                edge="end"
+                                                title="Otomatik şifre üret"
+                                            >
+                                                <VpnKey />
                                             </IconButton>
                                         </InputAdornment>
                                     ),
