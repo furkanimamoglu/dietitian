@@ -44,6 +44,8 @@ import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 import PersonIcon from "@mui/icons-material/Person";
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 function QuickSearchToolbar() {
     return (
@@ -275,8 +277,38 @@ export default function Danisanlarim() {
     };
 
     const printQR = async () => {
+        if (!qrData) return;
 
-    }
+        try {
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const imgData = qrData;
+
+            const imgWidth = 100;
+            const imgHeight = 100;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+
+            doc.addImage(
+                imgData,
+                'PNG',
+                (pageWidth - imgWidth) / 2,
+                (pageHeight - imgHeight) / 2,
+                imgWidth,
+                imgHeight
+            );
+
+            doc.autoPrint();
+
+            window.open(doc.output('bloburl'), '_blank');
+        } catch (error) {
+            console.error('QR yazdırma hatası:', error);
+        }
+    };
 
     const closeQrDialog = () => setQrDialogOpen(false);
 
@@ -366,10 +398,6 @@ export default function Danisanlarim() {
 
     const handleSnackbarClose = () => {
         setSnackbar(prev => ({...prev, open: false}));
-    };
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(prev => !prev);
     };
 
     const columns = [
