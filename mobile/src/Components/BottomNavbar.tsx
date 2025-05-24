@@ -1,16 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    View,
-    TouchableOpacity,
-    Text,
-    StyleSheet,
+    Animated,
     Modal,
+    StyleSheet,
+    Text,
     TextInput,
-    Alert,
+    TouchableOpacity,
     TouchableWithoutFeedback,
-    Animated
+    View
 } from 'react-native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

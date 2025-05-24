@@ -1,5 +1,5 @@
 const path = require('path');
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Anamnes = sequelize.define('Anamnes', {
@@ -20,7 +20,8 @@ const Anamnes = sequelize.define('Anamnes', {
             isInt: {
                 msg: 'Diyetisyen ID sayısal bir değer olmalıdır.'
             }
-        }},
+        }
+    },
     client_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -31,7 +32,8 @@ const Anamnes = sequelize.define('Anamnes', {
             isInt: {
                 msg: 'Danışan ID sayısal bir değer olmalıdır.'
             }
-        }},
+        }
+    },
     saglik_bilgileri: {
         type: DataTypes.JSON,
         allowNull: true,

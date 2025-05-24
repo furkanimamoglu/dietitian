@@ -1,6 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, ScrollView} from 'react-native';
-import {Card, Text} from 'react-native-paper';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 

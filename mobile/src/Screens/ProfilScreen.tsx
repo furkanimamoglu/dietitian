@@ -1,9 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, ScrollView, Image} from 'react-native';
-import {Card, Text, Button} from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {Image, ScrollView, StyleSheet, View} from 'react-native';
+import {Button, Card, Text} from 'react-native-paper';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
 
@@ -68,7 +67,7 @@ const Profil = ({navigation}) => {
                         <Button onPress={() => console.log('Profili Düzenle')} mode="outlined" style={styles.button}>Profili
                             Düzenle</Button>
                         <Button onPress={() => console.log('Ödemelerim')} mode="outlined" style={styles.button}>
-                                                    Ödemelerim</Button>
+                            Ödemelerim</Button>
                         <Button onPress={() => console.log('Şifreyi Değiştir')} mode="outlined" style={styles.button}>Şifreyi
                             Değiştir</Button>
                         <Button onPress={() => console.log('Ayarlar')} mode="outlined"

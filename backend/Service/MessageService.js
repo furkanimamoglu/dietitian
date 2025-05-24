@@ -1,8 +1,8 @@
 const path = require('path');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
-const { Message } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
-const { DIETITIAN, CLIENT } = require(path.join(__dirname, '..', 'Enum', 'Role'));
+const {Message} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 
 class MessageService {
 

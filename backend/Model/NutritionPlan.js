@@ -1,5 +1,5 @@
 const path = require('path');
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const NutritionPlan = sequelize.define('NutritionPlan', {

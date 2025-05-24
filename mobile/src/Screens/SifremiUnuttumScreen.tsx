@@ -1,16 +1,16 @@
 import React, {useState} from 'react';
 import {
-    View,
-    StyleSheet,
     Alert,
-    StatusBar,
+    Dimensions,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Dimensions,
-    TouchableOpacity
+    StatusBar,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import {Text, TextInput, Button, Card, useTheme} from 'react-native-paper';
+import {Button, Card, Text, TextInput, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import axios from 'axios';

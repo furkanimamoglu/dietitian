@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, ScrollView, Dimensions, Modal} from 'react-native';
-import {Avatar, Card, Text, Surface, Button} from 'react-native-paper';
+import {Dimensions, Modal, ScrollView, StyleSheet, View} from 'react-native';
+import {Avatar, Button, Card, Surface, Text} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
 import Header from '../Components/Header';
@@ -17,10 +17,10 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const [userName, setUserName] = useState<string>('Yükleniyor...');
     const [measurementInfo, setMeasurementInfo] = useState<{
-      kilo: number;
-      yag: number;
-      kas: number;
-      su: number;
+        kilo: number;
+        yag: number;
+        kas: number;
+        su: number;
     } | null>(null);
     const [closestAppointment, setClosestAppointment] = useState<Date | null>(null);
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
@@ -221,10 +221,10 @@ const AnaSayfa = ({navigation}: Props) => {
                 </Surface>
 
                 <Card style={styles.card}>
-                    <Card.Title title="Gelecek Randevu Tarihiniz" />
+                    <Card.Title title="Gelecek Randevu Tarihiniz"/>
                     <Card.Content>
                         <View style={styles.randevuBilgi}>
-                            <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon} />
+                            <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon}/>
                             <View style={styles.randevuDetay}>
                                 <Text style={styles.randevuTarih}>
                                     {closestAppointment

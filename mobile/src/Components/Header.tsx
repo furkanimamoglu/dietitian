@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {
-    TouchableOpacity,
-    Image,
-    View,
-    Text,
-    StyleSheet,
     Animated,
     Dimensions,
+    Image,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
     TouchableWithoutFeedback,
-    StatusBar
+    View
 } from 'react-native';
 import {Appbar} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
