@@ -100,7 +100,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             });
 
             const data = await response.json();
-            console.log('Received meal plan:', JSON.stringify(data, null, 2));
 
             // Check if response contains showOnScreen and message
             if (data.showOnScreen && data.message) {

@@ -42,17 +42,16 @@ app.use((req, res, next) => {
 });
 
 // Routers
-app.use('/dietitian', dietitianRoutes);
-app.use('/client', clientRoutes);
-app.use('/appointment', appointmentRoutes);
-app.use('/anamnes', anamnesRoutes);
-app.use('/message', messageRoutes);
-app.use('/recipe', recipeRoutes);
-app.use('/exercise', exerciseRoutes);
-app.use('/invoice', invoiceRoutes);
-app.use('/message', messageRoutes);
-app.use('/measurement', measurementRoutes);
-app.use('/package', packageRoutes);
+app.use('/api/dietitian', dietitianRoutes);
+app.use('/api/client', clientRoutes);
+app.use('/api/appointment', appointmentRoutes);
+app.use('/api/anamnes', anamnesRoutes);
+app.use('/api/message', messageRoutes);
+app.use('/api/recipe', recipeRoutes);
+app.use('/api/exercise', exerciseRoutes);
+app.use('/api/invoice', invoiceRoutes);
+app.use('/api/measurement', measurementRoutes);
+app.use('/api/package', packageRoutes);
 
 // Working Directory
 try {

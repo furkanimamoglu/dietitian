@@ -71,12 +71,7 @@ const Exercise = sequelize.define('Exercise', {
         video: {
             type: DataTypes.STRING,
             allowNull: true,
-            defaultValue: null,
-            validate: {
-                isUrl: {
-                    msg: 'Video alanı geçerli bir URL olmalıdır.'
-                }
-            }
+            defaultValue: null
         },
         duration: {
             type: DataTypes.INTEGER,
@@ -85,10 +80,6 @@ const Exercise = sequelize.define('Exercise', {
             validate: {
                 isInt: {
                     msg: 'Süre sayısal bir değer olmalıdır.'
-                },
-                min: {
-                    args: 0,
-                    msg: 'Süre negatif olamaz.'
                 }
             }
         },
@@ -124,16 +115,7 @@ const Exercise = sequelize.define('Exercise', {
         calories_burned: {
             type: DataTypes.INTEGER,
             allowNull: true,
-            defaultValue: 0,
-            validate: {
-                isInt: {
-                    msg: 'Yakılan kalori sayısal bir değer olmalıdır.'
-                },
-                min: {
-                    args: 0,
-                    msg: 'Yakılan kalori negatif olamaz.'
-                }
-            }
+            defaultValue: 0
         }
     },
     {

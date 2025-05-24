@@ -42,8 +42,8 @@ const Message = sequelize.define('Message', {
                     msg: "Gönderen alanı boş olamaz"
                 },
                 isIn: {
-                    args: [['dietitian', 'client']],
-                    msg: "Gönderen alanı 'dietitian' veya 'client' olmalıdır"
+                    args: [['DIETITIAN', 'CLIENT']],
+                    msg: "Gönderen alanı 'DIETITIAN' veya 'CLIENT' olmalıdır"
                 }
             }
         },
