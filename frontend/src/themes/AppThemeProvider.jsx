@@ -11,7 +11,7 @@ function AppThemeProvider({children}) {
                     main: '#3d8a3d',
                 },
                 secondary: {
-                    main: '#e8f5e9',
+                    main: '#ff9e31',
                 },
                 Ink: {
                     Darkest: '#000000',
@@ -160,36 +160,7 @@ function AppThemeProvider({children}) {
                     // lineHeight: '14px',
                     display: 'block',
                 },
-            },
-            components: {
-                MuiCssBaseline: {
-                    styleOverrides: {
-                        body: {
-                            // ---CSS BODY--- \\
-                        },
-                    },
-                },
-                MuiLink: {
-                    styleOverrides: {
-                        root: {
-                            cursor: 'pointer',
-                            textDecoration: 'none',
-                            lineHeight: '16px',
-                            transition: 'all 0.1s ease-in-out',
-                            '&:hover': {
-                                opacity: 0.8,
-                            },
-                        },
-                    },
-                },
-                MuiIconButton: {
-                    styleOverrides: {
-                        root: {
-                            aspectRatio: '1/1',
-                        },
-                    },
-                },
-            },
+            }
         }),
     );
     return <ThemeProvider theme={theme}>{children}</ThemeProvider>;

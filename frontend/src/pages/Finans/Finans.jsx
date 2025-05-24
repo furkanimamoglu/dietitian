@@ -1,20 +1,44 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from 'axios';
 import config from "../../config.js";
 import {
-    Paper, Typography, Box, Grid, Tab, Tabs, TextField, Button,
-    Chip, InputAdornment, MenuItem, Select, FormControl, InputLabel,
-    Divider, List, ListItem, ListItemIcon, ListItemText, Pagination
+    Box,
+    Button,
+    Chip,
+    Divider,
+    FormControl,
+    Grid,
+    InputAdornment,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    MenuItem,
+    Pagination,
+    Paper,
+    Select,
+    Tab,
+    Tabs,
+    TextField,
+    Typography
 } from '@mui/material';
 import {
-    Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon,
-    CurrencyLira as CurrencyLiraIcon, MonetizationOn as MonetizationOnIcon,
-    Receipt as ReceiptIcon, Payments as PaymentsIcon, Save as SaveIcon,
-    ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon,
-    CheckCircle as CheckCircleIcon, Pending as PendingIcon,
-    Cancel as CancelIcon, Search as SearchIcon, Warning as WarningIcon
+    Add as AddIcon,
+    ArrowDownward as ArrowDownwardIcon,
+    ArrowUpward as ArrowUpwardIcon,
+    CheckCircle as CheckCircleIcon,
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+    MonetizationOn as MonetizationOnIcon,
+    Payments as PaymentsIcon,
+    Pending as PendingIcon,
+    Receipt as ReceiptIcon,
+    Save as SaveIcon,
+    Search as SearchIcon,
+    Warning as WarningIcon
 } from '@mui/icons-material';
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';

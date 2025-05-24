@@ -2,7 +2,7 @@ const path = require("path");
 
 const measurementService = require(path.join(__dirname, "..", "Service", "MeasurementService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class measurementController {
 

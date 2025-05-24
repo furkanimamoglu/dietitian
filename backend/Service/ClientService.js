@@ -1,11 +1,19 @@
 const path = require('path');
 
-const { Client, ExerciseAssignment, Exercise, Notification, NutritionAssignment, NutritionPlan, Measurement } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {
+    Client,
+    ExerciseAssignment,
+    Exercise,
+    Notification,
+    NutritionAssignment,
+    NutritionPlan,
+    Measurement
+} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const jwt = require('jsonwebtoken');
 const config = require(path.join(__dirname, '..', 'config.json'));
-const { CLIENT } = require(path.join(__dirname, '..', 'Enum', 'Role'));
-const { Op } = require('sequelize');
+const {CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
+const {Op} = require('sequelize');
 
 class ClientService {
     static async login(phoneNumber, password) {
@@ -158,7 +166,7 @@ class ClientService {
             }
 
             const measurement = await Measurement.findOne({
-                where: { client_id },
+                where: {client_id},
                 order: [['createdAt', 'DESC']]
             });
 

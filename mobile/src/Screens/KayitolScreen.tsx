@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    View,
-    StyleSheet,
     Alert,
-    ScrollView,
+    Dimensions,
     KeyboardAvoidingView,
     Platform,
+    ScrollView,
     StatusBar,
-    Dimensions,
-    TouchableOpacity
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import {TextInput, Button, Text, Divider, ActivityIndicator, Card, useTheme} from 'react-native-paper';
+import {ActivityIndicator, Button, Card, Text, TextInput, useTheme} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useRoute, useNavigation, RouteProp} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import config from '../../config';
 

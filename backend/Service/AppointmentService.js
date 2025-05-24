@@ -2,7 +2,7 @@ const path = require('path');
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const Appointment = require(path.join(__dirname, '..', 'Model', 'Appointment'));
 const Client = require(path.join(__dirname, '..', 'Model', 'Client'));
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 
 class AppointmentService {
     static async fetchDietitianAppointments(user_id) {
@@ -55,7 +55,7 @@ class AppointmentService {
 
 
     static async addAppointment(data) {
-        const { title, start, end, client_id } = data;
+        const {title, start, end, client_id} = data;
 
         const client = await Client.findByPk(client_id);
         if (!client) {
@@ -73,8 +73,8 @@ class AppointmentService {
                 where: {
                     dietitian_id,
                     [Op.and]: [
-                        { start: { [Op.lt]: end } },
-                        { end: { [Op.gt]: start } }
+                        {start: {[Op.lt]: end}},
+                        {end: {[Op.gt]: start}}
                     ]
                 }
             });
@@ -97,7 +97,7 @@ class AppointmentService {
     }
 
     static async updateAppointment(appointment_id, data) {
-        const { title, start, end, dietitian_id, client_id, status } = data;
+        const {title, start, end, dietitian_id, client_id, status} = data;
 
         try {
             if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
@@ -111,11 +111,11 @@ class AppointmentService {
 
             const conflictingAppointments = await Appointment.findOne({
                 where: {
-                    id: { [Op.ne]: appointment_id },
+                    id: {[Op.ne]: appointment_id},
                     dietitian_id: dietitian_id,
                     [Op.and]: [
-                        { start: { [Op.lt]: end } },  // diğer randevu senin bitişinden önce başlamışsa
-                        { end: { [Op.gt]: start } }   // ve senin başlangıcından sonra bitiyorsa => çakışma var
+                        {start: {[Op.lt]: end}},  // diğer randevu senin bitişinden önce başlamışsa
+                        {end: {[Op.gt]: start}}   // ve senin başlangıcından sonra bitiyorsa => çakışma var
                     ]
                 }
             });
@@ -146,7 +146,7 @@ class AppointmentService {
             }
 
             const appointments = await Appointment.findAll({
-                where: { client_id: client_id },
+                where: {client_id: client_id},
                 order: [['start', 'ASC']]
             });
 

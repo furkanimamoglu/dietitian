@@ -1,18 +1,10 @@
-import React, {useRef} from 'react';
-import {
-    View,
-    StyleSheet,
-    Dimensions,
-    SafeAreaView,
-    TouchableOpacity,
-    StatusBar
-} from 'react-native';
+import React, {useMemo, useRef} from 'react';
+import {Dimensions, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Swiper from 'react-native-swiper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useMemo} from 'react';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 

@@ -1,6 +1,6 @@
-import React, {useState, useMemo} from 'react';
-import {View, StyleSheet, ScrollView, TouchableOpacity, Dimensions} from 'react-native';
-import {Card, Text, Button, Divider, Avatar, Chip} from 'react-native-paper';
+import React, {useMemo, useState} from 'react';
+import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Avatar, Button, Card, Divider, Text} from 'react-native-paper';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 
