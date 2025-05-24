@@ -46,6 +46,12 @@ export default function Dashboard() {
     const [approvedLimit, setApprovedLimit] = useState(5);
     const [pendingLimit, setPendingLimit] = useState(5);
 
+    const [searchNoteText, setSearchNoteText] = useState('');
+
+    const filteredNotes = notes.filter(note =>
+        note.noteContent.toLowerCase().includes(searchNoteText.toLowerCase())
+    );
+
     const weeklyStats = [
         {
             icon: <CheckCircleIcon sx={{color: '#27ae60', fontSize: 32}}/>, // Onaylı randevu
@@ -234,24 +240,19 @@ export default function Dashboard() {
                 }
             );
 
-            // Find the appointment to get client name for success message
             const appointment = pendingAppointments.find(app => app.id === appointmentId);
             const clientName = appointment ? `${appointment.Client.name}` : 'Danışan';
 
-            // Set success message based on action
             const actionText = action === 'approved' ? 'onaylandı' : 'reddedildi';
             setSuccessMessage(`${clientName} için randevu talebi başarıyla ${actionText}.`);
             setShowSuccessPopup(true);
 
-            // If approved, add to today's appointments list
             if (action === 'approved' && appointment) {
                 setApprovedAppointments(prev => [...prev, appointment]);
             }
 
-            // Remove the appointment from the list after successful action
             setPendingAppointments(pendingAppointments.filter(app => app.id !== appointmentId));
 
-            // Update the pending requests count
             setPendingRequests(prev => Math.max(0, prev - 1));
 
         } catch (error) {
@@ -273,7 +274,6 @@ export default function Dashboard() {
                     }
                 );
 
-                // Refresh notes after adding
                 const response = await axios.get(
                     config[config.environment].apiUrl + "/dietitian/getMyNotes",
                     {
@@ -284,10 +284,8 @@ export default function Dashboard() {
                 );
                 setNotes(response.data || []);
 
-                // Clear input field
                 setNoteText('');
 
-                // Show success message
                 setSuccessMessage('Not başarıyla eklendi.');
                 setShowSuccessPopup(true);
             } catch (error) {
@@ -689,7 +687,22 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Notlarım"
-                                sx={{pb: 1}}
+                                action={
+                                    <TextField
+                                        size="small"
+                                        placeholder="Ara..."
+                                        value={searchNoteText}
+                                        onChange={(e) => setSearchNoteText(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <Box component="span" sx={{color: 'action.active', mr: 0.5}}>
+                                                    🔍
+                                                </Box>
+                                            ),
+                                        }}
+                                    />
+                                }
+                                sx={{pb: 1, display: 'flex', alignItems: 'center'}}
                             />
                             <Divider/>
                             <CardContent>
@@ -712,35 +725,40 @@ export default function Dashboard() {
                                 </Box>
 
                                 <List sx={{maxHeight: 300, overflow: 'auto'}}>
-                                    {notes.map((note) => (
-                                        <React.Fragment key={note.id}>
-                                            <ListItem
-                                                secondaryAction={
-                                                    <IconButton
-                                                        edge="end"
-                                                        aria-label="delete"
-                                                        onClick={() => handleDeleteNote(note.id)}
-                                                    >
-                                                        <DeleteIcon/>
-                                                    </IconButton>
-                                                }
-                                                sx={{
-                                                    bgcolor: '#f8f9fa',
-                                                    borderRadius: 1,
-                                                    mb: 1,
-                                                    borderLeft: '3px solid #3498db'
-                                                }}
-                                            >
-                                                <ListItemText
-                                                    primary={note.noteContent}
-                                                    secondary={new Date(note.createdAt).toLocaleString()}
-                                                />
-                                            </ListItem>
-                                        </React.Fragment>
-                                    ))}
-                                    {notes.length === 0 && (
+                                    {filteredNotes.length > 0 ? (
+                                        filteredNotes.map((note) => (
+                                            <React.Fragment key={note.id}>
+                                                <ListItem
+                                                    secondaryAction={
+                                                        <IconButton
+                                                            edge="end"
+                                                            aria-label="delete"
+                                                            onClick={() => handleDeleteNote(note.id)}
+                                                        >
+                                                            <DeleteIcon/>
+                                                        </IconButton>
+                                                    }
+                                                    sx={{
+                                                        bgcolor: '#f8f9fa',
+                                                        borderRadius: 1,
+                                                        mb: 1,
+                                                        borderLeft: '3px solid #3498db'
+                                                    }}
+                                                >
+                                                    <ListItemText
+                                                        primary={note.noteContent}
+                                                        secondary={new Date(note.createdAt).toLocaleString()}
+                                                    />
+                                                </ListItem>
+                                            </React.Fragment>
+                                        ))
+                                    ) : (
                                         <ListItem>
-                                            <ListItemText primary="Henüz not bulunmamaktadır."/>
+                                            <ListItemText primary={
+                                                searchNoteText
+                                                    ? "Arama kriterine uygun not bulunamadı."
+                                                    : "Henüz not bulunmamaktadır."
+                                            }/>
                                         </ListItem>
                                     )}
                                 </List>
