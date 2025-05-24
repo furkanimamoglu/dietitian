@@ -229,6 +229,7 @@ export default function Danisanlarim() {
     };
 
     const openCreateDialog = () => setCreateDialogOpen(true);
+
     const closeCreateDialog = () => {
         setNewClient({
             phoneNumber: "",
@@ -237,13 +238,10 @@ export default function Danisanlarim() {
             gender: "",
             email: ""
         });
-
         setFormErrors({});
-
         setShowPassword(false);
-
         setCreateDialogOpen(false);
-    }
+    };
 
     const openDeleteDialog = (client) => {
         console.log("Opening delete dialog for client:", client);
@@ -323,26 +321,55 @@ export default function Danisanlarim() {
 
     const validateForm = () => {
         const errors = {};
-        if (!newClient.phoneNumber) errors.phoneNumber = "Telefon numarası zorunludur";
-        else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
 
-        if (!newClient.password) errors.password = "Şifre zorunludur";
-        if (!newClient.name) errors.name = "İsim zorunludur";
+        // İsim validasyonu
+        if (!newClient.name || newClient.name.trim() === "") {
+            errors.name = "Adı Soyadı zorunludur";
+        } else if (newClient.name.trim().length < 2) {
+            errors.name = "Adı Soyadı en az 2 karakter olmalıdır";
+        }
+
+        // Telefon validasyonu
+        if (!newClient.phoneNumber || newClient.phoneNumber.trim() === "") {
+            errors.phoneNumber = "Telefon numarası zorunludur";
+        } else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) {
+            errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
+        }
+
+        // Şifre validasyonu
+        if (!newClient.password || newClient.password.trim() === "") {
+            errors.password = "Şifre zorunludur";
+        } else if (newClient.password.length < 6) {
+            errors.password = "Şifre en az 6 karakter olmalıdır";
+        }
+
+        // Email validasyonu (opsiyonel ama girilmişse geçerli olmalı)
+        if (newClient.email && newClient.email.trim() !== "") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newClient.email)) {
+                errors.email = "Geçerli bir e-posta adresi giriniz";
+            }
+        }
+
+        // Cinsiyet validasyonu
+        if (!newClient.gender || newClient.gender === "") {
+            errors.gender = "Cinsiyet seçimi zorunludur";
+        }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
     const handleInputChange = (e) => {
-        const {name, value} = e.target;
-        setNewClient(prev => ({...prev, [name]: value}));
+        const { name, value } = e.target;
+        setNewClient(prev => ({ ...prev, [name]: value }));
 
+        // Kullanıcı yazmaya başladığında o alanın hatasını temizle
         if (formErrors[name]) {
-            setFormErrors(prev => ({...prev, [name]: ""}));
+            setFormErrors(prev => ({ ...prev, [name]: "" }));
         }
     };
 
-    // Handle phone number specific validation
     const handlePhoneChange = (e) => {
         let value = e.target.value.replace(/\D/g, '');
         if (value.startsWith('0')) {
@@ -361,13 +388,28 @@ export default function Danisanlarim() {
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) return;
+        // Validasyonu çalıştır
+        if (!validateForm()) {
+            // İlk hatalı alana odaklan
+            const firstErrorField = Object.keys(formErrors)[0];
+            if (firstErrorField) {
+                const element = document.querySelector(`[name="${firstErrorField}"]`);
+                if (element) {
+                    element.focus();
+                }
+            }
+            return;
+        }
 
         try {
             const response = await axios.post(
                 `${config[config.environment].apiUrl}/dietitian/registerClient`,
-                newClient,
-                {headers: {Authorization: localStorage.getItem("token")}}
+                {
+                    ...newClient,
+                    name: newClient.name.trim(),
+                    email: newClient.email.trim()
+                },
+                { headers: { Authorization: localStorage.getItem("token") } }
             );
 
             setClients(prev => [...prev, response.data]);
@@ -378,6 +420,7 @@ export default function Danisanlarim() {
                 severity: "success"
             });
 
+            // Formu temizle
             setNewClient({
                 phoneNumber: "",
                 password: "",
@@ -385,12 +428,26 @@ export default function Danisanlarim() {
                 gender: "",
                 email: ""
             });
+            setFormErrors({});
             closeCreateDialog();
+
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
+
+            // Server tarafından gelen hataları göster
+            let errorMessage = "Danışan eklenirken bir hata oluştu";
+
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.status === 400) {
+                errorMessage = "Girilen bilgilerde hata var. Lütfen kontrol ediniz.";
+            } else if (error.response?.status === 409) {
+                errorMessage = "Bu telefon numarası zaten kayıtlı.";
+            }
+
             setSnackbar({
                 open: true,
-                message: error.response?.data?.message || "Danışan eklenirken bir hata oluştu",
+                message: errorMessage,
                 severity: "error"
             });
         }
@@ -956,25 +1013,30 @@ export default function Danisanlarim() {
                         <Stack spacing={3} sx={{mt: 1}}>
                             <TextField
                                 fullWidth
+                                required
                                 label="Adı Soyadı"
                                 name="name"
                                 value={newClient.name}
                                 onChange={handleInputChange}
                                 margin="normal"
                                 error={!!formErrors.name}
-                                helperText={formErrors.name}
+                                helperText={formErrors.name || "Danışanın tam adını giriniz"}
+                                autoComplete="name"
+                                inputProps={{ maxLength: 50 }}
                             />
 
 
                             <TextField
                                 fullWidth
+                                required
                                 label="Telefon Numarası"
                                 name="phoneNumber"
                                 value={newClient.phoneNumber}
                                 onChange={handlePhoneChange}
                                 margin="normal"
                                 error={!!formErrors.phoneNumber}
-                                helperText={formErrors.phoneNumber}
+                                helperText={formErrors.phoneNumber || "10 haneli telefon numarası"}
+                                autoComplete="tel"
                                 InputProps={{
                                     startAdornment: <InputAdornment position="start">+90</InputAdornment>,
                                 }}
@@ -982,6 +1044,7 @@ export default function Danisanlarim() {
 
                             <TextField
                                 fullWidth
+                                required
                                 label="Şifre"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
@@ -989,13 +1052,15 @@ export default function Danisanlarim() {
                                 onChange={handleInputChange}
                                 margin="normal"
                                 error={!!formErrors.password}
-                                helperText={formErrors.password}
+                                helperText={formErrors.password || "En az 6 karakter olmalıdır"}
+                                autoComplete="new-password"
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
                                             <IconButton
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 edge="end"
+                                                title={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
                                             >
                                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
@@ -1014,29 +1079,38 @@ export default function Danisanlarim() {
 
                             <TextField
                                 fullWidth
-                                label="E-posta"
+                                label="E-posta (Opsiyonel)"
                                 name="email"
+                                type="email"
                                 value={newClient.email}
                                 onChange={handleInputChange}
                                 margin="normal"
                                 error={!!formErrors.email}
-                                helperText={formErrors.email}
+                                helperText={formErrors.email || "Geçerli bir e-posta adresi giriniz"}
+                                autoComplete="email"
                             />
 
 
-                            <FormControl fullWidth margin="normal" error={!!formErrors.gender}>
-                                <InputLabel>Cinsiyet</InputLabel>
+                            <FormControl fullWidth margin="normal" required error={!!formErrors.gender}>
+                                <InputLabel>Cinsiyet *</InputLabel>
                                 <Select
                                     name="gender"
                                     value={newClient.gender}
                                     onChange={handleInputChange}
-                                    label="Cinsiyet"
+                                    label="Cinsiyet *"
                                 >
+                                    <MenuItem value="">
+                                        <em>Seçiniz...</em>
+                                    </MenuItem>
                                     <MenuItem value="Erkek">Erkek</MenuItem>
                                     <MenuItem value="Kadın">Kadın</MenuItem>
                                     <MenuItem value="Diğer">Diğer</MenuItem>
                                 </Select>
-                                {formErrors.gender && <Typography color="error" variant="caption">{formErrors.gender}</Typography>}
+                                {formErrors.gender && (
+                                    <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
+                                        {formErrors.gender}
+                                    </Typography>
+                                )}
                             </FormControl>
                         </Stack>
                     </DialogContent>
