@@ -1,54 +1,51 @@
-import React, {useEffect, useState, useCallback} from "react";
+import React, {useCallback, useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {
+    Alert,
     Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    Stack,
-    TextField,
-    Typography,
-    Paper,
+    FormControl,
     Grid,
     IconButton,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     InputAdornment,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
     Snackbar,
-    Alert
+    Stack,
+    TextField,
+    Typography
 } from "@mui/material";
-import {
-    DataGrid,
-    GridToolbarQuickFilter,
-    GridToolbarContainer,
-    GridToolbarExport
-} from "@mui/x-data-grid";
+import {DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarQuickFilter} from "@mui/x-data-grid";
 import {trTR} from "@mui/x-data-grid/locales";
 import {
+    ArrowForward,
     Cancel,
     CheckCircle,
-    GroupAdd,
-    Visibility,
+    CheckCircleOutline,
+    Close as CloseIcon,
     Delete as DeleteIcon,
-    QrCode as QrCodeIcon,
-    Male as MaleIcon,
+    Edit as EditIcon,
     Female as FemaleIcon,
     Group as GroupIcon,
-    CheckCircleOutline,
-    Edit as EditIcon,
-    ArrowForward,
-    Close as CloseIcon,
-    Autorenew as AutorenewIcon,
-    VisibilityOff,
+    GroupAdd,
+    Male as MaleIcon,
+    QrCode as QrCodeIcon,
+    Visibility,
+    VisibilityOff, VpnKey,
 } from "@mui/icons-material";
-import {green, red, blue, pink} from "@mui/material/colors";
-import {useNavigate} from "react-router-dom";
+import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
+import PersonIcon from "@mui/icons-material/Person";
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 function QuickSearchToolbar() {
     return (
@@ -80,7 +77,7 @@ export default function Danisanlarim() {
         email: ""
     });
     const [formErrors, setFormErrors] = useState({});
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(true);
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
@@ -92,6 +89,7 @@ export default function Danisanlarim() {
     const inactiveCount = clients.filter(c => c.status === false).length;
     const maleCount = clients.filter(c => c.gender === "Erkek").length;
     const femaleCount = clients.filter(c => c.gender === "Kadın").length;
+    const otherCount = clients.filter(c => c.gender === "Diğer").length;
 
     useEffect(() => {
         axios
@@ -144,6 +142,18 @@ export default function Danisanlarim() {
                         updatedRow,
                         {headers: {Authorization: localStorage.getItem("token")}}
                     );
+                    setNewClient({
+                        phoneNumber: "",
+                        password: "",
+                        name: "",
+                        gender: "",
+                        email: ""
+                    });
+
+                    setFormErrors({});
+
+                    setShowPassword(false);
+
                     setEditDialogOpen(false);
                     resolve(res.data);
                     unsubscribe();
@@ -167,10 +177,34 @@ export default function Danisanlarim() {
     }, []);
 
     const handleEditConfirm = () => {
+        setNewClient({
+            phoneNumber: "",
+            password: "",
+            name: "",
+            gender: "",
+            email: ""
+        });
+
+        setFormErrors({});
+
+        setShowPassword(false);
+
         window.dispatchEvent(new Event('editConfirmed'));
     };
 
     const handleEditCancel = () => {
+        setNewClient({
+            phoneNumber: "",
+            password: "",
+            name: "",
+            gender: "",
+            email: ""
+        });
+
+        setFormErrors({});
+
+        setShowPassword(false);
+
         setEditDialogOpen(false);
         window.dispatchEvent(new Event('editCancelled'));
     };
@@ -194,11 +228,20 @@ export default function Danisanlarim() {
         }
     };
 
-    // ---------------------------
-    // Dialog Handlers
-    // ---------------------------
     const openCreateDialog = () => setCreateDialogOpen(true);
-    const closeCreateDialog = () => setCreateDialogOpen(false);
+
+    const closeCreateDialog = () => {
+        setNewClient({
+            phoneNumber: "",
+            password: "",
+            name: "",
+            gender: "",
+            email: ""
+        });
+        setFormErrors({});
+        setShowPassword(false);
+        setCreateDialogOpen(false);
+    };
 
     const openDeleteDialog = (client) => {
         console.log("Opening delete dialog for client:", client);
@@ -230,9 +273,43 @@ export default function Danisanlarim() {
             console.error("QR fetch hatası:", err);
         }
     };
+
+    const printQR = async () => {
+        if (!qrData) return;
+
+        try {
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const imgData = qrData;
+
+            const imgWidth = 100;
+            const imgHeight = 100;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+
+            doc.addImage(
+                imgData,
+                'PNG',
+                (pageWidth - imgWidth) / 2,
+                (pageHeight - imgHeight) / 2,
+                imgWidth,
+                imgHeight
+            );
+
+            doc.autoPrint();
+
+            window.open(doc.output('bloburl'), '_blank');
+        } catch (error) {
+            console.error('QR yazdırma hatası:', error);
+        }
+    };
+
     const closeQrDialog = () => setQrDialogOpen(false);
 
-    // Function to generate a random password
     const generatePassword = () => {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let password = "";
@@ -242,31 +319,57 @@ export default function Danisanlarim() {
         setNewClient(prev => ({...prev, password}));
     };
 
-    // Validate form before submission
     const validateForm = () => {
         const errors = {};
-        if (!newClient.phoneNumber) errors.phoneNumber = "Telefon numarası zorunludur";
-        else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
 
-        if (!newClient.password) errors.password = "Şifre zorunludur";
-        if (!newClient.name) errors.name = "İsim zorunludur";
+        // İsim validasyonu
+        if (!newClient.name || newClient.name.trim() === "") {
+            errors.name = "Adı Soyadı zorunludur";
+        } else if (newClient.name.trim().length < 2) {
+            errors.name = "Adı Soyadı en az 2 karakter olmalıdır";
+        }
+
+        // Telefon validasyonu
+        if (!newClient.phoneNumber || newClient.phoneNumber.trim() === "") {
+            errors.phoneNumber = "Telefon numarası zorunludur";
+        } else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) {
+            errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
+        }
+
+        // Şifre validasyonu
+        if (!newClient.password || newClient.password.trim() === "") {
+            errors.password = "Şifre zorunludur";
+        } else if (newClient.password.length < 6) {
+            errors.password = "Şifre en az 6 karakter olmalıdır";
+        }
+
+        // Email validasyonu (opsiyonel ama girilmişse geçerli olmalı)
+        if (newClient.email && newClient.email.trim() !== "") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newClient.email)) {
+                errors.email = "Geçerli bir e-posta adresi giriniz";
+            }
+        }
+
+        // Cinsiyet validasyonu
+        if (!newClient.gender || newClient.gender === "") {
+            errors.gender = "Cinsiyet seçimi zorunludur";
+        }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
-    // Handle form input changes
     const handleInputChange = (e) => {
-        const {name, value} = e.target;
-        setNewClient(prev => ({...prev, [name]: value}));
+        const { name, value } = e.target;
+        setNewClient(prev => ({ ...prev, [name]: value }));
 
-        // Clear the error when user types
+        // Kullanıcı yazmaya başladığında o alanın hatasını temizle
         if (formErrors[name]) {
-            setFormErrors(prev => ({...prev, [name]: ""}));
+            setFormErrors(prev => ({ ...prev, [name]: "" }));
         }
     };
 
-    // Handle phone number specific validation
     const handlePhoneChange = (e) => {
         let value = e.target.value.replace(/\D/g, '');
         if (value.startsWith('0')) {
@@ -282,30 +385,42 @@ export default function Danisanlarim() {
         }
     };
 
-    // Update the existing handleCreateSubmit function
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) return;
+        // Validasyonu çalıştır
+        if (!validateForm()) {
+            // İlk hatalı alana odaklan
+            const firstErrorField = Object.keys(formErrors)[0];
+            if (firstErrorField) {
+                const element = document.querySelector(`[name="${firstErrorField}"]`);
+                if (element) {
+                    element.focus();
+                }
+            }
+            return;
+        }
 
         try {
             const response = await axios.post(
                 `${config[config.environment].apiUrl}/dietitian/registerClient`,
-                newClient,
-                {headers: {Authorization: localStorage.getItem("token")}}
+                {
+                    ...newClient,
+                    name: newClient.name.trim(),
+                    email: newClient.email.trim()
+                },
+                { headers: { Authorization: localStorage.getItem("token") } }
             );
 
-            // Add the new client to the list
             setClients(prev => [...prev, response.data]);
 
-            // Show success message
             setSnackbar({
                 open: true,
                 message: "Danışan başarıyla eklendi",
                 severity: "success"
             });
 
-            // Reset form and close dialog
+            // Formu temizle
             setNewClient({
                 phoneNumber: "",
                 password: "",
@@ -313,32 +428,35 @@ export default function Danisanlarim() {
                 gender: "",
                 email: ""
             });
+            setFormErrors({});
             closeCreateDialog();
-            navigate(`/danisan/${response.data.id}`);
 
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
+
+            // Server tarafından gelen hataları göster
+            let errorMessage = "Danışan eklenirken bir hata oluştu";
+
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.status === 400) {
+                errorMessage = "Girilen bilgilerde hata var. Lütfen kontrol ediniz.";
+            } else if (error.response?.status === 409) {
+                errorMessage = "Bu telefon numarası zaten kayıtlı.";
+            }
+
             setSnackbar({
                 open: true,
-                message: error.response?.data?.message || "Danışan eklenirken bir hata oluştu",
+                message: errorMessage,
                 severity: "error"
             });
         }
     };
 
-    // Handle snackbar close
     const handleSnackbarClose = () => {
         setSnackbar(prev => ({...prev, open: false}));
     };
 
-    // Toggle password visibility
-    const togglePasswordVisibility = () => {
-        setShowPassword(prev => !prev);
-    };
-
-    // ---------------------------
-    // DataGrid Column Definitions
-    // ---------------------------
     const columns = [
         {field: "id", headerName: "ID", width: 70},
         {field: "name", headerName: "İsim", flex: 1, editable: true},
@@ -363,20 +481,23 @@ export default function Danisanlarim() {
             headerName: "Cinsiyet",
             width: 90,
             type: "singleSelect",
-            valueOptions: ["Erkek", "Kadın"],
+            valueOptions: ["Erkek", "Kadın", "Diğer"],
             editable: true,
             renderCell: (params) =>
                 params.value === "Erkek" ? (
                     <MaleIcon sx={{color: blue[500]}}/>
-                ) : (
+                ) : params.value === "Kadın" ? (
                     <FemaleIcon sx={{color: pink[500]}}/>
+                ) : (
+                    <PersonIcon sx={{color: purple[500]}}/>
                 ),
         },
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 140,
+            width: 160,
             sortable: false,
+            editable: false,
             renderCell: (params) => (
                 <Stack direction="row" spacing={1}>
                     <Button
@@ -437,7 +558,7 @@ export default function Danisanlarim() {
                 {/* İstatistik Kartları */}
                 <Box sx={{mb: 4, mt: 2}}>
                     <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -475,7 +596,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -513,7 +634,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -551,7 +672,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -589,7 +710,7 @@ export default function Danisanlarim() {
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={2.4}>
+                        <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
                                 sx={{
@@ -622,6 +743,44 @@ export default function Danisanlarim() {
                                     </Typography>
                                     <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
                                         Erkek Danışan
+                                    </Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+
+                        <Grid item xs={12} sm={6} md={2}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 3,
+                                    height: '100%',
+                                    background: 'linear-gradient(135deg, #A1A1A1 0%, #6C63FF 100%)',
+                                    borderRadius: '20px',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'translateY(-5px)',
+                                        boxShadow: '0 8px 25px rgba(108, 99, 255, 0.35)',
+                                    },
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 60%)',
+                                    }
+                                }}
+                            >
+                                <Box sx={{position: 'relative', zIndex: 1}}>
+                                    <PersonIcon sx={{fontSize: 40, color: 'rgba(255,255,255,0.9)', mb: 2}}/>
+                                    <Typography variant="h4" sx={{color: '#fff', fontWeight: 700, mb: 0.5}}>
+                                        {otherCount}
+                                    </Typography>
+                                    <Typography variant="body1" sx={{color: 'rgba(255,255,255,0.9)'}}>
+                                        Diğer Danışan
                                     </Typography>
                                 </Box>
                             </Paper>
@@ -811,11 +970,11 @@ export default function Danisanlarim() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => window.print()} variant="outlined">
-                        Yazdır
-                    </Button>
-                    <Button onClick={closeQrDialog} variant="contained">
+                    <Button onClick={closeQrDialog} variant="outlined" color="secondary">
                         Kapat
+                    </Button>
+                    <Button onClick={printQR} variant="contained" color="primary">
+                        Yazdır
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -836,11 +995,13 @@ export default function Danisanlarim() {
                 }}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <GroupAdd/>
-                        <Typography variant="h6">Yeni Danışan Ekle</Typography>
+                        <Typography variant="h6" color="primary.main" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
+                            Yeni Danışan Ekle
+                        </Typography>
                     </Box>
                     <IconButton
                         edge="end"
-                        color="inherit"
+                        color="primary.secondary"
                         onClick={closeCreateDialog}
                         aria-label="close"
                     >
@@ -851,94 +1012,105 @@ export default function Danisanlarim() {
                     <DialogContent dividers>
                         <Stack spacing={3} sx={{mt: 1}}>
                             <TextField
-                                label="İsim Soyisim"
-                                name="name"
                                 fullWidth
                                 required
+                                label="Adı Soyadı"
+                                name="name"
                                 value={newClient.name}
                                 onChange={handleInputChange}
+                                margin="normal"
                                 error={!!formErrors.name}
-                                helperText={formErrors.name}
-                                placeholder="Danışanın adı ve soyadı"
-                                variant="outlined"
+                                helperText={formErrors.name || "Danışanın tam adını giriniz"}
+                                autoComplete="name"
+                                inputProps={{ maxLength: 50 }}
                             />
 
+
                             <TextField
-                                label="Telefon Numarası"
-                                name="phoneNumber"
                                 fullWidth
                                 required
+                                label="Telefon Numarası"
+                                name="phoneNumber"
                                 value={newClient.phoneNumber}
                                 onChange={handlePhoneChange}
+                                margin="normal"
                                 error={!!formErrors.phoneNumber}
-                                helperText={formErrors.phoneNumber || "Başında 0 olmadan 10 haneli numara (5XX...)"}
-                                placeholder="5XXXXXXXXX"
-                                variant="outlined"
+                                helperText={formErrors.phoneNumber || "10 haneli telefon numarası"}
+                                autoComplete="tel"
                                 InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">+90</InputAdornment>
-                                    ),
+                                    startAdornment: <InputAdornment position="start">+90</InputAdornment>,
                                 }}
                             />
 
                             <TextField
+                                fullWidth
+                                required
                                 label="Şifre"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
-                                fullWidth
-                                required
                                 value={newClient.password}
                                 onChange={handleInputChange}
+                                margin="normal"
                                 error={!!formErrors.password}
-                                helperText={formErrors.password}
-                                variant="outlined"
+                                helperText={formErrors.password || "En az 6 karakter olmalıdır"}
+                                autoComplete="new-password"
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
                                             <IconButton
-                                                onClick={togglePasswordVisibility}
+                                                onClick={() => setShowPassword(!showPassword)}
                                                 edge="end"
+                                                title={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
                                             >
-                                                {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                             <IconButton
                                                 onClick={generatePassword}
                                                 edge="end"
-                                                color="primary"
-                                                title="Otomatik şifre oluştur"
+                                                title="Otomatik şifre üret"
                                             >
-                                                <AutorenewIcon/>
+                                                <VpnKey />
                                             </IconButton>
                                         </InputAdornment>
                                     ),
                                 }}
                             />
 
+
                             <TextField
-                                label="E-posta Adresi"
+                                fullWidth
+                                label="E-posta (Opsiyonel)"
                                 name="email"
                                 type="email"
-                                fullWidth
                                 value={newClient.email}
                                 onChange={handleInputChange}
+                                margin="normal"
                                 error={!!formErrors.email}
-                                helperText={formErrors.email}
-                                placeholder="ornek@domain.com"
-                                variant="outlined"
+                                helperText={formErrors.email || "Geçerli bir e-posta adresi giriniz"}
+                                autoComplete="email"
                             />
 
-                            <FormControl fullWidth>
-                                <InputLabel id="gender-label">Cinsiyet</InputLabel>
+
+                            <FormControl fullWidth margin="normal" required error={!!formErrors.gender}>
+                                <InputLabel>Cinsiyet *</InputLabel>
                                 <Select
-                                    labelId="gender-label"
                                     name="gender"
                                     value={newClient.gender}
-                                    label="Cinsiyet"
                                     onChange={handleInputChange}
+                                    label="Cinsiyet *"
                                 >
+                                    <MenuItem value="">
+                                        <em>Seçiniz...</em>
+                                    </MenuItem>
                                     <MenuItem value="Erkek">Erkek</MenuItem>
                                     <MenuItem value="Kadın">Kadın</MenuItem>
+                                    <MenuItem value="Diğer">Diğer</MenuItem>
                                 </Select>
+                                {formErrors.gender && (
+                                    <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
+                                        {formErrors.gender}
+                                    </Typography>
+                                )}
                             </FormControl>
                         </Stack>
                     </DialogContent>

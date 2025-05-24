@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import "./Randevularim.css";
 import {toast} from 'react-hot-toast';
@@ -12,20 +12,20 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import Default from "../../Components/Layouts/Default.jsx";
 
 import {
+    Autocomplete,
     Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    Grid2,
-    TextField,
-    IconButton,
-    Select,
-    MenuItem,
     FormControl,
+    Grid2,
+    IconButton,
     InputLabel,
-    Autocomplete
+    MenuItem,
+    Select,
+    TextField
 } from '@mui/material';
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -42,6 +42,15 @@ export default function Randevularim() {
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+    // Validasyon durumları için state'ler
+    const [validationErrors, setValidationErrors] = useState({
+        title: false,
+        start: false,
+        end: false,
+        client_id: false
+    });
+    const [showValidation, setShowValidation] = useState(false);
 
     const [eventData, setEventData] = useState({
         id: null,
@@ -109,6 +118,19 @@ export default function Randevularim() {
         fetchClients();
     }, []);
 
+    // Validasyon fonksiyonu
+    const validateEventData = () => {
+        const errors = {
+            title: !eventData.title.trim(),
+            start: !eventData.start,
+            end: !eventData.end,
+            client_id: !eventData.client_id
+        };
+
+        setValidationErrors(errors);
+        return !Object.values(errors).some(error => error);
+    };
+
     const handleRandevuEkleButton = () => {
         setEventData({
             id: null,
@@ -118,6 +140,14 @@ export default function Randevularim() {
             client_id: "",
             status: "pending",
         });
+        // Validasyon durumlarını sıfırla
+        setValidationErrors({
+            title: false,
+            start: false,
+            end: false,
+            client_id: false
+        });
+        setShowValidation(false);
         setRandevuEklePopup(true);
     };
 
@@ -142,6 +172,14 @@ export default function Randevularim() {
                 client_id: "",
                 status: "pending",
             }));
+            // Validasyon durumlarını sıfırla
+            setValidationErrors({
+                title: false,
+                start: false,
+                end: false,
+                client_id: false
+            });
+            setShowValidation(false);
             setRandevuEklePopup(true);
         }
     };
@@ -162,6 +200,14 @@ export default function Randevularim() {
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
+        // Validasyon durumlarını sıfırla
+        setValidationErrors({
+            title: false,
+            start: false,
+            end: false,
+            client_id: false
+        });
+        setShowValidation(false);
         setRandevuDuzenlePopup(true);
     };
 
@@ -222,6 +268,13 @@ export default function Randevularim() {
     };
 
     const randevuEkle = async () => {
+        setShowValidation(true);
+
+        if (!validateEventData()) {
+            toast.error('Lütfen tüm gerekli alanları doldurun.');
+            return;
+        }
+
         try {
             const requestData = {
                 title: eventData.title,
@@ -270,6 +323,7 @@ export default function Randevularim() {
 
             setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
             setRandevuEklePopup(false);
+            setShowValidation(false);
 
             toast.success('Randevu başarıyla oluşturuldu!');
         } catch (error) {
@@ -279,6 +333,13 @@ export default function Randevularim() {
     };
 
     const handleEventSave = async () => {
+        setShowValidation(true);
+
+        if (!validateEventData()) {
+            toast.error('Lütfen tüm gerekli alanları doldurun.');
+            return;
+        }
+
         try {
             const updatedEventWithDates = {
                 id: eventData.id,
@@ -328,6 +389,7 @@ export default function Randevularim() {
             });
 
             handleDialogClose();
+            setShowValidation(false);
         } catch (error) {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
         }
@@ -336,6 +398,13 @@ export default function Randevularim() {
     const handleDialogClose = () => {
         setRandevuDuzenlePopup(false);
         setRandevuEklePopup(false);
+        setShowValidation(false);
+        setValidationErrors({
+            title: false,
+            start: false,
+            end: false,
+            client_id: false
+        });
     };
 
     const handleEventChange = (key, value) => {
@@ -343,6 +412,14 @@ export default function Randevularim() {
             ...prev,
             [key]: value,
         }));
+
+        // Eğer validasyon gösteriliyorsa, alan doldurulduğunda hatayı temizle
+        if (showValidation && value) {
+            setValidationErrors(prev => ({
+                ...prev,
+                [key]: false
+            }));
+        }
     };
 
     const handleEventDelete = async () => {
@@ -493,9 +570,8 @@ export default function Randevularim() {
                         onChange={(e) => handleEventChange("title", e.target.value)}
                         fullWidth
                         margin="normal"
-                        required
-                        error={!eventData.title}
-                        helperText={!eventData.title ? "Bu alan zorunludur" : ""}
+                        error={showValidation && validationErrors.title}
+                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
@@ -510,9 +586,8 @@ export default function Randevularim() {
                                 textField: {
                                     fullWidth: true,
                                     margin: "normal",
-                                    required: true,
-                                    error: !eventData.start,
-                                    helperText: !eventData.start ? "Bu alan zorunludur" : ""
+                                    error: showValidation && validationErrors.start,
+                                    helperText: showValidation && validationErrors.start ? "Bu alan zorunludur" : ""
                                 }
                             }}
                         />
@@ -528,9 +603,8 @@ export default function Randevularim() {
                                 textField: {
                                     fullWidth: true,
                                     margin: "normal",
-                                    required: true,
-                                    error: !eventData.end,
-                                    helperText: !eventData.end ? "Bu alan zorunludur" : ""
+                                    error: showValidation && validationErrors.end,
+                                    helperText: showValidation && validationErrors.end ? "Bu alan zorunludur" : ""
                                 }
                             }}
                         />
@@ -545,15 +619,14 @@ export default function Randevularim() {
                                 {...params}
                                 label="Danışan"
                                 margin="normal"
-                                required
-                                error={!eventData.client_id}
-                                helperText={!eventData.client_id ? "Bu alan zorunludur" : ""}
+                                error={showValidation && validationErrors.client_id}
+                                helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
                             />
                         )}
                         fullWidth
                     />
                     {/* Status Selectbox (MUI) */}
-                    <FormControl fullWidth margin="normal" required>
+                    <FormControl fullWidth margin="normal">
                         <InputLabel id="status-label">Durum</InputLabel>
                         <Select
                             labelId="status-label"
@@ -575,9 +648,6 @@ export default function Randevularim() {
                     <Button
                         onClick={randevuEkle}
                         color="primary"
-                        disabled={
-                            !eventData.title || !eventData.start || !eventData.end || !eventData.client_id
-                        }
                     >
                         Kaydet
                     </Button>
@@ -608,9 +678,8 @@ export default function Randevularim() {
                         onChange={(e) => handleEventChange("title", e.target.value)}
                         fullWidth
                         margin="normal"
-                        required
-                        error={!eventData.title}
-                        helperText={!eventData.title ? "Bu alan zorunludur" : ""}
+                        error={showValidation && validationErrors.title}
+                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
@@ -625,9 +694,8 @@ export default function Randevularim() {
                                 textField: {
                                     fullWidth: true,
                                     margin: "normal",
-                                    required: true,
-                                    error: !eventData.start,
-                                    helperText: !eventData.start ? "Bu alan zorunludur" : ""
+                                    error: showValidation && validationErrors.start,
+                                    helperText: showValidation && validationErrors.start ? "Bu alan zorunludur" : ""
                                 }
                             }}
                         />
@@ -643,9 +711,8 @@ export default function Randevularim() {
                                 textField: {
                                     fullWidth: true,
                                     margin: "normal",
-                                    required: true,
-                                    error: !eventData.end,
-                                    helperText: !eventData.end ? "Bu alan zorunludur" : ""
+                                    error: showValidation && validationErrors.end,
+                                    helperText: showValidation && validationErrors.end ? "Bu alan zorunludur" : ""
                                 }
                             }}
                         />
@@ -660,15 +727,14 @@ export default function Randevularim() {
                                 {...params}
                                 label="Danışan"
                                 margin="normal"
-                                required
-                                error={!eventData.client_id}
-                                helperText={!eventData.client_id ? "Bu alan zorunludur" : ""}
+                                error={showValidation && validationErrors.client_id}
+                                helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
                             />
                         )}
                         fullWidth
                     />
                     {/* Status Selectbox (MUI) */}
-                    <FormControl fullWidth margin="normal" required>
+                    <FormControl fullWidth margin="normal">
                         <InputLabel id="status-label">Durum</InputLabel>
                         <Select
                             labelId="status-label"
@@ -694,9 +760,6 @@ export default function Randevularim() {
                     <Button
                         onClick={handleEventSave}
                         color="primary"
-                        disabled={
-                            !eventData.title || !eventData.start || !eventData.end || !eventData.client_id
-                        }
                     >
                         Kaydet
                     </Button>

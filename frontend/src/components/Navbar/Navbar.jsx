@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import Box from "@mui/material/Box";
-import {useNavigate, useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import Button from "@mui/material/Button";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";

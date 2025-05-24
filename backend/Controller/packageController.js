@@ -2,7 +2,7 @@ const path = require("path");
 
 const PackageService = require(path.join(__dirname, "..", "Service", "PackageService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class packageController {
 

@@ -1,7 +1,7 @@
 const path = require('path');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
-const { Exercise, ExerciseCategory, ExerciseAssignment } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {Exercise, ExerciseCategory, ExerciseAssignment} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 
 class ExerciseService {
 

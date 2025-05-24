@@ -3,7 +3,7 @@ const path = require("path");
 
 const ClientService = require(path.join(__dirname, "..", "Service", "ClientService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const { CLIENT } = require(path.join(__dirname, "..", "Enum", "Role"));
+const {CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class ClientController {
 

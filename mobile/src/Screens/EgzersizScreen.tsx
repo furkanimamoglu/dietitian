@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useCallback, useMemo} from 'react';
-import {View, StyleSheet, TouchableOpacity, Modal, Text, TextInput, FlatList, ActivityIndicator} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {ActivityIndicator, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
@@ -63,11 +63,11 @@ const Egzersiz = ({navigation}) => {
 
     // Status için renk ve metin eşleştirmesi
     const statusMap = useMemo(() => ({
-        'completed': { color: '#43a047', text: 'Tamamlandı' },
-        'active': { color: '#1e88e5', text: 'Aktif' },
-        'missed': { color: '#e53935', text: 'Kaçırıldı' },
-        'pending': { color: '#fb8c00', text: 'Beklemede' },
-        default: { color: '#757575', text: 'Belirsiz' }
+        'completed': {color: '#43a047', text: 'Tamamlandı'},
+        'active': {color: '#1e88e5', text: 'Aktif'},
+        'missed': {color: '#e53935', text: 'Kaçırıldı'},
+        'pending': {color: '#fb8c00', text: 'Beklemede'},
+        default: {color: '#757575', text: 'Belirsiz'}
     }), []);
 
     const getCategoryIcon = useCallback((categoryId) => {
@@ -79,7 +79,7 @@ const Egzersiz = ({navigation}) => {
     }, [statusMap]);
 
     const formatDate = useCallback((dateString) => {
-        const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+        const options = {year: 'numeric', month: 'numeric', day: 'numeric'};
         return new Date(dateString).toLocaleDateString('tr-TR', options);
     }, []);
 
@@ -131,12 +131,12 @@ const Egzersiz = ({navigation}) => {
                 <View style={styles.cardContent}>
                     <View style={styles.cardHeader}>
                         <View style={[styles.iconContainer, {backgroundColor: statusInfo.color}]}>
-                            <Icon name={categoryIcon} size={24} color="#fff" />
+                            <Icon name={categoryIcon} size={24} color="#fff"/>
                         </View>
                         <View style={styles.cardTitleContainer}>
                             <Text style={styles.title}>{item.Exercise?.exercise_name}</Text>
                             <View style={styles.statusContainer}>
-                                <View style={[styles.statusIndicator, {backgroundColor: statusInfo.color}]} />
+                                <View style={[styles.statusIndicator, {backgroundColor: statusInfo.color}]}/>
                                 <Text style={styles.statusText}>{statusInfo.text}</Text>
                             </View>
                         </View>
@@ -149,17 +149,17 @@ const Egzersiz = ({navigation}) => {
                                 }}
                                 style={styles.completeButton}
                             >
-                                <Icon name="check-circle" size={28} color="#43a047" />
+                                <Icon name="check-circle" size={28} color="#43a047"/>
                             </TouchableOpacity>
                         )}
                     </View>
 
-                    <View style={styles.divider} />
+                    <View style={styles.divider}/>
 
                     <View style={styles.cardDetails}>
                         <View style={styles.detailRow}>
                             <View style={styles.detailItem}>
-                                <Icon name="calendar-range" size={18} color="#757575" />
+                                <Icon name="calendar-range" size={18} color="#757575"/>
                                 <Text style={styles.detailText}>
                                     {formatDate(item.start_date)} - {formatDate(item.end_date)}
                                 </Text>
@@ -168,18 +168,18 @@ const Egzersiz = ({navigation}) => {
 
                         <View style={styles.detailRow}>
                             <View style={styles.detailItem}>
-                                <Icon name="clock-outline" size={18} color="#757575" />
+                                <Icon name="clock-outline" size={18} color="#757575"/>
                                 <Text style={styles.detailText}>{item.Exercise?.duration} dakika</Text>
                             </View>
                             <View style={styles.detailItem}>
-                                <Icon name="fire" size={18} color="#f57c00" />
+                                <Icon name="fire" size={18} color="#f57c00"/>
                                 <Text style={styles.detailText}>{item.Exercise?.calories_burned} kcal</Text>
                             </View>
                         </View>
 
                         {item.note && (
                             <View style={styles.noteContainer}>
-                                <Icon name="note-text-outline" size={18} color="#757575" />
+                                <Icon name="note-text-outline" size={18} color="#757575"/>
                                 <Text style={styles.noteText}>{item.note}</Text>
                             </View>
                         )}
@@ -246,7 +246,7 @@ const Egzersiz = ({navigation}) => {
     if (loading && !refreshing) {
         return (
             <View style={[styles.container, styles.centerContent]}>
-                <ActivityIndicator size="large" color="#2e7d32" />
+                <ActivityIndicator size="large" color="#2e7d32"/>
                 <Text style={styles.loadingText}>Egzersizler Yükleniyor...</Text>
             </View>
         );
@@ -254,7 +254,7 @@ const Egzersiz = ({navigation}) => {
 
     return (
         <View style={styles.container}>
-            <Header navigation={navigation} />
+            <Header navigation={navigation}/>
 
             <View style={styles.content}>
                 {/* Özet Card */}
@@ -263,19 +263,19 @@ const Egzersiz = ({navigation}) => {
                         <Text style={styles.summaryTitle}>Egzersiz Özeti</Text>
                         <View style={styles.statsContainer}>
                             <View style={styles.statItem}>
-                                <Icon name="clock-outline" size={24} color="#1e88e5" />
+                                <Icon name="clock-outline" size={24} color="#1e88e5"/>
                                 <Text style={styles.statValue}>{stats.totalDuration}</Text>
                                 <Text style={styles.statLabel}>Dakika</Text>
                             </View>
-                            <View style={styles.verticalDivider} />
+                            <View style={styles.verticalDivider}/>
                             <View style={styles.statItem}>
-                                <Icon name="check-circle" size={24} color="#43a047" />
+                                <Icon name="check-circle" size={24} color="#43a047"/>
                                 <Text style={styles.statValue}>{stats.completedExercises}</Text>
                                 <Text style={styles.statLabel}>Tamamlanan</Text>
                             </View>
-                            <View style={styles.verticalDivider} />
+                            <View style={styles.verticalDivider}/>
                             <View style={styles.statItem}>
-                                <Icon name="calendar-clock" size={24} color="#fb8c00" />
+                                <Icon name="calendar-clock" size={24} color="#fb8c00"/>
                                 <Text style={styles.statValue}>{stats.activeExercises}</Text>
                                 <Text style={styles.statLabel}>Aktif</Text>
                             </View>
@@ -285,7 +285,7 @@ const Egzersiz = ({navigation}) => {
 
                 {error ? (
                     <View style={styles.errorContainer}>
-                        <Icon name="alert-circle-outline" size={48} color="#e53935" />
+                        <Icon name="alert-circle-outline" size={48} color="#e53935"/>
                         <Text style={styles.errorText}>{error}</Text>
                         <TouchableOpacity
                             style={styles.retryButton}
@@ -296,7 +296,7 @@ const Egzersiz = ({navigation}) => {
                     </View>
                 ) : exerciseInfo.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Icon name="dumbbell" size={64} color="#bdbdbd" />
+                        <Icon name="dumbbell" size={64} color="#bdbdbd"/>
                         <Text style={styles.emptyText}>Henüz egzersiz programınız bulunmuyor</Text>
                         <Text style={styles.emptySubtext}>
                             Diyetisyeniniz sizin için egzersiz programı oluşturduğunda burada görüntülenecektir.
@@ -322,7 +322,7 @@ const Egzersiz = ({navigation}) => {
             {/* Egzersiz tamamlama modal */}
             {renderCompleteExerciseModal()}
 
-            <BottomNavbar navigation={navigation} />
+            <BottomNavbar navigation={navigation}/>
         </View>
     );
 };
