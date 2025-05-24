@@ -61,13 +61,7 @@ const Dietitian = sequelize.define('Dietitian', {
     name: {
         type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: "İsimsiz Danışan",
-        validate: {
-            len: {
-                args: [3, 50],
-                msg: 'İsim en az 3, en fazla 50 karakter olabilir.'
-            }
-        }
+        defaultValue: "İsimsiz Danışan"
     },
     role: {
         type: DataTypes.STRING,
@@ -97,13 +91,7 @@ const Dietitian = sequelize.define('Dietitian', {
         }
     },
     gender: {
-        type: DataTypes.STRING,
-        validate: {
-            isIn: {
-                args: [["Erkek", "Kadın", "Diğer"]],
-                msg: 'Cinsiyet yalnızca "Erkek", "Kadın" veya "Diğer" olabilir.'
-            }
-        }
+        type: DataTypes.STRING
     },
     ipAddress: {
         type: DataTypes.STRING,
