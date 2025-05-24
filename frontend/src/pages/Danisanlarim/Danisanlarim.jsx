@@ -880,11 +880,11 @@ export default function Danisanlarim() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => window.print()} variant="outlined">
-                        Yazdır
-                    </Button>
-                    <Button onClick={closeQrDialog} variant="contained">
+                    <Button onClick={closeQrDialog} variant="outlined" color="secondary">
                         Kapat
+                    </Button>
+                    <Button onClick={() => window.print()} variant="contained" color="primary">
+                        Yazdır
                     </Button>
                 </DialogActions>
             </Dialog>
