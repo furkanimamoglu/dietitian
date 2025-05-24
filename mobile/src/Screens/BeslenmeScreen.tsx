@@ -1,29 +1,21 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
+import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
 import {
-    View,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
-    Alert,
-    FlatList
-} from 'react-native';
-import {
-    Card,
-    Text,
-    Checkbox,
-    IconButton,
+    Avatar,
     Button,
+    Card,
+    Checkbox,
+    Chip,
     Dialog,
-    Portal,
-    Provider,
+    Divider,
     FAB,
+    IconButton,
+    Portal,
     ProgressBar,
+    Provider,
     RadioButton,
     Surface,
-    Chip,
-    Divider,
-    Avatar
+    Text
 } from 'react-native-paper';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -108,7 +100,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             });
 
             const data = await response.json();
-            console.log('Received meal plan:', JSON.stringify(data, null, 2));
 
             // Check if response contains showOnScreen and message
             if (data.showOnScreen && data.message) {

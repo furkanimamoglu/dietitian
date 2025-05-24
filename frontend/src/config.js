@@ -1,12 +1,12 @@
 const config = {
-    environment: "dev",
+    environment: "prod",
 
     dev: {
         apiUrl: 'http://localhost:3000'
     },
 
     prod: {
-        apiUrl: 'http://diyetia.com/api'
+        apiUrl: 'https://diyetia.com/api'
     }
 };
 

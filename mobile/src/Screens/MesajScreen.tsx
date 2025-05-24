@@ -1,19 +1,19 @@
-import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
-    View,
-    StyleSheet,
+    ActivityIndicator,
     FlatList,
-    TextInput,
-    TouchableOpacity,
-    Text,
-    KeyboardAvoidingView,
-    Platform,
     Image,
-    PermissionsAndroid,
+    KeyboardAvoidingView,
     Modal,
+    PermissionsAndroid,
+    Platform,
     Pressable,
     StatusBar,
-    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -130,9 +130,12 @@ const Mesaj = ({navigation}) => {
     };
 
     useEffect(() => {
-        fetchClientInfo().then(response => {});
-        fetchMessages().then(response => {});
-        requestCameraPermission().then(response => {});
+        fetchClientInfo().then(response => {
+        });
+        fetchMessages().then(response => {
+        });
+        requestCameraPermission().then(response => {
+        });
 
         intervalRef.current = setInterval(() => {
             fetchMessages();

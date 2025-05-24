@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, ScrollView, Text as RNText, Dimensions, Modal, TouchableOpacity} from 'react-native';
-import {Avatar, Card, Text, Surface, ProgressBar, Button} from 'react-native-paper';
+import {Dimensions, Modal, ScrollView, StyleSheet, View} from 'react-native';
+import {Avatar, Button, Card, Surface, Text} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
 import Header from '../Components/Header';
@@ -17,10 +17,10 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const [userName, setUserName] = useState<string>('Yükleniyor...');
     const [measurementInfo, setMeasurementInfo] = useState<{
-      kilo: number;
-      yag: number;
-      kas: number;
-      su: number;
+        kilo: number;
+        yag: number;
+        kas: number;
+        su: number;
     } | null>(null);
     const [closestAppointment, setClosestAppointment] = useState<Date | null>(null);
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
@@ -134,7 +134,7 @@ const AnaSayfa = ({navigation}: Props) => {
             const data = await response.json();
 
             if (response.ok) {
-                const approvedAppointments = data.filter(appt => appt.status === 'approved');
+                const approvedAppointments = data.filter((appt: { status: string; }) => appt.status === 'approved');
 
                 if (approvedAppointments.length > 0 && approvedAppointments[0].start) {
                     setClosestAppointment(new Date(approvedAppointments[0].start));
@@ -221,10 +221,10 @@ const AnaSayfa = ({navigation}: Props) => {
                 </Surface>
 
                 <Card style={styles.card}>
-                    <Card.Title title="Gelecek Randevu Tarihiniz" />
+                    <Card.Title title="Gelecek Randevu Tarihiniz"/>
                     <Card.Content>
                         <View style={styles.randevuBilgi}>
-                            <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon} />
+                            <Avatar.Icon size={48} icon="calendar" style={styles.randevuIcon}/>
                             <View style={styles.randevuDetay}>
                                 <Text style={styles.randevuTarih}>
                                     {closestAppointment

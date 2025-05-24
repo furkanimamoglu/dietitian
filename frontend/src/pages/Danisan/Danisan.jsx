@@ -1,49 +1,49 @@
-import React, {useEffect, useState, useMemo, useRef} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import './Danisan.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
-import {useParams, useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 import {
-    Box,
-    Typography,
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Avatar,
-    Divider,
-    Paper,
-    Grid,
+    Box,
+    Button,
     Card,
     CardContent,
     CardHeader,
-    Tabs,
-    Tab,
-    IconButton,
     Chip,
-    Skeleton,
-    useTheme,
-    useMediaQuery,
-    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    Grid,
+    IconButton,
+    InputAdornment,
     List,
     ListItem,
-    ListItemText,
     ListItemAvatar,
-    CircularProgress,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    TextField,
-    InputAdornment,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
+    ListItemText,
     MenuItem,
+    Paper,
+    Skeleton,
+    Tab,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
+    Tabs,
+    TextField,
+    Typography,
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -256,7 +256,7 @@ function Danisan() {
 
     // Anamnez form alanlarındaki değişiklikleri yakalar (üst seviye alanlar için)
     const handleAnamnezFormChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setAnamnezForm(prevForm => ({
             ...prevForm,
             [name]: value
@@ -985,13 +985,13 @@ function Danisan() {
                 return (
                     <Box>
                         {anamnezLoading ? (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                                <CircularProgress />
+                            <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
+                                <CircularProgress/>
                             </Box>
                         ) : anamnezData ? (
                             <>
                                 {/* Sağlık Bilgileri Akordiyonu */}
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 1}}>
                                     <Button
                                         variant="contained"
                                         color="primary"
@@ -1033,7 +1033,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Kronik Hastalıklar"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1048,7 +1051,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Alerjiler"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1063,7 +1069,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="İlaç Kullanımı"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1078,7 +1087,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Geçmiş Ameliyatlar"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1093,7 +1105,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Aile Sağlık Geçmişi"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1108,7 +1123,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Uyku"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1156,7 +1174,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Günlük Su Tüketimi"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1171,11 +1192,14 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Öğün Düzeni"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
-                                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                                                        <Typography variant="body2" sx={{whiteSpace: 'pre-line'}}>
                                                             {anamnezData.diyet_aliskanliklari.ogun_duzeni || "Belirtilmemiş"}
                                                         </Typography>
                                                     </CardContent>
@@ -1186,7 +1210,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Favori Yiyecekler"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1201,7 +1228,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Sevmediği Yiyecekler"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1216,7 +1246,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Atıştırmalık Alışkanlıkları"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1231,7 +1264,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Dışarıda Yemek"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1279,7 +1315,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Aktivite Seviyesi"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1294,7 +1333,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Egzersiz Alışkanlıkları"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1309,7 +1351,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Sevdiği Sporlar"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1324,7 +1369,10 @@ function Danisan() {
                                                 <Card variant="outlined" sx={{height: '100%'}}>
                                                     <CardHeader
                                                         title="Mesleği ve Aktivite Durumu"
-                                                        titleTypographyProps={{variant: 'subtitle1', fontWeight: 'bold'}}
+                                                        titleTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            fontWeight: 'bold'
+                                                        }}
                                                         sx={{bgcolor: 'grey.100', py: 1}}
                                                     />
                                                     <CardContent>
@@ -1375,17 +1423,17 @@ function Danisan() {
                                 </Accordion>
                             </>
                         ) : (
-                            <Box sx={{ textAlign: 'center', mt: 4 }}>
+                            <Box sx={{textAlign: 'center', mt: 4}}>
                                 <Typography variant="h6" color="text.secondary">
                                     Bu danışan için anamnez verisi bulunamadı.
                                 </Typography>
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    sx={{ mt: 2 }}
+                                    sx={{mt: 2}}
                                     onClick={handleOpenAnamnezDialog}
                                 >
-                                    <AddIcon sx={{ mr: 1 }} />
+                                    <AddIcon sx={{mr: 1}}/>
                                     Anamnez Ekle
                                 </Button>
                             </Box>
@@ -4241,14 +4289,14 @@ function Danisan() {
                 <DialogTitle>
                     Anamnez Bilgilerini Düzenle
                     <IconButton
-                        style={{ position: 'absolute', right: 8, top: 8 }}
+                        style={{position: 'absolute', right: 8, top: 8}}
                         onClick={() => setIsAnamnezDialogOpen(false)}
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
-                    <Box sx={{ mb: 3 }}>
+                    <Box sx={{mb: 3}}>
                         <Typography variant="h6" gutterBottom>Sağlık Bilgileri</Typography>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={6}>
@@ -4314,7 +4362,7 @@ function Danisan() {
                         </Grid>
                     </Box>
 
-                    <Box sx={{ mb: 3 }}>
+                    <Box sx={{mb: 3}}>
                         <Typography variant="h6" gutterBottom>Diyet Alışkanlıkları</Typography>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={6}>
@@ -4380,7 +4428,7 @@ function Danisan() {
                         </Grid>
                     </Box>
 
-                    <Box sx={{ mb: 3 }}>
+                    <Box sx={{mb: 3}}>
                         <Typography variant="h6" gutterBottom>Fiziksel Aktivite</Typography>
                         <Grid container spacing={2}>
                             <Grid item xs={12} md={6}>

@@ -1,10 +1,17 @@
-import React, {useRef, useEffect, useState, useCallback} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Default from "../../Components/Layouts/Default.jsx";
 import {
     Avatar,
+    Badge,
     Box,
+    Button,
     Chip,
+    CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     Divider,
+    Fade,
     Grid,
     IconButton,
     InputAdornment,
@@ -12,20 +19,13 @@ import {
     ListItemAvatar,
     ListItemButton,
     ListItemText,
+    Menu,
     Paper,
     TextField,
+    Tooltip,
     Typography,
     useTheme,
-    Badge,
-    Tooltip,
-    Zoom,
-    Fade,
-    Menu,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Button,
-    CircularProgress
+    Zoom
 } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
@@ -245,7 +245,7 @@ export default function Mesaj() {
                 setMessages(prev =>
                     prev.map(msg =>
                         msg.id === tempId
-                            ? { ...msg, id: response.data.id }
+                            ? {...msg, id: response.data.id}
                             : msg
                     )
                 );

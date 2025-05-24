@@ -1,26 +1,25 @@
-import React, {useState, useCallback, useMemo, useEffect} from 'react';
-import {View, StyleSheet, FlatList} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Alert, FlatList, StyleSheet, View} from 'react-native';
 import {
+    Avatar,
+    Button,
     Card,
-    Text,
+    Chip,
+    Dialog,
+    Divider,
     FAB,
+    IconButton,
     Portal,
     Provider,
-    Dialog,
-    Button,
-    TextInput,
-    Chip,
-    Divider,
     Surface,
-    IconButton,
-    Avatar
+    Text,
+    TextInput
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
-import {Alert} from 'react-native';
 
 interface Appointment {
     id: number;

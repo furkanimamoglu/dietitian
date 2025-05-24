@@ -1,19 +1,18 @@
 // src/screens/LoginScreen.tsx
 import React, {useState} from 'react';
 import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
     Alert,
-    ImageBackground,
-    StatusBar,
+    Dimensions,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Dimensions
+    StatusBar,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {Text, TextInput, Button, Card, useTheme} from 'react-native-paper';
+import {Button, Card, Text, TextInput, useTheme} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';

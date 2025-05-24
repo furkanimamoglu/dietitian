@@ -2,7 +2,7 @@ const path = require("path");
 
 const RecipeService = require(path.join(__dirname, "..", "Service", "RecipeService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class recipeController {
 

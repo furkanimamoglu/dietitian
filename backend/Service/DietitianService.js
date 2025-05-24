@@ -6,10 +6,17 @@ const QRCode = require('qrcode');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 
-const { DIETITIAN, CLIENT } = require(path.join(__dirname, '..', 'Enum', 'Role'));
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 
-const { Dietitian, Client, NutritionPlan, NutritionCategory, NutritionAssignment, Notes } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
-const { Op } = require('sequelize');
+const {
+    Dietitian,
+    Client,
+    NutritionPlan,
+    NutritionCategory,
+    NutritionAssignment,
+    Notes
+} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {Op} = require('sequelize');
 
 
 class DietitianService {

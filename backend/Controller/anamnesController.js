@@ -2,7 +2,7 @@ const path = require("path");
 
 const AnamnesService = require(path.join(__dirname, "..", "Service", "AnamnesService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 
 class anamnesController {
@@ -50,8 +50,9 @@ class anamnesController {
             const {saglik_bilgileri, diyet_aliskanliklari, fiziksel_aktivite, ozel_notlar} = req.body;
 
             const result = await AnamnesService.updateAnamnes(dietitian_id, client_id,
-                {saglik_bilgileri, diyet_aliskanliklari, fiziksel_aktivite, ozel_notlar
-            });
+                {
+                    saglik_bilgileri, diyet_aliskanliklari, fiziksel_aktivite, ozel_notlar
+                });
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({

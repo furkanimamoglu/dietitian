@@ -20,6 +20,7 @@ const Notes = require(path.join(__dirname, 'Notes'));
 const Package = require(path.join(__dirname, 'Package'));
 const PackageItems = require(path.join(__dirname, 'PackageItems'));
 const Measurement = require(path.join(__dirname, 'Measurement'));
+const BloodTest = require(path.join(__dirname, 'BloodTest'));
 
 Dietitian.hasMany(Client, {
     foreignKey: 'dietitian_id',
@@ -272,5 +273,6 @@ module.exports = {
     RecipeCategory,
     Package,
     PackageItems,
-    Measurement
+    Measurement,
+    BloodTest
 };
