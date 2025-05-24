@@ -91,7 +91,7 @@ const Measurement = sequelize.define('Measurement', {
             },
             min: {
                 args: [10],
-                msg: "Kalça ölçüsü en az 40 cm olmalıdır."
+                msg: "Kalça ölçüsü en az 10 cm olmalıdır."
             },
             max: {
                 args: [300],
