@@ -3,8 +3,8 @@ const path = require("path");
 const DietitianService = require(path.join(__dirname, "..", "Service", "DietitianService"));
 const Exception = require(path.join(__dirname, "..", "Exception", "Exception"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const { Notes } = require(path.join(__dirname, "..", "Model", "MainModel"));
-const { DIETITIAN } = require(path.join(__dirname, "..", "Enum", "Role"));
+const {Notes} = require(path.join(__dirname, "..", "Model", "MainModel"));
+const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 const moment = require("moment");
 
