@@ -26,7 +26,6 @@ import {DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarQuickFilte
 import {trTR} from "@mui/x-data-grid/locales";
 import {
     ArrowForward,
-    Autorenew as AutorenewIcon,
     Cancel,
     CheckCircle,
     CheckCircleOutline,
@@ -406,8 +405,9 @@ export default function Danisanlarim() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 140,
+            width: 160,
             sortable: false,
+            editable: false,
             renderCell: (params) => (
                 <Stack direction="row" spacing={1}>
                     <Button
