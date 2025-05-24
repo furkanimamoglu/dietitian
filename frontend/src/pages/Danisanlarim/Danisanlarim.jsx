@@ -1,52 +1,47 @@
-import React, {useEffect, useState, useCallback} from "react";
+import React, {useCallback, useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {
+    Alert,
     Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    Stack,
-    TextField,
-    Typography,
-    Paper,
+    FormControl,
     Grid,
     IconButton,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     InputAdornment,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
     Snackbar,
-    Alert
+    Stack,
+    TextField,
+    Typography
 } from "@mui/material";
-import {
-    DataGrid,
-    GridToolbarQuickFilter,
-    GridToolbarContainer,
-    GridToolbarExport
-} from "@mui/x-data-grid";
+import {DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarQuickFilter} from "@mui/x-data-grid";
 import {trTR} from "@mui/x-data-grid/locales";
 import {
+    ArrowForward,
+    Autorenew as AutorenewIcon,
     Cancel,
     CheckCircle,
-    GroupAdd,
-    Visibility,
+    CheckCircleOutline,
+    Close as CloseIcon,
     Delete as DeleteIcon,
-    QrCode as QrCodeIcon,
-    Male as MaleIcon,
+    Edit as EditIcon,
     Female as FemaleIcon,
     Group as GroupIcon,
-    CheckCircleOutline,
-    Edit as EditIcon,
-    ArrowForward,
-    Close as CloseIcon,
-    Autorenew as AutorenewIcon,
+    GroupAdd,
+    Male as MaleIcon,
+    QrCode as QrCodeIcon,
+    Visibility,
     VisibilityOff,
 } from "@mui/icons-material";
-import {green, red, blue, pink} from "@mui/material/colors";
-import {useNavigate} from "react-router-dom";
+import {blue, green, pink, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 import PersonIcon from "@mui/icons-material/Person";
@@ -910,7 +905,7 @@ export default function Danisanlarim() {
                 }}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <GroupAdd/>
-                        <Typography variant="h6" color="primary.main" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
+                        <Typography variant="h6" color="primary.main" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
                             Yeni Danışan Ekle
                         </Typography>
                     </Box>
@@ -1016,7 +1011,7 @@ export default function Danisanlarim() {
                                     fullWidth
                                     required
                                     displayEmpty
-                                    sx={{ mb: 2 }}
+                                    sx={{mb: 2}}
                                 >
                                     <MenuItem value="" disabled>Cinsiyet Seçiniz</MenuItem>
                                     <MenuItem value="Erkek">Erkek</MenuItem>

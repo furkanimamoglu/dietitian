@@ -6,15 +6,15 @@ import {
     Avatar,
     Box,
     Button,
+    CircularProgress,
+    Container,
+    Divider,
+    IconButton,
+    InputAdornment,
     Link,
     Paper,
     TextField,
-    Typography,
-    Container,
-    InputAdornment,
-    IconButton,
-    Divider,
-    CircularProgress
+    Typography
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -130,7 +130,7 @@ function Login() {
                         <Divider flexItem sx={{width: "100%", mb: 1}}/>
 
                         <form onSubmit={handleSubmit} style={{width: '100%'}}>
-                            <Typography variant="subtitle1" gutterBottom sx={{ mb: 1, fontWeight: 'medium' }}>
+                            <Typography variant="subtitle1" gutterBottom sx={{mb: 1, fontWeight: 'medium'}}>
                                 Telefon Numarası:
                             </Typography>
                             <TextField
@@ -157,7 +157,7 @@ function Login() {
                                 }}
                             />
 
-                            <Typography variant="subtitle1" gutterBottom sx={{ mt: 1, mb: 1, fontWeight: 'medium' }}>
+                            <Typography variant="subtitle1" gutterBottom sx={{mt: 1, mb: 1, fontWeight: 'medium'}}>
                                 Şifre:
                             </Typography>
                             <TextField
