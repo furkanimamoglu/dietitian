@@ -50,7 +50,6 @@ app.use('/api/message', messageRoutes);
 app.use('/api/recipe', recipeRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/invoice', invoiceRoutes);
-app.use('/api/message', messageRoutes);
 app.use('/api/measurement', measurementRoutes);
 app.use('/api/package', packageRoutes);
 
