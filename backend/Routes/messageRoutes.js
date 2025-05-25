@@ -7,6 +7,7 @@ const messageController = require(path.join(__dirname, '..', 'Controller', 'mess
 
 router.get('/getMyMessages', messageController.getMyMessages);
 router.get('/getMyUnreadMessageCount', messageController.getMyUnreadMessageCount);
+router.post('/changeMessageStatusToReaded', messageController.changeMessageStatusToReaded);
 router.post('/sendMessage', messageController.sendMessage);
 
 module.exports = router;
