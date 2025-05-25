@@ -16,9 +16,25 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import PersonIcon from '@mui/icons-material/Person';
+import PeopleIcon from '@mui/icons-material/People';
 import {jsPDF} from "jspdf";
 import 'jspdf-autotable';
-import {Autocomplete, TextField} from '@mui/material';
+import {
+    Autocomplete,
+    TextField,
+    Avatar,
+    CircularProgress,
+    Paper,
+    Typography,
+    Divider,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Box,
+    InputAdornment
+} from '@mui/material';
 
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
@@ -614,9 +630,17 @@ export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
+    const [filteredDanisanList, setFilteredDanisanList] = useState([]);
+    const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
+
+    // Danışana atanmış programlar için yeni state'ler
+    const [clientProgramsModal, setClientProgramsModal] = useState(false);
+    const [selectedClientPrograms, setSelectedClientPrograms] = useState([]);
+    const [loadingClientPrograms, setLoadingClientPrograms] = useState(false);
+    const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
@@ -717,6 +741,17 @@ export default function Beslenme() {
                 console.error("Error fetching clients:", error);
             });
     }, []);
+
+    // Filtreleme için danışan listesini izle
+    useEffect(() => {
+        if (danisanList.length > 0) {
+            setFilteredDanisanList(
+                danisanList.filter(danisan =>
+                    danisan.name.toLowerCase().includes(danisanSearchTerm.toLowerCase())
+                )
+            );
+        }
+    }, [danisanList, danisanSearchTerm]);
 
     // Fetch nutrition categories
     useEffect(() => {
@@ -1410,7 +1445,7 @@ export default function Beslenme() {
                     </div>
                 </div>
 
-                {/* Right Panel - Nutrition Programs */}
+                {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
                     <div className="nutrition-cards-grid">
                         {loading ? (
@@ -1437,6 +1472,142 @@ export default function Beslenme() {
                         )}
                     </div>
                 </div>
+
+                {/* Right Panel - Sidebar */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        flex: '0 0 260px',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        height: 'fit-content',
+                        maxHeight: 'calc(100vh - 100px)'
+                    }}
+                    className="right-sidebar-panel"
+                >
+                    <Box sx={{ padding: '16px 0', backgroundColor: '#1976d2' }}>
+                        <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <PeopleIcon sx={{ mr: 1 }} /> Danışanlarım
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ padding: '16px' }}>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Danışan ara..."
+                            value={danisanSearchTerm}
+                            onChange={(e) => setDanisanSearchTerm(e.target.value)}
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: "rgba(0, 0, 0, 0.54)" }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {loading ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3 }}>
+                                <CircularProgress size={28} sx={{ mb: 2 }} />
+                                <Typography variant="body2" color="text.secondary">
+                                    Danışanlar yükleniyor...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <List
+                                sx={{
+                                    width: '100%',
+                                    maxHeight: 'calc(100vh - 200px)',
+                                    overflowY: 'auto',
+                                    '&::-webkit-scrollbar': {
+                                        width: '6px',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: 'rgba(0,0,0,0.2)',
+                                        borderRadius: '3px'
+                                    }
+                                }}
+                                dense
+                            >
+                                {filteredDanisanList.length > 0 ? (
+                                    filteredDanisanList.map((danisan) => (
+                                        <React.Fragment key={danisan.id}>
+                                            <ListItem
+                                                button
+                                                onClick={() => {
+                                                    setSelectedClientInfo(danisan);
+                                                    setLoadingClientPrograms(true);
+                                                    axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${danisan.id}`, {
+                                                        headers: { Authorization: localStorage.getItem("token") }
+                                                    })
+                                                        .then(response => {
+                                                            setSelectedClientPrograms(response.data || []);
+                                                            setLoadingClientPrograms(false);
+                                                            setClientProgramsModal(true);
+                                                        })
+                                                        .catch(error => {
+                                                            console.error("Error fetching client programs:", error);
+                                                            setLoadingClientPrograms(false);
+                                                            setErrorMessage("Danışan programları yüklenirken bir hata oluştu.");
+                                                            setShowErrorPopup(true);
+                                                        });
+                                                }}
+                                                sx={{
+                                                    borderRadius: '8px',
+                                                    my: 0.5,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                                                    }
+                                                }}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: danisan.image ? 'transparent' : '#1976d2',
+                                                            width: 40,
+                                                            height: 40
+                                                        }}
+                                                        src={danisan.image || ''}
+                                                    >
+                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={danisan.name}
+                                                    secondary={danisan.email}
+                                                    primaryTypographyProps={{ fontWeight: 'medium' }}
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li" />
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 4
+                                    }}>
+                                        <PersonIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+                                        <Typography variant="body2" color="text.secondary" align="center">
+                                            Danışan bulunamadı.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </List>
+                        )}
+                    </Box>
+                </Paper>
             </div>
 
             {/* Add Plan Modal */}
@@ -1929,6 +2100,207 @@ export default function Beslenme() {
                     </div>
                 </div>
             )}
+
+            {/* Client Programs Modal */}
+            <Modal
+                isOpen={clientProgramsModal}
+                title={`${selectedClientInfo?.name} - Atanan Programlar`}
+                onClose={() => setClientProgramsModal(false)}
+                fullWidth={true}
+            >
+                <div className="modal-body client-programs-modal">
+                    {loadingClientPrograms ? (
+                        <div className="loading-container">
+                            <CircularProgress size={40} />
+                            <p>Programlar yükleniyor...</p>
+                        </div>
+                    ) : selectedClientPrograms.length > 0 ? (
+                        <div className="client-programs-wrapper">
+                            <div className="client-info-summary">
+                                <Avatar
+                                    sx={{
+                                        bgcolor: selectedClientInfo?.image ? 'transparent' : '#1976d2',
+                                        width: 60,
+                                        height: 60
+                                    }}
+                                    src={selectedClientInfo?.image || ''}
+                                >
+                                    {!selectedClientInfo?.image && selectedClientInfo?.name.charAt(0)}
+                                </Avatar>
+                                <div className="client-info-details">
+                                    <h3>{selectedClientInfo?.name}</h3>
+                                    <p>{selectedClientInfo?.email}</p>
+                                    <div className="client-stats">
+                                        <span className="client-stat-item">
+                                            <strong>{selectedClientPrograms.length}</strong> Aktif Program
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="client-programs-list">
+                                {selectedClientPrograms.map((program, index) => {
+                                    // Tarih formatını düzeltme
+                                    const formatDate = (dateStr) => {
+                                        if (!dateStr) return "Belirtilmemiş";
+                                        const date = new Date(dateStr);
+                                        return date.toLocaleDateString('tr-TR', {
+                                            day: '2-digit',
+                                            month: 'long',
+                                            year: 'numeric'
+                                        });
+                                    };
+
+                                    // Başlangıç ve bitiş tarihleri arasındaki gün sayısını hesaplama
+                                    const calculateDaysBetween = (start, end) => {
+                                        if (!start || !end) return null;
+                                        const startDate = new Date(start);
+                                        const endDate = new Date(end);
+                                        const diffTime = endDate - startDate;
+                                        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                    };
+
+                                    const daysBetween = calculateDaysBetween(program.start_date, program.end_date);
+
+                                    // Program durumunu hesaplama
+                                    const getProgramStatus = () => {
+                                        const today = new Date();
+                                        const startDate = new Date(program.start_date);
+                                        const endDate = new Date(program.end_date);
+
+                                        if (today < startDate) {
+                                            return { status: "Başlamamış", color: "#3f51b5" };
+                                        } else if (today > endDate) {
+                                            return { status: "Tamamlandı", color: "#4caf50" };
+                                        } else {
+                                            return { status: "Devam Ediyor", color: "#ff9800" };
+                                        }
+                                    };
+
+                                    const status = getProgramStatus();
+
+                                    // İlerleme çubuğu yüzdesini hesaplama
+                                    const calculateProgress = () => {
+                                        const today = new Date();
+                                        const startDate = new Date(program.start_date);
+                                        const endDate = new Date(program.end_date);
+
+                                        if (today < startDate) return 0;
+                                        if (today > endDate) return 100;
+
+                                        const totalDays = calculateDaysBetween(program.start_date, program.end_date);
+                                        const passedDays = calculateDaysBetween(program.start_date, today.toISOString().split('T')[0]);
+
+                                        return Math.round((passedDays / totalDays) * 100);
+                                    };
+
+                                    const progressPercent = calculateProgress();
+
+                                    return (
+                                        <div key={index} className="client-program-card">
+                                            <div className="program-card-header">
+                                                <h3>{program.title}</h3>
+                                                <div
+                                                    className="program-status"
+                                                    style={{backgroundColor: status.color}}
+                                                >
+                                                    {status.status}
+                                                </div>
+                                            </div>
+
+                                            <div className="program-card-dates">
+                                                <div className="date-item">
+                                                    <div className="date-label">Başlangıç</div>
+                                                    <div className="date-value">{formatDate(program.start_date)}</div>
+                                                </div>
+                                                <div className="date-divider"></div>
+                                                <div className="date-item">
+                                                    <div className="date-label">Bitiş</div>
+                                                    <div className="date-value">{formatDate(program.end_date)}</div>
+                                                </div>
+                                                <div className="date-divider"></div>
+                                                <div className="date-item">
+                                                    <div className="date-label">Süre</div>
+                                                    <div className="date-value">{daysBetween} gün</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="program-progress-container">
+                                                <div className="progress-header">
+                                                    <span>Program İlerlemesi</span>
+                                                    <span>{progressPercent}%</span>
+                                                </div>
+                                                <div className="progress-bar-container">
+                                                    <div
+                                                        className="progress-bar"
+                                                        style={{width: `${progressPercent}%`, backgroundColor: status.color}}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="program-card-description">
+                                                <p>{program.description || "Açıklama bulunmuyor."}</p>
+                                            </div>
+
+                                            {program.note && (
+                                                <div className="program-note">
+                                                    <div className="note-header">Diyetisyen Notu</div>
+                                                    <div className="note-content">{program.note}</div>
+                                                </div>
+                                            )}
+
+                                            <div className="program-card-actions">
+                                                <button
+                                                    className="program-card-btn view-btn"
+                                                    onClick={() => {
+                                                        // Bir sonraki aşamada programı görüntülemek için işlev eklenebilir
+                                                        const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
+                                                        if (programDetails) {
+                                                            setSelectedProgram(programDetails);
+                                                            setViewProgramModal(true);
+                                                            setClientProgramsModal(false);
+                                                        }
+                                                    }}
+                                                >
+                                                    Programı Görüntüle
+                                                </button>
+                                                <button
+                                                    className="program-card-btn print-btn"
+                                                    onClick={() => {
+                                                        // Bir sonraki aşamada programı yazdırmak için işlev eklenebilir
+                                                        const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
+                                                        if (programDetails) {
+                                                            handlePrint(programDetails);
+                                                        }
+                                                    }}
+                                                >
+                                                    PDF İndir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="no-programs-message">
+                            <RestaurantIcon sx={{ fontSize: 60, color: '#ccc', marginBottom: '16px' }} />
+                            <h3>Atanmış Program Bulunamadı</h3>
+                            <p>Bu danışana henüz bir beslenme programı atanmamış.</p>
+                            <button
+                                className="assign-new-program-btn"
+                                onClick={() => {
+                                    setClientProgramsModal(false);
+                                    // Eğer modal kapatılıp başka bir işlem yapılması gerekiyorsa
+                                    // burada yönlendirme yapılabilir
+                                }}
+                            >
+                                Kapat
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </Modal>
         </Default>
     );
 }
