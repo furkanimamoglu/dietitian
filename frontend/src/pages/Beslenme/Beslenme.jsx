@@ -16,9 +16,45 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import PersonIcon from '@mui/icons-material/Person';
+import PeopleIcon from '@mui/icons-material/People';
+import EventIcon from '@mui/icons-material/Event';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import NoteIcon from '@mui/icons-material/Note';
+import DescriptionIcon from '@mui/icons-material/Description';
 import {jsPDF} from "jspdf";
 import 'jspdf-autotable';
-import {Autocomplete, TextField} from '@mui/material';
+import {
+    Autocomplete,
+    TextField,
+    Avatar,
+    CircularProgress,
+    Paper,
+    Typography,
+    Divider,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Box,
+    InputAdornment,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    IconButton,
+    Card,
+    CardContent,
+    CardActions,
+    CardHeader,
+    Chip,
+    Grid,
+    LinearProgress,
+    Stack
+} from '@mui/material';
 
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
@@ -614,9 +650,17 @@ export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
     const [danisanList, setDanisanList] = useState([]);
+    const [filteredDanisanList, setFilteredDanisanList] = useState([]);
+    const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
+
+    // Danışana atanmış programlar için yeni state'ler
+    const [clientProgramsModal, setClientProgramsModal] = useState(false);
+    const [selectedClientPrograms, setSelectedClientPrograms] = useState([]);
+    const [loadingClientPrograms, setLoadingClientPrograms] = useState(false);
+    const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
@@ -717,6 +761,17 @@ export default function Beslenme() {
                 console.error("Error fetching clients:", error);
             });
     }, []);
+
+    // Filtreleme için danışan listesini izle
+    useEffect(() => {
+        if (danisanList.length > 0) {
+            setFilteredDanisanList(
+                danisanList.filter(danisan =>
+                    danisan.name.toLowerCase().includes(danisanSearchTerm.toLowerCase())
+                )
+            );
+        }
+    }, [danisanList, danisanSearchTerm]);
 
     // Fetch nutrition categories
     useEffect(() => {
@@ -1410,7 +1465,7 @@ export default function Beslenme() {
                     </div>
                 </div>
 
-                {/* Right Panel - Nutrition Programs */}
+                {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
                     <div className="nutrition-cards-grid">
                         {loading ? (
@@ -1437,6 +1492,141 @@ export default function Beslenme() {
                         )}
                     </div>
                 </div>
+
+                {/* Right Panel - Sidebar */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        flex: '0 0 260px',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        height: 'calc(76vh)',
+                        maxHeight: 'calc(100vh - 100px)'
+                    }}
+                    className="right-sidebar-panel"
+                >
+                    <Box sx={{ padding: '16px 0', backgroundColor: '#087708' }}>
+                        <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <PeopleIcon sx={{ mr: 1 }} /> Beslenme Planları
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ padding: '16px' }}>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Danışan ara..."
+                            value={danisanSearchTerm}
+                            onChange={(e) => setDanisanSearchTerm(e.target.value)}
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: "rgba(0, 0, 0, 0.54)" }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {loading ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3 }}>
+                                <CircularProgress size={28} sx={{ mb: 2 }} />
+                                <Typography variant="body2" color="text.primary">
+                                    Danışanlar yükleniyor...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <List
+                                sx={{
+                                    width: '100%',
+                                    maxHeight: 'calc(100vh - 200px)',
+                                    overflowY: 'auto',
+                                    '&::-webkit-scrollbar': {
+                                        width: '6px',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: 'rgba(0,0,0,0.2)',
+                                        borderRadius: '3px'
+                                    }
+                                }}
+                                dense
+                            >
+                                {filteredDanisanList.length > 0 ? (
+                                    filteredDanisanList.map((danisan) => (
+                                        <React.Fragment key={danisan.id}>
+                                            <ListItem
+                                                button
+                                                onClick={() => {
+                                                    setSelectedClientInfo(danisan);
+                                                    setLoadingClientPrograms(true);
+                                                    axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${danisan.id}`, {
+                                                        headers: { Authorization: localStorage.getItem("token") }
+                                                    })
+                                                        .then(response => {
+                                                            setSelectedClientPrograms(response.data || []);
+                                                            setLoadingClientPrograms(false);
+                                                            setClientProgramsModal(true);
+                                                        })
+                                                        .catch(error => {
+                                                            console.error("Error fetching client programs:", error);
+                                                            setLoadingClientPrograms(false);
+                                                            setErrorMessage("Danışan programları yüklenirken bir hata oluştu.");
+                                                            setShowErrorPopup(true);
+                                                        });
+                                                }}
+                                                sx={{
+                                                    borderRadius: '8px',
+                                                    my: 0.5,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                                                    }
+                                                }}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            width: 40,
+                                                            height: 40
+                                                        }}
+                                                        src={danisan.image || ''}
+                                                    >
+                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={danisan.name}
+                                                    primaryTypographyProps={{ fontWeight: 'medium' }}
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li" />
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 4
+                                    }}>
+                                        <PersonIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+                                        <Typography variant="body2" color="text.secondary" align="center">
+                                            Danışan bulunamadı.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </List>
+                        )}
+                    </Box>
+                </Paper>
             </div>
 
             {/* Add Plan Modal */}
@@ -1929,6 +2119,390 @@ export default function Beslenme() {
                     </div>
                 </div>
             )}
+
+            {/* Client Programs Modal */}
+            <Dialog
+                open={clientProgramsModal}
+                onClose={() => setClientProgramsModal(false)}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: '12px',
+                        overflow: 'hidden'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    backgroundColor: '#1976d2',
+                    color: 'green',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 2
+                }}>
+                    <Typography variant="h4" component="div">
+                        {selectedClientInfo?.name} - Atanan Programlar
+                    </Typography>
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={() => setClientProgramsModal(false)}
+                        aria-label="close"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 3 }}>
+                    {loadingClientPrograms ? (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            my: 5
+                        }}>
+                            <CircularProgress size={40} sx={{ mb: 2 }} />
+                            <Typography variant="body1" color="text.secondary">
+                                Programlar yükleniyor...
+                            </Typography>
+                        </Box>
+                    ) : selectedClientPrograms.length > 0 ? (
+                        <Box>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 3,
+                                    mb: 3,
+                                    backgroundColor: '#f8f9fa',
+                                    borderRadius: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 3
+                                }}
+                            >
+                                <Avatar
+                                    sx={{
+                                        bgcolor: selectedClientInfo?.image ? 'transparent' : '#087708',
+                                        width: 80,
+                                        height: 80,
+                                        boxShadow: '0 3px 10px rgba(0, 0, 0, 0.2)'
+                                    }}
+                                    src={selectedClientInfo?.image || ''}
+                                >
+                                    {!selectedClientInfo?.image && selectedClientInfo?.name.charAt(0)}
+                                </Avatar>
+                                <Box>
+                                    <Typography variant="h5" component="div" gutterBottom fontWeight="500">
+                                        {selectedClientInfo?.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                                        {selectedClientInfo?.email}
+                                    </Typography>
+                                    <Stack direction="row" spacing={1} alignItems="center" mt={1}>
+                                        <Chip
+                                            icon={<EventIcon fontSize="small" />}
+                                            label={`${selectedClientPrograms.length} Aktif Program`}
+                                            color="primary"
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    </Stack>
+                                </Box>
+                            </Paper>
+
+                            <Box sx={{ mt: 2 }}>
+                                <Grid container spacing={3}>
+                                    {selectedClientPrograms.map((program, index) => {
+                                        // Tarih formatını düzeltme
+                                        const formatDate = (dateStr) => {
+                                            if (!dateStr) return "Belirtilmemiş";
+                                            const date = new Date(dateStr);
+                                            return date.toLocaleDateString('tr-TR', {
+                                                day: '2-digit',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            });
+                                        };
+
+                                        // Başlangıç ve bitiş tarihleri arasındaki gün sayısını hesaplama
+                                        const calculateDaysBetween = (start, end) => {
+                                            if (!start || !end) return null;
+                                            const startDate = new Date(start);
+                                            const endDate = new Date(end);
+                                            const diffTime = endDate - startDate;
+                                            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                        };
+
+                                        const daysBetween = calculateDaysBetween(program.start_date, program.end_date);
+
+                                        // Program durumunu hesaplama
+                                        const getProgramStatus = () => {
+                                            const today = new Date();
+                                            const startDate = new Date(program.start_date);
+                                            const endDate = new Date(program.end_date);
+
+                                            if (today < startDate) {
+                                                return { status: "Başlamamış", color: "#3f51b5", chipColor: "primary" };
+                                            } else if (today > endDate) {
+                                                return { status: "Tamamlandı", color: "#4caf50", chipColor: "success" };
+                                            } else {
+                                                return { status: "Devam Ediyor", color: "#ff9800", chipColor: "warning" };
+                                            }
+                                        };
+
+                                        const status = getProgramStatus();
+
+                                        // İlerleme çubuğu yüzdesini hesaplama
+                                        const calculateProgress = () => {
+                                            const today = new Date();
+                                            const startDate = new Date(program.start_date);
+                                            const endDate = new Date(program.end_date);
+
+                                            if (today < startDate) return 0;
+                                            if (today > endDate) return 100;
+
+                                            const totalDays = calculateDaysBetween(program.start_date, program.end_date);
+                                            const passedDays = calculateDaysBetween(program.start_date, today.toISOString().split('T')[0]);
+
+                                            return Math.round((passedDays / totalDays) * 100);
+                                        };
+
+                                        const progressPercent = calculateProgress();
+
+                                        return (
+                                            <Grid item xs={12} key={index}>
+                                                <Card
+                                                    elevation={2}
+                                                    sx={{
+                                                        borderRadius: '10px',
+                                                        overflow: 'visible'
+                                                    }}
+                                                >
+                                                    <CardHeader
+                                                        title={
+                                                            <Typography variant="h6" component="div">
+                                                                {program.title}
+                                                            </Typography>
+                                                        }
+                                                        action={
+                                                            <Chip
+                                                                label={status.status}
+                                                                color={status.chipColor}
+                                                                size="small"
+                                                                sx={{ fontWeight: 'medium' }}
+                                                            />
+                                                        }
+                                                    />
+                                                    <CardContent sx={{ pt: 0 }}>
+                                                        <Paper
+                                                            elevation={0}
+                                                            sx={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                backgroundColor: '#f8f9fa',
+                                                                p: 2,
+                                                                borderRadius: '8px',
+                                                                mb: 2
+                                                            }}
+                                                        >
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    Başlangıç
+                                                                </Typography>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                    <CalendarTodayIcon
+                                                                        color="primary"
+                                                                        fontSize="small"
+                                                                        sx={{ mr: 0.5 }}
+                                                                    />
+                                                                    <Typography variant="body1" fontWeight="medium">
+                                                                        {formatDate(program.start_date)}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+
+                                                            <Divider orientation="vertical" flexItem />
+
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    Bitiş
+                                                                </Typography>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                    <EventAvailableIcon
+                                                                        color="primary"
+                                                                        fontSize="small"
+                                                                        sx={{ mr: 0.5 }}
+                                                                    />
+                                                                    <Typography variant="body1" fontWeight="medium">
+                                                                        {formatDate(program.end_date)}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+
+                                                            <Divider orientation="vertical" flexItem />
+
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    Süre
+                                                                </Typography>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                    <AccessTimeIcon
+                                                                        color="primary"
+                                                                        fontSize="small"
+                                                                        sx={{ mr: 0.5 }}
+                                                                    />
+                                                                    <Typography variant="body1" fontWeight="medium">
+                                                                        {daysBetween} gün
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+                                                        </Paper>
+
+                                                        <Box sx={{ mb: 2 }}>
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                mb: 0.5
+                                                            }}>
+                                                                <Typography variant="body2" fontWeight="medium">
+                                                                    Program İlerlemesi
+                                                                </Typography>
+                                                                <Typography variant="body2" fontWeight="medium">
+                                                                    {progressPercent}%
+                                                                </Typography>
+                                                            </Box>
+                                                            <LinearProgress
+                                                                variant="determinate"
+                                                                value={progressPercent}
+                                                                color={
+                                                                    status.chipColor === "success" ? "success" :
+                                                                    status.chipColor === "primary" ? "primary" : "warning"
+                                                                }
+                                                                sx={{
+                                                                    height: 8,
+                                                                    borderRadius: 2,
+                                                                    backgroundColor: 'rgba(0,0,0,0.1)'
+                                                                }}
+                                                            />
+                                                        </Box>
+
+                                                        {program.description && (
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'flex-start',
+                                                                mb: 2
+                                                            }}>
+                                                                <DescriptionIcon
+                                                                    fontSize="small"
+                                                                    color="action"
+                                                                    sx={{ mt: 0.3, mr: 1 }}
+                                                                />
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {program.description || "Açıklama bulunmuyor."}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+
+                                                        {program.note && (
+                                                            <Box sx={{
+                                                                border: '1px solid rgba(0, 0, 0, 0.12)',
+                                                                borderRadius: 1,
+                                                                p: 1.5,
+                                                                mb: 2,
+                                                                backgroundColor: '#fffde7'
+                                                            }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mb: 0.5
+                                                                }}>
+                                                                    <NoteIcon fontSize="small" sx={{ mr: 1 }} color="warning" />
+                                                                    <Typography variant="body2" fontWeight="medium">
+                                                                        Diyetisyen Notu
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Typography variant="body2" color="text.secondary" sx={{ pl: 3.5 }}>
+                                                                    {program.note}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </CardContent>
+
+                                                    <CardActions sx={{ justifyContent: 'flex-end', p: 2, pt: 0 }}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            startIcon={<FileDownloadIcon />}
+                                                            onClick={() => {
+                                                                const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
+                                                                if (programDetails) {
+                                                                    handlePrint(programDetails);
+                                                                }
+                                                            }}
+                                                        >
+                                                            PDF İndir
+                                                        </Button>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            startIcon={<RestaurantIcon />}
+                                                            onClick={() => {
+                                                                const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
+                                                                if (programDetails) {
+                                                                    setSelectedProgram(programDetails);
+                                                                    setViewProgramModal(true);
+                                                                    setClientProgramsModal(false);
+                                                                }
+                                                            }}
+                                                        >
+                                                            Programı Görüntüle
+                                                        </Button>
+                                                    </CardActions>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
+                                </Grid>
+                            </Box>
+                        </Box>
+                    ) : (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            py: 5,
+                            textAlign: 'center'
+                        }}>
+                            <RestaurantIcon sx={{ fontSize: 70, color: '#ccc', mb: 2 }} />
+                            <Typography variant="h6" gutterBottom>
+                                Atanmış Program Bulunamadı
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                                Bu danışana henüz bir beslenme programı atanmamış.
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                onClick={() => setClientProgramsModal(false)}
+                            >
+                                Kapat
+                            </Button>
+                        </Box>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Default>
     );
 }
