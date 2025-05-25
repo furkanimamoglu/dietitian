@@ -461,6 +461,13 @@ export default function Danisanlarim() {
         {field: "id", headerName: "ID", width: 70},
         {field: "name", headerName: "İsim", flex: 1, editable: true},
         {field: "email", headerName: "Email", flex: 1.2, editable: true},
+        {
+            field: "password",
+            headerName: "Şifre",
+            flex: 1.2,
+            editable: true,
+            renderCell: (params) => '•'.repeat(params.value?.length || 8),
+        },
         {field: "phoneNumber", headerName: "Telefon", flex: 1, editable: true},
         {
             field: "status",
@@ -491,6 +498,45 @@ export default function Danisanlarim() {
                 ) : (
                     <PersonIcon sx={{color: purple[500]}}/>
                 ),
+        },
+        {
+            field: "kvkkApproval",
+            headerName: "KVKK",
+            width: 90,
+            type: "boolean",
+            editable: false,
+            renderCell: (params) =>
+                params.value ? (
+                    <CheckCircle sx={{color: green[500]}}/>
+                ) : (
+                    <Cancel sx={{color: red[500]}}/>
+                ),
+        },
+        {
+            field: "createdAt",
+            headerName: "Kayıt Tarihi",
+            width: 180,
+            editable: false,
+            valueFormatter: (params) => {
+                const date = new Date(params);
+                if (!params || isNaN(date.getTime())) {
+                    return '';
+                }
+                return date.toLocaleString('tr-TR');
+            }
+        },
+        {
+            field: "updatedAt",
+            headerName: "Son Güncelleme",
+            width: 180,
+            editable: false,
+            valueFormatter: (params) => {
+                const date = new Date(params);
+                if (!params || isNaN(date.getTime())) {
+                    return '';
+                }
+                return date.toLocaleString('tr-TR');
+            }
         },
         {
             field: "actions",
