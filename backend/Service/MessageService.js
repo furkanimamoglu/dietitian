@@ -33,8 +33,7 @@ class MessageService {
 
         if (user_role === DIETITIAN && partner_id) {
             return await Message.count({
-                where: {dietitian_id: user_id, client_id: partner_id, sender: CLIENT, isRead: false},
-                order: [['createdAt', 'ASC']]
+                where: {dietitian_id: user_id, client_id: partner_id, sender: CLIENT, isRead: false}
             });
         } else if(user_role === DIETITIAN && !partner_id)
         {
