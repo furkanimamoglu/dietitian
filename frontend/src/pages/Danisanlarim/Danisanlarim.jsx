@@ -458,7 +458,6 @@ export default function Danisanlarim() {
     };
 
     const columns = [
-        {field: "id", headerName: "ID", width: 70},
         {field: "name", headerName: "İsim", flex: 1, editable: true},
         {field: "email", headerName: "Email", flex: 1.2, editable: true},
         {
