@@ -27,7 +27,7 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const checkKVKKStatus = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/getMyKVKKStatus`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyKVKKStatus`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const approveKVKK = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/approveKVKK`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/approveKVKK`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const fetchClientInfo = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getClientInfo`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const fetchMeasurementInfo = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/getMyLatestMeasurement`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyLatestMeasurement`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const fetchAppointmentInfo = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/appointment/fetchClientAppointments`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

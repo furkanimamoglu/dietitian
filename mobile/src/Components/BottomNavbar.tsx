@@ -45,14 +45,12 @@ const BottomNav = ({navigation}: Props) => {
     const [isExerciseSubmitting, setIsExerciseSubmitting] = useState(false);
     const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
 
-    // Toast notification state
     const [toastVisible, setToastVisible] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
     const toastOpacity = useState(new Animated.Value(0))[0];
 
     useEffect(() => {
-        // Fetch nutrition plan ID on component mount
         fetchNutritionPlanId();
     }, []);
 
@@ -86,7 +84,7 @@ const BottomNav = ({navigation}: Props) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -173,7 +171,7 @@ const BottomNav = ({navigation}: Props) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -254,7 +252,7 @@ const BottomNav = ({navigation}: Props) => {
             };
 
             // Send the update to the server
-            const updateResponse = await fetch(`${config.apiUrl}/client/updateMealPlan`, {
+            const updateResponse = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,
@@ -367,12 +365,20 @@ const BottomNav = ({navigation}: Props) => {
             )}
 
             <View style={styles.bottomNavbar}>
-                <TouchableOpacity onPress={() => navigation.replace('Egzersiz')}
-                                  style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
+                <TouchableOpacity onPress={() => {
+                    if (route.name !== 'Egzersiz') {
+                        navigation.replace('Egzersiz');
+                    }
+                }}
+                style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
                     <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.replace('Beslenme')}
+                <TouchableOpacity onPress={() => {
+                    if (route.name !== 'Beslenme') {
+                        navigation.replace('Beslenme');
+                    }
+                }}
                                   style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
                     <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
@@ -383,12 +389,20 @@ const BottomNav = ({navigation}: Props) => {
                     <Text style={styles.plusText}>+</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.replace('Randevu')}
+                <TouchableOpacity onPress={() => {
+                    if (route.name !== 'Randevu') {
+                        navigation.replace('Randevu');
+                    }
+                }}
                                   style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
                     <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.replace('AnaSayfa')}
+                <TouchableOpacity onPress={() => {
+                    if (route.name !== 'AnaSayfa') {
+                        navigation.replace('AnaSayfa');
+                    }
+                }}
                                   style={[styles.navItem, isActive('AnaSayfa') && styles.activeNavItem]}>
                     <Icon name="home" size={24} color={isActive('AnaSayfa') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('AnaSayfa') && styles.activeLabel]}>Ana Sayfa</Text>

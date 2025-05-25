@@ -20,7 +20,7 @@ const Egzersiz = ({navigation}) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${config.apiUrl}/client/getMyDailyExercises`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyDailyExercises`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const Egzersiz = ({navigation}) => {
 
     const updateExerciseStatus = async (exerciseId, newStatus) => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/updateMyExercise`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/updateMyExercise`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

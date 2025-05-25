@@ -43,7 +43,7 @@ export default function Header({navigation}: Props) {
 
     const fetchNotifications = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/getMyNotifications`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyNotifications`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export default function Header({navigation}: Props) {
 
     const fetchClientInfo = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getClientInfo`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export default function Header({navigation}: Props) {
 
     const closeDrawer = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/readMyAllNotifications`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/readMyAllNotifications`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

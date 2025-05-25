@@ -91,7 +91,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 console.error('Token Bulunamadı');
                 return;
             }
-            const response = await fetch(`${config.apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -372,7 +372,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/client/updateMealPlan`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,
