@@ -755,7 +755,6 @@ export default function Beslenme() {
             });
     };
 
-    // Initial fetch
     useEffect(() => {
         fetchNutritionPlans();
     }, []);
@@ -765,15 +764,12 @@ export default function Beslenme() {
     );
 
     const filteredBeslenmeData = beslenmeData.filter(item => {
-        // If no categories are checked, show all items
         if (checkedCategories.length === 0) {
             return true;
         }
-        // Otherwise, show only items that belong to checked categories
         return checkedCategories.includes(item.category_id);
     });
 
-    // Category handlers
     const handleCategoryCheck = (categoryId) => {
         setCheckedCategories(prev =>
             prev.includes(categoryId)
@@ -785,7 +781,6 @@ export default function Beslenme() {
     const handleOpenMultiDeleteConfirm = () => {
         if (checkedCategories.length === 0) return;
 
-        // Find plans that would be affected by deleting these categories
         const plansToDelete = beslenmeData.filter(plan =>
             checkedCategories.includes(plan.category_id)
         );
@@ -801,14 +796,11 @@ export default function Beslenme() {
             })
         );
 
-        // Execute all promises
         Promise.all(deletePromises)
             .then(() => {
-                // Update local state after successful deletion
                 setCategoryData(prev =>
                     prev.filter(cat => !checkedCategories.includes(cat.id))
                 );
-                // Also remove any plans that were in the deleted categories
                 setBeslenmeData(prev =>
                     prev.filter(plan => !checkedCategories.includes(plan.category_id))
                 );
@@ -818,7 +810,6 @@ export default function Beslenme() {
                 setDeleteMultiCategoriesConfirmModal(false);
                 setAffectedPlans([]);
 
-                // Show success popup
                 setSuccessMessage(`${categoryCount} kategori başarıyla silindi.`);
                 setShowSuccessPopup(true);
             })
@@ -833,7 +824,6 @@ export default function Beslenme() {
         const category = categoryData.find(cat => cat.id === categoryId);
         if (!category) return;
 
-        // Find plans that would be affected by deleting this category
         const plansToDelete = beslenmeData.filter(plan => plan.category_id === categoryId);
 
         setCategoryToDelete(category);
@@ -848,16 +838,13 @@ export default function Beslenme() {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {
-                // Update local state after successful deletion
                 setCategoryData(prev => prev.filter(cat => cat.id !== categoryToDelete.id));
                 setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
-                // Also remove any plans that were in the deleted category
                 setBeslenmeData(prev => prev.filter(plan => plan.category_id !== categoryToDelete.id));
                 setDeleteCategoryConfirmModal(false);
                 setCategoryToDelete(null);
                 setAffectedPlans([]);
 
-                // Show success popup
                 setSuccessMessage(`"${categoryToDelete.name || categoryToDelete.title}" kategorisi başarıyla silindi.`);
                 setShowSuccessPopup(true);
             })
@@ -876,19 +863,16 @@ export default function Beslenme() {
             category_name: newCategoryTitle.trim()
         };
 
-        // Make API call to add the category
         axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
-                // Add the new category to the state
                 setCategoryData([...categoryData, response.data]);
                 setNewCategoryTitle('');
                 setAddCategoryModal(false);
             })
             .catch(error => {
                 console.error("Error adding category:", error);
-                // You might want to show an error message to the user here
             });
     };
 
@@ -902,7 +886,6 @@ export default function Beslenme() {
             mealPlan: {}
         };
 
-        // Initialize the meal plan structure with empty arrays
         DAYS_OF_WEEK.forEach(day => {
             planData.mealPlan[day] = {};
             MEALS.forEach(meal => {
@@ -910,14 +893,11 @@ export default function Beslenme() {
             });
         });
 
-        // Make API call to add the plan
         axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
-                // Add the new plan to the state
                 setBeslenmeData([...beslenmeData, response.data]);
-                // Reset form
                 setNewPlan({
                     title: '',
                     description: '',
@@ -925,13 +905,11 @@ export default function Beslenme() {
                 });
                 setAddPlanModal(false);
 
-                // Show success message
                 setSuccessMessage(`"${planData.title}" programı başarıyla oluşturuldu.`);
                 setShowSuccessPopup(true);
             })
             .catch(error => {
                 console.error("Error adding plan:", error);
-                // Show error message
                 setErrorMessage(error.response?.data?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
                 setShowErrorPopup(true);
             });
@@ -939,12 +917,10 @@ export default function Beslenme() {
 
     const handleOpenAddToUserModal = (item) => {
         setSelectedProgram(item);
-        // Set default dates (today and a week from today)
         const today = new Date();
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7);
 
-        // Format dates as YYYY-MM-DD
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1065,46 +1041,36 @@ export default function Beslenme() {
             return [];
         };
 
-        // Loop through days
         DAYS_OF_WEEK.forEach((day, index) => {
-            // For the last 3 days (5, 6, 7), put them on the second row
             if (index === 4) {
-                xPos = margin + dayWidth / 2; // Center the last 3 days
+                xPos = margin + dayWidth / 2;
                 yPos += dayHeight + 5;
             }
 
-            // Draw day card with rounded corners and shadow effect
-            // First draw shadow
             doc.setFillColor(230, 230, 230);
             doc.roundedRect(xPos + 1, yPos + 1, dayWidth - 7, dayHeight, 3, 3, 'F');
 
-            // Then draw card
             doc.setFillColor(255, 255, 255);
             doc.roundedRect(xPos, yPos, dayWidth - 7, dayHeight, 3, 3, 'F');
 
-            // Day header background - use orange for weekends, green for weekdays
             if (day === "Cumartesi" || day === "Pazar") {
-                doc.setFillColor(255, 152, 0); // Orange for weekends
+                doc.setFillColor(255, 152, 0);
             } else {
-                doc.setFillColor(76, 175, 80); // Green for weekdays
+                doc.setFillColor(76, 175, 80);
             }
             doc.roundedRect(xPos, yPos, dayWidth - 7, 8, 3, 3, 'F');
 
-            // Day header text
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(9);
             const safeDayName = day.replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
                 .replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ö/g, 'o');
             doc.text(safeDayName, xPos + 5, yPos + 5.5);
 
-            // Reset text color
             doc.setTextColor(0, 0, 0);
 
-            // Draw meals
             let mealYPos = yPos + 12;
 
             MEALS.forEach((meal, mealIndex) => {
-                // Meal name
                 doc.setFontSize(7);
                 doc.setFont('helvetica', 'bold');
                 const safeMeal = meal.replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
@@ -1112,7 +1078,6 @@ export default function Beslenme() {
                 doc.text(`${safeMeal}:`, xPos + 2, mealYPos);
                 doc.setFont('helvetica', 'normal');
 
-                // Meal content
                 if (program.mealPlan &&
                     program.mealPlan[day] &&
                     program.mealPlan[day][meal]) {
@@ -1120,7 +1085,6 @@ export default function Beslenme() {
                     const mealItems = getMealItems(program.mealPlan[day][meal]);
 
                     if (mealItems.length > 0) {
-                        // Limit to first 2 items to save space
                         const displayItems = mealItems.slice(0, 2);
                         let itemYPos = mealYPos + 3;
 
@@ -1152,57 +1116,46 @@ export default function Beslenme() {
                 mealYPos += mealSpacing;
             });
 
-            // Move to next day position
             xPos += dayWidth;
             dayCount++;
         });
 
-        // Add footer with green line
         doc.setDrawColor(76, 175, 80);
         doc.setLineWidth(0.5);
         doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
 
-        // Add dietitian contact info in footer
         doc.setFontSize(8);
         doc.setTextColor(76, 175, 80);
         doc.text("Sağlıklı günler dileriz!", margin, pageHeight - 10);
         doc.setTextColor(255, 152, 0);
         doc.text("www.diyetisyen.com", pageWidth / 2 - 15, pageHeight - 10);
 
-        // Save the PDF
         doc.save(`${program.title}_beslenme_programi.pdf`);
     };
 
     const handleEdit = (item) => {
         setSelectedProgram(item);
 
-        // Set form fields with current values
         setEditTitle(item.title || '');
         setEditDescription(item.description || '');
         setEditCategoryId(item.category_id || '');
 
-        // Initialize meal plan from item or create empty one
         const initialPlan = item.mealPlan || {};
 
-        // Ensure all days and meals exist
         const fullPlan = {};
         DAYS_OF_WEEK.forEach(day => {
             fullPlan[day] = {};
             MEALS.forEach(meal => {
-                // Handle complex format (new structure)
                 if (initialPlan[day] && initialPlan[day][meal] && initialPlan[day][meal].main) {
                     fullPlan[day][meal] = {
                         main: [...initialPlan[day][meal].main],
                         alternatives: {...initialPlan[day][meal].alternatives}
                     };
                 }
-                // Handle array format 
                 else if (initialPlan[day] && initialPlan[day][meal] && Array.isArray(initialPlan[day][meal])) {
                     fullPlan[day][meal] = [...initialPlan[day][meal]];
                 }
-                // Handle string format (backward compatibility)
                 else if (initialPlan[day] && initialPlan[day][meal] && typeof initialPlan[day][meal] === 'string') {
-                    // Convert comma-separated string to array for compatibility with older data
                     fullPlan[day][meal] = initialPlan[day][meal]
                         .split(',')
                         .map(item => item.trim())
@@ -1221,27 +1174,22 @@ export default function Beslenme() {
     const handleSaveMealPlan = async () => {
         setIsSaving(true);
         try {
-            // Prepare the data to send
             const data = {
                 title: editTitle,
                 description: editDescription,
                 category_id: editCategoryId,
-                mealPlan: {} // We'll copy the structure with proper handling for different formats
+                mealPlan: {}
             };
 
-            // Add nutrition_plan_id for updates
             if (selectedProgram && selectedProgram.id) {
                 data.nutrition_plan_id = selectedProgram.id;
             }
 
-            // Initialize the meal plan structure even if there's no data
             DAYS_OF_WEEK.forEach(day => {
                 data.mealPlan[day] = {};
                 MEALS.forEach(meal => {
-                    // Initialize with empty arrays by default
                     data.mealPlan[day][meal] = [];
 
-                    // If we have data for this day/meal, process it
                     if (mealPlan && mealPlan[day] && mealPlan[day][meal]) {
                         const mealData = mealPlan[day][meal];
 
