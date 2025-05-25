@@ -26,6 +26,7 @@ const recipeRoutes = require(path.join(__dirname, "Routes", "recipeRoutes"));
 const exerciseRoutes = require(path.join(__dirname, "Routes", "exerciseRoutes"));
 const anamnesRoutes = require(path.join(__dirname, "Routes", "anamnesRoutes"));
 const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
+const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
 
 app.use(bodyParser.json());
 
@@ -53,6 +54,7 @@ app.use('/api/invoice', invoiceRoutes);
 app.use('/api/message', messageRoutes);
 app.use('/api/measurement', measurementRoutes);
 app.use('/api/package', packageRoutes);
+app.use('/api/nutrition', nutritionRoutes);
 
 // Working Directory
 try {
