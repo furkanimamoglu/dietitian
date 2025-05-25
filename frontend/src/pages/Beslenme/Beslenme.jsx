@@ -1513,7 +1513,7 @@ export default function Beslenme() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <PeopleIcon sx={{ mr: 1 }} /> Beslenme Planları
+                            <PeopleIcon sx={{ mr: 1 }} /> Beslenme Plan Yönetimi
                         </Typography>
                     </Box>
 
