@@ -9,6 +9,8 @@ router.get('/getMyExercises', exerciseController.getMyExercises);
 router.post('/addExercise', exerciseController.addExercise);
 router.put('/updateExercise', exerciseController.updateExercise);
 router.delete('/deleteExercise', exerciseController.deleteExercise);
+
+router.get('/getClientExercises', exerciseController.getClientExercises);
 router.post('/assignExercise', exerciseController.assignExercise);
 router.get('/getAssignedExercisesByClient', exerciseController.getAssignedExercisesByClient);
 router.delete('/deleteExerciseAssignment', exerciseController.deleteExerciseAssignment);

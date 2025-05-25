@@ -19,8 +19,43 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import PersonIcon from '@mui/icons-material/Person';
+import PeopleIcon from '@mui/icons-material/People';
+import EventIcon from '@mui/icons-material/Event';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import NoteIcon from '@mui/icons-material/Note';
+import DescriptionIcon from '@mui/icons-material/Description';
+import {
+    Avatar,
+    CircularProgress,
+    Paper,
+    Typography,
+    Divider,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Box,
+    InputAdornment,
+    TextField,
+    Button,
+    IconButton,
+    Chip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Card,
+    CardContent,
+    CardHeader,
+    CardActions,
+    LinearProgress,
+    Stack,
+    Tooltip
+} from '@mui/material';
 import {jsPDF} from "jspdf";
-import 'jspdf-autotable';
 
 // Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
@@ -205,6 +240,18 @@ export default function Egzersizler() {
         calories_burned: 0
     });
 
+    // Danışana atanmış egzersiz programları için state'ler
+    const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
+    const [filteredDanisanList, setFilteredDanisanList] = useState([]);
+    const [clientExercisesModal, setClientExercisesModal] = useState(false);
+    const [selectedClientExercises, setSelectedClientExercises] = useState([]);
+    const [loadingClientExercises, setLoadingClientExercises] = useState(false);
+    const [selectedClientInfo, setSelectedClientInfo] = useState(null);
+
+    // Silme onay modalı için state'ler
+    const [deleteAssignmentConfirmModal, setDeleteAssignmentConfirmModal] = useState(false);
+    const [assignmentToDelete, setAssignmentToDelete] = useState(null);
+
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
@@ -244,6 +291,27 @@ export default function Egzersizler() {
             });
     }, []);
 
+    // Danışana atanmış egzersiz programları için fonksiyon
+    const getClientExercises = (clientId) => {
+        const danisan = danisanList.find(d => d.id === clientId);
+        setSelectedClientInfo(danisan);
+        setLoadingClientExercises(true);
+        axios.get(`${config[config.environment].apiUrl}/exercise/getClientExercises?client_id=${clientId}`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+            .then(response => {
+                setSelectedClientExercises(response.data || []);
+                setLoadingClientExercises(false);
+                setClientExercisesModal(true);
+            })
+            .catch(error => {
+                console.error("Error fetching client exercises:", error);
+                setLoadingClientExercises(false);
+                setErrorMessage("Danışan egzersizleri yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            });
+    }
+
     // Fetch exercises
     const fetchExercises = () => {
         setLoading(true);
@@ -264,12 +332,10 @@ export default function Egzersizler() {
             });
     };
 
-    // Initial fetch
     useEffect(() => {
         fetchExercises();
     }, []);
 
-    // Fetch clients data
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/dietitian/getAllMyClients`, {
@@ -284,6 +350,16 @@ export default function Egzersizler() {
                 console.error("Error fetching clients:", error);
             });
     }, []);
+
+    useEffect(() => {
+        if (danisanList.length > 0) {
+            setFilteredDanisanList(
+                danisanList.filter(danisan =>
+                    danisan.name.toLowerCase().includes(danisanSearchTerm.toLowerCase())
+                )
+            );
+        }
+    }, [danisanList, danisanSearchTerm]);
 
     // Filter categories based on search term
     const filteredCategories = categoryData.filter(category =>
@@ -613,20 +689,47 @@ export default function Egzersizler() {
             });
     };
 
-    // PDF generation for exercise details
+    const handleDeleteAssignedExercise = (assignmentId) => {
+        if (!assignmentId) return;
+
+        // Modal ile silme onayı iste
+        setAssignmentToDelete(assignmentId);
+        setDeleteAssignmentConfirmModal(true);
+    };
+
+    const confirmDeleteAssignment = () => {
+        if (!assignmentToDelete) return;
+
+        setIsSaving(true);
+
+        axios.delete(`${config[config.environment].apiUrl}/exercise/deleteExerciseAssignment?exercise_assignment_id=${assignmentToDelete}`, {
+            headers: {
+                Authorization: localStorage.getItem("token")
+            }
+        })
+            .then(() => {
+                setSelectedClientExercises(prev => prev.filter(item => item.id !== assignmentToDelete));
+                setSuccessMessage("Egzersiz ataması başarıyla silindi.");
+                setShowSuccessPopup(true);
+            })
+            .catch(error => {
+                console.error("Error deleting exercise assignment:", error);
+                setErrorMessage("Egzersiz ataması silinirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setIsSaving(false);
+                setDeleteAssignmentConfirmModal(false);
+                setAssignmentToDelete(null);
+            });
+    };
+
     const generatePDF = (exercise) => {
-        // Create a new PDF document
         const doc = new jsPDF();
 
-        // Add title
         doc.setFontSize(20);
         doc.text(exercise.exercise_name, 20, 20);
 
-        // Add details
-        doc.setFontSize(12);
-        doc.text("Egzersiz Detayları", 20, 30);
-
-        // Add content
         doc.setFontSize(10);
         let y = 40;
 
@@ -717,7 +820,7 @@ export default function Egzersizler() {
                     </div>
                 </div>
 
-                {/* Right Panel - Exercise Programs */}
+                {/* Middle Panel - Exercise Programs */}
                 <div className="programs-panel">
                     {/* Filters section */}
                     <div className="filters-container">
@@ -791,6 +894,124 @@ export default function Egzersizler() {
                         )}
                     </div>
                 </div>
+
+                {/* Right Panel - Sidebar */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        flex: '0 0 260px',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        height: 'calc(76vh)',
+                        maxHeight: 'calc(100vh - 100px)'
+                    }}
+                    className="right-sidebar-panel"
+                >
+                    <Box sx={{ padding: '16px 0', backgroundColor: '#087708' }}>
+                        <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <PeopleIcon sx={{ mr: 1 }} /> Egzersiz Programları
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ padding: '16px' }}>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Danışan ara..."
+                            value={danisanSearchTerm}
+                            onChange={(e) => setDanisanSearchTerm(e.target.value)}
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: "rgba(0, 0, 0, 0.54)" }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {loading ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3 }}>
+                                <CircularProgress size={28} sx={{ mb: 2 }} />
+                                <Typography variant="body2" color="text.primary">
+                                    Danışanlar yükleniyor...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <List
+                                sx={{
+                                    width: '100%',
+                                    maxHeight: 'calc(100vh - 200px)',
+                                    overflowY: 'auto',
+                                    '&::-webkit-scrollbar': {
+                                        width: '6px',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: 'rgba(0,0,0,0.2)',
+                                        borderRadius: '3px'
+                                    }
+                                }}
+                                dense
+                            >
+                                {filteredDanisanList.length > 0 ? (
+                                    filteredDanisanList.map((danisan) => (
+                                        <React.Fragment key={danisan.id}>
+                                            <ListItem
+                                                button
+                                                onClick={() => getClientExercises(danisan.id)}
+                                                sx={{
+                                                    borderRadius: '8px',
+                                                    my: 0.5,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                                                    }
+                                                }}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            width: 40,
+                                                            height: 40
+                                                        }}
+                                                        src={danisan.image || ''}
+                                                    >
+                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={danisan.name}
+                                                    primaryTypographyProps={{ fontWeight: 'medium' }}
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li" />
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 4
+                                    }}>
+                                        <PersonIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+                                        <Typography variant="body2" color="text.secondary" align="center">
+                                            Danışan bulunamadı.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </List>
+                        )}
+                    </Box>
+                </Paper>
             </div>
 
             {/* Add Category Modal */}
@@ -1351,6 +1572,165 @@ export default function Egzersizler() {
                     </div>
                 </div>
             )}
+
+            {/* Danışana Atanmış Egzersizler Modalı */}
+            <Modal
+                isOpen={clientExercisesModal}
+                title={`${selectedClientInfo?.name || 'Danışan'} - Egzersiz Program Yönetimi`}
+                onClose={() => setClientExercisesModal(false)}
+                fullWidth={true}
+            >
+                <div className="modal-body">
+                    {loadingClientExercises ? (
+                        <div className="loading-container">
+                            <CircularProgress size={30} />
+                            <p>Egzersiz programları yükleniyor...</p>
+                        </div>
+                    ) : selectedClientExercises.length > 0 ? (
+                        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                            {selectedClientExercises.map((item) => (
+                                <React.Fragment key={item.id}>
+                                    <ListItem
+                                        alignItems="flex-start"
+                                        secondaryAction={
+                                            <Tooltip title="Atamayı Sil">
+                                                <IconButton
+                                                    edge="end"
+                                                    aria-label="delete"
+                                                    onClick={() => handleDeleteAssignedExercise(item.id)}
+                                                    color="error"
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <ListItemAvatar>
+                                            <Avatar sx={{ bgcolor: '#087708' }}>
+                                                <FitnessCenterIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={
+                                                <Typography fontWeight="500">
+                                                    {item.Exercise?.exercise_name || "Egzersiz"}
+                                                </Typography>
+                                            }
+                                            secondary={
+                                                <React.Fragment>
+                                                    <Typography
+                                                        component="span"
+                                                        variant="body2"
+                                                        color="text.primary"
+                                                        sx={{ display: 'block' }}
+                                                    >
+                                                        {item.Exercise?.exercise_description?.substring(0, 60)}
+                                                        {item.Exercise?.exercise_description?.length > 60 ? "..." : ""}
+                                                    </Typography>
+
+                                                    <Box sx={{ mt: 1 }}>
+                                                        <Chip
+                                                            size="small"
+                                                            icon={<CalendarTodayIcon fontSize="small" />}
+                                                            label={`${new Date(item.start_date).toLocaleDateString('tr-TR')} - ${new Date(item.end_date).toLocaleDateString('tr-TR')}`}
+                                                            sx={{ mr: 1, mb: 1 }}
+                                                        />
+
+                                                        {item.Exercise?.difficulty && (
+                                                            <Chip
+                                                                size="small"
+                                                                label={`Zorluk: ${item.Exercise.difficulty}/5`}
+                                                                color={item.Exercise.difficulty > 3 ? "error" : item.Exercise.difficulty > 1 ? "warning" : "success"}
+                                                                variant="outlined"
+                                                                sx={{ mr: 1, mb: 1 }}
+                                                            />
+                                                        )}
+
+                                                        {item.Exercise?.calories_burned && (
+                                                            <Chip
+                                                                size="small"
+                                                                label={`${item.Exercise.calories_burned} kcal`}
+                                                                color="primary"
+                                                                variant="outlined"
+                                                                sx={{ mr: 1, mb: 1 }}
+                                                            />
+                                                        )}
+                                                    </Box>
+
+                                                    {item.note && (
+                                                        <Box sx={{ display: 'flex', alignItems: 'flex-start', bgcolor: '#f5f5f5', borderRadius: '4px', p: 1, mt: 1 }}>
+                                                            <NoteIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary', fontSize: '16px', mt: 0.3 }} />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {item.note}
+                                                            </Typography>
+                                                        </Box>
+                                                    )}
+                                                </React.Fragment>
+                                            }
+                                        />
+                                    </ListItem>
+                                    <Divider variant="inset" component="li" />
+                                </React.Fragment>
+                            ))}
+                        </List>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 4 }}>
+                            <DescriptionIcon sx={{ fontSize: 50, color: 'text.disabled', mb: 2 }} />
+                            <Typography variant="body1" color="text.secondary" align="center">
+                                Bu danışana atanmış egzersiz programı bulunmamaktadır.
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
+                                Sağ üst köşedeki "Egzersiz Ekle" butonunu kullanarak yeni egzersiz programları oluşturabilir ve danışanlarınıza atayabilirsiniz.
+                            </Typography>
+                        </Box>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn close-btn"
+                        onClick={() => setClientExercisesModal(false)}
+                    >
+                        Kapat
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Assignment Confirmation Modal */}
+            <Modal
+                isOpen={deleteAssignmentConfirmModal}
+                title="Egzersiz Atamasını Sil"
+                onClose={() => {
+                    setDeleteAssignmentConfirmModal(false);
+                    setAssignmentToDelete(null);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon" />
+                        <p className="warning-text">
+                            Bu egzersiz atamasını silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn cancel-btn"
+                        onClick={() => {
+                            setDeleteAssignmentConfirmModal(false);
+                            setAssignmentToDelete(null);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button
+                        className="modal-btn delete-confirm-btn"
+                        onClick={confirmDeleteAssignment}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
         </Default>
     );
 }

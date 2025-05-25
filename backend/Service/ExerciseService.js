@@ -15,6 +15,27 @@ class ExerciseService {
         });
     }
 
+    static async getClientExercises(dietitian_id, client_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        if (!client_id) {
+            throw new Exception("Danışan ID eksik.", 400, true);
+        }
+
+        return await ExerciseAssignment.findAll({
+            where: {client_id},
+            include: [
+                {
+                    model: Exercise,
+                    as: 'Exercise',
+                    where: {dietitian_id}
+                }
+            ]
+        });
+    }
+
     static async addExercise(dietitian_id, exerciseData) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);
