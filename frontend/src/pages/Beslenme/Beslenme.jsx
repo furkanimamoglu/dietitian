@@ -1592,7 +1592,7 @@ export default function Beslenme() {
                                                 <ListItemAvatar>
                                                     <Avatar
                                                         sx={{
-                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            bgcolor: danisan.image ? 'transparent' : '#ffa955',
                                                             width: 40,
                                                             height: 40
                                                         }}
