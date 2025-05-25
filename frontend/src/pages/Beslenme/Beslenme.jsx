@@ -1500,7 +1500,7 @@ export default function Beslenme() {
                         flex: '0 0 260px',
                         borderRadius: '12px',
                         overflow: 'hidden',
-                        height: 'calc(100vh - 100px)', // Changed from 'fit-content' to always take full height
+                        height: 'calc(76vh)',
                         maxHeight: 'calc(100vh - 100px)'
                     }}
                     className="right-sidebar-panel"
