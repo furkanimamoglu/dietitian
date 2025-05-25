@@ -1288,8 +1288,7 @@ export default function Finans() {
                     </Box>
                 );
 
-            case 1: // Package Management
-                // Filter packages based on search term
+            case 1:
                 const filteredPackages = packages.filter(pkg =>
                     pkg.name.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
                     pkg.type.toLowerCase().includes(packageSearchTerm.toLowerCase()) ||
@@ -1453,7 +1452,7 @@ export default function Finans() {
                     </Box>
                 );
 
-            case 2: // Invoice Management
+            case 2:
                 return (
                     <Box className="invoice-management">
                         <Paper elevation={3} className="filters-section">
@@ -1465,7 +1464,7 @@ export default function Finans() {
                                         value={searchTerm}
                                         onChange={(e) => {
                                             setSearchTerm(e.target.value);
-                                            setCurrentPage(1); // Reset to first page on search
+                                            setCurrentPage(1);
                                         }}
                                         size="small"
                                         InputProps={{
@@ -1484,7 +1483,7 @@ export default function Finans() {
                                             value={statusFilter}
                                             onChange={(e) => {
                                                 setStatusFilter(e.target.value);
-                                                setCurrentPage(1); // Reset to first page on filter change
+                                                setCurrentPage(1);
                                             }}
                                             label="Durum"
                                         >
@@ -1513,7 +1512,7 @@ export default function Finans() {
                             <Grid container spacing={3}>
                                 {currentInvoices.length > 0 ? (
                                     currentInvoices.map(invoice => (
-                                        <Grid item xs={12} md={6} lg={4} key={invoice.id}>
+                                        <Grid item xs={12} md={6} lg={2} key={invoice.id}>
                                             <Paper elevation={3}
                                                    className={`invoice-card status-${invoice.status.toLowerCase()}`}>
                                                 <Box position="relative" p={3}>

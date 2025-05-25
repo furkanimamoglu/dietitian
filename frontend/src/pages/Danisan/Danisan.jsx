@@ -105,16 +105,13 @@ function Danisan() {
     const [isAddAppointmentDialogOpen, setIsAddAppointmentDialogOpen] = useState(false);
     const [appointmentForm, setAppointmentForm] = useState({title: '', start: '', end: ''});
 
-    // Ölçümler için state
     const [measurements, setMeasurements] = useState([]);
     const [measurementsLoading, setMeasurementsLoading] = useState(false);
 
-    // Kan Tahlili PDF dosyaları için state
     const [bloodTestFiles, setBloodTestFiles] = useState([]);
     const [isPdfViewOpen, setIsPdfViewOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 
-    // PDF görüntüleme fonksiyonu
     const handleViewBloodTestFile = (file) => {
         setSelectedFile(file);
         setIsPdfViewOpen(true);
@@ -3583,7 +3580,6 @@ function Danisan() {
                     </Box>
                 );
             case 'odeme':
-                // Aktif invoice'u bul
                 const today = new Date();
                 const activeInvoice = clientInvoices.find(inv => {
                     if (!inv.issueDate || !inv.dueDate) return false;
@@ -3591,7 +3587,6 @@ function Danisan() {
                     const end = new Date(inv.dueDate);
                     return today >= start && today <= end;
                 });
-                // Pagination hesaplamaları
                 const totalPages = Math.ceil(clientInvoices.length / invoicesPerPage);
                 const paginatedInvoices = clientInvoices.slice(
                     (currentInvoicePage - 1) * invoicesPerPage,
