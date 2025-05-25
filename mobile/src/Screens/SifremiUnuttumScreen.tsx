@@ -41,7 +41,7 @@ const SifremiUnuttumScreen: React.FC = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${config.apiUrl}/client/forgot-password`, {
+            const response = await axios.post(`${config[config.environment].apiUrl}/client/forgot-password`, {
                 phoneNumber: phone
             });
 
@@ -69,7 +69,7 @@ const SifremiUnuttumScreen: React.FC = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${config.apiUrl}/client/verify-code`, {
+            const response = await axios.post(`${config[config.environment].apiUrl}/client/verify-code`, {
                 phoneNumber: phone,
                 verificationCode: verificationCode
             });
@@ -102,7 +102,7 @@ const SifremiUnuttumScreen: React.FC = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${config.apiUrl}/client/reset-password`, {
+            const response = await axios.post(`${config[config.environment].apiUrl}/client/reset-password`, {
                 phoneNumber: phone,
                 verificationCode: verificationCode,
                 newPassword: newPassword

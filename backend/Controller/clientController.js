@@ -74,6 +74,7 @@ class ClientController {
             }
 
             const result = await ClientService.getClientInfo(client_id);
+
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({

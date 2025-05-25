@@ -73,7 +73,6 @@ export default function Mesaj() {
         }
     }, [messages]);
 
-    // Yeni mesajları kontrol etme fonksiyonu - optimize edilmiş
     const checkNewMessages = useCallback(async (partnerId) => {
         if (!partnerId) return;
 
@@ -87,7 +86,6 @@ export default function Mesaj() {
                 }
             );
 
-            // Eğer hiç mesaj yoksa işlemi sonlandır
             if (!response.data || response.data.length === 0) {
                 return;
             }
@@ -168,6 +166,53 @@ export default function Mesaj() {
         fetchDanisanList();
     }, []);
 
+    const [unreadCounts, setUnreadCounts] = useState({});
+
+    const fetchUnreadMessageCounts = useCallback(async () => {
+        try {
+            if (!danisanList || danisanList.length === 0) return;
+
+            // Her danışan için ayrı ayrı istek yapılır
+            const promises = danisanList.map(danisan =>
+                axios.get(
+                    config[config.environment].apiUrl + `/message/getMyUnreadMessageCount?partner_id=${danisan.id}`,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                        }
+                    }
+                )
+            );
+
+            const responses = await Promise.all(promises);
+
+            const newUnreadCounts = danisanList.reduce((acc, danisan, index) => {
+                acc[danisan.id] = responses[index]?.data.unreadMessageCount|| 0;
+                return acc;
+            }, {});
+
+            setUnreadCounts(newUnreadCounts);
+        } catch (error) {
+            console.error("Okunmamış mesaj sayısını alırken hata:", error);
+        }
+    }, [danisanList]);
+
+
+
+    useEffect(() => {
+        if (danisanList.length > 0) {
+            fetchUnreadMessageCounts();
+        }
+
+        const interval = setInterval(() => {
+            if (danisanList.length > 0) {
+                fetchUnreadMessageCounts();
+            }
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, [fetchUnreadMessageCounts]);
+
     const fetchDanisanList = () => {
         axios
             .get(config[config.environment].apiUrl + "/dietitian/getAllMyClients", {
@@ -182,17 +227,47 @@ export default function Mesaj() {
                     unreadCount: 0
                 }));
                 setDanisanList(enhancedData);
+
+                // Danışan listesi yüklendikten sonra okunmamış mesaj sayılarını al
+                setTimeout(() => {
+                    fetchUnreadMessageCounts();
+                }, 100);
             })
             .catch((error) => {
                 console.error("Error fetching clients:", error);
             });
     };
 
-    // fetchMessages fonksiyonunu kaldırdık çünkü artık checkNewMessages kullanıyoruz
+    const markMessagesAsRead = useCallback(async (partnerId) => {
+        if (!partnerId) return;
+
+        try {
+            await axios.post(
+                config[config.environment].apiUrl + `/message/changeMessageStatusToReaded?partner_id=${partnerId}`,
+                {},
+                {
+                    headers: {
+                        Authorization: localStorage.getItem("token"),
+                    }
+                }
+            );
+
+            setUnreadCounts(prev => ({
+                ...prev,
+                [partnerId]: 0
+            }));
+
+        } catch (error) {
+            console.error("Mesajları okundu olarak işaretlerken hata:", error);
+        }
+    }, []);
+
     const handleDanisanSelect = (danisan) => {
         setSelectedDanisan(danisan);
-        setMessages([]); // Mesajları temizle
-        setLastMessageId(null); // Son mesaj ID'sini sıfırla
+        setMessages([]);
+        setLastMessageId(null);
+
+        markMessagesAsRead(danisan.id);
 
         setTimeout(() => {
             if (messageInputRef.current) {
@@ -460,9 +535,9 @@ export default function Mesaj() {
                                                             >
                                                                 {danisan.lastMessage || "Yeni danışan"}
                                                             </Typography>
-                                                            {danisan.unreadCount > 0 && (
+                                                            {unreadCounts[danisan.id] > 0 && (
                                                                 <Badge
-                                                                    badgeContent={danisan.unreadCount}
+                                                                    badgeContent={unreadCounts[danisan.id]}
                                                                     color="primary"
                                                                     size="small"
                                                                 />

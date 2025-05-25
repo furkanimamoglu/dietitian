@@ -6,6 +6,8 @@ const router = express.Router();
 const messageController = require(path.join(__dirname, '..', 'Controller', 'messageController'));
 
 router.get('/getMyMessages', messageController.getMyMessages);
+router.get('/getMyUnreadMessageCount', messageController.getMyUnreadMessageCount);
+router.post('/changeMessageStatusToReaded', messageController.changeMessageStatusToReaded);
 router.post('/sendMessage', messageController.sendMessage);
 
 module.exports = router;

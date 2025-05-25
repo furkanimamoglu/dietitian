@@ -60,7 +60,7 @@ const KayitolScreen: React.FC = () => {
         setFetchingDietitian(true);
         try {
             const response = await fetch(
-                `${config.apiUrl}/dietitian/getDietitianNameById?dietitian_id=${id}`
+                `${config[config.environment].apiUrl}/dietitian/getDietitianNameById?dietitian_id=${id}`
             );
             const data = await response.json();
             setDietitianName(typeof data === 'string' ? data : data.dietitian_name);
@@ -109,7 +109,7 @@ const KayitolScreen: React.FC = () => {
         setLoading(true);
         try {
             const response = await fetch(
-                `${config.apiUrl}/client/register`,
+                `${config[config.environment].apiUrl}/client/register`,
                 {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},

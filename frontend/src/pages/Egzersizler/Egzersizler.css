@@ -1,7 +1,6 @@
 /* Egzersizler Container */
 .egzersizler-container {
     display: flex;
-    height: 78vh;
     gap: 1rem;
     margin-top: 1rem;
 }
