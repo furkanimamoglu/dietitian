@@ -33,8 +33,7 @@ type Notification = {
 };
 
 export default function Header({navigation}: Props) {
-    const notificationCount = 3;
-    const messageCount = 5;
+    const [messageCount, setMessageCount] = useState<number>(0);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerAnim] = useState(new Animated.Value(screenWidth));
@@ -58,6 +57,26 @@ export default function Header({navigation}: Props) {
             }
         } catch (error) {
             console.error('Bildirim hatası:', error);
+        }
+    };
+
+    const fetchUnreadMessages = async () => {
+        try {
+            const response = await fetch(`${config[config.environment].apiUrl}/message/getMyUnreadMessageCount`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setMessageCount(data.count || 0);
+            } else {
+                console.log('Okunmamış mesaj sayısı alınamadı:', data.message);
+            }
+        } catch (error) {
+            console.error('Mesaj sayısı hatası:', error);
         }
     };
 
@@ -100,6 +119,7 @@ export default function Header({navigation}: Props) {
     };
 
     useEffect(() => {
+        fetchUnreadMessages();
         fetchClientInfo();
         checkToken();
         fetchNotifications();
@@ -176,11 +196,13 @@ export default function Header({navigation}: Props) {
                             <TouchableOpacity onPress={() => navigation.navigate('Mesaj')}
                                               style={styles.notificationWrapper}>
                                 <Icon name="message-outline" size={24} color="#ffffff" style={styles.icon}/>
-                                { /* messageCount > 0 && (
-                                    <View style={styles.notificationBadge}>
-                                        <Text style={styles.notificationText}>0</Text>
-                                    </View>
-                                ) */}
+                                {
+                                    messageCount > 0 && (
+                                        <View style={styles.notificationBadge}>
+                                            <Text style={styles.notificationText}>{messageCount}</Text>
+                                        </View>
+                                    )
+                                }
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={openDrawer} style={styles.notificationWrapper}>

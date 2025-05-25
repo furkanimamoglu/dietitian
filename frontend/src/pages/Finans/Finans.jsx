@@ -318,12 +318,10 @@ export default function Finans() {
         }
     };
 
-    // Helper to determine if a package amount should be prorated
     const shouldProrate = (packageType) => {
-        return packageType !== "Seanslık"; // Don't prorate session-based packages
+        return packageType !== "Seanslık";
     };
 
-    // Calculate financial statistics
     const currentMonthPaid = invoices
         .filter(invoice => {
             const invoiceDate = new Date(invoice.issueDate);
@@ -333,18 +331,15 @@ export default function Finans() {
                 invoice.status === "Ödendi";
         })
         .reduce((total, invoice) => {
-            // Find the package to get its type
             const pkg = packages.find(p => p.id === invoice.packageId);
             if (!pkg) return total + invoice.amount;
 
-            // For session-based packages, count the full amount
-            // For subscription packages, prorate the amount
             if (shouldProrate(pkg.type)) {
                 const durationInMonths = getPackageDurationInMonths(pkg.type);
                 const proratedAmount = invoice.amount / durationInMonths;
                 return total + proratedAmount;
             } else {
-                return total + invoice.amount; // Full amount for sessions
+                return total + invoice.amount;
             }
         }, 0);
 
@@ -357,59 +352,49 @@ export default function Finans() {
                 invoice.status !== "Ödendi";
         })
         .reduce((total, invoice) => {
-            // Find the package to get its type
             const pkg = packages.find(p => p.id === invoice.packageId);
             if (!pkg) return total + invoice.amount;
 
-            // For session-based packages, count the full amount
-            // For subscription packages, prorate the amount
             if (shouldProrate(pkg.type)) {
                 const durationInMonths = getPackageDurationInMonths(pkg.type);
                 const proratedAmount = invoice.amount / durationInMonths;
                 return total + proratedAmount;
             } else {
-                return total + invoice.amount; // Full amount for sessions
+                return total + invoice.amount;
             }
         }, 0);
 
-    // Total revenue for the current month (paid + pending)
     const totalRevenue = currentMonthPaid + currentMonthUnpaid;
 
-    // All-time total paid revenue (kept for reference but not displayed)
     const allTimeTotalRevenue = invoices
         .filter(invoice => invoice.status === "Ödendi")
         .reduce((total, invoice) => total + invoice.amount, 0);
 
-    // Filter invoices based on search and filter
     const filteredInvoices = invoices.filter(invoice => {
-        const matchesSearch = invoice.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            invoice.packageName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch =
+            (invoice?.clientName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase()) ||
+            (invoice?.packageName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase());
         const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
 
-    // Pagination calculation
     const indexOfLastInvoice = currentPage * invoicesPerPage;
     const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
     const currentInvoices = filteredInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
     const totalPages = Math.ceil(filteredInvoices.length / invoicesPerPage);
 
-    // Handle page change
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
-        // Scroll to top of invoice list
         const invoiceSection = document.getElementById('invoice-list');
         if (invoiceSection) {
             invoiceSection.scrollIntoView({behavior: 'smooth'});
         }
     };
 
-    // Tab change handler
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
 
-    // Calculate monthly comparison
     const getMonthlyComparison = () => {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth();

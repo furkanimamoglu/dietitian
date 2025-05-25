@@ -14,7 +14,6 @@ import {useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config.js';
 
-// Define a simple navigation prop type that doesn't depend on RootStackParamList
 type NavigationProp = {
     replace: (routeName: string) => void;
     navigate: (routeName: string) => void;
@@ -59,14 +58,12 @@ const BottomNav = ({navigation}: Props) => {
         setToastType(type);
         setToastVisible(true);
 
-        // Animate fade in
         Animated.timing(toastOpacity, {
             toValue: 1,
             duration: 300,
             useNativeDriver: true
         }).start();
 
-        // Auto hide after 3 seconds
         setTimeout(() => {
             Animated.timing(toastOpacity, {
                 toValue: 0,
@@ -94,7 +91,6 @@ const BottomNav = ({navigation}: Props) => {
 
             const data = await response.json();
 
-            // Store the nutrition plan ID
             if (data.nutrition_plan_id) {
                 setNutritionPlanId(data.nutrition_plan_id);
             } else if (data.NutritionPlan && data.NutritionPlan.id) {
@@ -106,6 +102,7 @@ const BottomNav = ({navigation}: Props) => {
     };
 
     const mealTypes = ['Kahvaltı', 'Öğle', 'Akşam', 'Aperatifler'];
+
     const exerciseTypes = [
         'Koşu',
         'Yürüyüş',
@@ -132,12 +129,10 @@ const BottomNav = ({navigation}: Props) => {
         setIsSubmitting(true);
 
         try {
-            // Get current day of the week in Turkish
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            // If we don't have a nutrition plan ID, we need to fetch it
             if (nutritionPlanId === null) {
                 await fetchNutritionPlanId();
                 if (nutritionPlanId === null) {
@@ -147,7 +142,6 @@ const BottomNav = ({navigation}: Props) => {
                 }
             }
 
-            // Convert app meal names to API meal names
             const convertAppMealNameToApiMealName = (appMealName: string): string => {
                 switch (appMealName) {
                     case 'Kahvaltı':
@@ -163,7 +157,6 @@ const BottomNav = ({navigation}: Props) => {
                 }
             };
 
-            // First get the current meal plan to update it
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 showToast('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.', 'error');
@@ -181,7 +174,6 @@ const BottomNav = ({navigation}: Props) => {
 
             const data = await response.json();
 
-            // Find the meal plan data
             let mealPlanData: any = null;
 
             if (data.mealPlan) {
@@ -191,7 +183,6 @@ const BottomNav = ({navigation}: Props) => {
             }
 
             if (!mealPlanData) {
-                // If we can't find a meal plan, create a new one
                 mealPlanData = {
                     [todayTurkish]: {
                         'Kahvaltı': [],
@@ -202,7 +193,6 @@ const BottomNav = ({navigation}: Props) => {
                 };
             }
 
-            // Make sure today's plan exists
             if (!mealPlanData[todayTurkish]) {
                 mealPlanData[todayTurkish] = {
                     'Kahvaltı': [],
@@ -212,38 +202,31 @@ const BottomNav = ({navigation}: Props) => {
                 };
             }
 
-            // Get the API meal type
             const apiMealType = convertAppMealNameToApiMealName(selectedMealType);
 
-            // Create or update the meal array for this meal type
             const todayPlan = mealPlanData[todayTurkish];
 
-            // Initialize the meal type if it doesn't exist
             if (!todayPlan[apiMealType]) {
                 todayPlan[apiMealType] = [];
             } else if (typeof todayPlan[apiMealType] === 'object' &&
                 !Array.isArray(todayPlan[apiMealType]) &&
                 todayPlan[apiMealType] &&
                 'main' in todayPlan[apiMealType]) {
-                // If it's in the complex format with main and alternatives
                 const mealData = todayPlan[apiMealType] as {
                     main: string[],
                     alternatives?: { [key: string]: string[] }
                 };
 
-                // Check if the meal is already in the list to avoid duplicates
                 if (!mealData.main.includes(newMeal)) {
                     mealData.main.push(newMeal);
                 }
             } else if (Array.isArray(todayPlan[apiMealType])) {
-                // Simple array format - Check if the meal is already in the list to avoid duplicates
                 const meals = todayPlan[apiMealType] as string[];
                 if (!meals.includes(newMeal)) {
                     meals.push(newMeal);
                 }
             }
 
-            // Prepare the update data
             const updateData = {
                 nutrition_plan_id: nutritionPlanId,
                 mealPlan: {
@@ -251,7 +234,6 @@ const BottomNav = ({navigation}: Props) => {
                 }
             };
 
-            // Send the update to the server
             const updateResponse = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
                 method: 'POST',
                 headers: {
@@ -340,7 +322,6 @@ const BottomNav = ({navigation}: Props) => {
                 </View>
             )}
 
-            {/* Overlay to close menu when clicked outside */}
             {menuOpen && (
                 <TouchableWithoutFeedback onPress={() => setMenuOpen(false)}>
                     <View style={styles.overlay}/>
