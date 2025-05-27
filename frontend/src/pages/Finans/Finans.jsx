@@ -2468,6 +2468,7 @@ export default function Finans() {
                                     <input
                                         id="package-price"
                                         type="number"
+                                        max={9223372036854775807}
                                         min={0}
                                         value={newPackage.price || ""}
                                         onChange={(e) => handlePackageChange('price', Number(e.target.value))}
@@ -2618,6 +2619,7 @@ export default function Finans() {
                                     <input
                                         id="invoice-amount"
                                         type="number"
+                                        max={9223372036854775807}
                                         min={0}
                                         value={newInvoice.amount || ""}
                                         onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}

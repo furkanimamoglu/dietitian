@@ -4,7 +4,7 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Note = sequelize.define('Note', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         allowNull: false,
         autoIncrement: true,
@@ -23,7 +23,7 @@ const Note = sequelize.define('Note', {
         }
     },
     noteContent: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         validate: {
             len: {
                 args: [0, 5000],

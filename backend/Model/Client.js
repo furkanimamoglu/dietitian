@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Client = sequelize.define('Client', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             autoIncrement: true,
             allowNull: false,
             primaryKey: true
         },
         dietitian_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             validate: {
                 notNull: {
@@ -20,7 +20,7 @@ const Client = sequelize.define('Client', {
             }
         },
         phoneNumber: {
-            type: DataTypes.BIGINT,
+            type: DataTypes.INTEGER,
             allowNull: false,
             unique: {
                 msg: 'Bu telefon numarası zaten kullanılıyor.'

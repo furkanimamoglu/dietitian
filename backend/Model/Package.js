@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Package = sequelize.define('Packages', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
         dietitian_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             validate: {
                 notNull: {
@@ -39,12 +39,12 @@ const Package = sequelize.define('Packages', {
             }
         },
         description: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: true,
             validate: {
                 len: {
-                    args: [0, 500],
-                    msg: 'Açıklama en fazla 500 karakter olabilir'
+                    args: [0, 5000],
+                    msg: 'Açıklama en fazla 5000 karakter olabilir'
                 }
             }
         },

@@ -5,7 +5,7 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Dietitian = sequelize.define('Dietitian', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         autoIncrement: true,
         allowNull: false,

@@ -4,7 +4,7 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const NutritionAssignment = sequelize.define('NutritionAssignment', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         allowNull: false,
         autoIncrement: true,
@@ -27,7 +27,7 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
         }
     },
     nutrition_plan_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         references: {
             model: 'NutritionPlans',

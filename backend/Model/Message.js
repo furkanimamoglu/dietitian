@@ -4,7 +4,7 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Message = sequelize.define('Message', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             autoIncrement: true,
             allowNull: false,

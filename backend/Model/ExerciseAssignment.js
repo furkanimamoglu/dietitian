@@ -4,7 +4,7 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         allowNull: false,
         autoIncrement: true,
@@ -27,7 +27,7 @@ const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
         }
     },
     exercise_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         references: {
             model: 'Exercises',

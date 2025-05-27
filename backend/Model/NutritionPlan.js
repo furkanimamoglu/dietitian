@@ -4,11 +4,26 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const NutritionPlan = sequelize.define('NutritionPlan', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true
+    },
+    category_id: {
+        allowNull: false,
+        references: {
+            model: 'NutritionCategories',
+            key: 'id'
+        },
+        validate: {
+            notNull: {
+                msg: 'Kategori ID gereklidir'
+            },
+            isInt: {
+                msg: 'Kategori ID geçerli bir sayı olmalıdır'
+            }
+        }
     },
     title: {
         type: DataTypes.STRING,
@@ -21,8 +36,8 @@ const NutritionPlan = sequelize.define('NutritionPlan', {
                 msg: 'Beslenme planı başlığı boş olamaz'
             },
             len: {
-                args: [3, 150],
-                msg: 'Başlık 3-150 karakter arasında olmalıdır'
+                args: [3, 100],
+                msg: 'Başlık 3-100 karakter arasında olmalıdır'
             }
         }
     },
@@ -39,22 +54,6 @@ const NutritionPlan = sequelize.define('NutritionPlan', {
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: '/placeholder.png'
-    },
-    category_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'NutritionCategories',
-            key: 'id'
-        },
-        validate: {
-            notNull: {
-                msg: 'Kategori ID gereklidir'
-            },
-            isInt: {
-                msg: 'Kategori ID geçerli bir sayı olmalıdır'
-            }
-        }
     },
     mealPlan: {
         type: DataTypes.JSON,

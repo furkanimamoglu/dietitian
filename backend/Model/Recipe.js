@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Recipe = sequelize.define('Recipe', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
         dietitian_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             references: {
                 model: 'Dietitians',
@@ -23,6 +23,22 @@ const Recipe = sequelize.define('Recipe', {
                 },
                 isInt: {
                     msg: 'Diyetisyen ID geçerli bir tamsayı olmalıdır'
+                }
+            }
+        },
+        category_id: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            references: {
+                model: 'RecipeCategories',
+                key: 'id'
+            },
+            validate: {
+                notNull: {
+                    msg: 'Kategori ID gereklidir'
+                },
+                isInt: {
+                    msg: 'Kategori ID geçerli bir tamsayı olmalıdır'
                 }
             }
         },
@@ -43,28 +59,12 @@ const Recipe = sequelize.define('Recipe', {
             }
         },
         description: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: true,
             validate: {
                 len: {
-                    args: [0, 500],
-                    msg: 'Açıklama en fazla 500 karakter olabilir'
-                }
-            }
-        },
-        category_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'RecipeCategories',
-                key: 'id'
-            },
-            validate: {
-                notNull: {
-                    msg: 'Kategori ID gereklidir'
-                },
-                isInt: {
-                    msg: 'Kategori ID geçerli bir tamsayı olmalıdır'
+                    args: [0, 5000],
+                    msg: 'Açıklama en fazla 5000 karakter olabilir'
                 }
             }
         },
@@ -84,7 +84,7 @@ const Recipe = sequelize.define('Recipe', {
             }
         },
         hazirlanis: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
             validate: {
                 notNull: {
@@ -94,13 +94,13 @@ const Recipe = sequelize.define('Recipe', {
                     msg: 'Hazırlanış bilgisi boş olamaz'
                 },
                 len: {
-                    args: [10, 2000],
-                    msg: 'Hazırlanış bilgisi 10-2000 karakter arasında olmalıdır'
+                    args: [1, 5000],
+                    msg: 'Hazırlanış bilgisi 1-5000 karakter arasında olmalıdır'
                 }
             }
         },
         malzemeler: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
             validate: {
                 notNull: {
@@ -110,8 +110,8 @@ const Recipe = sequelize.define('Recipe', {
                     msg: 'Malzeme listesi boş olamaz'
                 },
                 len: {
-                    args: [5, 1000],
-                    msg: 'Malzeme listesi 5-1000 karakter arasında olmalıdır'
+                    args: [1, 5000],
+                    msg: 'Malzeme listesi 1-1000 karakter arasında olmalıdır'
                 }
             }
         },
