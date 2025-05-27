@@ -186,6 +186,7 @@ export default function Finans() {
 
     // Add search state for packages
     const [packageSearchTerm, setPackageSearchTerm] = useState('');
+    const [packageFormErrors, setPackageFormErrors] = useState({});
     
     // CSV Import/Export states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -633,6 +634,9 @@ export default function Finans() {
 
     // Package management handlers
     const handleOpenPackageDialog = async (pkg = null) => {
+        // Reset any form errors
+        setPackageFormErrors({});
+        
         if (pkg) {
             setCurrentPackage(pkg);
 
@@ -672,7 +676,7 @@ export default function Finans() {
             setNewPackage({
                 name: "",
                 type: "Seanslık",
-                price: 0,
+                price: "",
                 description: "",
                 services: [""],
                 serviceItems: []
@@ -684,6 +688,17 @@ export default function Finans() {
     const handleClosePackageDialog = () => {
         setPackageDialogOpen(false);
         setCurrentPackage(null);
+        // Reset form errors
+        setPackageFormErrors({});
+        // Reset the form data when closing
+        setNewPackage({
+            name: "",
+            type: "Seanslık",
+            price: "",
+            description: "",
+            services: [""],
+            serviceItems: []
+        });
     };
 
     const handlePackageChange = (field, value) => {
@@ -691,6 +706,15 @@ export default function Finans() {
             ...newPackage,
             [field]: value
         });
+        
+        // Clear error for this field if it exists
+        if (packageFormErrors[field]) {
+            setPackageFormErrors(prev => {
+                const newErrors = {...prev};
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
     const handleServiceChange = (index, value) => {
@@ -719,8 +743,27 @@ export default function Finans() {
     };
 
     const handleSavePackage = async () => {
-        if (!newPackage.name || !newPackage.type || newPackage.price <= 0) {
-            toast.error("Lütfen tüm gerekli alanları doldurun.");
+        // Reset previous errors
+        const errors = {};
+        
+        // Validate all required fields
+        if (!newPackage.name || newPackage.name.trim() === "") {
+            errors.name = "Lütfen paket adını girin";
+        }
+        
+        if (!newPackage.type) {
+            errors.type = "Lütfen paket tipini seçin";
+        }
+        
+        if (newPackage.price === "" || newPackage.price === null || isNaN(newPackage.price) || newPackage.price <= 0) {
+            errors.price = "Lütfen geçerli bir fiyat girin";
+        }
+        
+        // Note: Paket İçeriği is now optional, so we removed that validation
+        
+        // If we have validation errors, show them and stop
+        if (Object.keys(errors).length > 0) {
+            setPackageFormErrors(errors);
             return;
         }
 
@@ -2404,9 +2447,11 @@ export default function Finans() {
                                     type="text"
                                     value={newPackage.name}
                                     onChange={(e) => handlePackageChange('name', e.target.value)}
-                                    required
+                                    className={packageFormErrors.name ? "error-input" : ""}
+                                    placeholder="Paket Adı"
                                     disabled={isLoading}
                                 />
+                                {packageFormErrors.name && <div className="error-message">{packageFormErrors.name}</div>}
                             </div>
 
                             <div className="form-group">
@@ -2415,14 +2460,17 @@ export default function Finans() {
                                     id="package-type"
                                     value={newPackage.type}
                                     onChange={(e) => handlePackageChange('type', e.target.value)}
+                                    className={packageFormErrors.type ? "error-input" : ""}
                                     disabled={isLoading}
                                 >
+                                    <option value="">Paket Tipi Seçin</option>
                                     <option value="Seanslık">Seanslık</option>
                                     <option value="Aylık">Aylık</option>
                                     <option value="3 Aylık">3 Aylık</option>
                                     <option value="6 Aylık">6 Aylık</option>
                                     <option value="1 Yıllık">1 Yıllık</option>
                                 </select>
+                                {packageFormErrors.type && <div className="error-message">{packageFormErrors.type}</div>}
                             </div>
                         </div>
 
@@ -2437,9 +2485,11 @@ export default function Finans() {
                                         min={0}
                                         value={newPackage.price || ""}
                                         onChange={(e) => handlePackageChange('price', Number(e.target.value))}
-                                        required
+                                        className={packageFormErrors.price ? "error-input" : ""}
+                                        placeholder="0"
                                         disabled={isLoading}
                                     />
+                                    {packageFormErrors.price && <div className="error-message">{packageFormErrors.price}</div>}
                                 </div>
                             </div>
 
@@ -2456,7 +2506,7 @@ export default function Finans() {
                         </div>
 
                         <div className="form-group full-width">
-                            <label>Paket İçeriği</label>
+                            <label>Paket İçeriği <span className="optional-label">(Opsiyonel)</span></label>
 
                             <div className="services-list-form">
                                 {newPackage.services.map((service, index) => (
