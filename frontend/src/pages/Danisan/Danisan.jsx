@@ -398,6 +398,10 @@ function Danisan() {
         });
     };
 
+    const deleteMeasurement = () => {
+
+    }
+
     const handleCreateMeasurement = async (e) => {
         e.preventDefault();
 
@@ -1638,13 +1642,21 @@ function Danisan() {
                                                                     align="right">{measurement.kas || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.su || '-'}</TableCell>
-                                                                <TableCell align="center">
+                                                                <TableCell sx={{ display: 'flex', justifyContent: 'center' }}
+                                                                    align="center">
                                                                     <IconButton
                                                                         color="primary"
                                                                         size="small"
                                                                         onClick={() => handleOpenEditMeasurementDialog(measurement)}
                                                                     >
                                                                         <EditIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        color="secondary"
+                                                                        sx={{ color: 'red' }}
+                                                                        onClick={() => deleteMeasurement(measurement)}
+                                                                    >
+                                                                        <DeleteIcon/>
                                                                     </IconButton>
                                                                 </TableCell>
                                                             </TableRow>
