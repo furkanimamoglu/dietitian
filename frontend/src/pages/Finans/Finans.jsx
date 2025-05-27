@@ -2587,8 +2587,8 @@ export default function Finans() {
 
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <div className="form-group">
+                                    <label htmlFor="invoice-amount">Fatura Tarihi</label>
                                     <DatePicker
-                                        label="Fatura Tarihi"
                                         value={newInvoice.issueDate ? new Date(newInvoice.issueDate) : null}
                                         onChange={(newValue) => {
                                             handleInvoiceChange('issueDate', newValue ? newValue.toISOString().split('T')[0] : '');
@@ -2604,8 +2604,8 @@ export default function Finans() {
                                 </div>
 
                                 <div className="form-group">
+                                    <label htmlFor="invoice-amount">Son Ödeme Tarihi</label>
                                     <DatePicker
-                                        label="Son Ödeme Tarihi"
                                         value={newInvoice.dueDate ? new Date(newInvoice.dueDate) : null}
                                         onChange={(newValue) => {
                                             handleInvoiceChange('dueDate', newValue ? newValue.toISOString().split('T')[0] : '');
