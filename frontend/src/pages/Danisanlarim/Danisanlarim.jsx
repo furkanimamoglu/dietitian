@@ -1307,8 +1307,8 @@ export default function Danisanlarim() {
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                             <DownloadIcon />
-                            <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
-                                CSV Dosyasından Danışan İçe Aktar
+                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
+                                Excel dosyasından Danışan İçe Aktar
                             </Typography>
                         </Box>
                         <IconButton
@@ -1323,7 +1323,7 @@ export default function Danisanlarim() {
                     <DialogContent dividers>
                         <Stack spacing={3} sx={{mt: 1}}>
                             <Typography variant="body1">
-                                CSV dosyanız aşağıdaki sütunları içermelidir:
+                                Excel dosyanız aşağıdaki sütunları içermelidir:
                             </Typography>
                             <ul>
                                 <li><Typography variant="body2">isim - Danışan Adı Soyadı (zorunlu)</Typography></li>
@@ -1340,7 +1340,7 @@ export default function Danisanlarim() {
                                 startIcon={<DownloadIcon />}
                                 sx={{mt: 2}}
                             >
-                                CSV Dosyası Seç
+                                Excel Dosyası Seç
                                 <input
                                     type="file"
                                     accept=".csv"
@@ -1349,7 +1349,7 @@ export default function Danisanlarim() {
                                 />
                             </Button>
                             <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
-                                Örnek CSV formatı:
+                                Örnek Excel formatı:
                             </Typography>
                             <code style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', display: 'block', overflowX: 'auto'}}>
                                 isim,telefon,cinsiyet,mail<br/>
@@ -1385,7 +1385,7 @@ export default function Danisanlarim() {
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                             <GroupAdd />
-                            <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
+                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 İçe Aktarılacak Danışanlar
                             </Typography>
                         </Box>
