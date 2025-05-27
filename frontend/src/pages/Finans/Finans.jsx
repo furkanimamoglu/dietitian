@@ -1339,13 +1339,13 @@ export default function Finans() {
                             ) : (
                                 <Grid container spacing={3}>
                                     {filteredPackages.map(pkg => (
-                                        <Grid item xs={12} md={6} lg={4} key={pkg.id}>
+                                        <Grid item xs={6} md={4} lg={2} key={pkg.id}>
                                             <Paper elevation={3} className="package-card">
                                                 <Box p={3}>
                                                     <Box display="flex" justifyContent="space-between"
                                                          alignItems="flex-start" mb={1}>
                                                         <Typography variant="h6" className="package-name">
-                                                            {pkg.name}
+                                                            {pkg.name && pkg.name.length > 15 ? `${pkg.name.substring(0, 15)}...` : pkg.name}
                                                         </Typography>
                                                         <Chip
                                                             label={pkg.type}
