@@ -616,10 +616,15 @@ function Danisan() {
 
     const calculateBMI = useMemo(() => {
         if (!measurements || measurements.length === 0) return null;
-        if (!danisan?.boy || !measurements[0]?.kilo) return null;
-
-        const heightInM = danisan.boy / 100;
-        const bmi = (measurements[0].kilo / (heightInM * heightInM)).toFixed(1);
+        
+        // Use either the height from measurements or from danisan profile
+        const height = measurements[0].boy || danisan?.boy;
+        const weight = measurements[0].kilo;
+        
+        if (!height || !weight) return null;
+        
+        const heightInM = height / 100;
+        const bmi = (weight / (heightInM * heightInM)).toFixed(1);
 
         // BMI kategorisi belirleme
         let category = '';
@@ -1756,7 +1761,7 @@ function Danisan() {
                                                             }}>
                                                                 <Box
                                                                     sx={{
-                                                                        width: '80%',
+                                                                        width: `${calculateBMI?.value ?? 0}%`,
                                                                         bgcolor: calculateBMI?.color || theme.palette.warning.main,
                                                                         height: '100%',
                                                                         borderRadius: 5
