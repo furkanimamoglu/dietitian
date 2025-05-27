@@ -412,7 +412,6 @@ function Danisan() {
                 }
             );
             
-            // Refresh measurements after deletion
             setMeasurementsLoading(true);
             const response = await axios.get(
                 config[config.environment].apiUrl + "/measurement/getClientMeasurement",
