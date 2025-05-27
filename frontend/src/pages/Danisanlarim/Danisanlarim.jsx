@@ -59,7 +59,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Document, Page, Image, PDFDownloadLink, PDFViewer, StyleSheet, View, Text, Font } from '@react-pdf/renderer';
 import Papa from 'papaparse';
 
-// Register a custom font with Turkish character support
 Font.register({
     family: 'Open Sans',
     fonts: [
@@ -67,7 +66,6 @@ Font.register({
     ]
 });
 
-// Define styles for PDF
 const styles = StyleSheet.create({
     page: {
         flexDirection: 'column',
@@ -1385,7 +1383,7 @@ export default function Danisanlarim() {
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                             <GroupAdd />
-                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
+                            <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
                                 İçe Aktarılacak Danışanlar
                             </Typography>
                         </Box>
