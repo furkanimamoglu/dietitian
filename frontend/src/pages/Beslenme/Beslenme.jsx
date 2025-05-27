@@ -903,8 +903,7 @@ const ViewMealPlan = ({mealPlan, programTitle, onExportPdf, selectedProgram}) =>
     return (
         <div className="view-meal-plan-container">
             <div className="view-meal-plan-header">
-                <h2>{programTitle} Programı</h2>
-                <PDFDownloadLink 
+                <PDFDownloadLink
                     document={<NutritionPlanDocument program={selectedProgram} />} 
                     fileName={`${programTitle.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                     style={{ textDecoration: 'none' }}
