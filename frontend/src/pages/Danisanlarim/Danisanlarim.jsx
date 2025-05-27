@@ -21,9 +21,18 @@ import {
     Stack,
     TextField,
     Typography,
-    Chip
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
 } from "@mui/material";
-import {DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarQuickFilter} from "@mui/x-data-grid";
+import {
+    DataGrid,
+    GridToolbarContainer,
+    GridToolbarQuickFilter
+} from "@mui/x-data-grid";
 import {trTR} from "@mui/x-data-grid/locales";
 import {
     ArrowForward,
@@ -40,6 +49,8 @@ import {
     QrCode as QrCodeIcon,
     Visibility,
     VisibilityOff, VpnKey,
+    Upload as UploadIcon,
+    Download as DownloadIcon
 } from "@mui/icons-material";
 import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
@@ -47,12 +58,12 @@ import config from "../../config.js";
 import PersonIcon from "@mui/icons-material/Person";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import Papa from 'papaparse';
 
 function QuickSearchToolbar() {
     return (
-        <GridToolbarContainer sx={{justifyContent: "space-between", py: 1}}>
+        <GridToolbarContainer sx={{justifyContent: "space-between", ml: "1rem", py: 1}}>
             <GridToolbarQuickFilter placeholder="Danışan Ara"/>
-            <GridToolbarExport csvOptions={{utf8WithBom: true}}/>
         </GridToolbarContainer>
     );
 }
@@ -70,6 +81,12 @@ export default function Danisanlarim() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
     const [activeFilter, setActiveFilter] = useState(null); // 'all', 'active', 'inactive', 'female', 'male', 'other'
+    
+    // CSV Import states
+    const [importDialogOpen, setImportDialogOpen] = useState(false);
+    const [csvData, setCsvData] = useState([]);
+    const [csvErrors, setCsvErrors] = useState({});
+    const [importPreviewOpen, setImportPreviewOpen] = useState(false);
 
     const filteredClients = useMemo(() => {
         if (!activeFilter) return clients;
@@ -586,41 +603,267 @@ export default function Danisanlarim() {
         },
     ];
 
+    const handleCsvFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Check if we have valid data
+                if (results.data && results.data.length > 0) {
+                    const parsedData = results.data.map((row, index) => {
+                        // Clean up phone number - remove non-digits
+                        let phoneNumber = row.telefon || "";
+                        phoneNumber = phoneNumber.replace(/\D/g, '');
+                        if (phoneNumber.startsWith('0')) {
+                            phoneNumber = phoneNumber.substring(1);
+                        }
+                        
+                        return {
+                            id: `temp_${index}`,
+                            name: row.isim || "",
+                            phoneNumber: phoneNumber,
+                            gender: row.cinsiyet || "",
+                            email: row.mail || "",
+                            password: generateRandomPassword(),
+                            status: true // Always set status to active
+                        };
+                    });
+                    
+                    setCsvData(parsedData);
+                    validateCsvData(parsedData);
+                    setImportDialogOpen(false);
+                    setImportPreviewOpen(true);
+                } else {
+                    setSnackbar({
+                        open: true,
+                        message: "CSV dosyası boş veya geçersiz format içeriyor",
+                        severity: "error"
+                    });
+                }
+            },
+            error: function(error) {
+                setSnackbar({
+                    open: true,
+                    message: `CSV okuma hatası: ${error.message}`,
+                    severity: "error"
+                });
+            }
+        });
+    };
+
+    const validateCsvData = (data) => {
+        const errors = {};
+        
+        data.forEach((row, index) => {
+            const rowErrors = {};
+            
+            // İsim validasyonu
+            if (!row.name || row.name.trim() === "") {
+                rowErrors.name = "İsim zorunludur";
+            }
+            
+            // Telefon validasyonu
+            if (!row.phoneNumber || row.phoneNumber.trim() === "") {
+                rowErrors.phoneNumber = "Telefon numarası zorunludur";
+            } else if (!/^[0-9]{10}$/.test(row.phoneNumber.replace(/\D/g, ''))) {
+                rowErrors.phoneNumber = "Geçerli bir telefon numarası giriniz";
+            }
+            
+            // Cinsiyet validasyonu
+            if (!row.gender || !["Erkek", "Kadın", "Diğer"].includes(row.gender)) {
+                rowErrors.gender = "Geçerli bir cinsiyet seçiniz (Erkek, Kadın, Diğer)";
+            }
+            
+            // Email validasyonu (opsiyonel)
+            if (row.email && row.email.trim() !== "") {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(row.email)) {
+                    rowErrors.email = "Geçerli bir e-posta adresi giriniz";
+                }
+            }
+            
+            if (Object.keys(rowErrors).length > 0) {
+                errors[index] = rowErrors;
+            }
+        });
+        
+        setCsvErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleCsvRowChange = (index, field, value) => {
+        const updatedData = [...csvData];
+        updatedData[index][field] = value;
+        setCsvData(updatedData);
+        
+        // Validate the updated row
+        const rowErrors = {};
+        const row = updatedData[index];
+        
+        if (field === "name" && (!value || value.trim() === "")) {
+            rowErrors.name = "İsim zorunludur";
+        }
+        
+        if (field === "phoneNumber") {
+            if (!value || value.trim() === "") {
+                rowErrors.phoneNumber = "Telefon numarası zorunludur";
+            } else if (!/^[0-9]{10}$/.test(value.replace(/\D/g, ''))) {
+                rowErrors.phoneNumber = "Geçerli bir telefon numarası giriniz";
+            }
+        }
+        
+        if (field === "gender" && (!value || !["Erkek", "Kadın", "Diğer"].includes(value))) {
+            rowErrors.gender = "Geçerli bir cinsiyet seçiniz";
+        }
+        
+        if (field === "email" && value && value.trim() !== "") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                rowErrors.email = "Geçerli bir e-posta adresi giriniz";
+            }
+        }
+        
+        const newErrors = {...csvErrors};
+        if (Object.keys(rowErrors).length > 0) {
+            newErrors[index] = {...(newErrors[index] || {}), ...rowErrors};
+        } else {
+            if (newErrors[index]) {
+                delete newErrors[index][field];
+                if (Object.keys(newErrors[index]).length === 0) {
+                    delete newErrors[index];
+                }
+            }
+        }
+        
+        setCsvErrors(newErrors);
+    };
+
+    const handleCsvRowDelete = (index) => {
+        const updatedData = csvData.filter((_, i) => i !== index);
+        setCsvData(updatedData);
+        
+        // Update errors
+        const newErrors = {...csvErrors};
+        delete newErrors[index];
+        
+        // Reindex errors if necessary
+        const reindexedErrors = {};
+        Object.keys(newErrors).forEach(key => {
+            const numKey = parseInt(key);
+            if (numKey > index) {
+                reindexedErrors[numKey - 1] = newErrors[key];
+            } else {
+                reindexedErrors[key] = newErrors[key];
+            }
+        });
+        
+        setCsvErrors(reindexedErrors);
+    };
+
+    const handleImportSubmit = async () => {
+        if (Object.keys(csvErrors).length > 0) {
+            setSnackbar({
+                open: true,
+                message: "Lütfen tüm hataları düzeltin",
+                severity: "error"
+            });
+            return;
+        }
+        
+        try {
+            let successCount = 0;
+            let failCount = 0;
+            
+            // Process each client one by one
+            for (const client of csvData) {
+                try {
+                    const response = await axios.post(
+                        `${config[config.environment].apiUrl}/dietitian/registerClient`,
+                        {
+                            name: client.name.trim(),
+                            phoneNumber: client.phoneNumber.replace(/\D/g, ''),
+                            password: client.password,
+                            gender: client.gender,
+                            email: client.email ? client.email.trim() : ""
+                        },
+                        { headers: { Authorization: localStorage.getItem("token") } }
+                    );
+                    
+                    setClients(prev => [...prev, response.data]);
+                    successCount++;
+                } catch (err) {
+                    console.error(`Danışan eklenirken hata: ${client.name}`, err);
+                    failCount++;
+                }
+            }
+            
+            setSnackbar({
+                open: true,
+                message: `${successCount} danışan başarıyla eklendi. ${failCount > 0 ? `${failCount} danışan eklenemedi.` : ''}`,
+                severity: failCount > 0 ? "warning" : "success"
+            });
+            
+            setImportPreviewOpen(false);
+            setCsvData([]);
+            
+        } catch (error) {
+            console.error("Toplu danışan eklenirken hata oluştu:", error);
+            setSnackbar({
+                open: true,
+                message: "Danışanlar eklenirken bir hata oluştu",
+                severity: "error"
+            });
+        }
+    };
+
+    const generateRandomPassword = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let password = "";
+        for (let i = 0; i < 8; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    };
+
+    // Export clients to CSV
+    const handleExportCSV = () => {
+        // Filter clients based on active filter
+        const dataToExport = filteredClients.map(client => ({
+            isim: client.name,
+            telefon: client.phoneNumber,
+            cinsiyet: client.gender,
+            mail: client.email || "",
+            durum: client.status ? "Aktif" : "İnaktif",
+        }));
+        
+        // Convert to CSV
+        const csv = Papa.unparse(dataToExport);
+        
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        // Set file name with current date
+        const date = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
+        const fileName = `danisanlar_${date}.csv`;
+        
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     // ---------------------------
     // Render
     // ---------------------------
     return (
         <Default>
             <Stack spacing={2} sx={{mt: "15px"}}>
-                {/* Action Buttons */}
-                <Stack direction="row" spacing={2}>
-                    <Button
-                        variant="contained"
-                        startIcon={<GroupAdd/>}
-                        onClick={openCreateDialog}
-                        sx={{
-                            borderRadius: 10,
-                            textTransform: "none",
-                            boxShadow: 3
-                        }}
-                    >
-                        Danışan Ekle
-                    </Button>
-
-                    <Button
-                        variant="contained"
-                        startIcon={<QrCodeIcon/>}
-                        onClick={fetchQR}
-                        sx={{
-                            borderRadius: 10,
-                            textTransform: "none",
-                            boxShadow: 3
-                        }}
-                    >
-                        QR'ımı Göster
-                    </Button>
-                </Stack>
-
                 {/* İstatistik Kartları */}
                 <Box sx={{mb: 4, mt: 2}}>
                     <Grid container spacing={3}>
@@ -884,6 +1127,63 @@ export default function Danisanlarim() {
                     </Grid>
                 </Box>
 
+                {/* Action Buttons - Add here, aligned to the right */}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                    <Stack direction="row" spacing={2}>
+                        <Button
+                            variant="contained"
+                            startIcon={<GroupAdd/>}
+                            onClick={openCreateDialog}
+                            sx={{
+                                borderRadius: 10,
+                                textTransform: "none",
+                                boxShadow: 3
+                            }}
+                        >
+                            Danışan Ekle
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            startIcon={<DownloadIcon/>}
+                            onClick={() => setImportDialogOpen(true)}
+                            sx={{
+                                borderRadius: 10,
+                                textTransform: "none",
+                                boxShadow: 3
+                            }}
+                        >
+                            İçe Aktar
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            startIcon={<UploadIcon/>}
+                            onClick={handleExportCSV}
+                            sx={{
+                                borderRadius: 10,
+                                textTransform: "none",
+                                boxShadow: 3
+                            }}
+                        >
+                            Dışa Aktar
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            startIcon={<QrCodeIcon/>}
+                            onClick={fetchQR}
+                            sx={{
+                                borderRadius: 10,
+                                textTransform: "none",
+                                boxShadow: 3
+                            }}
+                        >
+                            QR'ımı Göster
+                        </Button>
+                    </Stack>
+                </Box>
+
                 {/* Data Grid */}
                 <Paper elevation={2} sx={{height: "65vh", width: "100%"}}>
                     <DataGrid
@@ -916,343 +1216,581 @@ export default function Danisanlarim() {
                         }}
                     />
                 </Paper>
-            </Stack>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
-                <DialogTitle>Silme Onayı</DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        {selectedClient?.name} danışanınızı silmeyi onaylıyor musunuz?
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeDeleteDialog} variant="outlined" color="secondary">
-                        Vazgeç
-                    </Button>
-                    <Button onClick={confirmDelete} variant="contained" color="error">
-                        Sil
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Confirmation Dialog */}
-            <Dialog
-                open={editDialogOpen}
-                onClose={handleEditCancel}
-                PaperProps={{
-                    sx: {
-                        borderRadius: '16px',
-                        maxWidth: '500px',
-                        width: '100%'
-                    }
-                }}
-            >
-                <DialogTitle sx={{
-                    background: 'linear-gradient(135deg, #6B8DD6 0%, #4B6CB7 100%)',
-                    color: 'white',
-                    py: 2,
-                    px: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1
-                }}>
-                    <EditIcon sx={{fontSize: 28}}/>
-                    <Typography variant="h6" component="span">
-                        Düzenleme Onayı
-                    </Typography>
-                </DialogTitle>
-                <DialogContent sx={{p: 0}}>
-                    <Box sx={{p: 3}}>
-                        <Typography variant="subtitle1" sx={{mb: 2, color: 'text.secondary'}}>
-                            Aşağıdaki değişiklikleri onaylıyor musunuz?
-                        </Typography>
-                        {pendingEdit && (
-                            <Box sx={{
-                                mt: 2,
-                                '& > :not(:last-child)': {
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider',
-                                    pb: 2,
-                                    mb: 2
-                                }
-                            }}>
-                                {Object.entries(pendingEdit.changes).map(([field, values]) => (
-                                    <Box key={field}>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'text.secondary',
-                                                fontWeight: 500,
-                                                mb: 1
-                                            }}
-                                        >
-                                            {field}
-                                        </Typography>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 2
-                                        }}>
-                                            <Paper
-                                                sx={{
-                                                    flex: 1,
-                                                    p: 1.5,
-                                                    background: '#fff5f5',
-                                                    border: '1px solid #ffcdd2',
-                                                    borderRadius: 1
-                                                }}
-                                            >
-                                                <Typography variant="body2" color="error.main">
-                                                    {values.old || '(boş)'}
-                                                </Typography>
-                                            </Paper>
-                                            <ArrowForward sx={{color: 'text.secondary'}}/>
-                                            <Paper
-                                                sx={{
-                                                    flex: 1,
-                                                    p: 1.5,
-                                                    background: '#f0f7f0',
-                                                    border: '1px solid #c8e6c9',
-                                                    borderRadius: 1
-                                                }}
-                                            >
-                                                <Typography variant="body2" color="success.main">
-                                                    {values.new || '(boş)'}
-                                                </Typography>
-                                            </Paper>
-                                        </Box>
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{
-                    p: 3,
-                    pt: 2,
-                    borderTop: '1px solid',
-                    borderColor: 'divider'
-                }}>
-                    <Button
-                        onClick={handleEditCancel}
-                        variant="outlined"
-                        color="inherit"
-                        startIcon={<CloseIcon/>}
-                        sx={{
-                            borderRadius: 2,
-                            px: 3
-                        }}
-                    >
-                        Vazgeç
-                    </Button>
-                    <Button
-                        onClick={handleEditConfirm}
-                        variant="contained"
-                        startIcon={<CheckCircleOutline/>}
-                        sx={{
-                            borderRadius: 2,
-                            px: 3,
-                            background: 'linear-gradient(135deg, #23B6E6 0%, #02A4D3 100%)',
-                            '&:hover': {
-                                background: 'linear-gradient(135deg, #02A4D3 0%, #23B6E6 100%)'
-                            }
-                        }}
-                    >
-                        Onayla
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* QR Dialog */}
-            <Dialog open={qrDialogOpen} onClose={closeQrDialog} maxWidth="xs" fullWidth>
-                <DialogTitle>QR Kodunuz</DialogTitle>
-                <DialogContent dividers sx={{display: "flex", justifyContent: "center"}}>
-                    {qrData ? (
-                        <img src={qrData} alt="Dietisyen QR" style={{maxWidth: "100%"}}/>
-                    ) : (
-                        <Typography>Yükleniyor…</Typography>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={closeQrDialog} variant="outlined" color="secondary">
-                        Kapat
-                    </Button>
-                    <Button onClick={printQR} variant="contained" color="primary">
-                        Yazdır
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Create Client Dialog */}
-            <Dialog
-                open={createDialogOpen}
-                onClose={closeCreateDialog}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle sx={{
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <GroupAdd/>
-                        <Typography variant="h6" color="primary.main" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
-                            Yeni Danışan Ekle
-                        </Typography>
-                    </Box>
-                    <IconButton
-                        edge="end"
-                        color="primary.secondary"
-                        onClick={closeCreateDialog}
-                        aria-label="close"
-                    >
-                        <CloseIcon/>
-                    </IconButton>
-                </DialogTitle>
-                <form onSubmit={handleCreateSubmit}>
+                {/* Import Dialog */}
+                <Dialog 
+                    open={importDialogOpen} 
+                    onClose={() => setImportDialogOpen(false)}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <DownloadIcon />
+                            <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
+                                CSV Dosyasından Danışan İçe Aktar
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            edge="end"
+                            onClick={() => setImportDialogOpen(false)}
+                            aria-label="close"
+                            sx={{color: 'white'}}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </DialogTitle>
                     <DialogContent dividers>
                         <Stack spacing={3} sx={{mt: 1}}>
-                            <TextField
-                                fullWidth
-                                required
-                                label="Adı Soyadı"
-                                name="name"
-                                value={newClient.name}
-                                onChange={handleInputChange}
-                                margin="normal"
-                                error={!!formErrors.name}
-                                helperText={formErrors.name || "Danışanın tam adını giriniz"}
-                                autoComplete="name"
-                                inputProps={{ maxLength: 50 }}
-                            />
-
-
-                            <TextField
-                                fullWidth
-                                required
-                                label="Telefon Numarası"
-                                name="phoneNumber"
-                                value={newClient.phoneNumber}
-                                onChange={handlePhoneChange}
-                                margin="normal"
-                                error={!!formErrors.phoneNumber}
-                                helperText={formErrors.phoneNumber || "10 haneli telefon numarası"}
-                                autoComplete="tel"
-                                InputProps={{
-                                    startAdornment: <InputAdornment position="start">+90</InputAdornment>,
-                                }}
-                            />
-
-                            <TextField
-                                fullWidth
-                                required
-                                label="Şifre"
-                                name="password"
-                                type={showPassword ? "text" : "password"}
-                                value={newClient.password}
-                                onChange={handleInputChange}
-                                margin="normal"
-                                error={!!formErrors.password}
-                                helperText={formErrors.password || "En az 6 karakter olmalıdır"}
-                                autoComplete="new-password"
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                edge="end"
-                                                title={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
-                                            >
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={generatePassword}
-                                                edge="end"
-                                                title="Otomatik şifre üret"
-                                            >
-                                                <VpnKey />
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-
-
-                            <TextField
-                                fullWidth
-                                label="E-posta (Opsiyonel)"
-                                name="email"
-                                type="email"
-                                value={newClient.email}
-                                onChange={handleInputChange}
-                                margin="normal"
-                                error={!!formErrors.email}
-                                helperText={formErrors.email || "Geçerli bir e-posta adresi giriniz"}
-                                autoComplete="email"
-                            />
-
-
-                            <FormControl fullWidth margin="normal" required error={!!formErrors.gender}>
-                                <InputLabel>Cinsiyet *</InputLabel>
-                                <Select
-                                    name="gender"
-                                    value={newClient.gender}
-                                    onChange={handleInputChange}
-                                    label="Cinsiyet *"
-                                >
-                                    <MenuItem value="">
-                                        <em>Seçiniz...</em>
-                                    </MenuItem>
-                                    <MenuItem value="Erkek">Erkek</MenuItem>
-                                    <MenuItem value="Kadın">Kadın</MenuItem>
-                                    <MenuItem value="Diğer">Diğer</MenuItem>
-                                </Select>
-                                {formErrors.gender && (
-                                    <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
-                                        {formErrors.gender}
-                                    </Typography>
-                                )}
-                            </FormControl>
+                            <Typography variant="body1">
+                                CSV dosyanız aşağıdaki sütunları içermelidir:
+                            </Typography>
+                            <ul>
+                                <li><Typography variant="body2">isim - Danışan Adı Soyadı (zorunlu)</Typography></li>
+                                <li><Typography variant="body2">telefon - Telefon Numarası (zorunlu, 10 haneli)</Typography></li>
+                                <li><Typography variant="body2">cinsiyet - Cinsiyet (zorunlu, "Erkek", "Kadın" veya "Diğer")</Typography></li>
+                                <li><Typography variant="body2">mail - E-posta Adresi (opsiyonel)</Typography></li>
+                            </ul>
+                            <Typography variant="body2" color="text.secondary">
+                                Not: Şifreler otomatik olarak oluşturulacaktır ve tüm danışanlar aktif olarak eklenecektir.
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                component="label"
+                                startIcon={<DownloadIcon />}
+                                sx={{mt: 2}}
+                            >
+                                CSV Dosyası Seç
+                                <input
+                                    type="file"
+                                    accept=".csv"
+                                    hidden
+                                    onChange={handleCsvFileUpload}
+                                />
+                            </Button>
+                            <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
+                                Örnek CSV formatı:
+                            </Typography>
+                            <code style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', display: 'block', overflowX: 'auto'}}>
+                                isim,telefon,cinsiyet,mail<br/>
+                                "Ahmet Yılmaz","5551234567","Erkek","ahmet@example.com"<br/>
+                                "Ayşe Demir","5559876543","Kadın","ayse@example.com"
+                            </code>
                         </Stack>
                     </DialogContent>
                     <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
                         <Button
-                            onClick={closeCreateDialog}
+                            onClick={() => setImportDialogOpen(false)}
+                            variant="outlined"
+                            startIcon={<CloseIcon/>}
+                        >
+                            İptal
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* CSV Preview Dialog */}
+                <Dialog
+                    open={importPreviewOpen}
+                    onClose={() => setImportPreviewOpen(false)}
+                    maxWidth="lg"
+                    fullWidth
+                >
+                    <DialogTitle sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <GroupAdd />
+                            <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
+                                İçe Aktarılacak Danışanlar
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            edge="end"
+                            onClick={() => setImportPreviewOpen(false)}
+                            aria-label="close"
+                            sx={{color: 'white'}}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                            {csvData.length} danışan bulundu. Bilgileri kontrol edip düzenleyebilirsiniz.
+                            {Object.keys(csvErrors).length > 0 && (
+                                <Typography variant="body2" color="error" sx={{mt: 1}}>
+                                    Lütfen işaretli hataları düzeltin.
+                                </Typography>
+                            )}
+                        </Typography>
+                        <TableContainer component={Paper} sx={{maxHeight: '60vh'}}>
+                            <Table stickyHeader size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>İsim</TableCell>
+                                        <TableCell>Telefon</TableCell>
+                                        <TableCell>Cinsiyet</TableCell>
+                                        <TableCell>E-posta</TableCell>
+                                        <TableCell>Şifre</TableCell>
+                                        <TableCell>İşlemler</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {csvData.map((row, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    value={row.name || ''}
+                                                    onChange={(e) => handleCsvRowChange(index, 'name', e.target.value)}
+                                                    error={csvErrors[index]?.name !== undefined}
+                                                    helperText={csvErrors[index]?.name}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    value={row.phoneNumber || ''}
+                                                    onChange={(e) => handleCsvRowChange(index, 'phoneNumber', e.target.value)}
+                                                    error={csvErrors[index]?.phoneNumber !== undefined}
+                                                    helperText={csvErrors[index]?.phoneNumber}
+                                                    InputProps={{
+                                                        startAdornment: <InputAdornment position="start">+90</InputAdornment>,
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <FormControl fullWidth size="small" error={csvErrors[index]?.gender !== undefined}>
+                                                    <Select
+                                                        value={row.gender || ''}
+                                                        onChange={(e) => handleCsvRowChange(index, 'gender', e.target.value)}
+                                                    >
+                                                        <MenuItem value="Erkek">Erkek</MenuItem>
+                                                        <MenuItem value="Kadın">Kadın</MenuItem>
+                                                        <MenuItem value="Diğer">Diğer</MenuItem>
+                                                    </Select>
+                                                    {csvErrors[index]?.gender && (
+                                                        <Typography variant="caption" color="error">
+                                                            {csvErrors[index].gender}
+                                                        </Typography>
+                                                    )}
+                                                </FormControl>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    value={row.email || ''}
+                                                    onChange={(e) => handleCsvRowChange(index, 'email', e.target.value)}
+                                                    error={csvErrors[index]?.email !== undefined}
+                                                    helperText={csvErrors[index]?.email}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    value={row.password || ''}
+                                                    onChange={(e) => handleCsvRowChange(index, 'password', e.target.value)}
+                                                    InputProps={{
+                                                        endAdornment: (
+                                                            <InputAdornment position="end">
+                                                                <IconButton
+                                                                    edge="end"
+                                                                    title="Yeni şifre oluştur"
+                                                                    onClick={() => {
+                                                                        const newPassword = generateRandomPassword();
+                                                                        handleCsvRowChange(index, 'password', newPassword);
+                                                                    }}
+                                                                >
+                                                                    <VpnKey fontSize="small" />
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleCsvRowDelete(index)}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </DialogContent>
+                    <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
+                        <Button
+                            onClick={() => setImportPreviewOpen(false)}
                             variant="outlined"
                             startIcon={<CloseIcon/>}
                         >
                             İptal
                         </Button>
                         <Button
-                            type="submit"
+                            onClick={handleImportSubmit}
                             variant="contained"
                             startIcon={<GroupAdd/>}
+                            disabled={Object.keys(csvErrors).length > 0 || csvData.length === 0}
                         >
-                            Danışan Ekle
+                            {csvData.length} Danışanı Ekle
                         </Button>
                     </DialogActions>
-                </form>
-            </Dialog>
+                </Dialog>
 
-            {/* Success/Error Notification */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={handleSnackbarClose}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-            >
-                <Alert
-                    onClose={handleSnackbarClose}
-                    severity={snackbar.severity}
-                    sx={{width: '100%'}}
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
+                    <DialogTitle>Silme Onayı</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            {selectedClient?.name} danışanınızı silmeyi onaylıyor musunuz?
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={closeDeleteDialog} variant="outlined" color="secondary">
+                            Vazgeç
+                        </Button>
+                        <Button onClick={confirmDelete} variant="contained" color="error">
+                            Sil
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Edit Confirmation Dialog */}
+                <Dialog
+                    open={editDialogOpen}
+                    onClose={handleEditCancel}
+                    PaperProps={{
+                        sx: {
+                            borderRadius: '16px',
+                            maxWidth: '500px',
+                            width: '100%'
+                        }
+                    }}
                 >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+                    <DialogTitle sx={{
+                        background: 'linear-gradient(135deg, #6B8DD6 0%, #4B6CB7 100%)',
+                        color: 'white',
+                        py: 2,
+                        px: 3,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                    }}>
+                        <EditIcon sx={{fontSize: 28}}/>
+                        <Typography variant="h6" component="span">
+                            Düzenleme Onayı
+                        </Typography>
+                    </DialogTitle>
+                    <DialogContent sx={{p: 0}}>
+                        <Box sx={{p: 3}}>
+                            <Typography variant="subtitle1" sx={{mb: 2, color: 'text.secondary'}}>
+                                Aşağıdaki değişiklikleri onaylıyor musunuz?
+                            </Typography>
+                            {pendingEdit && (
+                                <Box sx={{
+                                    mt: 2,
+                                    '& > :not(:last-child)': {
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                        pb: 2,
+                                        mb: 2
+                                    }
+                                }}>
+                                    {Object.entries(pendingEdit.changes).map(([field, values]) => (
+                                        <Box key={field}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: 'text.secondary',
+                                                    fontWeight: 500,
+                                                    mb: 1
+                                                }}
+                                            >
+                                                {field}
+                                            </Typography>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 2
+                                            }}>
+                                                <Paper
+                                                    sx={{
+                                                        flex: 1,
+                                                        p: 1.5,
+                                                        background: '#fff5f5',
+                                                        border: '1px solid #ffcdd2',
+                                                        borderRadius: 1
+                                                    }}
+                                                >
+                                                    <Typography variant="body2" color="error.main">
+                                                        {values.old || '(boş)'}
+                                                    </Typography>
+                                                </Paper>
+                                                <ArrowForward sx={{color: 'text.secondary'}}/>
+                                                <Paper
+                                                    sx={{
+                                                        flex: 1,
+                                                        p: 1.5,
+                                                        background: '#f0f7f0',
+                                                        border: '1px solid #c8e6c9',
+                                                        borderRadius: 1
+                                                    }}
+                                                >
+                                                    <Typography variant="body2" color="success.main">
+                                                        {values.new || '(boş)'}
+                                                    </Typography>
+                                                </Paper>
+                                            </Box>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+                    </DialogContent>
+                    <DialogActions sx={{
+                        p: 3,
+                        pt: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider'
+                    }}>
+                        <Button
+                            onClick={handleEditCancel}
+                            variant="outlined"
+                            color="inherit"
+                            startIcon={<CloseIcon/>}
+                            sx={{
+                                borderRadius: 2,
+                                px: 3
+                            }}
+                        >
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={handleEditConfirm}
+                            variant="contained"
+                            startIcon={<CheckCircleOutline/>}
+                            sx={{
+                                borderRadius: 2,
+                                px: 3,
+                                background: 'linear-gradient(135deg, #23B6E6 0%, #02A4D3 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #02A4D3 0%, #23B6E6 100%)'
+                                }
+                            }}
+                        >
+                            Onayla
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* QR Dialog */}
+                <Dialog open={qrDialogOpen} onClose={closeQrDialog} maxWidth="xs" fullWidth>
+                    <DialogTitle>QR Kodunuz</DialogTitle>
+                    <DialogContent dividers sx={{display: "flex", justifyContent: "center"}}>
+                        {qrData ? (
+                            <img src={qrData} alt="Dietisyen QR" style={{maxWidth: "100%"}}/>
+                        ) : (
+                            <Typography>Yükleniyor…</Typography>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={closeQrDialog} variant="outlined" color="secondary">
+                            Kapat
+                        </Button>
+                        <Button onClick={printQR} variant="contained" color="primary">
+                            Yazdır
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* Create Client Dialog */}
+                <Dialog
+                    open={createDialogOpen}
+                    onClose={closeCreateDialog}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <GroupAdd/>
+                            <Typography variant="h6" color="primary.main" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
+                                Yeni Danışan Ekle
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            edge="end"
+                            color="primary.secondary"
+                            onClick={closeCreateDialog}
+                            aria-label="close"
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </DialogTitle>
+                    <form onSubmit={handleCreateSubmit}>
+                        <DialogContent dividers>
+                            <Stack spacing={3} sx={{mt: 1}}>
+                                <TextField
+                                    fullWidth
+                                    required
+                                    label="Adı Soyadı"
+                                    name="name"
+                                    value={newClient.name}
+                                    onChange={handleInputChange}
+                                    margin="normal"
+                                    error={!!formErrors.name}
+                                    helperText={formErrors.name || "Danışanın tam adını giriniz"}
+                                    autoComplete="name"
+                                    inputProps={{ maxLength: 50 }}
+                                />
+
+
+                                <TextField
+                                    fullWidth
+                                    required
+                                    label="Telefon Numarası"
+                                    name="phoneNumber"
+                                    value={newClient.phoneNumber}
+                                    onChange={handlePhoneChange}
+                                    margin="normal"
+                                    error={!!formErrors.phoneNumber}
+                                    helperText={formErrors.phoneNumber || "10 haneli telefon numarası"}
+                                    autoComplete="tel"
+                                    InputProps={{
+                                        startAdornment: <InputAdornment position="start">+90</InputAdornment>,
+                                    }}
+                                />
+
+                                <TextField
+                                    fullWidth
+                                    required
+                                    label="Şifre"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={newClient.password}
+                                    onChange={handleInputChange}
+                                    margin="normal"
+                                    error={!!formErrors.password}
+                                    helperText={formErrors.password || "En az 6 karakter olmalıdır"}
+                                    autoComplete="new-password"
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    edge="end"
+                                                    title={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+                                                >
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                                <IconButton
+                                                    onClick={generatePassword}
+                                                    edge="end"
+                                                    title="Otomatik şifre üret"
+                                                >
+                                                    <VpnKey />
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+
+
+                                <TextField
+                                    fullWidth
+                                    label="E-posta (Opsiyonel)"
+                                    name="email"
+                                    type="email"
+                                    value={newClient.email}
+                                    onChange={handleInputChange}
+                                    margin="normal"
+                                    error={!!formErrors.email}
+                                    helperText={formErrors.email || "Geçerli bir e-posta adresi giriniz"}
+                                    autoComplete="email"
+                                />
+
+
+                                <FormControl fullWidth margin="normal" required error={!!formErrors.gender}>
+                                    <InputLabel>Cinsiyet *</InputLabel>
+                                    <Select
+                                        name="gender"
+                                        value={newClient.gender}
+                                        onChange={handleInputChange}
+                                        label="Cinsiyet *"
+                                    >
+                                        <MenuItem value="">
+                                            <em>Seçiniz...</em>
+                                        </MenuItem>
+                                        <MenuItem value="Erkek">Erkek</MenuItem>
+                                        <MenuItem value="Kadın">Kadın</MenuItem>
+                                        <MenuItem value="Diğer">Diğer</MenuItem>
+                                    </Select>
+                                    {formErrors.gender && (
+                                        <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
+                                            {formErrors.gender}
+                                        </Typography>
+                                    )}
+                                </FormControl>
+                            </Stack>
+                        </DialogContent>
+                        <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
+                            <Button
+                                onClick={closeCreateDialog}
+                                variant="outlined"
+                                startIcon={<CloseIcon/>}
+                            >
+                                İptal
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                startIcon={<GroupAdd/>}
+                            >
+                                Danışan Ekle
+                            </Button>
+                        </DialogActions>
+                    </form>
+                </Dialog>
+
+                {/* Success/Error Notification */}
+                <Snackbar
+                    open={snackbar.open}
+                    autoHideDuration={6000}
+                    onClose={handleSnackbarClose}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                >
+                    <Alert
+                        onClose={handleSnackbarClose}
+                        severity={snackbar.severity}
+                        sx={{width: '100%'}}
+                    >
+                        {snackbar.message}
+                    </Alert>
+                </Snackbar>
+            </Stack>
         </Default>
     );
 }
