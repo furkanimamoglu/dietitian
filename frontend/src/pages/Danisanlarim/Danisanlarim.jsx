@@ -56,9 +56,108 @@ import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 import PersonIcon from "@mui/icons-material/Person";
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import { Document, Page, Image, PDFDownloadLink, PDFViewer, StyleSheet, View, Text, Font } from '@react-pdf/renderer';
 import Papa from 'papaparse';
+
+// Register a custom font with Turkish character support
+Font.register({
+    family: 'Open Sans',
+    fonts: [
+        { src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf' }
+    ]
+});
+
+// Define styles for PDF
+const styles = StyleSheet.create({
+    page: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: 30,
+        fontSize: 12,
+        fontFamily: 'Open Sans',
+        backgroundColor: '#f9f9f9',
+    },
+    instructionText: {
+        marginBottom: 20,
+        textAlign: 'center',
+        paddingHorizontal: 10,
+        fontFamily: 'Open Sans',
+        fontSize: 14,
+        color: '#444',
+    },
+    qrContainer: {
+        position: 'relative',
+        width: 300,
+        height: 350,
+        padding: 25,
+        display: 'flex',
+        border: '5 dashed black',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 15
+    },
+    qrImage: {
+        width: 250,
+        height: 250,
+        borderRadius: 10,
+    },
+    highlight: {
+        color: '#2E7D32',
+        fontWeight: 'bold',
+    },
+    logo: {
+        fontSize: 18,
+        color: '#2E7D32',
+        fontWeight: 'bold',
+        marginTop: 10,
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 30,
+        fontSize: 10,
+        color: '#888',
+        textAlign: 'center',
+    },
+    header: {
+        fontSize: 22,
+        color: '#2E7D32',
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    ribbon: {
+        position: 'absolute',
+        top: -10,
+        right: -10,
+        width: 100,
+        height: 100,
+        backgroundColor: '#2E7D32',
+        transform: 'rotate(45deg)',
+    }
+});
+
+const QRDocument = ({ qrData }) => (
+    <Document>
+        <Page size="A4" style={styles.page}>
+            <Text style={styles.header}>Diyetisyen QR Kodu</Text>
+            
+            <Text style={styles.instructionText}>
+                Bu QR kodu <Text style={styles.highlight}>danışanlarınıza</Text> göstererek, sizi diyetisyen olarak 
+                uygulamalarına eklemelerini sağlayabilirsiniz.
+            </Text>
+
+            <View style={styles.qrContainer}>
+                <Image style={styles.qrImage} src={qrData} />
+                <Text style={styles.logo}>Diyetia</Text>
+            </View>
+            
+            <Text style={styles.footer}>
+                Diyetia.com - Sağlıklı beslenme için teknolojik çözümler
+            </Text>
+        </Page>
+    </Document>
+);
 
 function QuickSearchToolbar() {
     return (
@@ -87,6 +186,8 @@ export default function Danisanlarim() {
     const [csvData, setCsvData] = useState([]);
     const [csvErrors, setCsvErrors] = useState({});
     const [importPreviewOpen, setImportPreviewOpen] = useState(false);
+
+    const [showPdfPreview, setShowPdfPreview] = useState(false);
 
     const filteredClients = useMemo(() => {
         if (!activeFilter) return clients;
@@ -319,41 +420,14 @@ export default function Danisanlarim() {
         }
     };
 
-    const printQR = async () => {
-        if (!qrData) return;
-
-        try {
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const imgData = qrData;
-
-            const imgWidth = 100;
-            const imgHeight = 100;
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-
-            doc.addImage(
-                imgData,
-                'PNG',
-                (pageWidth - imgWidth) / 2,
-                (pageHeight - imgHeight) / 2,
-                imgWidth,
-                imgHeight
-            );
-
-            doc.autoPrint();
-
-            window.open(doc.output('bloburl'), '_blank');
-        } catch (error) {
-            console.error('QR yazdırma hatası:', error);
-        }
+    const togglePdfPreview = () => {
+        setShowPdfPreview(!showPdfPreview);
     };
 
-    const closeQrDialog = () => setQrDialogOpen(false);
+    const closeQrDialog = () => {
+        setQrDialogOpen(false);
+        setShowPdfPreview(false);
+    };
 
     const generatePassword = () => {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -1602,11 +1676,11 @@ export default function Danisanlarim() {
                 </Dialog>
 
                 {/* QR Dialog */}
-                <Dialog open={qrDialogOpen} onClose={closeQrDialog} maxWidth="xs" fullWidth>
+                <Dialog open={qrDialogOpen} onClose={closeQrDialog}>
                     <DialogTitle>QR Kodunuz</DialogTitle>
-                    <DialogContent dividers sx={{display: "flex", justifyContent: "center"}}>
+                    <DialogContent dividers sx={{display: "flex", alignItems: "center"}}>
                         {qrData ? (
-                            <img src={qrData} alt="Dietisyen QR" style={{maxWidth: "100%"}}/>
+                            <img src={qrData} alt="Dietisyen QR" style={{maxWidth: "25rem", margin: "20px 0"}}/>
                         ) : (
                             <Typography>Yükleniyor…</Typography>
                         )}
@@ -1615,9 +1689,23 @@ export default function Danisanlarim() {
                         <Button onClick={closeQrDialog} variant="outlined" color="secondary">
                             Kapat
                         </Button>
-                        <Button onClick={printQR} variant="contained" color="primary">
-                            Yazdır
-                        </Button>
+                        {qrData && (
+                            <PDFDownloadLink 
+                                document={<QRDocument qrData={qrData} />} 
+                                fileName="diyetisyen-qr.pdf"
+                                style={{ textDecoration: 'none' }}
+                            >
+                                {({ blob, url, loading, error }) => 
+                                    <Button 
+                                        variant="contained" 
+                                        color="primary" 
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Yükleniyor...' : 'PDF İndir'}
+                                    </Button>
+                                }
+                            </PDFDownloadLink>
+                        )}
                     </DialogActions>
                 </Dialog>
 
