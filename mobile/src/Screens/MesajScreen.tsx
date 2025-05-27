@@ -40,7 +40,7 @@ const Mesaj = ({navigation}) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/message/getMyMessages`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/message/getMyMessages`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -76,7 +76,7 @@ const Mesaj = ({navigation}) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/message/getMyMessages`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/message/getMyMessages`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -111,7 +111,7 @@ const Mesaj = ({navigation}) => {
 
     const fetchClientInfo = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getClientInfo`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ const Mesaj = ({navigation}) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/message/sendMessage`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/message/sendMessage`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,

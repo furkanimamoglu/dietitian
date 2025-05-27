@@ -36,7 +36,8 @@ const LoginScreen = ({navigation}: Props) => {
     const handleLogin = async () => {
         try {
             setLoading(true);
-            const response = await axios.post(`${config.apiUrl}/client/login`, {
+            console.log(`${config[config.environment].apiUrl}/client/login`)
+            const response = await axios.post(`${config[config.environment].apiUrl}/client/login`, {
                 phoneNumber: phone,
                 password: password,
             });

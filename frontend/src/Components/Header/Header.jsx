@@ -1,4 +1,5 @@
-import * as React from 'react';
+import {useNavigate} from 'react-router-dom';
+import React, {useEffect, useState} from "react";
 import {
     alpha,
     AppBar,
@@ -41,7 +42,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
 import HelpIcon from '@mui/icons-material/Help';
-import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import config from "../../config.js";
 
@@ -131,17 +131,18 @@ export default function Header() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!localStorage.getItem('token')) {
             window.location.href = '/login';
         }
     }, []);
 
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
-    const [searchQuery, setSearchQuery] = React.useState('');
-    const [searchResults, setSearchResults] = React.useState([]);
-    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-    const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
+    const [messageCount, setMessageCount] = useState(0);
+    const [anchorElUser, setAnchorElUser] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -211,6 +212,33 @@ export default function Header() {
             setSearchQuery('');
         }
     };
+
+    const fetchUnreadMessageCount = async () => {
+        try {
+            const token = localStorage.getItem('token'); // veya başka bir token saklama yönteminiz
+            const response = await axios.get(`${config[config.environment].apiUrl}/message/getMyUnreadMessageCount`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token || ''
+                }
+            });
+
+            if (response.data) {
+                setMessageCount(response.data.unreadMessageCount || 0);
+            }
+        } catch (error) {
+            console.error('Okunmamış mesaj sayısı alınamadı:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUnreadMessageCount();
+
+        const interval = setInterval(fetchUnreadMessageCount, 60000); // Her 1 dakikada bir
+
+        return () => clearInterval(interval);
+    }, []);
+
 
     const navigationItems = [
         {name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
@@ -363,7 +391,7 @@ export default function Header() {
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mr: {xs: 2, md: 4}}}>
                             <Tooltip title="Mesajlar" arrow>
                                 <IconButton onClick={() => navigate('/mesaj')} color="inherit">
-                                    <Badge /* badgeContent={1} */ color="warning">
+                                    <Badge badgeContent={messageCount} color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
                                 </IconButton>

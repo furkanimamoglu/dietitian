@@ -26,11 +26,12 @@ const recipeRoutes = require(path.join(__dirname, "Routes", "recipeRoutes"));
 const exerciseRoutes = require(path.join(__dirname, "Routes", "exerciseRoutes"));
 const anamnesRoutes = require(path.join(__dirname, "Routes", "anamnesRoutes"));
 const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
+const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
 
 app.use(bodyParser.json());
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: true,
     credentials: true
 }));
 
@@ -52,6 +53,7 @@ app.use('/api/exercise', exerciseRoutes);
 app.use('/api/invoice', invoiceRoutes);
 app.use('/api/measurement', measurementRoutes);
 app.use('/api/package', packageRoutes);
+app.use('/api/nutrition', nutritionRoutes);
 
 // Working Directory
 try {

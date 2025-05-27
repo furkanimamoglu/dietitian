@@ -16,7 +16,7 @@ const Profil = ({navigation}) => {
     useEffect(() => {
         const fetchClientInfo = async () => {
             try {
-                const response = await fetch(`${config.apiUrl}/client/getClientInfo`, {
+                const response = await fetch(`${config[config.environment].apiUrl}/client/getClientInfo`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

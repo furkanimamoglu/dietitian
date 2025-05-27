@@ -60,7 +60,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/appointment/fetchClientAppointments`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/appointment/fetchClientAppointments`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -97,7 +97,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                 return;
             }
 
-            const response = await fetch(`${config.apiUrl}/appointment/deleteAppointmentAsClient?appointment_id=${appointmentId}`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/appointment/deleteAppointmentAsClient?appointment_id=${appointmentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': token,
@@ -182,7 +182,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                 const startDateTime = new Date(`${formatDate(selectedDate)}T${selectedTime}`);
                 const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
-                const response = await fetch(`${config.apiUrl}/appointment/addAppointmentAsClient`, {
+                const response = await fetch(`${config[config.environment].apiUrl}/appointment/addAppointmentAsClient`, {
                     method: 'POST',
                     headers: {
                         'Authorization': token,

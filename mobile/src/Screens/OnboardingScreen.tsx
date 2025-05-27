@@ -10,7 +10,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
 const {width, height} = Dimensions.get('window');
 
-// Performans için onboarding içeriğini memo olarak tanımla
 const OnboardingContent = [
     {
         icon: "nutrition",
