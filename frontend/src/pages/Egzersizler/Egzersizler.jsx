@@ -224,7 +224,7 @@ const pdfStyles = StyleSheet.create({
 const ExerciseDocument = ({ exercise, assignmentData }) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Dr. Ayşe Yılmaz"; // Bu kısım dinamik olarak değiştirilebilir
+    const dietitianName = "Dr. Furkan İmamoğlu"; // Bu kısım dinamik olarak değiştirilebilir
 
     return (
         <Document>

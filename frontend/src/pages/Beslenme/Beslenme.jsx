@@ -215,7 +215,7 @@ const pdfStyles = StyleSheet.create({
 const NutritionPlanDocument = ({ program }) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Dr. Ayşe Yılmaz";
+    const dietitianName = "Dr. Furkan İmamoğlu";
 
     // Helper function to get meal items
     const getMealItems = (mealData) => {
