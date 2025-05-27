@@ -398,8 +398,42 @@ function Danisan() {
         });
     };
 
-    const deleteMeasurement = () => {
+    const deleteMeasurement = async (measurement) => {
+        try {
+            await axios.delete(
+                config[config.environment].apiUrl + "/measurement/deleteMeasurement",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        measurement_id: measurement.id
+                    }
+                }
+            );
+            
+            // Refresh measurements after deletion
+            setMeasurementsLoading(true);
+            const response = await axios.get(
+                config[config.environment].apiUrl + "/measurement/getClientMeasurement",
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: id,
+                    },
+                }
+            );
+            setMeasurements(response.data);
+            setMeasurementsLoading(false);
 
+            setSuccessMessage("Ölçüm başarıyla silindi.");
+            setShowSuccessPopup(true);
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || "Ölçüm silinirken bir hata oluştu.");
+            setShowErrorPopup(true);
+        }
     }
 
     const handleCreateMeasurement = async (e) => {
