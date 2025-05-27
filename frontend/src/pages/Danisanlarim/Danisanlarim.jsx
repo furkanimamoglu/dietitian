@@ -904,6 +904,15 @@ export default function Danisanlarim() {
                             "& .MuiDataGrid-footerContainer": {
                                 bgcolor: "background.default",
                             },
+                            // Hücre seçiminde oluşan çerçeveyi kaldırma
+                            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+                                outline: "none",
+                            },
+                            "& .MuiDataGrid-cell.Mui-selected, & .MuiDataGrid-cell.Mui-selected:hover, & .MuiDataGrid-cell.Mui-selected:focus": {
+                                outline: "none",
+                                border: "none",
+                                boxShadow: "none",
+                            },
                         }}
                     />
                 </Paper>
