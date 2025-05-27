@@ -86,12 +86,13 @@ const Client = sequelize.define('Client', {
             }
         },
         status: {
-            type: DataTypes.BOOLEAN,
+            type: DataTypes.ENUM('aktif', 'inaktif'),
             allowNull: false,
-            defaultValue: true,
+            defaultValue: 'aktif',
             validate: {
-                notNull: {
-                    msg: 'Durum alanı boş bırakılamaz.'
+                isIn: {
+                    args: [['aktif', 'inaktif']],
+                    msg: "Durum 'aktif', 'inaktif' olmalıdır."
                 }
             }
         },

@@ -35,14 +35,14 @@ const Invoice = sequelize.define('Invoice', {
             }
         },
         amount: {
-            type: DataTypes.DECIMAL(10, 2),
+            type: DataTypes.BIGINT,
             allowNull: false,
             validate: {
                 isDecimal: {
                     msg: "Tutar bir ondalık sayı olmalıdır."
                 },
                 min: {
-                    args: [0.01],
+                    args: [0],
                     msg: "Tutar 0'dan büyük olmalıdır."
                 },
                 notNull: {
