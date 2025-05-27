@@ -486,23 +486,16 @@ export default function Danisanlarim() {
     };
 
     const columns = [
-        {field: "name", headerName: "İsim", flex: 1, editable: true},
-        {field: "email", headerName: "Email", flex: 1.2, editable: true},
-        {
-            field: "password",
-            headerName: "Şifre",
-            flex: 1.2,
-            editable: true,
-            renderCell: (params) => '•'.repeat(params.value?.length || 8),
-        },
-        {field: "phoneNumber", headerName: "Telefon", flex: 1, editable: true},
+        {field: "name", headerName: "İsim", flex: 1, editable: false},
+        {field: "email", headerName: "Email", flex: 1.2, editable: false},
+        {field: "phoneNumber", headerName: "Telefon", flex: 1, editable: false},
         {
             field: "status",
             headerName: "Durum",
             width: 90,
             type: "singleSelect",
             valueOptions: [true, false],
-            editable: true,
+            editable: false,
             renderCell: (params) =>
                 params.row.status ? (
                     <CheckCircle sx={{color: green[500]}}/>
@@ -516,7 +509,7 @@ export default function Danisanlarim() {
             width: 90,
             type: "singleSelect",
             valueOptions: ["Erkek", "Kadın", "Diğer"],
-            editable: true,
+            editable: false,
             renderCell: (params) =>
                 params.value === "Erkek" ? (
                     <MaleIcon sx={{color: blue[500]}}/>
