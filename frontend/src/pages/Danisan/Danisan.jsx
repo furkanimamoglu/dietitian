@@ -1834,7 +1834,7 @@ function Danisan() {
                                     display: 'flex',
                                     justifyContent: 'space-between'
                                 }}>
-                                    <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                    <Typography variant="h5" sx={{fontWeight: 'bold'}}>
                                         {nutritionPlan && nutritionPlan.length > 0
                                             ? nutritionPlan[selectedPlanIndex]?.note || "İsim Girilmemiş Plan"
                                             : "İsim Girilmemiş Plan"}
@@ -2274,7 +2274,7 @@ function Danisan() {
                         <Card elevation={3} sx={{mb: 3}}>
                             <CardHeader
                                 title="Atanmış Planlar"
-                                titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
+                                titleTypographyProps={{variant: 'h5', fontWeight: 'bold'}}
                                 sx={{
                                     bgcolor: 'primary.light',
                                     color: 'primary.contrastText',
