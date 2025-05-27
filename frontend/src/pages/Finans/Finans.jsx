@@ -2365,7 +2365,7 @@ export default function Finans() {
                                         id="package-price"
                                         type="number"
                                         min={0}
-                                        value={newPackage.price}
+                                        value={newPackage.price || ""}
                                         onChange={(e) => handlePackageChange('price', Number(e.target.value))}
                                         required
                                         disabled={isLoading}
@@ -2504,7 +2504,7 @@ export default function Finans() {
                                         id="invoice-amount"
                                         type="number"
                                         min={0}
-                                        value={newInvoice.amount}
+                                        value={newInvoice.amount || ""}
                                         onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
                                         required
                                     />
