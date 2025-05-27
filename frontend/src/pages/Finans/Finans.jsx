@@ -215,6 +215,7 @@ export default function Finans() {
     // Package management state
     const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
     const [currentInvoice, setCurrentInvoice] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
     const [newInvoice, setNewInvoice] = useState({
         clientName: "",
         clientId: 0,
@@ -1000,38 +1001,63 @@ export default function Finans() {
 
     // Invoice management handlers
     const handleOpenInvoiceDialog = (invoice = null) => {
+        // Always reset form first to clear any previous data
+        setCurrentInvoice(null);
+        // Reset any form errors
+        setFormErrors({});
+        
         if (invoice) {
+            // If editing an existing invoice
             setCurrentInvoice(invoice);
             setNewInvoice({...invoice});
         } else {
+            // If creating a new invoice, set default values
             const firstPackage = packages.length > 0 ? packages[0] : null;
             const today = new Date();
             let dueDate;
+            
             if (firstPackage) {
                 dueDate = calculateDueDateFromPackageType(today, firstPackage.type);
             } else {
                 dueDate = new Date(today);
                 dueDate.setDate(dueDate.getDate() + 7);
             }
-            setCurrentInvoice(null);
+            
+            // Set fresh default values
             setNewInvoice({
-                clientName: clients.length > 0 ? clients[0].name : "",
-                clientId: clients.length > 0 ? clients[0].id : 0,
-                packageId: firstPackage ? firstPackage.id : 0,
-                packageName: firstPackage ? firstPackage.name : "",
-                amount: firstPackage ? Number(firstPackage.price) : 0,
+                clientName: "",
+                clientId: "",
+                packageId: "",
+                packageName: "",
+                amount: 0,
                 status: "Beklemede",
                 issueDate: safelyFormatDate(today),
                 dueDate: safelyFormatDate(dueDate),
                 description: ""
             });
         }
+        
+        // Open the dialog after setting the state
         setInvoiceDialogOpen(true);
     };
 
     const handleCloseInvoiceDialog = () => {
         setInvoiceDialogOpen(false);
         setCurrentInvoice(null);
+        // Reset form errors
+        setFormErrors({});
+        // Reset the form data when closing
+        setNewInvoice({
+            clientName: "",
+            clientId: "",
+            packageId: "",
+            packageName: "",
+            amount: 0,
+            status: "Beklemede",
+            issueDate: new Date().toISOString().split('T')[0],
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            description: ""
+        });
     };
 
     const handleInvoiceChange = (field, value) => {
@@ -1039,6 +1065,15 @@ export default function Finans() {
             ...newInvoice,
             [field]: value
         });
+        
+        // Clear error for this field if it exists
+        if (formErrors[field]) {
+            setFormErrors(prev => {
+                const newErrors = {...prev};
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
 
         // Auto-update client name if client id changes
         if (field === 'clientId') {
@@ -1068,6 +1103,15 @@ export default function Finans() {
                         packageName: selectedPackage.name,
                         dueDate: safelyFormatDate(dueDate)
                     }));
+                    
+                    // Clear amount error if it exists since we're setting a valid amount
+                    if (formErrors.amount) {
+                        setFormErrors(prev => {
+                            const newErrors = {...prev};
+                            delete newErrors.amount;
+                            return newErrors;
+                        });
+                    }
                 } catch (error) {
                     console.error('Error updating due date:', error);
                     // Still update other fields but use a safe default for dueDate
@@ -1083,7 +1127,7 @@ export default function Finans() {
                 // This allows users to manually select their preferred due date
                 setNewInvoice(prev => ({
                     ...prev,
-                    packageId: Number(value) || 0,
+                    packageId: Number(value) || "",
                     packageName: "",
                     amount: 0
                 }));
@@ -1104,6 +1148,15 @@ export default function Finans() {
                         issueDate: value,
                         dueDate: safelyFormatDate(dueDate)
                     }));
+                    
+                    // Clear due date error if it exists since we're setting a valid due date
+                    if (formErrors.dueDate) {
+                        setFormErrors(prev => {
+                            const newErrors = {...prev};
+                            delete newErrors.dueDate;
+                            return newErrors;
+                        });
+                    }
                 } else {
                     // If no package is selected, don't change the due date
                     // Let user set it manually
@@ -1132,15 +1185,33 @@ export default function Finans() {
     };
 
     const handleSaveInvoice = async () => {
-        // Tutar boşsa hata ver, 0 kabul et
-        if (newInvoice.amount === '' || newInvoice.amount === null || isNaN(newInvoice.amount)) {
-            toast.error("Lütfen tutar alanını doldurun.");
-            return;
-        }
+        // Reset previous errors
+        const errors = {};
+        
+        // Validate all required fields
         if (!newInvoice.clientId) {
-            toast.error("Lütfen danışan seçin.");
+            errors.clientId = "Lütfen bir danışan seçin";
+        }
+        
+        if (newInvoice.amount === '' || newInvoice.amount === null || isNaN(newInvoice.amount) || newInvoice.amount <= 0) {
+            errors.amount = "Lütfen geçerli bir tutar girin";
+        }
+        
+        if (!newInvoice.issueDate) {
+            errors.issueDate = "Lütfen fatura tarihi seçin";
+        }
+        
+        if (!newInvoice.dueDate) {
+            errors.dueDate = "Lütfen son ödeme tarihi seçin";
+        }
+        
+        // If we have validation errors, show them and stop
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
             return;
         }
+        
+        // If validation passes, continue with saving
         setIsLoading(true);
         try {
             const getApiUrl = (endpoint) => {
@@ -1153,7 +1224,7 @@ export default function Finans() {
                     Authorization: localStorage.getItem("token"),
                 },
             };
-            const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+            
             // Status mapping fonksiyonu kullan
             const backendStatus = mapStatusToBackend(newInvoice.status);
             const invoiceData = {
@@ -1165,6 +1236,7 @@ export default function Finans() {
                 dueDate: newInvoice.dueDate,
                 description: newInvoice.description || ""
             };
+            
             if (currentInvoice) {
                 // Update
                 const response = await axios.put(getApiUrl('/invoice/updateInvoice'), {
@@ -1177,6 +1249,7 @@ export default function Finans() {
                 await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
                 toast.success("Yeni fatura oluşturuldu.");
             }
+            
             await fetchInvoices();
             handleCloseInvoiceDialog();
         } catch (error) {
@@ -2459,19 +2532,22 @@ export default function Finans() {
                                         className="readonly-input"
                                     />
                                 ) : (
-                                    <select
-                                        id="client-select"
-                                        value={newInvoice.clientId || ""}
-                                        onChange={(e) => handleInvoiceChange('clientId', e.target.value ? Number(e.target.value) : 0)}
-                                        required
-                                    >
-                                        <option value="">Danışan Seçin</option>
-                                        {clients.map(client => (
-                                            <option key={client.id} value={client.id}>
-                                                {client.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <>
+                                        <select
+                                            id="client-select"
+                                            value={newInvoice.clientId || ""}
+                                            onChange={(e) => handleInvoiceChange('clientId', e.target.value ? Number(e.target.value) : "")}
+                                            className={formErrors.clientId ? "error-input" : ""}
+                                        >
+                                            <option value="">Danışan Seçin</option>
+                                            {clients.map(client => (
+                                                <option key={client.id} value={client.id}>
+                                                    {client.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formErrors.clientId && <div className="error-message">{formErrors.clientId}</div>}
+                                    </>
                                 )}
                             </div>
 
@@ -2480,7 +2556,7 @@ export default function Finans() {
                                 <select
                                     id="package-select"
                                     value={newInvoice.packageId || ""}
-                                    onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : 0)}
+                                    onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : "")}
                                 >
                                     <option value="">Paket Seçin</option>
                                     {packages.length > 0 && packages.map(pkg => (
@@ -2503,9 +2579,10 @@ export default function Finans() {
                                         min={0}
                                         value={newInvoice.amount || ""}
                                         onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
-                                        required
+                                        className={formErrors.amount ? "error-input" : ""}
                                     />
                                 </div>
+                                {formErrors.amount && <div className="error-message">{formErrors.amount}</div>}
                             </div>
 
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -2518,8 +2595,9 @@ export default function Finans() {
                                         }}
                                         slotProps={{
                                             textField: {
-                                                required: true,
-                                                fullWidth: true
+                                                fullWidth: true,
+                                                error: !!formErrors.issueDate,
+                                                helperText: formErrors.issueDate
                                             }
                                         }}
                                     />
@@ -2534,8 +2612,9 @@ export default function Finans() {
                                         }}
                                         slotProps={{
                                             textField: {
-                                                required: true,
-                                                fullWidth: true
+                                                fullWidth: true,
+                                                error: !!formErrors.dueDate,
+                                                helperText: formErrors.dueDate
                                             }
                                         }}
                                     />
