@@ -382,8 +382,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
                 <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={() => {
-                    }} // Controlled component
+                    onChange={onCheck}
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
