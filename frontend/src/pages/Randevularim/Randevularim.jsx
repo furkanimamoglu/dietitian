@@ -580,6 +580,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            minutesStep={15}
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -597,6 +598,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            minutesStep={15}
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
