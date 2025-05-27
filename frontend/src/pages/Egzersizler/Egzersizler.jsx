@@ -27,6 +27,8 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
 import {
     Avatar,
     CircularProgress,
@@ -55,7 +57,259 @@ import {
     Stack,
     Tooltip
 } from '@mui/material';
-import {jsPDF} from "jspdf";
+
+// Register a custom font with Turkish character support
+Font.register({
+    family: 'Open Sans',
+    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
+});
+
+// Define styles for PDF
+const pdfStyles = StyleSheet.create({
+    page: {
+        flexDirection: 'column',
+        backgroundColor: '#fff',
+        padding: 10,
+        fontFamily: 'Open Sans'
+    },
+    header: {
+        backgroundColor: '#087708',
+        padding: 5,
+        marginBottom: 10,
+        borderRadius: 5,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    headerContent: {
+        flex: 1
+    },
+    headerTitle: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4
+    },
+    headerInfo: {
+        color: 'white',
+        fontSize: 9,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    logoContainer: {
+        width: 50,
+        height: 50,
+        backgroundColor: 'white',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 10
+    },
+    logo: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#087708'
+    },
+    infoSection: {
+        flexDirection: 'row',
+        marginBottom: 10,
+        borderRadius: 5,
+        overflow: 'hidden'
+    },
+    infoBox: {
+        flex: 1,
+        padding: 8,
+        backgroundColor: '#f5f5f5',
+        margin: 2
+    },
+    infoTitle: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        marginBottom: 3,
+        color: '#087708'
+    },
+    infoContent: {
+        fontSize: 8,
+        color: '#333'
+    },
+    exerciseDetails: {
+        marginBottom: 15,
+        border: '1px solid #E0E0E0',
+        borderRadius: 5,
+        overflow: 'hidden'
+    },
+    exerciseHeader: {
+        backgroundColor: '#087708',
+        padding: 6,
+    },
+    exerciseHeaderText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold'
+    },
+    exerciseContent: {
+        padding: 10,
+        backgroundColor: '#f9f9f9'
+    },
+    exerciseRow: {
+        flexDirection: 'row',
+        marginBottom: 5,
+        paddingBottom: 3,
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEEEEE',
+        borderBottomStyle: 'solid'
+    },
+    exerciseLabel: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        width: '30%',
+        color: '#555'
+    },
+    exerciseValue: {
+        fontSize: 8,
+        width: '70%'
+    },
+    instructionsTitle: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginTop: 8,
+        marginBottom: 4,
+        color: '#087708',
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEEEEE',
+        borderBottomStyle: 'solid',
+        paddingBottom: 2
+    },
+    instructionsText: {
+        fontSize: 8,
+        lineHeight: 1.4
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 10,
+        left: 0,
+        right: 0,
+        textAlign: 'right',
+        paddingTop: 5,
+        marginRight: 15
+    },
+    footerText: {
+        fontSize: 7,
+        color: '#087708'
+    },
+    footerWebsite: {
+        fontSize: 7,
+        color: '#FF9800',
+        marginTop: 2
+    },
+    notesSection: {
+        marginTop: 10,
+        padding: 8,
+        backgroundColor: '#FFF9C4',
+        borderRadius: 5
+    },
+    notesTitle: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        marginBottom: 3,
+        color: '#FF9800'
+    },
+    notesContent: {
+        fontSize: 8,
+        color: '#333'
+    }
+});
+
+// PDF Document Component for Exercise
+const ExerciseDocument = ({ exercise, assignmentData }) => {
+    const today = new Date();
+    const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
+    const dietitianName = "Dr. Ayşe Yılmaz"; // Bu kısım dinamik olarak değiştirilebilir
+
+    return (
+        <Document>
+            <Page size="A4" style={pdfStyles.page}>
+                <View style={pdfStyles.header}>
+                    <View style={pdfStyles.headerContent}>
+                        <Text style={pdfStyles.headerTitle}>{exercise.exercise_name} Egzersiz Programı</Text>
+                        <View style={pdfStyles.headerInfo}>
+                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
+                        </View>
+                    </View>
+                    <View style={pdfStyles.logoContainer}>
+                        <Text style={pdfStyles.logo}>Diyetia</Text>
+                    </View>
+                </View>
+                
+                <View style={pdfStyles.infoSection}>
+                    <View style={pdfStyles.infoBox}>
+                        <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
+                        <Text style={pdfStyles.infoContent}>Beslenme ve Diyet Uzmanı</Text>
+                        <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
+                        <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
+                    </View>
+                    
+                    {assignmentData && (
+                        <View style={pdfStyles.infoBox}>
+                            <Text style={pdfStyles.infoTitle}>Program Bilgileri</Text>
+                            <Text style={pdfStyles.infoContent}>Danışan: {assignmentData.clientName || "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>Başlangıç: {assignmentData.startDate ? new Date(assignmentData.startDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>Bitiş: {assignmentData.endDate ? new Date(assignmentData.endDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                        </View>
+                    )}
+                </View>
+                
+                <View style={pdfStyles.exerciseDetails}>
+                    <View style={pdfStyles.exerciseHeader}>
+                        <Text style={pdfStyles.exerciseHeaderText}>Egzersiz Detayları</Text>
+                    </View>
+                    <View style={pdfStyles.exerciseContent}>
+                        <View style={pdfStyles.exerciseRow}>
+                            <Text style={pdfStyles.exerciseLabel}>Süre:</Text>
+                            <Text style={pdfStyles.exerciseValue}>{exercise.duration || 0} dakika</Text>
+                        </View>
+                        <View style={pdfStyles.exerciseRow}>
+                            <Text style={pdfStyles.exerciseLabel}>Zorluk Seviyesi:</Text>
+                            <Text style={pdfStyles.exerciseValue}>{exercise.difficulty || 0}/5</Text>
+                        </View>
+                        <View style={pdfStyles.exerciseRow}>
+                            <Text style={pdfStyles.exerciseLabel}>Yakılan Kalori:</Text>
+                            <Text style={pdfStyles.exerciseValue}>{exercise.calories_burned || 0} kcal</Text>
+                        </View>
+                        {exercise.equipment && (
+                            <View style={pdfStyles.exerciseRow}>
+                                <Text style={pdfStyles.exerciseLabel}>Ekipman:</Text>
+                                <Text style={pdfStyles.exerciseValue}>{exercise.equipment}</Text>
+                            </View>
+                        )}
+                        {exercise.video && (
+                            <View style={pdfStyles.exerciseRow}>
+                                <Text style={pdfStyles.exerciseLabel}>Video URL:</Text>
+                                <Text style={pdfStyles.exerciseValue}>{exercise.video}</Text>
+                            </View>
+                        )}
+                        
+                        <Text style={pdfStyles.instructionsTitle}>Egzersiz Açıklaması</Text>
+                        <Text style={pdfStyles.instructionsText}>{exercise.exercise_description || "Bu egzersiz için detaylı açıklama bulunmamaktadır."}</Text>
+                    </View>
+                </View>
+                
+                {assignmentData && assignmentData.note && (
+                    <View style={pdfStyles.notesSection}>
+                        <Text style={pdfStyles.notesTitle}>Diyetisyen Notu</Text>
+                        <Text style={pdfStyles.notesContent}>{assignmentData.note}</Text>
+                    </View>
+                )}
+                
+                <View style={pdfStyles.footer}>
+                    <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
+                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
+                </View>
+            </Page>
+        </Document>
+    );
+};
 
 // Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
@@ -123,13 +377,25 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
                     >
                         <PersonAddIcon/>
                     </button>
-                    <button
-                        className="action-button print-btn"
-                        title="Yazdır"
-                        onClick={() => onPrint(item)}
+                    <PDFDownloadLink
+                        document={<ExerciseDocument exercise={item} assignmentData={null} />}
+                        fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
+                        style={{ textDecoration: 'none' }}
                     >
-                        <PrintIcon/>
-                    </button>
+                        {({ blob, url, loading, error }) => (
+                            <button
+                                className="action-button print-btn"
+                                title="Yazdır"
+                                disabled={loading}
+                                onClick={(e) => {
+                                    if (loading) e.preventDefault();
+                                    else onPrint(item);
+                                }}
+                            >
+                                <PrintIcon/>
+                            </button>
+                        )}
+                    </PDFDownloadLink>
                     <button
                         className="action-button edit-btn"
                         title="Düzenle"
@@ -487,8 +753,8 @@ export default function Egzersizler() {
     };
 
     const handlePrint = (item) => {
-        // Implementation for printing exercise details
-        generatePDF(item);
+        // PDF generation is now handled by the PDFDownloadLink component
+        console.log("Printing exercise:", item);
     };
 
     const handleEdit = (item) => {
@@ -724,48 +990,7 @@ export default function Egzersizler() {
             });
     };
 
-    const generatePDF = (exercise) => {
-        const doc = new jsPDF();
-
-        doc.setFontSize(20);
-        doc.text(exercise.exercise_name, 20, 20);
-
-        doc.setFontSize(10);
-        let y = 40;
-
-        if (exercise.exercise_description) {
-            doc.text("Açıklama:", 20, y);
-            doc.text(exercise.exercise_description, 60, y);
-            y += 10;
-        }
-
-        if (exercise.equipment) {
-            doc.text("Ekipman:", 20, y);
-            doc.text(exercise.equipment, 60, y);
-            y += 10;
-        }
-
-        doc.text("Süre:", 20, y);
-        doc.text(`${exercise.duration || 0} dakika`, 60, y);
-        y += 10;
-
-        doc.text("Zorluk:", 20, y);
-        doc.text(`${exercise.difficulty || 0}/5`, 60, y);
-        y += 10;
-
-        doc.text("Yakılan Kalori:", 20, y);
-        doc.text(`${exercise.calories_burned || 0} kcal`, 60, y);
-        y += 10;
-
-        if (exercise.video) {
-            doc.text("Video Linki:", 20, y);
-            doc.text(exercise.video, 60, y);
-            y += 10;
-        }
-
-        // Save the PDF
-        doc.save(`${exercise.exercise_name}_egzersiz.pdf`);
-    };
+    // PDF generation is now handled by the ExerciseDocument component with react-pdf
 
     return (
         <Default>
@@ -1612,9 +1837,38 @@ export default function Egzersizler() {
                                         </ListItemAvatar>
                                         <ListItemText
                                             primary={
-                                                <Typography fontWeight="500">
-                                                    {item.Exercise?.exercise_name || "Egzersiz"}
-                                                </Typography>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <Typography fontWeight="500">
+                                                        {item.Exercise?.exercise_name || "Egzersiz"}
+                                                    </Typography>
+                                                    <PDFDownloadLink
+                                                        document={
+                                                            <ExerciseDocument 
+                                                                exercise={item.Exercise} 
+                                                                assignmentData={{
+                                                                    clientName: selectedClientInfo?.name,
+                                                                    startDate: item.start_date,
+                                                                    endDate: item.end_date,
+                                                                    note: item.note
+                                                                }} 
+                                                            />
+                                                        }
+                                                        fileName={`${item.Exercise?.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
+                                                        style={{ textDecoration: 'none' }}
+                                                    >
+                                                        {({ blob, url, loading, error }) => (
+                                                            <Button
+                                                                size="small"
+                                                                startIcon={<FileDownloadIcon />}
+                                                                disabled={loading}
+                                                                variant="outlined"
+                                                                color="primary"
+                                                            >
+                                                                PDF
+                                                            </Button>
+                                                        )}
+                                                    </PDFDownloadLink>
+                                                </Box>
                                             }
                                             secondary={
                                                 <React.Fragment>

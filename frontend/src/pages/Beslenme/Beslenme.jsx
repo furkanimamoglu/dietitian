@@ -215,7 +215,7 @@ const pdfStyles = StyleSheet.create({
 const NutritionPlanDocument = ({ program }) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Dr. Furkan İmamoğlu";
+    const dietitianName = "Dr. Ayşe Yılmaz";
 
     // Helper function to get meal items
     const getMealItems = (mealData) => {
@@ -430,17 +430,17 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                         style={{ textDecoration: 'none' }}
                     >
                         {({ blob, url, loading, error }) => (
-                            <button
-                                className="action-button print-btn"
-                                title="Yazdır"
+                    <button
+                        className="action-button print-btn"
+                        title="Yazdır"
                                 disabled={loading}
                                 onClick={(e) => {
                                     if (loading) e.preventDefault();
                                     else onPrint(item);
                                 }}
-                            >
-                                <PrintIcon/>
-                            </button>
+                    >
+                        <PrintIcon/>
+                    </button>
                         )}
                     </PDFDownloadLink>
                     <button
@@ -912,7 +912,7 @@ const ViewMealPlan = ({mealPlan, programTitle, onExportPdf, selectedProgram}) =>
                         <button className="export-pdf-button" disabled={loading}>
                             <FileDownloadIcon />
                             {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
-                        </button>
+                </button>
                     )}
                 </PDFDownloadLink>
             </div>
@@ -2628,13 +2628,13 @@ export default function Beslenme() {
                                                                         style={{ textDecoration: 'none' }}
                                                                     >
                                                                         {({ blob, url, loading, error }) => (
-                                                                            <Button
-                                                                                variant="outlined"
-                                                                                startIcon={<FileDownloadIcon />}
+                                                        <Button
+                                                            variant="outlined"
+                                                            startIcon={<FileDownloadIcon />}
                                                                                 disabled={loading}
                                                                             >
                                                                                 {loading ? 'Hazırlanıyor...' : 'PDF İndir'}
-                                                                            </Button>
+                                                        </Button>
                                                                         )}
                                                                     </PDFDownloadLink>
                                                                 );
