@@ -35,6 +35,13 @@ export default function App() {
                         },
                         duration: 3000,
                     }}
+                    containerStyle={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                        marginBottom: '5rem',
+                        marginRight: '2.5rem',
+                    }}
                 />
             </Box>
         </Router>

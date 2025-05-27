@@ -656,10 +656,8 @@ export default function Finans() {
                 const serviceItems = servicesResponse.data;
                 const serviceNames = serviceItems.map(item => item.name);
 
-                // If no services, add an empty service
-                if (serviceNames.length === 0) {
-                    serviceNames.push("");
-                }
+                // Don't add an empty service if there are no services
+                // Let the user add services if they want to
 
                 setNewPackage({
                     ...pkg,
@@ -669,7 +667,7 @@ export default function Finans() {
             } catch (error) {
                 console.error('Error fetching package items:', error);
                 toast.error('Paket hizmetleri yüklenirken bir hata oluştu.');
-                setNewPackage({...pkg, services: [""], serviceItems: []});
+                setNewPackage({...pkg, services: [], serviceItems: []});
             }
         } else {
             setCurrentPackage(null);
@@ -678,7 +676,7 @@ export default function Finans() {
                 type: "Seanslık",
                 price: "",
                 description: "",
-                services: [""],
+                services: [], // Start with no services
                 serviceItems: []
             });
         }
@@ -696,7 +694,7 @@ export default function Finans() {
             type: "Seanslık",
             price: "",
             description: "",
-            services: [""],
+            services: [], // No default services
             serviceItems: []
         });
     };
@@ -2167,19 +2165,11 @@ export default function Finans() {
                     setImportDialogOpen(false);
                     setImportPreviewOpen(true);
                 } else {
-                    setSnackbar({
-                        open: true,
-                        message: "CSV dosyası boş veya geçersiz format içeriyor",
-                        severity: "error"
-                    });
+                    toast.error('CSV dosyası boş veya geçersiz format içeriyor.');
                 }
             },
             error: function(error) {
-                setSnackbar({
-                    open: true,
-                    message: `CSV okuma hatası: ${error.message}`,
-                    severity: "error"
-                });
+                toast.error(`CSV okuma hatası: ${error.message}`);
             }
         });
     };
@@ -2357,12 +2347,10 @@ export default function Finans() {
                     failCount++;
                 }
             }
-            
-            setSnackbar({
-                open: true,
-                message: `${successCount} fatura başarıyla eklendi. ${failCount > 0 ? `${failCount} fatura eklenemedi.` : ''}`,
-                severity: failCount > 0 ? "warning" : "success"
-            });
+
+            toast.success(
+                `${successCount} fatura başarıyla eklendi. ${failCount > 0 ? `${failCount} fatura eklenemedi.` : ''}`
+            );
             
             setImportPreviewOpen(false);
             setCsvData([]);
@@ -2370,11 +2358,9 @@ export default function Finans() {
             
         } catch (error) {
             console.error("Toplu fatura eklenirken hata oluştu:", error);
-            setSnackbar({
-                open: true,
-                message: "Faturalar eklenirken bir hata oluştu",
-                severity: "error"
-            });
+            toast.error(
+                "Faturalar eklenirken bir hata oluştu"
+            );
         }
     };
     
@@ -2509,27 +2495,33 @@ export default function Finans() {
                             <label>Paket İçeriği <span className="optional-label">(Opsiyonel)</span></label>
 
                             <div className="services-list-form">
-                                {newPackage.services.map((service, index) => (
-                                    <div key={index} className="service-item-input">
-                                        <span className="service-item-number">{index + 1}.</span>
-                                        <input
-                                            type="text"
-                                            placeholder={`Hizmet ${index + 1}`}
-                                            value={service}
-                                            onChange={(e) => handleServiceChange(index, e.target.value)}
-                                            disabled={isLoading}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="remove-button"
-                                            onClick={() => handleRemoveService(index)}
-                                            disabled={newPackage.services.length <= 1 || isLoading}
-                                            title="Hizmeti Sil"
-                                        >
-                                            <DeleteIcon/>
-                                        </button>
+                                {newPackage.services.length > 0 ? (
+                                    newPackage.services.map((service, index) => (
+                                        <div key={index} className="service-item-input">
+                                            <span className="service-item-number">{index + 1}.</span>
+                                            <input
+                                                type="text"
+                                                placeholder={`Hizmet ${index + 1}`}
+                                                value={service}
+                                                onChange={(e) => handleServiceChange(index, e.target.value)}
+                                                disabled={isLoading}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="remove-button"
+                                                onClick={() => handleRemoveService(index)}
+                                                disabled={isLoading}
+                                                title="Hizmeti Sil"
+                                            >
+                                                <DeleteIcon/>
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="no-services-message">
+                                        Henüz hizmet eklenmedi. Paket içeriğini belirtmek için "Hizmet Ekle" butonunu kullanabilirsiniz.
                                     </div>
-                                ))}
+                                )}
 
                                 <button
                                     type="button"

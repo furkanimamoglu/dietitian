@@ -1174,3 +1174,14 @@
     font-weight: normal;
     margin-left: 4px;
 }
+
+.no-services-message {
+    padding: 16px;
+    text-align: center;
+    color: #94a3b8;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    border: 1px dashed #cbd5e1;
+}
