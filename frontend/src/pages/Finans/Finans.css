@@ -933,7 +933,7 @@
 }
 
 .warning-icon {
-    color: #e74c3c;
+    color: #ffffff;
     font-size: 24px;
     margin-right: 12px;
     margin-top: 2px;
@@ -1088,4 +1088,54 @@
     border-radius: 4px;
     border: 1px solid #e2e8f0;
     flex-grow: 1;
+}
+
+/* Add styles for the delete warning modal */
+.delete-warning-modal {
+    border: 2px solid #e74c3c;
+    background-color: #fff;
+}
+
+.warning-header {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.warning-header h2 {
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.warning-header .warning-icon {
+    font-size: 24px;
+}
+
+.warning-header .close-button {
+    color: white;
+}
+
+.delete-confirm-modal {
+    padding: 20px 10px;
+    text-align: center;
+}
+
+.delete-confirm-modal .warning-text {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.delete-confirm-modal .delete-note {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.modal-btn.delete-confirm-btn {
+    background-color: #e74c3c;
+}
+
+.modal-btn.delete-confirm-btn:hover {
+    background-color: #c0392b;
 }

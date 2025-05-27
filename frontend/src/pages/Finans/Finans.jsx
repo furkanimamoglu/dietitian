@@ -120,19 +120,16 @@ const ConfirmationDialog = ({isOpen, onClose, onConfirm, title, message, itemNam
 
     return (
         <div className="custom-modal-overlay" onClick={handleOverlayClick}>
-            <div className="custom-modal">
-                <div className="custom-modal-header">
-                    <h2>{title}</h2>
+            <div className="custom-modal delete-warning-modal">
+                <div className="custom-modal-header warning-header">
+                    <h2><WarningIcon className="warning-icon" /> {title}</h2>
                     <button className="close-button" onClick={onClose} disabled={isLoading}>&times;</button>
                 </div>
                 <div className="custom-modal-content">
                     <div className="delete-confirm-modal">
-                        <div className="delete-warning">
-                            <WarningIcon className="warning-icon"/>
-                            <p className="warning-text">
-                                <strong>{itemName}</strong> {message}
-                            </p>
-                        </div>
+                        <p className="warning-text">
+                            <strong>{itemName}</strong> {message}
+                        </p>
                         <p className="delete-note">Bu işlem geri alınamaz.</p>
                     </div>
                 </div>
