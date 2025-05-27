@@ -1601,7 +1601,7 @@ export default function Beslenme() {
                                 onClick={() => setAddPlanModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Plan Ekle</span>
+                                <span className="btn-text">Plan</span>
                             </button>
                             <button
                                 className="action-btn add-btn"
@@ -1609,7 +1609,7 @@ export default function Beslenme() {
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Kategori Ekle</span>
+                                <span className="btn-text">Kategori</span>
                             </button>
                             <button
                                 className="action-btn delete-btn"

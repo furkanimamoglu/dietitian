@@ -479,6 +479,8 @@ export default function Egzersizler() {
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
     const [affectedExercises, setAffectedExercises] = useState([]);
+    // Add state for multiple categories deletion
+    const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
 
     // New exercise state
     const [newExercise, setNewExercise] = useState({
@@ -695,6 +697,19 @@ export default function Egzersizler() {
         setCategoryToDelete(category);
         setAffectedExercises(exercisesToDelete);
         setDeleteCategoryConfirmModal(true);
+    };
+
+    // Add handler for multiple categories deletion
+    const handleOpenMultiDeleteConfirm = () => {
+        if (checkedCategories.length === 0) return;
+
+        // Find exercises that would be affected by deleting these categories
+        const exercisesToDelete = egzersizData.filter(exercise =>
+            checkedCategories.includes(exercise.category_id)
+        );
+
+        setAffectedExercises(exercisesToDelete);
+        setDeleteMultiCategoriesConfirmModal(true);
     };
 
     const handleAddCategory = () => {
@@ -1014,7 +1029,7 @@ export default function Egzersizler() {
                                 onClick={() => setAddExerciseModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Egzersiz Ekle</span>
+                                <span className="btn-text">Egzersiz</span>
                             </button>
                             <button
                                 className="action-btn add-btn"
@@ -1022,7 +1037,15 @@ export default function Egzersizler() {
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Kategori Ekle</span>
+                                <span className="btn-text">Kategori</span>
+                            </button>
+                            <button
+                                className="action-btn delete-btn"
+                                title="Seçilenleri Sil"
+                                onClick={handleOpenMultiDeleteConfirm}
+                                disabled={checkedCategories.length === 0}
+                            >
+                                <DeleteIcon/>
                             </button>
                         </div>
                     </div>
@@ -1407,6 +1430,128 @@ export default function Egzersizler() {
                     <button
                         className="modal-btn delete-confirm-btn"
                         onClick={handleSingleCategoryDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Multiple Categories Confirmation Modal */}
+            <Modal
+                isOpen={deleteMultiCategoriesConfirmModal}
+                title="Kategorileri Sil"
+                onClose={() => {
+                    setDeleteMultiCategoriesConfirmModal(false);
+                    setAffectedExercises([]);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon"/>
+                        <p className="warning-text">
+                            <strong>{checkedCategories.length}</strong> kategoriyi silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+
+                    {affectedExercises.length > 0 && (
+                        <div className="affected-plans">
+                            <p className="delete-note important">
+                                <strong>Önemli:</strong> Bu kategoriler ile
+                                ilişkili <strong>{affectedExercises.length}</strong> egzersiz silinecektir:
+                            </p>
+                            <ul className="affected-plans-list">
+                                {affectedExercises.map(exercise => (
+                                    <li key={exercise.id}><span className="plan-title">{exercise.exercise_name}</span></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn cancel-btn"
+                        onClick={() => {
+                            setDeleteMultiCategoriesConfirmModal(false);
+                            setAffectedExercises([]);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button
+                        className="modal-btn delete-confirm-btn"
+                        onClick={() => {
+                            if (checkedCategories.length === 0) {
+                                setErrorMessage("Silinecek kategori seçilmedi.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+
+                            // Create an array of promises for each category deletion
+                            const deletePromises = checkedCategories.map(categoryId =>
+                                axios.delete(
+                                    `${config[config.environment].apiUrl}/exercise/deleteExerciseCategory?exercise_category_id=${categoryId}`,
+                                    {
+                                        headers: {
+                                            Authorization: localStorage.getItem("token"),
+                                        },
+                                    }
+                                )
+                            );
+
+                            // Execute all deletion requests
+                            Promise.all(deletePromises)
+                                .then(responses => {
+                                    // Check if all deletions were successful
+                                    const allSuccessful = responses.every(response => response.status === 200);
+
+                                    if (allSuccessful) {
+                                        // Remove deleted categories from state
+                                        setCategoryData(prevData =>
+                                            prevData.filter(category => !checkedCategories.includes(category.id))
+                                        );
+
+                                        // Clear checked categories
+                                        setCheckedCategories([]);
+
+                                        // Refresh exercises to remove those from deleted categories
+                                        fetchExercises();
+
+                                        // Show success message
+                                        setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
+                                        setShowSuccessPopup(true);
+                                    } else {
+                                        // Some deletions failed
+                                        setErrorMessage("Bazı kategoriler silinemedi.");
+                                        setShowErrorPopup(true);
+
+                                        // Refresh categories to get updated list
+                                        axios
+                                            .get(`${config[config.environment].apiUrl}/exercise/getMyExerciseCategories`, {
+                                                headers: {
+                                                    Authorization: localStorage.getItem("token"),
+                                                },
+                                            })
+                                            .then((response) => {
+                                                setCategoryData(response.data);
+                                                setCheckedCategories([]);
+                                            });
+                                    }
+
+                                    // Close modal and reset state
+                                    setDeleteMultiCategoriesConfirmModal(false);
+                                    setAffectedExercises([]);
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting categories:", error);
+                                    setErrorMessage("Kategoriler silinirken bir hata oluştu.");
+                                    setShowErrorPopup(true);
+
+                                    // Close modal but don't clear checkedCategories
+                                    setDeleteMultiCategoriesConfirmModal(false);
+                                    setAffectedExercises([]);
+                                });
+                        }}
                     >
                         Sil
                     </button>

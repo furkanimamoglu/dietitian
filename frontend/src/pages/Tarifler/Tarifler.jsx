@@ -653,7 +653,7 @@ export default function Tarifler() {
                                 onClick={() => setAddRecipeModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Tarif Ekle</span>
+                                <span className="btn-text">Tarif</span>
                             </button>
                             <button
                                 className="action-btn add-btn"
@@ -661,7 +661,7 @@ export default function Tarifler() {
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Kategori Ekle</span>
+                                <span className="btn-text">Kategori</span>
                             </button>
                             <button
                                 className="action-btn delete-btn"
