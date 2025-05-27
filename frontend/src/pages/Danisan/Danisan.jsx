@@ -64,6 +64,13 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import ErrorIcon from "@mui/icons-material/Error";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
+import Person from '@mui/icons-material/Person';
+import Cake from '@mui/icons-material/Cake';
+import Work from '@mui/icons-material/Work';
+import Favorite from '@mui/icons-material/Favorite';
+import Email from '@mui/icons-material/Email';
+import Phone from '@mui/icons-material/Phone';
+import LocationCity from '@mui/icons-material/LocationCity';
 
 function Danisan() {
     const {id} = useParams();
@@ -109,17 +116,10 @@ function Danisan() {
     const [measurementsLoading, setMeasurementsLoading] = useState(false);
 
     const [bloodTestFiles, setBloodTestFiles] = useState([]);
-    const [isPdfViewOpen, setIsPdfViewOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 
     const handleViewBloodTestFile = (file) => {
         setSelectedFile(file);
-        setIsPdfViewOpen(true);
-    };
-
-    const handleClosePdfView = () => {
-        setIsPdfViewOpen(false);
-        setSelectedFile(null);
     };
 
     // Success popup states
@@ -406,8 +406,8 @@ function Danisan() {
         const kas = parseFloat(measurementForm.kas) || 0;
         const su = parseFloat(measurementForm.su) || 0;
         const toplam = yag + kas + su;
-        if (yag > 100 || kas > 100 || su > 100 || toplam > 100) {
-            setErrorMessage("Yağ, kas ve su yüzdelerinin toplamı %100'ü geçemez.");
+        if (yag > 100 || kas > 100 || su > 100 || toplam !== 100) {
+            setErrorMessage("Yağ, kas ve su oranları 100'den düşük ve toplamı %100'e eşit olmalıdır.");
             setShowErrorPopup(true);
             return;
         }
@@ -3862,8 +3862,8 @@ function Danisan() {
                                     alt={`${danisan.name} ${danisan.surname}`}
                                     src="/placeholder_client.jpg"
                                     sx={{
-                                        width: 150,
-                                        height: 150,
+                                        width: 120,
+                                        height: 120,
                                         mb: 2,
                                         border: '4px solid',
                                         borderColor: 'primary.light',
@@ -3874,45 +3874,81 @@ function Danisan() {
                                         }
                                     }}
                                 />
-                                <Typography variant="h5" sx={{fontWeight: 'bold', mb: 1}}>
+                                <Typography variant="h5" sx={{fontWeight: 'bold', mb: 1, textAlign: 'center'}}>
                                     {danisan.name} {danisan.surname}
                                 </Typography>
                                 <Divider sx={{width: '100%', my: 2}}/>
-                                {/* Danışan Bilgileri Grid */}
-                                <Box sx={{width: '100%', mb: 2}}>
-                                    <Grid container spacing={1}>
-                                        <Grid item xs={6}>
-                                            <Typography
-                                                variant="body2"><strong>Cinsiyet:</strong> {danisan.gender || '-'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="body2"><strong>Doğum
-                                                Tarihi:</strong> {danisan.birthDate || '-'}</Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="body2"><strong>Meslek:</strong> {danisan.job || '-'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="body2"><strong>Medeni
-                                                Durum:</strong> {danisan.maritalStatus || '-'}</Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="body2"><strong>E-posta:</strong> {danisan.email || '-'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography
-                                                variant="body2"><strong>Telefon:</strong> {danisan.phoneNumber || '-'}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant="body2"><strong>Şehir:</strong> {danisan.city || '-'}
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
+                                
+                                {/* Danışan Bilgileri - Yeni Tasarım */}
+                                <List sx={{width: '100%', p: 0}}>
+                                    <ListItem sx={{
+                                        py: 1,
+                                        px: 0,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
+                                                <Person fontSize="small" />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={<Typography variant="body2" color="text.secondary">Cinsiyet</Typography>}
+                                            secondary={<Typography variant="body1">{danisan.gender || '-'}</Typography>}
+                                        />
+                                    </ListItem>
+                                    
+                                    <ListItem sx={{
+                                        py: 1,
+                                        px: 0,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
+                                                <Cake fontSize="small" />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={<Typography variant="body2" color="text.secondary">Doğum Tarihi</Typography>}
+                                            secondary={<Typography variant="body1">{danisan.birthDate || '-'}</Typography>}
+                                        />
+                                    </ListItem>
+                                    
+                                    <ListItem sx={{
+                                        py: 1,
+                                        px: 0,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
+                                                <Email fontSize="small" />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={<Typography variant="body2" color="text.secondary">E-posta</Typography>}
+                                            secondary={<Typography variant="body1" noWrap>{danisan.email || '-'}</Typography>}
+                                        />
+                                    </ListItem>
+                                    
+                                    <ListItem sx={{
+                                        py: 1,
+                                        px: 0,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
+                                                <Phone fontSize="small" />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={<Typography variant="body2" color="text.secondary">Telefon</Typography>}
+                                            secondary={<Typography variant="body1">{danisan.phoneNumber || '-'}</Typography>}
+                                        />
+                                    </ListItem>
+                                </List>
                             </Box>
                         </Card>
                     </Grid>
