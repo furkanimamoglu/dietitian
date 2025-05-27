@@ -275,14 +275,24 @@ export default function Header() {
                     )}
 
                     {/* Logo / Marka Adı */}
-                    <LogoContainer isMobile={isMobile} sx={{display: 'flex'}}>
-                        <SpaIcon sx={{
+                    <LogoContainer
+                        onClick={() => navigate('/dashboard')}
+                        isMobile={isMobile}
+                        sx={{
                             display: 'flex',
-                            ml: {xs: 0, md: 4},
-                            mr: 1,
-                            color: 'white',
-                            fontSize: isMobile ? 22 : 24
-                        }}/>
+                            alignItems: 'center',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <SpaIcon
+                            sx={{
+                                display: 'flex',
+                                ml: { xs: 0, md: 4 },
+                                mr: 1,
+                                color: 'white',
+                                fontSize: isMobile ? 22 : 24
+                            }}
+                        />
                         <Typography
                             variant="h6"
                             sx={{
