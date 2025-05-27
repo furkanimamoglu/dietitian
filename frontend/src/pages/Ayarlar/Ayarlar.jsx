@@ -70,7 +70,7 @@ export default function Ayarlar() {
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
     const [personalInfo, setPersonalInfo] = useState({
-        name: "Dr. Ayşe Yılmaz",
+        name: "Dr. Furkan İmamoğlu",
         email: "ayse.yilmaz@example.com",
         phone: "+90 555 123 4567"
     });
@@ -671,7 +671,7 @@ export default function Ayarlar() {
                                     <Divider sx={{mb: 3}}/>
 
                                     <Typography variant="body1">
-                                        Dr. Ayşe Yılmaz
+                                        Dr. Furkan İmamoğlu
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
                                         İstanbul Beslenme Kliniği

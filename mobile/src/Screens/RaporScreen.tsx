@@ -9,7 +9,7 @@ const RaporEkrani = ({navigation}) => {
     const [activeTab, setActiveTab] = useState('genel');
 
     const danisanBilgisi = {
-        ad: 'Ayşe Yılmaz',
+        ad: 'Furkan İmamoğlu',
         yas: 32,
         baslangicTarihi: '15 Ocak 2025',
         sonRandevu: '1 Mayıs 2025',
