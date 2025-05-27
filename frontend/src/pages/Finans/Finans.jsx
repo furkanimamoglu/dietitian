@@ -665,14 +665,19 @@ export default function Finans() {
                     }
                 }
 
-                toast.success(`${newPackage.name} paketi güncellendi.`);
+                toast.success(
+                    `${newPackage.name && newPackage.name.length > 20
+                        ? newPackage.name.substring(0, 15) + '...'
+                        : newPackage.name
+                    } paketi güncellendi.`
+                );
             } else {
                 // Create new package
                 const packageData = {
                     name: newPackage.name,
                     description: newPackage.description,
                     type: newPackage.type,
-                    price: parseInt(newPackage.price, 10) // Ensure price is sent as a number
+                    price: parseInt(newPackage.price, 10)
                 };
 
                 const response = await axios.post(
@@ -696,7 +701,12 @@ export default function Finans() {
                     }
                 }
 
-                toast.success(`${newPackage.name} paketi oluşturuldu.`);
+                toast.success(
+                    `${newPackage.name && newPackage.name.length > 20
+                        ? newPackage.name.substring(0, 15) + '...'
+                        : newPackage.name
+                    } paketi oluşturuldu.`
+                );
             }
 
             // Refresh packages after saving
@@ -756,6 +766,12 @@ export default function Finans() {
                     authHeaders
                 );
                 toast.success(`"${itemName}" paketi silindi.`);
+                toast.success(
+                    `${itemName && itemName.length > 20
+                        ? itemName.substring(0, 15) + '...'
+                        : itemName
+                    } paketi silindi.`
+                );
                 await fetchPackages(); // Refresh packages list
             } else if (itemType === 'invoice') {
                 await axios.delete(getApiUrl(`/invoice/deleteInvoice?invoice_id=${itemId}`), authHeaders);
@@ -1069,7 +1085,12 @@ export default function Finans() {
                 dueDate: invoice.dueDate,
                 description: invoice.description || ""
             }, authHeaders);
-            toast.success(`${invoice.clientName} için ödeme durumu güncellendi.`);
+            toast.success(
+                `${invoice.clientName && invoice.clientName.length > 20
+                    ? invoice.clientName.substring(0, 15) + '...'
+                    : invoice.clientName
+                } için ödeme durumu güncellendi.`
+            );
             await fetchInvoices();
         } catch (error) {
             console.error('Status update error:', error);
