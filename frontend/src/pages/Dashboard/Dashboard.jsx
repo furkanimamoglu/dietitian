@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import {
@@ -8,6 +8,7 @@ import {
     Card,
     CardContent,
     CardHeader,
+    Chip,
     Divider,
     Grid,
     IconButton,
@@ -47,6 +48,9 @@ export default function Dashboard() {
     const [pendingLimit, setPendingLimit] = useState(5);
 
     const [searchNoteText, setSearchNoteText] = useState('');
+
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const timerRef = useRef(null);
 
     const filteredNotes = notes.filter(note =>
         note.noteContent.toLowerCase().includes(searchNoteText.toLowerCase())
@@ -188,7 +192,15 @@ export default function Dashboard() {
                         }
                     }
                 );
-                setApprovedAppointments(response.data || []);
+                
+                // Filter out past appointments
+                const now = new Date();
+                const futureAppointments = (response.data || []).filter(appointment => {
+                    const appointmentEndTime = new Date(appointment.end);
+                    return appointmentEndTime > now;
+                });
+                
+                setApprovedAppointments(futureAppointments);
             } catch (error) {
                 console.error("Bugünkü onaylanmış randevular çekilirken bir hata oluştu:", error);
                 setApprovedAppointments([]);
@@ -213,6 +225,25 @@ export default function Dashboard() {
         };
 
         fetchDashboardData();
+    }, []);
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => {
+            setCurrentTime(new Date());
+            
+            // Also check if any appointments have ended and should be removed from the list
+            const now = new Date();
+            setApprovedAppointments(prev => prev.filter(appointment => {
+                const appointmentEndTime = new Date(appointment.end);
+                return appointmentEndTime > now;
+            }));
+        }, 30000); // Update every 30 seconds instead of every minute
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        };
     }, []);
 
     useEffect(() => {
@@ -351,9 +382,56 @@ export default function Dashboard() {
     ];
 
     const formatTimeRange = (startDate, endDate) => {
-        const start = new Date(startDate).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-        const end = new Date(endDate).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-        return `${start}-${end}`;
+        const format = (date) => {
+            const d = new Date(date);
+            const h = String(d.getUTCHours()).padStart(2, '0');
+            const m = String(d.getUTCMinutes()).padStart(2, '0');
+            return `${h}:${m}`;
+        };
+    
+        return `${format(startDate)}-${format(endDate)}`;
+    };    
+
+    const calculateTimeRemaining = (appointmentTime) => {
+        const now = new Date(); // Use local time
+        const appointmentDate = new Date(appointmentTime); // Appointment time is already in Turkey time
+        appointmentDate.setHours(appointmentDate.getHours() - 3);
+        // If appointment is in the past
+        if (appointmentDate < now) {
+            return "Başladı";
+        }
+        
+        const diffMs = appointmentDate - now;
+        const diffMins = Math.floor(diffMs / 60000);
+        
+        if (diffMins < 60) {
+            return `${diffMins} dk`;
+        } else {
+            const hours = Math.floor(diffMins / 60);
+            const mins = diffMins % 60;
+            return `${hours} sa ${mins > 0 ? mins + ' dk' : ''}`;
+        }
+    };
+    
+
+    const getCountdownColor = (appointmentTime) => {
+        const now = new Date(); // Use local time
+        const appointmentDate = new Date(appointmentTime); // Appointment time is already in Turkey time
+        
+        if (appointmentDate < now) {
+            return "error"; // Appointment already started
+        }
+        
+        const diffMs = appointmentDate - now;
+        const diffMins = Math.floor(diffMs / 60000);
+        
+        if (diffMins < 30) {
+            return "warning";
+        } else if (diffMins < 60) {
+            return "info";
+        } else {
+            return "success";
+        }
     };
 
     const handleLoadMoreApproved = () => {
@@ -484,8 +562,13 @@ export default function Dashboard() {
                                                         primary={`${appointment.Client.name}`}
                                                         secondary={`${appointment.title}`}
                                                     />
+                                                    <Chip
+                                                        size="small"
+                                                        color={getCountdownColor(appointment.start)}
+                                                        label={calculateTimeRemaining(appointment.start)}
+                                                        sx={{ ml: 1 }}
+                                                    />
                                                 </ListItem>
-                                                <Divider component="li" variant="inset"/>
                                             </React.Fragment>
                                         ))
                                     ) : (
