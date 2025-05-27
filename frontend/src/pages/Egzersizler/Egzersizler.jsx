@@ -1162,7 +1162,7 @@ export default function Egzersizler() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <PeopleIcon sx={{ mr: 1 }} /> Egzersiz Programları
+                            <PeopleIcon sx={{ mr: 1 }} /> Egzersiz Yönetimi
                         </Typography>
                     </Box>
 

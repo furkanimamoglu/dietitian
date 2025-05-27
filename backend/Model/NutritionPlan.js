@@ -11,6 +11,7 @@ const NutritionPlan = sequelize.define('NutritionPlan', {
         primaryKey: true
     },
     category_id: {
+        type: DataTypes.BIGINT,
         allowNull: false,
         references: {
             model: 'NutritionCategories',

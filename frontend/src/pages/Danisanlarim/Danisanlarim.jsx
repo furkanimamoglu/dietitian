@@ -1298,7 +1298,7 @@ export default function Danisanlarim() {
                 >
                     <DialogTitle sx={{
                         backgroundColor: 'primary.main',
-                        color: 'white',
+                        color: 'orange',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'
@@ -1306,14 +1306,14 @@ export default function Danisanlarim() {
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                             <DownloadIcon />
                             <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
-                                Excel dosyasından Danışan İçe Aktar
+                                İçe Aktar
                             </Typography>
                         </Box>
                         <IconButton
                             edge="end"
                             onClick={() => setImportDialogOpen(false)}
                             aria-label="close"
-                            sx={{color: 'white'}}
+                            sx={{color: 'red'}}
                         >
                             <CloseIcon/>
                         </IconButton>
@@ -1356,15 +1356,6 @@ export default function Danisanlarim() {
                             </code>
                         </Stack>
                     </DialogContent>
-                    <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
-                        <Button
-                            onClick={() => setImportDialogOpen(false)}
-                            variant="outlined"
-                            startIcon={<CloseIcon/>}
-                        >
-                            İptal
-                        </Button>
-                    </DialogActions>
                 </Dialog>
 
                 {/* CSV Preview Dialog */}
@@ -1675,7 +1666,28 @@ export default function Danisanlarim() {
 
                 {/* QR Dialog */}
                 <Dialog open={qrDialogOpen} onClose={closeQrDialog}>
-                    <DialogTitle>QR Kodunuz</DialogTitle>
+                    <DialogTitle sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'orange',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <QrCodeIcon />
+                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
+                                QR Kodunuz
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            edge="end"
+                            onClick={() => closeQrDialog(false)}
+                            aria-label="close"
+                            sx={{color: 'red'}}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </DialogTitle>
                     <DialogContent dividers sx={{display: "flex", alignItems: "center"}}>
                         {qrData ? (
                             <img src={qrData} alt="Dietisyen QR" style={{maxWidth: "25rem", margin: "20px 0"}}/>
@@ -1842,14 +1854,7 @@ export default function Danisanlarim() {
                                 </FormControl>
                             </Stack>
                         </DialogContent>
-                        <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
-                            <Button
-                                onClick={closeCreateDialog}
-                                variant="outlined"
-                                startIcon={<CloseIcon/>}
-                            >
-                                İptal
-                            </Button>
+                        <DialogActions sx={{p: 2, justifyContent: 'flex-end'}}>
                             <Button
                                 type="submit"
                                 variant="contained"

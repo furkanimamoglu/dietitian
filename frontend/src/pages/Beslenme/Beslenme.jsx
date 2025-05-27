@@ -1687,7 +1687,7 @@ export default function Beslenme() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <PeopleIcon sx={{ mr: 1 }} /> Beslenme Plan Yönetimi
+                            <PeopleIcon sx={{ mr: 1 }} /> Plan Yönetimi
                         </Typography>
                     </Box>
 

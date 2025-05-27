@@ -20,7 +20,7 @@ const Client = sequelize.define('Client', {
             }
         },
         phoneNumber: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             unique: {
                 msg: 'Bu telefon numarası zaten kullanılıyor.'
