@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState, useMemo} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import {
@@ -20,7 +20,8 @@ import {
     Snackbar,
     Stack,
     TextField,
-    Typography
+    Typography,
+    Chip
 } from "@mui/material";
 import {DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarQuickFilter} from "@mui/x-data-grid";
 import {trTR} from "@mui/x-data-grid/locales";
@@ -68,6 +69,33 @@ export default function Danisanlarim() {
     const [qrData, setQrData] = useState("");
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
+    const [activeFilter, setActiveFilter] = useState(null); // 'all', 'active', 'inactive', 'female', 'male', 'other'
+
+    const filteredClients = useMemo(() => {
+        if (!activeFilter) return clients;
+
+        switch (activeFilter) {
+            case 'all':
+                return clients;
+            case 'active':
+                return clients.filter(c => c.status === true);
+            case 'inactive':
+                return clients.filter(c => c.status === false);
+            case 'female':
+                return clients.filter(c => c.gender === "Kadın");
+            case 'male':
+                return clients.filter(c => c.gender === "Erkek");
+            case 'other':
+                return clients.filter(c => c.gender === "Diğer");
+            default:
+                return clients;
+        }
+    }, [clients, activeFilter]);
+
+    // Kart seçimini ele alma fonksiyonu
+    const handleCardSelect = (filter) => {
+        setActiveFilter(activeFilter === filter ? null : filter);
+    };
 
     const [newClient, setNewClient] = useState({
         phoneNumber: "",
@@ -606,6 +634,7 @@ export default function Danisanlarim() {
                         <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
+                                onClick={() => handleCardSelect('all')}
                                 sx={{
                                     p: 3,
                                     height: '100%',
@@ -613,7 +642,11 @@ export default function Danisanlarim() {
                                     borderRadius: '20px',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    opacity: activeFilter && activeFilter !== 'all' ? 0.6 : 1,
+                                    transform: activeFilter === 'all' ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: activeFilter === 'all' ? '0 8px 25px rgba(107, 141, 214, 0.5)' : '0 4px 15px rgba(107, 141, 214, 0.2)',
                                     '&:hover': {
                                         transform: 'translateY(-5px)',
                                         boxShadow: '0 8px 25px rgba(107, 141, 214, 0.35)',
@@ -644,6 +677,7 @@ export default function Danisanlarim() {
                         <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
+                                onClick={() => handleCardSelect('active')}
                                 sx={{
                                     p: 3,
                                     height: '100%',
@@ -651,7 +685,11 @@ export default function Danisanlarim() {
                                     borderRadius: '20px',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    opacity: activeFilter && activeFilter !== 'active' ? 0.6 : 1,
+                                    transform: activeFilter === 'active' ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: activeFilter === 'active' ? '0 8px 25px rgba(35, 182, 230, 0.5)' : '0 4px 15px rgba(35, 182, 230, 0.2)',
                                     '&:hover': {
                                         transform: 'translateY(-5px)',
                                         boxShadow: '0 8px 25px rgba(35, 182, 230, 0.35)',
@@ -682,6 +720,7 @@ export default function Danisanlarim() {
                         <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
+                                onClick={() => handleCardSelect('inactive')}
                                 sx={{
                                     p: 3,
                                     height: '100%',
@@ -689,7 +728,11 @@ export default function Danisanlarim() {
                                     borderRadius: '20px',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    opacity: activeFilter && activeFilter !== 'inactive' ? 0.6 : 1,
+                                    transform: activeFilter === 'inactive' ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: activeFilter === 'inactive' ? '0 8px 25px rgba(255, 94, 98, 0.5)' : '0 4px 15px rgba(255, 94, 98, 0.2)',
                                     '&:hover': {
                                         transform: 'translateY(-5px)',
                                         boxShadow: '0 8px 25px rgba(255, 94, 98, 0.35)',
@@ -720,6 +763,7 @@ export default function Danisanlarim() {
                         <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
+                                onClick={() => handleCardSelect('female')}
                                 sx={{
                                     p: 3,
                                     height: '100%',
@@ -727,7 +771,11 @@ export default function Danisanlarim() {
                                     borderRadius: '20px',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    opacity: activeFilter && activeFilter !== 'female' ? 0.6 : 1,
+                                    transform: activeFilter === 'female' ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: activeFilter === 'female' ? '0 8px 25px rgba(248, 87, 166, 0.5)' : '0 4px 15px rgba(248, 87, 166, 0.2)',
                                     '&:hover': {
                                         transform: 'translateY(-5px)',
                                         boxShadow: '0 8px 25px rgba(248, 87, 166, 0.35)',
@@ -758,6 +806,7 @@ export default function Danisanlarim() {
                         <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
+                                onClick={() => handleCardSelect('male')}
                                 sx={{
                                     p: 3,
                                     height: '100%',
@@ -765,7 +814,11 @@ export default function Danisanlarim() {
                                     borderRadius: '20px',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    opacity: activeFilter && activeFilter !== 'male' ? 0.6 : 1,
+                                    transform: activeFilter === 'male' ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: activeFilter === 'male' ? '0 8px 25px rgba(67, 203, 255, 0.5)' : '0 4px 15px rgba(67, 203, 255, 0.2)',
                                     '&:hover': {
                                         transform: 'translateY(-5px)',
                                         boxShadow: '0 8px 25px rgba(67, 203, 255, 0.35)',
@@ -796,6 +849,7 @@ export default function Danisanlarim() {
                         <Grid item xs={12} sm={6} md={2}>
                             <Paper
                                 elevation={0}
+                                onClick={() => handleCardSelect('other')}
                                 sx={{
                                     p: 3,
                                     height: '100%',
@@ -803,7 +857,11 @@ export default function Danisanlarim() {
                                     borderRadius: '20px',
                                     position: 'relative',
                                     overflow: 'hidden',
+                                    cursor: 'pointer',
                                     transition: 'all 0.3s ease',
+                                    opacity: activeFilter && activeFilter !== 'other' ? 0.6 : 1,
+                                    transform: activeFilter === 'other' ? 'scale(1.05)' : 'scale(1)',
+                                    boxShadow: activeFilter === 'other' ? '0 8px 25px rgba(108, 99, 255, 0.5)' : '0 4px 15px rgba(108, 99, 255, 0.2)',
                                     '&:hover': {
                                         transform: 'translateY(-5px)',
                                         boxShadow: '0 8px 25px rgba(108, 99, 255, 0.35)',
@@ -837,7 +895,7 @@ export default function Danisanlarim() {
                 <Paper elevation={2} sx={{height: "65vh", width: "100%"}}>
                     <DataGrid
                         localeText={trTR.components.MuiDataGrid.defaultProps.localeText}
-                        rows={clients}
+                        rows={filteredClients}
                         columns={columns}
                         pageSize={10}
                         rowsPerPageOptions={[5, 10, 25]}
