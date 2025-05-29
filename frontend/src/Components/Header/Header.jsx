@@ -41,7 +41,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
-import HelpIcon from '@mui/icons-material/Help';
 import axios from 'axios';
 import config from "../../config.js";
 
@@ -249,7 +248,6 @@ export default function Header() {
         {name: "Egzersizler", route: "/egzersiz", icon: <SportsGymnasticsIcon sx={{color: "#3f51b5"}}/>},
         {name: "Finans", route: "/finans", icon: <AccountBalanceWalletIcon sx={{color: "#2c8d32"}}/>},
         {name: "Mesajlar", route: "/mesaj", icon: <MailIcon sx={{color: mobilePrimaryColor}}/>},
-        {name: "Yardım", route: "/yardim", icon: <HelpIcon sx={{color: mobilePrimaryColor}}/>}
     ];
 
     return (
@@ -404,12 +402,6 @@ export default function Header() {
                                     <Badge badgeContent={messageCount} color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
-                                </IconButton>
-                            </Tooltip>
-
-                            <Tooltip title="Yardım" arrow>
-                                <IconButton color="inherit">
-                                    <HelpIcon sx={{color: 'white'}}/>
                                 </IconButton>
                             </Tooltip>
 
