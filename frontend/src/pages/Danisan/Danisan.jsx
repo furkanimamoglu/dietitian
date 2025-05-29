@@ -3398,7 +3398,16 @@ function Danisan() {
                                                 </TableRow>
                                             </TableHead>
                                                     <TableBody>
-                                                        {assignedExercises.map((exercise) => (
+                                                        {assignedExercises.length > 10 && (
+                                                            <TableRow>
+                                                                <TableCell colSpan={6} sx={{textAlign: 'center', py: 2, bgcolor: 'rgba(0, 0, 0, 0.02)'}}>
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Toplam {assignedExercises.length} egzersizden son 10 tanesi görüntüleniyor
+                                                                    </Typography>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                        {assignedExercises.slice(-10).map((exercise) => (
                                                             <TableRow
                                                                 key={exercise.id}
                                                                 sx={{
