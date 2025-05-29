@@ -237,11 +237,9 @@ export default function Ayarlar() {
     ];
 
     const sessionDurations = [
+        {value: 15, label: "15 dakika"},
         {value: 30, label: "30 dakika"},
-        {value: 45, label: "45 dakika"},
-        {value: 60, label: "1 saat"},
-        {value: 90, label: "1.5 saat"},
-        {value: 120, label: "2 saat"},
+        {value: 60, label: "1 saat"}
     ];
 
     return (
