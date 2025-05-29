@@ -1382,7 +1382,7 @@ export default function Danisanlarim() {
                             edge="end"
                             onClick={() => setImportPreviewOpen(false)}
                             aria-label="close"
-                            sx={{color: 'white'}}
+                            sx={{color: 'red'}}
                         >
                             <CloseIcon/>
                         </IconButton>
@@ -1499,14 +1499,7 @@ export default function Danisanlarim() {
                             </Table>
                         </TableContainer>
                     </DialogContent>
-                    <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
-                        <Button
-                            onClick={() => setImportPreviewOpen(false)}
-                            variant="outlined"
-                            startIcon={<CloseIcon/>}
-                        >
-                            İptal
-                        </Button>
+                    <DialogActions sx={{p: 2, justifyContent: 'flex-end'}}>
                         <Button
                             onClick={handleImportSubmit}
                             variant="contained"
