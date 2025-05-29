@@ -933,7 +933,15 @@ export default function Egzersizler() {
     };
 
     const handleAddToUser = () => {
-        if (!selectedExercise || !selectedUser || !startDate || !endDate) return;
+        if (!selectedExercise || !selectedUser || !startDate || !endDate) {
+            console.log("Missing required fields:", {
+                exerciseExists: !!selectedExercise,
+                userExists: !!selectedUser,
+                startDateExists: !!startDate,
+                endDateExists: !!endDate
+            });
+            return;
+        }
 
         const addData = {
             client_id: selectedUser.id,
@@ -943,6 +951,8 @@ export default function Egzersizler() {
             note: assignmentNote
         };
 
+        console.log("Assigning exercise with data:", addData);
+        
         setIsSaving(true);
 
         axios.post(`${config[config.environment].apiUrl}/exercise/assignExercise`, addData, {
@@ -1847,8 +1857,20 @@ export default function Egzersizler() {
                             value={selectedUser?.id || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
-                                const user = danisanList.find(u => u.id === parseInt(userId));
-                                setSelectedUser(user);
+                                if (userId) {
+                                    const numUserId = parseInt(userId, 10);
+                                    
+                                    const user = danisanList.find(u => String(u.id) === String(numUserId));
+                                    if (user) {
+                                        setSelectedUser(user);
+                                        console.log("Selected user:", user.name, "ID:", user.id, "Type:", typeof user.id);
+                                    } else {
+                                        console.log("No user found with ID:", numUserId);
+                                    }
+                                } else {
+                                    setSelectedUser(null);
+                                    console.log("User selection cleared");
+                                }
                             }}
                         >
                             <option value="">Danışan Seçin</option>

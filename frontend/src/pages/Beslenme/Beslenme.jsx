@@ -1313,7 +1313,15 @@ export default function Beslenme() {
     };
 
     const handleAddToUser = () => {
-        if (!selectedProgram || !selectedUser || !startDate || !endDate) return;
+        if (!selectedProgram || !selectedUser || !startDate || !endDate) {
+            console.log("Missing required fields:", {
+                programExists: !!selectedProgram,
+                userExists: !!selectedUser,
+                startDateExists: !!startDate,
+                endDateExists: !!endDate
+            });
+            return;
+        }
 
         const addData = {
             client_id: selectedUser.id,
@@ -1322,6 +1330,8 @@ export default function Beslenme() {
             end_date: endDate,
             note: assignmentNote
         };
+
+        console.log("Assigning nutrition plan with data:", addData);
 
         axios.post(`${config[config.environment].apiUrl}/dietitian/assignNutritionPlanToClient`, addData, {
             headers: {Authorization: localStorage.getItem("token")}
@@ -1924,8 +1934,19 @@ export default function Beslenme() {
                             value={selectedUser?.id || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
-                                const user = danisanList.find(u => u.id === parseInt(userId));
-                                setSelectedUser(user);
+                                if (userId) {
+                                    const numUserId = parseInt(userId, 10);
+                                    
+                                    const user = danisanList.find(u => String(u.id) === String(numUserId));
+                                    if (user) {
+                                        setSelectedUser(user);
+                                        console.log("Selected user:", user.name, "ID:", user.id, "Type:", typeof user.id);
+                                    } else {
+                                        console.log("No user found with ID:", numUserId);
+                                    }
+                                } else {
+                                    setSelectedUser(null);
+                                }
                             }}
                         >
                             <option value="">Danışan Seçin</option>
