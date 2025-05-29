@@ -1373,8 +1373,8 @@ export default function Danisanlarim() {
                         alignItems: 'center'
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <GroupAdd />
-                            <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
+                            <GroupAdd sx={{color: 'orange'}} />
+                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 İçe Aktarılacak Danışanlar
                             </Typography>
                         </Box>
