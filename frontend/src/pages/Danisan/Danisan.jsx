@@ -92,13 +92,196 @@ const initialWaterTrackingData = {
 };
 
 // Water tracking component - moved outside the main component
-const WaterTrackingCard = ({ data }) => {
+const WaterTrackingCard = ({ data, clientId }) => {
+    const [waterData, setWaterData] = useState(data);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [apiResponse, setApiResponse] = useState(null); // Store raw API response for debugging
+
     const currentDay = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
     const mappedDay = currentDay === 0 ? 6 : currentDay - 1; // Convert to 0-6 where 0 is Monday
     
-    const totalConsumed = data.weeklyData.reduce((sum, day) => sum + day.consumed, 0);
-    const totalGoal = data.dailyGoal * 7;
+    useEffect(() => {
+        const fetchWaterData = async () => {
+            setIsLoading(true);
+            setError(null);
+            
+            try {
+                // Get current date
+                const today = new Date();
+                // Get date from 6 days ago for weekly data
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - 6);
+                
+                // Format dates as YYYY-MM-DD
+                const formatDate = (date) => {
+                    return date.toISOString().split('T')[0];
+                };
+                
+                console.log(`Fetching water data for client ${clientId} from ${formatDate(weekStart)} to ${formatDate(today)}`);
+                
+                const response = await axios.get(
+                    `${config[config.environment].apiUrl}/nutrition/getClientWater`,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                        },
+                        params: {
+                            client_id: clientId,
+                            start_date: formatDate(weekStart),
+                            end_date: formatDate(today)
+                        }
+                    }
+                );
+                
+                console.log("Water API response:", response.data);
+                setApiResponse(response.data);
+                
+                if (response.data) {
+                    // Process the response data
+                    const processedData = processWaterData(response.data);
+                    console.log("Processed water data:", processedData);
+                    setWaterData(prevData => ({
+                        ...prevData,
+                        weeklyData: processedData
+                    }));
+                }
+            } catch (err) {
+                console.error("Error fetching water data:", err);
+                setError("Su tüketim verileri yüklenirken bir hata oluştu.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        // Process API response into the format needed for display
+        const processWaterData = (apiData) => {
+            const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+            const dailyGoal = data.dailyGoal; // Use the goal from props
+            
+            // Create default data structure with 0 consumed for all days
+            const processedData = dayNames.map(day => ({
+                day,
+                consumed: 0,
+                completed: false
+            }));
+            
+            // If we have API data, update the corresponding days
+            if (Array.isArray(apiData)) {
+                // Önce tarihe göre verileri gruplayalım
+                const groupedByDate = {};
+                
+                apiData.forEach(item => {
+                    if (item.date) {
+                        if (!groupedByDate[item.date]) {
+                            groupedByDate[item.date] = 0;
+                        }
+                        // Tüm olası alan adlarını kontrol ederek su miktarını ekleyelim
+                        const amount = item.amount || item.consumed || item.amount_ml || 0;
+                        groupedByDate[item.date] += parseInt(amount, 10);
+                    }
+                });
+                
+                // Şimdi gruplanmış verileri işleyelim
+                Object.entries(groupedByDate).forEach(([dateStr, totalAmount]) => {
+                    const date = new Date(dateStr);
+                    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1; // Convert to 0-6 where 0 is Monday
+                    
+                    if (dayIndex >= 0 && dayIndex < 7) {
+                        processedData[dayIndex].consumed = totalAmount;
+                        processedData[dayIndex].completed = totalAmount >= dailyGoal;
+                    }
+                });
+            } else if (apiData && typeof apiData === 'object') {
+                // Handle case where API returns an object with dates as keys
+                Object.entries(apiData).forEach(([dateKey, value]) => {
+                    try {
+                        const date = new Date(dateKey);
+                        const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+                        
+                        if (dayIndex >= 0 && dayIndex < 7) {
+                            // Try to extract amount from different possible structures
+                            let amount = 0;
+                            if (typeof value === 'number') {
+                                amount = value;
+                            } else if (typeof value === 'object') {
+                                amount = value.amount || value.consumed || value.amount_ml || 0;
+                            }
+                            
+                            processedData[dayIndex].consumed = parseInt(amount, 10);
+                            processedData[dayIndex].completed = parseInt(amount, 10) >= dailyGoal;
+                        }
+                    } catch (err) {
+                        console.error("Error processing date:", dateKey, err);
+                    }
+                });
+            }
+            
+            return processedData;
+        };
+        
+        if (clientId) {
+            fetchWaterData();
+        }
+    }, [clientId, data.dailyGoal]);
+    
+    const totalConsumed = waterData.weeklyData.reduce((sum, day) => sum + day.consumed, 0);
+    const totalGoal = waterData.dailyGoal * 7;
     const weeklyCompletionPercentage = Math.min(Math.round((totalConsumed / totalGoal) * 100), 100);
+    
+    if (isLoading) {
+        return (
+            <Card elevation={3} sx={{ mb: 3 }}>
+                <CardHeader
+                    title="Su Takibi"
+                    titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                    avatar={
+                        <Avatar sx={{ bgcolor: 'info.main' }}>
+                            <WaterDropIcon />
+                        </Avatar>
+                    }
+                    sx={{
+                        bgcolor: 'info.light',
+                        color: 'info.contrastText',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider'
+                    }}
+                />
+                <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+                        <CircularProgress />
+                    </Box>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    if (error) {
+        return (
+            <Card elevation={3} sx={{ mb: 3 }}>
+                <CardHeader
+                    title="Su Takibi"
+                    titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                    avatar={
+                        <Avatar sx={{ bgcolor: 'error.main' }}>
+                            <ErrorIcon />
+                        </Avatar>
+                    }
+                    sx={{
+                        bgcolor: 'error.light',
+                        color: 'error.contrastText',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider'
+                    }}
+                />
+                <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
+                        <Typography color="error">{error}</Typography>
+                    </Box>
+                </CardContent>
+            </Card>
+        );
+    }
     
     return (
         <Card elevation={3} sx={{ mb: 3 }}>
@@ -153,45 +336,120 @@ const WaterTrackingCard = ({ data }) => {
                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                     Günlük Takip
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    {data.weeklyData.map((day, index) => (
-                        <Tooltip key={index} title={`${day.day}: ${day.consumed} ml / ${data.dailyGoal} ml`}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    mb: 2,
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                    gap: 1
+                }}>
+                    {waterData.weeklyData.map((day, index) => (
+                        <Tooltip key={index} title={`${day.day}: ${day.consumed} ml / ${waterData.dailyGoal} ml`}>
                             <Box 
                                 sx={{ 
-                                    display: 'flex', 
-                                    flexDirection: 'column', 
+                                    flex: '1 1 auto',
+                                    minWidth: { xs: '30%', sm: 'auto' },
+                                    mb: { xs: 2, sm: 0 },
+                                    p: 1,
+                                    bgcolor: index === mappedDay ? 'rgba(41, 182, 246, 0.08)' : 'transparent',
+                                    borderRadius: 2,
+                                    boxShadow: index === mappedDay ? '0 2px 8px rgba(41, 182, 246, 0.15)' : 'none',
+                                    transition: 'all 0.3s ease',
+                                    display: 'flex',
+                                    flexDirection: 'column',
                                     alignItems: 'center',
-                                    opacity: index === mappedDay ? 1 : 0.7
+                                    position: 'relative',
+                                    '&:hover': {
+                                        transform: 'translateY(-4px)',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                                    }
                                 }}
                             >
-                                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
-                                    {day.day.substring(0, 3)}
-                                </Typography>
-                                <Box 
-                                    sx={{ 
-                                        width: 40, 
-                                        height: 40, 
-                                        borderRadius: '50%', 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center',
-                                        border: '2px solid',
-                                        borderColor: day.completed ? 'info.main' : 'grey.300',
-                                        bgcolor: day.completed ? 'info.lighter' : 'transparent',
-                                        color: day.completed ? 'info.main' : 'grey.500'
-                                    }}
-                                >
-                                    <OpacityIcon fontSize={day.completed ? "small" : "small"} />
-                                </Box>
                                 <Typography 
                                     variant="caption" 
-                                    color={index === mappedDay ? "info.main" : "text.secondary"} 
                                     sx={{ 
-                                        mt: 0.5, 
-                                        fontWeight: index === mappedDay ? 'bold' : 'normal' 
+                                        fontWeight: index === mappedDay ? 'bold' : 'normal',
+                                        color: index === mappedDay ? 'info.main' : 'text.secondary',
+                                        mb: 0.5
                                     }}
                                 >
-                                    {Math.round((day.consumed / data.dailyGoal) * 100)}%
+                                    {day.day.substring(0, 3)}
+                                </Typography>
+                                
+                                {/* Su şişesi görünümü */}
+                                <Box sx={{ 
+                                    position: 'relative',
+                                    width: 30,
+                                    height: 60,
+                                    mb: 1,
+                                    borderRadius: '4px 4px 12px 12px',
+                                    border: '2px solid',
+                                    borderColor: day.completed ? 'info.main' : 'grey.300',
+                                    overflow: 'hidden',
+                                    boxShadow: day.completed ? '0 2px 8px rgba(41, 182, 246, 0.2)' : 'none'
+                                }}>
+                                    {/* Su seviyesi */}
+                                    <Box sx={{ 
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: `${Math.min(Math.round((day.consumed / waterData.dailyGoal) * 100), 100)}%`,
+                                        bgcolor: day.completed ? 'info.main' : 'info.light',
+                                        transition: 'height 0.5s ease'
+                                    }} />
+                                    
+                                    {/* Su dalgası efekti */}
+                                    {day.consumed > 0 && (
+                                        <Box sx={{ 
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: '4px',
+                                            bgcolor: 'rgba(255, 255, 255, 0.5)',
+                                            borderRadius: '50%',
+                                            transform: 'scale(1.5)',
+                                            opacity: 0.7
+                                        }} />
+                                    )}
+                                </Box>
+                                
+                                {/* Tamamlanma işareti */}
+                                {day.completed && (
+                                    <Box sx={{ 
+                                        position: 'absolute',
+                                        top: 18,
+                                        right: 8,
+                                        bgcolor: 'success.main',
+                                        color: 'white',
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <CheckCircleIcon sx={{ fontSize: 12 }} />
+                                    </Box>
+                                )}
+                                
+                                <Typography 
+                                    variant="caption" 
+                                    sx={{ 
+                                        fontWeight: 'bold',
+                                        color: day.completed ? 'success.main' : (
+                                            day.consumed > 0 ? 'info.main' : 'text.secondary'
+                                        )
+                                    }}
+                                >
+                                    {day.consumed} ml
+                                </Typography>
+                                <Typography 
+                                    variant="caption" 
+                                    color="text.secondary"
+                                >
+                                    {Math.round((day.consumed / waterData.dailyGoal) * 100)}%
                                 </Typography>
                             </Box>
                         </Tooltip>
@@ -206,10 +464,10 @@ const WaterTrackingCard = ({ data }) => {
                         </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                        Günlük hedef: <strong>{data.dailyGoal} ml</strong> ({data.dailyGoal / 1000} litre)
+                        Günlük hedef: <strong>{waterData.dailyGoal} ml</strong> ({waterData.dailyGoal / 1000} litre)
                     </Typography>
                     <Typography variant="body2">
-                        Bugün tüketilen: <strong>{data.weeklyData[mappedDay].consumed} ml</strong> ({Math.round((data.weeklyData[mappedDay].consumed / data.dailyGoal) * 100)}%)
+                        Bugün tüketilen: <strong>{waterData.weeklyData[mappedDay].consumed} ml</strong> ({Math.round((waterData.weeklyData[mappedDay].consumed / waterData.dailyGoal) * 100)}%)
                     </Typography>
                 </Box>
             </CardContent>
@@ -2003,9 +2261,6 @@ function Danisan() {
                             </Box>
                         </Box>
 
-                        {/* Water Tracking Card */}
-                        <WaterTrackingCard data={waterTrackingData} />
-
                         {nutritionPlanLoading ? (
                             <Box sx={{display: 'flex', justifyContent: 'center', my: 4}}>
                                 <Grid container spacing={3}>
@@ -2465,6 +2720,9 @@ function Danisan() {
                                 <Divider/>
                             </Paper>
                         )}
+
+                        {/* Water Tracking Card */}
+                        <WaterTrackingCard data={waterTrackingData} clientId={id} />
 
                         <Card elevation={3} sx={{mb: 3}}>
                             <CardHeader

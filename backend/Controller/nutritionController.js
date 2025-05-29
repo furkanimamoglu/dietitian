@@ -36,17 +36,37 @@ class nutritionController {
     static async getClientWater(req, res) {
         try {
             const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
+            const user_id = Security.getUserIdFromToken(token);
+            const isClient = Security.checkUserPermission(token, CLIENT);
+            const isDietitian = Security.checkUserPermission(token, DIETITIAN);
 
-            if (!token || !client_id || !permission) {
+            if (!token || !user_id) {
                 return res.status(401).json({
                     showOnScreen: true,
                     message: "Yetkisiz erişim."
                 });
             }
 
-            const {start_date, end_date} = req.body;
+            let client_id;
+
+            if (isClient) {
+                client_id = user_id;
+            } else if (isDietitian) {
+                client_id = req.query.client_id;
+                if (!client_id) {
+                    return res.status(400).json({
+                        showOnScreen: true,
+                        message: "Danışan bilgisi eksik."
+                    });
+                }
+            } else {
+                return res.status(403).json({
+                    showOnScreen: true,
+                    message: "Bu işlemi yapma yetkiniz yok."
+                });
+            }
+
+            const { start_date, end_date } = req.body;
 
             const result = await NutritionService.getClientWater(client_id, start_date, end_date);
 
@@ -55,7 +75,7 @@ class nutritionController {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
-            })
+            });
         }
     }
 
