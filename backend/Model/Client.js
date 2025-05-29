@@ -86,13 +86,13 @@ const Client = sequelize.define('Client', {
             }
         },
         status: {
-            type: DataTypes.ENUM('aktif', 'inaktif'),
+            type: DataTypes.ENUM('Aktif', 'Pasif'),
             allowNull: false,
-            defaultValue: 'aktif',
+            defaultValue: 'Aktif',
             validate: {
                 isIn: {
-                    args: [['aktif', 'inaktif']],
-                    msg: "Durum 'aktif', 'inaktif' olmalıdır."
+                    args: [['Aktif', 'Pasif']],
+                    msg: "Durum 'Aktif', 'Pasif' olmalıdır."
                 }
             }
         },

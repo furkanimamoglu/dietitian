@@ -194,9 +194,9 @@ export default function Danisanlarim() {
             case 'all':
                 return clients;
             case 'active':
-                return clients.filter(c => c.status === true);
+                return clients.filter(c => c.status === "Aktif");
             case 'inactive':
-                return clients.filter(c => c.status === false);
+                return clients.filter(c => c.status === "Pasif");
             case 'female':
                 return clients.filter(c => c.gender === "Kadın");
             case 'male':
@@ -229,8 +229,8 @@ export default function Danisanlarim() {
     });
 
     const totalCount = clients.length;
-    const activeCount = clients.filter(c => c.status === true).length;
-    const inactiveCount = clients.filter(c => c.status === false).length;
+    const activeCount = clients.filter(c => c.status === "Aktif").length;
+    const inactiveCount = clients.filter(c => c.status === "Pasif").length;
     const maleCount = clients.filter(c => c.gender === "Erkek").length;
     const femaleCount = clients.filter(c => c.gender === "Kadın").length;
     const otherCount = clients.filter(c => c.gender === "Diğer").length;
@@ -583,8 +583,8 @@ export default function Danisanlarim() {
             headerName: "Durum",
             width: 90,
             type: "singleSelect",
-            valueOptions: [true, false],
-            editable: false,
+            valueOptions: ["Aktif", "Pasif"],
+            editable: true,
             renderCell: (params) =>
                 params.row.status ? (
                     <CheckCircle sx={{color: green[500]}}/>
@@ -700,7 +700,7 @@ export default function Danisanlarim() {
                             gender: row.cinsiyet || "",
                             email: row.mail || "",
                             password: generateRandomPassword(),
-                            status: true // Always set status to active
+                            status: "Aktif"
                         };
                     });
                     
@@ -908,7 +908,7 @@ export default function Danisanlarim() {
             telefon: client.phoneNumber,
             cinsiyet: client.gender,
             mail: client.email || "",
-            durum: client.status ? "Aktif" : "İnaktif",
+            durum: client.status ? "Aktif" : "Pasif",
         }));
         
         // Convert to CSV
