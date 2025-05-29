@@ -2,6 +2,7 @@ const path = require('path');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Dietitian = require(path.join(__dirname, 'Dietitian'));
+const DietitianSubscription = require(path.join(__dirname, 'DietitianSubscription'));
 const Client = require(path.join(__dirname, 'Client'));
 const Exercise = require(path.join(__dirname, 'Exercise'));
 const ExerciseCategory = require(path.join(__dirname, 'ExerciseCategory'));
@@ -262,9 +263,34 @@ Water.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
+// Modify relationship between Dietitian and DietitianSubscription
+// Create the association without ON DELETE CASCADE
+DietitianSubscription.hasMany(Dietitian, {
+    foreignKey: {
+        name: 'subscription_type',
+        allowNull: false
+    },
+    sourceKey: 'subscription_type',
+    as: 'dietitians',
+    onDelete: 'NO ACTION',  // Change to NO ACTION to avoid the CASCADE issue
+    onUpdate: 'NO ACTION'
+});
+
+Dietitian.belongsTo(DietitianSubscription, {
+    foreignKey: {
+        name: 'subscription_type',
+        allowNull: false
+    },
+    targetKey: 'subscription_type',
+    as: 'subscription',
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION'
+});
+
 module.exports = {
     sequelize,
     Dietitian,
+    DietitianSubscription,
     Client,
     Appointment,
     Anamnes,

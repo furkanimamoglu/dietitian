@@ -88,6 +88,54 @@ class DietitianService {
         }
     }
 
+    static async changePassword(user_id, oldPassword, newPassword) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            if (!oldPassword || !newPassword) {
+                throw new Exception('Eski ve yeni şifre alanları doldurulmalıdır.', 400, true);
+            }
+
+            const dietitian = await Dietitian.findByPk(user_id);
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404, true);
+            }
+
+            if (dietitian.password !== oldPassword) {
+                throw new Exception('Eski şifre yanlış.', 400, true);
+            }
+
+            await dietitian.update({password: newPassword});
+
+            return {message: 'Şifre başarıyla değiştirildi.'};
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    static async updateDietitian(user_id, updateData) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findByPk(user_id);
+
+            if (!dietitian) {
+                throw new Exception('Diyetisyen bulunamadı.', 404, true);
+            }
+
+            await dietitian.update(updateData);
+
+            return dietitian;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
     static async delete(id) {
         try {
             const dietitian = await Dietitian.findByPk(id);

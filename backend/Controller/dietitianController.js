@@ -61,6 +61,64 @@ class DietitianController {
         }
     }
 
+    static async changePassword(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {oldPassword, newPassword} = req.body;
+
+            if (!oldPassword || !newPassword) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm parametreler doldurulmalıdır.'
+                });
+            }
+
+            const result = await DietitianService.changePassword(dietitian_id, oldPassword, newPassword);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
+        }
+    }
+
+    static async updateDietitian(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {name, email, phoneNumber, gender} = req.body;
+
+            const result = await DietitianService.updateDietitian(dietitian_id, {name, email, phoneNumber, gender});
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
+        }
+    }
+
     static async registerClient(req, res) {
         try {
             const token = req.headers.authorization;

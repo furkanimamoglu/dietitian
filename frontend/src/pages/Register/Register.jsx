@@ -34,14 +34,7 @@ function Register() {
     const [message, setMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [userType, setUserType] = useState('danisan');
     const navigate = useNavigate();
-
-    const handleUserTypeChange = (event, newValue) => {
-        if (newValue !== null) {
-            setUserType(newValue);
-        }
-    };
 
     const handlePhoneNumberChange = (e) => {
         const value = e.target.value;
@@ -98,11 +91,8 @@ function Register() {
         <DefaultWithFooter>
             <Box className="register-page">
                 <Box className="header-banner">
-                    <Typography variant="h3" className="header-title">
-                        Yeni Bir Başlangıç
-                    </Typography>
                     <Typography variant="h4" className="header-subtitle">
-                        Sağlıklı Yaşama Adım Atın
+                        Danışanlarınızla Buluşun
                     </Typography>
                 </Box>
 
@@ -138,42 +128,8 @@ function Register() {
                         </Typography>
 
                         <Typography variant="body2" color="text.secondary" sx={{mb: 3}}>
-                            Yeni bir hesap oluşturun
+                            Yeni bir diyetisyen hesabı oluşturun
                         </Typography>
-
-                        <Tabs
-                            value={userType}
-                            onChange={handleUserTypeChange}
-                            variant="fullWidth"
-                            sx={{
-                                mb: 3,
-                                width: '100%',
-                                '& .MuiTabs-indicator': {
-                                    backgroundColor: '#2E7D32',
-                                },
-                            }}
-                        >
-                            <Tab
-                                value="danisan"
-                                label="Danışan"
-                                sx={{
-                                    '&.Mui-selected': {
-                                        color: '#2E7D32',
-                                        fontWeight: 'bold',
-                                    }
-                                }}
-                            />
-                            <Tab
-                                value="diyetisyen"
-                                label="Diyetisyen"
-                                sx={{
-                                    '&.Mui-selected': {
-                                        color: '#2E7D32',
-                                        fontWeight: 'bold',
-                                    }
-                                }}
-                            />
-                        </Tabs>
 
                         <Divider flexItem sx={{width: "100%", mb: 3}}/>
 

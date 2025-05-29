@@ -25,7 +25,8 @@ import {
     Tab,
     Tabs,
     TextField,
-    Typography
+    Typography,
+    CircularProgress
 } from "@mui/material";
 import {
     Brightness4,
@@ -39,15 +40,17 @@ import {
     Settings as SettingsIcon,
     Visibility,
     VisibilityOff,
-    School,
-    WorkOutline,
-    LocationOn,
-    Description,
+    Email,
+    Phone,
     AccessTime,
     ColorLens,
-    Campaign,
-    NotificationsActive
+    NotificationsActive,
+    Description,
+    KeyOutlined
 } from "@mui/icons-material";
+
+import config from "../../config.js";
+import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -75,19 +78,14 @@ export default function Ayarlar() {
     const [showPassword, setShowPassword] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState("");
 
     const [personalInfo, setPersonalInfo] = useState({
         name: "Dr. Furkan İmamoğlu",
-        title: "Uzman Diyetisyen",
         email: "ayse.yilmaz@example.com",
-        phone: "+90 555 123 4567",
-        education: "Hacettepe Üniversitesi, Beslenme ve Diyetetik",
-        experience: "8 yıl",
-        specializations: ["Sporcu Beslenmesi", "Kilo Yönetimi", "Klinik Beslenme"],
-        about: "Sağlıklı beslenme konusunda uzmanlaşmış, danışanlarıyla kişiselleştirilmiş beslenme programları oluşturmaya odaklanan bir diyetisyenim.",
-        location: "İstanbul, Kadıköy",
-        consultationHours: "Pazartesi - Cuma: 09:00 - 18:00",
-        languages: ["Türkçe", "İngilizce"]
+        phoneNumber: "+90 555 123 4567",
+        gender: "Erkek",
     });
 
     const [passwordInfo, setPasswordInfo] = useState({
@@ -122,30 +120,6 @@ export default function Ayarlar() {
         });
     };
 
-    const handleSpecializationChange = (e, index) => {
-        const updatedSpecializations = [...personalInfo.specializations];
-        updatedSpecializations[index] = e.target.value;
-        setPersonalInfo({
-            ...personalInfo,
-            specializations: updatedSpecializations
-        });
-    };
-
-    const addSpecialization = () => {
-        setPersonalInfo({
-            ...personalInfo,
-            specializations: [...personalInfo.specializations, ""]
-        });
-    };
-
-    const removeSpecialization = (index) => {
-        const updatedSpecializations = personalInfo.specializations.filter((_, i) => i !== index);
-        setPersonalInfo({
-            ...personalInfo,
-            specializations: updatedSpecializations
-        });
-    };
-
     const handleAppSettingsChange = (e) => {
         const {name, value, checked} = e.target;
         setAppSettings({
@@ -165,28 +139,68 @@ export default function Ayarlar() {
         // Simulating API call to save settings
         setTimeout(() => {
             setSaveSuccess(true);
+            showSuccessToast("Ayarlarınız başarıyla kaydedildi!");
             setTimeout(() => setSaveSuccess(false), 3000);
         }, 500);
     };
 
-    const handleChangePassword = () => {
-        // Placeholder for password change logic
+    const handleChangePassword = async () => {
+        // Clear previous errors
+        setPasswordError("");
+        
+        // Validate passwords match
         if (passwordInfo.newPassword !== passwordInfo.confirmNewPassword) {
-            // Handle error - passwords don't match
+            setPasswordError("Yeni şifreler eşleşmiyor");
+            return;
+        }
+        
+        // Validate password not empty
+        if (!passwordInfo.currentPassword || !passwordInfo.newPassword) {
+            setPasswordError("Tüm alanları doldurunuz");
             return;
         }
 
-        // Simulating API call to change password
-        setTimeout(() => {
-            setOpenPasswordModal(false);
-            setSaveSuccess(true);
-            setPasswordInfo({
-                currentPassword: "",
-                newPassword: "",
-                confirmNewPassword: ""
+        try {
+            setIsChangingPassword(true);
+            const response = await fetch(`${config[config.environment].apiUrl}/dietitian/changePassword`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem("token"),
+                },
+                body: JSON.stringify({
+                    oldPassword: passwordInfo.currentPassword,
+                    newPassword: passwordInfo.newPassword
+                })
             });
-            setTimeout(() => setSaveSuccess(false), 3000);
-        }, 500);
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Success
+                setOpenPasswordModal(false);
+                setPasswordInfo({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmNewPassword: ""
+                });
+                
+                // Show toast notification for success
+                showSuccessToast("Şifreniz başarıyla değiştirildi");
+            } else {
+                // Error
+                setPasswordError(data.message || "Şifre değiştirme işlemi başarısız oldu");
+                // Show toast notification for error
+                showErrorToast(data.message || "Şifre değiştirme işlemi başarısız oldu");
+            }
+        } catch (error) {
+            const errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
+            setPasswordError(errorMessage);
+            showErrorToast(errorMessage);
+            console.error("Password change error:", error);
+        } finally {
+            setIsChangingPassword(false);
+        }
     };
 
     const handleClickShowPassword = () => {
@@ -223,11 +237,9 @@ export default function Ayarlar() {
     ];
 
     const sessionDurations = [
+        {value: 15, label: "15 dakika"},
         {value: 30, label: "30 dakika"},
-        {value: 45, label: "45 dakika"},
-        {value: 60, label: "1 saat"},
-        {value: 90, label: "1.5 saat"},
-        {value: 120, label: "2 saat"},
+        {value: 60, label: "1 saat"}
     ];
 
     return (
@@ -273,53 +285,48 @@ export default function Ayarlar() {
                                             />
                                             <Typography variant="h5" align="center">{personalInfo.name}</Typography>
                                             <Typography variant="subtitle1" color="text.secondary" align="center">
-                                                {personalInfo.title}
+                                                Diyetisyen
                                             </Typography>
-                                            
-                                            <Box sx={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0.5, mt: 2}}>
-                                                {personalInfo.specializations.map((spec, index) => (
-                                                    <Chip 
-                                                        key={index}
-                                                        label={spec}
-                                                        size="small"
-                                                        color="primary"
-                                                        variant="outlined"
-                                                    />
-                                                ))}
-                                            </Box>
                                         </Box>
                                         
                                         <Divider sx={{my: 2}} />
                                         
                                         <Box sx={{mb: 2}}>
                                             <Typography variant="body2" sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                                <LocationOn fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
-                                                {personalInfo.location}
+                                                <Person fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                Cinsiyet: {personalInfo.gender}
                                             </Typography>
                                             
                                             <Typography variant="body2" sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                                <School fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
-                                                {personalInfo.education}
+                                                <Email fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                {personalInfo.email}
                                             </Typography>
                                             
                                             <Typography variant="body2" sx={{display: 'flex', alignItems: 'center'}}>
-                                                <WorkOutline fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
-                                                {personalInfo.experience} deneyim
+                                                <Phone fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                {personalInfo.phoneNumber}
                                             </Typography>
                                         </Box>
                                         
                                         <Divider sx={{my: 2}} />
                                         
-                                        <Typography variant="body2" sx={{mb: 2}}>
-                                            {personalInfo.about}
-                                        </Typography>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            fullWidth
+                                            startIcon={<KeyOutlined />}
+                                            onClick={handleOpenPasswordModal}
+                                            sx={{mb: 2}}
+                                        >
+                                            Şifremi Değiştir
+                                        </Button>
                                         
                                         <Button
                                             variant="outlined"
                                             fullWidth
                                             size="small"
                                         >
-                                            Danışan Gözünden Görüntüle
+                                            Profil Önizleme
                                         </Button>
                                     </Box>
                                 </CardContent>
@@ -330,10 +337,10 @@ export default function Ayarlar() {
                             <Card variant="outlined" className="settings-card">
                                 <CardContent>
                                     <Typography variant="h6" gutterBottom>
-                                        Profil Bilgileri
+                                        Temel Hesap Bilgileri
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" paragraph>
-                                        Bu bilgiler danışanlarınıza profilinizde görünecektir.
+                                        Sisteme kayıtlı olan temel hesap bilgilerinizi buradan güncelleyebilirsiniz.
                                     </Typography>
                                     <Divider sx={{mb: 3}}/>
 
@@ -345,18 +352,6 @@ export default function Ayarlar() {
                                                     label="Ad Soyad"
                                                     name="name"
                                                     value={personalInfo.name}
-                                                    onChange={handlePersonalInfoChange}
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                />
-                                            </Grid>
-                                            
-                                            <Grid item xs={12} md={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Ünvan"
-                                                    name="title"
-                                                    value={personalInfo.title}
                                                     onChange={handlePersonalInfoChange}
                                                     margin="normal"
                                                     variant="outlined"
@@ -380,33 +375,8 @@ export default function Ayarlar() {
                                                 <TextField
                                                     fullWidth
                                                     label="Telefon"
-                                                    name="phone"
-                                                    value={personalInfo.phone}
-                                                    onChange={handlePersonalInfoChange}
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                />
-                                            </Grid>
-                                            
-                                            <Grid item xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Konum"
-                                                    name="location"
-                                                    value={personalInfo.location}
-                                                    onChange={handlePersonalInfoChange}
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                    placeholder="Şehir, İlçe"
-                                                />
-                                            </Grid>
-                                            
-                                            <Grid item xs={12} md={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Eğitim"
-                                                    name="education"
-                                                    value={personalInfo.education}
+                                                    name="phoneNumber"
+                                                    value={personalInfo.phoneNumber}
                                                     onChange={handlePersonalInfoChange}
                                                     margin="normal"
                                                     variant="outlined"
@@ -414,89 +384,25 @@ export default function Ayarlar() {
                                             </Grid>
                                             
                                             <Grid item xs={12} md={6}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Deneyim"
-                                                    name="experience"
-                                                    value={personalInfo.experience}
-                                                    onChange={handlePersonalInfoChange}
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                    placeholder="Örn: 8 yıl"
-                                                />
-                                            </Grid>
-                                            
-                                            <Grid item xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Çalışma Saatleri"
-                                                    name="consultationHours"
-                                                    value={personalInfo.consultationHours}
-                                                    onChange={handlePersonalInfoChange}
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                />
-                                            </Grid>
-                                            
-                                            <Grid item xs={12}>
-                                                <Typography variant="subtitle2" sx={{mt: 2, mb: 1}}>Uzmanlık Alanları</Typography>
-                                                {personalInfo.specializations.map((specialization, index) => (
-                                                    <Box key={index} sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                                        <TextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={specialization}
-                                                            onChange={(e) => handleSpecializationChange(e, index)}
-                                                            margin="dense"
-                                                            variant="outlined"
-                                                        />
-                                                        <IconButton 
-                                                            color="error" 
-                                                            onClick={() => removeSpecialization(index)}
-                                                            disabled={personalInfo.specializations.length <= 1}
-                                                        >
-                                                            <CloseIcon />
-                                                        </IconButton>
-                                                    </Box>
-                                                ))}
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    onClick={addSpecialization}
-                                                    sx={{mt: 1}}
-                                                    disabled={personalInfo.specializations.length >= 5}
-                                                >
-                                                    Uzmanlık Alanı Ekle
-                                                </Button>
-                                            </Grid>
-                                            
-                                            <Grid item xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    label="Hakkımda"
-                                                    name="about"
-                                                    value={personalInfo.about}
-                                                    onChange={handlePersonalInfoChange}
-                                                    margin="normal"
-                                                    variant="outlined"
-                                                    multiline
-                                                    rows={4}
-                                                    helperText="Kendinizi ve çalışma prensiplerinizi kısaca tanıtın (300 karakter)"
-                                                    inputProps={{ maxLength: 300 }}
-                                                />
+                                                <FormControl fullWidth margin="normal">
+                                                    <InputLabel id="gender-label">Cinsiyet</InputLabel>
+                                                    <Select
+                                                        labelId="gender-label"
+                                                        id="gender"
+                                                        name="gender"
+                                                        value={personalInfo.gender}
+                                                        label="Cinsiyet"
+                                                        onChange={handlePersonalInfoChange}
+                                                    >
+                                                        <MenuItem value="Erkek">Erkek</MenuItem>
+                                                        <MenuItem value="Kadın">Kadın</MenuItem>
+                                                        <MenuItem value="Diğer">Diğer</MenuItem>
+                                                    </Select>
+                                                </FormControl>
                                             </Grid>
                                         </Grid>
 
-                                        <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 3}}>
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                startIcon={<LockIcon/>}
-                                                onClick={handleOpenPasswordModal}
-                                            >
-                                                Şifremi Değiştir
-                                            </Button>
-
+                                        <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
                                             <Button
                                                 variant="contained"
                                                 color="primary"
@@ -774,6 +680,12 @@ export default function Ayarlar() {
 
                     <Divider sx={{mb: 3}}/>
 
+                    {passwordError && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                            {passwordError}
+                        </Alert>
+                    )}
+
                     <Box component="form" className="form-container">
                         <TextField
                             fullWidth
@@ -851,6 +763,7 @@ export default function Ayarlar() {
                             <Button
                                 variant="outlined"
                                 onClick={handleClosePasswordModal}
+                                disabled={isChangingPassword}
                             >
                                 İptal
                             </Button>
@@ -858,8 +771,10 @@ export default function Ayarlar() {
                                 variant="contained"
                                 color="primary"
                                 onClick={handleChangePassword}
+                                disabled={isChangingPassword}
+                                startIcon={isChangingPassword ? <CircularProgress size={20} color="inherit" /> : <LockIcon />}
                             >
-                                Şifreyi Değiştir
+                                {isChangingPassword ? 'İşleniyor...' : 'Şifreyi Değiştir'}
                             </Button>
                         </Box>
                     </Box>
