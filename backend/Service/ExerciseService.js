@@ -1,4 +1,5 @@
 const path = require('path');
+const { Op } = require('sequelize');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const {Exercise, ExerciseCategory, ExerciseAssignment} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
@@ -69,6 +70,37 @@ class ExerciseService {
                     where: {dietitian_id}
                 }
             ]
+        });
+    }
+
+    static async getClientExerciseHistory(dietitian_id, client_id, startDate, endDate) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        if (!client_id) {
+            throw new Exception("Danışan ID eksik.", 400, true);
+        }
+
+        const whereClause = { client_id };
+        
+        if (startDate && endDate) {
+            whereClause.updatedAt = {
+                [Op.between]: [new Date(startDate), new Date(endDate)]
+            };
+        }
+
+        return await ExerciseAssignment.findAll({
+            where: whereClause,
+            include: [
+                {
+                    model: Exercise,
+                    as: 'Exercise',
+                    where: {dietitian_id},
+                    required: true
+                }
+            ],
+            order: [['updatedAt', 'DESC']]
         });
     }
 
