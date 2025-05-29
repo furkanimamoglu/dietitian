@@ -297,98 +297,6 @@ const AnaSayfa = ({navigation}: Props) => {
             <Header navigation={navigation}/>
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Karşılama Kartı */}
-                <Surface style={styles.welcomeCard}>
-                    <View style={styles.welcomeContent}>
-                        <View>
-                            <Text style={styles.welcomeText}>Merhaba,{'\n'}{userName}!</Text>
-                            <Text style={styles.subText}>Bugün programın için harika bir gün 💪</Text>
-                        </View>
-                    </View>
-                </Surface>
-
-                {/* Su Tüketimi Kartı */}
-                <Surface style={styles.waterCard}>
-                    <View style={styles.waterHeader}>
-                        <View style={styles.waterInfo}>
-                            <Icon name="water" size={28} color="#0288d1" />
-                            <View style={{ marginLeft: 12 }}>
-                                <Text style={styles.waterTitle}>Günlük Su Tüketimi</Text>
-                                <Text style={styles.waterTarget}>{totalWaterIntake} / {dailyWaterGoal} ml</Text>
-                            </View>
-                        </View>
-                        <Text style={styles.waterPercentage}>{waterPercentage}%</Text>
-                    </View>
-
-                    <View style={styles.waterMeterContainer}>
-                        <ProgressBar 
-                            progress={waterPercentage / 100} 
-                            color="#0288d1" 
-                            style={styles.waterMeter} 
-                        />
-                    </View>
-
-                    <View style={styles.waterBottles}>
-                        {waterContainers.slice(0, 5).map((container, index) => (
-                            <TouchableOpacity 
-                                key={index} 
-                                style={styles.waterBottleContainer}
-                                onPress={() => addWaterIntake(container.amount)}
-                            >
-                                <Icon
-                                    name={container.icon}
-                                    size={24}
-                                    color={container.color}
-                                />
-                                <Text style={{color: container.color, fontSize: 12}}>{container.amount}ml</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    {/* Water entries preview */}
-                    {waterIntake.length > 0 && (
-                        <View style={styles.waterEntriesPreview}>
-                            <Divider style={{marginVertical: 12}} />
-                            <Text style={styles.waterEntriesTitle}>Son Eklenenler</Text>
-                            
-                            {waterIntake.slice(0, 2).map((item) => (
-                                <View key={item.id} style={styles.waterEntryItem}>
-                                    <View style={styles.waterEntryInfo}>
-                                        <Icon name="cup-water" size={16} color="#0288d1" />
-                                        <Text style={styles.waterEntryText}>
-                                            {item.amount_ml} ml • {formatTime(item.date)}
-                                        </Text>
-                                    </View>
-                                    <TouchableOpacity 
-                                        onPress={() => deleteWaterIntake(item.id)}
-                                        disabled={deletingWaterId === item.id}
-                                    >
-                                        <Icon 
-                                            name="delete-outline" 
-                                            size={18} 
-                                            color="#F44336" 
-                                            style={{opacity: deletingWaterId === item.id ? 0.5 : 1}}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                            
-                            {waterIntake.length > 2 && (
-                                <Button 
-                                    mode="text" 
-                                    onPress={() => setShowWaterListModal(true)}
-                                    style={{marginTop: 8}}
-                                    labelStyle={{fontSize: 12}}
-                                    icon="chevron-down"
-                                    contentStyle={{flexDirection: 'row-reverse'}}
-                                >
-                                    Tümünü Gör
-                                </Button>
-                            )}
-                        </View>
-                    )}
-                </Surface>
-
                 {/* Sağlık Göstergeleri */}
                 <Surface style={styles.statsContainer}>
                     <View style={styles.statItem}>
@@ -424,6 +332,15 @@ const AnaSayfa = ({navigation}: Props) => {
                     </View>
                 </Surface>
 
+                {/* Motivasyon Kartı */}
+                <Surface style={styles.motivationCard}>
+                    <Icon name="star-circle" size={36} color="#fff" style={styles.motivationIcon}/>
+                    <Text style={styles.motivationText}>
+                        "Küçük adımlar büyük değişimlerin başlangıcıdır. Bugün attığın her adım, yarın daha sağlıklı bir
+                        sen için."
+                    </Text>
+                </Surface>
+
                 <Card style={styles.card}>
                     <Card.Title title="Gelecek Randevu Tarihiniz"/>
                     <Card.Content>
@@ -448,39 +365,86 @@ const AnaSayfa = ({navigation}: Props) => {
                     </Card.Content>
                 </Card>
 
-                {/* İlerleme Grafiği - LineChart olmadan
-        <Text style={styles.sectionTitle}>Haftalık İlerleme</Text>
-        <Surface style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Ağırlık Takibi (kg)</Text>
-          <View style={styles.chartContainer}>
-            {weeklyProgress.map((item, index) => (
-              <View key={index} style={styles.barColumn}>
-                <Text style={styles.barValue}>{item.value}</Text>
-                <View style={styles.barContainer}>
-                  <View
-                    style={[
-                      styles.barFill,
-                      {
-                        height: `${(item.value / maxValue) * 80}%`,
-                        backgroundColor: index === 4 ? '#2e7d32' : '#81c784'
-                      }
-                    ]}
-                  />
-                </View>
-                <Text style={styles.barDay}>{item.day}</Text>
-              </View>
-            ))}
-          </View>
-        </Surface>
-        */}
+                {/* Su Tüketimi Kartı */}
+                <Surface style={styles.waterCard}>
+                    <View style={styles.waterHeader}>
+                        <View style={styles.waterInfo}>
+                            <Icon name="water" size={28} color="#0288d1" />
+                            <View style={{ marginLeft: 12 }}>
+                                <Text style={styles.waterTitle}>Günlük Su Tüketimi</Text>
+                                <Text style={styles.waterTarget}>{totalWaterIntake} / {dailyWaterGoal} ml</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.waterPercentage}>{waterPercentage}%</Text>
+                    </View>
 
-                {/* Motivasyon Kartı */}
-                <Surface style={styles.motivationCard}>
-                    <Icon name="star-circle" size={36} color="#fff" style={styles.motivationIcon}/>
-                    <Text style={styles.motivationText}>
-                        "Küçük adımlar büyük değişimlerin başlangıcıdır. Bugün attığın her adım, yarın daha sağlıklı bir
-                        sen için."
-                    </Text>
+                    <View style={styles.waterMeterContainer}>
+                        <ProgressBar
+                            progress={waterPercentage / 100}
+                            color="#0288d1"
+                            style={styles.waterMeter}
+                        />
+                    </View>
+
+                    <View style={styles.waterBottles}>
+                        {waterContainers.slice(0, 5).map((container, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.waterBottleContainer}
+                                onPress={() => addWaterIntake(container.amount)}
+                            >
+                                <Icon
+                                    name={container.icon}
+                                    size={24}
+                                    color={container.color}
+                                />
+                                <Text style={{color: container.color, fontSize: 12}}>{container.amount}ml</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/* Water entries preview */}
+                    {waterIntake.length > 0 && (
+                        <View style={styles.waterEntriesPreview}>
+                            <Divider style={{marginVertical: 12}} />
+                            <Text style={styles.waterEntriesTitle}>Son Eklenenler</Text>
+
+                            {waterIntake.slice(0, 2).map((item) => (
+                                <View key={item.id} style={styles.waterEntryItem}>
+                                    <View style={styles.waterEntryInfo}>
+                                        <Icon name="cup-water" size={16} color="#0288d1" />
+                                        <Text style={styles.waterEntryText}>
+                                            {item.amount_ml} ml • {formatTime(item.date)}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => deleteWaterIntake(item.id)}
+                                        disabled={deletingWaterId === item.id}
+                                    >
+                                        <Icon
+                                            name="delete-outline"
+                                            size={18}
+                                            color="#F44336"
+                                            style={{opacity: deletingWaterId === item.id ? 0.5 : 1}}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+
+                            {waterIntake.length > 2 && (
+                                <Button
+                                    mode="text"
+                                    onPress={() => setShowWaterListModal(true)}
+                                    style={{marginTop: 8}}
+                                    labelStyle={{fontSize: 12}}
+                                    icon="chevron-down"
+                                    contentStyle={{flexDirection: 'row-reverse'}}
+                                >
+                                    Tümünü Gör
+                                </Button>
+                            )}
+                        </View>
+                    )}
                 </Surface>
 
                 {/* Alt boşluk */}
@@ -671,6 +635,7 @@ const styles = StyleSheet.create({
         paddingLeft: 4
     },
     statsContainer: {
+        marginTop: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 16,
