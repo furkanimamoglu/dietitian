@@ -69,6 +69,7 @@ import {
 } from '@mui/x-data-grid';
 import Papa from 'papaparse';
 import {trTR} from "@mui/x-data-grid/locales";
+import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
 
 const CustomModal = ({isOpen, onClose, title, children}) => {
     const overlayRef = React.useRef(null);
@@ -278,7 +279,7 @@ export default function Finans() {
             setPackages(packagesWithServices);
         } catch (error) {
             console.error('Error fetching packages:', error);
-            toast.error('Paketler yüklenirken bir hata oluştu.');
+            showErrorToast('Paketler yüklenirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -300,7 +301,7 @@ export default function Finans() {
             setClients(response.data);
         } catch (error) {
             console.error('Error fetching clients:', error);
-            toast.error('Danışanlar yüklenirken bir hata oluştu.');
+            showErrorToast('Danışanlar yüklenirken bir hata oluştu.');
         }
     };
 
@@ -329,7 +330,7 @@ export default function Finans() {
             setInvoices(invoicesData);
         } catch (error) {
             console.error('Error fetching invoices:', error);
-            toast.error('Faturalar yüklenirken bir hata oluştu.');
+            showErrorToast('Faturalar yüklenirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -666,7 +667,7 @@ export default function Finans() {
                 });
             } catch (error) {
                 console.error('Error fetching package items:', error);
-                toast.error('Paket hizmetleri yüklenirken bir hata oluştu.');
+                showErrorToast('Paket hizmetleri yüklenirken bir hata oluştu.');
                 setNewPackage({...pkg, services: [], serviceItems: []});
             }
         } else {
@@ -850,7 +851,7 @@ export default function Finans() {
                     }
                 }
 
-                toast.success(
+                showSuccessToast(
                     `${newPackage.name && newPackage.name.length > 20
                         ? newPackage.name.substring(0, 15) + '...'
                         : newPackage.name
@@ -886,7 +887,7 @@ export default function Finans() {
                     }
                 }
 
-                toast.success(
+                showSuccessToast(
                     `${newPackage.name && newPackage.name.length > 20
                         ? newPackage.name.substring(0, 15) + '...'
                         : newPackage.name
@@ -898,7 +899,7 @@ export default function Finans() {
             await fetchPackages();
         } catch (error) {
             console.error('Error saving package:', error);
-            toast.error('Paket kaydedilirken bir hata oluştu.');
+            showErrorToast('Paket kaydedilirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
             handleClosePackageDialog();
@@ -909,7 +910,7 @@ export default function Finans() {
         // Check if package is used in any invoices
         const isUsed = invoices.some(invoice => invoice.packageId === id);
         if (isUsed) {
-            toast.error("Bu paket faturalarda kullanıldığı için silinemez.");
+            showErrorToast("Bu paket faturalarda kullanıldığı için silinemez.");
             return;
         }
 
@@ -950,8 +951,8 @@ export default function Finans() {
                     getApiUrl(`/package/deletePackage?package_id=${itemId}`),
                     authHeaders
                 );
-                toast.success(`"${itemName}" paketi silindi.`);
-                toast.success(
+                showSuccessToast(`"${itemName}" paketi silindi.`);
+                showSuccessToast(
                     `${itemName && itemName.length > 20
                         ? itemName.substring(0, 15) + '...'
                         : itemName
@@ -960,12 +961,12 @@ export default function Finans() {
                 await fetchPackages(); // Refresh packages list
             } else if (itemType === 'invoice') {
                 await axios.delete(getApiUrl(`/invoice/deleteInvoice?invoice_id=${itemId}`), authHeaders);
-                toast.success(`Fatura silindi.`);
+                showSuccessToast(`Fatura silindi.`);
                 await fetchInvoices();
             }
         } catch (error) {
             console.error(`Error deleting ${itemType}:`, error);
-            toast.error(`${itemType === 'package' ? 'Paket' : 'Fatura'} silinirken bir hata oluştu.`);
+            showErrorToast(`${itemType === 'package' ? 'Paket' : 'Fatura'} silinirken bir hata oluştu.`);
         } finally {
             setIsLoading(false);
         }
@@ -1284,18 +1285,18 @@ export default function Finans() {
                     invoice_id: currentInvoice.id,
                     ...invoiceData
                 }, authHeaders);
-                toast.success("Fatura güncellendi.");
+                showSuccessToast("Fatura güncellendi.");
             } else {
                 // Create
                 await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
-                toast.success("Yeni fatura oluşturuldu.");
+                showSuccessToast("Yeni fatura oluşturuldu.");
             }
             
             await fetchInvoices();
             handleCloseInvoiceDialog();
         } catch (error) {
             console.error('Error saving invoice:', error);
-            toast.error('Fatura kaydedilirken bir hata oluştu.');
+            showErrorToast('Fatura kaydedilirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -1342,7 +1343,7 @@ export default function Finans() {
                 dueDate: invoice.dueDate,
                 description: invoice.description || ""
             }, authHeaders);
-            toast.success(
+            showSuccessToast(
                 `${invoice.clientName && invoice.clientName.length > 20
                     ? invoice.clientName.substring(0, 15) + '...'
                     : invoice.clientName
@@ -1351,7 +1352,7 @@ export default function Finans() {
             await fetchInvoices();
         } catch (error) {
             console.error('Status update error:', error);
-            toast.error('Durum güncellenirken bir hata oluştu.');
+            showErrorToast('Durum güncellenirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -2165,11 +2166,11 @@ export default function Finans() {
                     setImportDialogOpen(false);
                     setImportPreviewOpen(true);
                 } else {
-                    toast.error('CSV dosyası boş veya geçersiz format içeriyor.');
+                    showErrorToast('CSV dosyası boş veya geçersiz format içeriyor.');
                 }
             },
             error: function(error) {
-                toast.error(`CSV okuma hatası: ${error.message}`);
+                showErrorToast(`CSV okuma hatası: ${error.message}`);
             }
         });
     };
@@ -2348,7 +2349,7 @@ export default function Finans() {
                 }
             }
 
-            toast.success(
+            showSuccessToast(
                 `${successCount} fatura başarıyla eklendi. ${failCount > 0 ? `${failCount} fatura eklenemedi.` : ''}`
             );
             
@@ -2358,7 +2359,7 @@ export default function Finans() {
             
         } catch (error) {
             console.error("Toplu fatura eklenirken hata oluştu:", error);
-            toast.error(
+            showErrorToast(
                 "Faturalar eklenirken bir hata oluştu"
             );
         }

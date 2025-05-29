@@ -4,6 +4,7 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 import {toast} from 'react-hot-toast';
+import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -486,7 +487,7 @@ export default function Tarifler() {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
-                toast.error("Kategoriler yüklenirken bir hata oluştu.");
+                showErrorToast("Kategoriler yüklenirken bir hata oluştu.");
             });
     }, []);
 
@@ -522,7 +523,7 @@ export default function Tarifler() {
             })
             .catch((error) => {
                 console.error("Error fetching recipes:", error);
-                toast.error("Tarifler yüklenirken bir hata oluştu.");
+                showErrorToast("Tarifler yüklenirken bir hata oluştu.");
                 setLoading(false);
             });
     };
