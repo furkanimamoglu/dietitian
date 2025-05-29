@@ -50,6 +50,7 @@ import {
 } from "@mui/icons-material";
 
 import config from "../../config.js";
+import { toast } from "react-hot-toast";
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -138,6 +139,7 @@ export default function Ayarlar() {
         // Simulating API call to save settings
         setTimeout(() => {
             setSaveSuccess(true);
+            toast.success("Ayarlarınız başarıyla kaydedildi!");
             setTimeout(() => setSaveSuccess(false), 3000);
         }, 500);
     };
@@ -177,19 +179,24 @@ export default function Ayarlar() {
             if (response.ok) {
                 // Success
                 setOpenPasswordModal(false);
-                setSaveSuccess(true);
                 setPasswordInfo({
                     currentPassword: "",
                     newPassword: "",
                     confirmNewPassword: ""
                 });
-                setTimeout(() => setSaveSuccess(false), 3000);
+                
+                // Show toast notification for success
+                toast.success("Şifreniz başarıyla değiştirildi");
             } else {
                 // Error
                 setPasswordError(data.message || "Şifre değiştirme işlemi başarısız oldu");
+                // Show toast notification for error
+                toast.error(data.message || "Şifre değiştirme işlemi başarısız oldu");
             }
         } catch (error) {
-            setPasswordError("Bir hata oluştu. Lütfen tekrar deneyin.");
+            const errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
+            setPasswordError(errorMessage);
+            toast.error(errorMessage);
             console.error("Password change error:", error);
         } finally {
             setIsChangingPassword(false);
