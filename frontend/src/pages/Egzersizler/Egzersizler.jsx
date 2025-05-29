@@ -630,13 +630,23 @@ export default function Egzersizler() {
             });
     }
     
-    // Add function to handle date filter changes
-    const handleFilterHistory = () => {
-        if (selectedClientInfo && historyStartDate && historyEndDate) {
-            fetchExerciseHistory(selectedClientInfo.id, historyStartDate, historyEndDate);
+    // Modify this to handle date changes automatically
+    const handleHistoryDateChange = (dateType, newValue) => {
+        const formattedDate = newValue ? newValue.toISOString().split('T')[0] : '';
+        
+        if (dateType === 'start') {
+            setHistoryStartDate(formattedDate);
+            if (selectedClientInfo && formattedDate && historyEndDate) {
+                fetchExerciseHistory(selectedClientInfo.id, formattedDate, historyEndDate);
+            }
+        } else {
+            setHistoryEndDate(formattedDate);
+            if (selectedClientInfo && historyStartDate && formattedDate) {
+                fetchExerciseHistory(selectedClientInfo.id, historyStartDate, formattedDate);
+            }
         }
-    }
-    
+    };
+
     // Add function to handle tab changes
     const handleChangeTab = (event, newValue) => {
         setActiveTab(newValue);
@@ -2278,7 +2288,7 @@ export default function Egzersizler() {
                     ) : (
                         // Exercise history tab
                         <div>
-                            <Paper elevation={0} sx={{ mb: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                            <Box sx={{ mb: 3, p: 2, bgcolor: '#ffffff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
                                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500, color: '#424242', display: 'flex', alignItems: 'center' }}>
                                     <FilterAltIcon sx={{ mr: 1, fontSize: 20, color: '#757575' }} />
                                     Tarih Aralığı Filtreleme
@@ -2289,9 +2299,7 @@ export default function Egzersizler() {
                                             <DatePicker
                                                 label="Başlangıç Tarihi"
                                                 value={historyStartDate ? new Date(historyStartDate) : null}
-                                                onChange={(newValue) => {
-                                                    setHistoryStartDate(newValue ? newValue.toISOString().split('T')[0] : '');
-                                                }}
+                                                onChange={(newValue) => handleHistoryDateChange('start', newValue)}
                                                 slotProps={{
                                                     textField: {
                                                         fullWidth: true,
@@ -2314,9 +2322,7 @@ export default function Egzersizler() {
                                             <DatePicker
                                                 label="Bitiş Tarihi"
                                                 value={historyEndDate ? new Date(historyEndDate) : null}
-                                                onChange={(newValue) => {
-                                                    setHistoryEndDate(newValue ? newValue.toISOString().split('T')[0] : '');
-                                                }}
+                                                onChange={(newValue) => handleHistoryDateChange('end', newValue)}
                                                 slotProps={{
                                                     textField: {
                                                         fullWidth: true,
@@ -2336,23 +2342,8 @@ export default function Egzersizler() {
                                             />
                                         </Box>
                                     </LocalizationProvider>
-                                    <Button 
-                                        variant="contained" 
-                                        onClick={handleFilterHistory}
-                                        sx={{ 
-                                            bgcolor: '#087708', 
-                                            px: 3,
-                                            height: 40,
-                                            '&:hover': {
-                                                bgcolor: '#05540d'
-                                            }
-                                        }}
-                                        startIcon={<SearchIcon />}
-                                    >
-                                        Filtrele
-                                    </Button>
                                 </Box>
-                            </Paper>
+                            </Box>
                             
                             {loadingHistory ? (
                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 5 }}>
