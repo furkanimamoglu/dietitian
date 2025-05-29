@@ -43,7 +43,9 @@ import {
     TextField,
     Typography,
     useMediaQuery,
-    useTheme
+    useTheme,
+    LinearProgress,
+    Tooltip
 } from "@mui/material";
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -71,6 +73,149 @@ import Favorite from '@mui/icons-material/Favorite';
 import Email from '@mui/icons-material/Email';
 import Phone from '@mui/icons-material/Phone';
 import LocationCity from '@mui/icons-material/LocationCity';
+import OpacityIcon from '@mui/icons-material/Opacity';
+import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+
+// Water tracking data - moved outside the component
+const initialWaterTrackingData = {
+    dailyGoal: 2500, // ml
+    weeklyData: [
+        { day: 'Pazartesi', consumed: 2200, completed: false },
+        { day: 'Salı', consumed: 2500, completed: true },
+        { day: 'Çarşamba', consumed: 2700, completed: true },
+        { day: 'Perşembe', consumed: 1800, completed: false },
+        { day: 'Cuma', consumed: 2600, completed: true },
+        { day: 'Cumartesi', consumed: 2500, completed: true },
+        { day: 'Pazar', consumed: 1500, completed: false },
+    ]
+};
+
+// Water tracking component - moved outside the main component
+const WaterTrackingCard = ({ data }) => {
+    const currentDay = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
+    const mappedDay = currentDay === 0 ? 6 : currentDay - 1; // Convert to 0-6 where 0 is Monday
+    
+    const totalConsumed = data.weeklyData.reduce((sum, day) => sum + day.consumed, 0);
+    const totalGoal = data.dailyGoal * 7;
+    const weeklyCompletionPercentage = Math.min(Math.round((totalConsumed / totalGoal) * 100), 100);
+    
+    return (
+        <Card elevation={3} sx={{ mb: 3 }}>
+            <CardHeader
+                title="Su Takibi"
+                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                avatar={
+                    <Avatar sx={{ bgcolor: 'info.main' }}>
+                        <WaterDropIcon />
+                    </Avatar>
+                }
+                sx={{
+                    bgcolor: 'info.light',
+                    color: 'info.contrastText',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider'
+                }}
+            />
+            <CardContent>
+                <Box sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Haftalık Su Tüketimi
+                        </Typography>
+                        <Typography variant="subtitle1" color="info.main" fontWeight="bold">
+                            {weeklyCompletionPercentage}%
+                        </Typography>
+                    </Box>
+                    <LinearProgress 
+                        variant="determinate" 
+                        value={weeklyCompletionPercentage} 
+                        sx={{ 
+                            height: 10, 
+                            borderRadius: 5,
+                            bgcolor: 'info.lighter',
+                            '& .MuiLinearProgress-bar': {
+                                bgcolor: 'info.main',
+                                borderRadius: 5
+                            }
+                        }} 
+                    />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                            {totalConsumed} ml
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            Hedef: {totalGoal} ml
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    Günlük Takip
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                    {data.weeklyData.map((day, index) => (
+                        <Tooltip key={index} title={`${day.day}: ${day.consumed} ml / ${data.dailyGoal} ml`}>
+                            <Box 
+                                sx={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center',
+                                    opacity: index === mappedDay ? 1 : 0.7
+                                }}
+                            >
+                                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+                                    {day.day.substring(0, 3)}
+                                </Typography>
+                                <Box 
+                                    sx={{ 
+                                        width: 40, 
+                                        height: 40, 
+                                        borderRadius: '50%', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        border: '2px solid',
+                                        borderColor: day.completed ? 'info.main' : 'grey.300',
+                                        bgcolor: day.completed ? 'info.lighter' : 'transparent',
+                                        color: day.completed ? 'info.main' : 'grey.500'
+                                    }}
+                                >
+                                    <OpacityIcon fontSize={day.completed ? "small" : "small"} />
+                                </Box>
+                                <Typography 
+                                    variant="caption" 
+                                    color={index === mappedDay ? "info.main" : "text.secondary"} 
+                                    sx={{ 
+                                        mt: 0.5, 
+                                        fontWeight: index === mappedDay ? 'bold' : 'normal' 
+                                    }}
+                                >
+                                    {Math.round((day.consumed / data.dailyGoal) * 100)}%
+                                </Typography>
+                            </Box>
+                        </Tooltip>
+                    ))}
+                </Box>
+
+                <Box sx={{ p: 2, bgcolor: 'info.lighter', borderRadius: 2, mt: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <LocalDrinkIcon sx={{ color: 'info.main', mr: 1 }} />
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Günlük Su İhtiyacı
+                        </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                        Günlük hedef: <strong>{data.dailyGoal} ml</strong> ({data.dailyGoal / 1000} litre)
+                    </Typography>
+                    <Typography variant="body2">
+                        Bugün tüketilen: <strong>{data.weeklyData[mappedDay].consumed} ml</strong> ({Math.round((data.weeklyData[mappedDay].consumed / data.dailyGoal) * 100)}%)
+                    </Typography>
+                </Box>
+            </CardContent>
+        </Card>
+    );
+};
 
 function Danisan() {
     const {id} = useParams();
@@ -88,6 +233,9 @@ function Danisan() {
     const [clientInvoicesLoading, setClientInvoicesLoading] = useState(false);
     const [currentInvoicePage, setCurrentInvoicePage] = useState(1);
     const invoicesPerPage = 4;
+
+    // Water tracking state - properly placed at the top level of the component
+    const [waterTrackingData, setWaterTrackingData] = useState(initialWaterTrackingData);
 
     const [appointments, setAppointments] = useState([]);
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
@@ -1460,6 +1608,124 @@ function Danisan() {
                                         </Paper>
                                     </AccordionDetails>
                                 </Accordion>
+                                {/* Kan Tahlili Akordiyonu */}
+                                <Accordion elevation={3} sx={{mb: 2}}>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon/>}
+                                        sx={{
+                                            bgcolor: 'error.light',
+                                            color: 'error.contrastText',
+                                        }}
+                                    >
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            width: '100%'
+                                        }}>
+                                            <Typography variant="h6" sx={{fontWeight: 'bold'}}>
+                                                Kan Tahlili
+                                            </Typography>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                {bloodTestFiles && bloodTestFiles.length > 0 && (
+                                                    <Chip
+                                                        label={`Son Yükleme: ${new Date(bloodTestFiles[0].uploadDate).toLocaleDateString('tr-TR')}`}
+                                                        size="small"
+                                                        color="error"
+                                                        sx={{mr: 1, fontWeight: 'bold'}}
+                                                    />
+                                                )}
+                                                <Button
+                                                    component="label"
+                                                    variant="contained"
+                                                    size="small"
+                                                    startIcon={<AddIcon/>}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    color="error"
+                                                    sx={{fontWeight: 'bold', color: 'white', boxShadow: 1}}
+                                                >
+                                                    Yükle
+                                                    <input
+                                                        type="file"
+                                                        accept="application/pdf"
+                                                        hidden
+                                                        onChange={handleBloodTestFileUpload}
+                                                    />
+                                                </Button>
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails>
+                                        {bloodTestFiles && bloodTestFiles.length > 0 ? (
+                                            <Box sx={{mt: 2}}>
+                                                <List>
+                                                    {bloodTestFiles.map((file, index) => (
+                                                        <Paper
+                                                            key={index}
+                                                            elevation={1}
+                                                            sx={{
+                                                                mb: 2,
+                                                                p: 2,
+                                                                borderLeft: '4px solid',
+                                                                borderColor: 'error.main'
+                                                            }}
+                                                        >
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                                                    <ReceiptLongIcon sx={{color: 'error.main', mr: 2}}/>
+                                                                    <Box>
+                                                                        <Typography variant="subtitle1"
+                                                                                    sx={{fontWeight: 'bold'}}>
+                                                                            Kan Tahlili
+                                                                            - {new Date(file.uploadDate).toLocaleDateString('tr-TR')}
+                                                                        </Typography>
+                                                                        <Typography variant="caption" color="text.secondary">
+                                                                            {file.fileName || 'Tahlil Dosyası'}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                                <Box>
+                                                                    <IconButton
+                                                                        color="primary"
+                                                                        onClick={() => handleViewBloodTestFile(file)}
+                                                                        size="small"
+                                                                    >
+                                                                        <Visibility/>
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        color="error"
+                                                                        onClick={() => handleDeleteBloodTestFile(index)}
+                                                                        size="small"
+                                                                    >
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </Box>
+                                                            </Box>
+                                                        </Paper>
+                                                    ))}
+                                                </List>
+                                            </Box>
+                                        ) : (
+                                            <Box sx={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                height: 120,
+                                                border: '1px dashed',
+                                                borderColor: 'error.main',
+                                                borderRadius: 1
+                                            }}>
+                                                <Typography color="text.secondary">
+                                                    Henüz kan tahlili dosyası eklenmemiş.
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </AccordionDetails>
+                                </Accordion>
                             </>
                         ) : (
                             <Box sx={{textAlign: 'center', mt: 4}}>
@@ -1477,125 +1743,6 @@ function Danisan() {
                                 </Button>
                             </Box>
                         )}
-
-                        {/* Kan Tahlili Akordiyonu */}
-                        <Accordion elevation={3} sx={{mb: 2}}>
-                            <AccordionSummary
-                                expandIcon={<ExpandMoreIcon/>}
-                                sx={{
-                                    bgcolor: 'error.light',
-                                    color: 'error.contrastText',
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    width: '100%'
-                                }}>
-                                    <Typography variant="h6" sx={{fontWeight: 'bold'}}>
-                                        Kan Tahlili
-                                    </Typography>
-                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                        {bloodTestFiles && bloodTestFiles.length > 0 && (
-                                            <Chip
-                                                label={`Son Yükleme: ${new Date(bloodTestFiles[0].uploadDate).toLocaleDateString('tr-TR')}`}
-                                                size="small"
-                                                color="error"
-                                                sx={{mr: 1, fontWeight: 'bold'}}
-                                            />
-                                        )}
-                                        <Button
-                                            component="label"
-                                            variant="contained"
-                                            size="small"
-                                            startIcon={<AddIcon/>}
-                                            onClick={(e) => e.stopPropagation()}
-                                            color="error"
-                                            sx={{fontWeight: 'bold', color: 'white', boxShadow: 1}}
-                                        >
-                                            Yükle
-                                            <input
-                                                type="file"
-                                                accept="application/pdf"
-                                                hidden
-                                                onChange={handleBloodTestFileUpload}
-                                            />
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                {bloodTestFiles && bloodTestFiles.length > 0 ? (
-                                    <Box sx={{mt: 2}}>
-                                        <List>
-                                            {bloodTestFiles.map((file, index) => (
-                                                <Paper
-                                                    key={index}
-                                                    elevation={1}
-                                                    sx={{
-                                                        mb: 2,
-                                                        p: 2,
-                                                        borderLeft: '4px solid',
-                                                        borderColor: 'error.main'
-                                                    }}
-                                                >
-                                                    <Box sx={{
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center'
-                                                    }}>
-                                                        <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                                            <ReceiptLongIcon sx={{color: 'error.main', mr: 2}}/>
-                                                            <Box>
-                                                                <Typography variant="subtitle1"
-                                                                            sx={{fontWeight: 'bold'}}>
-                                                                    Kan Tahlili
-                                                                    - {new Date(file.uploadDate).toLocaleDateString('tr-TR')}
-                                                                </Typography>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    {file.fileName || 'Tahlil Dosyası'}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box>
-                                                            <IconButton
-                                                                color="primary"
-                                                                onClick={() => handleViewBloodTestFile(file)}
-                                                                size="small"
-                                                            >
-                                                                <Visibility/>
-                                                            </IconButton>
-                                                            <IconButton
-                                                                color="error"
-                                                                onClick={() => handleDeleteBloodTestFile(index)}
-                                                                size="small"
-                                                            >
-                                                                <DeleteIcon/>
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                </Paper>
-                                            ))}
-                                        </List>
-                                    </Box>
-                                ) : (
-                                    <Box sx={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        height: 120,
-                                        border: '1px dashed',
-                                        borderColor: 'error.main',
-                                        borderRadius: 1
-                                    }}>
-                                        <Typography color="text.secondary">
-                                            Henüz kan tahlili dosyası eklenmemiş.
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </AccordionDetails>
-                        </Accordion>
                     </Box>
                 );
             case 'olcum':
@@ -1855,6 +2002,9 @@ function Danisan() {
                                 </Button> */}
                             </Box>
                         </Box>
+
+                        {/* Water Tracking Card */}
+                        <WaterTrackingCard data={waterTrackingData} />
 
                         {nutritionPlanLoading ? (
                             <Box sx={{display: 'flex', justifyContent: 'center', my: 4}}>

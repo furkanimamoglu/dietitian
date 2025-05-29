@@ -7,4 +7,8 @@ const nutritionController = require(path.join(__dirname, '..', 'Controller', 'nu
 
 router.get('/getClientNutritionPlans', nutritionController.getClientNutritionPlans);
 
+router.delete('/deleteClientWater', nutritionController.deleteClientWater);
+router.post('/addClientWater', nutritionController.addClientWater);
+router.get('/getClientWater', nutritionController.getClientWater);
+
 module.exports = router;

@@ -20,6 +20,7 @@ const Notes = require(path.join(__dirname, 'Notes'));
 const Package = require(path.join(__dirname, 'Package'));
 const PackageItems = require(path.join(__dirname, 'PackageItems'));
 const Measurement = require(path.join(__dirname, 'Measurement'));
+const Water = require(path.join(__dirname, 'Water'));
 const BloodTest = require(path.join(__dirname, 'BloodTest'));
 
 Dietitian.hasMany(Client, {
@@ -253,6 +254,14 @@ Package.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id'
 });
 
+Client.hasMany(Water, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+});
+Water.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
 module.exports = {
     sequelize,
     Dietitian,
@@ -274,5 +283,6 @@ module.exports = {
     Package,
     PackageItems,
     Measurement,
+    Water,
     BloodTest
 };
