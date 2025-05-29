@@ -63,6 +63,7 @@ const getIconByType = (type) => {
 
 const settings = [
     {label: 'Ayarlar', value: 'ayarlar'},
+    {label: 'Ödeme', value: 'odeme'},
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
@@ -158,6 +159,8 @@ export default function Header() {
             navigate('/login');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
+        } else if (value === 'odeme') {
+            navigate('/odeme');
         } else {
             navigate('/dashboard');
         }

@@ -30,7 +30,6 @@ import {
 import {
     Brightness4,
     Close as CloseIcon,
-    CreditCard,
     Edit as EditIcon,
     Language,
     Lock as LockIcon,
@@ -39,7 +38,15 @@ import {
     Save,
     Settings as SettingsIcon,
     Visibility,
-    VisibilityOff
+    VisibilityOff,
+    School,
+    WorkOutline,
+    LocationOn,
+    Description,
+    AccessTime,
+    ColorLens,
+    Campaign,
+    NotificationsActive
 } from "@mui/icons-material";
 
 function TabPanel(props) {
@@ -71,8 +78,16 @@ export default function Ayarlar() {
 
     const [personalInfo, setPersonalInfo] = useState({
         name: "Dr. Furkan İmamoğlu",
+        title: "Uzman Diyetisyen",
         email: "ayse.yilmaz@example.com",
-        phone: "+90 555 123 4567"
+        phone: "+90 555 123 4567",
+        education: "Hacettepe Üniversitesi, Beslenme ve Diyetetik",
+        experience: "8 yıl",
+        specializations: ["Sporcu Beslenmesi", "Kilo Yönetimi", "Klinik Beslenme"],
+        about: "Sağlıklı beslenme konusunda uzmanlaşmış, danışanlarıyla kişiselleştirilmiş beslenme programları oluşturmaya odaklanan bir diyetisyenim.",
+        location: "İstanbul, Kadıköy",
+        consultationHours: "Pazartesi - Cuma: 09:00 - 18:00",
+        languages: ["Türkçe", "İngilizce"]
     });
 
     const [passwordInfo, setPasswordInfo] = useState({
@@ -83,14 +98,17 @@ export default function Ayarlar() {
 
     const [appSettings, setAppSettings] = useState({
         darkMode: false,
-        emailNotifications: true,
-        smsNotifications: false,
-        autoSave: true,
+        danisanNotifications: true,
+        randevuNotifications: true,
+        messagingNotifications: true,
+        autoLogout: 30,
         language: "Türkçe",
-        fontSize: 14,
         colorTheme: "default",
-        soundNotifications: true,
-        autoLogout: 30
+        defaultSessionDuration: 60,
+        defaultCaloriePlan: 1800,
+        showWeightGraphs: true,
+        enableMealReminders: true,
+        showProgressReports: true
     });
 
     const handleTabChange = (event, newValue) => {
@@ -101,6 +119,30 @@ export default function Ayarlar() {
         setPersonalInfo({
             ...personalInfo,
             [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSpecializationChange = (e, index) => {
+        const updatedSpecializations = [...personalInfo.specializations];
+        updatedSpecializations[index] = e.target.value;
+        setPersonalInfo({
+            ...personalInfo,
+            specializations: updatedSpecializations
+        });
+    };
+
+    const addSpecialization = () => {
+        setPersonalInfo({
+            ...personalInfo,
+            specializations: [...personalInfo.specializations, ""]
+        });
+    };
+
+    const removeSpecialization = (index) => {
+        const updatedSpecializations = personalInfo.specializations.filter((_, i) => i !== index);
+        setPersonalInfo({
+            ...personalInfo,
+            specializations: updatedSpecializations
         });
     };
 
@@ -180,6 +222,14 @@ export default function Ayarlar() {
         {value: "Español", label: "Español"},
     ];
 
+    const sessionDurations = [
+        {value: 30, label: "30 dakika"},
+        {value: 45, label: "45 dakika"},
+        {value: 60, label: "1 saat"},
+        {value: 90, label: "1.5 saat"},
+        {value: 120, label: "2 saat"},
+    ];
+
     return (
         <Default>
             <Box className="ayarlar-full-container">
@@ -201,120 +251,266 @@ export default function Ayarlar() {
                         variant="fullWidth"
                         className="settings-tabs"
                     >
-                        <Tab icon={<Person/>} iconPosition="start" label="Kişisel Bilgiler"/>
+                        <Tab icon={<Person/>} iconPosition="start" label="Profil Bilgileri"/>
                         <Tab icon={<SettingsIcon/>} iconPosition="start" label="Uygulama Ayarları"/>
-                        <Tab icon={<CreditCard/>} iconPosition="start" label="Abonelik ve Ödeme"/>
                     </Tabs>
                 </Box>
 
                 <TabPanel value={tabValue} index={0}>
-                    <Card variant="outlined" className="settings-card">
-                        <CardContent>
-                            <Box display="flex" alignItems="center" mb={3}>
-                                <Avatar
-                                    src="/profile-placeholder.jpg"
-                                    sx={{width: 100, height: 100, mr: 3}}
-                                />
-                                <Box>
-                                    <Typography variant="h5">{personalInfo.name}</Typography>
-                                    <Typography variant="body1" color="text.secondary">Premium Diyetisyen</Typography>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        sx={{mt: 1}}
-                                        startIcon={<EditIcon/>}
-                                    >
-                                        Profil Fotoğrafını Değiştir
-                                    </Button>
-                                </Box>
-                            </Box>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={4}>
+                            <Card variant="outlined" className="settings-card profile-preview-card">
+                                <CardContent>
+                                    <Typography variant="h6" gutterBottom sx={{mb: 3}}>
+                                        Profil Önizleme
+                                    </Typography>
+                                    
+                                    <Box className="profile-preview-container">
+                                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3}}>
+                                            <Avatar
+                                                src="/profile-placeholder.jpg"
+                                                sx={{width: 120, height: 120, mb: 2}}
+                                            />
+                                            <Typography variant="h5" align="center">{personalInfo.name}</Typography>
+                                            <Typography variant="subtitle1" color="text.secondary" align="center">
+                                                {personalInfo.title}
+                                            </Typography>
+                                            
+                                            <Box sx={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 0.5, mt: 2}}>
+                                                {personalInfo.specializations.map((spec, index) => (
+                                                    <Chip 
+                                                        key={index}
+                                                        label={spec}
+                                                        size="small"
+                                                        color="primary"
+                                                        variant="outlined"
+                                                    />
+                                                ))}
+                                            </Box>
+                                        </Box>
+                                        
+                                        <Divider sx={{my: 2}} />
+                                        
+                                        <Box sx={{mb: 2}}>
+                                            <Typography variant="body2" sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                                <LocationOn fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                {personalInfo.location}
+                                            </Typography>
+                                            
+                                            <Typography variant="body2" sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                                <School fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                {personalInfo.education}
+                                            </Typography>
+                                            
+                                            <Typography variant="body2" sx={{display: 'flex', alignItems: 'center'}}>
+                                                <WorkOutline fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                {personalInfo.experience} deneyim
+                                            </Typography>
+                                        </Box>
+                                        
+                                        <Divider sx={{my: 2}} />
+                                        
+                                        <Typography variant="body2" sx={{mb: 2}}>
+                                            {personalInfo.about}
+                                        </Typography>
+                                        
+                                        <Button
+                                            variant="outlined"
+                                            fullWidth
+                                            size="small"
+                                        >
+                                            Danışan Gözünden Görüntüle
+                                        </Button>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={8}>
+                            <Card variant="outlined" className="settings-card">
+                                <CardContent>
+                                    <Typography variant="h6" gutterBottom>
+                                        Profil Bilgileri
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" paragraph>
+                                        Bu bilgiler danışanlarınıza profilinizde görünecektir.
+                                    </Typography>
+                                    <Divider sx={{mb: 3}}/>
 
-                            <Typography variant="h6" gutterBottom>
-                                Kişisel Bilgiler
-                            </Typography>
-                            <Divider sx={{mb: 3}}/>
+                                    <Box component="form" className="form-container">
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Ad Soyad"
+                                                    name="name"
+                                                    value={personalInfo.name}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Ünvan"
+                                                    name="title"
+                                                    value={personalInfo.title}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="E-posta"
+                                                    name="email"
+                                                    type="email"
+                                                    value={personalInfo.email}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Telefon"
+                                                    name="phone"
+                                                    value={personalInfo.phone}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Konum"
+                                                    name="location"
+                                                    value={personalInfo.location}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                    placeholder="Şehir, İlçe"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Eğitim"
+                                                    name="education"
+                                                    value={personalInfo.education}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12} md={6}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Deneyim"
+                                                    name="experience"
+                                                    value={personalInfo.experience}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                    placeholder="Örn: 8 yıl"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Çalışma Saatleri"
+                                                    name="consultationHours"
+                                                    value={personalInfo.consultationHours}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                />
+                                            </Grid>
+                                            
+                                            <Grid item xs={12}>
+                                                <Typography variant="subtitle2" sx={{mt: 2, mb: 1}}>Uzmanlık Alanları</Typography>
+                                                {personalInfo.specializations.map((specialization, index) => (
+                                                    <Box key={index} sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={specialization}
+                                                            onChange={(e) => handleSpecializationChange(e, index)}
+                                                            margin="dense"
+                                                            variant="outlined"
+                                                        />
+                                                        <IconButton 
+                                                            color="error" 
+                                                            onClick={() => removeSpecialization(index)}
+                                                            disabled={personalInfo.specializations.length <= 1}
+                                                        >
+                                                            <CloseIcon />
+                                                        </IconButton>
+                                                    </Box>
+                                                ))}
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    onClick={addSpecialization}
+                                                    sx={{mt: 1}}
+                                                    disabled={personalInfo.specializations.length >= 5}
+                                                >
+                                                    Uzmanlık Alanı Ekle
+                                                </Button>
+                                            </Grid>
+                                            
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Hakkımda"
+                                                    name="about"
+                                                    value={personalInfo.about}
+                                                    onChange={handlePersonalInfoChange}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                    multiline
+                                                    rows={4}
+                                                    helperText="Kendinizi ve çalışma prensiplerinizi kısaca tanıtın (300 karakter)"
+                                                    inputProps={{ maxLength: 300 }}
+                                                />
+                                            </Grid>
+                                        </Grid>
 
-                            <Box component="form" className="form-container">
-                                <TextField
-                                    fullWidth
-                                    label="Ad Soyad"
-                                    name="name"
-                                    value={personalInfo.name}
-                                    onChange={handlePersonalInfoChange}
-                                    margin="normal"
-                                    variant="outlined"
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton edge="end">
-                                                    <EditIcon/>
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
+                                        <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 3}}>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                startIcon={<LockIcon/>}
+                                                onClick={handleOpenPasswordModal}
+                                            >
+                                                Şifremi Değiştir
+                                            </Button>
 
-                                <TextField
-                                    fullWidth
-                                    label="E-posta"
-                                    name="email"
-                                    type="email"
-                                    value={personalInfo.email}
-                                    onChange={handlePersonalInfoChange}
-                                    margin="normal"
-                                    variant="outlined"
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton edge="end">
-                                                    <EditIcon/>
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-
-                                <TextField
-                                    fullWidth
-                                    label="Telefon"
-                                    name="phone"
-                                    value={personalInfo.phone}
-                                    onChange={handlePersonalInfoChange}
-                                    margin="normal"
-                                    variant="outlined"
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton edge="end">
-                                                    <EditIcon/>
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    startIcon={<LockIcon/>}
-                                    onClick={handleOpenPasswordModal}
-                                    sx={{mt: 2, alignSelf: "flex-start"}}
-                                >
-                                    Şifremi Değiştir
-                                </Button>
-
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    startIcon={<Save/>}
-                                    onClick={handleSaveSettings}
-                                    sx={{mt: 3}}
-                                >
-                                    Değişiklikleri Kaydet
-                                </Button>
-                            </Box>
-                        </CardContent>
-                    </Card>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                startIcon={<Save/>}
+                                                onClick={handleSaveSettings}
+                                            >
+                                                Değişiklikleri Kaydet
+                                            </Button>
+                                        </Box>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    </Grid>
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={1}>
@@ -323,9 +519,9 @@ export default function Ayarlar() {
                             <Card variant="outlined" className="settings-card">
                                 <CardContent>
                                     <Box display="flex" alignItems="center" mb={2}>
-                                        <Brightness4 color="primary" sx={{mr: 1}}/>
+                                        <ColorLens color="primary" sx={{mr: 1}}/>
                                         <Typography variant="h6">
-                                            Görünüm Ayarları
+                                            Görünüm ve Dil
                                         </Typography>
                                     </Box>
                                     <Divider sx={{mb: 3}}/>
@@ -342,22 +538,6 @@ export default function Ayarlar() {
                                             }
                                             label="Karanlık Mod"
                                         />
-
-                                        <Box sx={{mt: 2, mb: 3}}>
-                                            <Typography gutterBottom>Yazı Boyutu</Typography>
-                                            <Slider
-                                                value={appSettings.fontSize}
-                                                onChange={(e, newValue) => {
-                                                    setAppSettings({...appSettings, fontSize: newValue});
-                                                }}
-                                                min={12}
-                                                max={20}
-                                                step={1}
-                                                marks
-                                                name="fontSize"
-                                                valueLabelDisplay="auto"
-                                            />
-                                        </Box>
 
                                         <FormControl fullWidth margin="normal">
                                             <InputLabel id="color-theme-label">Renk Teması</InputLabel>
@@ -376,6 +556,70 @@ export default function Ayarlar() {
                                                 ))}
                                             </Select>
                                         </FormControl>
+                                        
+                                        <FormControl fullWidth margin="normal">
+                                            <InputLabel id="language-label">Dil Seçimi</InputLabel>
+                                            <Select
+                                                labelId="language-label"
+                                                id="language"
+                                                value={appSettings.language}
+                                                label="Dil Seçimi"
+                                                name="language"
+                                                onChange={handleAppSettingsChange}
+                                            >
+                                                {languages.map(lang => (
+                                                    <MenuItem key={lang.value} value={lang.value}>
+                                                        {lang.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                            
+                            <Card variant="outlined" className="settings-card" sx={{mt: 3}}>
+                                <CardContent>
+                                    <Box display="flex" alignItems="center" mb={2}>
+                                        <AccessTime color="primary" sx={{mr: 1}}/>
+                                        <Typography variant="h6">
+                                            Oturum Ayarları
+                                        </Typography>
+                                    </Box>
+                                    <Divider sx={{mb: 3}}/>
+
+                                    <Box className="app-settings-container">
+                                        <FormControl fullWidth margin="normal">
+                                            <InputLabel id="session-duration-label">Varsayılan Seans Süresi</InputLabel>
+                                            <Select
+                                                labelId="session-duration-label"
+                                                id="session-duration"
+                                                value={appSettings.defaultSessionDuration}
+                                                label="Varsayılan Seans Süresi"
+                                                name="defaultSessionDuration"
+                                                onChange={handleAppSettingsChange}
+                                            >
+                                                {sessionDurations.map(duration => (
+                                                    <MenuItem key={duration.value} value={duration.value}>
+                                                        {duration.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        
+                                        <Typography gutterBottom sx={{mt: 2}}>Otomatik Çıkış Süresi (dakika)</Typography>
+                                        <Slider
+                                            value={appSettings.autoLogout}
+                                            onChange={(e, newValue) => {
+                                                setAppSettings({...appSettings, autoLogout: newValue});
+                                            }}
+                                            min={5}
+                                            max={60}
+                                            step={5}
+                                            marks
+                                            name="autoLogout"
+                                            valueLabelDisplay="auto"
+                                        />
                                     </Box>
                                 </CardContent>
                             </Card>
@@ -385,7 +629,7 @@ export default function Ayarlar() {
                             <Card variant="outlined" className="settings-card">
                                 <CardContent>
                                     <Box display="flex" alignItems="center" mb={2}>
-                                        <Notifications color="primary" sx={{mr: 1}}/>
+                                        <NotificationsActive color="primary" sx={{mr: 1}}/>
                                         <Typography variant="h6">
                                             Bildirim Ayarları
                                         </Typography>
@@ -396,303 +640,117 @@ export default function Ayarlar() {
                                         <FormControlLabel
                                             control={
                                                 <Switch
-                                                    checked={appSettings.emailNotifications}
+                                                    checked={appSettings.danisanNotifications}
                                                     onChange={handleAppSettingsChange}
-                                                    name="emailNotifications"
+                                                    name="danisanNotifications"
                                                     color="primary"
                                                 />
                                             }
-                                            label="E-posta Bildirimleri"
+                                            label="Yeni Danışan Bildirimleri"
                                         />
 
                                         <FormControlLabel
                                             control={
                                                 <Switch
-                                                    checked={appSettings.smsNotifications}
+                                                    checked={appSettings.randevuNotifications}
                                                     onChange={handleAppSettingsChange}
-                                                    name="smsNotifications"
+                                                    name="randevuNotifications"
                                                     color="primary"
                                                 />
                                             }
-                                            label="SMS Bildirimleri"
+                                            label="Randevu Bildirimleri"
                                         />
 
                                         <FormControlLabel
                                             control={
                                                 <Switch
-                                                    checked={appSettings.soundNotifications}
+                                                    checked={appSettings.messagingNotifications}
                                                     onChange={handleAppSettingsChange}
-                                                    name="soundNotifications"
+                                                    name="messagingNotifications"
                                                     color="primary"
                                                 />
                                             }
-                                            label="Ses Bildirimleri"
+                                            label="Mesajlaşma Bildirimleri"
                                         />
                                     </Box>
                                 </CardContent>
                             </Card>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <Card variant="outlined" className="settings-card">
+                            
+                            <Card variant="outlined" className="settings-card" sx={{mt: 3}}>
                                 <CardContent>
                                     <Box display="flex" alignItems="center" mb={2}>
-                                        <Language color="primary" sx={{mr: 1}}/>
+                                        <Description color="primary" sx={{mr: 1}}/>
                                         <Typography variant="h6">
-                                            Genel Ayarlar
+                                            Diyet ve Program Ayarları
                                         </Typography>
                                     </Box>
                                     <Divider sx={{mb: 3}}/>
 
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12} md={6}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        checked={appSettings.autoSave}
-                                                        onChange={handleAppSettingsChange}
-                                                        name="autoSave"
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label="Otomatik Kaydetme"
-                                            />
-                                        </Grid>
-
-                                        <Grid item xs={12} md={6}>
-                                            <FormControl fullWidth>
-                                                <InputLabel id="language-label">Dil Seçimi</InputLabel>
-                                                <Select
-                                                    labelId="language-label"
-                                                    id="language"
-                                                    value={appSettings.language}
-                                                    label="Dil Seçimi"
-                                                    name="language"
-                                                    onChange={handleAppSettingsChange}
-                                                >
-                                                    {languages.map(lang => (
-                                                        <MenuItem key={lang.value} value={lang.value}>
-                                                            {lang.label}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        </Grid>
-
-                                        <Grid item xs={12} md={6}>
-                                            <Typography gutterBottom>Otomatik Çıkış Süresi (dakika)</Typography>
-                                            <Slider
-                                                value={appSettings.autoLogout}
-                                                onChange={(e, newValue) => {
-                                                    setAppSettings({...appSettings, autoLogout: newValue});
-                                                }}
-                                                min={5}
-                                                max={60}
-                                                step={5}
-                                                marks
-                                                name="autoLogout"
-                                                valueLabelDisplay="auto"
-                                            />
-                                        </Grid>
-                                    </Grid>
-
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        startIcon={<Save/>}
-                                        onClick={handleSaveSettings}
-                                        sx={{mt: 3}}
-                                    >
-                                        Ayarları Kaydet
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    </Grid>
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={2}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={8}>
-                            <Card variant="outlined" className="settings-card subscription-main-card">
-                                <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                        Abonelik ve Ödeme Bilgileri
-                                    </Typography>
-                                    <Divider sx={{mb: 3}}/>
-
-                                    <Box className="subscription-container">
-                                        <Paper elevation={0} variant="outlined" sx={{
-                                            p: 3,
-                                            mb: 3,
-                                            borderRadius: 2,
-                                            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
-                                        }}>
-                                            <Grid container spacing={2}>
-                                                <Grid item xs={12} md={8}>
-                                                    <Box sx={{color: 'white'}}>
-                                                        <Typography variant="subtitle1" gutterBottom>
-                                                            Mevcut Plan
-                                                        </Typography>
-                                                        <Typography variant="h4" gutterBottom fontWeight="bold">
-                                                            Premium Diyetisyen Paketi
-                                                        </Typography>
-                                                        <Typography variant="body1">
-                                                            Tüm özelliklere sınırsız erişim
-                                                        </Typography>
-                                                        <Box sx={{mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap'}}>
-                                                            <Chip
-                                                                label="Sınırsız Danışan"
-                                                                size="small"
-                                                                sx={{
-                                                                    backgroundColor: 'rgba(255,255,255,0.2)',
-                                                                    color: 'white'
-                                                                }}
-                                                            />
-                                                            <Chip
-                                                                label="Gelişmiş Raporlar"
-                                                                size="small"
-                                                                sx={{
-                                                                    backgroundColor: 'rgba(255,255,255,0.2)',
-                                                                    color: 'white'
-                                                                }}
-                                                            />
-                                                            <Chip
-                                                                label="7/24 Destek"
-                                                                size="small"
-                                                                sx={{
-                                                                    backgroundColor: 'rgba(255,255,255,0.2)',
-                                                                    color: 'white'
-                                                                }}
-                                                            />
-                                                        </Box>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item xs={12} md={4}>
-                                                    <Box sx={{
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'flex-end',
-                                                        color: 'white',
-                                                        height: '100%',
-                                                        justifyContent: 'space-between'
-                                                    }}>
-                                                        <Typography variant="h3" fontWeight="bold">
-                                                            ₺599
-                                                            <Typography component="span"
-                                                                        variant="body1">/ay</Typography>
-                                                        </Typography>
-                                                        <Typography variant="body2" sx={{mt: 2}}>
-                                                            Sonraki ödeme tarihi: <b>15 Nisan 2023</b>
-                                                        </Typography>
-                                                    </Box>
-                                                </Grid>
-                                            </Grid>
-                                        </Paper>
-
-                                        <Typography variant="subtitle1" gutterBottom sx={{mt: 4, mb: 2}}>
-                                            Ödeme Geçmişi
-                                        </Typography>
-
-                                        <Box sx={{mb: 3}}>
-                                            {[
-                                                {date: '15 Mart 2023', amount: '₺599', status: 'Ödendi'},
-                                                {date: '15 Şubat 2023', amount: '₺599', status: 'Ödendi'},
-                                                {date: '15 Ocak 2023', amount: '₺599', status: 'Ödendi'}
-                                            ].map((payment, index) => (
-                                                <Box key={index} sx={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    p: 2,
-                                                    borderBottom: '1px solid #eee',
-                                                    '&:hover': {backgroundColor: '#f9f9f9'}
-                                                }}>
-                                                    <Typography variant="body2">{payment.date}</Typography>
-                                                    <Typography variant="body2">{payment.amount}</Typography>
-                                                    <Chip
-                                                        label={payment.status}
-                                                        size="small"
-                                                        color="success"
-                                                        sx={{height: 24}}
-                                                    />
-                                                </Box>
-                                            ))}
-                                        </Box>
-
-                                        <Box sx={{display: 'flex', gap: 2, mt: 4}}>
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                            >
-                                                Faturaları Görüntüle
-                                            </Button>
-
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                startIcon={<CreditCard/>}
-                                            >
-                                                Ödeme Yöntemini Güncelle
-                                            </Button>
-                                        </Box>
-                                    </Box>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Card variant="outlined" className="settings-card">
-                                <CardContent>
-                                    <Typography variant="h6" gutterBottom>
-                                        Mevcut Ödeme Yöntemi
-                                    </Typography>
-                                    <Divider sx={{mb: 3}}/>
-
-                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 3}}>
-                                        <Box
-                                            component="img"
-                                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png"
-                                            alt="Visa"
-                                            sx={{width: 60, mr: 2}}
+                                    <Box className="app-settings-container">
+                                        <TextField
+                                            fullWidth
+                                            label="Varsayılan Kalori Planı"
+                                            name="defaultCaloriePlan"
+                                            type="number"
+                                            value={appSettings.defaultCaloriePlan}
+                                            onChange={handleAppSettingsChange}
+                                            margin="normal"
+                                            variant="outlined"
+                                            inputProps={{ min: 1200, max: 3000, step: 50 }}
+                                            helperText="Kcal/gün"
                                         />
-                                        <Box>
-                                            <Typography variant="body1">
-                                                **** **** **** 4242
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Son Kullanma: 06/24
-                                            </Typography>
-                                        </Box>
+                                        
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={appSettings.showWeightGraphs}
+                                                    onChange={handleAppSettingsChange}
+                                                    name="showWeightGraphs"
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Kilo Takip Grafiklerini Göster"
+                                        />
+                                        
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={appSettings.enableMealReminders}
+                                                    onChange={handleAppSettingsChange}
+                                                    name="enableMealReminders"
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="Öğün Hatırlatıcılarını Etkinleştir"
+                                        />
+                                        
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    checked={appSettings.showProgressReports}
+                                                    onChange={handleAppSettingsChange}
+                                                    name="showProgressReports"
+                                                    color="primary"
+                                                />
+                                            }
+                                            label="İlerleme Raporlarını Göster"
+                                        />
                                     </Box>
-
-                                    <Typography variant="h6" gutterBottom sx={{mt: 4}}>
-                                        Fatura Adresi
-                                    </Typography>
-                                    <Divider sx={{mb: 3}}/>
-
-                                    <Typography variant="body1">
-                                        Dr. Furkan İmamoğlu
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        İstanbul Beslenme Kliniği
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Bağdat Caddesi No: 123
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Kadıköy / İstanbul
-                                    </Typography>
-
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        startIcon={<EditIcon/>}
-                                        sx={{mt: 3}}
-                                    >
-                                        Fatura Bilgilerini Düzenle
-                                    </Button>
                                 </CardContent>
                             </Card>
+                        </Grid>
+                        
+                        <Grid item xs={12}>
+                            <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    startIcon={<Save/>}
+                                    onClick={handleSaveSettings}
+                                >
+                                    Tüm Ayarları Kaydet
+                                </Button>
+                            </Box>
                         </Grid>
                     </Grid>
                 </TabPanel>

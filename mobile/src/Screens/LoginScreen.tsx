@@ -1,7 +1,6 @@
 // src/screens/LoginScreen.tsx
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-    Alert,
     Dimensions,
     KeyboardAvoidingView,
     Platform,
@@ -9,10 +8,11 @@ import {
     StatusBar,
     StyleSheet,
     TouchableOpacity,
-    View
+    View,
+    Animated
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {Button, Card, Text, TextInput, useTheme} from 'react-native-paper';
+import {Button, Card, Text, TextInput, useTheme, Surface} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,6 +27,29 @@ const LoginScreen = ({navigation}: Props) => {
     const [phone, setPhone] = useState('');
     const [secure, setSecure] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const errorOpacity = useState(new Animated.Value(0))[0];
+
+    useEffect(() => {
+        if (errorMessage) {
+            // Animate error message appearance
+            Animated.sequence([
+                Animated.timing(errorOpacity, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: true
+                }),
+                Animated.delay(5000), // Show error for 5 seconds
+                Animated.timing(errorOpacity, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true
+                })
+            ]).start(() => {
+                setErrorMessage(null);
+            });
+        }
+    }, [errorMessage, errorOpacity]);
 
     const handleChange = (text: string) => {
         const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
@@ -36,20 +59,30 @@ const LoginScreen = ({navigation}: Props) => {
     const handleLogin = async () => {
         try {
             setLoading(true);
-            console.log(`${config[config.environment].apiUrl}/client/login`)
-            const response = await axios.post(`${config[config.environment].apiUrl}/client/login`, {
-                phoneNumber: phone,
-                password: password,
-            });
-            const token = response.data?.token;
-            if (!token) throw new Error('Token alınamadı.');
-            await AsyncStorage.setItem('token', `Bearer ${token}`);
-            navigation.replace('AnaSayfa');
+            setErrorMessage(null);
+            
+            // Handle config indexing safely
+            const env = config.environment as keyof typeof config;
+            if (typeof config[env] === 'object' && 'apiUrl' in config[env]) {
+                const apiUrl = (config[env] as { apiUrl: string }).apiUrl;
+                
+                const response = await axios.post(`${apiUrl}/client/login`, {
+                    phoneNumber: phone,
+                    password: password,
+                });
+                
+                const token = response.data?.token;
+                if (!token) throw new Error('Token alınamadı.');
+                await AsyncStorage.setItem('token', `Bearer ${token}`);
+                navigation.replace('AnaSayfa');
+            } else {
+                throw new Error('API URL bulunamadı');
+            }
         } catch (error: any) {
-            Alert.alert(
-                'Giriş Başarısız',
-                error?.response?.data?.message || error.message || 'Bilinmeyen hata'
-            );
+            const errorMsg = error?.response?.data?.message || 
+                             error?.message || 
+                             'Bilinmeyen hata oluştu';
+            setErrorMessage(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -57,6 +90,22 @@ const LoginScreen = ({navigation}: Props) => {
 
     const handleDietitianLogin = () => {
         console.log('Diyetisyen girişine yönlendir');
+    };
+
+    const ErrorMessage = () => {
+        if (!errorMessage) return null;
+        
+        return (
+            <Animated.View style={[styles.errorContainer, { opacity: errorOpacity }]}>
+                <Surface style={styles.errorSurface}>
+                    <Icon name="alert-circle" size={24} color="#D32F2F" style={styles.errorIcon} />
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                    <TouchableOpacity onPress={() => setErrorMessage(null)} style={styles.closeButton}>
+                        <Icon name="close" size={20} color="#666" />
+                    </TouchableOpacity>
+                </Surface>
+            </Animated.View>
+        );
     };
 
     return (
@@ -76,6 +125,8 @@ const LoginScreen = ({navigation}: Props) => {
                         <Text variant="headlineMedium" style={styles.title}>Diyetia</Text>
                         <Text variant="bodyMedium" style={styles.subtitle}>Sağlıklı yaşam yolculuğunuz için</Text>
                     </View>
+
+                    <ErrorMessage />
 
                     <Card style={styles.formCard}>
                         <Card.Content>
@@ -114,7 +165,7 @@ const LoginScreen = ({navigation}: Props) => {
                             />
 
                             <TouchableOpacity
-                                onPress={() => navigation.navigate('SifremiUnuttum', {})}
+                                onPress={() => navigation.navigate('SifremiUnuttum', undefined)}
                                 style={styles.forgotContainer}
                             >
                                 <Text style={styles.forgotText}>Şifremi unuttum?</Text>
@@ -198,6 +249,33 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#777',
         marginBottom: 16,
+    },
+    errorContainer: {
+        width: '100%',
+        marginBottom: 16,
+        alignItems: 'center',
+    },
+    errorSurface: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFEBEE',
+        borderRadius: 8,
+        padding: 12,
+        elevation: 1,
+        borderLeftWidth: 4,
+        borderLeftColor: '#D32F2F',
+    },
+    errorIcon: {
+        marginRight: 10,
+    },
+    errorText: {
+        flex: 1,
+        color: '#D32F2F',
+        fontSize: 14,
+    },
+    closeButton: {
+        padding: 4,
     },
     formCard: {
         borderRadius: 16,

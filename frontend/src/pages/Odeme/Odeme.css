@@ -1,0 +1,58 @@
+.odeme-container {
+    width: 100%;
+    padding: 20px 30px;
+}
+
+.odeme-title {
+    margin-bottom: 24px;
+    color: #333;
+    font-weight: 500;
+}
+
+.payment-tabs {
+    margin-bottom: 20px;
+}
+
+.payment-tabs .MuiTab-root {
+    text-transform: none;
+    font-weight: 500;
+}
+
+.payment-card {
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    overflow: visible !important;
+}
+
+.current-plan-card {
+    position: relative;
+    overflow: visible;
+}
+
+.payment-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    max-width: 90vw;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 3px 20px rgba(0, 0, 0, 0.2);
+    padding: 24px;
+}
+
+.upgrade-modal {
+    width: 600px;
+}
+
+@media (max-width: 600px) {
+    .odeme-container {
+        padding: 12px;
+    }
+    
+    .payment-modal {
+        width: 90vw;
+        padding: 16px;
+    }
+}

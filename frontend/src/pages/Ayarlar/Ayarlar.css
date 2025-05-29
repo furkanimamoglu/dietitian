@@ -29,8 +29,14 @@
     overflow: visible !important;
 }
 
-.subscription-main-card {
+.profile-preview-card {
     height: 100%;
+}
+
+.profile-preview-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-container {

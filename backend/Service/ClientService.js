@@ -28,6 +28,10 @@ class ClientService {
                 throw new Exception('Hatalı giriş bilgileri.', 400, true);
             }
 
+            if (client.status === 'Pasif') {
+                throw new Exception('Hesabınız diyetisyeniniz tarafından pasif duruma getirilmiş. Lütfen diyetisyeninizle iletişime geçin.', 403, true);
+            }
+
             const token = jwt.sign(
                 {
                     id: client.id,
