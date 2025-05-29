@@ -2885,13 +2885,15 @@ function Danisan() {
             case 'randevu':
                 const now = new Date();
                 const upcomingAppointments = appointments.filter(app =>
-                    ['pending', 'approved'].includes(app.status) &&
+                    // Include all appointments with start date in the future (within next 7 days)
+                    // Changed status filter to only exclude canceled appointments
+                    (app.status !== 'canceled' && app.status !== 'cancelled') &&
                     new Date(app.start) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) &&
                     new Date(app.start) > now
                 );
                 const pastAppointments = appointments.filter(app =>
-                    (app.status !== 'pending') &&
-                    (app.status !== 'canceled') &&
+                    // Include all past appointments except cancelled ones
+                    (app.status !== 'canceled' && app.status !== 'cancelled') &&
                     (new Date(app.start) <= now)
                 );
                 return (
@@ -3077,7 +3079,7 @@ function Danisan() {
                                     <CardHeader
                                         title="Son Randevu Notları"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
-                                        subheader={pastAppointments.length > 0 && pastAppointments[0].start ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
+                                        subheader={pastAppointments.length > 0 ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
                                         sx={{
                                             bgcolor: 'primary.light',
                                             color: 'primary.contrastText',
@@ -3089,13 +3091,19 @@ function Danisan() {
                                         }}
                                     />
                                     <CardContent>
-                                        {pastAppointments.length > 0 && pastAppointments[0].note ? (
-                                            <Typography variant="body1" paragraph>
-                                                {pastAppointments[0].note}
-                                            </Typography>
+                                        {pastAppointments.length > 0 ? (
+                                            pastAppointments[0].note ? (
+                                                <Typography variant="body1" paragraph>
+                                                    {pastAppointments[0].note}
+                                                </Typography>
+                                            ) : (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Bu randevu için not eklenmemiş.
+                                                </Typography>
+                                            )
                                         ) : (
                                             <Typography variant="body2" color="text.secondary">
-                                                Henüz not eklenmemiş.
+                                                Henüz tamamlanmış randevu bulunmamaktadır.
                                             </Typography>
                                         )}
                                     </CardContent>
@@ -3122,7 +3130,7 @@ function Danisan() {
                                                     textAlign: 'center'
                                                 }}>
                                                     <Typography variant="h4"
-                                                                sx={{fontWeight: 'bold'}}>{pastAppointments.filter(a => a.status === 'completed').length}</Typography>
+                                                                sx={{fontWeight: 'bold'}}>{pastAppointments.filter(a => a.status === 'completed' || a.status === 'approved').length}</Typography>
                                                     <Typography variant="body2">Tamamlanan</Typography>
                                                 </Box>
                                             </Grid>
