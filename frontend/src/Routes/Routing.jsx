@@ -33,9 +33,9 @@ export default function Routing() {
             <Route path="/egzersiz/*" element={<Egzersizler/>}/>
             <Route path="/finans/*" element={<Egzersizler/>}/>
             <Route path="/tarif/*" element={<Tarifler/>}/>
-            <Route path="/login/*" element={<Login/>}/>
-            <Route path="/register/*" element={<Register/>}/>
-            <Route path="/forgotpassword/*" element={<ForgotPassword/>}/>
+            <Route path="/girisyap/*" element={<Login/>}/>
+            <Route path="/kayitol/*" element={<Register/>}/>
+            <Route path="/sifremiunuttum/*" element={<ForgotPassword/>}/>
             <Route path="/odeme/*" element={<Odeme/>}/>
 
             {/* Error Routes */}
