@@ -2721,9 +2721,7 @@ function Danisan() {
                             </Paper>
                         )}
 
-                        {/* Water Tracking Card */}
-                        <WaterTrackingCard data={waterTrackingData} clientId={id} />
-
+                        {/* Atanmış Planlar Kartı */}
                         <Card elevation={3} sx={{mb: 3}}>
                             <CardHeader
                                 title="Atanmış Planlar"
@@ -2840,6 +2838,9 @@ function Danisan() {
                                 )}
                             </List>
                         </Card>
+
+                        {/* Water Tracking Card */}
+                        <WaterTrackingCard data={waterTrackingData} clientId={id} />
                     </Box>
                 );
             case 'randevu':
