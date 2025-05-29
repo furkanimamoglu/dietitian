@@ -42,20 +42,6 @@ const ExerciseAssignment = sequelize.define('ExerciseAssignment', {
             }
         }
     },
-    status: {
-        type: DataTypes.ENUM('active', 'completed', 'pending', 'cancelled'),
-        allowNull: false,
-        defaultValue: 'active',
-        validate: {
-            notNull: {
-                msg: 'Durum alanı boş bırakılamaz.'
-            },
-            isIn: {
-                args: [['active', 'completed', 'pending', 'cancelled']],
-                msg: 'Durum değeri geçerli olmalıdır.'
-            }
-        }
-    },
     note: {
         type: DataTypes.TEXT,
         allowNull: true,

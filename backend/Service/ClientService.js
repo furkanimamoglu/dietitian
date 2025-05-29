@@ -3,7 +3,6 @@ const path = require('path');
 const {
     Client,
     ExerciseAssignment,
-    Exercise,
     Notification,
     NutritionAssignment,
     NutritionPlan,
@@ -400,7 +399,6 @@ class ClientService {
             throw new Exception(error.message, error.statusCode || 400);
         }
     }
-
 
 }
 

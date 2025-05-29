@@ -585,12 +585,13 @@ export default function Danisanlarim() {
             type: "singleSelect",
             valueOptions: ["Aktif", "Pasif"],
             editable: true,
-            renderCell: (params) =>
-                params.row.status ? (
-                    <CheckCircle sx={{color: green[500]}}/>
-                ) : (
-                    <Cancel sx={{color: red[500]}}/>
-                ),
+            renderCell: (params) => {
+                if (params.row.status === "Aktif") {
+                    return <CheckCircle sx={{color: green[500]}}/>;
+                } else {
+                    return <Cancel sx={{color: red[500]}}/>;
+                }
+            }
         },
         {
             field: "gender",
