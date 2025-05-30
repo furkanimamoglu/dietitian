@@ -13,6 +13,7 @@ router.delete('/deleteExercise', exerciseController.deleteExercise);
 router.get('/getClientExercises', exerciseController.getClientExercises);
 router.post('/assignExercise', exerciseController.assignExercise);
 router.get('/getAssignedExercisesByClient', exerciseController.getAssignedExercisesByClient);
+router.get('/getClientExerciseHistory', exerciseController.getClientExerciseHistory);
 router.delete('/deleteExerciseAssignment', exerciseController.deleteExerciseAssignment);
 
 router.get('/getMyExerciseCategories', exerciseController.getMyExerciseCategories);

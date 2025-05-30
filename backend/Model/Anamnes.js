@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Anamnes = sequelize.define('Anamnes', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true
     },
     dietitian_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             notNull: {
@@ -23,7 +23,7 @@ const Anamnes = sequelize.define('Anamnes', {
         }
     },
     client_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             notNull: {

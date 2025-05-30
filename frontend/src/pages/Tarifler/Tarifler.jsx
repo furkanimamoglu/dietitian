@@ -4,6 +4,7 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 import {toast} from 'react-hot-toast';
+import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -259,8 +260,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
                 <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={() => {
-                    }} // Controlled component
+                    onChange={onCheck}
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
@@ -487,7 +487,7 @@ export default function Tarifler() {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
-                toast.error("Kategoriler yüklenirken bir hata oluştu.");
+                showErrorToast("Kategoriler yüklenirken bir hata oluştu.");
             });
     }, []);
 
@@ -523,7 +523,7 @@ export default function Tarifler() {
             })
             .catch((error) => {
                 console.error("Error fetching recipes:", error);
-                toast.error("Tarifler yüklenirken bir hata oluştu.");
+                showErrorToast("Tarifler yüklenirken bir hata oluştu.");
                 setLoading(false);
             });
     };
@@ -654,7 +654,7 @@ export default function Tarifler() {
                                 onClick={() => setAddRecipeModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Tarif Ekle</span>
+                                <span className="btn-text">Tarif</span>
                             </button>
                             <button
                                 className="action-btn add-btn"
@@ -662,7 +662,7 @@ export default function Tarifler() {
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Kategori Ekle</span>
+                                <span className="btn-text">Kategori</span>
                             </button>
                             <button
                                 className="action-btn delete-btn"

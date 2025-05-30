@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Measurement = sequelize.define('Measurement', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
     },
     client_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             isInt: {
@@ -23,7 +23,7 @@ const Measurement = sequelize.define('Measurement', {
         }
     },
     boy: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             isInt: {
@@ -43,7 +43,7 @@ const Measurement = sequelize.define('Measurement', {
         }
     },
     kilo: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             isInt: {
@@ -63,7 +63,7 @@ const Measurement = sequelize.define('Measurement', {
         }
     },
     bel: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             isInt: {
@@ -83,7 +83,7 @@ const Measurement = sequelize.define('Measurement', {
         }
     },
     kalca: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             isInt: {
@@ -103,7 +103,7 @@ const Measurement = sequelize.define('Measurement', {
         }
     },
     gogus: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
         validate: {
             isInt: {

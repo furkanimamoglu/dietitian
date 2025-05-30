@@ -33,10 +33,10 @@ class Security {
      */
     checkUserPermission(token, checkRole) {
         let userRole = this.getPermissionFromToken(token);
-        if (!userRole || !checkRole) {
-            return false;
+        if (userRole || checkRole) {
+            return userRole === checkRole;
         } else {
-            return true;
+            return false;
         }
     }
 

@@ -18,7 +18,7 @@ export default function Navbar() {
 
     React.useEffect(() => {
         const handleScroll = () => {
-            const isScrolled = window.scrollY > 10;
+            const isScrolled = window.scrollY > 20;
             if (isScrolled !== scrolled) {
                 setScrolled(isScrolled);
             }
@@ -50,9 +50,9 @@ export default function Navbar() {
                     display: {xs: "none", md: "flex"},
                     position: 'sticky',
                     top: '65px',
-                    mt: scrolled ? 0 : "1rem",
+                    mt: "1rem",
                     boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 4px 6px rgba(0,0,0,0.1)",
-                    transition: "all 0.3s ease",
+                    transition: "background-color 0.3s ease, box-shadow 0.3s ease",
                     zIndex: 100,
                     borderRadius: 0,
                     justifyContent: "center",

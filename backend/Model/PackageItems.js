@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const PackageItems = sequelize.define('PackageItems', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
         package_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             validate: {
                 notNull: {

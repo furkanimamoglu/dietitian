@@ -24,9 +24,15 @@ import PeopleIcon from '@mui/icons-material/People';
 import EventIcon from '@mui/icons-material/Event';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import HistoryIcon from '@mui/icons-material/History';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
 import {
     Avatar,
     CircularProgress,
@@ -53,9 +59,263 @@ import {
     CardActions,
     LinearProgress,
     Stack,
-    Tooltip
+    Tooltip,
+    Tab,
+    Tabs
 } from '@mui/material';
-import {jsPDF} from "jspdf";
+
+// Register a custom font with Turkish character support
+Font.register({
+    family: 'Open Sans',
+    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
+});
+
+// Define styles for PDF
+const pdfStyles = StyleSheet.create({
+    page: {
+        flexDirection: 'column',
+        backgroundColor: '#fff',
+        padding: 10,
+        fontFamily: 'Open Sans'
+    },
+    header: {
+        backgroundColor: '#087708',
+        padding: 5,
+        marginBottom: 10,
+        borderRadius: 5,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    headerContent: {
+        flex: 1
+    },
+    headerTitle: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4
+    },
+    headerInfo: {
+        color: 'white',
+        fontSize: 9,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    logoContainer: {
+        width: 50,
+        height: 50,
+        backgroundColor: 'white',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 10
+    },
+    logo: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#087708'
+    },
+    infoSection: {
+        flexDirection: 'row',
+        marginBottom: 10,
+        borderRadius: 5,
+        overflow: 'hidden'
+    },
+    infoBox: {
+        flex: 1,
+        padding: 8,
+        backgroundColor: '#f5f5f5',
+        margin: 2
+    },
+    infoTitle: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        marginBottom: 3,
+        color: '#087708'
+    },
+    infoContent: {
+        fontSize: 8,
+        color: '#333'
+    },
+    exerciseDetails: {
+        marginBottom: 15,
+        border: '1px solid #E0E0E0',
+        borderRadius: 5,
+        overflow: 'hidden'
+    },
+    exerciseHeader: {
+        backgroundColor: '#087708',
+        padding: 6,
+    },
+    exerciseHeaderText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold'
+    },
+    exerciseContent: {
+        padding: 10,
+        backgroundColor: '#f9f9f9'
+    },
+    exerciseRow: {
+        flexDirection: 'row',
+        marginBottom: 5,
+        paddingBottom: 3,
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEEEEE',
+        borderBottomStyle: 'solid'
+    },
+    exerciseLabel: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        width: '30%',
+        color: '#555'
+    },
+    exerciseValue: {
+        fontSize: 8,
+        width: '70%'
+    },
+    instructionsTitle: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginTop: 8,
+        marginBottom: 4,
+        color: '#087708',
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEEEEE',
+        borderBottomStyle: 'solid',
+        paddingBottom: 2
+    },
+    instructionsText: {
+        fontSize: 8,
+        lineHeight: 1.4
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 10,
+        left: 0,
+        right: 0,
+        textAlign: 'right',
+        paddingTop: 5,
+        marginRight: 15
+    },
+    footerText: {
+        fontSize: 7,
+        color: '#087708'
+    },
+    footerWebsite: {
+        fontSize: 7,
+        color: '#FF9800',
+        marginTop: 2
+    },
+    notesSection: {
+        marginTop: 10,
+        padding: 8,
+        backgroundColor: '#FFF9C4',
+        borderRadius: 5
+    },
+    notesTitle: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        marginBottom: 3,
+        color: '#FF9800'
+    },
+    notesContent: {
+        fontSize: 8,
+        color: '#333'
+    }
+});
+
+// PDF Document Component for Exercise
+const ExerciseDocument = ({ exercise, assignmentData }) => {
+    const today = new Date();
+    const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
+    const dietitianName = "Dr. Furkan İmamoğlu"; // Bu kısım dinamik olarak değiştirilebilir
+
+    return (
+        <Document>
+            <Page size="A4" style={pdfStyles.page}>
+                <View style={pdfStyles.header}>
+                    <View style={pdfStyles.headerContent}>
+                        <Text style={pdfStyles.headerTitle}>{exercise.exercise_name} Egzersiz Programı</Text>
+                        <View style={pdfStyles.headerInfo}>
+                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
+                        </View>
+                    </View>
+                    <View style={pdfStyles.logoContainer}>
+                        <Text style={pdfStyles.logo}>Diyetia</Text>
+                    </View>
+                </View>
+                
+                <View style={pdfStyles.infoSection}>
+                    <View style={pdfStyles.infoBox}>
+                        <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
+                        <Text style={pdfStyles.infoContent}>Beslenme ve Diyet Uzmanı</Text>
+                        <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
+                        <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
+                    </View>
+                    
+                    {assignmentData && (
+                        <View style={pdfStyles.infoBox}>
+                            <Text style={pdfStyles.infoTitle}>Program Bilgileri</Text>
+                            <Text style={pdfStyles.infoContent}>Danışan: {assignmentData.clientName || "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>Başlangıç: {assignmentData.startDate ? new Date(assignmentData.startDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>Bitiş: {assignmentData.endDate ? new Date(assignmentData.endDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                        </View>
+                    )}
+                </View>
+                
+                <View style={pdfStyles.exerciseDetails}>
+                    <View style={pdfStyles.exerciseHeader}>
+                        <Text style={pdfStyles.exerciseHeaderText}>Egzersiz Detayları</Text>
+                    </View>
+                    <View style={pdfStyles.exerciseContent}>
+                        <View style={pdfStyles.exerciseRow}>
+                            <Text style={pdfStyles.exerciseLabel}>Süre:</Text>
+                            <Text style={pdfStyles.exerciseValue}>{exercise.duration || 0} dakika</Text>
+                        </View>
+                        <View style={pdfStyles.exerciseRow}>
+                            <Text style={pdfStyles.exerciseLabel}>Zorluk Seviyesi:</Text>
+                            <Text style={pdfStyles.exerciseValue}>{exercise.difficulty || 0}/5</Text>
+                        </View>
+                        <View style={pdfStyles.exerciseRow}>
+                            <Text style={pdfStyles.exerciseLabel}>Yakılan Kalori:</Text>
+                            <Text style={pdfStyles.exerciseValue}>{exercise.calories_burned || 0} kcal</Text>
+                        </View>
+                        {exercise.equipment && (
+                            <View style={pdfStyles.exerciseRow}>
+                                <Text style={pdfStyles.exerciseLabel}>Ekipman:</Text>
+                                <Text style={pdfStyles.exerciseValue}>{exercise.equipment}</Text>
+                            </View>
+                        )}
+                        {exercise.video && (
+                            <View style={pdfStyles.exerciseRow}>
+                                <Text style={pdfStyles.exerciseLabel}>Video URL:</Text>
+                                <Text style={pdfStyles.exerciseValue}>{exercise.video}</Text>
+                            </View>
+                        )}
+                        
+                        <Text style={pdfStyles.instructionsTitle}>Egzersiz Açıklaması</Text>
+                        <Text style={pdfStyles.instructionsText}>{exercise.exercise_description || "Bu egzersiz için detaylı açıklama bulunmamaktadır."}</Text>
+                    </View>
+                </View>
+                
+                {assignmentData && assignmentData.note && (
+                    <View style={pdfStyles.notesSection}>
+                        <Text style={pdfStyles.notesTitle}>Diyetisyen Notu</Text>
+                        <Text style={pdfStyles.notesContent}>{assignmentData.note}</Text>
+                    </View>
+                )}
+                
+                <View style={pdfStyles.footer}>
+                    <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
+                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
+                </View>
+            </Page>
+        </Document>
+    );
+};
 
 // Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
@@ -68,8 +328,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
                 <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={() => {
-                    }}
+                    onChange={onCheck}
                     onClick={(e) => e.stopPropagation()}
                 />
             </div>
@@ -123,13 +382,25 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
                     >
                         <PersonAddIcon/>
                     </button>
-                    <button
-                        className="action-button print-btn"
-                        title="Yazdır"
-                        onClick={() => onPrint(item)}
+                    <PDFDownloadLink
+                        document={<ExerciseDocument exercise={item} assignmentData={null} />}
+                        fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
+                        style={{ textDecoration: 'none' }}
                     >
-                        <PrintIcon/>
-                    </button>
+                        {({ blob, url, loading, error }) => (
+                            <button
+                                className="action-button print-btn"
+                                title="Yazdır"
+                                disabled={loading}
+                                onClick={(e) => {
+                                    if (loading) e.preventDefault();
+                                    else onPrint(item);
+                                }}
+                            >
+                                <PrintIcon/>
+                            </button>
+                        )}
+                    </PDFDownloadLink>
                     <button
                         className="action-button edit-btn"
                         title="Düzenle"
@@ -214,6 +485,8 @@ export default function Egzersizler() {
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
     const [affectedExercises, setAffectedExercises] = useState([]);
+    // Add state for multiple categories deletion
+    const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
 
     // New exercise state
     const [newExercise, setNewExercise] = useState({
@@ -251,6 +524,13 @@ export default function Egzersizler() {
     // Silme onay modalı için state'ler
     const [deleteAssignmentConfirmModal, setDeleteAssignmentConfirmModal] = useState(false);
     const [assignmentToDelete, setAssignmentToDelete] = useState(null);
+
+    // Add new state for exercise history
+    const [exerciseHistory, setExerciseHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [historyStartDate, setHistoryStartDate] = useState('');
+    const [historyEndDate, setHistoryEndDate] = useState('');
+    const [activeTab, setActiveTab] = useState(0);
 
     // Auto-hide success popup after 3 seconds
     useEffect(() => {
@@ -296,6 +576,23 @@ export default function Egzersizler() {
         const danisan = danisanList.find(d => d.id === clientId);
         setSelectedClientInfo(danisan);
         setLoadingClientExercises(true);
+        
+        // Set default dates for history filter (last 30 days)
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 30);
+        
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        setHistoryStartDate(formatDate(startDate));
+        setHistoryEndDate(formatDate(endDate));
+        
+        // Get assigned exercises
         axios.get(`${config[config.environment].apiUrl}/exercise/getClientExercises?client_id=${clientId}`, {
             headers: { Authorization: localStorage.getItem("token") }
         })
@@ -303,6 +600,9 @@ export default function Egzersizler() {
                 setSelectedClientExercises(response.data || []);
                 setLoadingClientExercises(false);
                 setClientExercisesModal(true);
+                
+                // Also fetch exercise history
+                fetchExerciseHistory(clientId, formatDate(startDate), formatDate(endDate));
             })
             .catch(error => {
                 console.error("Error fetching client exercises:", error);
@@ -310,6 +610,46 @@ export default function Egzersizler() {
                 setErrorMessage("Danışan egzersizleri yüklenirken bir hata oluştu.");
                 setShowErrorPopup(true);
             });
+    }
+    
+    // Add function to fetch exercise history
+    const fetchExerciseHistory = (clientId, startDate, endDate) => {
+        setLoadingHistory(true);
+        axios.get(`${config[config.environment].apiUrl}/exercise/getClientExerciseHistory?client_id=${clientId}&start_date=${startDate}&end_date=${endDate}`, {
+            headers: { Authorization: localStorage.getItem("token") }
+        })
+            .then(response => {
+                setExerciseHistory(response.data || []);
+                setLoadingHistory(false);
+            })
+            .catch(error => {
+                console.error("Error fetching exercise history:", error);
+                setLoadingHistory(false);
+                setErrorMessage("Egzersiz geçmişi yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            });
+    }
+    
+    // Modify this to handle date changes automatically
+    const handleHistoryDateChange = (dateType, newValue) => {
+        const formattedDate = newValue ? newValue.toISOString().split('T')[0] : '';
+        
+        if (dateType === 'start') {
+            setHistoryStartDate(formattedDate);
+            if (selectedClientInfo && formattedDate && historyEndDate) {
+                fetchExerciseHistory(selectedClientInfo.id, formattedDate, historyEndDate);
+            }
+        } else {
+            setHistoryEndDate(formattedDate);
+            if (selectedClientInfo && historyStartDate && formattedDate) {
+                fetchExerciseHistory(selectedClientInfo.id, historyStartDate, formattedDate);
+            }
+        }
+    };
+
+    // Add function to handle tab changes
+    const handleChangeTab = (event, newValue) => {
+        setActiveTab(newValue);
     }
 
     // Fetch exercises
@@ -432,6 +772,19 @@ export default function Egzersizler() {
         setDeleteCategoryConfirmModal(true);
     };
 
+    // Add handler for multiple categories deletion
+    const handleOpenMultiDeleteConfirm = () => {
+        if (checkedCategories.length === 0) return;
+
+        // Find exercises that would be affected by deleting these categories
+        const exercisesToDelete = egzersizData.filter(exercise =>
+            checkedCategories.includes(exercise.category_id)
+        );
+
+        setAffectedExercises(exercisesToDelete);
+        setDeleteMultiCategoriesConfirmModal(true);
+    };
+
     const handleAddCategory = () => {
         if (newCategoryTitle.trim() === '') return;
 
@@ -487,8 +840,8 @@ export default function Egzersizler() {
     };
 
     const handlePrint = (item) => {
-        // Implementation for printing exercise details
-        generatePDF(item);
+        // PDF generation is now handled by the PDFDownloadLink component
+        console.log("Printing exercise:", item);
     };
 
     const handleEdit = (item) => {
@@ -653,7 +1006,15 @@ export default function Egzersizler() {
     };
 
     const handleAddToUser = () => {
-        if (!selectedExercise || !selectedUser || !startDate || !endDate) return;
+        if (!selectedExercise || !selectedUser || !startDate || !endDate) {
+            console.log("Missing required fields:", {
+                exerciseExists: !!selectedExercise,
+                userExists: !!selectedUser,
+                startDateExists: !!startDate,
+                endDateExists: !!endDate
+            });
+            return;
+        }
 
         const addData = {
             client_id: selectedUser.id,
@@ -663,6 +1024,8 @@ export default function Egzersizler() {
             note: assignmentNote
         };
 
+        console.log("Assigning exercise with data:", addData);
+        
         setIsSaving(true);
 
         axios.post(`${config[config.environment].apiUrl}/exercise/assignExercise`, addData, {
@@ -724,48 +1087,7 @@ export default function Egzersizler() {
             });
     };
 
-    const generatePDF = (exercise) => {
-        const doc = new jsPDF();
-
-        doc.setFontSize(20);
-        doc.text(exercise.exercise_name, 20, 20);
-
-        doc.setFontSize(10);
-        let y = 40;
-
-        if (exercise.exercise_description) {
-            doc.text("Açıklama:", 20, y);
-            doc.text(exercise.exercise_description, 60, y);
-            y += 10;
-        }
-
-        if (exercise.equipment) {
-            doc.text("Ekipman:", 20, y);
-            doc.text(exercise.equipment, 60, y);
-            y += 10;
-        }
-
-        doc.text("Süre:", 20, y);
-        doc.text(`${exercise.duration || 0} dakika`, 60, y);
-        y += 10;
-
-        doc.text("Zorluk:", 20, y);
-        doc.text(`${exercise.difficulty || 0}/5`, 60, y);
-        y += 10;
-
-        doc.text("Yakılan Kalori:", 20, y);
-        doc.text(`${exercise.calories_burned || 0} kcal`, 60, y);
-        y += 10;
-
-        if (exercise.video) {
-            doc.text("Video Linki:", 20, y);
-            doc.text(exercise.video, 60, y);
-            y += 10;
-        }
-
-        // Save the PDF
-        doc.save(`${exercise.exercise_name}_egzersiz.pdf`);
-    };
+    // PDF generation is now handled by the ExerciseDocument component with react-pdf
 
     return (
         <Default>
@@ -790,7 +1112,7 @@ export default function Egzersizler() {
                                 onClick={() => setAddExerciseModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Egzersiz Ekle</span>
+                                <span className="btn-text">Egzersiz</span>
                             </button>
                             <button
                                 className="action-btn add-btn"
@@ -798,7 +1120,15 @@ export default function Egzersizler() {
                                 onClick={() => setAddCategoryModal(true)}
                             >
                                 <AddIcon/>
-                                <span className="btn-text">Kategori Ekle</span>
+                                <span className="btn-text">Kategori</span>
+                            </button>
+                            <button
+                                className="action-btn delete-btn"
+                                title="Seçilenleri Sil"
+                                onClick={handleOpenMultiDeleteConfirm}
+                                disabled={checkedCategories.length === 0}
+                            >
+                                <DeleteIcon/>
                             </button>
                         </div>
                     </div>
@@ -915,7 +1245,7 @@ export default function Egzersizler() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <PeopleIcon sx={{ mr: 1 }} /> Egzersiz Programları
+                            <PeopleIcon sx={{ mr: 1 }} /> Egzersiz Yönetimi
                         </Typography>
                     </Box>
 
@@ -1183,6 +1513,128 @@ export default function Egzersizler() {
                     <button
                         className="modal-btn delete-confirm-btn"
                         onClick={handleSingleCategoryDelete}
+                    >
+                        Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Delete Multiple Categories Confirmation Modal */}
+            <Modal
+                isOpen={deleteMultiCategoriesConfirmModal}
+                title="Kategorileri Sil"
+                onClose={() => {
+                    setDeleteMultiCategoriesConfirmModal(false);
+                    setAffectedExercises([]);
+                }}
+            >
+                <div className="modal-body delete-confirm-modal">
+                    <div className="delete-warning">
+                        <WarningIcon className="warning-icon"/>
+                        <p className="warning-text">
+                            <strong>{checkedCategories.length}</strong> kategoriyi silmek istediğinize emin misiniz?
+                        </p>
+                    </div>
+                    <p className="delete-note">Bu işlem geri alınamaz.</p>
+
+                    {affectedExercises.length > 0 && (
+                        <div className="affected-plans">
+                            <p className="delete-note important">
+                                <strong>Önemli:</strong> Bu kategoriler ile
+                                ilişkili <strong>{affectedExercises.length}</strong> egzersiz silinecektir:
+                            </p>
+                            <ul className="affected-plans-list">
+                                {affectedExercises.map(exercise => (
+                                    <li key={exercise.id}><span className="plan-title">{exercise.exercise_name}</span></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn cancel-btn"
+                        onClick={() => {
+                            setDeleteMultiCategoriesConfirmModal(false);
+                            setAffectedExercises([]);
+                        }}
+                    >
+                        Vazgeç
+                    </button>
+                    <button
+                        className="modal-btn delete-confirm-btn"
+                        onClick={() => {
+                            if (checkedCategories.length === 0) {
+                                setErrorMessage("Silinecek kategori seçilmedi.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+
+                            // Create an array of promises for each category deletion
+                            const deletePromises = checkedCategories.map(categoryId =>
+                                axios.delete(
+                                    `${config[config.environment].apiUrl}/exercise/deleteExerciseCategory?exercise_category_id=${categoryId}`,
+                                    {
+                                        headers: {
+                                            Authorization: localStorage.getItem("token"),
+                                        },
+                                    }
+                                )
+                            );
+
+                            // Execute all deletion requests
+                            Promise.all(deletePromises)
+                                .then(responses => {
+                                    // Check if all deletions were successful
+                                    const allSuccessful = responses.every(response => response.status === 200);
+
+                                    if (allSuccessful) {
+                                        // Remove deleted categories from state
+                                        setCategoryData(prevData =>
+                                            prevData.filter(category => !checkedCategories.includes(category.id))
+                                        );
+
+                                        // Clear checked categories
+                                        setCheckedCategories([]);
+
+                                        // Refresh exercises to remove those from deleted categories
+                                        fetchExercises();
+
+                                        // Show success message
+                                        setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
+                                        setShowSuccessPopup(true);
+                                    } else {
+                                        // Some deletions failed
+                                        setErrorMessage("Bazı kategoriler silinemedi.");
+                                        setShowErrorPopup(true);
+
+                                        // Refresh categories to get updated list
+                                        axios
+                                            .get(`${config[config.environment].apiUrl}/exercise/getMyExerciseCategories`, {
+                                                headers: {
+                                                    Authorization: localStorage.getItem("token"),
+                                                },
+                                            })
+                                            .then((response) => {
+                                                setCategoryData(response.data);
+                                                setCheckedCategories([]);
+                                            });
+                                    }
+
+                                    // Close modal and reset state
+                                    setDeleteMultiCategoriesConfirmModal(false);
+                                    setAffectedExercises([]);
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting categories:", error);
+                                    setErrorMessage("Kategoriler silinirken bir hata oluştu.");
+                                    setShowErrorPopup(true);
+
+                                    // Close modal but don't clear checkedCategories
+                                    setDeleteMultiCategoriesConfirmModal(false);
+                                    setAffectedExercises([]);
+                                });
+                        }}
                     >
                         Sil
                     </button>
@@ -1478,8 +1930,20 @@ export default function Egzersizler() {
                             value={selectedUser?.id || ''}
                             onChange={(e) => {
                                 const userId = e.target.value;
-                                const user = danisanList.find(u => u.id === parseInt(userId));
-                                setSelectedUser(user);
+                                if (userId) {
+                                    const numUserId = parseInt(userId, 10);
+                                    
+                                    const user = danisanList.find(u => String(u.id) === String(numUserId));
+                                    if (user) {
+                                        setSelectedUser(user);
+                                        console.log("Selected user:", user.name, "ID:", user.id, "Type:", typeof user.id);
+                                    } else {
+                                        console.log("No user found with ID:", numUserId);
+                                    }
+                                } else {
+                                    setSelectedUser(null);
+                                    console.log("User selection cleared");
+                                }
                             }}
                         >
                             <option value="">Danışan Seçin</option>
@@ -1581,108 +2045,448 @@ export default function Egzersizler() {
                 fullWidth={true}
             >
                 <div className="modal-body">
-                    {loadingClientExercises ? (
-                        <div className="loading-container">
-                            <CircularProgress size={30} />
-                            <p>Egzersiz programları yükleniyor...</p>
-                        </div>
-                    ) : selectedClientExercises.length > 0 ? (
-                        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                            {selectedClientExercises.map((item) => (
-                                <React.Fragment key={item.id}>
-                                    <ListItem
-                                        alignItems="flex-start"
-                                        secondaryAction={
-                                            <Tooltip title="Atamayı Sil">
-                                                <IconButton
-                                                    edge="end"
-                                                    aria-label="delete"
-                                                    onClick={() => handleDeleteAssignedExercise(item.id)}
-                                                    color="error"
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <ListItemAvatar>
-                                            <Avatar sx={{ bgcolor: '#087708' }}>
-                                                <FitnessCenterIcon />
-                                            </Avatar>
-                                        </ListItemAvatar>
-                                        <ListItemText
-                                            primary={
-                                                <Typography fontWeight="500">
-                                                    {item.Exercise?.exercise_name || "Egzersiz"}
-                                                </Typography>
-                                            }
-                                            secondary={
-                                                <React.Fragment>
-                                                    <Typography
-                                                        component="span"
-                                                        variant="body2"
-                                                        color="text.primary"
-                                                        sx={{ display: 'block' }}
-                                                    >
-                                                        {item.Exercise?.exercise_description?.substring(0, 60)}
-                                                        {item.Exercise?.exercise_description?.length > 60 ? "..." : ""}
-                                                    </Typography>
-
-                                                    <Box sx={{ mt: 1 }}>
-                                                        <Chip
-                                                            size="small"
-                                                            icon={<CalendarTodayIcon fontSize="small" />}
-                                                            label={`${new Date(item.start_date).toLocaleDateString('tr-TR')} - ${new Date(item.end_date).toLocaleDateString('tr-TR')}`}
-                                                            sx={{ mr: 1, mb: 1 }}
-                                                        />
-
-                                                        {item.Exercise?.difficulty && (
-                                                            <Chip
-                                                                size="small"
-                                                                label={`Zorluk: ${item.Exercise.difficulty}/5`}
-                                                                color={item.Exercise.difficulty > 3 ? "error" : item.Exercise.difficulty > 1 ? "warning" : "success"}
-                                                                variant="outlined"
-                                                                sx={{ mr: 1, mb: 1 }}
-                                                            />
-                                                        )}
-
-                                                        {item.Exercise?.calories_burned && (
-                                                            <Chip
-                                                                size="small"
-                                                                label={`${item.Exercise.calories_burned} kcal`}
-                                                                color="primary"
-                                                                variant="outlined"
-                                                                sx={{ mr: 1, mb: 1 }}
-                                                            />
-                                                        )}
+                    <Box sx={{ 
+                        borderBottom: 1, 
+                        borderColor: 'divider',
+                        mb: 3,
+                        backgroundColor: '#f8f9fa',
+                        borderRadius: '8px 8px 0 0',
+                        overflow: 'hidden'
+                    }}>
+                        <Tabs 
+                            value={activeTab} 
+                            onChange={handleChangeTab} 
+                            aria-label="exercise tabs"
+                            variant="fullWidth"
+                            sx={{ 
+                                '& .MuiTabs-indicator': {
+                                    backgroundColor: '#087708',
+                                    height: 3
+                                },
+                                '& .Mui-selected': {
+                                    color: '#087708',
+                                    fontWeight: 'bold'
+                                }
+                            }}
+                        >
+                            <Tab 
+                                label="Atanmış Egzersizler" 
+                                icon={<EventAvailableIcon />} 
+                                iconPosition="start"
+                                sx={{ py: 2 }}
+                            />
+                            <Tab 
+                                label="Egzersiz Geçmişi" 
+                                icon={<HistoryIcon />} 
+                                iconPosition="start"
+                                sx={{ py: 2 }}
+                            />
+                        </Tabs>
+                    </Box>
+                    
+                    {activeTab === 0 ? (
+                        // Assigned exercises tab
+                        loadingClientExercises ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 5 }}>
+                                <CircularProgress size={40} sx={{ color: '#087708', mb: 2 }} />
+                                <Typography variant="body1" color="text.secondary">Egzersiz programları yükleniyor...</Typography>
+                            </Box>
+                        ) : selectedClientExercises.length > 0 ? (
+                            <Box sx={{ bgcolor: 'background.paper', borderRadius: 2, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                                <List sx={{ width: '100%' }}>
+                                    {selectedClientExercises.map((item) => (
+                                        <React.Fragment key={item.id}>
+                                            <ListItem
+                                                alignItems="flex-start"
+                                                sx={{ 
+                                                    py: 2, 
+                                                    transition: 'background-color 0.2s',
+                                                    '&:hover': {
+                                                        backgroundColor: '#f5f5f5'
+                                                    }
+                                                }}
+                                                secondaryAction={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <PDFDownloadLink
+                                                            document={
+                                                                <ExerciseDocument 
+                                                                    exercise={item.Exercise} 
+                                                                    assignmentData={{
+                                                                        clientName: selectedClientInfo?.name,
+                                                                        startDate: item.start_date,
+                                                                        endDate: item.end_date,
+                                                                        note: item.note
+                                                                    }} 
+                                                                />
+                                                            }
+                                                            fileName={`${item.Exercise?.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
+                                                            style={{ textDecoration: 'none' }}
+                                                        >
+                                                            {({ blob, url, loading, error }) => (
+                                                                <Button
+                                                                    size="small"
+                                                                    startIcon={<FileDownloadIcon />}
+                                                                    disabled={loading}
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    sx={{ borderRadius: 6 }}
+                                                                >
+                                                                    PDF
+                                                                </Button>
+                                                            )}
+                                                        </PDFDownloadLink>
+                                                        
+                                                        <Tooltip title="Atamayı Sil">
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label="delete"
+                                                                onClick={() => handleDeleteAssignedExercise(item.id)}
+                                                                color="error"
+                                                                sx={{ 
+                                                                    backgroundColor: 'rgba(244,67,54,0.1)',
+                                                                    '&:hover': {
+                                                                        backgroundColor: 'rgba(244,67,54,0.2)'
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     </Box>
-
-                                                    {item.note && (
-                                                        <Box sx={{ display: 'flex', alignItems: 'flex-start', bgcolor: '#f5f5f5', borderRadius: '4px', p: 1, mt: 1 }}>
-                                                            <NoteIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary', fontSize: '16px', mt: 0.3 }} />
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                {item.note}
+                                                }
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar sx={{ 
+                                                        bgcolor: '#087708',
+                                                        width: 48,
+                                                        height: 48,
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                    }}>
+                                                        <FitnessCenterIcon />
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={
+                                                        <Typography 
+                                                            variant="h6" 
+                                                            fontWeight="500"
+                                                            sx={{ 
+                                                                color: '#2e7d32',
+                                                                fontSize: '1.1rem',
+                                                                mb: 0.5
+                                                            }}
+                                                        >
+                                                            {item.Exercise?.exercise_name || "Egzersiz"}
+                                                        </Typography>
+                                                    }
+                                                    secondary={
+                                                        <React.Fragment>
+                                                            <Typography
+                                                                component="span"
+                                                                variant="body2"
+                                                                color="text.primary"
+                                                                sx={{ display: 'block', mb: 1 }}
+                                                            >
+                                                                {item.Exercise?.exercise_description?.substring(0, 120)}
+                                                                {item.Exercise?.exercise_description?.length > 120 ? "..." : ""}
                                                             </Typography>
-                                                        </Box>
-                                                    )}
-                                                </React.Fragment>
-                                            }
-                                        />
-                                    </ListItem>
-                                    <Divider variant="inset" component="li" />
-                                </React.Fragment>
-                            ))}
-                        </List>
+
+                                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+                                                                <Chip
+                                                                    size="small"
+                                                                    icon={<CalendarTodayIcon fontSize="small" />}
+                                                                    label={`${new Date(item.start_date).toLocaleDateString('tr-TR')} - ${new Date(item.end_date).toLocaleDateString('tr-TR')}`}
+                                                                    sx={{ mr: 1, mb: 1, bgcolor: '#e8f5e9', color: '#2e7d32', fontWeight: 500 }}
+                                                                />
+
+                                                                {item.Exercise?.difficulty && (
+                                                                    <Chip
+                                                                        size="small"
+                                                                        label={`Zorluk: ${item.Exercise.difficulty}/5`}
+                                                                        color={item.Exercise.difficulty > 3 ? "error" : item.Exercise.difficulty > 1 ? "warning" : "success"}
+                                                                        variant="outlined"
+                                                                        sx={{ mr: 1, mb: 1, fontWeight: 500 }}
+                                                                    />
+                                                                )}
+
+                                                                {item.Exercise?.calories_burned && (
+                                                                    <Chip
+                                                                        size="small"
+                                                                        icon={<LocalFireDepartmentIcon fontSize="small" />}
+                                                                        label={`${item.Exercise.calories_burned} kcal`}
+                                                                        color="primary"
+                                                                        variant="outlined"
+                                                                        sx={{ mr: 1, mb: 1, fontWeight: 500 }}
+                                                                    />
+                                                                )}
+                                                                
+                                                                {item.Exercise?.duration && (
+                                                                    <Chip
+                                                                        size="small"
+                                                                        icon={<AccessTimeIcon fontSize="small" />}
+                                                                        label={`${item.Exercise.duration} dakika`}
+                                                                        sx={{ mr: 1, mb: 1, bgcolor: '#e3f2fd', color: '#1565c0', fontWeight: 500 }}
+                                                                    />
+                                                                )}
+                                                            </Box>
+
+                                                            {item.note && (
+                                                                <Box sx={{ 
+                                                                    display: 'flex', 
+                                                                    alignItems: 'flex-start', 
+                                                                    bgcolor: '#fffde7', 
+                                                                    borderRadius: '8px', 
+                                                                    p: 1.5, 
+                                                                    mt: 1,
+                                                                    borderLeft: '3px solid #fbc02d'
+                                                                }}>
+                                                                    <NoteIcon fontSize="small" sx={{ mr: 1, color: '#f57f17', fontSize: '18px', mt: 0.3 }} />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {item.note}
+                                                                    </Typography>
+                                                                </Box>
+                                                            )}
+                                                        </React.Fragment>
+                                                    }
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li" />
+                                        </React.Fragment>
+                                    ))}
+                                </List>
+                            </Box>
+                        ) : (
+                            <Box sx={{ 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                py: 6,
+                                px: 3,
+                                bgcolor: '#f8f9fa',
+                                borderRadius: 2,
+                                border: '1px dashed #bdbdbd'
+                            }}>
+                                <DescriptionIcon sx={{ fontSize: 60, color: '#bdbdbd', mb: 2 }} />
+                                <Typography variant="h6" color="text.secondary" align="center" gutterBottom>
+                                    Bu danışana atanmış egzersiz programı bulunmamaktadır
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1, maxWidth: 500 }}>
+                                    Sağ üst köşedeki "Egzersiz Ekle" butonunu kullanarak yeni egzersiz programları oluşturabilir ve danışanlarınıza atayabilirsiniz.
+                                </Typography>
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    startIcon={<AddIcon />}
+                                    sx={{ mt: 3 }}
+                                    onClick={() => setAddExerciseModal(true)}
+                                >
+                                    Yeni Egzersiz Ekle
+                                </Button>
+                            </Box>
+                        )
                     ) : (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 4 }}>
-                            <DescriptionIcon sx={{ fontSize: 50, color: 'text.disabled', mb: 2 }} />
-                            <Typography variant="body1" color="text.secondary" align="center">
-                                Bu danışana atanmış egzersiz programı bulunmamaktadır.
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
-                                Sağ üst köşedeki "Egzersiz Ekle" butonunu kullanarak yeni egzersiz programları oluşturabilir ve danışanlarınıza atayabilirsiniz.
-                            </Typography>
-                        </Box>
+                        // Exercise history tab
+                        <div>
+                            <Box sx={{ mb: 3, p: 2, bgcolor: '#ffffff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500, color: '#424242', display: 'flex', alignItems: 'center' }}>
+                                    <FilterAltIcon sx={{ mr: 1, fontSize: 20, color: '#757575' }} />
+                                    Tarih Aralığı Filtreleme
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end' }}>
+                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                        <Box sx={{ flex: '1 1 200px' }}>
+                                            <DatePicker
+                                                label="Başlangıç Tarihi"
+                                                value={historyStartDate ? new Date(historyStartDate) : null}
+                                                onChange={(newValue) => handleHistoryDateChange('start', newValue)}
+                                                slotProps={{
+                                                    textField: {
+                                                        fullWidth: true,
+                                                        variant: "outlined",
+                                                        size: "small",
+                                                        sx: { 
+                                                            backgroundColor: '#fff',
+                                                            borderRadius: 1,
+                                                            '& .MuiOutlinedInput-root': {
+                                                                '&:hover fieldset': {
+                                                                    borderColor: '#087708',
+                                                                },
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Box>
+                                        <Box sx={{ flex: '1 1 200px' }}>
+                                            <DatePicker
+                                                label="Bitiş Tarihi"
+                                                value={historyEndDate ? new Date(historyEndDate) : null}
+                                                onChange={(newValue) => handleHistoryDateChange('end', newValue)}
+                                                slotProps={{
+                                                    textField: {
+                                                        fullWidth: true,
+                                                        variant: "outlined",
+                                                        size: "small",
+                                                        sx: { 
+                                                            backgroundColor: '#fff',
+                                                            borderRadius: 1,
+                                                            '& .MuiOutlinedInput-root': {
+                                                                '&:hover fieldset': {
+                                                                    borderColor: '#087708',
+                                                                },
+                                                            }
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </Box>
+                                    </LocalizationProvider>
+                                </Box>
+                            </Box>
+                            
+                            {loadingHistory ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 5 }}>
+                                    <CircularProgress sx={{ color: '#087708', mb: 2 }} />
+                                    <Typography variant="body1" color="text.secondary">Egzersiz geçmişi yükleniyor...</Typography>
+                                </Box>
+                            ) : exerciseHistory.filter(item => item.status === 'completed').length > 0 ? (
+                                <Paper elevation={1} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                                    <Box sx={{ 
+                                        p: 2, 
+                                        bgcolor: '#087708', 
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}>
+                                        <CheckCircleIcon sx={{ mr: 1 }} />
+                                        <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                            Tamamlanan Egzersiz Geçmişi
+                                        </Typography>
+                                    </Box>
+                                    
+                                    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                                        {exerciseHistory
+                                            .filter(item => item.status === 'completed')
+                                            .map((item) => (
+                                            <React.Fragment key={item.id}>
+                                                <ListItem 
+                                                    alignItems="flex-start"
+                                                    sx={{ 
+                                                        py: 2, 
+                                                        transition: 'background-color 0.2s',
+                                                        '&:hover': {
+                                                            backgroundColor: '#f5f5f5'
+                                                        }
+                                                    }}
+                                                >
+                                                    <ListItemAvatar>
+                                                        <Avatar sx={{ 
+                                                            bgcolor: '#43a047',
+                                                            width: 48,
+                                                            height: 48,
+                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                        }}>
+                                                            <CheckCircleIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary={
+                                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <Typography 
+                                                                    variant="h6" 
+                                                                    fontWeight="500"
+                                                                    sx={{ 
+                                                                        color: '#2e7d32',
+                                                                        fontSize: '1.1rem'
+                                                                    }}
+                                                                >
+                                                                    {item.Exercise?.exercise_name || "Egzersiz"}
+                                                                </Typography>
+                                                                <Chip 
+                                                                    label="Tamamlandı" 
+                                                                    color="success" 
+                                                                    size="small" 
+                                                                    icon={<CheckCircleIcon />}
+                                                                    sx={{ fontWeight: 'medium' }}
+                                                                />
+                                                            </Box>
+                                                        }
+                                                        secondary={
+                                                            <React.Fragment>
+                                                                <Box sx={{ 
+                                                                    mt: 1, 
+                                                                    py: 1,
+                                                                    px: 1.5,
+                                                                    bgcolor: '#e8f5e9', 
+                                                                    borderRadius: 1,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center'
+                                                                }}>
+                                                                    <EventIcon sx={{ color: '#2e7d32', mr: 1, fontSize: 20 }} />
+                                                                    <Typography component="span" variant="body2" fontWeight="medium" color="#2e7d32">
+                                                                        Tamamlanma Tarihi: {new Date(item.updatedAt).toLocaleString('tr-TR')}
+                                                                    </Typography>
+                                                                </Box>
+                                                                
+                                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1.5 }}>
+                                                                    <Chip
+                                                                        size="small"
+                                                                        icon={<AccessTimeIcon fontSize="small" />}
+                                                                        label={`Süre: ${item.duration || item.Exercise?.duration || 0} dakika`}
+                                                                        sx={{ mr: 1, mb: 1, bgcolor: '#e3f2fd', color: '#1565c0', fontWeight: 500 }}
+                                                                    />
+                                                                    
+                                                                    {item.Exercise?.calories_burned && (
+                                                                        <Chip
+                                                                            size="small"
+                                                                            icon={<LocalFireDepartmentIcon fontSize="small" />}
+                                                                            label={`${item.Exercise.calories_burned} kcal`}
+                                                                            sx={{ mr: 1, mb: 1, bgcolor: '#ffebee', color: '#c62828', fontWeight: 500 }}
+                                                                        />
+                                                                    )}
+                                                                    
+                                                                    {item.Exercise?.difficulty && (
+                                                                        <Chip
+                                                                            size="small"
+                                                                            label={`Zorluk: ${item.Exercise.difficulty}/5`}
+                                                                            color={item.Exercise.difficulty > 3 ? "error" : item.Exercise.difficulty > 1 ? "warning" : "success"}
+                                                                            variant="outlined"
+                                                                            sx={{ mr: 1, mb: 1, fontWeight: 500 }}
+                                                                        />
+                                                                    )}
+                                                                </Box>
+                                                            </React.Fragment>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                                <Divider variant="inset" component="li" />
+                                            </React.Fragment>
+                                        ))}
+                                    </List>
+                                </Paper>
+                            ) : (
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    py: 6,
+                                    px: 3,
+                                    bgcolor: '#f8f9fa',
+                                    borderRadius: 2,
+                                    border: '1px dashed #bdbdbd'
+                                }}>
+                                    <EventBusyIcon sx={{ fontSize: 60, color: '#bdbdbd', mb: 2 }} />
+                                    <Typography variant="h6" color="text.secondary" align="center">
+                                        Seçilen tarih aralığında tamamlanmış egzersiz bulunmamaktadır
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1, maxWidth: 600 }}>
+                                        Danışanınız henüz herhangi bir egzersizi tamamlamamış veya seçtiğiniz tarih aralığında tamamlanmış egzersiz bulunmuyor. Farklı bir tarih aralığı seçebilir veya danışanınızın egzersizleri tamamlamasını bekleyebilirsiniz.
+                                    </Typography>
+                                </Box>
+                            )}
+                        </div>
                     )}
                 </div>
                 <div className="modal-footer">

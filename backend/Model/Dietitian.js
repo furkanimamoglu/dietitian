@@ -2,14 +2,24 @@ const path = require('path');
 const {DataTypes} = require('sequelize');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
-
 const Dietitian = sequelize.define('Dietitian', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         unique: true,
         autoIncrement: true,
         allowNull: false,
         primaryKey: true
+    },
+    subscription_type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "free",
+        validate: {
+            isIn: {
+                args: [["free","student","starter", "premium"]],
+                msg: 'Abonelik türü yalnızca "free", "student", "starter" veya "premium" olabilir.'
+            }
+        }
     },
     phoneNumber: {
         type: DataTypes.BIGINT,

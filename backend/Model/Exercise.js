@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Exercise = sequelize.define('Exercise', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
         dietitian_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             references: {
                 model: 'Dietitians',
@@ -27,7 +27,7 @@ const Exercise = sequelize.define('Exercise', {
             }
         },
         category_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             references: {
                 model: 'ExerciseCategories',
@@ -59,7 +59,7 @@ const Exercise = sequelize.define('Exercise', {
             }
         },
         exercise_description: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: true,
             validate: {
                 len: {

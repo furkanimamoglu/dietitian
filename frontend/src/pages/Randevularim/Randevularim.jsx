@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import "./Randevularim.css";
 import {toast} from 'react-hot-toast';
+import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
 
 import FullCalendar from "@fullcalendar/react";
 import "@fullcalendar/core";
@@ -158,11 +159,9 @@ export default function Randevularim() {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
             const startDate = new Date(arg.dateStr);
-
-            startDate.setHours(startDate.getHours() + 3);
-
             const endDate = new Date(startDate);
-            endDate.setHours(endDate.getHours() + 1);
+
+            endDate.setMinutes(endDate.getMinutes() + 15);
 
             setEventData((prev) => ({
                 ...prev,
@@ -271,7 +270,7 @@ export default function Randevularim() {
         setShowValidation(true);
 
         if (!validateEventData()) {
-            toast.error('Lütfen tüm gerekli alanları doldurun.');
+            showErrorToast('Lütfen tüm gerekli alanları doldurun.');
             return;
         }
 
@@ -303,7 +302,7 @@ export default function Randevularim() {
                 appointmentData = response.data;
             } else {
                 console.error("API yanıtı beklenen formatta değil:", response.data);
-                toast.error('Sunucu yanıtı beklenmeyen formatta. Yöneticinize başvurun.');
+                showErrorToast('Sunucu yanıtı beklenmeyen formatta. Yöneticinize başvurun.');
                 return;
             }
 
@@ -325,10 +324,10 @@ export default function Randevularim() {
             setRandevuEklePopup(false);
             setShowValidation(false);
 
-            toast.success('Randevu başarıyla oluşturuldu!');
+            showSuccessToast('Randevu başarıyla oluşturuldu!');
         } catch (error) {
             console.error("Randevu eklenirken bir hata oluştu:", error);
-            toast.error('Randevu eklenirken bir hata oluştu: ' + (error.response?.data?.message || error.message || 'Bilinmeyen hata'));
+            showErrorToast('Randevu eklenirken bir hata oluştu: ' + (error.response?.data?.message || error.message || 'Bilinmeyen hata'));
         }
     };
 
@@ -336,7 +335,7 @@ export default function Randevularim() {
         setShowValidation(true);
 
         if (!validateEventData()) {
-            toast.error('Lütfen tüm gerekli alanları doldurun.');
+            showErrorToast('Lütfen tüm gerekli alanları doldurun.');
             return;
         }
 
@@ -449,7 +448,7 @@ export default function Randevularim() {
             );
 
             // Toast bildirim göster
-            toast.success('Randevu başarıyla silindi!');
+            showSuccessToast('Randevu başarıyla silindi!');
 
             // Dialogları kapat
             setConfirmDialogOpen(false);
@@ -457,7 +456,7 @@ export default function Randevularim() {
 
         } catch (error) {
             console.error("Randevu silinirken bir hata oluştu:", error);
-            toast.error('Randevu silinirken bir hata oluştu!');
+            showErrorToast('Randevu silinirken bir hata oluştu!');
             setConfirmDialogOpen(false);
         }
     };
@@ -582,6 +581,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            minutesStep={15}
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -599,6 +599,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            minutesStep={15}
                             slotProps={{
                                 textField: {
                                     fullWidth: true,

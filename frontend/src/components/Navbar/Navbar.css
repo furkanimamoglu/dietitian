@@ -22,7 +22,7 @@
     letter-spacing: 0.8px;
 }
 
-/* Aktif menü için animasyon - removed pulsing animation that may cause issues */
+/* Remove the problematic animation */
 @keyframes subtle-pulse {
     0% {
         box-shadow: 0 0 0 0 rgba(71, 145, 64, 0.2);
@@ -35,8 +35,10 @@
     }
 }
 
+/* Remove animation from active button */
 .nav-button.active {
-    animation: subtle-pulse 2s infinite;
+    /* animation: subtle-pulse 2s infinite; */
+    box-shadow: 0 0 0 0 rgba(71, 145, 64, 0.2);
 }
 
 .nav-button.active::after {
@@ -116,11 +118,14 @@
 
 /* Akıcı geçişler ve gölgeler */
 .desktop-navbar {
-    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Remove transform from transitions to prevent layout shifts */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    will-change: background-color, box-shadow;
 }
 
 .desktop-navbar.scrolled {
-    transform: translateY(0);
+    /* Remove transform to prevent layout shifts */
+    /* transform: translateY(0); */
 }
 
 .navbar-divider {

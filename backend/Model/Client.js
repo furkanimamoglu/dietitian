@@ -4,14 +4,14 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Client = sequelize.define('Client', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             autoIncrement: true,
             allowNull: false,
             primaryKey: true
         },
         dietitian_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: false,
             validate: {
                 notNull: {
@@ -86,12 +86,13 @@ const Client = sequelize.define('Client', {
             }
         },
         status: {
-            type: DataTypes.BOOLEAN,
+            type: DataTypes.ENUM('Aktif', 'Pasif'),
             allowNull: false,
-            defaultValue: true,
+            defaultValue: 'Aktif',
             validate: {
-                notNull: {
-                    msg: 'Durum alanı boş bırakılamaz.'
+                isIn: {
+                    args: [['Aktif', 'Pasif']],
+                    msg: "Durum 'Aktif', 'Pasif' olmalıdır."
                 }
             }
         },

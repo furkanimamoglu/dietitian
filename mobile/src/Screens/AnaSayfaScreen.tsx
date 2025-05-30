@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, Modal, ScrollView, StyleSheet, View} from 'react-native';
-import {Avatar, Button, Card, Surface, Text} from 'react-native-paper';
+import {Dimensions, Modal, ScrollView, StyleSheet, View, TouchableOpacity, Alert, FlatList} from 'react-native';
+import {Avatar, Button, Card, Surface, Text, ProgressBar, IconButton, Divider, List} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
 import Header from '../Components/Header';
@@ -13,6 +13,15 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AnaSayfa'>;
 
 const {width} = Dimensions.get('window');
 
+// Water container options with their volumes
+const waterContainers = [
+    { name: 'Bardak', icon: 'cup', amount: 200, color: '#2196F3' },
+    { name: 'Büyük Bardak', icon: 'cup', amount: 300, color: '#03A9F4' },
+    { name: 'Şişe', icon: 'bottle-soda', amount: 500, color: '#00BCD4' },
+    { name: 'Büyük Şişe', icon: 'bottle-soda-outline', amount: 1000, color: '#009688' },
+    { name: 'Sürahi', icon: 'bottle-tonic', amount: 1500, color: '#4CAF50' },
+];
+
 const AnaSayfa = ({navigation}: Props) => {
 
     const [userName, setUserName] = useState<string>('Yükleniyor...');
@@ -24,6 +33,14 @@ const AnaSayfa = ({navigation}: Props) => {
     } | null>(null);
     const [closestAppointment, setClosestAppointment] = useState<Date | null>(null);
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
+
+    // Water tracking state
+    const [waterIntake, setWaterIntake] = useState<Array<{id: string, client_id: string, date: string, amount_ml: number}>>([]);
+    const [waterLoading, setWaterLoading] = useState<boolean>(false);
+    const [showWaterModal, setShowWaterModal] = useState<boolean>(false);
+    const [showWaterListModal, setShowWaterListModal] = useState<boolean>(false);
+    const [dailyWaterGoal] = useState<number>(2500); // Default daily goal in ml
+    const [deletingWaterId, setDeletingWaterId] = useState<string | null>(null);
 
     const checkKVKKStatus = async () => {
         try {
@@ -149,10 +166,109 @@ const AnaSayfa = ({navigation}: Props) => {
         }
     };
 
+    // Format date to YYYY-MM-DD for API
+    const formatDateForAPI = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const fetchWaterIntake = async () => {
+        try {
+            setWaterLoading(true);
+            const today = new Date();
+            const formattedDate = formatDateForAPI(today);
+            
+            const response = await fetch(`${config[config.environment].apiUrl}/nutrition/getClientWater?start_date=${formattedDate}&end_date=${formattedDate}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setWaterIntake(data);
+            } else {
+                console.log('Su tüketimi bilgisi alınamadı');
+            }
+        } catch (error) {
+            console.error('Su tüketimi verisi yüklenirken hata:', error);
+        } finally {
+            setWaterLoading(false);
+        }
+    };
+
+    const addWaterIntake = async (amount: number) => {
+        try {
+            const newTotal = totalWaterIntake + amount;
+            
+            if (newTotal > dailyWaterGoal * 2) {
+                Alert.alert(
+                    'Uyarı', 
+                    `Günlük hedefin 2 katından fazla su ekleyemezsin. Maksimum ${dailyWaterGoal * 2 - totalWaterIntake} ml daha ekleyebilirsin.`,
+                    [{ text: 'Tamam', style: 'cancel' }]
+                );
+                return;
+            }
+            
+            const response = await fetch(`${config[config.environment].apiUrl}/nutrition/addClientWater`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                },
+                body: JSON.stringify({ amount })
+            });
+            
+            if (response.ok) {
+                // Refresh water intake data
+                fetchWaterIntake();
+                setShowWaterModal(false);
+            } else {
+                Alert.alert('Hata', 'Su tüketimi eklenirken bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Su tüketimi eklenirken hata:', error);
+            Alert.alert('Hata', 'Bağlantı hatası. Lütfen tekrar deneyin.');
+        }
+    };
+
+    const deleteWaterIntake = async (waterId: string) => {
+        try {
+            setDeletingWaterId(waterId);
+            const response = await fetch(`${config[config.environment].apiUrl}/nutrition/deleteClientWater?water_id=${waterId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': await AsyncStorage.getItem('token') || ''
+                }
+            });
+            
+            if (response.ok) {
+                setWaterIntake(prev => prev.filter(item => item.id !== waterId));
+                Alert.alert('Başarılı', 'Su tüketimi kaydı silindi.');
+            } else {
+                Alert.alert('Hata', 'Su tüketimi silinirken bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Su tüketimi silinirken hata:', error);
+            Alert.alert('Hata', 'Bağlantı hatası. Lütfen tekrar deneyin.');
+        } finally {
+            setDeletingWaterId(null);
+        }
+    };
+
+    // Calculate total water intake
+    const totalWaterIntake = waterIntake.reduce((sum, item) => sum + item.amount_ml, 0);
+    const waterPercentage = Math.min(Math.round((totalWaterIntake / dailyWaterGoal) * 100), 100);
+
     useEffect(() => {
         fetchAppointmentInfo();
         fetchMeasurementInfo();
         fetchClientInfo();
+        fetchWaterIntake();
         checkKVKKStatus();
     }, []);
 
@@ -170,21 +286,17 @@ const AnaSayfa = ({navigation}: Props) => {
 
     const maxValue = Math.max(...weeklyProgress.map(item => item.value));
 
+    // Format time for display
+    const formatTime = (dateString: string): string => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    };
+
     return (
         <View style={styles.container}>
             <Header navigation={navigation}/>
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Karşılama Kartı */}
-                <Surface style={styles.welcomeCard}>
-                    <View style={styles.welcomeContent}>
-                        <View>
-                            <Text style={styles.welcomeText}>Merhaba,{'\n'}{userName}!</Text>
-                            <Text style={styles.subText}>Bugün programın için harika bir gün 💪</Text>
-                        </View>
-                    </View>
-                </Surface>
-
                 {/* Sağlık Göstergeleri */}
                 <Surface style={styles.statsContainer}>
                     <View style={styles.statItem}>
@@ -220,6 +332,15 @@ const AnaSayfa = ({navigation}: Props) => {
                     </View>
                 </Surface>
 
+                {/* Motivasyon Kartı */}
+                <Surface style={styles.motivationCard}>
+                    <Icon name="star-circle" size={36} color="#fff" style={styles.motivationIcon}/>
+                    <Text style={styles.motivationText}>
+                        "Küçük adımlar büyük değişimlerin başlangıcıdır. Bugün attığın her adım, yarın daha sağlıklı bir
+                        sen için."
+                    </Text>
+                </Surface>
+
                 <Card style={styles.card}>
                     <Card.Title title="Gelecek Randevu Tarihiniz"/>
                     <Card.Content>
@@ -244,84 +365,162 @@ const AnaSayfa = ({navigation}: Props) => {
                     </Card.Content>
                 </Card>
 
-                {/* İlerleme Grafiği - LineChart olmadan
-        <Text style={styles.sectionTitle}>Haftalık İlerleme</Text>
-        <Surface style={styles.chartCard}>
-          <Text style={styles.chartTitle}>Ağırlık Takibi (kg)</Text>
-          <View style={styles.chartContainer}>
-            {weeklyProgress.map((item, index) => (
-              <View key={index} style={styles.barColumn}>
-                <Text style={styles.barValue}>{item.value}</Text>
-                <View style={styles.barContainer}>
-                  <View
-                    style={[
-                      styles.barFill,
-                      {
-                        height: `${(item.value / maxValue) * 80}%`,
-                        backgroundColor: index === 4 ? '#2e7d32' : '#81c784'
-                      }
-                    ]}
-                  />
-                </View>
-                <Text style={styles.barDay}>{item.day}</Text>
-              </View>
-            ))}
-          </View>
-        </Surface>
-        */}
+                {/* Su Tüketimi Kartı */}
+                <Surface style={styles.waterCard}>
+                    <View style={styles.waterHeader}>
+                        <View style={styles.waterInfo}>
+                            <Icon name="water" size={28} color="#0288d1" />
+                            <View style={{ marginLeft: 12 }}>
+                                <Text style={styles.waterTitle}>Günlük Su Tüketimi</Text>
+                                <Text style={styles.waterTarget}>{totalWaterIntake} / {dailyWaterGoal} ml</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.waterPercentage}>{waterPercentage}%</Text>
+                    </View>
 
-                {/* Su Tüketimi
-        <Text style={styles.sectionTitle}>Su Tüketimi</Text>
-        <Surface style={styles.waterCard}>
-          <View style={styles.waterHeader}>
-            <View style={styles.waterInfo}>
-              <Icon name="cup-water" size={28} color="#0288d1" />
-              <View style={{ marginLeft: 12 }}>
-                <Text style={styles.waterTitle}>Günlük Hedefiniz</Text>
-                <Text style={styles.waterTarget}>{healthData.waterAmount}</Text>
-              </View>
-            </View>
-            <Text style={styles.waterPercentage}>{waterPercentage}%</Text>
-          </View>
+                    <View style={styles.waterMeterContainer}>
+                        <ProgressBar
+                            progress={waterPercentage / 100}
+                            color="#0288d1"
+                            style={styles.waterMeter}
+                        />
+                    </View>
 
-          <View style={styles.waterMeterContainer}>
-            <ProgressBar progress={waterPercentage / 100} color="#0288d1" style={styles.waterMeter} />
-          </View>
+                    <View style={styles.waterBottles}>
+                        {waterContainers.slice(0, 5).map((container, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.waterBottleContainer}
+                                onPress={() => addWaterIntake(container.amount)}
+                            >
+                                <Icon
+                                    name={container.icon}
+                                    size={24}
+                                    color={container.color}
+                                />
+                                <Text style={{color: container.color, fontSize: 12}}>{container.amount}ml</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
 
-          <View style={styles.waterBottles}>
-            {[0, 1, 2, 3, 4].map((index) => (
-              <View key={index} style={styles.waterBottleContainer}>
-                <Icon
-                  name={index < 3 ? "cup-water" : "cup"}
-                  size={26}
-                  color={index < 3 ? "#0288d1" : "#B0BEC5"}
-                />
-                <Text style={{color: index < 3 ? "#0288d1" : "#B0BEC5"}}>500ml</Text>
-              </View>
-            ))}
-          </View>
-        </Surface> */}
+                    {/* Water entries preview */}
+                    {waterIntake.length > 0 && (
+                        <View style={styles.waterEntriesPreview}>
+                            <Divider style={{marginVertical: 12}} />
+                            <Text style={styles.waterEntriesTitle}>Son Eklenenler</Text>
 
-                {/* Motivasyon Kartı */}
-                <Surface style={styles.motivationCard}>
-                    <Icon name="star-circle" size={36} color="#fff" style={styles.motivationIcon}/>
-                    <Text style={styles.motivationText}>
-                        "Küçük adımlar büyük değişimlerin başlangıcıdır. Bugün attığın her adım, yarın daha sağlıklı bir
-                        sen için."
-                    </Text>
+                            {waterIntake.slice(0, 2).map((item) => (
+                                <View key={item.id} style={styles.waterEntryItem}>
+                                    <View style={styles.waterEntryInfo}>
+                                        <Icon name="cup-water" size={16} color="#0288d1" />
+                                        <Text style={styles.waterEntryText}>
+                                            {item.amount_ml} ml • {formatTime(item.date)}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => deleteWaterIntake(item.id)}
+                                        disabled={deletingWaterId === item.id}
+                                    >
+                                        <Icon
+                                            name="delete-outline"
+                                            size={18}
+                                            color="#F44336"
+                                            style={{opacity: deletingWaterId === item.id ? 0.5 : 1}}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+
+                            {waterIntake.length > 2 && (
+                                <Button
+                                    mode="text"
+                                    onPress={() => setShowWaterListModal(true)}
+                                    style={{marginTop: 8}}
+                                    labelStyle={{fontSize: 12}}
+                                    icon="chevron-down"
+                                    contentStyle={{flexDirection: 'row-reverse'}}
+                                >
+                                    Tümünü Gör
+                                </Button>
+                            )}
+                        </View>
+                    )}
                 </Surface>
 
                 {/* Alt boşluk */}
                 <View style={styles.bottomSpacer}/>
             </ScrollView>
 
+            {/* Water List Modal */}
+            <Modal
+                visible={showWaterListModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowWaterListModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.waterListModalContainer}>
+                        <View style={styles.waterListModalHeader}>
+                            <Text style={styles.waterListModalTitle}>Bugünkü Su Tüketimi</Text>
+                            <IconButton
+                                icon="close"
+                                size={20}
+                                onPress={() => setShowWaterListModal(false)}
+                            />
+                        </View>
+                        
+                        <Divider />
+                        
+                        {waterIntake.length === 0 ? (
+                            <Text style={styles.emptyListText}>Bugün henüz su tüketimi kaydedilmemiş.</Text>
+                        ) : (
+                            <FlatList
+                                data={waterIntake}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({item}) => (
+                                    <List.Item
+                                        title={`${item.amount_ml} ml`}
+                                        description={`Saat: ${formatTime(item.date)}`}
+                                        left={props => <List.Icon {...props} icon="water" color="#0288d1" />}
+                                        right={props => (
+                                            <IconButton
+                                                icon="delete-outline"
+                                                iconColor="#F44336"
+                                                size={20}
+                                                onPress={() => deleteWaterIntake(item.id)}
+                                                disabled={deletingWaterId === item.id}
+                                                style={{opacity: deletingWaterId === item.id ? 0.5 : 1}}
+                                            />
+                                        )}
+                                    />
+                                )}
+                                ItemSeparatorComponent={() => <Divider />}
+                                style={styles.waterListModalContent}
+                            />
+                        )}
+                        
+                        <View style={styles.waterListModalFooter}>
+                            <Text style={styles.waterListModalTotal}>
+                                Toplam: <Text style={{fontWeight: 'bold'}}>{totalWaterIntake} ml</Text> ({waterPercentage}%)
+                            </Text>
+                            <Button 
+                                mode="contained" 
+                                onPress={() => setShowWaterListModal(false)}
+                                style={{backgroundColor: '#0288d1'}}
+                            >
+                                Kapat
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
             {/* KVKK Modal */}
             <Modal
                 visible={showKVKKModal}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => {
-                }}
+                onRequestClose={() => {}}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
@@ -436,6 +635,7 @@ const styles = StyleSheet.create({
         paddingLeft: 4
     },
     statsContainer: {
+        marginTop: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 16,
@@ -523,7 +723,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16
+        marginBottom: 12
     },
     waterInfo: {
         flexDirection: 'row',
@@ -556,7 +756,10 @@ const styles = StyleSheet.create({
         paddingTop: 8
     },
     waterBottleContainer: {
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 8,
+        borderRadius: 8,
+        backgroundColor: '#f5f5f5'
     },
     planCard: {
         borderRadius: 16,
@@ -701,6 +904,69 @@ const styles = StyleSheet.create({
     },
     rejectButton: {
         backgroundColor: '#d32f2f'
+    },
+    waterEntriesPreview: {
+        marginTop: 4
+    },
+    waterEntriesTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#424242',
+        marginBottom: 8
+    },
+    waterEntryItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 6
+    },
+    waterEntryInfo: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    waterEntryText: {
+        marginLeft: 8,
+        fontSize: 13,
+        color: '#424242'
+    },
+    waterListModalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        width: '90%',
+        maxHeight: '80%',
+        elevation: 5
+    },
+    waterListModalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16
+    },
+    waterListModalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#0288d1'
+    },
+    waterListModalContent: {
+        maxHeight: 400
+    },
+    waterListModalFooter: {
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    waterListModalTotal: {
+        fontSize: 16,
+        color: '#424242'
+    },
+    emptyListText: {
+        padding: 20,
+        textAlign: 'center',
+        color: '#757575',
+        fontStyle: 'italic'
     },
 });
 

@@ -3,7 +3,6 @@ const path = require('path');
 const {
     Client,
     ExerciseAssignment,
-    Exercise,
     Notification,
     NutritionAssignment,
     NutritionPlan,
@@ -27,6 +26,10 @@ class ClientService {
 
             if (!client) {
                 throw new Exception('Hatalı giriş bilgileri.', 400, true);
+            }
+
+            if (client.status === 'Pasif') {
+                throw new Exception('Hesabınız diyetisyeniniz tarafından pasif duruma getirilmiş. Lütfen diyetisyeninizle iletişime geçin.', 403, true);
             }
 
             const token = jwt.sign(
@@ -400,7 +403,6 @@ class ClientService {
             throw new Exception(error.message, error.statusCode || 400);
         }
     }
-
 
 }
 

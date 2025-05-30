@@ -1,7 +1,7 @@
 const path = require('path');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
-const {Invoice, Recipe, Client} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {Invoice, Client} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {Op} = require('sequelize');
 
 class InvoiceService {

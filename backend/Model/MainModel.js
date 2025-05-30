@@ -2,6 +2,8 @@ const path = require('path');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Dietitian = require(path.join(__dirname, 'Dietitian'));
+const DietitianSub = require(path.join(__dirname, 'DietitianSub'));
+const DietitianSubPackage = require(path.join(__dirname, 'DietitianSubPackage'));
 const Client = require(path.join(__dirname, 'Client'));
 const Exercise = require(path.join(__dirname, 'Exercise'));
 const ExerciseCategory = require(path.join(__dirname, 'ExerciseCategory'));
@@ -20,6 +22,7 @@ const Notes = require(path.join(__dirname, 'Notes'));
 const Package = require(path.join(__dirname, 'Package'));
 const PackageItems = require(path.join(__dirname, 'PackageItems'));
 const Measurement = require(path.join(__dirname, 'Measurement'));
+const Water = require(path.join(__dirname, 'Water'));
 const BloodTest = require(path.join(__dirname, 'BloodTest'));
 
 Dietitian.hasMany(Client, {
@@ -253,9 +256,79 @@ Package.belongsTo(Dietitian, {
     foreignKey: 'dietitian_id'
 });
 
+Client.hasMany(Water, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+});
+Water.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
+DietitianSubPackage.hasMany(Dietitian, {
+    foreignKey: {
+        name: 'subscription_type',
+        allowNull: false
+    },
+    sourceKey: 'subscription_type',
+    as: 'dietitians',
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION'
+});
+
+Dietitian.belongsTo(DietitianSubPackage, {
+    foreignKey: {
+        name: 'subscription_type',
+        allowNull: false
+    },
+    targetKey: 'subscription_type',
+    as: 'subscription',
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION'
+});
+
+Dietitian.hasOne(DietitianSub, {
+    foreignKey: {
+        name: 'dietitian_id',
+        allowNull: false
+    },
+    onDelete: 'CASCADE',
+    hooks: true
+});
+
+DietitianSub.belongsTo(Dietitian, {
+    foreignKey: {
+        name: 'dietitian_id',
+        allowNull: false
+    },
+    onDelete: 'NO ACTION',
+    onUpdate: 'CASCADE'
+});
+
+DietitianSub.belongsTo(DietitianSubPackage, {
+    foreignKey: {
+        name: 'package_id',
+        allowNull: false
+    },
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    as: 'package'
+});
+
+DietitianSubPackage.hasMany(DietitianSub, {
+    foreignKey: {
+        name: 'package_id',
+        allowNull: false
+    },
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    as: 'dietitianSubs'
+});
+
 module.exports = {
     sequelize,
     Dietitian,
+    DietitianSub,
+    DietitianSubPackage,
     Client,
     Appointment,
     Anamnes,
@@ -274,5 +347,6 @@ module.exports = {
     Package,
     PackageItems,
     Measurement,
+    Water,
     BloodTest
 };

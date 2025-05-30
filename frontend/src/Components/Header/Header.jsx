@@ -41,7 +41,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 import SpaIcon from '@mui/icons-material/Spa';
 import MailIcon from '@mui/icons-material/Mail';
-import HelpIcon from '@mui/icons-material/Help';
 import axios from 'axios';
 import config from "../../config.js";
 
@@ -64,6 +63,7 @@ const getIconByType = (type) => {
 
 const settings = [
     {label: 'Ayarlar', value: 'ayarlar'},
+    {label: 'Ödeme', value: 'odeme'},
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
@@ -159,6 +159,8 @@ export default function Header() {
             navigate('/login');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
+        } else if (value === 'odeme') {
+            navigate('/odeme');
         } else {
             navigate('/dashboard');
         }
@@ -239,7 +241,6 @@ export default function Header() {
         return () => clearInterval(interval);
     }, []);
 
-
     const navigationItems = [
         {name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
         {name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},
@@ -249,7 +250,6 @@ export default function Header() {
         {name: "Egzersizler", route: "/egzersiz", icon: <SportsGymnasticsIcon sx={{color: "#3f51b5"}}/>},
         {name: "Finans", route: "/finans", icon: <AccountBalanceWalletIcon sx={{color: "#2c8d32"}}/>},
         {name: "Mesajlar", route: "/mesaj", icon: <MailIcon sx={{color: mobilePrimaryColor}}/>},
-        {name: "Yardım", route: "/yardim", icon: <HelpIcon sx={{color: mobilePrimaryColor}}/>}
     ];
 
     return (
@@ -275,14 +275,24 @@ export default function Header() {
                     )}
 
                     {/* Logo / Marka Adı */}
-                    <LogoContainer isMobile={isMobile} sx={{display: 'flex'}}>
-                        <SpaIcon sx={{
+                    <LogoContainer
+                        onClick={() => navigate('/dashboard')}
+                        isMobile={isMobile}
+                        sx={{
                             display: 'flex',
-                            ml: {xs: 0, md: 4},
-                            mr: 1,
-                            color: 'white',
-                            fontSize: isMobile ? 22 : 24
-                        }}/>
+                            alignItems: 'center',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <SpaIcon
+                            sx={{
+                                display: 'flex',
+                                ml: { xs: 0, md: 4 },
+                                mr: 1,
+                                color: 'white',
+                                fontSize: isMobile ? 22 : 24
+                            }}
+                        />
                         <Typography
                             variant="h6"
                             sx={{
@@ -394,12 +404,6 @@ export default function Header() {
                                     <Badge badgeContent={messageCount} color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
-                                </IconButton>
-                            </Tooltip>
-
-                            <Tooltip title="Yardım" arrow>
-                                <IconButton color="inherit">
-                                    <HelpIcon sx={{color: 'white'}}/>
                                 </IconButton>
                             </Tooltip>
 

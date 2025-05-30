@@ -7,6 +7,10 @@ const dietitianController = require(path.join(__dirname, '..', 'Controller', 'di
 router.post('/login', dietitianController.login);
 router.post('/register', dietitianController.register);
 
+router.put('/changePassword', dietitianController.changePassword);
+router.put('/updatePhoneNumber', dietitianController.updatePhoneNumber);
+router.put('/changeMail', dietitianController.changeMail);
+
 router.get('/getDietitianInfo', dietitianController.getDietitianInfo);
 
 router.post('/registerClient', dietitianController.registerClient);

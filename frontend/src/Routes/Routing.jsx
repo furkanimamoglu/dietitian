@@ -15,6 +15,7 @@ import Ayarlar from "../pages/Ayarlar/Ayarlar.jsx";
 import Mesaj from "../pages/Mesaj/Mesaj.jsx";
 import Finans from "../pages/Finans/Finans.jsx";
 import LandingPage from "../pages/LandingPage/LandingPage.jsx";
+import Odeme from "../pages/Odeme/Odeme.jsx";
 
 export default function Routing() {
     return (
@@ -32,9 +33,10 @@ export default function Routing() {
             <Route path="/egzersiz/*" element={<Egzersizler/>}/>
             <Route path="/finans/*" element={<Egzersizler/>}/>
             <Route path="/tarif/*" element={<Tarifler/>}/>
-            <Route path="/login/*" element={<Login/>}/>
-            <Route path="/register/*" element={<Register/>}/>
-            <Route path="/forgotpassword/*" element={<ForgotPassword/>}/>
+            <Route path="/girisyap/*" element={<Login/>}/>
+            <Route path="/kayitol/*" element={<Register/>}/>
+            <Route path="/sifremiunuttum/*" element={<ForgotPassword/>}/>
+            <Route path="/odeme/*" element={<Odeme/>}/>
 
             {/* Error Routes */}
             <Route path="/*" element={ExceptionPage(404)}/>

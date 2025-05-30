@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from 'axios';
@@ -10,6 +10,7 @@ import {
     Divider,
     FormControl,
     Grid,
+    IconButton,
     InputAdornment,
     InputLabel,
     List,
@@ -20,10 +21,23 @@ import {
     Pagination,
     Paper,
     Select,
+    Stack,
     Tab,
     Tabs,
     TextField,
-    Typography
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Alert,
+    Snackbar
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -38,12 +52,24 @@ import {
     Receipt as ReceiptIcon,
     Save as SaveIcon,
     Search as SearchIcon,
-    Warning as WarningIcon
+    Warning as WarningIcon,
+    Close as CloseIcon,
+    Download as DownloadIcon,
+    Upload as UploadIcon,
+    Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {toast} from 'react-hot-toast';
+import {
+    DataGrid,
+    GridToolbarContainer,
+    GridToolbarQuickFilter
+} from '@mui/x-data-grid';
+import Papa from 'papaparse';
+import {trTR} from "@mui/x-data-grid/locales";
+import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
 
 const CustomModal = ({isOpen, onClose, title, children}) => {
     const overlayRef = React.useRef(null);
@@ -95,19 +121,16 @@ const ConfirmationDialog = ({isOpen, onClose, onConfirm, title, message, itemNam
 
     return (
         <div className="custom-modal-overlay" onClick={handleOverlayClick}>
-            <div className="custom-modal">
-                <div className="custom-modal-header">
-                    <h2>{title}</h2>
+            <div className="custom-modal delete-warning-modal">
+                <div className="custom-modal-header warning-header">
+                    <h2><WarningIcon className="warning-icon" /> {title}</h2>
                     <button className="close-button" onClick={onClose} disabled={isLoading}>&times;</button>
                 </div>
                 <div className="custom-modal-content">
                     <div className="delete-confirm-modal">
-                        <div className="delete-warning">
-                            <WarningIcon className="warning-icon"/>
-                            <p className="warning-text">
-                                <strong>{itemName}</strong> {message}
-                            </p>
-                        </div>
+                        <p className="warning-text">
+                            <strong>{itemName}</strong> {message}
+                        </p>
                         <p className="delete-note">Bu işlem geri alınamaz.</p>
                     </div>
                 </div>
@@ -164,6 +187,50 @@ export default function Finans() {
 
     // Add search state for packages
     const [packageSearchTerm, setPackageSearchTerm] = useState('');
+    const [packageFormErrors, setPackageFormErrors] = useState({});
+    
+    // CSV Import/Export states
+    const [importDialogOpen, setImportDialogOpen] = useState(false);
+    const [csvData, setCsvData] = useState([]);
+    const [csvErrors, setCsvErrors] = useState({});
+    const [importPreviewOpen, setImportPreviewOpen] = useState(false);
+    
+    // Snackbar state
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success"
+    });
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [invoicesPerPage] = useState(6);
+
+    // Add these two new states for confirmation dialogs
+    const [deleteConfirmation, setDeleteConfirmation] = useState({
+        isOpen: false,
+        itemId: null,
+        itemType: null, // 'invoice' or 'package'
+        itemName: ''
+    });
+
+    // Package management state
+    const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+    const [currentInvoice, setCurrentInvoice] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
+    const [newInvoice, setNewInvoice] = useState({
+        clientName: "",
+        clientId: 0,
+        packageId: 0,
+        packageName: "",
+        amount: 0,
+        status: "Beklemede",
+        issueDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        description: ""
+    });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     // Fetch packages on component mount
     useEffect(() => {
@@ -212,7 +279,7 @@ export default function Finans() {
             setPackages(packagesWithServices);
         } catch (error) {
             console.error('Error fetching packages:', error);
-            toast.error('Paketler yüklenirken bir hata oluştu.');
+            showErrorToast('Paketler yüklenirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -234,7 +301,7 @@ export default function Finans() {
             setClients(response.data);
         } catch (error) {
             console.error('Error fetching clients:', error);
-            toast.error('Danışanlar yüklenirken bir hata oluştu.');
+            showErrorToast('Danışanlar yüklenirken bir hata oluştu.');
         }
     };
 
@@ -242,20 +309,18 @@ export default function Finans() {
     const fetchInvoices = async () => {
         setIsLoading(true);
         try {
-            const apiUrl = config && config[config.environment] && config[config.environment].apiUrl
-                ? `${config[config.environment].apiUrl}/invoice/getMyInvoices`
-                : '/invoice/getMyInvoices';
+            const apiUrl = `${config[config.environment].apiUrl}/invoice/getMyInvoices`;
             const response = await axios.get(apiUrl, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
             });
-            // Adapt response to local state shape
             const invoicesData = response.data.map(inv => ({
                 id: inv.id,
                 clientId: inv.client_id,
                 clientName: inv.Client?.name || '',
                 packageId: inv.package_id,
+                packageName: inv.Package?.name || '',
                 amount: Number(inv.amount),
                 status: inv.status === 'paid' ? 'Ödendi' : inv.status === 'unpaid' ? 'Beklemede' : inv.status === 'cancelled' ? 'Ödenmedi' : inv.status,
                 issueDate: inv.issueDate ? inv.issueDate.split('T')[0] : '',
@@ -265,40 +330,11 @@ export default function Finans() {
             setInvoices(invoicesData);
         } catch (error) {
             console.error('Error fetching invoices:', error);
-            toast.error('Faturalar yüklenirken bir hata oluştu.');
+            showErrorToast('Faturalar yüklenirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
     };
-
-    // Package management state
-    const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
-    const [currentInvoice, setCurrentInvoice] = useState(null);
-    const [newInvoice, setNewInvoice] = useState({
-        clientName: "",
-        clientId: 0,
-        packageId: 0,
-        packageName: "",
-        amount: 0,
-        status: "Beklemede",
-        issueDate: new Date().toISOString().split('T')[0],
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        description: ""
-    });
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-
-    // Add these two new states for confirmation dialogs
-    const [deleteConfirmation, setDeleteConfirmation] = useState({
-        isOpen: false,
-        itemId: null,
-        itemType: null, // 'invoice' or 'package'
-        itemName: ''
-    });
-
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [invoicesPerPage] = useState(6);
 
     // Add helper function to get package duration in months
     const getPackageDurationInMonths = (packageType) => {
@@ -321,6 +357,124 @@ export default function Finans() {
     const shouldProrate = (packageType) => {
         return packageType !== "Seanslık";
     };
+    
+    // Filter invoices based on search term and status filter
+    const filteredInvoices = useMemo(() => {
+        return invoices.filter(invoice => {
+            const matchesSearch =
+                (invoice?.clientName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase()) ||
+                (invoice?.packageName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase());
+            const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [invoices, searchTerm, statusFilter]);
+    
+    // DataGrid columns for invoices
+    const invoiceColumns = [
+        {
+            field: "clientName",
+            headerName: "Danışan",
+            flex: 1,
+            editable: false
+        },
+        {
+            field: "description",
+            headerName: "Açıklama",
+            flex: 1,
+            editable: false,
+        },
+        {
+            field: "amount",
+            headerName: "Tutar",
+            editable: false,
+            valueFormatter: (params) => {
+                if (params === undefined || params === null) return '';
+                return `${params.toLocaleString()} ₺`;
+            }
+        },
+        {
+            field: "status",
+            headerName: "Durum",
+            width: 120,
+            editable: false,
+            renderCell: (params) => (
+                <Chip
+                    label={params.value}
+                    color={
+                        params.value === "Ödendi" ? "success" :
+                        params.value === "Beklemede" ? "warning" : "error"
+                    }
+                    size="small"
+                />
+            ),
+        },
+        {
+            field: "issueDate",
+            headerName: "Fatura Tarihi",
+            editable: false,
+            valueFormatter: (params) => {
+                if (params === undefined || params === null) return '';
+                const date = new Date(params);
+                if (isNaN(date.getTime())) {
+                    return '';
+                }
+                return date.toLocaleDateString('tr-TR');
+            }
+        },
+        {
+            field: "dueDate",
+            headerName: "Son Ödeme",
+            editable: false,
+            valueFormatter: (params) => {
+                if (params === undefined || params === null) return '';
+                const date = new Date(params);
+                if (isNaN(date.getTime())) {
+                    return '';
+                }
+                return date.toLocaleDateString('tr-TR');
+            }
+        },
+        {
+            field: "actions",
+            headerName: "İşlemler",
+            width: 275,
+            sortable: false,
+            filterable: false,
+            editable: false,
+            renderCell: (params) => (
+                <Stack direction="row" spacing={1}>
+                    <FormControl size="small" sx={{minWidth: 110}}>
+                        <Select
+                            value={params.row.status}
+                            onChange={(e) => handleStatusChange(params.row.id, e.target.value)}
+                            size="small"
+                            variant="outlined"
+                        >
+                            <MenuItem value="Ödendi">Ödendi</MenuItem>
+                            <MenuItem value="Beklemede">Beklemede</MenuItem>
+                            <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleOpenInvoiceDialog(params.row)}
+                    >
+                        <EditIcon fontSize="small" />
+                    </Button>
+                    <Button
+                        size="small"
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleDeleteInvoice(params.row.id)}
+                    >
+                        <DeleteIcon fontSize="small" />
+                    </Button>
+                </Stack>
+            ),
+        },
+    ];
 
     const currentMonthPaid = invoices
         .filter(invoice => {
@@ -369,14 +523,6 @@ export default function Finans() {
     const allTimeTotalRevenue = invoices
         .filter(invoice => invoice.status === "Ödendi")
         .reduce((total, invoice) => total + invoice.amount, 0);
-
-    const filteredInvoices = invoices.filter(invoice => {
-        const matchesSearch =
-            (invoice?.clientName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase()) ||
-            (invoice?.packageName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase());
-        const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
 
     const indexOfLastInvoice = currentPage * invoicesPerPage;
     const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
@@ -489,6 +635,9 @@ export default function Finans() {
 
     // Package management handlers
     const handleOpenPackageDialog = async (pkg = null) => {
+        // Reset any form errors
+        setPackageFormErrors({});
+        
         if (pkg) {
             setCurrentPackage(pkg);
 
@@ -508,10 +657,8 @@ export default function Finans() {
                 const serviceItems = servicesResponse.data;
                 const serviceNames = serviceItems.map(item => item.name);
 
-                // If no services, add an empty service
-                if (serviceNames.length === 0) {
-                    serviceNames.push("");
-                }
+                // Don't add an empty service if there are no services
+                // Let the user add services if they want to
 
                 setNewPackage({
                     ...pkg,
@@ -520,17 +667,17 @@ export default function Finans() {
                 });
             } catch (error) {
                 console.error('Error fetching package items:', error);
-                toast.error('Paket hizmetleri yüklenirken bir hata oluştu.');
-                setNewPackage({...pkg, services: [""], serviceItems: []});
+                showErrorToast('Paket hizmetleri yüklenirken bir hata oluştu.');
+                setNewPackage({...pkg, services: [], serviceItems: []});
             }
         } else {
             setCurrentPackage(null);
             setNewPackage({
                 name: "",
                 type: "Seanslık",
-                price: 0,
+                price: "",
                 description: "",
-                services: [""],
+                services: [], // Start with no services
                 serviceItems: []
             });
         }
@@ -540,6 +687,17 @@ export default function Finans() {
     const handleClosePackageDialog = () => {
         setPackageDialogOpen(false);
         setCurrentPackage(null);
+        // Reset form errors
+        setPackageFormErrors({});
+        // Reset the form data when closing
+        setNewPackage({
+            name: "",
+            type: "Seanslık",
+            price: "",
+            description: "",
+            services: [], // No default services
+            serviceItems: []
+        });
     };
 
     const handlePackageChange = (field, value) => {
@@ -547,6 +705,15 @@ export default function Finans() {
             ...newPackage,
             [field]: value
         });
+        
+        // Clear error for this field if it exists
+        if (packageFormErrors[field]) {
+            setPackageFormErrors(prev => {
+                const newErrors = {...prev};
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
     const handleServiceChange = (index, value) => {
@@ -575,8 +742,27 @@ export default function Finans() {
     };
 
     const handleSavePackage = async () => {
-        if (!newPackage.name || !newPackage.type || newPackage.price <= 0) {
-            toast.error("Lütfen tüm gerekli alanları doldurun.");
+        // Reset previous errors
+        const errors = {};
+        
+        // Validate all required fields
+        if (!newPackage.name || newPackage.name.trim() === "") {
+            errors.name = "Lütfen paket adını girin";
+        }
+        
+        if (!newPackage.type) {
+            errors.type = "Lütfen paket tipini seçin";
+        }
+        
+        if (newPackage.price === "" || newPackage.price === null || isNaN(newPackage.price) || newPackage.price <= 0) {
+            errors.price = "Lütfen geçerli bir fiyat girin";
+        }
+        
+        // Note: Paket İçeriği is now optional, so we removed that validation
+        
+        // If we have validation errors, show them and stop
+        if (Object.keys(errors).length > 0) {
+            setPackageFormErrors(errors);
             return;
         }
 
@@ -665,14 +851,19 @@ export default function Finans() {
                     }
                 }
 
-                toast.success(`${newPackage.name} paketi güncellendi.`);
+                showSuccessToast(
+                    `${newPackage.name && newPackage.name.length > 20
+                        ? newPackage.name.substring(0, 15) + '...'
+                        : newPackage.name
+                    } paketi güncellendi.`
+                );
             } else {
                 // Create new package
                 const packageData = {
                     name: newPackage.name,
                     description: newPackage.description,
                     type: newPackage.type,
-                    price: parseInt(newPackage.price, 10) // Ensure price is sent as a number
+                    price: parseInt(newPackage.price, 10)
                 };
 
                 const response = await axios.post(
@@ -696,14 +887,19 @@ export default function Finans() {
                     }
                 }
 
-                toast.success(`${newPackage.name} paketi oluşturuldu.`);
+                showSuccessToast(
+                    `${newPackage.name && newPackage.name.length > 20
+                        ? newPackage.name.substring(0, 15) + '...'
+                        : newPackage.name
+                    } paketi oluşturuldu.`
+                );
             }
 
             // Refresh packages after saving
             await fetchPackages();
         } catch (error) {
             console.error('Error saving package:', error);
-            toast.error('Paket kaydedilirken bir hata oluştu.');
+            showErrorToast('Paket kaydedilirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
             handleClosePackageDialog();
@@ -714,7 +910,7 @@ export default function Finans() {
         // Check if package is used in any invoices
         const isUsed = invoices.some(invoice => invoice.packageId === id);
         if (isUsed) {
-            toast.error("Bu paket faturalarda kullanıldığı için silinemez.");
+            showErrorToast("Bu paket faturalarda kullanıldığı için silinemez.");
             return;
         }
 
@@ -755,16 +951,22 @@ export default function Finans() {
                     getApiUrl(`/package/deletePackage?package_id=${itemId}`),
                     authHeaders
                 );
-                toast.success(`"${itemName}" paketi silindi.`);
+                showSuccessToast(`"${itemName}" paketi silindi.`);
+                showSuccessToast(
+                    `${itemName && itemName.length > 20
+                        ? itemName.substring(0, 15) + '...'
+                        : itemName
+                    } paketi silindi.`
+                );
                 await fetchPackages(); // Refresh packages list
             } else if (itemType === 'invoice') {
                 await axios.delete(getApiUrl(`/invoice/deleteInvoice?invoice_id=${itemId}`), authHeaders);
-                toast.success(`Fatura silindi.`);
+                showSuccessToast(`Fatura silindi.`);
                 await fetchInvoices();
             }
         } catch (error) {
             console.error(`Error deleting ${itemType}:`, error);
-            toast.error(`${itemType === 'package' ? 'Paket' : 'Fatura'} silinirken bir hata oluştu.`);
+            showErrorToast(`${itemType === 'package' ? 'Paket' : 'Fatura'} silinirken bir hata oluştu.`);
         } finally {
             setIsLoading(false);
         }
@@ -841,38 +1043,63 @@ export default function Finans() {
 
     // Invoice management handlers
     const handleOpenInvoiceDialog = (invoice = null) => {
+        // Always reset form first to clear any previous data
+        setCurrentInvoice(null);
+        // Reset any form errors
+        setFormErrors({});
+        
         if (invoice) {
+            // If editing an existing invoice
             setCurrentInvoice(invoice);
             setNewInvoice({...invoice});
         } else {
+            // If creating a new invoice, set default values
             const firstPackage = packages.length > 0 ? packages[0] : null;
             const today = new Date();
             let dueDate;
+            
             if (firstPackage) {
                 dueDate = calculateDueDateFromPackageType(today, firstPackage.type);
             } else {
                 dueDate = new Date(today);
                 dueDate.setDate(dueDate.getDate() + 7);
             }
-            setCurrentInvoice(null);
+            
+            // Set fresh default values
             setNewInvoice({
-                clientName: clients.length > 0 ? clients[0].name : "",
-                clientId: clients.length > 0 ? clients[0].id : 0,
-                packageId: firstPackage ? firstPackage.id : 0,
-                packageName: firstPackage ? firstPackage.name : "",
-                amount: firstPackage ? Number(firstPackage.price) : 0,
+                clientName: "",
+                clientId: "",
+                packageId: "",
+                packageName: "",
+                amount: 0,
                 status: "Beklemede",
                 issueDate: safelyFormatDate(today),
                 dueDate: safelyFormatDate(dueDate),
                 description: ""
             });
         }
+        
+        // Open the dialog after setting the state
         setInvoiceDialogOpen(true);
     };
 
     const handleCloseInvoiceDialog = () => {
         setInvoiceDialogOpen(false);
         setCurrentInvoice(null);
+        // Reset form errors
+        setFormErrors({});
+        // Reset the form data when closing
+        setNewInvoice({
+            clientName: "",
+            clientId: "",
+            packageId: "",
+            packageName: "",
+            amount: 0,
+            status: "Beklemede",
+            issueDate: new Date().toISOString().split('T')[0],
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            description: ""
+        });
     };
 
     const handleInvoiceChange = (field, value) => {
@@ -880,6 +1107,15 @@ export default function Finans() {
             ...newInvoice,
             [field]: value
         });
+        
+        // Clear error for this field if it exists
+        if (formErrors[field]) {
+            setFormErrors(prev => {
+                const newErrors = {...prev};
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
 
         // Auto-update client name if client id changes
         if (field === 'clientId') {
@@ -909,6 +1145,15 @@ export default function Finans() {
                         packageName: selectedPackage.name,
                         dueDate: safelyFormatDate(dueDate)
                     }));
+                    
+                    // Clear amount error if it exists since we're setting a valid amount
+                    if (formErrors.amount) {
+                        setFormErrors(prev => {
+                            const newErrors = {...prev};
+                            delete newErrors.amount;
+                            return newErrors;
+                        });
+                    }
                 } catch (error) {
                     console.error('Error updating due date:', error);
                     // Still update other fields but use a safe default for dueDate
@@ -924,7 +1169,7 @@ export default function Finans() {
                 // This allows users to manually select their preferred due date
                 setNewInvoice(prev => ({
                     ...prev,
-                    packageId: Number(value) || 0,
+                    packageId: Number(value) || "",
                     packageName: "",
                     amount: 0
                 }));
@@ -945,6 +1190,15 @@ export default function Finans() {
                         issueDate: value,
                         dueDate: safelyFormatDate(dueDate)
                     }));
+                    
+                    // Clear due date error if it exists since we're setting a valid due date
+                    if (formErrors.dueDate) {
+                        setFormErrors(prev => {
+                            const newErrors = {...prev};
+                            delete newErrors.dueDate;
+                            return newErrors;
+                        });
+                    }
                 } else {
                     // If no package is selected, don't change the due date
                     // Let user set it manually
@@ -973,15 +1227,33 @@ export default function Finans() {
     };
 
     const handleSaveInvoice = async () => {
-        // Tutar boşsa hata ver, 0 kabul et
-        if (newInvoice.amount === '' || newInvoice.amount === null || isNaN(newInvoice.amount)) {
-            toast.error("Lütfen tutar alanını doldurun.");
-            return;
-        }
+        // Reset previous errors
+        const errors = {};
+        
+        // Validate all required fields
         if (!newInvoice.clientId) {
-            toast.error("Lütfen danışan seçin.");
+            errors.clientId = "Lütfen bir danışan seçin";
+        }
+        
+        if (newInvoice.amount === '' || newInvoice.amount === null || isNaN(newInvoice.amount) || newInvoice.amount <= 0) {
+            errors.amount = "Lütfen geçerli bir tutar girin";
+        }
+        
+        if (!newInvoice.issueDate) {
+            errors.issueDate = "Lütfen fatura tarihi seçin";
+        }
+        
+        if (!newInvoice.dueDate) {
+            errors.dueDate = "Lütfen son ödeme tarihi seçin";
+        }
+        
+        // If we have validation errors, show them and stop
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
             return;
         }
+        
+        // If validation passes, continue with saving
         setIsLoading(true);
         try {
             const getApiUrl = (endpoint) => {
@@ -994,7 +1266,7 @@ export default function Finans() {
                     Authorization: localStorage.getItem("token"),
                 },
             };
-            const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
+            
             // Status mapping fonksiyonu kullan
             const backendStatus = mapStatusToBackend(newInvoice.status);
             const invoiceData = {
@@ -1006,23 +1278,25 @@ export default function Finans() {
                 dueDate: newInvoice.dueDate,
                 description: newInvoice.description || ""
             };
+            
             if (currentInvoice) {
                 // Update
                 const response = await axios.put(getApiUrl('/invoice/updateInvoice'), {
                     invoice_id: currentInvoice.id,
                     ...invoiceData
                 }, authHeaders);
-                toast.success("Fatura güncellendi.");
+                showSuccessToast("Fatura güncellendi.");
             } else {
                 // Create
                 await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
-                toast.success("Yeni fatura oluşturuldu.");
+                showSuccessToast("Yeni fatura oluşturuldu.");
             }
+            
             await fetchInvoices();
             handleCloseInvoiceDialog();
         } catch (error) {
             console.error('Error saving invoice:', error);
-            toast.error('Fatura kaydedilirken bir hata oluştu.');
+            showErrorToast('Fatura kaydedilirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -1069,11 +1343,16 @@ export default function Finans() {
                 dueDate: invoice.dueDate,
                 description: invoice.description || ""
             }, authHeaders);
-            toast.success(`${invoice.clientName} için ödeme durumu güncellendi.`);
+            showSuccessToast(
+                `${invoice.clientName && invoice.clientName.length > 20
+                    ? invoice.clientName.substring(0, 15) + '...'
+                    : invoice.clientName
+                } için ödeme durumu güncellendi.`
+            );
             await fetchInvoices();
         } catch (error) {
             console.error('Status update error:', error);
-            toast.error('Durum güncellenirken bir hata oluştu.');
+            showErrorToast('Durum güncellenirken bir hata oluştu.');
         } finally {
             setIsLoading(false);
         }
@@ -1339,13 +1618,13 @@ export default function Finans() {
                             ) : (
                                 <Grid container spacing={3}>
                                     {filteredPackages.map(pkg => (
-                                        <Grid item xs={12} md={6} lg={4} key={pkg.id}>
+                                        <Grid item xs={6} md={4} lg={2} key={pkg.id}>
                                             <Paper elevation={3} className="package-card">
                                                 <Box p={3}>
                                                     <Box display="flex" justifyContent="space-between"
                                                          alignItems="flex-start" mb={1}>
                                                         <Typography variant="h6" className="package-name">
-                                                            {pkg.name}
+                                                            {pkg.name && pkg.name.length > 15 ? `${pkg.name.substring(0, 15)}...` : pkg.name}
                                                         </Typography>
                                                         <Chip
                                                             label={pkg.type}
@@ -1460,7 +1739,7 @@ export default function Finans() {
                                  flexWrap="wrap">
                                 <Box display="flex" alignItems="center" gap={2} className="search-filters" flexGrow={1}>
                                     <TextField
-                                        placeholder="Danışan veya paket ara..."
+                                        placeholder="Fatura Ara..."
                                         value={searchTerm}
                                         onChange={(e) => {
                                             setSearchTerm(e.target.value);
@@ -1495,170 +1774,635 @@ export default function Finans() {
                                     </FormControl>
                                 </Box>
 
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    startIcon={<AddIcon/>}
-                                    onClick={() => handleOpenInvoiceDialog()}
-                                    className="add-invoice-btn"
-                                    sx={{mt: {xs: 2, md: 0}}}
-                                >
-                                    Yeni Fatura
-                                </Button>
+                                <Stack direction="row" spacing={2}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<AddIcon/>}
+                                        onClick={() => handleOpenInvoiceDialog()}
+                                        sx={{mt: {xs: 2, md: 0}}}
+                                    >
+                                        Yeni Fatura
+                                    </Button>
+                                    
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<DownloadIcon/>}
+                                        onClick={() => setImportDialogOpen(true)}
+                                        sx={{
+                                            mt: {xs: 2, md: 0},
+                                            borderRadius: 2,
+                                            textTransform: "none",
+                                            boxShadow: 3
+                                        }}
+                                    >
+                                        İçe Aktar
+                                    </Button>
+
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<UploadIcon/>}
+                                        onClick={handleExportCSV}
+                                        sx={{
+                                            mt: {xs: 2, md: 0},
+                                            borderRadius: 2,
+                                            textTransform: "none",
+                                            boxShadow: 3
+                                        }}
+                                    >
+                                        Dışa Aktar
+                                    </Button>
+                                </Stack>
                             </Box>
                         </Paper>
 
-                        <Box mt={4} id="invoice-list">
-                            <Grid container spacing={3}>
-                                {currentInvoices.length > 0 ? (
-                                    currentInvoices.map(invoice => (
-                                        <Grid item xs={12} md={6} lg={2} key={invoice.id}>
-                                            <Paper elevation={3}
-                                                   className={`invoice-card status-${invoice.status.toLowerCase()}`}>
-                                                <Box position="relative" p={3}>
-                                                    <Box className="invoice-header" mb={2} display="flex"
-                                                         justifyContent="space-between" alignItems="flex-start">
-                                                        <Box>
-                                                            <Typography variant="h6"
-                                                                        className="client-name">{invoice.clientName}</Typography>
-                                                            <Typography variant="body2"
-                                                                        color="textSecondary">{invoice.packageName}</Typography>
-                                                        </Box>
-
-                                                        <Chip
-                                                            label={invoice.status}
-                                                            color={
-                                                                invoice.status === "Ödendi" ? "success" :
-                                                                    invoice.status === "Beklemede" ? "warning" : "error"
-                                                            }
-                                                            size="small"
-                                                            className="status-chip"
-                                                        />
-                                                    </Box>
-
-                                                    <Typography variant="h5" className="invoice-amount" gutterBottom>
-                                                        {invoice.amount.toLocaleString()} ₺
-                                                    </Typography>
-
-                                                    <Divider sx={{my: 2}}/>
-
-                                                    <Grid container spacing={2} className="invoice-dates">
-                                                        <Grid item xs={6}>
-                                                            <Typography variant="caption" color="textSecondary">
-                                                                Fatura Tarihi
-                                                            </Typography>
-                                                            <Typography variant="body2">
-                                                                {new Date(invoice.issueDate).toLocaleDateString('tr-TR')}
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={6}>
-                                                            <Typography variant="caption" color="textSecondary">
-                                                                Son Ödeme
-                                                            </Typography>
-                                                            <Typography variant="body2">
-                                                                {new Date(invoice.dueDate).toLocaleDateString('tr-TR')}
-                                                            </Typography>
-                                                        </Grid>
-                                                    </Grid>
-
-                                                    <Box className="invoice-card-footer-spacer" mt={5}></Box>
-                                                </Box>
-                                                <Box className="invoice-card-footer">
-                                                    <FormControl size="small" sx={{minWidth: 130}}>
-                                                        <InputLabel>Durum</InputLabel>
-                                                        <Select
-                                                            value={invoice.status}
-                                                            onChange={(e) => handleStatusChange(invoice.id, e.target.value)}
-                                                            label="Durum"
-                                                        >
-                                                            <MenuItem value="Ödendi">Ödendi</MenuItem>
-                                                            <MenuItem value="Beklemede">Beklemede</MenuItem>
-                                                            <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
-                                                        </Select>
-                                                    </FormControl>
-
-                                                    <Box className="invoice-card-actions">
-                                                        <Button
-                                                            variant="contained"
-                                                            color="primary"
-                                                            size="small"
-                                                            startIcon={<EditIcon/>}
-                                                            onClick={() => handleOpenInvoiceDialog(invoice)}
-                                                        >
-                                                            Düzenle
-                                                        </Button>
-                                                        <Button
-                                                            variant="contained"
-                                                            color="error"
-                                                            size="small"
-                                                            startIcon={<DeleteIcon/>}
-                                                            onClick={() => handleDeleteInvoice(invoice.id)}
-                                                        >
-                                                            Sil
-                                                        </Button>
-                                                    </Box>
-                                                </Box>
-                                            </Paper>
-                                        </Grid>
-                                    ))
-                                ) : (
-                                    <Grid item xs={12}>
-                                        <Paper elevation={3} className="empty-state">
-                                            <Box p={4} textAlign="center">
-                                                <Box className="empty-icon">
-                                                    <ReceiptIcon style={{fontSize: 64, opacity: 0.3}}/>
-                                                </Box>
-                                                <Typography variant="h6" color="textSecondary" gutterBottom>
-                                                    Fatura Bulunamadı
-                                                </Typography>
-                                                <Typography variant="body2" color="textSecondary">
-                                                    Arama kriterlerinize uygun fatura bulunmuyor. Filtrelerinizi
-                                                    değiştirmeyi veya yeni fatura oluşturmayı deneyebilirsiniz.
-                                                </Typography>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    startIcon={<AddIcon/>}
-                                                    onClick={() => handleOpenInvoiceDialog()}
-                                                    sx={{mt: 3}}
-                                                >
-                                                    Yeni Fatura Oluştur
-                                                </Button>
-                                            </Box>
-                                        </Paper>
-                                    </Grid>
-                                )}
-                            </Grid>
-
-                            {/* Pagination */}
-                            {filteredInvoices.length > invoicesPerPage && (
-                                <Box display="flex" justifyContent="center" mt={4} mb={2}>
-                                    <Pagination
-                                        count={totalPages}
-                                        page={currentPage}
-                                        onChange={handlePageChange}
-                                        color="primary"
-                                        showFirstButton
-                                        showLastButton
-                                        size="large"
-                                    />
-                                </Box>
-                            )}
-
-                            {/* Invoice count info */}
-                            <Box textAlign="center" mt={2} mb={4}>
-                                <Typography variant="body2" color="textSecondary">
-                                    Toplam {filteredInvoices.length} faturadan {indexOfFirstInvoice + 1}-
-                                    {Math.min(indexOfLastInvoice, filteredInvoices.length)} arası gösteriliyor
-                                </Typography>
-                            </Box>
+                        <Box mt={4} id="invoice-list" sx={{ height: "65vh", width: "100%" }}>
+                            <DataGrid
+                                localeText={trTR.components.MuiDataGrid.defaultProps.localeText}
+                                rows={filteredInvoices}
+                                columns={invoiceColumns}
+                                pageSize={10}
+                                rowsPerPageOptions={[5, 10, 25]}
+                                disableSelectionOnClick
+                                getRowId={(row) => row.id}
+                                sx={{
+                                    "& .MuiDataGrid-columnHeaders": {
+                                        bgcolor: "background.default",
+                                    },
+                                    "& .MuiDataGrid-footerContainer": {
+                                        bgcolor: "background.default",
+                                    },
+                                    // Hücre seçiminde oluşan çerçeveyi kaldırma
+                                    "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+                                        outline: "none",
+                                    },
+                                    "& .MuiDataGrid-cell.Mui-selected, & .MuiDataGrid-cell.Mui-selected:hover, & .MuiDataGrid-cell.Mui-selected:focus": {
+                                        outline: "none",
+                                        border: "none",
+                                        boxShadow: "none",
+                                    },
+                                }}
+                            />
                         </Box>
+                        
+                        {/* CSV Import Dialog */}
+                        <Dialog 
+                            open={importDialogOpen} 
+                            onClose={() => setImportDialogOpen(false)}
+                            maxWidth="sm"
+                            fullWidth
+                        >
+                            <DialogTitle sx={{
+                                backgroundColor: 'primary.main',
+                                color: 'white',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                    <DownloadIcon />
+                                    <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
+                                        Excel dosyasından Fatura İçe Aktar
+                                    </Typography>
+                                </Box>
+                                <IconButton
+                                    edge="end"
+                                    onClick={() => setImportDialogOpen(false)}
+                                    aria-label="close"
+                                    sx={{color: 'white'}}
+                                >
+                                    <CloseIcon/>
+                                </IconButton>
+                            </DialogTitle>
+                            <DialogContent dividers>
+                                <Stack spacing={3} sx={{mt: 1}}>
+                                    <Typography variant="body1">
+                                        Excel dosyanız aşağıdaki sütunları içermelidir:
+                                    </Typography>
+                                    <ul>
+                                        <li><Typography variant="body2">danisan - Danışan Adı (zorunlu)</Typography></li>
+                                        <li><Typography variant="body2">paket - Paket Adı (opsiyonel)</Typography></li>
+                                        <li><Typography variant="body2">tutar - Fatura Tutarı (zorunlu)</Typography></li>
+                                        <li><Typography variant="body2">durum - Fatura Durumu (opsiyonel, "Ödendi", "Beklemede" veya "Ödenmedi")</Typography></li>
+                                        <li><Typography variant="body2">fatura_tarihi - Fatura Tarihi (opsiyonel, YYYY-MM-DD formatında)</Typography></li>
+                                        <li><Typography variant="body2">son_odeme - Son Ödeme Tarihi (opsiyonel, YYYY-MM-DD formatında)</Typography></li>
+                                        <li><Typography variant="body2">aciklama - Açıklama (opsiyonel)</Typography></li>
+                                    </ul>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Not: Danışan adı sistemde kayıtlı olmalıdır.
+                                    </Typography>
+                                    <Button
+                                        variant="contained"
+                                        component="label"
+                                        startIcon={<DownloadIcon />}
+                                        sx={{mt: 2}}
+                                    >
+                                        Excel Dosyası Seç
+                                        <input
+                                            type="file"
+                                            accept=".csv"
+                                            hidden
+                                            onChange={handleCsvFileUpload}
+                                        />
+                                    </Button>
+                                    <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
+                                        Örnek Excel formatı:
+                                    </Typography>
+                                    <code style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', display: 'block', overflowX: 'auto'}}>
+                                        danisan,paket,tutar,durum,fatura_tarihi,son_odeme,aciklama<br/>
+                                        "Ahmet Yılmaz","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs ayı ödemesi"<br/>
+                                        "Ayşe Demir","Seanslık","250","Beklemede","2023-05-15","2023-05-22","İlk seans"
+                                    </code>
+                                </Stack>
+                            </DialogContent>
+                            <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
+                                <Button
+                                    onClick={() => setImportDialogOpen(false)}
+                                    variant="outlined"
+                                    startIcon={<CloseIcon/>}
+                                >
+                                    İptal
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+
+                        {/* CSV Preview Dialog */}
+                        <Dialog
+                            open={importPreviewOpen}
+                            onClose={() => setImportPreviewOpen(false)}
+                            maxWidth="lg"
+                            fullWidth
+                        >
+                            <DialogTitle sx={{
+                                backgroundColor: 'primary.main',
+                                color: 'white',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                    <ReceiptIcon />
+                                    <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
+                                        İçe Aktarılacak Faturalar
+                                    </Typography>
+                                </Box>
+                                <IconButton
+                                    edge="end"
+                                    onClick={() => setImportPreviewOpen(false)}
+                                    aria-label="close"
+                                    sx={{color: 'white'}}
+                                >
+                                    <CloseIcon/>
+                                </IconButton>
+                            </DialogTitle>
+                            <DialogContent dividers>
+                                <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                                    {csvData.length} fatura bulundu. Bilgileri kontrol edip düzenleyebilirsiniz.
+                                    {Object.keys(csvErrors).length > 0 && (
+                                        <Typography variant="body2" color="error" sx={{mt: 1}}>
+                                            Lütfen işaretli hataları düzeltin.
+                                        </Typography>
+                                    )}
+                                </Typography>
+                                <TableContainer component={Paper} sx={{maxHeight: '60vh'}}>
+                                    <Table stickyHeader size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Danışan</TableCell>
+                                                <TableCell>Paket</TableCell>
+                                                <TableCell>Tutar</TableCell>
+                                                <TableCell>Durum</TableCell>
+                                                <TableCell>Fatura Tarihi</TableCell>
+                                                <TableCell>Son Ödeme</TableCell>
+                                                <TableCell>İşlemler</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {csvData.map((row, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>
+                                                        <FormControl fullWidth size="small" error={csvErrors[index]?.clientName !== undefined}>
+                                                            <Select
+                                                                value={row.clientName || ''}
+                                                                onChange={(e) => handleCsvRowChange(index, 'clientName', e.target.value)}
+                                                            >
+                                                                <MenuItem value="">
+                                                                    <em>Seçiniz...</em>
+                                                                </MenuItem>
+                                                                {clients.map(client => (
+                                                                    <MenuItem key={client.id} value={client.name}>
+                                                                        {client.name}
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                            {csvErrors[index]?.clientName && (
+                                                                <Typography variant="caption" color="error">
+                                                                    {csvErrors[index].clientName}
+                                                                </Typography>
+                                                            )}
+                                                        </FormControl>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormControl fullWidth size="small">
+                                                            <Select
+                                                                value={row.packageName || ''}
+                                                                onChange={(e) => handleCsvRowChange(index, 'packageName', e.target.value)}
+                                                            >
+                                                                <MenuItem value="">
+                                                                    <em>Paket Seçiniz</em>
+                                                                </MenuItem>
+                                                                {packages.map(pkg => (
+                                                                    <MenuItem key={pkg.id} value={pkg.name}>
+                                                                        {pkg.name} - {Number(pkg.price).toLocaleString()} ₺
+                                                                    </MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            type="number"
+                                                            value={row.amount || 0}
+                                                            onChange={(e) => handleCsvRowChange(index, 'amount', Number(e.target.value))}
+                                                            error={csvErrors[index]?.amount !== undefined}
+                                                            helperText={csvErrors[index]?.amount}
+                                                            InputProps={{
+                                                                endAdornment: <InputAdornment position="end">₺</InputAdornment>,
+                                                            }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <FormControl fullWidth size="small">
+                                                            <Select
+                                                                value={row.status || 'Beklemede'}
+                                                                onChange={(e) => handleCsvRowChange(index, 'status', e.target.value)}
+                                                            >
+                                                                <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                                                <MenuItem value="Beklemede">Beklemede</MenuItem>
+                                                                <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            type="date"
+                                                            value={row.issueDate || ''}
+                                                            onChange={(e) => handleCsvRowChange(index, 'issueDate', e.target.value)}
+                                                            error={csvErrors[index]?.issueDate !== undefined}
+                                                            helperText={csvErrors[index]?.issueDate}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            type="date"
+                                                            value={row.dueDate || ''}
+                                                            onChange={(e) => handleCsvRowChange(index, 'dueDate', e.target.value)}
+                                                            error={csvErrors[index]?.dueDate !== undefined}
+                                                            helperText={csvErrors[index]?.dueDate}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <IconButton
+                                                            color="error"
+                                                            onClick={() => handleCsvRowDelete(index)}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </DialogContent>
+                            <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
+                                <Button
+                                    onClick={() => setImportPreviewOpen(false)}
+                                    variant="outlined"
+                                    startIcon={<CloseIcon/>}
+                                >
+                                    İptal
+                                </Button>
+                                <Button
+                                    onClick={handleImportSubmit}
+                                    variant="contained"
+                                    startIcon={<ReceiptIcon/>}
+                                    disabled={Object.keys(csvErrors).length > 0 || csvData.length === 0}
+                                >
+                                    {csvData.length} Faturayı Ekle
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                        
+                        {/* Snackbar for notifications */}
+                        <Snackbar
+                            open={snackbar.open}
+                            autoHideDuration={6000}
+                            onClose={handleSnackbarClose}
+                            anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                        >
+                            <Alert
+                                onClose={handleSnackbarClose}
+                                severity={snackbar.severity}
+                                sx={{width: '100%'}}
+                            >
+                                {snackbar.message}
+                            </Alert>
+                        </Snackbar>
                     </Box>
                 );
 
             default:
                 return null;
         }
+    };
+
+    // Handle snackbar close
+    const handleSnackbarClose = () => {
+        setSnackbar(prev => ({...prev, open: false}));
+    };
+    
+    // CSV Import/Export handlers
+    const handleCsvFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Check if we have valid data
+                if (results.data && results.data.length > 0) {
+                    const parsedData = results.data.map((row, index) => {
+                        // Find client by name
+                        const client = clients.find(c => c.name && c.name.toLowerCase() === (row.danisan || "").toLowerCase());
+                        // Find package by name
+                        const pkg = packages.find(p => p.name && p.name.toLowerCase() === (row.paket || "").toLowerCase());
+                        
+                        return {
+                            id: `temp_${index}`,
+                            clientId: client ? client.id : null,
+                            clientName: row.danisan || "",
+                            packageId: pkg ? pkg.id : null,
+                            packageName: row.paket || "",
+                            amount: parseFloat(row.tutar || 0) || 0,
+                            status: row.durum === "Ödendi" || row.durum === "Beklemede" || row.durum === "Ödenmedi" 
+                                ? row.durum 
+                                : "Beklemede",
+                            issueDate: row.fatura_tarihi || new Date().toISOString().split('T')[0],
+                            dueDate: row.son_odeme || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                            description: row.aciklama || ""
+                        };
+                    });
+                    
+                    setCsvData(parsedData);
+                    validateCsvData(parsedData);
+                    setImportDialogOpen(false);
+                    setImportPreviewOpen(true);
+                } else {
+                    showErrorToast('CSV dosyası boş veya geçersiz format içeriyor.');
+                }
+            },
+            error: function(error) {
+                showErrorToast(`CSV okuma hatası: ${error.message}`);
+            }
+        });
+    };
+    
+    const validateCsvData = (data) => {
+        const errors = {};
+        
+        data.forEach((row, index) => {
+            const rowErrors = {};
+            
+            // Client validation
+            if (!row.clientName || row.clientName.trim() === "") {
+                rowErrors.clientName = "Danışan adı zorunludur";
+            } else if (!row.clientId) {
+                rowErrors.clientName = "Danışan sistemde bulunamadı";
+            }
+            
+            // Amount validation
+            if (isNaN(row.amount) || row.amount <= 0) {
+                rowErrors.amount = "Geçerli bir tutar giriniz";
+            }
+            
+            // Date validation
+            if (!row.issueDate || !isValidDateString(row.issueDate)) {
+                rowErrors.issueDate = "Geçerli bir fatura tarihi giriniz";
+            }
+            
+            if (!row.dueDate || !isValidDateString(row.dueDate)) {
+                rowErrors.dueDate = "Geçerli bir son ödeme tarihi giriniz";
+            }
+            
+            if (Object.keys(rowErrors).length > 0) {
+                errors[index] = rowErrors;
+            }
+        });
+        
+        setCsvErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+    
+    const handleCsvRowChange = (index, field, value) => {
+        const updatedData = [...csvData];
+        updatedData[index][field] = value;
+        
+        // If changing client, update clientId
+        if (field === 'clientName') {
+            const client = clients.find(c => c.name === value);
+            updatedData[index].clientId = client ? client.id : null;
+        }
+        
+        // If changing package, update packageId and amount
+        if (field === 'packageName') {
+            const pkg = packages.find(p => p.name === value);
+            updatedData[index].packageId = pkg ? pkg.id : null;
+            if (pkg) {
+                updatedData[index].amount = Number(pkg.price);
+            }
+        }
+        
+        setCsvData(updatedData);
+        
+        // Validate the updated row
+        const rowErrors = {};
+        const row = updatedData[index];
+        
+        if (field === "clientName") {
+            if (!value || value.trim() === "") {
+                rowErrors.clientName = "Danışan adı zorunludur";
+            } else if (!row.clientId) {
+                rowErrors.clientName = "Danışan sistemde bulunamadı";
+            }
+        }
+        
+        if (field === "amount") {
+            if (isNaN(value) || value <= 0) {
+                rowErrors.amount = "Geçerli bir tutar giriniz";
+            }
+        }
+        
+        if (field === "issueDate") {
+            if (!value || !isValidDateString(value)) {
+                rowErrors.issueDate = "Geçerli bir fatura tarihi giriniz";
+            }
+        }
+        
+        if (field === "dueDate") {
+            if (!value || !isValidDateString(value)) {
+                rowErrors.dueDate = "Geçerli bir son ödeme tarihi giriniz";
+            }
+        }
+        
+        const newErrors = {...csvErrors};
+        if (Object.keys(rowErrors).length > 0) {
+            newErrors[index] = {...(newErrors[index] || {}), ...rowErrors};
+        } else {
+            if (newErrors[index]) {
+                delete newErrors[index][field];
+                if (Object.keys(newErrors[index]).length === 0) {
+                    delete newErrors[index];
+                }
+            }
+        }
+        
+        setCsvErrors(newErrors);
+    };
+    
+    const handleCsvRowDelete = (index) => {
+        const updatedData = csvData.filter((_, i) => i !== index);
+        setCsvData(updatedData);
+        
+        // Update errors
+        const newErrors = {...csvErrors};
+        delete newErrors[index];
+        
+        // Reindex errors if necessary
+        const reindexedErrors = {};
+        Object.keys(newErrors).forEach(key => {
+            const numKey = parseInt(key);
+            if (numKey > index) {
+                reindexedErrors[numKey - 1] = newErrors[key];
+            } else {
+                reindexedErrors[key] = newErrors[key];
+            }
+        });
+        
+        setCsvErrors(reindexedErrors);
+    };
+    
+    const handleImportSubmit = async () => {
+        if (Object.keys(csvErrors).length > 0) {
+            setSnackbar({
+                open: true,
+                message: "Lütfen tüm hataları düzeltin",
+                severity: "error"
+            });
+            return;
+        }
+        
+        try {
+            let successCount = 0;
+            let failCount = 0;
+            
+            // Process each invoice one by one
+            for (const invoice of csvData) {
+                try {
+                    const getApiUrl = (endpoint) => {
+                        return config && config[config.environment] && config[config.environment].apiUrl
+                            ? `${config[config.environment].apiUrl}${endpoint}`
+                            : endpoint;
+                    };
+                    
+                    const authHeaders = {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                        },
+                    };
+                    
+                    // Map status to backend format
+                    const backendStatus = mapStatusToBackend(invoice.status);
+                    
+                    const invoiceData = {
+                        client_id: invoice.clientId,
+                        amount: invoice.amount,
+                        status: backendStatus,
+                        package_id: invoice.packageId || null,
+                        issueDate: invoice.issueDate,
+                        dueDate: invoice.dueDate,
+                        description: invoice.description || ""
+                    };
+                    
+                    await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
+                    successCount++;
+                } catch (err) {
+                    console.error(`Fatura eklenirken hata: ${invoice.clientName}`, err);
+                    failCount++;
+                }
+            }
+
+            showSuccessToast(
+                `${successCount} fatura başarıyla eklendi. ${failCount > 0 ? `${failCount} fatura eklenemedi.` : ''}`
+            );
+            
+            setImportPreviewOpen(false);
+            setCsvData([]);
+            await fetchInvoices();
+            
+        } catch (error) {
+            console.error("Toplu fatura eklenirken hata oluştu:", error);
+            showErrorToast(
+                "Faturalar eklenirken bir hata oluştu"
+            );
+        }
+    };
+    
+    const handleExportCSV = () => {
+        // Filter invoices based on active filter
+        const filteredInvoices = invoices.filter(invoice => {
+            const matchesSearch =
+                (invoice?.clientName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase()) ||
+                (invoice?.packageName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase());
+            const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+        
+        // Prepare data for export
+        const dataToExport = filteredInvoices.map(invoice => ({
+            danisan: invoice.clientName || "",
+            paket: invoice.packageName || "",
+            tutar: invoice.amount,
+            durum: invoice.status,
+            fatura_tarihi: invoice.issueDate,
+            son_odeme: invoice.dueDate,
+            aciklama: invoice.description || ""
+        }));
+        
+        // Convert to CSV
+        const csv = Papa.unparse(dataToExport);
+        
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        // Set file name with current date
+        const date = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
+        const fileName = `faturalar_${date}.csv`;
+        
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -1690,9 +2434,11 @@ export default function Finans() {
                                     type="text"
                                     value={newPackage.name}
                                     onChange={(e) => handlePackageChange('name', e.target.value)}
-                                    required
+                                    className={packageFormErrors.name ? "error-input" : ""}
+                                    placeholder="Paket Adı"
                                     disabled={isLoading}
                                 />
+                                {packageFormErrors.name && <div className="error-message">{packageFormErrors.name}</div>}
                             </div>
 
                             <div className="form-group">
@@ -1701,14 +2447,17 @@ export default function Finans() {
                                     id="package-type"
                                     value={newPackage.type}
                                     onChange={(e) => handlePackageChange('type', e.target.value)}
+                                    className={packageFormErrors.type ? "error-input" : ""}
                                     disabled={isLoading}
                                 >
+                                    <option value="">Paket Tipi Seçin</option>
                                     <option value="Seanslık">Seanslık</option>
                                     <option value="Aylık">Aylık</option>
                                     <option value="3 Aylık">3 Aylık</option>
                                     <option value="6 Aylık">6 Aylık</option>
                                     <option value="1 Yıllık">1 Yıllık</option>
                                 </select>
+                                {packageFormErrors.type && <div className="error-message">{packageFormErrors.type}</div>}
                             </div>
                         </div>
 
@@ -1720,11 +2469,15 @@ export default function Finans() {
                                     <input
                                         id="package-price"
                                         type="number"
-                                        value={newPackage.price}
+                                        max={9223372036854775807}
+                                        min={0}
+                                        value={newPackage.price || ""}
                                         onChange={(e) => handlePackageChange('price', Number(e.target.value))}
-                                        required
+                                        className={packageFormErrors.price ? "error-input" : ""}
+                                        placeholder="0"
                                         disabled={isLoading}
                                     />
+                                    {packageFormErrors.price && <div className="error-message">{packageFormErrors.price}</div>}
                                 </div>
                             </div>
 
@@ -1741,30 +2494,36 @@ export default function Finans() {
                         </div>
 
                         <div className="form-group full-width">
-                            <label>Paket İçeriği</label>
+                            <label>Paket İçeriği <span className="optional-label">(Opsiyonel)</span></label>
 
                             <div className="services-list-form">
-                                {newPackage.services.map((service, index) => (
-                                    <div key={index} className="service-item-input">
-                                        <span className="service-item-number">{index + 1}.</span>
-                                        <input
-                                            type="text"
-                                            placeholder={`Hizmet ${index + 1}`}
-                                            value={service}
-                                            onChange={(e) => handleServiceChange(index, e.target.value)}
-                                            disabled={isLoading}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="remove-button"
-                                            onClick={() => handleRemoveService(index)}
-                                            disabled={newPackage.services.length <= 1 || isLoading}
-                                            title="Hizmeti Sil"
-                                        >
-                                            <DeleteIcon/>
-                                        </button>
+                                {newPackage.services.length > 0 ? (
+                                    newPackage.services.map((service, index) => (
+                                        <div key={index} className="service-item-input">
+                                            <span className="service-item-number">{index + 1}.</span>
+                                            <input
+                                                type="text"
+                                                placeholder={`Hizmet ${index + 1}`}
+                                                value={service}
+                                                onChange={(e) => handleServiceChange(index, e.target.value)}
+                                                disabled={isLoading}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="remove-button"
+                                                onClick={() => handleRemoveService(index)}
+                                                disabled={isLoading}
+                                                title="Hizmeti Sil"
+                                            >
+                                                <DeleteIcon/>
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="no-services-message">
+                                        Henüz hizmet eklenmedi. Paket içeriğini belirtmek için "Hizmet Ekle" butonunu kullanabilirsiniz.
                                     </div>
-                                ))}
+                                )}
 
                                 <button
                                     type="button"
@@ -1817,19 +2576,22 @@ export default function Finans() {
                                         className="readonly-input"
                                     />
                                 ) : (
-                                    <select
-                                        id="client-select"
-                                        value={newInvoice.clientId || ""}
-                                        onChange={(e) => handleInvoiceChange('clientId', e.target.value ? Number(e.target.value) : 0)}
-                                        required
-                                    >
-                                        <option value="">Danışan Seçin</option>
-                                        {clients.map(client => (
-                                            <option key={client.id} value={client.id}>
-                                                {client.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <>
+                                        <select
+                                            id="client-select"
+                                            value={newInvoice.clientId || ""}
+                                            onChange={(e) => handleInvoiceChange('clientId', e.target.value ? Number(e.target.value) : "")}
+                                            className={formErrors.clientId ? "error-input" : ""}
+                                        >
+                                            <option value="">Danışan Seçin</option>
+                                            {clients.map(client => (
+                                                <option key={client.id} value={client.id}>
+                                                    {client.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formErrors.clientId && <div className="error-message">{formErrors.clientId}</div>}
+                                    </>
                                 )}
                             </div>
 
@@ -1838,7 +2600,7 @@ export default function Finans() {
                                 <select
                                     id="package-select"
                                     value={newInvoice.packageId || ""}
-                                    onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : 0)}
+                                    onChange={(e) => handleInvoiceChange('packageId', e.target.value ? Number(e.target.value) : "")}
                                 >
                                     <option value="">Paket Seçin</option>
                                     {packages.length > 0 && packages.map(pkg => (
@@ -1858,41 +2620,46 @@ export default function Finans() {
                                     <input
                                         id="invoice-amount"
                                         type="number"
-                                        value={newInvoice.amount || 0}
+                                        max={9223372036854775807}
+                                        min={0}
+                                        value={newInvoice.amount || ""}
                                         onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
-                                        required
+                                        className={formErrors.amount ? "error-input" : ""}
                                     />
                                 </div>
+                                {formErrors.amount && <div className="error-message">{formErrors.amount}</div>}
                             </div>
 
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <div className="form-group">
+                                    <label htmlFor="invoice-amount">Fatura Tarihi</label>
                                     <DatePicker
-                                        label="Fatura Tarihi"
                                         value={newInvoice.issueDate ? new Date(newInvoice.issueDate) : null}
                                         onChange={(newValue) => {
                                             handleInvoiceChange('issueDate', newValue ? newValue.toISOString().split('T')[0] : '');
                                         }}
                                         slotProps={{
                                             textField: {
-                                                required: true,
-                                                fullWidth: true
+                                                fullWidth: true,
+                                                error: !!formErrors.issueDate,
+                                                helperText: formErrors.issueDate
                                             }
                                         }}
                                     />
                                 </div>
 
                                 <div className="form-group">
+                                    <label htmlFor="invoice-amount">Son Ödeme Tarihi</label>
                                     <DatePicker
-                                        label="Son Ödeme Tarihi"
                                         value={newInvoice.dueDate ? new Date(newInvoice.dueDate) : null}
                                         onChange={(newValue) => {
                                             handleInvoiceChange('dueDate', newValue ? newValue.toISOString().split('T')[0] : '');
                                         }}
                                         slotProps={{
                                             textField: {
-                                                required: true,
-                                                fullWidth: true
+                                                fullWidth: true,
+                                                error: !!formErrors.dueDate,
+                                                helperText: formErrors.dueDate
                                             }
                                         }}
                                     />

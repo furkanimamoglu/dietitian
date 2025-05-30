@@ -4,7 +4,7 @@ const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Notification = sequelize.define('Notification', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: true,
             autoIncrement: true,
             allowNull: false,
@@ -25,14 +25,14 @@ const Notification = sequelize.define('Notification', {
             allowNull: false,
             validate: {
                 notNull: {
-                    msg: 'Mesaj içeriği gereklidir'
+                    msg: 'Bildirim içeriği gereklidir'
                 },
                 notEmpty: {
-                    msg: 'Mesaj içeriği boş olamaz'
+                    msg: 'Bildirim içeriği boş olamaz'
                 },
                 len: {
-                    args: [1, 500],
-                    msg: 'Mesaj en fazla 500 karakter olabilir'
+                    args: [1, 255],
+                    msg: 'Bildirim en fazla 255 karakter olabilir'
                 }
             }
         }
