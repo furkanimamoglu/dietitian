@@ -241,7 +241,6 @@ export default function Header() {
         return () => clearInterval(interval);
     }, []);
 
-
     const navigationItems = [
         {name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
         {name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},

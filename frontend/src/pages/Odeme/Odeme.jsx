@@ -69,11 +69,9 @@ export default function Odeme() {
         cvv: ''
     });
     
-    // Dietitian info state
     const [dietitianInfo, setDietitianInfo] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Mevcut abonelik ve faturalama bilgileri
     const [subscriptionInfo, setSubscriptionInfo] = useState({
         currentPlan: "Premium Diyetisyen Paketi",
         price: 1000,
@@ -83,7 +81,6 @@ export default function Odeme() {
         features: ["Sınırsız Danışan", "Gelişmiş Raporlar", "7/24 Destek", "Çevrimiçi Randevu", "Gelişmiş İstatistikler"]
     });
 
-    // Ödeme yöntemleri
     const [paymentMethods] = useState([
         {
             id: 1,
