@@ -23,7 +23,7 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
     },
     client_limit: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 5,
         validate: {
             isInt: {
@@ -33,7 +33,7 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
     },
     appointment_limit: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 20,
         validate: {
             isInt: {
@@ -43,7 +43,7 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
     },
     nutrition_plan_limit: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 10,
         validate: {
             isInt: {
@@ -53,7 +53,7 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
     },
     exercise_limit: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 10,
         validate: {
             isInt: {
@@ -63,7 +63,7 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
     },
     recipe_limit: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         defaultValue: 10,
         validate: {
             isInt: {
@@ -107,12 +107,23 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
 DietitianSubPackage.afterSync(async () => {
     try {
         const count = await DietitianSubPackage.count();
-        
+
         if (count === 0) {
             await DietitianSubPackage.bulkCreate([
                 {
+                    subscription_type: "free",
+                    client_limit: null,
+                    appointment_limit: null,
+                    nutrition_plan_limit: null,
+                    exercise_limit: null,
+                    recipe_limit: null,
+                    price: 500.00,
+                    duration_days: 30,
+                    features: ["Tüm Özellikler", "25 Danışan", "Sınırsız Randevu", "Sınırsız Beslenme Planı", "Sınırsız Egzersiz", "Sınırsız Tarif", "E-mail Desteği", "7/24 Destek"]
+                },
+                {
                     subscription_type: "starter",
-                    client_limit: 25,
+                    client_limit: null,
                     appointment_limit: null,
                     nutrition_plan_limit: null,
                     exercise_limit: null,

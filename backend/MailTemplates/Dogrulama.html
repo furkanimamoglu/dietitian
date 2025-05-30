@@ -1,0 +1,176 @@
+const getDogrulamaEmailTemplate = (verificationCode) => {
+return `
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Diyetia Doğrulama Kodu</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #FF8F00 100%);
+                padding: 40px 30px;
+                text-align: center;
+                position: relative;
+            }
+
+            .logo h1 {
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+                margin: 0;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                letter-spacing: -0.5px;
+            }
+
+            .logo .tagline {
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 14px;
+                margin-top: 5px;
+                font-weight: 300;
+            }
+
+            .content {
+                padding: 40px 30px;
+            }
+
+            .welcome h2 {
+                color: #2E7D32;
+                font-size: 24px;
+                margin: 0 0 10px 0;
+                font-weight: 600;
+                text-align: center;
+            }
+
+            .welcome p {
+                color: #555;
+                font-size: 16px;
+                margin: 0;
+                text-align: center;
+            }
+
+            .verification-section {
+                background: linear-gradient(135deg, #E8F5E8 0%, #FFF3E0 100%);
+                border-radius: 12px;
+                padding: 30px;
+                text-align: center;
+                margin: 30px 0;
+                border: 1px solid rgba(76, 175, 80, 0.2);
+            }
+
+            .verification-text {
+                color: #2E7D32;
+                font-size: 16px;
+                margin-bottom: 20px;
+                font-weight: 500;
+            }
+
+            .verification-code {
+                background: linear-gradient(135deg, #4CAF50 0%, #FF8F00 100%);
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+                padding: 20px 30px;
+                border-radius: 8px;
+                display: inline-block;
+                letter-spacing: 4px;
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                margin: 10px 0;
+            }
+
+            .timer-info {
+                background: #FFF3E0;
+                border-left: 4px solid #FF8F00;
+                padding: 15px 20px;
+                margin: 20px 0;
+                border-radius: 0 8px 8px 0;
+            }
+
+            .timer-info p {
+                margin: 0;
+                color: #E65100;
+                font-weight: 500;
+                font-size: 14px;
+            }
+
+            .footer {
+                background: #f8f8f8;
+                padding: 30px;
+                text-align: center;
+                border-top: 1px solid #eee;
+            }
+
+            .footer p {
+                color: #666;
+                font-size: 14px;
+                margin: 5px 0;
+            }
+
+            @media (max-width: 600px) {
+                .container { margin: 10px; }
+                .header, .content { padding: 30px 20px; }
+                .verification-code {
+                    font-size: 24px;
+                    letter-spacing: 2px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <h1>🥗 Diyetia</h1>
+                <div class="tagline">Profesyonel Beslenme Danışmanlığı Platformu</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="welcome">
+                <h2>Diyetia Ailesine Hoş Geldiniz! 🌱</h2>
+                <p>Profesyonel beslenme danışmanlığı yolculuğunuz başlıyor</p>
+            </div>
+
+            <div class="verification-section">
+                <div class="verification-text">
+                    📱 Telefon numaranızı doğrulamak için aşağıdaki kodu kullanın:
+                </div>
+                <div class="verification-code">${verificationCode}</div>
+            </div>
+
+            <div class="timer-info">
+                <p>⏰ Bu kod 10 dakika boyunca geçerlidir. Lütfen bu süre içinde doğrulama işlemini tamamlayın.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Diyetia Ekibi</strong></p>
+            <p>Sağlıklı yaşam için güvenilir ortağınız</p>
+            <p style="font-size: 12px; color: #999;">
+                Bu e-posta size Diyetia hesap doğrulama sürecinin bir parçası olarak gönderilmiştir.
+            </p>
+        </div>
+    </div>
+    </body>
+    </html>
+`;
+};
+
+module.exports = getDogrulamaEmailTemplate;

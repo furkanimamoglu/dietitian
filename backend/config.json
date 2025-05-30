@@ -13,6 +13,10 @@
   "server": {
     "port": 3000
   },
+  "mailAuth": {
+    "emailAddress": "diyetia.app@gmail.com",
+    "emailAppPassword": "lgit zzvy qhuo zwxw"
+  },
   "ddl": "update",
   "secretkey": "furkantopsecret"
 }

@@ -37,22 +37,44 @@ class DietitianController {
 
     static async register(req, res) {
         try {
-            const {phoneNumber, password} = req.body;
+            const {phoneNumber, password, email} = req.body;
             const ipAddress = req.ip;
 
-            if (!phoneNumber || !password || !ipAddress) {
+            if (!phoneNumber || !password || !email || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.register(phoneNumber, password, ipAddress);
+            const result = await DietitianService.register(phoneNumber, email, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,
                 role: result.role
             });
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
+        }
+    }
+
+    static async verifyEmail(req, res) {
+        try {
+            const {email, verificationCode} = req.body;
+
+            if (!email || !verificationCode) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Mail ve Verification Code parametresi gereklidir.'
+                });
+            }
+
+            const result = await DietitianService.verifyEmail(email, verificationCode);
+
+            res.status(200).json(result);
         } catch (err) {
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,

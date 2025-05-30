@@ -1,6 +1,9 @@
 const path = require('path');
 
 const config = require(path.join(__dirname, '..', 'config.json'));
+const mailer = require(path.join(__dirname, '..', 'Utils', 'Mailer.js'));
+const getDogrulamaEmailTemplate = require(path.join(__dirname, '..', 'MailTemplates', 'Dogrulama.html'));
+
 const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
 
@@ -17,6 +20,7 @@ const {
     Notes
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {Op} = require('sequelize');
+const moment = require("moment");
 
 
 class DietitianService {
@@ -55,17 +59,34 @@ class DietitianService {
         }
     }
 
-    static async register(phoneNumber, password, ipAddress) {
+    static async register(phoneNumber, email, password, ipAddress) {
         try {
-            if (!phoneNumber || !password) {
+            if (!phoneNumber || !password || !email) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
+            const verificationCode = Math.floor(100000 + Math.random() * 900000);
+            const verificationCodeExpires = moment().add(10, 'minutes').toDate();
+
+            const emailSent = await mailer.sendMail(
+                email,
+                'Diyetia Doğrulama Kodu',
+                `Onay kodunuz: ${verificationCode}`,
+                getDogrulamaEmailTemplate(verificationCode)
+            );
+
+            if (!emailSent) {
+                throw new Exception('Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyiniz.', 500);
+            }
+
             const dietitian = await Dietitian.create({
-                phoneNumber: phoneNumber,
-                password: password,
-                role: DIETITIAN,
-                ipAddress: ipAddress
+                phoneNumber,
+                email,
+                password,
+                role: 'DIETITIAN',
+                ipAddress,
+                verificationCode,
+                verificationCodeExpires,
             });
 
             const token = jwt.sign(
@@ -83,6 +104,37 @@ class DietitianService {
                 role: dietitian.role,
                 token: token
             };
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    static async verifyEmail(mail, verificationCode) {
+        try {
+            if (!mail || !verificationCode) {
+                throw new Exception('E-posta ve doğrulama kodu gereklidir.', 400, true);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: {
+                    email: mail,
+                    verificationCode: verificationCode,
+                    verificationCodeExpires: {
+                        [Op.gt]: new Date()
+                    }
+                }
+            });
+
+            if (!dietitian) {
+                throw new Exception('Geçersiz e-posta veya doğrulama kodu.', 400, true);
+            }
+
+            await dietitian.update({
+                verificationCode: null,
+                verificationCodeExpires: null
+            });
+
+            return {status: "success", message: 'E-posta başarıyla doğrulandı.'};
         } catch (error) {
             throw new Exception(error.message, 400);
         }
