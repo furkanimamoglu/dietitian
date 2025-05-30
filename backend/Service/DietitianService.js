@@ -116,7 +116,33 @@ class DietitianService {
         }
     }
 
-    static async updateDietitian(user_id, updateData) {
+    static async updatePhoneNumber(user_id, phoneNumber) {
+        try {
+            if (!user_id) {
+                throw new Exception("Yetkisiz Erişim.", 401);
+            }
+
+            throw new Exception("SMS doğrulama henüz aktif değil. Bu alan geliştirme aşamasındadır.", 503, true);
+
+            const dietitian = await Dietitian.findByPk(user_id);
+
+            if (!dietitian) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            if (!phoneNumber) {
+                throw new Exception("Telefon numarası gereklidir.", 400, true);
+            }
+
+            await dietitian.update({ phoneNumber });
+
+            return dietitian;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
+        }
+    }
+
+    static async updateEmail(user_id, email) {
         try {
             if (!user_id) {
                 throw new Exception("Yetkisiz Erişim.", 401);
@@ -125,14 +151,18 @@ class DietitianService {
             const dietitian = await Dietitian.findByPk(user_id);
 
             if (!dietitian) {
-                throw new Exception('Diyetisyen bulunamadı.', 404, true);
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
             }
 
-            await dietitian.update(updateData);
+            if (!email) {
+                throw new Exception("E-posta adresi gereklidir.", 400, true);
+            }
+
+            await dietitian.update({ email });
 
             return dietitian;
         } catch (error) {
-            throw new Exception(error.message, 400);
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
         }
     }
 

@@ -2,7 +2,7 @@ const path = require('path');
 const {DataTypes} = require('sequelize');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
-const DietitianSubscription = sequelize.define('DietitianSubscription', {
+const DietitianSubPackage = sequelize.define('DietitianSubscription', {
     id: {
         type: DataTypes.BIGINT,
         unique: true,
@@ -104,66 +104,44 @@ const DietitianSubscription = sequelize.define('DietitianSubscription', {
     }
 });
 
-DietitianSubscription.afterSync(async () => {
+DietitianSubPackage.afterSync(async () => {
     try {
-        const count = await DietitianSubscription.count();
+        const count = await DietitianSubPackage.count();
         
         if (count === 0) {
-            await DietitianSubscription.bulkCreate([
+            await DietitianSubPackage.bulkCreate([
                 {
-                    subscription_type: "free",
+                    subscription_type: "starter",
                     client_limit: 25,
-                    appointment_limit: 10,
-                    nutrition_plan_limit: 5,
-                    exercise_limit: 5,
-                    recipe_limit: 5,
-                    price: 0.00,
+                    appointment_limit: null,
+                    nutrition_plan_limit: null,
+                    exercise_limit: null,
+                    recipe_limit: null,
+                    price: 500.00,
                     duration_days: 30,
-                    features: ["Temel Özellikler", "5 Danışan", "10 Randevu", "5 Beslenme Planı"]
+                    features: ["Tüm Özellikler", "25 Danışan", "Sınırsız Randevu", "Sınırsız Beslenme Planı", "Sınırsız Egzersiz", "Sınırsız Tarif", "E-mail Desteği", "7/24 Destek"]
                 },
                 {
                     subscription_type: "student",
-                    client_limit: 100,
-                    appointment_limit: 20,
-                    nutrition_plan_limit: 10,
-                    exercise_limit: 10,
-                    recipe_limit: 10,
-                    price: 99.99,
+                    client_limit: null,
+                    appointment_limit: null,
+                    nutrition_plan_limit: null,
+                    exercise_limit: null,
+                    recipe_limit: null,
+                    price: 500.00,
                     duration_days: 30,
-                    features: ["Temel Özellikler", "10 Danışan", "20 Randevu", "10 Beslenme Planı", "Öğrenci İndirimi"]
-                },
-                {
-                    subscription_type: "starter",
-                    client_limit: 100,
-                    appointment_limit: 50,
-                    nutrition_plan_limit: 30,
-                    exercise_limit: 30,
-                    recipe_limit: 30,
-                    price: 199.99,
-                    duration_days: 30,
-                    features: ["Tüm Özellikler", "20 Danışan", "50 Randevu", "30 Beslenme Planı", "E-mail Desteği"]
+                    features: ["Tüm Özellikler", "Sınırsız Danışan", "Sınırsız Randevu", "Sınırsız Beslenme Planı", "Sınırsız Egzersiz", "Sınırsız Tarif", "SMS Desteği", "E-mail Desteği", "7/24 Destek"]
                 },
                 {
                     subscription_type: "premium",
-                    client_limit: 9999,
-                    appointment_limit: 9999,
-                    nutrition_plan_limit: 9999,
-                    exercise_limit: 9999,
-                    recipe_limit: 9999,
+                    client_limit: null,
+                    appointment_limit: null,
+                    nutrition_plan_limit: null,
+                    exercise_limit: null,
+                    recipe_limit: null,
                     price: 1000.00,
                     duration_days: 30,
-                    features: ["Tüm Özellikler", "Sınırsız Danışan", "Sınırsız Randevu", "Sınırsız Plan", "E-mail Desteği", "7/24 Destek"]
-                },
-                {
-                    subscription_type: "kurumsal",
-                    client_limit: 1000,
-                    appointment_limit: 1000,
-                    nutrition_plan_limit: 500,
-                    exercise_limit: 500,
-                    recipe_limit: 500,
-                    price: 999.99,
-                    duration_days: 30,
-                    features: ["Tüm Premium Özellikler", "Çoklu Diyetisyen Desteği", "Özel Raporlama", "Öncelikli Destek"]
+                    features: ["Tüm Özellikler", "Sınırsız Danışan", "Sınırsız Randevu", "Sınırsız Beslenme Planı", "Sınırsız Egzersiz", "Sınırsız Tarif", "SMS Desteği", "E-mail Desteği", "7/24 Destek"]
                 }
             ]);
         }
@@ -172,4 +150,4 @@ DietitianSubscription.afterSync(async () => {
     }
 });
 
-module.exports = DietitianSubscription;
+module.exports = DietitianSubPackage;
