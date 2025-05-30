@@ -94,7 +94,7 @@ class DietitianController {
         }
     }
 
-    static async updateDietitian(req, res) {
+    static async updatePhoneNumber(req, res) {
         try {
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
@@ -107,14 +107,62 @@ class DietitianController {
                 });
             }
 
-            const {name, email, phoneNumber, gender} = req.body;
+            const { phoneNumber } = req.body;
 
-            const result = await DietitianService.updateDietitian(dietitian_id, {name, email, phoneNumber, gender});
+            if (!phoneNumber) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Telefon numarası gereklidir."
+                });
+            }
+
+            const result = await DietitianService.updatePhoneNumber(dietitian_id, phoneNumber);
             res.status(200).json(result);
         } catch (err) {
             res.status(err.status || 500).json({
-                showOnScreen: err.showOnScreen,
-                message: err.message
+                showOnScreen: err.showOnScreen || true,
+                message: err.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    static async changeMail(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const { email } = req.body;
+
+            if (!email) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "E-posta adresi gereklidir."
+                });
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Geçersiz e-posta formatı."
+                });
+            }
+
+            const result = await DietitianService.updateEmail(dietitian_id, email);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen || true,
+                message: err.message || "Bir hata oluştu."
             });
         }
     }

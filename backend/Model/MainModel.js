@@ -2,7 +2,8 @@ const path = require('path');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Dietitian = require(path.join(__dirname, 'Dietitian'));
-const DietitianSubscription = require(path.join(__dirname, 'DietitianSubscription'));
+const DietitianSub = require(path.join(__dirname, 'DietitianSub'));
+const DietitianSubPackage = require(path.join(__dirname, 'DietitianSubPackage'));
 const Client = require(path.join(__dirname, 'Client'));
 const Exercise = require(path.join(__dirname, 'Exercise'));
 const ExerciseCategory = require(path.join(__dirname, 'ExerciseCategory'));
@@ -263,20 +264,18 @@ Water.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
-// Modify relationship between Dietitian and DietitianSubscription
-// Create the association without ON DELETE CASCADE
-DietitianSubscription.hasMany(Dietitian, {
+DietitianSubPackage.hasMany(Dietitian, {
     foreignKey: {
         name: 'subscription_type',
         allowNull: false
     },
     sourceKey: 'subscription_type',
     as: 'dietitians',
-    onDelete: 'NO ACTION',  // Change to NO ACTION to avoid the CASCADE issue
+    onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION'
 });
 
-Dietitian.belongsTo(DietitianSubscription, {
+Dietitian.belongsTo(DietitianSubPackage, {
     foreignKey: {
         name: 'subscription_type',
         allowNull: false
@@ -287,10 +286,49 @@ Dietitian.belongsTo(DietitianSubscription, {
     onUpdate: 'NO ACTION'
 });
 
+Dietitian.hasOne(DietitianSub, {
+    foreignKey: {
+        name: 'dietitian_id',
+        allowNull: false
+    },
+    onDelete: 'CASCADE',
+    hooks: true
+});
+
+DietitianSub.belongsTo(Dietitian, {
+    foreignKey: {
+        name: 'dietitian_id',
+        allowNull: false
+    },
+    onDelete: 'NO ACTION',
+    onUpdate: 'CASCADE'
+});
+
+DietitianSub.belongsTo(DietitianSubPackage, {
+    foreignKey: {
+        name: 'package_id',
+        allowNull: false
+    },
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    as: 'package'
+});
+
+DietitianSubPackage.hasMany(DietitianSub, {
+    foreignKey: {
+        name: 'package_id',
+        allowNull: false
+    },
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    as: 'dietitianSubs'
+});
+
 module.exports = {
     sequelize,
     Dietitian,
-    DietitianSubscription,
+    DietitianSub,
+    DietitianSubPackage,
     Client,
     Appointment,
     Anamnes,

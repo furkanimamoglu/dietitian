@@ -273,9 +273,6 @@ export default function Ayarlar() {
                         <Grid item xs={12} md={4}>
                             <Card variant="outlined" className="settings-card profile-preview-card">
                                 <CardContent>
-                                    <Typography variant="h6" gutterBottom sx={{mb: 3}}>
-                                        Profil Önizleme
-                                    </Typography>
                                     
                                     <Box className="profile-preview-container">
                                         <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3}}>
@@ -319,14 +316,6 @@ export default function Ayarlar() {
                                             sx={{mb: 2}}
                                         >
                                             Şifremi Değiştir
-                                        </Button>
-                                        
-                                        <Button
-                                            variant="outlined"
-                                            fullWidth
-                                            size="small"
-                                        >
-                                            Profil Önizleme
                                         </Button>
                                     </Box>
                                 </CardContent>

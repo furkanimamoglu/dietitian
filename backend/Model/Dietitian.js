@@ -16,8 +16,8 @@ const Dietitian = sequelize.define('Dietitian', {
         defaultValue: "free",
         validate: {
             isIn: {
-                args: [["free", "student","starter", "premium", "kurumsal"]],
-                msg: 'Abonelik türü yalnızca "free", "student", "starter", "premium" veya "kurumsal" olabilir.'
+                args: [["free","student","starter", "premium"]],
+                msg: 'Abonelik türü yalnızca "free", "student", "starter" veya "premium" olabilir.'
             }
         }
     },
