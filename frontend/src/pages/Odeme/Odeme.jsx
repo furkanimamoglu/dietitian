@@ -48,7 +48,7 @@ import {
     Compare, // Keep Compare icon for the tab, even if label changes
     Star,
     StarBorder,
-    School,
+    School, // Add School icon
     Diamond,
     Cancel
 } from "@mui/icons-material";
@@ -1395,10 +1395,6 @@ export default function Odeme() {
                         </Typography>
                         <Divider sx={{mb: 3}} />
 
-                        <Typography variant="body2" paragraph>
-                            Plan değişikliği bir sonraki fatura döneminden itibaren geçerli olacaktır.
-                        </Typography>
-
                         {selectedPlan && (
                             <>
                                 <Box sx={{
@@ -1558,6 +1554,33 @@ export default function Odeme() {
                                         </Grid>
                                     </Box>
                                 )}
+
+                                {/* === START: STUDENT PLAN INSTRUCTION === */}
+                                {selectedPlan?.type === 'student' && (
+                                    <Box
+                                        sx={{
+                                            p: 2,
+                                            bgcolor: '#e8f5e9', // Light green background for info
+                                            borderRadius: 1,
+                                            mb: 3, // Spacing before buttons
+                                            border: '1px dashed #4caf50', // Green dashed border
+                                        }}
+                                    >
+                                        <Typography variant="body2" paragraph fontWeight="bold" color="success">
+                                            Önemli Not: Öğrenci Planı Kaydı
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            Öğrenci indiriminden faydalanabilmek için, lütfen güncel öğrenci belgenizin bir kopyasını, Diyetia'ya kayıtlı telefon numaranızı ve e-posta adresinizi
+                                            {' '}
+                                            <a href="mailto:destek@diyetia.com" style={{ color: '#1b5e20', fontWeight: 'bold' }}>
+                                                destek@diyetia.com
+                                            </a>
+                                            {' '}
+                                            adresine gönderin. Belgeniz incelendikten sonra kaydınız onaylanacaktır.
+                                        </Typography>
+                                    </Box>
+                                )}
+                                {/* === END: STUDENT PLAN INSTRUCTION === */}
 
 
                             </>
