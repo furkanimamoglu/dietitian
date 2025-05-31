@@ -223,7 +223,6 @@ export default function Odeme() {
     };
 
     const handleSaveSettings = () => {
-        // Simulating API call to save settings
         setTimeout(() => {
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
@@ -255,7 +254,6 @@ export default function Odeme() {
     };
     
     const handleAutoRenewChange = (e) => {
-        // Burada API çağrısı yapılarak auto-renew durumu değiştirilebilir
         console.log("Auto renew changed", e.target.checked);
     };
 
@@ -294,7 +292,6 @@ export default function Odeme() {
     };
     
     const handleCancelSubscription = () => {
-        // Burada abonelik iptal etme API çağrısı yapılacak
         handleSaveSettings();
         handleCloseCancelModal();
     };
