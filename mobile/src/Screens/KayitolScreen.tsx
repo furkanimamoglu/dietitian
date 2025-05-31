@@ -308,7 +308,7 @@ const KayitolScreen: React.FC = () => {
 
                             <View style={styles.dietitianSection}>
                                 <Text style={styles.sectionTitle}>Diyetisyen Bilgileri</Text>
-                                <TextInput
+                                {/*<TextInput
                                     label="Diyetisyen Referans Kodu"
                                     mode="outlined"
                                     value={dietitianCode}
@@ -326,7 +326,7 @@ const KayitolScreen: React.FC = () => {
                                                 icon={() => <ActivityIndicator size={20} color="#F57C00"/>}/> :
                                             undefined
                                     }
-                                />
+                                />*/}
 
                                 {dietitianName ? (
                                     <View style={styles.dietitianInfo}>

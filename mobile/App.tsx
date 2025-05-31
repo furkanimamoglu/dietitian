@@ -38,8 +38,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const linking = {
     prefixes: [
-        `${config.app_scheme}://`,
-        config.base_url
+        `${config[config.environment].app_scheme}://`,
+        config[config.environment].apiUrl
     ],
     config: {
         screens: {

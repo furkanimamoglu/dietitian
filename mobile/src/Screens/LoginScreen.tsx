@@ -1,4 +1,3 @@
-// src/screens/LoginScreen.tsx
 import React, {useState, useEffect} from 'react';
 import {
     Dimensions,
@@ -187,8 +186,8 @@ const LoginScreen = ({navigation}: Props) => {
                                 style={styles.input}
                                 outlineColor="#DDD"
                                 activeOutlineColor="#F57C00"
-                                textContentType="telephoneNumber" // Add this for iOS autofill
-                                autoComplete="tel" // Add this for Android autofill
+                                textContentType="telephoneNumber"
+                                autoComplete="tel"
                             />
 
                             <TextInput
@@ -207,8 +206,8 @@ const LoginScreen = ({navigation}: Props) => {
                                 style={styles.input}
                                 outlineColor="#DDD"
                                 activeOutlineColor="#F57C00"
-                                textContentType="password" // Add this for iOS autofill
-                                autoComplete="password" // Add this for Android autofill
+                                textContentType="password"
+                                autoComplete="password"
                             />
 
                             <TouchableOpacity
