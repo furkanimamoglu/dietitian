@@ -372,6 +372,41 @@ export default function Danisanlarim() {
         }
     };
 
+    const handleChangeStatus = async (client) => {
+        try {
+            // Mevcut durumun tersini ayarla
+            const newStatus = client.status === "Aktif" ? "Pasif" : "Aktif";
+
+            await axios.post(
+                `${config[config.environment].apiUrl}/dietitian/changeClientStatus`,
+                {
+                    client_id: client.id,
+                    status: newStatus
+                },
+                { headers: { Authorization: localStorage.getItem("token") } }
+            );
+
+            // Yerel veriyi güncelle
+            setClients(prev => prev.map(c =>
+                c.id === client.id ? {...c, status: newStatus} : c
+            ));
+
+            setSnackbar({
+                open: true,
+                message: `${client.name} durumu ${newStatus === "Aktif" ? "aktif" : "pasif"} olarak değiştirildi`,
+                severity: "success"
+            });
+
+        } catch (error) {
+            console.error("Durum değiştirme hatası:", error);
+            setSnackbar({
+                open: true,
+                message: "Danışan durumu değiştirilemedi",
+                severity: "error"
+            });
+        }
+    };
+
     const openCreateDialog = () => setCreateDialogOpen(true);
 
     const closeCreateDialog = () => {
@@ -584,7 +619,7 @@ export default function Danisanlarim() {
             width: 90,
             type: "singleSelect",
             valueOptions: ["Aktif", "Pasif"],
-            editable: true,
+            editable: false,
             renderCell: (params) => {
                 if (params.row.status === "Aktif") {
                     return <CheckCircle sx={{color: green[500]}}/>;
@@ -651,7 +686,7 @@ export default function Danisanlarim() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 160,
+            width: 240, // Genişliği arttırdım
             sortable: false,
             editable: false,
             renderCell: (params) => (
@@ -660,14 +695,28 @@ export default function Danisanlarim() {
                         size="small"
                         variant="outlined"
                         onClick={() => navigate(`/danisan/${params.row.id}`)}
+                        title="Detayları Görüntüle"
                     >
                         <Visibility fontSize="small"/>
                     </Button>
                     <Button
                         size="small"
                         variant="outlined"
+                        color={params.row.status === "Aktif" ? "error" : "success"}
+                        onClick={() => handleChangeStatus(params.row)}
+                        title={params.row.status === "Aktif" ? "Pasifleştir" : "Aktifleştir"}
+                    >
+                        {params.row.status === "Aktif" ?
+                            <Cancel fontSize="small"/> :
+                            <CheckCircle fontSize="small"/>
+                        }
+                    </Button>
+                    <Button
+                        size="small"
+                        variant="outlined"
                         color="error"
                         onClick={() => openDeleteDialog(params.row)}
+                        title="Sil"
                     >
                         <DeleteIcon fontSize="small"/>
                     </Button>
