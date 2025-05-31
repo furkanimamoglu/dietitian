@@ -274,7 +274,8 @@ export default function Default(props) {
                 }}
             >
                 {/* İçerik Blokaj Overlay - sadece ödeme sayfası değilse göster */}
-                {isContentBlocked && !isPaymentPage && (
+                {/* İçerik Blokaj Overlay - sadece ödeme sayfası değilse göster */}
+                {isContentBlocked && !isPaymentPage ? (
                     <Box
                         sx={{
                             position: 'absolute',
@@ -310,10 +311,9 @@ export default function Default(props) {
                             Paket Seç
                         </Button>
                     </Box>
+                ) : (
+                    props.children
                 )}
-
-                {/* Normal içerik burada render edilir */}
-                {props.children}
             </Box>
             <Footer />
 
