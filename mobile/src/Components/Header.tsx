@@ -182,10 +182,9 @@ export default function Header({navigation}: Props) {
                         )}
                         <TouchableOpacity onPress={() => navigation.navigate('Profil')} style={styles.avatarWrapper}>
                             <View style={styles.avatarContent}>
-                                <Image
-                                    source={{uri: userProfile || 'https://i.pravatar.cc/101'}}
-                                    style={styles.avatar}
-                                />
+                                <View style={styles.avatarPlaceholder}>
+                                    <Text style={styles.avatarInitial}>{userName?.charAt(0).toUpperCase()}</Text>
+                                </View>
                                 <Text style={styles.avatarLabel}>{userName}</Text>
                             </View>
                         </TouchableOpacity>
@@ -368,4 +367,18 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#666',
     },
+
+    avatarPlaceholder: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#ccc',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarInitial: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    }
 });

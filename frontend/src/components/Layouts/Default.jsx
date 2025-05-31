@@ -255,7 +255,6 @@ export default function Default(props) {
 
     const handleCloseModal = () => {
         setShowSubscriptionModal(false);
-        // İçerik hala bloklu kalacak, sadece modal kapanacak
     };
 
     return (

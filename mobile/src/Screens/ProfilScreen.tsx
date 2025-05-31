@@ -56,14 +56,17 @@ const Profil = ({navigation}) => {
 
             <ScrollView style={styles.content}>
                 <View style={styles.profileSection}>
-                    <Image source={{uri: 'https://i.pravatar.cc/150?img=3'}} style={styles.avatar}/>
+                    <View style={styles.avatarPlaceholder}>
+                        <Text style={styles.avatarInitial}>{user.name?.charAt(0).toUpperCase()}</Text>
+                    </View>
                     <Text style={styles.name}>{user.name}</Text>
-                    <Text style={styles.labelText}>Telefon: {user.phone}</Text>
+                    <Text style={styles.labelText}>Telefon: +90{user.phone}</Text>
                     <Text style={styles.labelText}>Mail: {user.email}</Text>
                 </View>
 
                 <Card style={styles.card}>
                     <Card.Content>
+                    {/*
                         <Button onPress={() => console.log('Profili Düzenle')} mode="outlined" style={styles.button}>Profili
                             Düzenle</Button>
                         <Button onPress={() => console.log('Ödemelerim')} mode="outlined" style={styles.button}>
@@ -72,6 +75,7 @@ const Profil = ({navigation}) => {
                             Değiştir</Button>
                         <Button onPress={() => console.log('Ayarlar')} mode="outlined"
                                 style={styles.button}>Ayarlar</Button>
+                    */ }
                         <Button onPress={handleLogout} mode="outlined" textColor="#d32f2f" style={styles.button}
                                 icon="logout">Çıkış Yap</Button>
                     </Card.Content>
@@ -91,13 +95,18 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         paddingVertical: 20
     },
-    avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 12,
-        borderWidth: 2,
-        borderColor: '#f57c00'
+    avatarPlaceholder: {
+      backgroundColor: '#2e7d32',
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    avatarInitial: {
+      color: 'white',
+      fontSize: 28,
+      fontWeight: 'bold',
     },
     name: {
         fontSize: 20,

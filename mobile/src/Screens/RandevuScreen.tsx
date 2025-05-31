@@ -133,12 +133,16 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
     const [filterStatus, setFilterStatus] = useState('all');
 
     const formatDate = useCallback((date: Date) => {
-        return date.toISOString().split('T')[0];
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }, []);
+
 
     const timeSlots = useMemo(() => {
         const slots = [];
-        for (let h = 8; h <= 18; h++) {
+        for (let h = 8; h <= 17; h++) {
             for (let m = 0; m < 60; m += 30) {
                 const hh = h.toString().padStart(2, '0');
                 const mm = m.toString().padStart(2, '0');
@@ -179,8 +183,14 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     return;
                 }
 
-                const startDateTime = new Date(`${formatDate(selectedDate)}T${selectedTime}`);
-                const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
+                const [hour, minute] = selectedTime.split(':').map(Number);
+
+                            const year = selectedDate.getUTCFullYear();
+                            const month = selectedDate.getUTCMonth(); // 0 tabanlı
+                            const day = selectedDate.getUTCDate();
+
+                            const startDateTime = new Date(Date.UTC(year, month, day, hour, minute));
+                            const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
                 const response = await fetch(`${config[config.environment].apiUrl}/appointment/addAppointmentAsClient`, {
                     method: 'POST',
@@ -190,8 +200,8 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     },
                     body: JSON.stringify({
                         title: description,
-                        start: startDateTime.toISOString(),
-                        end: endDateTime.toISOString()
+                        start: startDateTime,
+                        end: endDateTime
                     })
                 });
 
