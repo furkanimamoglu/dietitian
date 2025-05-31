@@ -54,7 +54,7 @@ class ClientService {
         }
     }
 
-    static async register(dietitian_id, name, phoneNumber, password, ipAddress) {
+    static async register(dietitian_id, name, gender, phoneNumber, password, ipAddress) {
         try {
             if (!dietitian_id) {
                 throw new Exception('Diyetisyen bulunamadı.', 400, true);
@@ -67,6 +67,7 @@ class ClientService {
             const client = await Client.create({
                 dietitian_id: dietitian_id,
                 name: name,
+                gender: gender,
                 phoneNumber: phoneNumber,
                 password: password,
                 role: CLIENT,
@@ -75,7 +76,7 @@ class ClientService {
 
             const token = jwt.sign(
                 {
-                    client_id: client.id,
+                    id: client.id,
                     dietitian_id: client.dietitian_id,
                     phoneNumber: client.phoneNumber,
                     role: CLIENT

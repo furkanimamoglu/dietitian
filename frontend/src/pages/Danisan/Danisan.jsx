@@ -86,7 +86,6 @@ import EventBusyIcon from '@mui/icons-material/EventBusy';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import HistoryIcon from '@mui/icons-material/History';
 
-// Water tracking data - moved outside the component
 const initialWaterTrackingData = {
     dailyGoal: 2500, // ml
     weeklyData: [
@@ -100,15 +99,14 @@ const initialWaterTrackingData = {
     ]
 };
 
-// Water tracking component - moved outside the main component
 const WaterTrackingCard = ({ data, clientId }) => {
     const [waterData, setWaterData] = useState(data);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [apiResponse, setApiResponse] = useState(null); // Store raw API response for debugging
+    const [apiResponse, setApiResponse] = useState(null);
 
-    const currentDay = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
-    const mappedDay = currentDay === 0 ? 6 : currentDay - 1; // Convert to 0-6 where 0 is Monday
+    const currentDay = new Date().getDay();
+    const mappedDay = currentDay === 0 ? 6 : currentDay - 1;
     
     useEffect(() => {
         const fetchWaterData = async () => {
@@ -116,13 +114,10 @@ const WaterTrackingCard = ({ data, clientId }) => {
             setError(null);
             
             try {
-                // Get current date
                 const today = new Date();
-                // Get date from 6 days ago for weekly data
                 const weekStart = new Date(today);
                 weekStart.setDate(today.getDate() - 6);
                 
-                // Format dates as YYYY-MM-DD
                 const formatDate = (date) => {
                     return date.toISOString().split('T')[0];
                 };
@@ -147,7 +142,6 @@ const WaterTrackingCard = ({ data, clientId }) => {
                 setApiResponse(response.data);
                 
                 if (response.data) {
-                    // Process the response data
                     const processedData = processWaterData(response.data);
                     console.log("Processed water data:", processedData);
                     setWaterData(prevData => ({
@@ -163,21 +157,17 @@ const WaterTrackingCard = ({ data, clientId }) => {
             }
         };
         
-        // Process API response into the format needed for display
         const processWaterData = (apiData) => {
             const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-            const dailyGoal = data.dailyGoal; // Use the goal from props
+            const dailyGoal = data.dailyGoal;
             
-            // Create default data structure with 0 consumed for all days
             const processedData = dayNames.map(day => ({
                 day,
                 consumed: 0,
                 completed: false
             }));
             
-            // If we have API data, update the corresponding days
             if (Array.isArray(apiData)) {
-                // Önce tarihe göre verileri gruplayalım
                 const groupedByDate = {};
                 
                 apiData.forEach(item => {
@@ -185,16 +175,14 @@ const WaterTrackingCard = ({ data, clientId }) => {
                         if (!groupedByDate[item.date]) {
                             groupedByDate[item.date] = 0;
                         }
-                        // Tüm olası alan adlarını kontrol ederek su miktarını ekleyelim
                         const amount = item.amount || item.consumed || item.amount_ml || 0;
                         groupedByDate[item.date] += parseInt(amount, 10);
                     }
                 });
                 
-                // Şimdi gruplanmış verileri işleyelim
                 Object.entries(groupedByDate).forEach(([dateStr, totalAmount]) => {
                     const date = new Date(dateStr);
-                    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1; // Convert to 0-6 where 0 is Monday
+                    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
                     
                     if (dayIndex >= 0 && dayIndex < 7) {
                         processedData[dayIndex].consumed = totalAmount;
@@ -202,14 +190,12 @@ const WaterTrackingCard = ({ data, clientId }) => {
                     }
                 });
             } else if (apiData && typeof apiData === 'object') {
-                // Handle case where API returns an object with dates as keys
                 Object.entries(apiData).forEach(([dateKey, value]) => {
                     try {
                         const date = new Date(dateKey);
                         const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
                         
                         if (dayIndex >= 0 && dayIndex < 7) {
-                            // Try to extract amount from different possible structures
                             let amount = 0;
                             if (typeof value === 'number') {
                                 amount = value;

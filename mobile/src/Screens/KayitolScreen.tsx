@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import {ActivityIndicator, Button, Card, Text, TextInput, useTheme} from 'react-native-paper';
+import {ActivityIndicator, Button, Card, Text, RadioButton, TextInput, useTheme} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -31,6 +31,7 @@ const KayitolScreen: React.FC = () => {
 
     const [name, setName] = useState('');
     const [dietitianCode, setDietitianCode] = useState(dietitianId);
+    const [gender, setGender] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -117,6 +118,7 @@ const KayitolScreen: React.FC = () => {
                         phoneNumber: parseInt(phone),
                         password: password,
                         name: name,
+                        gender: gender,
                         dietitian_id: parseInt(dietitianCode),
                     })
                 }
@@ -124,9 +126,7 @@ const KayitolScreen: React.FC = () => {
             const data = await response.json();
             if (response.ok) {
                 await AsyncStorage.setItem('token', `Bearer ${data.token}`);
-                Alert.alert('Başarılı', 'Kaydınız başarıyla oluşturuldu', [
-                    {text: 'Tamam', onPress: () => navigation.navigate('AnaSayfa' as never)}
-                ]);
+                await navigation.navigate('AnaSayfa');
             } else {
                 Alert.alert('Hata', data.message || 'Kayıt başarısız.');
             }
@@ -189,6 +189,26 @@ const KayitolScreen: React.FC = () => {
                                 outlineColor="#DDD"
                                 activeOutlineColor="#F57C00"
                             />
+
+                            <Text style={{ marginBottom: 8, fontSize: 16, fontWeight: 'bold' }}>Cinsiyet</Text>
+                            <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={gender}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <RadioButton value="Erkek" />
+                                        <Text>Erkek</Text>
+                                    </View>
+
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <RadioButton value="Kadın" />
+                                        <Text>Kadın</Text>
+                                    </View>
+
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <RadioButton value="Diğer" />
+                                        <Text>Diğer</Text>
+                                    </View>
+                                </View>
+                            </RadioButton.Group>
 
                             <TextInput
                                 label="Şifre"
