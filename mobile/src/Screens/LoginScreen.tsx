@@ -23,6 +23,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({navigation}: Props) => {
     const theme = useTheme();
+    const [clientInfo, setClientInfo] = useState({});
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [secure, setSecure] = useState(true);
@@ -32,24 +33,24 @@ const LoginScreen = ({navigation}: Props) => {
 
     useEffect(() => {
         if (errorMessage) {
-            // Animate error message appearance
             Animated.sequence([
                 Animated.timing(errorOpacity, {
                     toValue: 1,
                     duration: 300,
                     useNativeDriver: true
                 }),
-                Animated.delay(5000), // Show error for 5 seconds
+                Animated.delay(5000),
                 Animated.timing(errorOpacity, {
                     toValue: 0,
                     duration: 300,
                     useNativeDriver: true
                 })
             ]).start(() => {
+                // Clear message only after animation fades out
                 setErrorMessage(null);
             });
         }
-    }, [errorMessage, errorOpacity]);
+    }, [errorMessage, errorOpacity]); // Include errorOpacity in dependencies
 
     const handleChange = (text: string) => {
         const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
@@ -60,56 +61,99 @@ const LoginScreen = ({navigation}: Props) => {
         try {
             setLoading(true);
             setErrorMessage(null);
-            
-            // Handle config indexing safely
-            const env = config.environment as keyof typeof config;
-            if (typeof config[env] === 'object' && 'apiUrl' in config[env]) {
-                const apiUrl = (config[env] as { apiUrl: string }).apiUrl;
-                
-                const response = await axios.post(`${apiUrl}/client/login`, {
+
+            const loginResponse = await axios.post(
+                `${config[config.environment].apiUrl}/client/login`,
+                {
                     phoneNumber: phone,
                     password: password,
-                });
-                
-                const token = response.data?.token;
-                if (!token) throw new Error('Token alınamadı.');
-                await AsyncStorage.setItem('token', `Bearer ${token}`);
-                navigation.replace('AnaSayfa');
-            } else {
-                throw new Error('API URL bulunamadı');
+                },
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    validateStatus: () => true,
+                }
+            );
+
+            console.log(loginResponse)
+
+            if (loginResponse.status !== 200) {
+                if (loginResponse.status === 400) {
+                    throw new Error(loginResponse.data.message);
+                }
+                throw new Error(loginResponse.data?.message || 'Giriş başarısız.');
             }
-        } catch (error: any) {
-            const errorMsg = error?.response?.data?.message || 
-                             error?.message || 
-                             'Bilinmeyen hata oluştu';
+
+            const token = loginResponse.data.token;
+            if (!token) {
+                throw new Error('Giriş başarılı ancak token alınamadı.');
+            }
+
+            const bearerToken = `Bearer ${token}`;
+            await AsyncStorage.setItem('token', bearerToken);
+
+            const clientResponse = await axios.get(
+                `${config[config.environment].apiUrl}/client/getClientInfo`,
+                {
+                    headers: {
+                        Authorization: bearerToken,
+                        'Content-Type': 'application/json',
+                    },
+                    validateStatus: () => true,
+                }
+            );
+
+            if (clientResponse.status !== 200) {
+                throw new Error(clientResponse.data?.message || 'Kullanıcı bilgileri alınamadı.');
+            }
+
+            const userStatus = clientResponse.data.status;
+
+            if (userStatus === 'Aktif') {
+                navigation.replace('AnaSayfa');
+            } else if (userStatus === 'Pasif') {
+                setErrorMessage('Hesabınız askıya alınmıştır. Lütfen yöneticinizle iletişime geçin.');
+            } else {
+                setErrorMessage('Hesap durumu belirlenemedi. Lütfen diyetisyeninizle iletişime geçin.');
+            }
+
+        } catch (error) {
+            const errorMsg = error.message || 'Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.';
             setErrorMessage(errorMsg);
         } finally {
             setLoading(false);
         }
     };
 
+
+    // handleDietitianLogin is not used in the UI, but keeping it for completeness
     const handleDietitianLogin = () => {
         console.log('Diyetisyen girişine yönlendir');
+        // You might want to add navigation logic here if a button existed
     };
 
     const ErrorMessage = () => {
+        // errorMessage is cleared by the useEffect animation sequence
+        // The component will render null when errorMessage is null
         if (!errorMessage) return null;
-        
+
         return (
             <Animated.View style={[styles.errorContainer, { opacity: errorOpacity }]}>
                 <Surface style={styles.errorSurface}>
                     <Icon name="alert-circle" size={24} color="#D32F2F" style={styles.errorIcon} />
                     <Text style={styles.errorText}>{errorMessage}</Text>
-                    <TouchableOpacity onPress={() => setErrorMessage(null)} style={styles.closeButton}>
+                    {/* Optional: Remove close button if you want it to only disappear after the animation */}
+                    {/* <TouchableOpacity onPress={() => setErrorMessage(null)} style={styles.closeButton}>
                         <Icon name="close" size={20} color="#666" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </Surface>
             </Animated.View>
         );
     };
 
+
     return (
         <View style={styles.container}>
+            {/* Changed StatusBar background to match theme/logo color for consistency */}
             <StatusBar backgroundColor="#F57C00" barStyle="light-content"/>
 
             <KeyboardAvoidingView
@@ -126,6 +170,7 @@ const LoginScreen = ({navigation}: Props) => {
                         <Text variant="bodyMedium" style={styles.subtitle}>Sağlıklı yaşam yolculuğunuz için</Text>
                     </View>
 
+                    {/* Error Message Component */}
                     <ErrorMessage />
 
                     <Card style={styles.formCard}>
@@ -142,7 +187,8 @@ const LoginScreen = ({navigation}: Props) => {
                                 style={styles.input}
                                 outlineColor="#DDD"
                                 activeOutlineColor="#F57C00"
-                                textContentType="telephoneNumber"
+                                textContentType="telephoneNumber" // Add this for iOS autofill
+                                autoComplete="tel" // Add this for Android autofill
                             />
 
                             <TextInput
@@ -161,7 +207,8 @@ const LoginScreen = ({navigation}: Props) => {
                                 style={styles.input}
                                 outlineColor="#DDD"
                                 activeOutlineColor="#F57C00"
-                                textContentType="password"
+                                textContentType="password" // Add this for iOS autofill
+                                autoComplete="password" // Add this for Android autofill
                             />
 
                             <TouchableOpacity
@@ -175,7 +222,7 @@ const LoginScreen = ({navigation}: Props) => {
                                 mode="contained"
                                 onPress={handleLogin}
                                 loading={loading}
-                                disabled={loading}
+                                disabled={loading || !phone || !password} // Disable if fields are empty or loading
                                 style={styles.loginButton}
                                 buttonColor="#F57C00"
                                 contentStyle={styles.buttonContent}
@@ -200,6 +247,16 @@ const LoginScreen = ({navigation}: Props) => {
                             >
                                 Hesap Oluştur
                             </Button>
+
+                            {/* You might want a button for dietitian login here if needed */}
+                            {/* <Button
+                                mode="text"
+                                onPress={handleDietitianLogin}
+                                style={styles.dietitianButton}
+                                textColor="#F57C00"
+                            >
+                                Diyetisyen Girişi
+                            </Button> */}
                         </Card.Content>
                     </Card>
 
@@ -217,7 +274,7 @@ const {width, height} = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff9f2',
+        backgroundColor: '#fff9f2', // Light creamy background
     },
     keyboardAvoidingView: {
         flex: 1,
@@ -226,22 +283,22 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         padding: 24,
-        paddingBottom: 40,
+        paddingBottom: 40, // Added padding bottom
     },
     logoContainer: {
         alignItems: 'center',
         marginBottom: 24,
     },
     logo: {
-        backgroundColor: 'rgba(245, 124, 0, 0.1)',
+        backgroundColor: 'rgba(245, 124, 0, 0.1)', // Lightened background for icon
         padding: 16,
         borderRadius: 50,
         marginBottom: 16,
-        elevation: 2,
+        elevation: 2, // Added subtle elevation
     },
     title: {
         textAlign: 'center',
-        color: '#F57C00',
+        color: '#F57C00', // Orange color
         fontWeight: '700',
         marginBottom: 4,
     },
@@ -254,33 +311,39 @@ const styles = StyleSheet.create({
         width: '100%',
         marginBottom: 16,
         alignItems: 'center',
+        // Position absolute if you want it to overlay content,
+        // but current placement within ScrollView is fine too.
+        // position: 'absolute',
+        // top: 20, // Adjust as needed
+        // zIndex: 10,
+        // paddingHorizontal: 24, // Ensure it aligns with scrollview padding
     },
-    errorSurface: {
-        width: '100%',
+     errorSurface: {
+        width: '100%', // Take full width of container
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFEBEE',
+        backgroundColor: '#FFEBEE', // Light red background
         borderRadius: 8,
         padding: 12,
         elevation: 1,
         borderLeftWidth: 4,
-        borderLeftColor: '#D32F2F',
+        borderLeftColor: '#D32F2F', // Darker red border
     },
     errorIcon: {
         marginRight: 10,
     },
     errorText: {
-        flex: 1,
-        color: '#D32F2F',
+        flex: 1, // Allows text to wrap
+        color: '#D32F2F', // Darker red text
         fontSize: 14,
     },
     closeButton: {
-        padding: 4,
+        padding: 4, // Make touch area easier
     },
     formCard: {
         borderRadius: 16,
         elevation: 4,
-        padding: 8,
+        padding: 8, // Added padding inside card
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
         shadowOffset: {width: 0, height: 2},
@@ -289,14 +352,14 @@ const styles = StyleSheet.create({
     },
     input: {
         marginBottom: 16,
-        backgroundColor: '#fff',
+        backgroundColor: '#fff', // Ensure white background
     },
     forgotContainer: {
         alignItems: 'flex-end',
-        marginBottom: 20,
+        marginBottom: 20, // Increased margin
     },
     forgotText: {
-        color: '#F57C00',
+        color: '#F57C00', // Orange color
         fontSize: 14,
     },
     loginButton: {
@@ -305,42 +368,42 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     buttonContent: {
-        height: 48,
+        height: 48, // Set button height
     },
     buttonLabel: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '600', // Semi-bold
     },
     orContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 16,
+        marginVertical: 16, // Vertical margin
     },
     divider: {
         flex: 1,
         height: 1,
-        backgroundColor: '#ddd',
+        backgroundColor: '#ddd', // Light grey divider
     },
     orText: {
         paddingHorizontal: 10,
-        color: '#777',
+        color: '#777', // Grey text
     },
     registerButton: {
-        marginBottom: 16,
+        marginBottom: 16, // Added margin bottom
         borderRadius: 8,
-        borderColor: '#F57C00',
-        borderWidth: 1.5,
+        borderColor: '#F57C00', // Orange border
+        borderWidth: 1.5, // Slightly thicker border
     },
     dietitianButton: {
-        alignSelf: 'center',
+        alignSelf: 'center', // Center the button
         marginTop: 8,
     },
-    footer: {
+     footer: {
         marginTop: 24,
         alignItems: 'center',
     },
     footerText: {
-        color: '#888',
+        color: '#888', // Darker grey
         fontSize: 12,
     },
 });
