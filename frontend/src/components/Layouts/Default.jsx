@@ -216,6 +216,7 @@ export default function Default(props) {
 
     // /odeme sayfasında kısıtlama uygulanmaz
     const isPaymentPage = location.pathname === '/odeme';
+    const isSettingsPage = location.pathname === '/ayarlar';
 
     const getDietitianInfo = async () => {
         try {
@@ -239,13 +240,13 @@ export default function Default(props) {
     }, []);
 
     useEffect(() => {
-        if (dietitianInfo.subscription_type === "free" && !isPaymentPage) {
+        if (dietitianInfo.subscription_type === "free" && isPaymentPage && isSettingsPage ) {
             setIsContentBlocked(true);
             setShowSubscriptionModal(true);
         } else {
             setIsContentBlocked(false);
         }
-    }, [dietitianInfo, isPaymentPage]);
+    }, [dietitianInfo, isPaymentPage, isSettingsPage]);
 
     const handleUpgrade = () => {
         setShowSubscriptionModal(false);
@@ -274,8 +275,7 @@ export default function Default(props) {
                 }}
             >
                 {/* İçerik Blokaj Overlay - sadece ödeme sayfası değilse göster */}
-                {/* İçerik Blokaj Overlay - sadece ödeme sayfası değilse göster */}
-                {isContentBlocked && !isPaymentPage ? (
+                {isContentBlocked && (!isPaymentPage || !isSettingsPage) ? (
                     <Box
                         sx={{
                             position: 'absolute',
