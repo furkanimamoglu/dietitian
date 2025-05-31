@@ -107,13 +107,10 @@ const CustomModal = ({isOpen, onClose, title, children}) => {
     );
 };
 
-// Custom Confirmation Dialog Component
 const ConfirmationDialog = ({isOpen, onClose, onConfirm, title, message, itemName, isLoading}) => {
     if (!isOpen) return null;
 
-    // Handle clicking outside the modal
     const handleOverlayClick = (e) => {
-        // Only close if not loading and the click is directly on the overlay
         if (!isLoading && e.target === e.currentTarget) {
             onClose();
         }
@@ -185,32 +182,33 @@ export default function Finans() {
         serviceItems: []
     });
 
-    // Add search state for packages
     const [packageSearchTerm, setPackageSearchTerm] = useState('');
     const [packageFormErrors, setPackageFormErrors] = useState({});
     
-    // CSV Import/Export states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
     const [csvData, setCsvData] = useState([]);
     const [csvErrors, setCsvErrors] = useState({});
     const [importPreviewOpen, setImportPreviewOpen] = useState(false);
+
+    const minDate = new Date();
+    minDate.setFullYear(minDate.getFullYear() - 25);
+
+    const maxDate = new Date();
+    maxDate.setFullYear(maxDate.getFullYear() + 10);
     
-    // Snackbar state
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
         severity: "success"
     });
 
-    // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [invoicesPerPage] = useState(6);
 
-    // Add these two new states for confirmation dialogs
     const [deleteConfirmation, setDeleteConfirmation] = useState({
         isOpen: false,
         itemId: null,
-        itemType: null, // 'invoice' or 'package'
+        itemType: null,
         itemName: ''
     });
 
@@ -2638,6 +2636,8 @@ export default function Finans() {
                                         onChange={(newValue) => {
                                             handleInvoiceChange('issueDate', newValue ? newValue.toISOString().split('T')[0] : '');
                                         }}
+                                        minDate={minDate}
+                                        maxDate={maxDate}
                                         slotProps={{
                                             textField: {
                                                 fullWidth: true,
@@ -2655,6 +2655,8 @@ export default function Finans() {
                                         onChange={(newValue) => {
                                             handleInvoiceChange('dueDate', newValue ? newValue.toISOString().split('T')[0] : '');
                                         }}
+                                        minDate={minDate}
+                                        maxDate={maxDate}
                                         slotProps={{
                                             textField: {
                                                 fullWidth: true,
