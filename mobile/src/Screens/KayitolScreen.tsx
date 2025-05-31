@@ -32,6 +32,7 @@ const KayitolScreen: React.FC = () => {
     const [name, setName] = useState('');
     const [dietitianCode, setDietitianCode] = useState(dietitianId);
     const [gender, setGender] = useState('');
+    const [mail, setMail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,6 +40,7 @@ const KayitolScreen: React.FC = () => {
     const [secureConfirmPassword, setSecureConfirmPassword] = useState(true);
 
     const [nameError, setNameError] = useState('');
+    const [mailError, setMailError] = useState('');
     const [phoneError, setPhoneError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
@@ -58,6 +60,11 @@ const KayitolScreen: React.FC = () => {
     const handleChange = (text: string) => {
         const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
         setPhone(digits);
+    };
+
+    const validateEmail = (email: string) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
     };
 
     const handleDietitianFetch = async (id: string) => {
@@ -83,9 +90,9 @@ const KayitolScreen: React.FC = () => {
     const validateForm = () => {
         let isValid = true;
 
-        // Tüm hata mesajlarını sıfırla
         setNameError('');
         setPhoneError('');
+        setMailError('');
         setPasswordError('');
         setConfirmPasswordError('');
         setDietitianCodeError('');
@@ -103,6 +110,11 @@ const KayitolScreen: React.FC = () => {
 
         if (!gender) {
             setGenderError('Lütfen cinsiyet seçin');
+            isValid = false;
+        }
+
+        if (!mail) {
+            setMailError('Lütfen mail adresinizi girin');
             isValid = false;
         }
 
@@ -138,6 +150,7 @@ const KayitolScreen: React.FC = () => {
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         phoneNumber: parseInt(phone),
+                        email: mail,
                         password: password,
                         name: name,
                         gender: gender,
@@ -198,6 +211,26 @@ const KayitolScreen: React.FC = () => {
                                 left={<TextInput.Icon icon="account" color="#AAA"/>}
                             />
                             {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+
+                            <TextInput
+                              label="Email"
+                              mode="outlined"
+                              value={mail}
+                              onChangeText={(text) => {
+                                setMail(text);
+                                if (!validateEmail(text)) {
+                                  setMailError('Geçerli bir e-posta giriniz.');
+                                } else {
+                                  setMailError('');
+                                }
+                              }}
+                              style={styles.input}
+                              outlineColor={mailError ? "#FF0000" : "#DDD"}
+                              activeOutlineColor={mailError ? "#FF0000" : "#F57C00"}
+                              left={<TextInput.Icon icon="email" color="#AAA" />}
+                            />
+                            {mailError ? <Text style={styles.errorText}>{mailError}</Text> : null}
+
 
                             <TextInput
                                 label="Telefon"
