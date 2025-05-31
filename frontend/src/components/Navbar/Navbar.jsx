@@ -31,7 +31,7 @@ export default function Navbar() {
     }, [scrolled]);
 
     const menu_items = [
-        {name: "ANA SAYFA", route: "/dashboard", icon: <HomeIcon/>},
+        {name: "ANA SAYFA", route: "/anasayfa", icon: <HomeIcon/>},
         {name: "DANIŞANLARIM", route: "/danisanlarim", icon: <PeopleIcon/>},
         {name: "RANDEVULARIM", route: "/randevularim", icon: <EventNoteIcon/>},
         {name: "BESLENME", route: "/beslenme", icon: <LocalDiningIcon/>},

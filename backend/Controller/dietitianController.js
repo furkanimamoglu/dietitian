@@ -37,17 +37,17 @@ class DietitianController {
 
     static async register(req, res) {
         try {
-            const {phoneNumber, password, email} = req.body;
+            const {name, phoneNumber, password, email} = req.body;
             const ipAddress = req.ip;
 
-            if (!phoneNumber || !password || !email || !ipAddress) {
+            if (!name || !phoneNumber || !password || !email || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.register(phoneNumber, email, password, ipAddress);
+            const result = await DietitianService.register(name, phoneNumber, email, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,

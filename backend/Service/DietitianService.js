@@ -59,9 +59,9 @@ class DietitianService {
         }
     }
 
-    static async register(phoneNumber, email, password, ipAddress) {
+    static async register(name, phoneNumber, email, password, ipAddress) {
         try {
-            if (!phoneNumber || !password || !email) {
+            if (!name || !phoneNumber || !password || !email) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
@@ -80,6 +80,7 @@ class DietitianService {
             }
 
             const dietitian = await Dietitian.create({
+                name,
                 phoneNumber,
                 email,
                 password,
@@ -116,17 +117,19 @@ class DietitianService {
             }
 
             const dietitian = await Dietitian.findOne({
-                where: {
-                    email: mail,
-                    verificationCode: verificationCode,
-                    verificationCodeExpires: {
-                        [Op.gt]: new Date()
-                    }
-                }
+                where: { email: mail }
             });
 
             if (!dietitian) {
-                throw new Exception('Geçersiz e-posta veya doğrulama kodu.', 400, true);
+                throw new Exception('Geçersiz e-posta.', 400, true);
+            }
+
+            if (Number(dietitian.verificationCode) !== verificationCode) {
+                throw new Exception('Geçersiz doğrulama kodu.', 400, true);
+            }
+
+            if (!dietitian.verificationCodeExpires || dietitian.verificationCodeExpires < new Date()) {
+                throw new Exception('Doğrulama kodunun süresi dolmuş.', 400, true);
             }
 
             await dietitian.update({
@@ -134,9 +137,9 @@ class DietitianService {
                 verificationCodeExpires: null
             });
 
-            return {status: "success", message: 'E-posta başarıyla doğrulandı.'};
+            return { status: "success", message: 'E-posta başarıyla doğrulandı.' };
         } catch (error) {
-            throw new Exception(error.message, 400);
+            throw new Exception(error.message || 'Bir hata oluştu.', 400);
         }
     }
 

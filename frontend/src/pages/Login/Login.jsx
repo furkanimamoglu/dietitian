@@ -67,7 +67,7 @@ function Login() {
                 const token = data.token;
                 localStorage.setItem('token', 'Bearer ' + token);
                 setMessage('Giriş başarılı! Yönlendiriliyor...');
-                setTimeout(() => navigate('/dashboard'), 2000);
+                setTimeout(() => navigate('/anasayfa'), 2000);
             })
             .catch((error) => {
                 console.error('Exception:', error);
@@ -215,13 +215,13 @@ function Login() {
 
                         <Box sx={{display: "flex", justifyContent: "space-between", width: "100%", mt: 1}}>
                             <Typography variant="body2">
-                                <Link href="/forgotpassword" sx={{textDecoration: "none", color: "primary.main"}}>
+                                <Link href="/sifremiunuttum" sx={{textDecoration: "none", color: "primary.main"}}>
                                     Şifremi Unuttum
                                 </Link>
                             </Typography>
 
                             <Typography variant="body2">
-                                <Link href="/register" sx={{textDecoration: "none", color: "primary.main"}}>
+                                <Link href="/kayitol" sx={{textDecoration: "none", color: "primary.main"}}>
                                     Hesap Oluştur
                                 </Link>
                             </Typography>

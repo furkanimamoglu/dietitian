@@ -133,7 +133,7 @@ export default function Header() {
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/login';
+            window.location.href = '/girisyap';
         }
     }, []);
 
@@ -156,13 +156,13 @@ export default function Header() {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
-            navigate('/login');
+            navigate('/girisyap');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
         } else if (value === 'odeme') {
             navigate('/odeme');
         } else {
-            navigate('/dashboard');
+            navigate('/anasayfa');
         }
         setAnchorElUser(null);
         setMobileMenuOpen(false);
@@ -242,7 +242,7 @@ export default function Header() {
     }, []);
 
     const navigationItems = [
-        {name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
+        {name: "Ana Sayfa", route: "/anasayfa", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
         {name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},
         {name: "Randevularım", route: "/randevularim", icon: <EventIcon sx={{color: "#e8dd00"}}/>},
         {name: "Beslenme", route: "/beslenme", icon: <LocalDiningIcon sx={{color: "#4caf50"}}/>},
@@ -276,7 +276,7 @@ export default function Header() {
 
                     {/* Logo / Marka Adı */}
                     <LogoContainer
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/anasayfa')}
                         isMobile={isMobile}
                         sx={{
                             display: 'flex',

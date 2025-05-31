@@ -22,7 +22,7 @@ export default function Routing() {
         <Routes>
             <Route path="/*" element={<LandingPage/>}/>
             {/* Diyetisyen Routes */}
-            <Route path="/dashboard/*" element={<Dashboard/>}/>
+            <Route path="/anasayfa/*" element={<Dashboard/>}/>
             <Route path="/ayarlar/*" element={<Ayarlar/>}/>
             <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
             <Route path="/danisan/:id" element={<Danisan/>}/>

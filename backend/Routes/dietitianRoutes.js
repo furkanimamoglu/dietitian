@@ -10,6 +10,7 @@ router.post('/register', dietitianController.register);
 router.put('/changePassword', dietitianController.changePassword);
 router.put('/updatePhoneNumber', dietitianController.updatePhoneNumber);
 router.put('/changeMail', dietitianController.changeMail);
+router.post('/verifyEmail', dietitianController.verifyEmail);
 
 router.get('/getDietitianInfo', dietitianController.getDietitianInfo);
 

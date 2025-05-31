@@ -8,6 +8,10 @@ import {
     Button,
     CircularProgress,
     Container,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
     Divider,
     IconButton,
     InputAdornment,
@@ -24,27 +28,42 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import PersonIcon from "@mui/icons-material/Person";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import SmsIcon from "@mui/icons-material/Sms";
 import DefaultWithFooter from "../../Components/Layouts/DefaultWithFooter.jsx";
 
 function Register() {
-    const [username, setUsername] = useState('');
+    const [isim, setIsim] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    // SMS Verification states
+    const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [verificationLoading, setVerificationLoading] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState('');
+
     const navigate = useNavigate();
 
     const handlePhoneNumberChange = (e) => {
         const value = e.target.value;
-        // Remove non-digit characters
         const digitsOnly = value.replace(/\D/g, '');
         setPhone(digitsOnly);
     };
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleVerificationCodeChange = (e) => {
+        const value = e.target.value;
+        const digitsOnly = value.replace(/\D/g, '');
+        if (digitsOnly.length <= 6) {
+            setVerificationCode(digitsOnly);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -58,12 +77,13 @@ function Register() {
             return;
         }
 
-        fetch(config[config.environment].apiUrl + "dietitian/register", {
+        fetch(config[config.environment].apiUrl + "/dietitian/register", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                name: isim,
                 email: email,
                 password: password,
                 phoneNumber: Number(phone)
@@ -77,14 +97,65 @@ function Register() {
                 }
             })
             .then(data => {
-                setMessage('Kayıt işlemi başarılı. Giriş sayfasına yönlendiriliyorsunuz...');
-                setTimeout(() => navigate('/login'), 2000);
+                const token = data.token;
+                localStorage.setItem('token', 'Bearer ' + token);
+                setMessage('Kayıt işlemi başarılı. Mail doğrulama kodu gönderildi.');
+                setLoading(false);
+                setShowVerificationDialog(true);
             })
             .catch(error => {
                 console.error('Exception:', error);
                 setMessage('Hata: Bir sorun oluştu, teknik ekip ile görüşün.');
                 setLoading(false);
             });
+    };
+
+    const handleVerifyCode = () => {
+        if (verificationCode.length !== 6) {
+            setVerificationMessage('Doğrulama kodu 6 haneli olmalıdır.');
+            return;
+        }
+
+        setVerificationLoading(true);
+        setVerificationMessage('');
+
+        fetch(config[config.environment].apiUrl + "/dietitian/verifyEmail", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                verificationCode: Number(verificationCode)
+            }),
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Doğrulama işlemi başarısız oldu.');
+                    });
+                }
+            })
+            .then(data => {
+                setVerificationMessage('E-posta başarıyla doğrulandı. Ana sayfaya yönlendiriliyorsunuz...');
+                setTimeout(() => {
+                    setShowVerificationDialog(false);
+                    navigate('/anasayfa');
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Verification Error:', error);
+                setVerificationMessage(error.message);
+                setVerificationLoading(false);
+            });
+    };
+
+    const handleCloseVerificationDialog = () => {
+        setShowVerificationDialog(false);
+        setVerificationCode('');
+        setVerificationMessage('');
     };
 
     return (
@@ -135,13 +206,13 @@ function Register() {
 
                         <form onSubmit={handleSubmit} style={{width: '100%'}}>
                             <TextField
-                                label="Kullanıcı Adı"
+                                label="İsim Soyisim"
                                 variant="outlined"
                                 fullWidth
                                 required
                                 sx={{mb: 3}}
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={isim}
+                                onChange={(e) => setIsim(e.target.value)}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -246,13 +317,112 @@ function Register() {
 
                         <Typography variant="body2" sx={{mt: 1}}>
                             Zaten hesabınız var mı?{' '}
-                            <Link href="/login"
+                            <Link href="/girisyap"
                                   sx={{textDecoration: "none", color: "primary.main", fontWeight: "medium"}}>
                                 Giriş Yap
                             </Link>
                         </Typography>
                     </Paper>
                 </Container>
+
+                {/* SMS Verification Dialog */}
+                <Dialog
+                    open={showVerificationDialog}
+                    onClose={handleCloseVerificationDialog}
+                    maxWidth="xs"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            borderRadius: 3,
+                            padding: 2
+                        }
+                    }}
+                >
+                    <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+                        <Avatar sx={{
+                            width: 48,
+                            height: 48,
+                            mx: 'auto',
+                            mb: 2,
+                            background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
+                        }}>
+                            <SmsIcon />
+                        </Avatar>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 500 }}>
+                            SMS Doğrulama
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                            Telefon numaranıza gönderilen 6 haneli doğrulama kodunu giriniz
+                        </Typography>
+                    </DialogTitle>
+
+                    <DialogContent sx={{ pt: 2 }}>
+                        <TextField
+                            autoFocus
+                            label="Doğrulama Kodu"
+                            type="text"
+                            fullWidth
+                            variant="outlined"
+                            value={verificationCode}
+                            onChange={handleVerificationCodeChange}
+                            placeholder="123456"
+                            inputProps={{
+                                maxLength: 6,
+                                style: {
+                                    textAlign: 'center',
+                                    fontSize: '1.5rem',
+                                    letterSpacing: '0.5rem'
+                                }
+                            }}
+                            sx={{
+                                mt: 2,
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderWidth: 2,
+                                    },
+                                }
+                            }}
+                        />
+
+                        {verificationMessage && (
+                            <Typography
+                                variant="body2"
+                                color={verificationMessage.includes('başarıyla') ? 'success.main' : 'error.main'}
+                                sx={{ mt: 2, textAlign: 'center', fontWeight: 500 }}
+                            >
+                                {verificationMessage}
+                            </Typography>
+                        )}
+                    </DialogContent>
+
+                    <DialogActions sx={{ px: 3, pb: 3, pt: 1, flexDirection: 'column', gap: 1 }}>
+                        <Button
+                            onClick={handleVerifyCode}
+                            variant="contained"
+                            fullWidth
+                            size="large"
+                            disabled={verificationLoading || verificationCode.length !== 6}
+                            sx={{
+                                py: 1.5,
+                                background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
+                                borderRadius: "30px",
+                                textTransform: "none",
+                                fontSize: "1rem",
+                                fontWeight: "bold"
+                            }}
+                        >
+                            {verificationLoading ? <CircularProgress size={24} color="inherit"/> : "Doğrula"}
+                        </Button>
+
+                        <Button
+                            onClick={handleCloseVerificationDialog}
+                            color="primary"
+                            sx={{ textTransform: "none" }}
+                        >
+                            İptal
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </DefaultWithFooter>
     );

@@ -52,28 +52,11 @@ const Dietitian = sequelize.define('Dietitian', {
     },
     verificationCode: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isNumeric: {
-                msg: 'Doğrulama kodu yalnızca rakamlardan oluşmalıdır.'
-            },
-            len: {
-                args: [6, 6],
-                msg: 'Doğrulama kodu 6 haneli olmalıdır.'
-            }
-        }
+        allowNull: true
     },
     verificationCodeExpires: {
         type: DataTypes.DATE,
-        allowNull: false,
-        validate: {
-            notNull: {
-                msg: 'Doğrulama kodu süresi alanı boş bırakılamaz.'
-            },
-            isDate: {
-                msg: 'Doğrulama kodu süresi geçerli bir tarih olmalıdır.'
-            }
-        }
+        allowNull: true
     },
     password: {
         type: DataTypes.STRING,
