@@ -235,6 +235,28 @@ class DietitianService {
         }
     }
 
+    static async changeClientStatus(user_id, client_id, status) {
+        try {
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: user_id
+                }
+            });
+
+            if (!client) {
+                throw new Exception('Client bulunamadı veya erişim yetkiniz yok.', 400, true);
+            }
+
+            client.status = status;
+            await client.save();
+
+            return client;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
     static async registerClient(user_id, name, email, password, phoneNumber, gender) {
         try {
             if (!user_id) {

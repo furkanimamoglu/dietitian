@@ -240,11 +240,12 @@ export default function Default(props) {
     }, []);
 
     useEffect(() => {
-        if (dietitianInfo.subscription_type === "free" && isPaymentPage && isSettingsPage ) {
+        if (dietitianInfo.subscription_type === "free" && !isPaymentPage && !isSettingsPage) {
             setIsContentBlocked(true);
             setShowSubscriptionModal(true);
         } else {
             setIsContentBlocked(false);
+            setShowSubscriptionModal(false);
         }
     }, [dietitianInfo, isPaymentPage, isSettingsPage]);
 
@@ -274,7 +275,7 @@ export default function Default(props) {
                 }}
             >
                 {/* İçerik Blokaj Overlay - sadece ödeme sayfası değilse göster */}
-                {isContentBlocked && (!isPaymentPage || !isSettingsPage) ? (
+                {isContentBlocked && !isPaymentPage && !isSettingsPage ? (
                     <Box
                         sx={{
                             position: 'absolute',

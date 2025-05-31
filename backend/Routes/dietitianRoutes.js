@@ -11,6 +11,7 @@ router.put('/changePassword', dietitianController.changePassword);
 router.put('/updatePhoneNumber', dietitianController.updatePhoneNumber);
 router.put('/changeMail', dietitianController.changeMail);
 router.post('/verifyEmail', dietitianController.verifyEmail);
+router.post('/changeClientStatus', dietitianController.changeClientStatus);
 
 router.get('/getDietitianInfo', dietitianController.getDietitianInfo);
 
