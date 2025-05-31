@@ -26,7 +26,7 @@ type KayitolRouteProp = RouteProp<RootStackParamList, 'Kayitol'>;
 const KayitolScreen: React.FC = () => {
     const theme = useTheme();
     const route = useRoute<KayitolRouteProp>();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const dietitianId = route.params?.dietitian_id || '';
 
     const [name, setName] = useState('');
@@ -37,6 +37,13 @@ const KayitolScreen: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [securePassword, setSecurePassword] = useState(true);
     const [secureConfirmPassword, setSecureConfirmPassword] = useState(true);
+
+    const [nameError, setNameError] = useState('');
+    const [phoneError, setPhoneError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+    const [dietitianCodeError, setDietitianCodeError] = useState('');
+    const [genderError, setGenderError] = useState('');
 
     const [dietitianName, setDietitianName] = useState('');
     const [loading, setLoading] = useState(false);
@@ -74,32 +81,47 @@ const KayitolScreen: React.FC = () => {
     };
 
     const validateForm = () => {
+        let isValid = true;
+
+        // Tüm hata mesajlarını sıfırla
+        setNameError('');
+        setPhoneError('');
+        setPasswordError('');
+        setConfirmPasswordError('');
+        setDietitianCodeError('');
+        setGenderError('');
+
         if (!name.trim()) {
-            Alert.alert('Uyarı', 'Lütfen isminizi girin');
-            return false;
+            setNameError('Lütfen isminizi girin');
+            isValid = false;
         }
 
         if (phone.length < 10) {
-            Alert.alert('Uyarı', 'Lütfen geçerli bir telefon numarası girin');
-            return false;
+            setPhoneError('Lütfen geçerli bir telefon numarası girin');
+            isValid = false;
+        }
+
+        if (!gender) {
+            setGenderError('Lütfen cinsiyet seçin');
+            isValid = false;
         }
 
         if (password.length < 6) {
-            Alert.alert('Uyarı', 'Şifre en az 6 karakter olmalıdır');
-            return false;
+            setPasswordError('Şifre en az 6 karakter olmalıdır');
+            isValid = false;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Uyarı', 'Şifreler eşleşmiyor');
-            return false;
+            setConfirmPasswordError('Şifreler eşleşmiyor');
+            isValid = false;
         }
 
         if (!dietitianCode) {
-            Alert.alert('Uyarı', 'Lütfen diyetisyen kodunu girin');
-            return false;
+            setDietitianCodeError('Lütfen diyetisyen kodunu girin');
+            isValid = false;
         }
 
-        return true;
+        return isValid;
     };
 
     const handleRegister = async () => {
@@ -171,10 +193,11 @@ const KayitolScreen: React.FC = () => {
                                 onChangeText={setName}
                                 autoCapitalize="words"
                                 style={styles.input}
-                                outlineColor="#DDD"
-                                activeOutlineColor="#F57C00"
+                                outlineColor={nameError ? "#FF0000" : "#DDD"}
+                                activeOutlineColor={nameError ? "#FF0000" : "#F57C00"}
                                 left={<TextInput.Icon icon="account" color="#AAA"/>}
                             />
+                            {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 
                             <TextInput
                                 label="Telefon"
@@ -186,29 +209,31 @@ const KayitolScreen: React.FC = () => {
                                 placeholder="5xxxxxxxxx"
                                 left={<TextInput.Affix text="+90"/>}
                                 style={styles.input}
-                                outlineColor="#DDD"
-                                activeOutlineColor="#F57C00"
+                                outlineColor={phoneError ? "#FF0000" : "#DDD"}
+                                activeOutlineColor={phoneError ? "#FF0000" : "#F57C00"}
                             />
+                            {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
-                            <Text style={{ marginBottom: 8, fontSize: 16, fontWeight: 'bold' }}>Cinsiyet</Text>
+                            <Text style={{ marginBottom: 8, fontSize: 16, fontWeight: '700' }}>Cinsiyet</Text>
                             <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={gender}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{ flexDirection: 'row' as const, justifyContent: 'space-between', marginBottom: 16 }}>
+                                    <View style={{ flexDirection: 'row' as const, alignItems: 'center' as const }}>
                                         <RadioButton value="Erkek" />
                                         <Text>Erkek</Text>
                                     </View>
 
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <View style={{ flexDirection: 'row' as const, alignItems: 'center' as const }}>
                                         <RadioButton value="Kadın" />
                                         <Text>Kadın</Text>
                                     </View>
 
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <View style={{ flexDirection: 'row' as const, alignItems: 'center' as const }}>
                                         <RadioButton value="Diğer" />
                                         <Text>Diğer</Text>
                                     </View>
                                 </View>
                             </RadioButton.Group>
+                            {genderError ? <Text style={styles.errorText}>{genderError}</Text> : null}
 
                             <TextInput
                                 label="Şifre"
@@ -217,8 +242,8 @@ const KayitolScreen: React.FC = () => {
                                 value={password}
                                 onChangeText={setPassword}
                                 style={styles.input}
-                                outlineColor="#DDD"
-                                activeOutlineColor="#F57C00"
+                                outlineColor={passwordError ? "#FF0000" : "#DDD"}
+                                activeOutlineColor={passwordError ? "#FF0000" : "#F57C00"}
                                 right={
                                     <TextInput.Icon
                                         icon={securePassword ? 'eye' : 'eye-off'}
@@ -227,6 +252,7 @@ const KayitolScreen: React.FC = () => {
                                     />
                                 }
                             />
+                            {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
                             <TextInput
                                 label="Şifre Tekrar"
@@ -235,8 +261,8 @@ const KayitolScreen: React.FC = () => {
                                 value={confirmPassword}
                                 onChangeText={setConfirmPassword}
                                 style={styles.input}
-                                outlineColor="#DDD"
-                                activeOutlineColor="#F57C00"
+                                outlineColor={confirmPasswordError ? "#FF0000" : "#DDD"}
+                                activeOutlineColor={confirmPasswordError ? "#FF0000" : "#F57C00"}
                                 right={
                                     <TextInput.Icon
                                         icon={secureConfirmPassword ? 'eye' : 'eye-off'}
@@ -245,6 +271,7 @@ const KayitolScreen: React.FC = () => {
                                     />
                                 }
                             />
+                            {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
 
                             <View style={styles.dietitianSection}>
                                 <Text style={styles.sectionTitle}>Diyetisyen Bilgileri</Text>
@@ -423,6 +450,13 @@ const styles = StyleSheet.create({
     loginTextBold: {
         color: '#F57C00',
         fontWeight: 'bold',
+    },
+    errorText: {
+        color: '#FF0000',
+        fontSize: 12,
+        marginTop: -10,
+        marginBottom: 10,
+        marginLeft: 5,
     },
 });
 
