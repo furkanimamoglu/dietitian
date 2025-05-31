@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, Modal, ScrollView, StyleSheet, View, TouchableOpacity, Alert, FlatList} from 'react-native';
+import { Dimensions, Modal, ScrollView, StyleSheet, View, TouchableOpacity, Alert, FlatList, RefreshControl } from 'react-native';
 import {Avatar, Button, Card, Surface, Text, ProgressBar, IconButton, Divider, List} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
@@ -11,9 +11,6 @@ import config from '../../config';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AnaSayfa'>;
 
-const {width} = Dimensions.get('window');
-
-// Water container options with their volumes
 const waterContainers = [
     { name: 'Bardak', icon: 'cup', amount: 200, color: '#2196F3' },
     { name: 'Büyük Bardak', icon: 'cup', amount: 300, color: '#03A9F4' },
@@ -33,14 +30,30 @@ const AnaSayfa = ({navigation}: Props) => {
     } | null>(null);
     const [closestAppointment, setClosestAppointment] = useState<Date | null>(null);
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
-
-    // Water tracking state
+    const [refreshing, setRefreshing] = useState<boolean>(false);
     const [waterIntake, setWaterIntake] = useState<Array<{id: string, client_id: string, date: string, amount_ml: number}>>([]);
     const [waterLoading, setWaterLoading] = useState<boolean>(false);
     const [showWaterModal, setShowWaterModal] = useState<boolean>(false);
     const [showWaterListModal, setShowWaterListModal] = useState<boolean>(false);
     const [dailyWaterGoal] = useState<number>(2500); // Default daily goal in ml
     const [deletingWaterId, setDeletingWaterId] = useState<string | null>(null);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            await Promise.all([
+                fetchClientInfo(),
+                fetchMeasurementInfo(),
+                fetchAppointmentInfo(),
+                fetchWaterIntake(),
+                checkKVKKStatus()
+            ]);
+        } catch (error) {
+            console.error('Yenileme hatası:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     const checkKVKKStatus = async () => {
         try {
@@ -296,7 +309,18 @@ const AnaSayfa = ({navigation}: Props) => {
         <View style={styles.container}>
             <Header navigation={navigation}/>
 
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                style={styles.content}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#2e7d32']}
+                        tintColor={'#2e7d32'}
+                    />
+                }
+            >
                 {/* Sağlık Göstergeleri */}
                 <Surface style={styles.statsContainer}>
                     <View style={styles.statItem}>
