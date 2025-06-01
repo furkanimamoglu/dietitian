@@ -76,12 +76,7 @@ const Recipe = sequelize.define('Recipe', {
         video: {
             type: DataTypes.STRING,
             allowNull: true,
-            defaultValue: "http://google.com",
-            validate: {
-                isUrl: {
-                    msg: 'Geçerli bir video URL\'si girilmelidir'
-                }
-            }
+            defaultValue: "https://youtube.com"
         },
         hazirlanis: {
             type: DataTypes.TEXT,
