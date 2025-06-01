@@ -153,7 +153,7 @@ function ForgotPassword() {
                         )}
 
                         <Typography variant="body2" sx={{mt: 1}}>
-                            <Link href="/girisyap"
+                            <Link href="/app/girisyap"
                                   sx={{textDecoration: "none", color: "primary.main", fontWeight: "medium"}}>
                                 Giriş sayfasına dön
                             </Link>

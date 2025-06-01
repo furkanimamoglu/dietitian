@@ -214,9 +214,8 @@ export default function Default(props) {
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [isContentBlocked, setIsContentBlocked] = useState(false);
 
-    // /odeme sayfasında kısıtlama uygulanmaz
-    const isPaymentPage = location.pathname === '/odeme';
-    const isSettingsPage = location.pathname === '/ayarlar';
+    const isPaymentPage = location.pathname === '/app/odeme';
+    const isSettingsPage = location.pathname === '/app/ayarlar';
 
     const getDietitianInfo = async () => {
         try {
@@ -251,7 +250,7 @@ export default function Default(props) {
 
     const handleUpgrade = () => {
         setShowSubscriptionModal(false);
-        navigate('/odeme');
+        navigate('/app/odeme');
     };
 
     const handleCloseModal = () => {

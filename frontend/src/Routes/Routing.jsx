@@ -20,33 +20,33 @@ import Odeme from "../pages/Odeme/Odeme.jsx";
 export default function Routing() {
     return (
         <Routes>
-            <Route path="/*" element={<LandingPage/>}/>
+            <Route path="/app/*" element={<LandingPage/>}/>
             {/* Diyetisyen Routes */}
-            <Route path="/anasayfa/*" element={<Dashboard/>}/>
-            <Route path="/ayarlar/*" element={<Ayarlar/>}/>
-            <Route path="/danisanlarim/*" element={<Danisanlarim/>}/>
-            <Route path="/danisan/:id" element={<Danisan/>}/>
-            <Route path="/finans/*" element={<Finans/>}/>
-            <Route path="/beslenme/*" element={<Beslenme/>}/>
-            <Route path="/randevularim/*" element={<Randevularim/>}/>
-            <Route path="/mesaj/*" element={<Mesaj/>}/>
-            <Route path="/egzersiz/*" element={<Egzersizler/>}/>
-            <Route path="/finans/*" element={<Egzersizler/>}/>
-            <Route path="/tarif/*" element={<Tarifler/>}/>
-            <Route path="/girisyap/*" element={<Login/>}/>
-            <Route path="/kayitol/*" element={<Register/>}/>
-            <Route path="/sifremiunuttum/*" element={<ForgotPassword/>}/>
-            <Route path="/odeme/*" element={<Odeme/>}/>
+            <Route path="/app/anasayfa/*" element={<Dashboard/>}/>
+            <Route path="/app/ayarlar/*" element={<Ayarlar/>}/>
+            <Route path="/app/danisanlarim/*" element={<Danisanlarim/>}/>
+            <Route path="/app/danisan/:id" element={<Danisan/>}/>
+            <Route path="/app/finans/*" element={<Finans/>}/>
+            <Route path="/app/beslenme/*" element={<Beslenme/>}/>
+            <Route path="/app/randevularim/*" element={<Randevularim/>}/>
+            <Route path="/app/mesaj/*" element={<Mesaj/>}/>
+            <Route path="/app/egzersiz/*" element={<Egzersizler/>}/>
+            <Route path="/app/finans/*" element={<Egzersizler/>}/>
+            <Route path="/app/tarif/*" element={<Tarifler/>}/>
+            <Route path="/app/girisyap/*" element={<Login/>}/>
+            <Route path="/app/kayitol/*" element={<Register/>}/>
+            <Route path="/app/sifremiunuttum/*" element={<ForgotPassword/>}/>
+            <Route path="/app/odeme/*" element={<Odeme/>}/>
 
             {/* Error Routes */}
-            <Route path="/*" element={ExceptionPage(404)}/>
-            <Route path="/400" element={ExceptionPage(400)}/>
-            <Route path="/401" element={ExceptionPage(401)}/>
-            <Route path="/403" element={ExceptionPage(403)}/>
-            <Route path="/500" element={ExceptionPage(500)}/>
-            <Route path="/502" element={ExceptionPage(502)}/>
-            <Route path="/503" element={ExceptionPage(503)}/>
-            <Route path="/504" element={ExceptionPage(504)}/>
+            <Route path="/app/*" element={ExceptionPage(404)}/>
+            <Route path="/app/400" element={ExceptionPage(400)}/>
+            <Route path="/app/401" element={ExceptionPage(401)}/>
+            <Route path="/app/403" element={ExceptionPage(403)}/>
+            <Route path="/app/500" element={ExceptionPage(500)}/>
+            <Route path="/app/502" element={ExceptionPage(502)}/>
+            <Route path="/app/503" element={ExceptionPage(503)}/>
+            <Route path="/app/504" element={ExceptionPage(504)}/>
         </Routes>
     );
 }

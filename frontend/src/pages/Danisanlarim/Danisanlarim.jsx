@@ -694,7 +694,7 @@ export default function Danisanlarim() {
                     <Button
                         size="small"
                         variant="outlined"
-                        onClick={() => navigate(`/danisan/${params.row.id}`)}
+                        onClick={() => navigate(`/app/danisan/${params.row.id}`)}
                         title="Detayları Görüntüle"
                     >
                         <Visibility fontSize="small"/>

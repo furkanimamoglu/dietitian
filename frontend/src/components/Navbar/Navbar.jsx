@@ -31,13 +31,13 @@ export default function Navbar() {
     }, [scrolled]);
 
     const menu_items = [
-        {name: "ANA SAYFA", route: "/anasayfa", icon: <HomeIcon/>},
-        {name: "DANIŞANLARIM", route: "/danisanlarim", icon: <PeopleIcon/>},
-        {name: "RANDEVULARIM", route: "/randevularim", icon: <EventNoteIcon/>},
-        {name: "BESLENME", route: "/beslenme", icon: <LocalDiningIcon/>},
-        {name: "TARİFLER", route: "/tarif", icon: <RestaurantMenuIcon/>},
-        {name: "EGZERSİZLER", route: "/egzersiz", icon: <FitnessCenterIcon/>},
-        {name: "FİNANS", route: "/finans", icon: <AccountBalanceWalletIcon/>},
+        {name: "ANA SAYFA", route: "/app/anasayfa", icon: <HomeIcon/>},
+        {name: "DANIŞANLARIM", route: "/app/danisanlarim", icon: <PeopleIcon/>},
+        {name: "RANDEVULARIM", route: "/app/randevularim", icon: <EventNoteIcon/>},
+        {name: "BESLENME", route: "/app/beslenme", icon: <LocalDiningIcon/>},
+        {name: "TARİFLER", route: "/app/tarif", icon: <RestaurantMenuIcon/>},
+        {name: "EGZERSİZLER", route: "/app/egzersiz", icon: <FitnessCenterIcon/>},
+        {name: "FİNANS", route: "/app/finans", icon: <AccountBalanceWalletIcon/>},
     ];
 
     return (
