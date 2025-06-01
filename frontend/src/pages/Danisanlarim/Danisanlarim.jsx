@@ -1787,9 +1787,9 @@ export default function Danisanlarim() {
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <GroupAdd/>
-                            <Typography variant="h6" color="primary.main" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <GroupAdd sx={{ color: '#2E7D32' }} />
+                            <Typography variant="h6" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
                                 Yeni Danışan Ekle
                             </Typography>
                         </Box>
