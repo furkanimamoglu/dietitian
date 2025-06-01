@@ -46,15 +46,15 @@ export default function Navbar() {
             <Box
                 className={`desktop-navbar ${scrolled ? "scrolled" : ""}`}
                 sx={{
-                    backgroundColor: "#ffd5c24a",
+                    backgroundColor: "#ffe9e3",
                     display: {xs: "none", md: "flex"},
                     position: 'sticky',
-                    top: '65px',
+                    top: '3.7rem',
                     mt: "1rem",
-                    boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 4px 6px rgba(0,0,0,0.1)",
+                    boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 4px 6px rgba(0,0,0,0.2)",
                     transition: "background-color 0.3s ease, box-shadow 0.3s ease",
                     zIndex: 100,
-                    borderRadius: 0,
+                    borderRadius: 3,
                     justifyContent: "center",
                     width: "100%"
                 }}
