@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View} from 'react-native';
 import {
     Avatar,
     Button,
@@ -123,12 +123,10 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             if (data.mealPlan) {
                 console.log('Found mealPlan directly in response');
                 mealPlanData = data.mealPlan;
-            }
-            else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
+            } else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
                 console.log('Found mealPlan inside NutritionPlan object');
                 mealPlanData = data.NutritionPlan.mealPlan;
-            }
-            else if (data.Kahvaltı || data['Öğle Yemeği'] || data['Akşam Yemeği'] || data.Aparatif) {
+            } else if (data.Kahvaltı || data['Öğle Yemeği'] || data['Akşam Yemeği'] || data.Aparatif) {
                 console.log('The response itself appears to be the meal plan for a day');
                 updateMealsFromPlan(data);
                 setLoading(false);
@@ -189,15 +187,12 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 mealData.forEach(item => {
                     checkedItems[item.isim] = item.yenildi;
                 });
-            }
-            else if (mealData.main && Array.isArray(mealData.main)) {
+            } else if (mealData.main && Array.isArray(mealData.main)) {
                 mainItems = [...mealData.main];
                 alternatives = mealData.alternatives || {};
-            }
-            else if (Array.isArray(mealData)) {
+            } else if (Array.isArray(mealData)) {
                 mainItems = [...mealData];
-            }
-            else if (typeof mealData === 'string') {
+            } else if (typeof mealData === 'string') {
                 mainItems = mealData.split(', ').map(item => item.trim()).filter(item => item !== '');
             }
 

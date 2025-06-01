@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
     Alert,
-    Dimensions,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -10,7 +9,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import {ActivityIndicator, Button, Card, Text, RadioButton, TextInput, useTheme} from 'react-native-paper';
+import {ActivityIndicator, Button, Card, RadioButton, Text, TextInput, useTheme} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -63,8 +62,8 @@ const KayitolScreen: React.FC = () => {
     };
 
     const validateEmail = (email: string) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     };
 
     const handleDietitianFetch = async (id: string) => {
@@ -213,21 +212,21 @@ const KayitolScreen: React.FC = () => {
                             {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 
                             <TextInput
-                              label="Email"
-                              mode="outlined"
-                              value={mail}
-                              onChangeText={(text) => {
-                                setMail(text);
-                                if (!validateEmail(text)) {
-                                  setMailError('Geçerli bir e-posta giriniz.');
-                                } else {
-                                  setMailError('');
-                                }
-                              }}
-                              style={styles.input}
-                              outlineColor={mailError ? "#FF0000" : "#DDD"}
-                              activeOutlineColor={mailError ? "#FF0000" : "#fc9e21"}
-                              left={<TextInput.Icon icon="email" color="#AAA" />}
+                                label="Email"
+                                mode="outlined"
+                                value={mail}
+                                onChangeText={(text) => {
+                                    setMail(text);
+                                    if (!validateEmail(text)) {
+                                        setMailError('Geçerli bir e-posta giriniz.');
+                                    } else {
+                                        setMailError('');
+                                    }
+                                }}
+                                style={styles.input}
+                                outlineColor={mailError ? "#FF0000" : "#DDD"}
+                                activeOutlineColor={mailError ? "#FF0000" : "#fc9e21"}
+                                left={<TextInput.Icon icon="email" color="#AAA"/>}
                             />
                             {mailError ? <Text style={styles.errorText}>{mailError}</Text> : null}
 
@@ -247,21 +246,25 @@ const KayitolScreen: React.FC = () => {
                             />
                             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
-                            <Text style={{ marginBottom: 8, fontSize: 16, fontWeight: '700' }}>Cinsiyet</Text>
+                            <Text style={{marginBottom: 8, fontSize: 16, fontWeight: '700'}}>Cinsiyet</Text>
                             <RadioButton.Group onValueChange={newValue => setGender(newValue)} value={gender}>
-                                <View style={{ flexDirection: 'row' as const, justifyContent: 'space-between', marginBottom: 16 }}>
-                                    <View style={{ flexDirection: 'row' as const, alignItems: 'center' as const }}>
-                                        <RadioButton value="Erkek" />
+                                <View style={{
+                                    flexDirection: 'row' as const,
+                                    justifyContent: 'space-between',
+                                    marginBottom: 16
+                                }}>
+                                    <View style={{flexDirection: 'row' as const, alignItems: 'center' as const}}>
+                                        <RadioButton value="Erkek"/>
                                         <Text>Erkek</Text>
                                     </View>
 
-                                    <View style={{ flexDirection: 'row' as const, alignItems: 'center' as const }}>
-                                        <RadioButton value="Kadın" />
+                                    <View style={{flexDirection: 'row' as const, alignItems: 'center' as const}}>
+                                        <RadioButton value="Kadın"/>
                                         <Text>Kadın</Text>
                                     </View>
 
-                                    <View style={{ flexDirection: 'row' as const, alignItems: 'center' as const }}>
-                                        <RadioButton value="Diğer" />
+                                    <View style={{flexDirection: 'row' as const, alignItems: 'center' as const}}>
+                                        <RadioButton value="Diğer"/>
                                         <Text>Diğer</Text>
                                     </View>
                                 </View>

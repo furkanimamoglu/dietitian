@@ -351,7 +351,7 @@ const BottomNav = ({navigation}: Props) => {
                         navigation.replace('Egzersiz');
                     }
                 }}
-                style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
+                                  style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
                     <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
                 </TouchableOpacity>

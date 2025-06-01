@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {BackHandler, useColorScheme, SafeAreaView} from 'react-native';
+import {BackHandler, SafeAreaView, useColorScheme} from 'react-native';
 import {DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {PaperProvider} from 'react-native-paper';

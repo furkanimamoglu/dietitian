@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Image, ScrollView, StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import {Button, Card, Text} from 'react-native-paper';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
@@ -66,7 +66,7 @@ const Profil = ({navigation}) => {
 
                 <Card style={styles.card}>
                     <Card.Content>
-                    {/*
+                        {/*
                         <Button onPress={() => console.log('Profili Düzenle')} mode="outlined" style={styles.button}>Profili
                             Düzenle</Button>
                         <Button onPress={() => console.log('Ödemelerim')} mode="outlined" style={styles.button}>
@@ -75,7 +75,7 @@ const Profil = ({navigation}) => {
                             Değiştir</Button>
                         <Button onPress={() => console.log('Ayarlar')} mode="outlined"
                                 style={styles.button}>Ayarlar</Button>
-                    */ }
+                    */}
                         <Button onPress={handleLogout} mode="outlined" textColor="#d32f2f" style={styles.button}
                                 icon="logout">Çıkış Yap</Button>
                     </Card.Content>
@@ -96,17 +96,17 @@ const styles = StyleSheet.create({
         paddingVertical: 20
     },
     avatarPlaceholder: {
-      backgroundColor: '#2e7d32',
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      justifyContent: 'center',
-      alignItems: 'center',
+        backgroundColor: '#2e7d32',
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     avatarInitial: {
-      color: 'white',
-      fontSize: 28,
-      fontWeight: 'bold',
+        color: 'white',
+        fontSize: 28,
+        fontWeight: 'bold',
     },
     name: {
         fontSize: 20,

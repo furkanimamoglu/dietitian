@@ -185,12 +185,12 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
 
                 const [hour, minute] = selectedTime.split(':').map(Number);
 
-                            const year = selectedDate.getUTCFullYear();
-                            const month = selectedDate.getUTCMonth(); // 0 tabanlı
-                            const day = selectedDate.getUTCDate();
+                const year = selectedDate.getUTCFullYear();
+                const month = selectedDate.getUTCMonth(); // 0 tabanlı
+                const day = selectedDate.getUTCDate();
 
-                            const startDateTime = new Date(Date.UTC(year, month, day, hour, minute));
-                            const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
+                const startDateTime = new Date(Date.UTC(year, month, day, hour, minute));
+                const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
                 const response = await fetch(`${config[config.environment].apiUrl}/appointment/addAppointmentAsClient`, {
                     method: 'POST',

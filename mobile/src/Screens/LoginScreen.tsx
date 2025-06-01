@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Animated,
     Dimensions,
     KeyboardAvoidingView,
     Platform,
@@ -7,11 +8,10 @@ import {
     StatusBar,
     StyleSheet,
     TouchableOpacity,
-    View,
-    Animated
+    View
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {Button, Card, Text, TextInput, useTheme, Surface} from 'react-native-paper';
+import {Button, Card, Surface, Text, TextInput, useTheme} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -66,7 +66,7 @@ const LoginScreen = ({navigation}: Props) => {
                     password: password,
                 },
                 {
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     validateStatus: () => true,
                 }
             );
@@ -125,9 +125,9 @@ const LoginScreen = ({navigation}: Props) => {
         if (!errorMessage) return null;
 
         return (
-            <Animated.View style={[styles.errorContainer, { opacity: errorOpacity }]}>
+            <Animated.View style={[styles.errorContainer, {opacity: errorOpacity}]}>
                 <Surface style={styles.errorSurface}>
-                    <Icon name="alert-circle" size={24} color="#D32F2F" style={styles.errorIcon} />
+                    <Icon name="alert-circle" size={24} color="#D32F2F" style={styles.errorIcon}/>
                     <Text style={styles.errorText}>{errorMessage}</Text>
                     {/* Optional: Remove close button if you want it to only disappear after the animation */}
                     {/* <TouchableOpacity onPress={() => setErrorMessage(null)} style={styles.closeButton}>
@@ -158,7 +158,7 @@ const LoginScreen = ({navigation}: Props) => {
                     </View>
 
                     {/* Error Message Component */}
-                    <ErrorMessage />
+                    <ErrorMessage/>
 
                     <Card style={styles.formCard}>
                         <Card.Content>
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
         // zIndex: 10,
         // paddingHorizontal: 24, // Ensure it aligns with scrollview padding
     },
-     errorSurface: {
+    errorSurface: {
         width: '100%', // Take full width of container
         flexDirection: 'row',
         alignItems: 'center',
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center', // Center the button
         marginTop: 8,
     },
-     footer: {
+    footer: {
         marginTop: 24,
         alignItems: 'center',
     },
