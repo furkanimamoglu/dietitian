@@ -214,8 +214,8 @@ export default function Default(props) {
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [isContentBlocked, setIsContentBlocked] = useState(false);
 
-    const isPaymentPage = location.pathname === '/app/odeme';
-    const isSettingsPage = location.pathname === '/app/ayarlar';
+    const isPaymentPage = location.pathname === '/odeme';
+    const isSettingsPage = location.pathname === '/ayarlar';
 
     const getDietitianInfo = async () => {
         try {
@@ -250,7 +250,7 @@ export default function Default(props) {
 
     const handleUpgrade = () => {
         setShowSubscriptionModal(false);
-        navigate('/app/odeme');
+        navigate('/odeme');
     };
 
     const handleCloseModal = () => {

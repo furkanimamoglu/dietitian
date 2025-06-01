@@ -556,15 +556,15 @@ class DietitianService {
             }
 
             const data = [
-                {type: "page", name: "Danışanlarım", url: "/app/danisanlarim"},
-                {type: "page", name: "Randevularım", url: "/app/randevularim"},
-                {type: "page", name: "Ayarlar", url: "/app/ayarlar"},
-                {type: "page", name: "Beslenme", url: "/app/beslenme"},
-                {type: "page", name: "Egzersiz", url: "/app/egzersiz"},
-                {type: "page", name: "Finans", url: "/app/finans"},
-                {type: "page", name: "Tarif", url: "/app/tarif"},
-                {type: "page", name: "Egzersiz", url: "/app/egzersiz"},
-                {type: "page", name: "Mesaj", url: "/app/mesaj"}
+                {type: "page", name: "Danışanlarım", url: "/danisanlarim"},
+                {type: "page", name: "Randevularım", url: "/randevularim"},
+                {type: "page", name: "Ayarlar", url: "/ayarlar"},
+                {type: "page", name: "Beslenme", url: "/beslenme"},
+                {type: "page", name: "Egzersiz", url: "/egzersiz"},
+                {type: "page", name: "Finans", url: "/finans"},
+                {type: "page", name: "Tarif", url: "/tarif"},
+                {type: "page", name: "Egzersiz", url: "/egzersiz"},
+                {type: "page", name: "Mesaj", url: "/mesaj"}
             ];
 
             const dietitian = await Dietitian.findOne({
@@ -585,7 +585,7 @@ class DietitianService {
                 data.push({
                     type: "danisan",
                     name: `${client.name}`,
-                    url: `/app/danisan/${client.id}`,
+                    url: `/danisan/${client.id}`,
                 });
             });
 

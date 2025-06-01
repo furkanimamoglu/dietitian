@@ -133,7 +133,7 @@ export default function Header() {
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/app/girisyap';
+            window.location.href = '/girisyap';
         }
     }, []);
 
@@ -153,16 +153,16 @@ export default function Header() {
     };
 
     const handleMenuItemClick = (value) => {
-        if (value === '/app/cikisyap') {
+        if (value === '/cikisyap') {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
-            navigate('/app/girisyap');
+            navigate('/girisyap');
         } else if (value === 'ayarlar') {
-            navigate('/app/ayarlar');
+            navigate('/ayarlar');
         } else if (value === 'odeme') {
-            navigate('/app/odeme');
+            navigate('/odeme');
         } else {
-            navigate('/app/anasayfa');
+            navigate('/anasayfa');
         }
         setAnchorElUser(null);
         setMobileMenuOpen(false);
@@ -242,14 +242,14 @@ export default function Header() {
     }, []);
 
     const navigationItems = [
-        {name: "Ana Sayfa", route: "/app/anasayfa", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
-        {name: "Danışanlarım", route: "/app/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},
-        {name: "Randevularım", route: "/app/randevularim", icon: <EventIcon sx={{color: "#e8dd00"}}/>},
-        {name: "Beslenme", route: "/app/beslenme", icon: <LocalDiningIcon sx={{color: "#4caf50"}}/>},
-        {name: "Tarifler", route: "/app/tarif", icon: <RestaurantMenuIcon sx={{color: "#6c07d6"}}/>},
-        {name: "Egzersizler", route: "/app/egzersiz", icon: <SportsGymnasticsIcon sx={{color: "#3f51b5"}}/>},
-        {name: "Finans", route: "/app/finans", icon: <AccountBalanceWalletIcon sx={{color: "#2c8d32"}}/>},
-        {name: "Mesajlar", route: "/app/mesaj", icon: <MailIcon sx={{color: mobilePrimaryColor}}/>},
+        {name: "Ana Sayfa", route: "/anasayfa", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
+        {name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},
+        {name: "Randevularım", route: "/randevularim", icon: <EventIcon sx={{color: "#e8dd00"}}/>},
+        {name: "Beslenme", route: "/beslenme", icon: <LocalDiningIcon sx={{color: "#4caf50"}}/>},
+        {name: "Tarifler", route: "/tarif", icon: <RestaurantMenuIcon sx={{color: "#6c07d6"}}/>},
+        {name: "Egzersizler", route: "/egzersiz", icon: <SportsGymnasticsIcon sx={{color: "#3f51b5"}}/>},
+        {name: "Finans", route: "/finans", icon: <AccountBalanceWalletIcon sx={{color: "#2c8d32"}}/>},
+        {name: "Mesajlar", route: "/mesaj", icon: <MailIcon sx={{color: mobilePrimaryColor}}/>},
     ];
 
     return (
@@ -276,7 +276,7 @@ export default function Header() {
 
                     {/* Logo / Marka Adı */}
                     <LogoContainer
-                        onClick={() => navigate('/app/anasayfa')}
+                        onClick={() => navigate('/anasayfa')}
                         isMobile={isMobile}
                         sx={{
                             display: 'flex',
@@ -400,7 +400,7 @@ export default function Header() {
                     {!isMobile && (
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mr: {xs: 2, md: 4}}}>
                             <Tooltip title="Mesajlar" arrow>
-                                <IconButton onClick={() => navigate('/app/mesaj')} color="inherit">
+                                <IconButton onClick={() => navigate('/mesaj')} color="inherit">
                                     <Badge badgeContent={messageCount} color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
