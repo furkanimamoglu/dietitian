@@ -10,13 +10,13 @@
 /* Başlık alanı */
 .fc-toolbar-title {
     font-size: 1.5rem;
-    color: #308a32;
+    color: #fc9e21;
     font-weight: bold;
 }
 
 /* Gezinme düğmeleri */
 .fc-button {
-    background-color: #228326 !important;
+    background-color: #ff7355 !important;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -27,7 +27,7 @@
 }
 
 .fc-button:hover {
-    background-color: #45a049 !important;
+    background-color: #ff471d !important;
 }
 
 .fc-button:disabled {
@@ -37,7 +37,7 @@
 
 /* Gün başlıkları (header) */
 .fc-col-header-cell {
-    background-color: #1B811BFF;
+    background-color: #fc9e21;
     color: white;
     font-size: 1rem;
     font-weight: bold;
@@ -73,7 +73,7 @@
 
 /* Etkinlikler */
 .fc-event {
-    background-color: #4CAF50;
+    background-color: #fc9e21;
     border: none;
     border-radius: 4px;
     color: white;
@@ -85,7 +85,7 @@
 
 .fc-event:hover {
     transform: scale(1.003);
-    background-color: #45a049;
+    background-color: #fc9e21;
 }
 
 .fc-daygrid-day:hover {
@@ -121,26 +121,26 @@
 }
 
 .fc-day-today {
-    background-color: rgb(76, 175, 80);
+    background-color: #FF5722;
 }
 
 .fc-daygrid-event-dot {
-    border: #1b5e20 solid
+    border: #FF5722 solid
 }
 
 /* Hover efekti */
 .fc-scrollgrid-sync-inner:hover {
-    background-color: rgba(131, 241, 139, 0.57); /* Daha açık yeşil ton */
+    background-color: rgba(255, 152, 0, 0.59); /* Daha açık yeşil ton */
     cursor: pointer;
-    color: #1b5e20; /* Daha koyu yeşil yazı rengi */
+    color: #FF5722; /* Daha koyu yeşil yazı rengi */
 }
 
 /* Sol şeritteki saat hücrelerinin çerçevesi */
 .fc-timegrid-slot-label-frame {
-    background-color: #228326 !important; /* Yeşil arka plan */
+    background-color: #FF9800 !important; /* Yeşil arka plan */
     color: #fff; /* Beyaz yazı rengi */
     font-weight: bold; /* Kalın yazı */
-    border: 1px solid #45a049; /* Yeşil çerçeve */
+    border: 1px solid #FF5722; /* Yeşil çerçeve */
     border-radius: 4px; /* Köşeleri yuvarlat */
     text-align: center; /* Ortalanmış yazı */
     padding: 5px; /* İçerik boşluğu */
@@ -148,7 +148,7 @@
 
 /* Sol şeritteki saat hücreleri için hover efekti */
 .fc-timegrid-slot-label-frame:hover {
-    background-color: #45a049; /* Daha açık yeşil ton */
+    background-color: #FF5722; /* Daha açık yeşil ton */
     cursor: pointer;
 }
 
