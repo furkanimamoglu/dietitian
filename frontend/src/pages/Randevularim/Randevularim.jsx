@@ -34,7 +34,9 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 
 import config from "../../config.js";
-import {Close, Delete} from "@mui/icons-material";
+import Close from "@mui/icons-material/Close";
+import Delete from "@mui/icons-material/Delete";
+
 
 export default function Randevularim() {
     const [randevular, setRandevular] = useState([]);
@@ -44,7 +46,6 @@ export default function Randevularim() {
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
-    // Validasyon durumları için state'ler
     const [validationErrors, setValidationErrors] = useState({
         title: false,
         start: false,

@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
+
 import {
     Avatar,
     Box,
@@ -19,14 +20,14 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import {
-    Add as AddIcon,
-    CheckCircle as CheckCircleIcon,
-    Delete as DeleteIcon,
-    Event as EventIcon,
-    Notifications as NotificationsIcon,
-    People as PeopleIcon,
-} from '@mui/icons-material';
+
+import AddIcon from '@mui/icons-material/Add';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EventIcon from '@mui/icons-material/Event';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PeopleIcon from '@mui/icons-material/People';
+
 import axios from 'axios';
 import config from "../../config.js";
 

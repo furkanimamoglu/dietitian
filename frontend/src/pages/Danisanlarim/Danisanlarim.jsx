@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useState, useMemo} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+
 import {
     Alert,
     Box,
@@ -28,30 +29,33 @@ import {
     TableHead,
     TableRow
 } from "@mui/material";
+
 import {
     DataGrid,
     GridToolbarContainer,
     GridToolbarQuickFilter
 } from "@mui/x-data-grid";
+
 import {trTR} from "@mui/x-data-grid/locales";
-import {
-    ArrowForward,
-    Cancel,
-    CheckCircle,
-    CheckCircleOutline,
-    Close as CloseIcon,
-    Delete as DeleteIcon,
-    Edit as EditIcon,
-    Female as FemaleIcon,
-    Group as GroupIcon,
-    GroupAdd,
-    Male as MaleIcon,
-    QrCode as QrCodeIcon,
-    Visibility,
-    VisibilityOff, VpnKey,
-    Upload as UploadIcon,
-    Download as DownloadIcon
-} from "@mui/icons-material";
+
+import ArrowForward from "@mui/icons-material/ArrowForward";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import FemaleIcon from "@mui/icons-material/Female";
+import GroupIcon from "@mui/icons-material/Group";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import MaleIcon from "@mui/icons-material/Male";
+import QrCodeIcon from "@mui/icons-material/QrCode";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import VpnKey from "@mui/icons-material/VpnKey";
+import UploadIcon from "@mui/icons-material/Upload";
+import DownloadIcon from "@mui/icons-material/Download";
+
 import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";

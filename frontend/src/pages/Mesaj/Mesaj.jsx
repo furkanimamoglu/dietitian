@@ -1,5 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Default from "../../Components/Layouts/Default.jsx";
+import "./Mesaj.css";
+
 import {
     Avatar,
     Badge,
@@ -27,6 +29,7 @@ import {
     useTheme,
     Zoom
 } from "@mui/material";
+
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
@@ -45,7 +48,6 @@ import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import axios from "axios";
 import config from "../../config.js";
-import "./Mesaj.css";
 
 export default function Mesaj() {
     const [danisanList, setDanisanList] = useState([]);

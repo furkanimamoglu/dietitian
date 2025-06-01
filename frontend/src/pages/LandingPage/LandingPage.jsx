@@ -1,5 +1,5 @@
 import React from "react";
-import "./LandingPage.css"; // İsterseniz LandingPage'e özel CSS'lerinizi buraya ekleyin
+import "./LandingPage.css";
 
 export default function LandingPage() {
     return (

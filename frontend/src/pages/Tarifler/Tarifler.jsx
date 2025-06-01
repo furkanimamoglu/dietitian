@@ -18,7 +18,6 @@ import ErrorIcon from '@mui/icons-material/Error';
 import {jsPDF} from "jspdf";
 import 'jspdf-autotable';
 
-// Helper function to get YouTube video ID from URL
 const getYouTubeVideoId = (url) => {
     if (!url) return null;
 
@@ -28,34 +27,27 @@ const getYouTubeVideoId = (url) => {
     return (match && match[2].length === 11) ? match[2] : null;
 };
 
-// PDF generation function
 const generatePDF = (recipe) => {
-    // Create a new PDF document
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
     });
 
-    // Add Unicode font support for Turkish characters
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.ttf', 'Helvetica', 'normal');
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.bold.ttf', 'Helvetica', 'bold');
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.italic.ttf', 'Helvetica', 'italic');
 
-    // Define colors for the PDF
-    const greenColor = [76, 175, 80]; // RGB value for primary green
-    const orangeColor = [255, 152, 0]; // RGB value for orange accent
+    const greenColor = [76, 175, 80];
+    const orangeColor = [255, 152, 0];
 
-    // Add header with green background
     doc.setFillColor(greenColor[0], greenColor[1], greenColor[2]);
     doc.rect(0, 0, doc.internal.pageSize.getWidth(), 40, 'F');
 
-    // Add title with white text
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('Helvetica', 'bold');
 
-    // Make sure text doesn't overflow
     let title = recipe.title || "Tarif";
     const titleWidth = doc.getStringUnitWidth(title) * 24 / doc.internal.scaleFactor;
     const availableWidth = doc.internal.pageSize.getWidth() - 40;
@@ -65,24 +57,20 @@ const generatePDF = (recipe) => {
 
     doc.text(title, 20, 25);
 
-    // Add orange decorative element
     doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
     doc.rect(0, 40, doc.internal.pageSize.getWidth(), 5, 'F');
 
-    // Reset text color to black
     doc.setTextColor(0, 0, 0);
 
-    // Add description
     let yPosition = 60;
     if (recipe.description && recipe.description.trim()) {
         doc.setFontSize(12);
         doc.setFont('Helvetica', 'italic');
         const descriptionLines = doc.splitTextToSize(recipe.description, doc.internal.pageSize.getWidth() - 40);
         doc.text(descriptionLines, 20, yPosition);
-        yPosition += descriptionLines.length * 7 + 10; // Add space after description
+        yPosition += descriptionLines.length * 7 + 10;
     }
 
-    // Add nutritional information if available
     if (recipe.nutritional_info) {
         doc.setFontSize(14);
         doc.setFont('Helvetica', 'bold');

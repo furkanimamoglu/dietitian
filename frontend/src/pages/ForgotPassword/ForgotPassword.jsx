@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import './ForgotPassword.css';
+
 import {
     Avatar,
     Box,
@@ -13,6 +14,7 @@ import {
     TextField,
     Typography
 } from "@mui/material";
+
 import LockResetIcon from "@mui/icons-material/LockReset";
 import PhoneIcon from "@mui/icons-material/Phone";
 import DefaultWithFooter from "../../Components/Layouts/DefaultWithFooter.jsx";
@@ -24,7 +26,6 @@ function ForgotPassword() {
 
     const handlePhoneNumberChange = (e) => {
         const value = e.target.value;
-        // Remove non-digit characters
         const digitsOnly = value.replace(/\D/g, '');
         setPhoneNumber(digitsOnly);
     };
@@ -33,14 +34,12 @@ function ForgotPassword() {
         e.preventDefault();
         setLoading(true);
 
-        // Validate phone number format
         if (!/^\d{10}$/.test(phoneNumber)) {
             setMessage('Telefon numarası 10 haneli olmalıdır (5XXXXXXXXX)');
             setLoading(false);
             return;
         }
 
-        // Implement password reset functionality here
         setTimeout(() => {
             setMessage('Şifre sıfırlama bağlantısı telefonunuza gönderildi.');
             setLoading(false);

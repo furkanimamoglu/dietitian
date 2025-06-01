@@ -8,7 +8,6 @@ import {
     Button,
     Card,
     CardContent,
-    Chip,
     Divider,
     FormControl,
     FormControlLabel,
@@ -18,7 +17,6 @@ import {
     InputLabel,
     MenuItem,
     Modal,
-    Paper,
     Select,
     Slider,
     Switch,
@@ -28,26 +26,21 @@ import {
     Typography,
     CircularProgress
 } from "@mui/material";
-import {
-    Brightness4,
-    Close as CloseIcon,
-    Edit as EditIcon,
-    Language,
-    Lock as LockIcon,
-    Notifications,
-    Person,
-    Save,
-    Settings as SettingsIcon,
-    Visibility,
-    VisibilityOff,
-    Email,
-    Phone,
-    AccessTime,
-    ColorLens,
-    NotificationsActive,
-    Description,
-    KeyOutlined
-} from "@mui/icons-material";
+
+import Close from '@mui/icons-material/Close';
+import LockIcon from '@mui/icons-material/Lock';
+import Person from '@mui/icons-material/Person';
+import Save from '@mui/icons-material/Save';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Email from '@mui/icons-material/Email';
+import Phone from '@mui/icons-material/Phone';
+import AccessTime from '@mui/icons-material/AccessTime';
+import ColorLens from '@mui/icons-material/ColorLens';
+import NotificationsActive from '@mui/icons-material/NotificationsActive';
+import Description from '@mui/icons-material/Description';
+import KeyOutlined from '@mui/icons-material/KeyOutlined';
 
 import config from "../../config.js";
 import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
@@ -663,7 +656,7 @@ export default function Ayarlar() {
                             Şifre Değiştir
                         </Typography>
                         <IconButton onClick={handleClosePasswordModal}>
-                            <CloseIcon/>
+                            <Close/>
                         </IconButton>
                     </Box>
 

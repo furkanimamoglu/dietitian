@@ -32,26 +32,21 @@ import {
     Typography,
     CircularProgress,
 } from "@mui/material";
-import {
-    CreditCard,
-    Edit as EditIcon,
-    ReceiptLong,
-    Check,
-    CheckCircle,
-    CurrencyLira,
-    Payments,
-    FileCopy,
-    History,
-    Download,
-    AccountBalance,
-    AddCard,
-    Compare, // Keep Compare icon for the tab, even if label changes
-    Star,
-    StarBorder,
-    School, // Add School icon
-    Diamond,
-    Cancel
-} from "@mui/icons-material";
+import CreditCard from "@mui/icons-material/CreditCard";
+import EditIcon from "@mui/icons-material/Edit";
+import ReceiptLong from "@mui/icons-material/ReceiptLong";
+import Check from "@mui/icons-material/Check";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import CurrencyLira from "@mui/icons-material/CurrencyLira";
+import Download from "@mui/icons-material/Download";
+import AccountBalance from "@mui/icons-material/AccountBalance";
+import Compare from "@mui/icons-material/Compare";
+import Star from "@mui/icons-material/Star";
+import StarBorder from "@mui/icons-material/StarBorder";
+import School from "@mui/icons-material/School";
+import Diamond from "@mui/icons-material/Diamond";
+import Cancel from "@mui/icons-material/Cancel";
+
 import axios from "axios";
 
 export default function Odeme() {

@@ -24,7 +24,9 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font, Image } from '@react-pdf/renderer';
+
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
+
 import {
     Autocomplete,
     TextField,
@@ -42,7 +44,6 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
     Button,
     IconButton,
     Card,
@@ -59,13 +60,11 @@ import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 
-// Register a custom font with Turkish character support
 Font.register({
     family: 'Open Sans',
     src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
 });
 
-// Define styles for PDF
 const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
@@ -1689,7 +1688,7 @@ export default function Beslenme() {
                     }}
                     className="right-sidebar-panel"
                 >
-                    <Box sx={{ padding: '16px 0', backgroundColor: '#087708' }}>
+                    <Box sx={{ padding: '16px 0', backgroundColor: '#fd9200' }}>
                         <Typography variant="h6" sx={{
                             textAlign: 'center',
                             color: 'white',

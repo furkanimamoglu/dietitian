@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import './Register.css';
 import config from "../../config.js";
+
 import {
     Avatar,
     Box,
@@ -22,6 +23,7 @@ import {
     TextField,
     Typography
 } from "@mui/material";
+
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";

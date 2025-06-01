@@ -8,22 +8,14 @@ import {
     Typography,
     Button,
     IconButton,
-    Card,
-    CardContent,
-    Chip,
-    Fade,
     Backdrop,
     Alert,
     AlertTitle
 } from '@mui/material';
-import {
-    Close as CloseIcon,
-    Star as StarIcon,
-    Check as CheckIcon,
-    Rocket as RocketIcon,
-    Lock as LockIcon,
-    Warning as WarningIcon
-} from '@mui/icons-material';
+
+import CloseIcon from '@mui/icons-material/Close';
+import RocketIcon from '@mui/icons-material/Rocket';
+import LockIcon from '@mui/icons-material/Lock';
 
 import Header from "../Header/Header.jsx";
 import Navbar from "../Navbar/Navbar.jsx";
@@ -38,7 +30,6 @@ const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
             onClose={onClose}
             maxWidth="sm"
             fullWidth
-            // Modal dışına tıklanarak kapatılamaz
             disableEscapeKeyDown
             PaperProps={{
                 sx: {

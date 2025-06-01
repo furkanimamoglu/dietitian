@@ -39,25 +39,24 @@ import {
     Alert,
     Snackbar
 } from '@mui/material';
-import {
-    Add as AddIcon,
-    ArrowDownward as ArrowDownwardIcon,
-    ArrowUpward as ArrowUpwardIcon,
-    CheckCircle as CheckCircleIcon,
-    Delete as DeleteIcon,
-    Edit as EditIcon,
-    MonetizationOn as MonetizationOnIcon,
-    Payments as PaymentsIcon,
-    Pending as PendingIcon,
-    Receipt as ReceiptIcon,
-    Save as SaveIcon,
-    Search as SearchIcon,
-    Warning as WarningIcon,
-    Close as CloseIcon,
-    Download as DownloadIcon,
-    Upload as UploadIcon,
-    Visibility as VisibilityIcon
-} from '@mui/icons-material';
+
+import AddIcon from '@mui/icons-material/Add';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import PendingIcon from '@mui/icons-material/Pending';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SaveIcon from '@mui/icons-material/Save';
+import SearchIcon from '@mui/icons-material/Search';
+import WarningIcon from '@mui/icons-material/Warning';
+import CloseIcon from '@mui/icons-material/Close';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
+
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
