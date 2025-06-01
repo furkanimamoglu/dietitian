@@ -87,7 +87,12 @@ export default function Randevularim() {
                         client_id: appointment.client_id,
                         status: appointment.status,
                     },
-                    color: appointment.status === "approved" ? "#4CAF50" : "#FF9800"
+                    color:
+                        appointment.status === "approved"
+                            ? "#4CAF50"
+                            : appointment.status === "cancelled"
+                                ? "#F44336"
+                                : "#FF9800"
                 }));
 
                 setRandevular(formattedAppointments);
