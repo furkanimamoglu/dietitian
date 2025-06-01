@@ -331,7 +331,7 @@ export default function Header() {
                                             position: "absolute",
                                             top: "100%",
                                             left: 0,
-                                            backgroundColor: "#f0f9f0",
+                                            backgroundColor: "#ffffff",
                                             zIndex: 1300,
                                             boxShadow: "0px 8px 20px rgba(0,0,0,0.15)",
                                             mt: 1,
@@ -350,7 +350,7 @@ export default function Header() {
                                                     onClick={() => handleResultClick(result.url)}
                                                     sx={{
                                                         "&:hover": {
-                                                            backgroundColor: "#e6f7e6",
+                                                            backgroundColor: "#ffffff",
                                                             boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
                                                         },
                                                         transition: "all 0.3s ease-in-out",

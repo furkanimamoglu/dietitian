@@ -1122,9 +1122,8 @@ export default function Finans() {
 
         // Auto-update amount and due date if package changes
         if (field === 'packageId') {
-            const selectedPackage = packages.find(pkg => pkg.id === Number(value));
+            const selectedPackage = packages.find(pkg => String(pkg.id) === String(value));
             if (selectedPackage) {
-                // Calculate due date based on package type and current issue date
                 try {
                     const issueDate = safelyParseDate(newInvoice.issueDate);
                     const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
@@ -1137,7 +1136,6 @@ export default function Finans() {
                         dueDate: safelyFormatDate(dueDate)
                     }));
 
-                    // Clear amount error if it exists since we're setting a valid amount
                     if (formErrors.amount) {
                         setFormErrors(prev => {
                             const newErrors = {...prev};
@@ -1147,7 +1145,6 @@ export default function Finans() {
                     }
                 } catch (error) {
                     console.error('Error updating due date:', error);
-                    // Still update other fields but use a safe default for dueDate
                     setNewInvoice(prev => ({
                         ...prev,
                         packageId: Number(value),
@@ -1156,8 +1153,6 @@ export default function Finans() {
                     }));
                 }
             } else {
-                // If no package is selected (or package ID is 0), update packageId but don't auto-set dueDate
-                // This allows users to manually select their preferred due date
                 setNewInvoice(prev => ({
                     ...prev,
                     packageId: Number(value) || "",

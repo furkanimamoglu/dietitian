@@ -64,63 +64,23 @@ const Measurement = sequelize.define('Measurement', {
     },
     bel: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Bel ölçüsü bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Bel ölçüsü en az 10 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Bel ölçüsü en fazla 300 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Bel ölçüsü gereklidir."
-            }
-        }
+        allowNull: true,
     },
     kalca: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Kalça ölçüsü bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Kalça ölçüsü en az 10 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Kalça ölçüsü en fazla 200 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Kalça ölçüsü gereklidir."
-            }
-        }
+        allowNull: true,
     },
     gogus: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Göğüs ölçüsü bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Göğüs ölçüsü en az 30 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Göğüs ölçüsü en fazla 200 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Göğüs ölçüsü gereklidir."
-            }
-        }
+        allowNull: true,
+    },
+    kol: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
+    },
+    bacak: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
     },
     yag: {
         type: DataTypes.INTEGER,
