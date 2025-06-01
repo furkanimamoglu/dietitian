@@ -3,8 +3,7 @@ import './Tarifler.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
-import {toast} from 'react-hot-toast';
-import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
+import {showErrorToast} from '../../utils/toastUtil';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';

@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {
-    Dialog,
-    DialogContent,
-    DialogActions,
-    Box,
-    Typography,
-    Button,
-    IconButton,
-    Backdrop,
     Alert,
-    AlertTitle
+    AlertTitle,
+    Backdrop,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    IconButton,
+    Typography
 } from '@mui/material';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -23,7 +23,7 @@ import Footer from "../Footer/Footer.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
-const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
+const SubscriptionInfoModal = ({open, onClose, onUpgrade}) => {
     return (
         <Dialog
             open={open}
@@ -46,7 +46,7 @@ const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
                 }
             }}
         >
-            <DialogContent sx={{ p: 0, position: 'relative' }}>
+            <DialogContent sx={{p: 0, position: 'relative'}}>
                 {/* Close Button */}
                 <IconButton
                     onClick={onClose}
@@ -63,7 +63,7 @@ const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
                         }
                     }}
                 >
-                    <CloseIcon />
+                    <CloseIcon/>
                 </IconButton>
 
                 {/* Uyarı Mesajı */}
@@ -76,9 +76,9 @@ const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
                         border: 'none',
                         borderBottom: '1px solid #f0f0f0'
                     }}
-                    icon={<LockIcon />}
+                    icon={<LockIcon/>}
                 >
-                    <AlertTitle sx={{ fontWeight: 'bold' }}>
+                    <AlertTitle sx={{fontWeight: 'bold'}}>
                         Paket Gerekli
                     </AlertTitle>
                     Bu özelliği kullanabilmek için paket satın almanız gerekmektedir.
@@ -118,17 +118,17 @@ const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
                         }}
                     />
 
-                    <RocketIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+                    <RocketIcon sx={{fontSize: 48, mb: 2, opacity: 0.9}}/>
                     <Typography variant="h5" fontWeight="bold" gutterBottom>
                         Paket Satın Alın
                     </Typography>
-                    <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                    <Typography variant="body1" sx={{opacity: 0.9}}>
                         Sistemi kullanabilmek için bir paket seçmeniz gerekiyor
                     </Typography>
                 </Box>
 
                 {/* Content Section */}
-                <Box sx={{ p: 4, textAlign: 'center' }}>
+                <Box sx={{p: 4, textAlign: 'center'}}>
                     <Typography
                         variant="h6"
                         color="text.primary"
@@ -152,7 +152,7 @@ const SubscriptionInfoModal = ({ open, onClose, onUpgrade }) => {
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{ p: 3, pt: 0, gap: 2, flexDirection: 'column' }}>
+            <DialogActions sx={{p: 3, pt: 0, gap: 2, flexDirection: 'column'}}>
                 {/* Ana CTA Button */}
                 <Button
                     onClick={onUpgrade}
@@ -250,8 +250,8 @@ export default function Default(props) {
 
     return (
         <>
-            <Header />
-            <Navbar />
+            <Header/>
+            <Navbar/>
             <Box
                 sx={{
                     flex: 1,
@@ -259,7 +259,7 @@ export default function Default(props) {
                     overflowY: 'auto',
                     overflowX: 'auto',
                     padding: '1rem',
-                    mt: { xs: '3rem', sm: '2rem' },
+                    mt: {xs: '3rem', sm: '2rem'},
                     pb: '60px',
                     position: 'relative'
                 }}
@@ -283,9 +283,9 @@ export default function Default(props) {
                             gap: 3
                         }}
                     >
-                        <LockIcon sx={{ fontSize: 64, color: '#ccc' }} />
+                        <LockIcon sx={{fontSize: 64, color: '#ccc'}}/>
                         <Typography variant="h5" color="text.secondary" textAlign="center">
-                            Bu içeriği görüntülemek için<br />
+                            Bu içeriği görüntülemek için<br/>
                             paket satın almanız gerekiyor
                         </Typography>
                         <Button
@@ -305,7 +305,7 @@ export default function Default(props) {
                     props.children
                 )}
             </Box>
-            <Footer />
+            <Footer/>
 
             <SubscriptionInfoModal
                 open={showSubscriptionModal && !isPaymentPage}

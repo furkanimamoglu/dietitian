@@ -8,6 +8,7 @@ import {
     Button,
     Card,
     CardContent,
+    CircularProgress,
     Divider,
     FormControl,
     FormControlLabel,
@@ -23,8 +24,7 @@ import {
     Tab,
     Tabs,
     TextField,
-    Typography,
-    CircularProgress
+    Typography
 } from "@mui/material";
 
 import Close from '@mui/icons-material/Close';
@@ -43,7 +43,7 @@ import Description from '@mui/icons-material/Description';
 import KeyOutlined from '@mui/icons-material/KeyOutlined';
 
 import config from "../../config.js";
-import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 function TabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -140,13 +140,13 @@ export default function Ayarlar() {
     const handleChangePassword = async () => {
         // Clear previous errors
         setPasswordError("");
-        
+
         // Validate passwords match
         if (passwordInfo.newPassword !== passwordInfo.confirmNewPassword) {
             setPasswordError("Yeni şifreler eşleşmiyor");
             return;
         }
-        
+
         // Validate password not empty
         if (!passwordInfo.currentPassword || !passwordInfo.newPassword) {
             setPasswordError("Tüm alanları doldurunuz");
@@ -168,7 +168,7 @@ export default function Ayarlar() {
             });
 
             const data = await response.json();
-            
+
             if (response.ok) {
                 // Success
                 setOpenPasswordModal(false);
@@ -177,7 +177,7 @@ export default function Ayarlar() {
                     newPassword: "",
                     confirmNewPassword: ""
                 });
-                
+
                 // Show toast notification for success
                 showSuccessToast("Şifreniz başarıyla değiştirildi");
             } else {
@@ -266,9 +266,14 @@ export default function Ayarlar() {
                         <Grid item xs={12} md={4}>
                             <Card variant="outlined" className="settings-card profile-preview-card">
                                 <CardContent>
-                                    
+
                                     <Box className="profile-preview-container">
-                                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3}}>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            mb: 3
+                                        }}>
                                             <Avatar
                                                 src="/profile-placeholder.jpg"
                                                 sx={{width: 120, height: 120, mb: 2}}
@@ -278,33 +283,35 @@ export default function Ayarlar() {
                                                 Diyetisyen
                                             </Typography>
                                         </Box>
-                                        
-                                        <Divider sx={{my: 2}} />
-                                        
+
+                                        <Divider sx={{my: 2}}/>
+
                                         <Box sx={{mb: 2}}>
-                                            <Typography variant="body2" sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                                <Person fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                            <Typography variant="body2"
+                                                        sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                                <Person fontSize="small" sx={{mr: 1, color: 'primary.main'}}/>
                                                 Cinsiyet: {personalInfo.gender}
                                             </Typography>
-                                            
-                                            <Typography variant="body2" sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                                <Email fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+
+                                            <Typography variant="body2"
+                                                        sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                                                <Email fontSize="small" sx={{mr: 1, color: 'primary.main'}}/>
                                                 {personalInfo.email}
                                             </Typography>
-                                            
+
                                             <Typography variant="body2" sx={{display: 'flex', alignItems: 'center'}}>
-                                                <Phone fontSize="small" sx={{mr: 1, color: 'primary.main'}} />
+                                                <Phone fontSize="small" sx={{mr: 1, color: 'primary.main'}}/>
                                                 {personalInfo.phoneNumber}
                                             </Typography>
                                         </Box>
-                                        
-                                        <Divider sx={{my: 2}} />
-                                        
+
+                                        <Divider sx={{my: 2}}/>
+
                                         <Button
                                             variant="contained"
                                             color="primary"
                                             fullWidth
-                                            startIcon={<KeyOutlined />}
+                                            startIcon={<KeyOutlined/>}
                                             onClick={handleOpenPasswordModal}
                                             sx={{mb: 2}}
                                         >
@@ -314,7 +321,7 @@ export default function Ayarlar() {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        
+
                         <Grid item xs={12} md={8}>
                             <Card variant="outlined" className="settings-card">
                                 <CardContent>
@@ -339,7 +346,7 @@ export default function Ayarlar() {
                                                     variant="outlined"
                                                 />
                                             </Grid>
-                                            
+
                                             <Grid item xs={12} md={6}>
                                                 <TextField
                                                     fullWidth
@@ -352,7 +359,7 @@ export default function Ayarlar() {
                                                     variant="outlined"
                                                 />
                                             </Grid>
-                                            
+
                                             <Grid item xs={12} md={6}>
                                                 <TextField
                                                     fullWidth
@@ -364,7 +371,7 @@ export default function Ayarlar() {
                                                     variant="outlined"
                                                 />
                                             </Grid>
-                                            
+
                                             <Grid item xs={12} md={6}>
                                                 <FormControl fullWidth margin="normal">
                                                     <InputLabel id="gender-label">Cinsiyet</InputLabel>
@@ -444,7 +451,7 @@ export default function Ayarlar() {
                                                 ))}
                                             </Select>
                                         </FormControl>
-                                        
+
                                         <FormControl fullWidth margin="normal">
                                             <InputLabel id="language-label">Dil Seçimi</InputLabel>
                                             <Select
@@ -465,7 +472,7 @@ export default function Ayarlar() {
                                     </Box>
                                 </CardContent>
                             </Card>
-                            
+
                             <Card variant="outlined" className="settings-card" sx={{mt: 3}}>
                                 <CardContent>
                                     <Box display="flex" alignItems="center" mb={2}>
@@ -494,8 +501,9 @@ export default function Ayarlar() {
                                                 ))}
                                             </Select>
                                         </FormControl>
-                                        
-                                        <Typography gutterBottom sx={{mt: 2}}>Otomatik Çıkış Süresi (dakika)</Typography>
+
+                                        <Typography gutterBottom sx={{mt: 2}}>Otomatik Çıkış Süresi
+                                            (dakika)</Typography>
                                         <Slider
                                             value={appSettings.autoLogout}
                                             onChange={(e, newValue) => {
@@ -563,7 +571,7 @@ export default function Ayarlar() {
                                     </Box>
                                 </CardContent>
                             </Card>
-                            
+
                             <Card variant="outlined" className="settings-card" sx={{mt: 3}}>
                                 <CardContent>
                                     <Box display="flex" alignItems="center" mb={2}>
@@ -584,10 +592,10 @@ export default function Ayarlar() {
                                             onChange={handleAppSettingsChange}
                                             margin="normal"
                                             variant="outlined"
-                                            inputProps={{ min: 1200, max: 3000, step: 50 }}
+                                            inputProps={{min: 1200, max: 3000, step: 50}}
                                             helperText="Kcal/gün"
                                         />
-                                        
+
                                         <FormControlLabel
                                             control={
                                                 <Switch
@@ -599,7 +607,7 @@ export default function Ayarlar() {
                                             }
                                             label="Kilo Takip Grafiklerini Göster"
                                         />
-                                        
+
                                         <FormControlLabel
                                             control={
                                                 <Switch
@@ -611,7 +619,7 @@ export default function Ayarlar() {
                                             }
                                             label="Öğün Hatırlatıcılarını Etkinleştir"
                                         />
-                                        
+
                                         <FormControlLabel
                                             control={
                                                 <Switch
@@ -627,7 +635,7 @@ export default function Ayarlar() {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        
+
                         <Grid item xs={12}>
                             <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2}}>
                                 <Button
@@ -663,7 +671,7 @@ export default function Ayarlar() {
                     <Divider sx={{mb: 3}}/>
 
                     {passwordError && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                        <Alert severity="error" sx={{mb: 2}}>
                             {passwordError}
                         </Alert>
                     )}
@@ -754,7 +762,8 @@ export default function Ayarlar() {
                                 color="primary"
                                 onClick={handleChangePassword}
                                 disabled={isChangingPassword}
-                                startIcon={isChangingPassword ? <CircularProgress size={20} color="inherit" /> : <LockIcon />}
+                                startIcon={isChangingPassword ? <CircularProgress size={20} color="inherit"/> :
+                                    <LockIcon/>}
                             >
                                 {isChangingPassword ? 'İşleniyor...' : 'Şifreyi Değiştir'}
                             </Button>

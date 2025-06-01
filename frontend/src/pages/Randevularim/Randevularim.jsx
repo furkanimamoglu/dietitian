@@ -1,8 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import "./Randevularim.css";
-import {toast} from 'react-hot-toast';
-import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 import FullCalendar from "@fullcalendar/react";
 import "@fullcalendar/core";

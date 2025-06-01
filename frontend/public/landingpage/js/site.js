@@ -6,12 +6,13 @@
  * https://5studios.net
  */
 
-(function() {
+(function () {
     'use strict';
 
     // Avoid `console` errors in browsers that lack a console.
     var method;
-    var noop = function () {};
+    var noop = function () {
+    };
     var methods = [
         'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
         'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
@@ -32,7 +33,7 @@
 }());
 
 // Place any code in here.
-$(function() {
+$(function () {
     'use strict';
 
     /** navbar reference **/
@@ -67,7 +68,7 @@ $(function() {
     /**
      *  NAVBAR SIDE COLLAPSIBLE - On Mobiles
      **/
-    $(".navbar-toggler", $navbar).on("click", function() {
+    $(".navbar-toggler", $navbar).on("click", function () {
         $navbar.toggleClass("navbar-expanded");
     });
 
@@ -80,7 +81,7 @@ $(function() {
     /**
      * Swiper Initialization
      **/
-    $('.swiper-container').each(function() {
+    $('.swiper-container').each(function () {
 
         var $this = $(this);
         var boolData = {
@@ -175,7 +176,7 @@ $(function() {
             effect: effect
         }, pagination, autoplay, coverflow);
 
-        var swiper = new Swiper (this, options);
+        var swiper = new Swiper(this, options);
 
         for (var e in events) {
             swiper.on(e, events[e]);
@@ -200,13 +201,13 @@ $(function() {
                 swiper.slideTo(index - 1);
 
                 if (navigationActiveSelector) {
-                    $item.siblings().each(function() {
+                    $item.siblings().each(function () {
                         $(navigationActiveSelector, this).removeClass(navigationActiveClass);
                     });
 
                     $activeItem.addClass(navigationActiveClass);
                 } else {
-                    $item.siblings('.'+navigationActiveClass).removeClass(navigationActiveClass);
+                    $item.siblings('.' + navigationActiveClass).removeClass(navigationActiveClass);
                     $item.addClass(navigationActiveClass);
                 }
 
@@ -230,7 +231,7 @@ $(function() {
     /**
      * TILT
      **/
-    if($(".tilt").length) {
+    if ($(".tilt").length) {
         $(".tilt").tilt({
             glare: true,
             maxGlare: 0.4
@@ -253,10 +254,10 @@ $(function() {
     /**
      * PRICING TABLES
      **/
-    $(".pricing-plans").on("change", 'input[name="pricing-basis"]', function() {
+    $(".pricing-plans").on("change", 'input[name="pricing-basis"]', function () {
         var period = this.value; // can take 'monthly' or 'yearly' as value
 
-        $(".price", $(".pricing-plans")).each(function() {
+        $(".price", $(".pricing-plans")).each(function () {
             // add 'yearly' css class to 'this' if you want to display /yr label for the price when displayed a yearly basis
             // $(this).addClass(period);
             this.innerHTML = $(this).data(period);

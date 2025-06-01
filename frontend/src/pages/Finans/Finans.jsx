@@ -1,12 +1,17 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import './Finans.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from 'axios';
 import config from "../../config.js";
 import {
+    Alert,
     Box,
     Button,
     Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
     FormControl,
     Grid,
@@ -18,26 +23,20 @@ import {
     ListItemIcon,
     ListItemText,
     MenuItem,
-    Pagination,
     Paper,
     Select,
+    Snackbar,
     Stack,
     Tab,
-    Tabs,
-    TextField,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Alert,
-    Snackbar
+    Tabs,
+    TextField,
+    Typography
 } from '@mui/material';
 
 import AddIcon from '@mui/icons-material/Add';
@@ -60,15 +59,10 @@ import UploadIcon from '@mui/icons-material/Upload';
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
-import {toast} from 'react-hot-toast';
-import {
-    DataGrid,
-    GridToolbarContainer,
-    GridToolbarQuickFilter
-} from '@mui/x-data-grid';
+import {DataGrid} from '@mui/x-data-grid';
 import Papa from 'papaparse';
 import {trTR} from "@mui/x-data-grid/locales";
-import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 const CustomModal = ({isOpen, onClose, title, children}) => {
     const overlayRef = React.useRef(null);
@@ -119,7 +113,7 @@ const ConfirmationDialog = ({isOpen, onClose, onConfirm, title, message, itemNam
         <div className="custom-modal-overlay" onClick={handleOverlayClick}>
             <div className="custom-modal delete-warning-modal">
                 <div className="custom-modal-header warning-header">
-                    <h2><WarningIcon className="warning-icon" /> {title}</h2>
+                    <h2><WarningIcon className="warning-icon"/> {title}</h2>
                     <button className="close-button" onClick={onClose} disabled={isLoading}>&times;</button>
                 </div>
                 <div className="custom-modal-content">
@@ -183,7 +177,7 @@ export default function Finans() {
 
     const [packageSearchTerm, setPackageSearchTerm] = useState('');
     const [packageFormErrors, setPackageFormErrors] = useState({});
-    
+
     const [importDialogOpen, setImportDialogOpen] = useState(false);
     const [csvData, setCsvData] = useState([]);
     const [csvErrors, setCsvErrors] = useState({});
@@ -194,7 +188,7 @@ export default function Finans() {
 
     const maxDate = new Date();
     maxDate.setFullYear(maxDate.getFullYear() + 10);
-    
+
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
@@ -354,7 +348,7 @@ export default function Finans() {
     const shouldProrate = (packageType) => {
         return packageType !== "Seanslık";
     };
-    
+
     // Filter invoices based on search term and status filter
     const filteredInvoices = useMemo(() => {
         return invoices.filter(invoice => {
@@ -365,7 +359,7 @@ export default function Finans() {
             return matchesSearch && matchesStatus;
         });
     }, [invoices, searchTerm, statusFilter]);
-    
+
     // DataGrid columns for invoices
     const invoiceColumns = [
         {
@@ -399,7 +393,7 @@ export default function Finans() {
                     label={params.value}
                     color={
                         params.value === "Ödendi" ? "success" :
-                        params.value === "Beklemede" ? "warning" : "error"
+                            params.value === "Beklemede" ? "warning" : "error"
                     }
                     size="small"
                 />
@@ -458,7 +452,7 @@ export default function Finans() {
                         color="primary"
                         onClick={() => handleOpenInvoiceDialog(params.row)}
                     >
-                        <EditIcon fontSize="small" />
+                        <EditIcon fontSize="small"/>
                     </Button>
                     <Button
                         size="small"
@@ -466,7 +460,7 @@ export default function Finans() {
                         color="error"
                         onClick={() => handleDeleteInvoice(params.row.id)}
                     >
-                        <DeleteIcon fontSize="small" />
+                        <DeleteIcon fontSize="small"/>
                     </Button>
                 </Stack>
             ),
@@ -634,7 +628,7 @@ export default function Finans() {
     const handleOpenPackageDialog = async (pkg = null) => {
         // Reset any form errors
         setPackageFormErrors({});
-        
+
         if (pkg) {
             setCurrentPackage(pkg);
 
@@ -702,7 +696,7 @@ export default function Finans() {
             ...newPackage,
             [field]: value
         });
-        
+
         // Clear error for this field if it exists
         if (packageFormErrors[field]) {
             setPackageFormErrors(prev => {
@@ -741,22 +735,22 @@ export default function Finans() {
     const handleSavePackage = async () => {
         // Reset previous errors
         const errors = {};
-        
+
         // Validate all required fields
         if (!newPackage.name || newPackage.name.trim() === "") {
             errors.name = "Lütfen paket adını girin";
         }
-        
+
         if (!newPackage.type) {
             errors.type = "Lütfen paket tipini seçin";
         }
-        
+
         if (newPackage.price === "" || newPackage.price === null || isNaN(newPackage.price) || newPackage.price <= 0) {
             errors.price = "Lütfen geçerli bir fiyat girin";
         }
-        
+
         // Note: Paket İçeriği is now optional, so we removed that validation
-        
+
         // If we have validation errors, show them and stop
         if (Object.keys(errors).length > 0) {
             setPackageFormErrors(errors);
@@ -1044,7 +1038,7 @@ export default function Finans() {
         setCurrentInvoice(null);
         // Reset any form errors
         setFormErrors({});
-        
+
         if (invoice) {
             // If editing an existing invoice
             setCurrentInvoice(invoice);
@@ -1054,14 +1048,14 @@ export default function Finans() {
             const firstPackage = packages.length > 0 ? packages[0] : null;
             const today = new Date();
             let dueDate;
-            
+
             if (firstPackage) {
                 dueDate = calculateDueDateFromPackageType(today, firstPackage.type);
             } else {
                 dueDate = new Date(today);
                 dueDate.setDate(dueDate.getDate() + 7);
             }
-            
+
             // Set fresh default values
             setNewInvoice({
                 clientName: "",
@@ -1075,7 +1069,7 @@ export default function Finans() {
                 description: ""
             });
         }
-        
+
         // Open the dialog after setting the state
         setInvoiceDialogOpen(true);
     };
@@ -1104,7 +1098,7 @@ export default function Finans() {
             ...newInvoice,
             [field]: value
         });
-        
+
         // Clear error for this field if it exists
         if (formErrors[field]) {
             setFormErrors(prev => {
@@ -1142,7 +1136,7 @@ export default function Finans() {
                         packageName: selectedPackage.name,
                         dueDate: safelyFormatDate(dueDate)
                     }));
-                    
+
                     // Clear amount error if it exists since we're setting a valid amount
                     if (formErrors.amount) {
                         setFormErrors(prev => {
@@ -1187,7 +1181,7 @@ export default function Finans() {
                         issueDate: value,
                         dueDate: safelyFormatDate(dueDate)
                     }));
-                    
+
                     // Clear due date error if it exists since we're setting a valid due date
                     if (formErrors.dueDate) {
                         setFormErrors(prev => {
@@ -1226,30 +1220,30 @@ export default function Finans() {
     const handleSaveInvoice = async () => {
         // Reset previous errors
         const errors = {};
-        
+
         // Validate all required fields
         if (!newInvoice.clientId) {
             errors.clientId = "Lütfen bir danışan seçin";
         }
-        
+
         if (newInvoice.amount === '' || newInvoice.amount === null || isNaN(newInvoice.amount) || newInvoice.amount <= 0) {
             errors.amount = "Lütfen geçerli bir tutar girin";
         }
-        
+
         if (!newInvoice.issueDate) {
             errors.issueDate = "Lütfen fatura tarihi seçin";
         }
-        
+
         if (!newInvoice.dueDate) {
             errors.dueDate = "Lütfen son ödeme tarihi seçin";
         }
-        
+
         // If we have validation errors, show them and stop
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
             return;
         }
-        
+
         // If validation passes, continue with saving
         setIsLoading(true);
         try {
@@ -1263,7 +1257,7 @@ export default function Finans() {
                     Authorization: localStorage.getItem("token"),
                 },
             };
-            
+
             // Status mapping fonksiyonu kullan
             const backendStatus = mapStatusToBackend(newInvoice.status);
             const invoiceData = {
@@ -1275,7 +1269,7 @@ export default function Finans() {
                 dueDate: newInvoice.dueDate,
                 description: newInvoice.description || ""
             };
-            
+
             if (currentInvoice) {
                 // Update
                 const response = await axios.put(getApiUrl('/invoice/updateInvoice'), {
@@ -1288,7 +1282,7 @@ export default function Finans() {
                 await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
                 showSuccessToast("Yeni fatura oluşturuldu.");
             }
-            
+
             await fetchInvoices();
             handleCloseInvoiceDialog();
         } catch (error) {
@@ -1781,7 +1775,7 @@ export default function Finans() {
                                     >
                                         Yeni Fatura
                                     </Button>
-                                    
+
                                     <Button
                                         variant="contained"
                                         startIcon={<DownloadIcon/>}
@@ -1813,7 +1807,7 @@ export default function Finans() {
                             </Box>
                         </Paper>
 
-                        <Box mt={4} id="invoice-list" sx={{ height: "65vh", width: "100%" }}>
+                        <Box mt={4} id="invoice-list" sx={{height: "65vh", width: "100%"}}>
                             <DataGrid
                                 localeText={trTR.components.MuiDataGrid.defaultProps.localeText}
                                 rows={filteredInvoices}
@@ -1841,10 +1835,10 @@ export default function Finans() {
                                 }}
                             />
                         </Box>
-                        
+
                         {/* CSV Import Dialog */}
-                        <Dialog 
-                            open={importDialogOpen} 
+                        <Dialog
+                            open={importDialogOpen}
                             onClose={() => setImportDialogOpen(false)}
                             maxWidth="sm"
                             fullWidth
@@ -1857,7 +1851,7 @@ export default function Finans() {
                                 alignItems: 'center'
                             }}>
                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <DownloadIcon />
+                                    <DownloadIcon/>
                                     <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
                                         Excel dosyasından Fatura İçe Aktar
                                     </Typography>
@@ -1877,13 +1871,19 @@ export default function Finans() {
                                         Excel dosyanız aşağıdaki sütunları içermelidir:
                                     </Typography>
                                     <ul>
-                                        <li><Typography variant="body2">danisan - Danışan Adı (zorunlu)</Typography></li>
+                                        <li><Typography variant="body2">danisan - Danışan Adı (zorunlu)</Typography>
+                                        </li>
                                         <li><Typography variant="body2">paket - Paket Adı (opsiyonel)</Typography></li>
-                                        <li><Typography variant="body2">tutar - Fatura Tutarı (zorunlu)</Typography></li>
-                                        <li><Typography variant="body2">durum - Fatura Durumu (opsiyonel, "Ödendi", "Beklemede" veya "Ödenmedi")</Typography></li>
-                                        <li><Typography variant="body2">fatura_tarihi - Fatura Tarihi (opsiyonel, YYYY-MM-DD formatında)</Typography></li>
-                                        <li><Typography variant="body2">son_odeme - Son Ödeme Tarihi (opsiyonel, YYYY-MM-DD formatında)</Typography></li>
-                                        <li><Typography variant="body2">aciklama - Açıklama (opsiyonel)</Typography></li>
+                                        <li><Typography variant="body2">tutar - Fatura Tutarı (zorunlu)</Typography>
+                                        </li>
+                                        <li><Typography variant="body2">durum - Fatura Durumu (opsiyonel, "Ödendi",
+                                            "Beklemede" veya "Ödenmedi")</Typography></li>
+                                        <li><Typography variant="body2">fatura_tarihi - Fatura Tarihi (opsiyonel,
+                                            YYYY-MM-DD formatında)</Typography></li>
+                                        <li><Typography variant="body2">son_odeme - Son Ödeme Tarihi (opsiyonel,
+                                            YYYY-MM-DD formatında)</Typography></li>
+                                        <li><Typography variant="body2">aciklama - Açıklama (opsiyonel)</Typography>
+                                        </li>
                                     </ul>
                                     <Typography variant="body2" color="text.secondary">
                                         Not: Danışan adı sistemde kayıtlı olmalıdır.
@@ -1891,7 +1891,7 @@ export default function Finans() {
                                     <Button
                                         variant="contained"
                                         component="label"
-                                        startIcon={<DownloadIcon />}
+                                        startIcon={<DownloadIcon/>}
                                         sx={{mt: 2}}
                                     >
                                         Excel Dosyası Seç
@@ -1905,9 +1905,16 @@ export default function Finans() {
                                     <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
                                         Örnek Excel formatı:
                                     </Typography>
-                                    <code style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', display: 'block', overflowX: 'auto'}}>
+                                    <code style={{
+                                        backgroundColor: '#f5f5f5',
+                                        padding: '10px',
+                                        borderRadius: '4px',
+                                        display: 'block',
+                                        overflowX: 'auto'
+                                    }}>
                                         danisan,paket,tutar,durum,fatura_tarihi,son_odeme,aciklama<br/>
-                                        "Ahmet Yılmaz","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs ayı ödemesi"<br/>
+                                        "Ahmet Yılmaz","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs ayı
+                                        ödemesi"<br/>
                                         "Ayşe Demir","Seanslık","250","Beklemede","2023-05-15","2023-05-22","İlk seans"
                                     </code>
                                 </Stack>
@@ -1938,7 +1945,7 @@ export default function Finans() {
                                 alignItems: 'center'
                             }}>
                                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <ReceiptIcon />
+                                    <ReceiptIcon/>
                                     <Typography variant="h6" sx={{color: 'white', fontWeight: 'bold'}}>
                                         İçe Aktarılacak Faturalar
                                     </Typography>
@@ -1978,7 +1985,8 @@ export default function Finans() {
                                             {csvData.map((row, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell>
-                                                        <FormControl fullWidth size="small" error={csvErrors[index]?.clientName !== undefined}>
+                                                        <FormControl fullWidth size="small"
+                                                                     error={csvErrors[index]?.clientName !== undefined}>
                                                             <Select
                                                                 value={row.clientName || ''}
                                                                 onChange={(e) => handleCsvRowChange(index, 'clientName', e.target.value)}
@@ -2026,7 +2034,8 @@ export default function Finans() {
                                                             error={csvErrors[index]?.amount !== undefined}
                                                             helperText={csvErrors[index]?.amount}
                                                             InputProps={{
-                                                                endAdornment: <InputAdornment position="end">₺</InputAdornment>,
+                                                                endAdornment: <InputAdornment
+                                                                    position="end">₺</InputAdornment>,
                                                             }}
                                                         />
                                                     </TableCell>
@@ -2069,7 +2078,7 @@ export default function Finans() {
                                                             color="error"
                                                             onClick={() => handleCsvRowDelete(index)}
                                                         >
-                                                            <DeleteIcon />
+                                                            <DeleteIcon/>
                                                         </IconButton>
                                                     </TableCell>
                                                 </TableRow>
@@ -2096,7 +2105,7 @@ export default function Finans() {
                                 </Button>
                             </DialogActions>
                         </Dialog>
-                        
+
                         {/* Snackbar for notifications */}
                         <Snackbar
                             open={snackbar.open}
@@ -2124,7 +2133,7 @@ export default function Finans() {
     const handleSnackbarClose = () => {
         setSnackbar(prev => ({...prev, open: false}));
     };
-    
+
     // CSV Import/Export handlers
     const handleCsvFileUpload = (event) => {
         const file = event.target.files[0];
@@ -2133,7 +2142,7 @@ export default function Finans() {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            complete: function(results) {
+            complete: function (results) {
                 // Check if we have valid data
                 if (results.data && results.data.length > 0) {
                     const parsedData = results.data.map((row, index) => {
@@ -2141,7 +2150,7 @@ export default function Finans() {
                         const client = clients.find(c => c.name && c.name.toLowerCase() === (row.danisan || "").toLowerCase());
                         // Find package by name
                         const pkg = packages.find(p => p.name && p.name.toLowerCase() === (row.paket || "").toLowerCase());
-                        
+
                         return {
                             id: `temp_${index}`,
                             clientId: client ? client.id : null,
@@ -2149,15 +2158,15 @@ export default function Finans() {
                             packageId: pkg ? pkg.id : null,
                             packageName: row.paket || "",
                             amount: parseFloat(row.tutar || 0) || 0,
-                            status: row.durum === "Ödendi" || row.durum === "Beklemede" || row.durum === "Ödenmedi" 
-                                ? row.durum 
+                            status: row.durum === "Ödendi" || row.durum === "Beklemede" || row.durum === "Ödenmedi"
+                                ? row.durum
                                 : "Beklemede",
                             issueDate: row.fatura_tarihi || new Date().toISOString().split('T')[0],
                             dueDate: row.son_odeme || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                             description: row.aciklama || ""
                         };
                     });
-                    
+
                     setCsvData(parsedData);
                     validateCsvData(parsedData);
                     setImportDialogOpen(false);
@@ -2166,58 +2175,58 @@ export default function Finans() {
                     showErrorToast('CSV dosyası boş veya geçersiz format içeriyor.');
                 }
             },
-            error: function(error) {
+            error: function (error) {
                 showErrorToast(`CSV okuma hatası: ${error.message}`);
             }
         });
     };
-    
+
     const validateCsvData = (data) => {
         const errors = {};
-        
+
         data.forEach((row, index) => {
             const rowErrors = {};
-            
+
             // Client validation
             if (!row.clientName || row.clientName.trim() === "") {
                 rowErrors.clientName = "Danışan adı zorunludur";
             } else if (!row.clientId) {
                 rowErrors.clientName = "Danışan sistemde bulunamadı";
             }
-            
+
             // Amount validation
             if (isNaN(row.amount) || row.amount <= 0) {
                 rowErrors.amount = "Geçerli bir tutar giriniz";
             }
-            
+
             // Date validation
             if (!row.issueDate || !isValidDateString(row.issueDate)) {
                 rowErrors.issueDate = "Geçerli bir fatura tarihi giriniz";
             }
-            
+
             if (!row.dueDate || !isValidDateString(row.dueDate)) {
                 rowErrors.dueDate = "Geçerli bir son ödeme tarihi giriniz";
             }
-            
+
             if (Object.keys(rowErrors).length > 0) {
                 errors[index] = rowErrors;
             }
         });
-        
+
         setCsvErrors(errors);
         return Object.keys(errors).length === 0;
     };
-    
+
     const handleCsvRowChange = (index, field, value) => {
         const updatedData = [...csvData];
         updatedData[index][field] = value;
-        
+
         // If changing client, update clientId
         if (field === 'clientName') {
             const client = clients.find(c => c.name === value);
             updatedData[index].clientId = client ? client.id : null;
         }
-        
+
         // If changing package, update packageId and amount
         if (field === 'packageName') {
             const pkg = packages.find(p => p.name === value);
@@ -2226,13 +2235,13 @@ export default function Finans() {
                 updatedData[index].amount = Number(pkg.price);
             }
         }
-        
+
         setCsvData(updatedData);
-        
+
         // Validate the updated row
         const rowErrors = {};
         const row = updatedData[index];
-        
+
         if (field === "clientName") {
             if (!value || value.trim() === "") {
                 rowErrors.clientName = "Danışan adı zorunludur";
@@ -2240,25 +2249,25 @@ export default function Finans() {
                 rowErrors.clientName = "Danışan sistemde bulunamadı";
             }
         }
-        
+
         if (field === "amount") {
             if (isNaN(value) || value <= 0) {
                 rowErrors.amount = "Geçerli bir tutar giriniz";
             }
         }
-        
+
         if (field === "issueDate") {
             if (!value || !isValidDateString(value)) {
                 rowErrors.issueDate = "Geçerli bir fatura tarihi giriniz";
             }
         }
-        
+
         if (field === "dueDate") {
             if (!value || !isValidDateString(value)) {
                 rowErrors.dueDate = "Geçerli bir son ödeme tarihi giriniz";
             }
         }
-        
+
         const newErrors = {...csvErrors};
         if (Object.keys(rowErrors).length > 0) {
             newErrors[index] = {...(newErrors[index] || {}), ...rowErrors};
@@ -2270,18 +2279,18 @@ export default function Finans() {
                 }
             }
         }
-        
+
         setCsvErrors(newErrors);
     };
-    
+
     const handleCsvRowDelete = (index) => {
         const updatedData = csvData.filter((_, i) => i !== index);
         setCsvData(updatedData);
-        
+
         // Update errors
         const newErrors = {...csvErrors};
         delete newErrors[index];
-        
+
         // Reindex errors if necessary
         const reindexedErrors = {};
         Object.keys(newErrors).forEach(key => {
@@ -2292,10 +2301,10 @@ export default function Finans() {
                 reindexedErrors[key] = newErrors[key];
             }
         });
-        
+
         setCsvErrors(reindexedErrors);
     };
-    
+
     const handleImportSubmit = async () => {
         if (Object.keys(csvErrors).length > 0) {
             setSnackbar({
@@ -2305,11 +2314,11 @@ export default function Finans() {
             });
             return;
         }
-        
+
         try {
             let successCount = 0;
             let failCount = 0;
-            
+
             // Process each invoice one by one
             for (const invoice of csvData) {
                 try {
@@ -2318,16 +2327,16 @@ export default function Finans() {
                             ? `${config[config.environment].apiUrl}${endpoint}`
                             : endpoint;
                     };
-                    
+
                     const authHeaders = {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                         },
                     };
-                    
+
                     // Map status to backend format
                     const backendStatus = mapStatusToBackend(invoice.status);
-                    
+
                     const invoiceData = {
                         client_id: invoice.clientId,
                         amount: invoice.amount,
@@ -2337,7 +2346,7 @@ export default function Finans() {
                         dueDate: invoice.dueDate,
                         description: invoice.description || ""
                     };
-                    
+
                     await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
                     successCount++;
                 } catch (err) {
@@ -2349,11 +2358,11 @@ export default function Finans() {
             showSuccessToast(
                 `${successCount} fatura başarıyla eklendi. ${failCount > 0 ? `${failCount} fatura eklenemedi.` : ''}`
             );
-            
+
             setImportPreviewOpen(false);
             setCsvData([]);
             await fetchInvoices();
-            
+
         } catch (error) {
             console.error("Toplu fatura eklenirken hata oluştu:", error);
             showErrorToast(
@@ -2361,7 +2370,7 @@ export default function Finans() {
             );
         }
     };
-    
+
     const handleExportCSV = () => {
         // Filter invoices based on active filter
         const filteredInvoices = invoices.filter(invoice => {
@@ -2371,7 +2380,7 @@ export default function Finans() {
             const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
-        
+
         // Prepare data for export
         const dataToExport = filteredInvoices.map(invoice => ({
             danisan: invoice.clientName || "",
@@ -2382,19 +2391,19 @@ export default function Finans() {
             son_odeme: invoice.dueDate,
             aciklama: invoice.description || ""
         }));
-        
+
         // Convert to CSV
         const csv = Papa.unparse(dataToExport);
-        
+
         // Create download link
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
-        
+
         // Set file name with current date
         const date = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
         const fileName = `faturalar_${date}.csv`;
-        
+
         link.href = url;
         link.setAttribute('download', fileName);
         document.body.appendChild(link);
@@ -2435,7 +2444,8 @@ export default function Finans() {
                                     placeholder="Paket Adı"
                                     disabled={isLoading}
                                 />
-                                {packageFormErrors.name && <div className="error-message">{packageFormErrors.name}</div>}
+                                {packageFormErrors.name &&
+                                    <div className="error-message">{packageFormErrors.name}</div>}
                             </div>
 
                             <div className="form-group">
@@ -2454,7 +2464,8 @@ export default function Finans() {
                                     <option value="6 Aylık">6 Aylık</option>
                                     <option value="1 Yıllık">1 Yıllık</option>
                                 </select>
-                                {packageFormErrors.type && <div className="error-message">{packageFormErrors.type}</div>}
+                                {packageFormErrors.type &&
+                                    <div className="error-message">{packageFormErrors.type}</div>}
                             </div>
                         </div>
 
@@ -2474,7 +2485,8 @@ export default function Finans() {
                                         placeholder="0"
                                         disabled={isLoading}
                                     />
-                                    {packageFormErrors.price && <div className="error-message">{packageFormErrors.price}</div>}
+                                    {packageFormErrors.price &&
+                                        <div className="error-message">{packageFormErrors.price}</div>}
                                 </div>
                             </div>
 
@@ -2518,7 +2530,8 @@ export default function Finans() {
                                     ))
                                 ) : (
                                     <div className="no-services-message">
-                                        Henüz hizmet eklenmedi. Paket içeriğini belirtmek için "Hizmet Ekle" butonunu kullanabilirsiniz.
+                                        Henüz hizmet eklenmedi. Paket içeriğini belirtmek için "Hizmet Ekle" butonunu
+                                        kullanabilirsiniz.
                                     </div>
                                 )}
 
@@ -2587,7 +2600,8 @@ export default function Finans() {
                                                 </option>
                                             ))}
                                         </select>
-                                        {formErrors.clientId && <div className="error-message">{formErrors.clientId}</div>}
+                                        {formErrors.clientId &&
+                                            <div className="error-message">{formErrors.clientId}</div>}
                                     </>
                                 )}
                             </div>

@@ -4,7 +4,7 @@ function ScrollingSpy(settings) {
     var $this = this,
         navbar = $(this.options.navbar);
 
-    this.navbarSticky = function(scrollTop) {
+    this.navbarSticky = function (scrollTop) {
         if (scrollTop >= this.options.offset) {
             navbar.addClass("navbar-sticky")
         } else {
@@ -12,22 +12,22 @@ function ScrollingSpy(settings) {
         }
     };
 
-    this.pricingSticky = function(scrollTop, pricingPlansTop) {
+    this.pricingSticky = function (scrollTop, pricingPlansTop) {
         if (scrollTop >= pricingPlansTop && scrollTop < (pricingPlansTop + $($this.options.pricingStickyElement).height())) {
-            setTimeout(function() {
+            setTimeout(function () {
                 $($this.options.pricingBasis).addClass('keep-sticky');
             }, 500);
         } else {
-            setTimeout(function() {
+            setTimeout(function () {
                 $($this.options.pricingBasis).removeClass('keep-sticky');
             }, 500);
         }
     };
 
-    this.initialize = function() {
+    this.initialize = function () {
         var w = $(window);
 
-        w.on("scroll", function() {
+        w.on("scroll", function () {
             var scrollTop = w.scrollTop();
 
             $this.navbarSticky(scrollTop);

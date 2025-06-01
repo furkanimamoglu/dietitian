@@ -1,6 +1,10 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+    return typeof obj;
+} : function (obj) {
+    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
 
 (function (factory) {
     if (typeof define === 'function' && define.amd) {
@@ -57,11 +61,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             var _this2 = this;
 
             if (this.timeout !== undefined) clearTimeout(this.timeout);
-            $(this).css({ 'transition': this.settings.speed + 'ms ' + this.settings.easing });
-            if (this.settings.glare) this.glareElement.css({ 'transition': 'opacity ' + this.settings.speed + 'ms ' + this.settings.easing });
+            $(this).css({'transition': this.settings.speed + 'ms ' + this.settings.easing});
+            if (this.settings.glare) this.glareElement.css({'transition': 'opacity ' + this.settings.speed + 'ms ' + this.settings.easing});
             this.timeout = setTimeout(function () {
-                $(_this2).css({ 'transition': '' });
-                if (_this2.settings.glare) _this2.glareElement.css({ 'transition': '' });
+                $(_this2).css({'transition': ''});
+                if (_this2.settings.glare) _this2.glareElement.css({'transition': ''});
             }, this.settings.speed);
         };
 
@@ -70,7 +74,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
          */
         var mouseEnter = function mouseEnter(event) {
             this.ticking = false;
-            $(this).css({ 'will-change': 'transform' });
+            $(this).css({'will-change': 'transform'});
             setTransition.call(this);
 
             // Trigger change event
@@ -88,7 +92,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                     pageY: $(this).offset().top + $(this).outerHeight() / 2
                 };
             }
-            return { x: event.pageX, y: event.pageY };
+            return {x: event.pageX, y: event.pageY};
         };
 
         /**
@@ -129,7 +133,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             // angle
             var angle = Math.atan2(this.mousePositions.x - (left + width / 2), -(this.mousePositions.y - (top + height / 2))) * (180 / Math.PI);
             // Return x & y tilt values
-            return { tiltX: tiltX, tiltY: tiltY, 'percentageX': percentageX * 100, 'percentageY': percentageY * 100, angle: angle };
+            return {
+                tiltX: tiltX,
+                tiltY: tiltY,
+                'percentageX': percentageX * 100,
+                'percentageY': percentageY * 100,
+                angle: angle
+            };
         };
 
         /**
@@ -228,7 +238,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         $.fn.tilt.destroy = function () {
             $(this).each(function () {
                 $(this).find('.js-tilt-glare').remove();
-                $(this).css({ 'will-change': '', 'transform': '' });
+                $(this).css({'will-change': '', 'transform': ''});
                 $(this).off('mousemove mouseenter mouseleave');
             });
         };

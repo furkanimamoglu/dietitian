@@ -8,11 +8,11 @@
 
 'use strict';
 
-$(function($) {
-    $("form").each(function() {
+$(function ($) {
+    $("form").each(function () {
         var $form = $(this);
         var options = {
-            errorPlacement: function(error, element) {
+            errorPlacement: function (error, element) {
                 var $parent = element.parent();
 
                 if ($parent.hasClass("input-group")) {
@@ -38,7 +38,7 @@ $(function($) {
         $form.validate(options);
     });
 
-    $("form").submit(function(evt) {
+    $("form").submit(function (evt) {
         evt.preventDefault();
         var $form = $(this);
 
@@ -62,10 +62,10 @@ $(function($) {
             });
 
             $.ajax(settings)
-                .done(function(data) {
+                .done(function (data) {
                     if (data.result) {
                         //setTimeout(function() {
-                            $form.trigger("form.submitted", [data]);
+                        $form.trigger("form.submitted", [data]);
                         //}, 1000);
 
                         $("input, textarea", $form).removeClass("error");
@@ -84,31 +84,33 @@ $(function($) {
                         }
 
                         if (data.errors) {
-                            $.each(data.errors, function(i, v) {
+                            $.each(data.errors, function (i, v) {
                                 var $input = $("[name$='[" + i + "]']", $form).addClass('error');
                                 $input
                                     .tooltip({title: v, placement: 'bottom', trigger: 'manual'}).tooltip('show')
-                                    .on('focus', function() { $(this).tooltip('destroy'); });
+                                    .on('focus', function () {
+                                        $(this).tooltip('destroy');
+                                    });
                             });
                         }
                     }
-                }).fail(function() {
-                    $(".response", $message).html($("<span class='block'>Something went wrong.</span>"));
-                    if (hasAjaxButton) {
-                        $(".failed", $ajaxButton).addClass("done");
-                    }
-                }).always(function() {
-                    $submit.addClass('loading-end');
+                }).fail(function () {
+                $(".response", $message).html($("<span class='block'>Something went wrong.</span>"));
+                if (hasAjaxButton) {
+                    $(".failed", $ajaxButton).addClass("done");
+                }
+            }).always(function () {
+                $submit.addClass('loading-end');
 
-                    if (hasAjaxButton) {
-                        setTimeout(function () {
-                            console.log('clearing status');
-                            $submit.removeClass('loading').removeClass('loading-end');
-                            $(".success,.failed", $ajaxButton).removeClass("done");
-                        }, 500);
-                    }
-                    //some other stuffs
-                });
+                if (hasAjaxButton) {
+                    setTimeout(function () {
+                        console.log('clearing status');
+                        $submit.removeClass('loading').removeClass('loading-end');
+                        $(".success,.failed", $ajaxButton).removeClass("done");
+                    }, 500);
+                }
+                //some other stuffs
+            });
         }
 
         function submitAjax($form) {

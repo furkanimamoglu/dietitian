@@ -25,35 +25,35 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
 
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
+import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 import {
     Autocomplete,
-    TextField,
     Avatar,
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+    Chip,
     CircularProgress,
-    Paper,
-    Typography,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     Divider,
+    Grid,
+    IconButton,
+    InputAdornment,
+    LinearProgress,
     List,
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Box,
-    InputAdornment,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Button,
-    IconButton,
-    Card,
-    CardContent,
-    CardActions,
-    CardHeader,
-    Chip,
-    Grid,
-    LinearProgress,
-    Stack
+    Paper,
+    Stack,
+    TextField,
+    Typography
 } from '@mui/material';
 
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
@@ -211,7 +211,7 @@ const pdfStyles = StyleSheet.create({
 });
 
 // PDF Document Component for Nutrition Plan
-const NutritionPlanDocument = ({ program }) => {
+const NutritionPlanDocument = ({program}) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
     const dietitianName = "Dr. Furkan İmamoğlu";
@@ -272,7 +272,7 @@ const NutritionPlanDocument = ({ program }) => {
                         <Text style={pdfStyles.logo}>Diyetia</Text>
                     </View>
                 </View>
-                
+
                 <View style={pdfStyles.infoSection}>
                     <View style={pdfStyles.infoBox}>
                         <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
@@ -281,38 +281,39 @@ const NutritionPlanDocument = ({ program }) => {
                         <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
                         <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
                     </View>
-                    
+
                     <View style={pdfStyles.infoBox}>
                         <Text style={pdfStyles.infoTitle}>Program Açıklaması</Text>
-                        <Text style={pdfStyles.infoContent}>{program.description || "Bu beslenme programı sağlıklı bir yaşam için özel olarak hazırlanmıştır. Programdaki öğünleri düzenli olarak takip etmeniz önerilir."}</Text>
+                        <Text
+                            style={pdfStyles.infoContent}>{program.description || "Bu beslenme programı sağlıklı bir yaşam için özel olarak hazırlanmıştır. Programdaki öğünleri düzenli olarak takip etmeniz önerilir."}</Text>
                         <Text style={pdfStyles.infoContent}>Günlük su tüketiminin en az 2 litre olması önerilir.</Text>
                         <Text style={pdfStyles.infoContent}>Öğünler arasında en az 3-4 saat olmalıdır.</Text>
                     </View>
                 </View>
-                
+
                 <View style={pdfStyles.daysContainer}>
                     {DAYS_OF_WEEK.map((day) => (
                         <View style={pdfStyles.dayCard} key={day}>
                             <View style={[
                                 pdfStyles.dayHeader,
-                                day === "Cumartesi" || day === "Pazar" 
-                                    ? {backgroundColor: '#FF9800'} 
+                                day === "Cumartesi" || day === "Pazar"
+                                    ? {backgroundColor: '#FF9800'}
                                     : null
                             ]}>
                                 <Text style={pdfStyles.dayHeaderText}>{day}</Text>
                             </View>
                             <View style={pdfStyles.dayContent}>
                                 {MEALS.map((meal) => {
-                                    const { mainItems, hasAlternatives, alternatives } = getMealItems(
-                                        program.mealPlan && program.mealPlan[day] 
-                                            ? program.mealPlan[day][meal] 
+                                    const {mainItems, hasAlternatives, alternatives} = getMealItems(
+                                        program.mealPlan && program.mealPlan[day]
+                                            ? program.mealPlan[day][meal]
                                             : null
                                     );
-                                    
+
                                     // Limit the number of items to display to prevent overflow
                                     const displayItems = mainItems.slice(0, 4);
                                     const hasMoreItems = mainItems.length > 4;
-                                    
+
                                     return (
                                         <View style={pdfStyles.mealSection} key={meal}>
                                             <Text style={pdfStyles.mealTitle}>{meal}</Text>
@@ -324,12 +325,14 @@ const NutritionPlanDocument = ({ program }) => {
                                                                 <Text style={pdfStyles.mealItemBullet}>• </Text>
                                                                 {item}
                                                             </Text>
-                                                            
-                                                            {hasAlternatives && alternatives && alternatives[item] && 
+
+                                                            {hasAlternatives && alternatives && alternatives[item] &&
                                                                 // Limit alternatives to 1 to save space
                                                                 alternatives[item].slice(0, 1).map((alt, altIdx) => (
-                                                                    <Text style={pdfStyles.alternativeItem} key={altIdx}>
-                                                                        <Text style={pdfStyles.alternativePrefix}>alt: </Text>
+                                                                    <Text style={pdfStyles.alternativeItem}
+                                                                          key={altIdx}>
+                                                                        <Text
+                                                                            style={pdfStyles.alternativePrefix}>alt: </Text>
                                                                         {alt}
                                                                     </Text>
                                                                 ))
@@ -353,7 +356,7 @@ const NutritionPlanDocument = ({ program }) => {
                         </View>
                     ))}
                 </View>
-                
+
                 <View style={pdfStyles.footer}>
                     <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
                     <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
@@ -423,22 +426,22 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                         <PersonAddIcon/>
                     </button>
                     <PDFDownloadLink
-                        document={<NutritionPlanDocument program={item} />}
+                        document={<NutritionPlanDocument program={item}/>}
                         fileName={`${item.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                        style={{ textDecoration: 'none' }}
+                        style={{textDecoration: 'none'}}
                     >
-                        {({ blob, url, loading, error }) => (
-                    <button
-                        className="action-button print-btn"
-                        title="Yazdır"
+                        {({blob, url, loading, error}) => (
+                            <button
+                                className="action-button print-btn"
+                                title="Yazdır"
                                 disabled={loading}
                                 onClick={(e) => {
                                     if (loading) e.preventDefault();
                                     else onPrint(item);
                                 }}
-                    >
-                        <PrintIcon/>
-                    </button>
+                            >
+                                <PrintIcon/>
+                            </button>
                         )}
                     </PDFDownloadLink>
                     <button
@@ -902,15 +905,15 @@ const ViewMealPlan = ({mealPlan, programTitle, onExportPdf, selectedProgram}) =>
         <div className="view-meal-plan-container">
             <div className="view-meal-plan-header">
                 <PDFDownloadLink
-                    document={<NutritionPlanDocument program={selectedProgram} />} 
+                    document={<NutritionPlanDocument program={selectedProgram}/>}
                     fileName={`${programTitle.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                    style={{ textDecoration: 'none' }}
+                    style={{textDecoration: 'none'}}
                 >
-                    {({ blob, url, loading, error }) => (
+                    {({blob, url, loading, error}) => (
                         <button className="export-pdf-button" disabled={loading}>
-                            <FileDownloadIcon />
+                            <FileDownloadIcon/>
                             {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
-                </button>
+                        </button>
                     )}
                 </PDFDownloadLink>
             </div>
@@ -1388,11 +1391,9 @@ export default function Beslenme() {
                         main: [...initialPlan[day][meal].main],
                         alternatives: {...initialPlan[day][meal].alternatives}
                     };
-                }
-                else if (initialPlan[day] && initialPlan[day][meal] && Array.isArray(initialPlan[day][meal])) {
+                } else if (initialPlan[day] && initialPlan[day][meal] && Array.isArray(initialPlan[day][meal])) {
                     fullPlan[day][meal] = [...initialPlan[day][meal]];
-                }
-                else if (initialPlan[day] && initialPlan[day][meal] && typeof initialPlan[day][meal] === 'string') {
+                } else if (initialPlan[day] && initialPlan[day][meal] && typeof initialPlan[day][meal] === 'string') {
                     fullPlan[day][meal] = initialPlan[day][meal]
                         .split(',')
                         .map(item => item.trim())
@@ -1688,7 +1689,7 @@ export default function Beslenme() {
                     }}
                     className="right-sidebar-panel"
                 >
-                    <Box sx={{ padding: '16px 0', backgroundColor: '#fd9200' }}>
+                    <Box sx={{padding: '16px 0', backgroundColor: '#fd9200'}}>
                         <Typography variant="h6" sx={{
                             textAlign: 'center',
                             color: 'white',
@@ -1696,11 +1697,11 @@ export default function Beslenme() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <PeopleIcon sx={{ mr: 1 }} /> Plan Yönetimi
+                            <PeopleIcon sx={{mr: 1}}/> Plan Yönetimi
                         </Typography>
                     </Box>
 
-                    <Box sx={{ padding: '16px' }}>
+                    <Box sx={{padding: '16px'}}>
                         <TextField
                             variant="outlined"
                             placeholder="Danışan ara..."
@@ -1711,16 +1712,16 @@ export default function Beslenme() {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: "rgba(0, 0, 0, 0.54)" }} />
+                                        <SearchIcon sx={{color: "rgba(0, 0, 0, 0.54)"}}/>
                                     </InputAdornment>
                                 ),
                             }}
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                         />
 
                         {loading ? (
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3 }}>
-                                <CircularProgress size={28} sx={{ mb: 2 }} />
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3}}>
+                                <CircularProgress size={28} sx={{mb: 2}}/>
                                 <Typography variant="body2" color="text.primary">
                                     Danışanlar yükleniyor...
                                 </Typography>
@@ -1750,7 +1751,7 @@ export default function Beslenme() {
                                                     setSelectedClientInfo(danisan);
                                                     setLoadingClientPrograms(true);
                                                     axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${danisan.id}`, {
-                                                        headers: { Authorization: localStorage.getItem("token") }
+                                                        headers: {Authorization: localStorage.getItem("token")}
                                                     })
                                                         .then(response => {
                                                             setSelectedClientPrograms(response.data || []);
@@ -1786,10 +1787,10 @@ export default function Beslenme() {
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     primary={danisan.name}
-                                                    primaryTypographyProps={{ fontWeight: 'medium' }}
+                                                    primaryTypographyProps={{fontWeight: 'medium'}}
                                                 />
                                             </ListItem>
-                                            <Divider variant="inset" component="li" />
+                                            <Divider variant="inset" component="li"/>
                                         </React.Fragment>
                                     ))
                                 ) : (
@@ -1800,7 +1801,7 @@ export default function Beslenme() {
                                         justifyContent: 'center',
                                         py: 4
                                     }}>
-                                        <PersonIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+                                        <PersonIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
                                         <Typography variant="body2" color="text.secondary" align="center">
                                             Danışan bulunamadı.
                                         </Typography>
@@ -1935,7 +1936,7 @@ export default function Beslenme() {
                                 const userId = e.target.value;
                                 if (userId) {
                                     const numUserId = parseInt(userId, 10);
-                                    
+
                                     const user = danisanList.find(u => String(u.id) === String(numUserId));
                                     if (user) {
                                         setSelectedUser(user);
@@ -2345,10 +2346,10 @@ export default function Beslenme() {
                         onClick={() => setClientProgramsModal(false)}
                         aria-label="close"
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
-                <DialogContent sx={{ p: 3 }}>
+                <DialogContent sx={{p: 3}}>
                     {loadingClientPrograms ? (
                         <Box sx={{
                             display: 'flex',
@@ -2357,7 +2358,7 @@ export default function Beslenme() {
                             justifyContent: 'center',
                             my: 5
                         }}>
-                            <CircularProgress size={40} sx={{ mb: 2 }} />
+                            <CircularProgress size={40} sx={{mb: 2}}/>
                             <Typography variant="body1" color="text.secondary">
                                 Programlar yükleniyor...
                             </Typography>
@@ -2396,7 +2397,7 @@ export default function Beslenme() {
                                     </Typography>
                                     <Stack direction="row" spacing={1} alignItems="center" mt={1}>
                                         <Chip
-                                            icon={<EventIcon fontSize="small" />}
+                                            icon={<EventIcon fontSize="small"/>}
                                             label={`${selectedClientPrograms.length} Aktif Program`}
                                             color="primary"
                                             variant="outlined"
@@ -2406,7 +2407,7 @@ export default function Beslenme() {
                                 </Box>
                             </Paper>
 
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{mt: 2}}>
                                 <Grid container spacing={3}>
                                     {selectedClientPrograms.map((program, index) => {
                                         // Tarih formatını düzeltme
@@ -2438,11 +2439,11 @@ export default function Beslenme() {
                                             const endDate = new Date(program.end_date);
 
                                             if (today < startDate) {
-                                                return { status: "Başlamamış", color: "#3f51b5", chipColor: "primary" };
+                                                return {status: "Başlamamış", color: "#3f51b5", chipColor: "primary"};
                                             } else if (today > endDate) {
-                                                return { status: "Tamamlandı", color: "#4caf50", chipColor: "success" };
+                                                return {status: "Tamamlandı", color: "#4caf50", chipColor: "success"};
                                             } else {
-                                                return { status: "Devam Ediyor", color: "#ff9800", chipColor: "warning" };
+                                                return {status: "Devam Ediyor", color: "#ff9800", chipColor: "warning"};
                                             }
                                         };
 
@@ -2485,11 +2486,11 @@ export default function Beslenme() {
                                                                 label={status.status}
                                                                 color={status.chipColor}
                                                                 size="small"
-                                                                sx={{ fontWeight: 'medium' }}
+                                                                sx={{fontWeight: 'medium'}}
                                                             />
                                                         }
                                                     />
-                                                    <CardContent sx={{ pt: 0 }}>
+                                                    <CardContent sx={{pt: 0}}>
                                                         <Paper
                                                             elevation={0}
                                                             sx={{
@@ -2509,11 +2510,15 @@ export default function Beslenme() {
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Başlangıç
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mt: 0.5
+                                                                }}>
                                                                     <CalendarTodayIcon
                                                                         color="primary"
                                                                         fontSize="small"
-                                                                        sx={{ mr: 0.5 }}
+                                                                        sx={{mr: 0.5}}
                                                                     />
                                                                     <Typography variant="body1" fontWeight="medium">
                                                                         {formatDate(program.start_date)}
@@ -2521,7 +2526,7 @@ export default function Beslenme() {
                                                                 </Box>
                                                             </Box>
 
-                                                            <Divider orientation="vertical" flexItem />
+                                                            <Divider orientation="vertical" flexItem/>
 
                                                             <Box sx={{
                                                                 display: 'flex',
@@ -2531,11 +2536,15 @@ export default function Beslenme() {
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Bitiş
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mt: 0.5
+                                                                }}>
                                                                     <EventAvailableIcon
                                                                         color="primary"
                                                                         fontSize="small"
-                                                                        sx={{ mr: 0.5 }}
+                                                                        sx={{mr: 0.5}}
                                                                     />
                                                                     <Typography variant="body1" fontWeight="medium">
                                                                         {formatDate(program.end_date)}
@@ -2543,7 +2552,7 @@ export default function Beslenme() {
                                                                 </Box>
                                                             </Box>
 
-                                                            <Divider orientation="vertical" flexItem />
+                                                            <Divider orientation="vertical" flexItem/>
 
                                                             <Box sx={{
                                                                 display: 'flex',
@@ -2553,11 +2562,15 @@ export default function Beslenme() {
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Süre
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mt: 0.5
+                                                                }}>
                                                                     <AccessTimeIcon
                                                                         color="primary"
                                                                         fontSize="small"
-                                                                        sx={{ mr: 0.5 }}
+                                                                        sx={{mr: 0.5}}
                                                                     />
                                                                     <Typography variant="body1" fontWeight="medium">
                                                                         {daysBetween} gün
@@ -2566,7 +2579,7 @@ export default function Beslenme() {
                                                             </Box>
                                                         </Paper>
 
-                                                        <Box sx={{ mb: 2 }}>
+                                                        <Box sx={{mb: 2}}>
                                                             <Box sx={{
                                                                 display: 'flex',
                                                                 justifyContent: 'space-between',
@@ -2584,7 +2597,7 @@ export default function Beslenme() {
                                                                 value={progressPercent}
                                                                 color={
                                                                     status.chipColor === "success" ? "success" :
-                                                                    status.chipColor === "primary" ? "primary" : "warning"
+                                                                        status.chipColor === "primary" ? "primary" : "warning"
                                                                 }
                                                                 sx={{
                                                                     height: 8,
@@ -2603,7 +2616,7 @@ export default function Beslenme() {
                                                                 <DescriptionIcon
                                                                     fontSize="small"
                                                                     color="action"
-                                                                    sx={{ mt: 0.3, mr: 1 }}
+                                                                    sx={{mt: 0.3, mr: 1}}
                                                                 />
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     {program.description || "Açıklama bulunmuyor."}
@@ -2624,36 +2637,39 @@ export default function Beslenme() {
                                                                     alignItems: 'center',
                                                                     mb: 0.5
                                                                 }}>
-                                                                    <NoteIcon fontSize="small" sx={{ mr: 1 }} color="warning" />
+                                                                    <NoteIcon fontSize="small" sx={{mr: 1}}
+                                                                              color="warning"/>
                                                                     <Typography variant="body2" fontWeight="medium">
                                                                         Diyetisyen Notu
                                                                     </Typography>
                                                                 </Box>
-                                                                <Typography variant="body2" color="text.secondary" sx={{ pl: 3.5 }}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{pl: 3.5}}>
                                                                     {program.note}
                                                                 </Typography>
                                                             </Box>
                                                         )}
                                                     </CardContent>
 
-                                                    <CardActions sx={{ justifyContent: 'flex-end', p: 2, pt: 0 }}>
+                                                    <CardActions sx={{justifyContent: 'flex-end', p: 2, pt: 0}}>
                                                         {(() => {
                                                             const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
                                                             if (programDetails) {
                                                                 return (
-                                                                    <PDFDownloadLink 
-                                                                        document={<NutritionPlanDocument program={programDetails} />} 
+                                                                    <PDFDownloadLink
+                                                                        document={<NutritionPlanDocument
+                                                                            program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                                                                        style={{ textDecoration: 'none' }}
+                                                                        style={{textDecoration: 'none'}}
                                                                     >
-                                                                        {({ blob, url, loading, error }) => (
-                                                        <Button
-                                                            variant="outlined"
-                                                            startIcon={<FileDownloadIcon />}
+                                                                        {({blob, url, loading, error}) => (
+                                                                            <Button
+                                                                                variant="outlined"
+                                                                                startIcon={<FileDownloadIcon/>}
                                                                                 disabled={loading}
                                                                             >
                                                                                 {loading ? 'Hazırlanıyor...' : 'PDF İndir'}
-                                                        </Button>
+                                                                            </Button>
                                                                         )}
                                                                     </PDFDownloadLink>
                                                                 );
@@ -2663,7 +2679,7 @@ export default function Beslenme() {
                                                         <Button
                                                             variant="contained"
                                                             color="primary"
-                                                            startIcon={<RestaurantIcon />}
+                                                            startIcon={<RestaurantIcon/>}
                                                             onClick={() => {
                                                                 const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
                                                                 if (programDetails) {
@@ -2692,11 +2708,11 @@ export default function Beslenme() {
                             py: 5,
                             textAlign: 'center'
                         }}>
-                            <RestaurantIcon sx={{ fontSize: 70, color: '#ccc', mb: 2 }} />
+                            <RestaurantIcon sx={{fontSize: 70, color: '#ccc', mb: 2}}/>
                             <Typography variant="h6" gutterBottom>
                                 Atanmış Program Bulunamadı
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{mb: 3}}>
                                 Bu danışana henüz bir beslenme programı atanmamış.
                             </Typography>
                             <Button

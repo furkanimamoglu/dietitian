@@ -10,16 +10,14 @@ import {
     CircularProgress,
     Container,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
     IconButton,
     InputAdornment,
     Link,
     Paper,
-    Tab,
-    Tabs,
     TextField,
     Typography
 } from "@mui/material";
@@ -340,7 +338,7 @@ function Register() {
                         }
                     }}
                 >
-                    <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
+                    <DialogTitle sx={{textAlign: 'center', pb: 1}}>
                         <Avatar sx={{
                             width: 48,
                             height: 48,
@@ -348,17 +346,17 @@ function Register() {
                             mb: 2,
                             background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
                         }}>
-                            <SmsIcon />
+                            <SmsIcon/>
                         </Avatar>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 500 }}>
+                        <Typography variant="h5" component="div" sx={{fontWeight: 500}}>
                             SMS Doğrulama
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
                             Telefon numaranıza gönderilen 6 haneli doğrulama kodunu giriniz
                         </Typography>
                     </DialogTitle>
 
-                    <DialogContent sx={{ pt: 2 }}>
+                    <DialogContent sx={{pt: 2}}>
                         <TextField
                             autoFocus
                             label="Doğrulama Kodu"
@@ -390,14 +388,14 @@ function Register() {
                             <Typography
                                 variant="body2"
                                 color={verificationMessage.includes('başarıyla') ? 'success.main' : 'error.main'}
-                                sx={{ mt: 2, textAlign: 'center', fontWeight: 500 }}
+                                sx={{mt: 2, textAlign: 'center', fontWeight: 500}}
                             >
                                 {verificationMessage}
                             </Typography>
                         )}
                     </DialogContent>
 
-                    <DialogActions sx={{ px: 3, pb: 3, pt: 1, flexDirection: 'column', gap: 1 }}>
+                    <DialogActions sx={{px: 3, pb: 3, pt: 1, flexDirection: 'column', gap: 1}}>
                         <Button
                             onClick={handleVerifyCode}
                             variant="contained"
@@ -419,7 +417,7 @@ function Register() {
                         <Button
                             onClick={handleCloseVerificationDialog}
                             color="primary"
-                            sx={{ textTransform: "none" }}
+                            sx={{textTransform: "none"}}
                         >
                             İptal
                         </Button>

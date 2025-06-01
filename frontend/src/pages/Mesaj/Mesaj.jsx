@@ -189,7 +189,7 @@ export default function Mesaj() {
             const responses = await Promise.all(promises);
 
             const newUnreadCounts = danisanList.reduce((acc, danisan, index) => {
-                acc[danisan.id] = responses[index]?.data.unreadMessageCount|| 0;
+                acc[danisan.id] = responses[index]?.data.unreadMessageCount || 0;
                 return acc;
             }, {});
 
@@ -198,7 +198,6 @@ export default function Mesaj() {
             console.error("Okunmamış mesaj sayısını alırken hata:", error);
         }
     }, [danisanList]);
-
 
 
     useEffect(() => {
