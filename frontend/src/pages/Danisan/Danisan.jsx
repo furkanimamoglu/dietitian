@@ -768,6 +768,9 @@ function Danisan() {
         bel: '',
         kalca: '',
         gogus: '',
+        digergogus: '',
+        kol: '',
+        bacak: '',
         yag: '',
         kas: '',
         su: ''
@@ -792,6 +795,9 @@ function Danisan() {
             bel: '',
             kalca: '',
             gogus: '',
+            diger: '',
+            kol: '',
+            bacak: '',
             yag: '',
             kas: '',
             su: ''
@@ -2029,7 +2035,7 @@ function Danisan() {
                         <Typography variant="h5" sx={{mb: 3, fontWeight: 'bold', color: theme.palette.primary.main}}>
                         </Typography>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} md={8}>
                                 <Card elevation={3} sx={{height: '100%'}}>
                                     <CardHeader
                                         title="Vücut Ölçümleri"
@@ -2072,6 +2078,7 @@ function Danisan() {
                                                             <TableCell align="right">Bel (cm)</TableCell>
                                                             <TableCell align="right">Kalça (cm)</TableCell>
                                                             <TableCell align="right">Göğüs (cm)</TableCell>
+                                                            <TableCell align="right">Göğüs (cm)</TableCell>
                                                             <TableCell align="right">Kol (cm)</TableCell>
                                                             <TableCell align="right">Bacak (cm)</TableCell>
                                                             <TableCell align="right">Yağ (%)</TableCell>
@@ -2096,6 +2103,8 @@ function Danisan() {
                                                                     align="right">{measurement.kalca || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.gogus || '-'}</TableCell>
+                                                                <TableCell
+                                                                    align="right">{measurement.gogusdiger || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.kol || '-'}</TableCell>
                                                                 <TableCell
@@ -2133,7 +2142,7 @@ function Danisan() {
                                     </CardContent>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} md={4}>
                                 <Card elevation={3} sx={{height: '100%'}}>
                                     <CardHeader
                                         title="Vücut Analizi"
@@ -4337,7 +4346,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.bel}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4351,7 +4359,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.kalca}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4365,7 +4372,45 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.gogus}
                                     onChange={handleMeasurementFormChange}
-                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Göğüs Çevresi"
+                                    name="digergogus"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.digergogus}
+                                    onChange={handleMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kol Çevresi"
+                                    name="kol"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.kol}
+                                    onChange={handleMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bacak Çevresi"
+                                    name="bacak"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.bacak}
+                                    onChange={handleMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
