@@ -43,7 +43,7 @@
 
 .nav-button.active::after {
     height: 4px !important;
-    background: linear-gradient(90deg, rgb(253, 146, 0) 0%, rgb(186, 115, 24) 50%, rgb(253, 146, 0) 100%) !important;
+    background: linear-gradient(90deg, rgb(253, 146, 0) 0%, rgb(255, 158, 39) 50%, rgb(253, 146, 0) 100%) !important;
     box-shadow: 0 1px 3px rgba(71, 145, 64, 0.4);
 }
 
