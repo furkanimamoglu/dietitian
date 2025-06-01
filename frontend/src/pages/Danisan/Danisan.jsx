@@ -2072,8 +2072,8 @@ function Danisan() {
                                                             <TableCell align="right">Boy (cm)</TableCell>
                                                             <TableCell align="right">Kilo (kg)</TableCell>
                                                             <TableCell align="right">Bel (cm)</TableCell>
+                                                            <TableCell align="right">Bel (cm)</TableCell>
                                                             <TableCell align="right">Kalça (cm)</TableCell>
-                                                            <TableCell align="right">Göğüs (cm)</TableCell>
                                                             <TableCell align="right">Göğüs (cm)</TableCell>
                                                             <TableCell align="right">Kol (cm)</TableCell>
                                                             <TableCell align="right">Bacak (cm)</TableCell>
@@ -4349,6 +4349,19 @@ function Danisan() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
+                                    label="Bel Çevresi"
+                                    name="digerbel"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.digerbel}
+                                    onChange={handleMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
                                     label="Kalça Çevresi"
                                     name="kalca"
                                     type="number"
@@ -4367,19 +4380,6 @@ function Danisan() {
                                     type="number"
                                     fullWidth
                                     value={measurementForm.gogus}
-                                    onChange={handleMeasurementFormChange}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Göğüs Çevresi"
-                                    name="digergogus"
-                                    type="number"
-                                    fullWidth
-                                    value={measurementForm.digergogus}
                                     onChange={handleMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
@@ -4519,6 +4519,19 @@ function Danisan() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
+                                    label="Bel Çevresi"
+                                    name="digerbel"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.digerbel}
+                                    onChange={handleEditMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
                                     label="Kalça Çevresi"
                                     name="kalca"
                                     type="number"
@@ -4537,19 +4550,6 @@ function Danisan() {
                                     type="number"
                                     fullWidth
                                     value={editMeasurementForm.gogus}
-                                    onChange={handleEditMeasurementFormChange}
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="Göğüs Çevresi"
-                                    name="digergogus"
-                                    type="number"
-                                    fullWidth
-                                    value={editMeasurementForm.digergogus}
                                     onChange={handleEditMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,

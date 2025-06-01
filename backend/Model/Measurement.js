@@ -74,7 +74,7 @@ const Measurement = sequelize.define('Measurement', {
         type: DataTypes.BIGINT,
         allowNull: true,
     },
-    gogusdiger: {
+    digerbel: {
         type: DataTypes.BIGINT,
         allowNull: true,
     },
