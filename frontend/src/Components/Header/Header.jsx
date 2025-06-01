@@ -298,7 +298,7 @@ export default function Header() {
                             src="/logo.png"
                             alt="Diyetia Logo"
                             sx={{
-                                height: isMobile ? '2.5rem' : '5rem',
+                                height: isMobile ? '2.5rem' : '6rem',
                                 width: 'auto',
                                 objectFit: 'contain',
                                 opacity: 0.8,
