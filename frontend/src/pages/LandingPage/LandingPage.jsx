@@ -9,7 +9,7 @@ export default function LandingPage() {
                 title="Landing Page Content"
                 style={{
                     width: '100%',
-                    height: '100vh',
+                    height: '99vh',
                     border: 'none',
                     overflowX: 'hidden',
                     overflowY: 'auto'

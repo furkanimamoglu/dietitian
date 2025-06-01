@@ -256,7 +256,7 @@ export default function Header() {
         <AppBar
             position="fixed"
             sx={{
-                background: isMobile ? mobileGradient : '#2e7d32',
+                background: isMobile ? mobileGradient : 'linear-gradient(135deg, #fc9e21  0%, #ff7355 50%, #fc9e21 100%)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             }}
         >
@@ -275,37 +275,40 @@ export default function Header() {
                     )}
 
                     {/* Logo / Marka Adı */}
-                    <LogoContainer
+                    <Box
                         onClick={() => navigate('/anasayfa')}
-                        isMobile={isMobile}
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            cursor: 'pointer'
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            backgroundColor: '#f8f7f1', // Bej rengi
+                            padding: isMobile ? '6px 12px' : '15px 30px',
+                            borderRadius: '50%', // Oval şekil
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            },
+                            // Logoyu sol üste konumlandırmak için ek stiller (isteğe bağlı, kapsayıcıya bağlı)
+                            position: 'absolute', // Veya 'fixed' eğer viewport'a göre konumlandırma isteniyorsa
+                            top: '20px',
+                            left: '20px',
+                            zIndex: 1000, // Diğer elementlerin üzerinde görünmesini sağlar
                         }}
                     >
-                        <SpaIcon
+                        <Box
+                            component="img"
+                            src="/logo.png" // Public klasöründeki logonuzun yolu
+                            alt="Diyetia Logo"
                             sx={{
-                                display: 'flex',
-                                ml: { xs: 0, md: 4 },
-                                mr: 1,
-                                color: 'white',
-                                fontSize: isMobile ? 22 : 24
+                                height: "5rem",
+                                width: "auto",
+                                objectFit: "contain",
+                                opacity: 0.8, // Hafif şeffaflık
                             }}
                         />
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: isMobile ? '1rem' : '1.25rem',
-                                letterSpacing: 1,
-                                color: 'white',
-                                fontFamily: 'Montserrat, sans-serif'
-                            }}
-                        >
-                            Diyetia
-                        </Typography>
-                    </LogoContainer>
+                    </Box>
 
                     {/* Desktop Search Bar */}
                     {!isMobile && (

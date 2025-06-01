@@ -46,7 +46,7 @@ export default function Navbar() {
             <Box
                 className={`desktop-navbar ${scrolled ? "scrolled" : ""}`}
                 sx={{
-                    backgroundColor: scrolled ? "rgba(238,255,238,0.95)" : "rgb(238,255,238)",
+                    backgroundColor: "#ffd5c24a",
                     display: {xs: "none", md: "flex"},
                     position: 'sticky',
                     top: '65px',
@@ -78,16 +78,16 @@ export default function Navbar() {
                                         my: 2,
                                         mx: 1.5,
                                         fontWeight: isActive ? "600" : "500",
-                                        color: isActive ? "rgb(10,50,8)" : "rgb(14,62,10)",
+                                        color: isActive ? "#ff7355" : "#bd6b00",
                                         display: "flex",
                                         alignItems: "center",
                                         padding: "8px 16px",
                                         borderRadius: "30px",
                                         backgroundColor: isActive
-                                            ? "rgba(71,145,64,0.2)"
+                                            ? "rgba(255,115,85,0.18)"
                                             : "transparent",
                                         "&:hover": {
-                                            backgroundColor: "rgba(71,145,64,0.1)",
+                                            backgroundColor: "rgba(255,115,85,0.13)",
                                             boxShadow: "0 4px 8px rgba(71,145,64,0.15)",
                                         },
                                         transition: "all 0.3s ease",
@@ -101,13 +101,13 @@ export default function Navbar() {
                                             left: "15%",
                                             width: "70%",
                                             height: "3px",
-                                            backgroundColor: "rgb(71,145,64)",
+                                            backgroundColor: "ff7355",
                                             borderRadius: "10px",
                                             zIndex: -1,
                                         } : {},
                                     }}
                                 >
-                                    <Box sx={{mr: 1, color: isActive ? "rgb(71,145,64)" : "inherit"}}>
+                                    <Box sx={{mr: 1, color: isActive ? "ff7355" : "inherit"}}>
                                         {page.icon}
                                     </Box>
                                     <Box sx={{fontWeight: "bold"}}>{page.name}</Box>
