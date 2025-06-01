@@ -2072,6 +2072,8 @@ function Danisan() {
                                                             <TableCell align="right">Bel (cm)</TableCell>
                                                             <TableCell align="right">Kalça (cm)</TableCell>
                                                             <TableCell align="right">Göğüs (cm)</TableCell>
+                                                            <TableCell align="right">Kol (cm)</TableCell>
+                                                            <TableCell align="right">Bacak (cm)</TableCell>
                                                             <TableCell align="right">Yağ (%)</TableCell>
                                                             <TableCell align="right">Kas (%)</TableCell>
                                                             <TableCell align="right">Su (%)</TableCell>
@@ -2094,6 +2096,10 @@ function Danisan() {
                                                                     align="right">{measurement.kalca || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.gogus || '-'}</TableCell>
+                                                                <TableCell
+                                                                    align="right">{measurement.kol || '-'}</TableCell>
+                                                                <TableCell
+                                                                    align="right">{measurement.bacak || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.yag || '-'}</TableCell>
                                                                 <TableCell

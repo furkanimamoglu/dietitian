@@ -152,10 +152,10 @@ export default function Header() {
     };
 
     const handleMenuItemClick = (value) => {
-        if (value === '/cikisyap') {
+        if (value === 'cikisyap') {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
-            navigate('/girisyap');
+            navigate('girisyap');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
         } else if (value === 'odeme') {
