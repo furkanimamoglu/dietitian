@@ -88,63 +88,15 @@ const Measurement = sequelize.define('Measurement', {
     },
     yag: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Vücut yağ oranı bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [1],
-                msg: "Vücut yağ oranı en az %1 olmalıdır."
-            },
-            max: {
-                args: [70],
-                msg: "Vücut yağ oranı en fazla %70 olmalıdır."
-            },
-            notNull: {
-                msg: "Vücut yağ oranı gereklidir."
-            }
-        }
+        allowNull: true
     },
     kas: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Kas kütlesi bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Kas kütlesi en az %10 olmalıdır."
-            },
-            max: {
-                args: [80],
-                msg: "Kas kütlesi en fazla %80 olmalıdır."
-            },
-            notNull: {
-                msg: "Kas kütlesi gereklidir."
-            }
-        }
+        allowNull: true
     },
     su: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Vücut su oranı bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [20],
-                msg: "Vücut su oranı en az %20 olmalıdır."
-            },
-            max: {
-                args: [90],
-                msg: "Vücut su oranı en fazla %90 olmalıdır."
-            },
-            notNull: {
-                msg: "Vücut su oranı gereklidir."
-            }
-        }
+        allowNull: true
     }
 });
 

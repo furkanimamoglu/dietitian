@@ -4420,7 +4420,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.yag}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4434,7 +4433,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.kas}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4448,7 +4446,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.su}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4515,7 +4512,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.bel}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4529,7 +4525,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.kalca}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4543,7 +4538,45 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.gogus}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Göğüs Çevresi"
+                                    name="digergogus"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.digergogus}
+                                    onChange={handleEditMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kol Çevresi"
+                                    name="kol"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.kol}
+                                    onChange={handleEditMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bacak Çevresi"
+                                    name="bacak"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.bacak}
+                                    onChange={handleEditMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4557,7 +4590,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.yag}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4571,7 +4603,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.kas}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4585,7 +4616,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.su}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
