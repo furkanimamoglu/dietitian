@@ -1588,6 +1588,28 @@ export default function Beslenme() {
             });
     };
 
+    const setDateRange = (weeks) => {
+        const today = new Date();
+        const start = new Date(today);
+        const end = new Date(today);
+
+        if (weeks === 'month') {
+            end.setMonth(end.getMonth() + 1);
+        } else {
+            end.setDate(end.getDate() + (7 * weeks));
+        }
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
+    };
+
     return (
         <Default>
             <div className="beslenme-container">
@@ -1928,6 +1950,41 @@ export default function Beslenme() {
                     </p>
                     <div className="input-container">
                         <label htmlFor="userSelect">Danışan Seçin</label>
+                        <div className="date-period-buttons">
+                            <Typography variant="h5" sx={{mb: 1, mt: 2}}>
+                                Hızlı Süre Seç:
+                            </Typography>
+                            <Stack direction="row" spacing={1} sx={{mb: 2}}>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(1)}
+                                >
+                                    1 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(2)}
+                                >
+                                    2 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(3)}
+                                >
+                                    3 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange('month')}
+                                >
+                                    1 Ay
+                                </Button>
+                            </Stack>
+                        </div>
                         <select
                             id="userSelect"
                             className="text-input"
