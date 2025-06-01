@@ -316,8 +316,8 @@ const AnaSayfa = ({navigation}: Props) => {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={['#2e7d32']}
-                        tintColor={'#2e7d32'}
+                        colors={['#fc9e21']}
+                        tintColor={'#fc9e21'}
                     />
                 }
             >
@@ -635,12 +635,6 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 12,
         color: '#757575',
-        marginBottom: 4
-    },
-    welcomeText: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#2e7d32',
         marginBottom: 4
     },
     subText: {

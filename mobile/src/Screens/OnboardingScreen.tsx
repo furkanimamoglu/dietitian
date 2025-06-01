@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 40,
-        shadowColor: "#FF6B00",
+        shadowColor: "#fc9e21",
         shadowOffset: {
             width: 0,
             height: 4,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 4,
     },
     activeDot: {
-        backgroundColor: '#FF6B00',
+        backgroundColor: '#fc9e21',
         width: 24,
         height: 8,
         borderRadius: 4,
@@ -190,11 +190,11 @@ const styles = StyleSheet.create({
     nextButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FF6B00',
+        backgroundColor: '#fc9e21',
         paddingVertical: 14,
         paddingHorizontal: 24,
         borderRadius: 30,
-        shadowColor: "#FF6B00",
+        shadowColor: "#fc9e21",
         shadowOffset: {
             width: 0,
             height: 4,

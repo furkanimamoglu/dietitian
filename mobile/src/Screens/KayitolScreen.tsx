@@ -175,7 +175,7 @@ const KayitolScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <StatusBar backgroundColor="#F57C00" barStyle="light-content"/>
+            <StatusBar backgroundColor="#fc9e21" barStyle="light-content"/>
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -189,11 +189,11 @@ const KayitolScreen: React.FC = () => {
                         style={styles.backButton}
                         onPress={() => navigation.goBack()}
                     >
-                        <Icon name="arrow-left" size={24} color="#F57C00"/>
+                        <Icon name="arrow-left" size={24} color="#fc9e21"/>
                     </TouchableOpacity>
 
                     <View style={styles.headerContainer}>
-                        <Icon name="account-plus" size={50} color="#F57C00" style={styles.icon}/>
+                        <Icon name="account-plus" size={50} color="#fc9e21" style={styles.icon}/>
                         <Text style={styles.header}>Hesap Oluştur</Text>
                     </View>
 
@@ -207,7 +207,7 @@ const KayitolScreen: React.FC = () => {
                                 autoCapitalize="words"
                                 style={styles.input}
                                 outlineColor={nameError ? "#FF0000" : "#DDD"}
-                                activeOutlineColor={nameError ? "#FF0000" : "#F57C00"}
+                                activeOutlineColor={nameError ? "#FF0000" : "#fc9e21"}
                                 left={<TextInput.Icon icon="account" color="#AAA"/>}
                             />
                             {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
@@ -226,7 +226,7 @@ const KayitolScreen: React.FC = () => {
                               }}
                               style={styles.input}
                               outlineColor={mailError ? "#FF0000" : "#DDD"}
-                              activeOutlineColor={mailError ? "#FF0000" : "#F57C00"}
+                              activeOutlineColor={mailError ? "#FF0000" : "#fc9e21"}
                               left={<TextInput.Icon icon="email" color="#AAA" />}
                             />
                             {mailError ? <Text style={styles.errorText}>{mailError}</Text> : null}
@@ -243,7 +243,7 @@ const KayitolScreen: React.FC = () => {
                                 left={<TextInput.Affix text="+90"/>}
                                 style={styles.input}
                                 outlineColor={phoneError ? "#FF0000" : "#DDD"}
-                                activeOutlineColor={phoneError ? "#FF0000" : "#F57C00"}
+                                activeOutlineColor={phoneError ? "#FF0000" : "#fc9e21"}
                             />
                             {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
@@ -276,12 +276,12 @@ const KayitolScreen: React.FC = () => {
                                 onChangeText={setPassword}
                                 style={styles.input}
                                 outlineColor={passwordError ? "#FF0000" : "#DDD"}
-                                activeOutlineColor={passwordError ? "#FF0000" : "#F57C00"}
+                                activeOutlineColor={passwordError ? "#FF0000" : "#fc9e21"}
                                 right={
                                     <TextInput.Icon
                                         icon={securePassword ? 'eye' : 'eye-off'}
                                         onPress={() => setSecurePassword(!securePassword)}
-                                        color="#F57C00"
+                                        color="#fc9e21"
                                     />
                                 }
                             />
@@ -295,12 +295,12 @@ const KayitolScreen: React.FC = () => {
                                 onChangeText={setConfirmPassword}
                                 style={styles.input}
                                 outlineColor={confirmPasswordError ? "#FF0000" : "#DDD"}
-                                activeOutlineColor={confirmPasswordError ? "#FF0000" : "#F57C00"}
+                                activeOutlineColor={confirmPasswordError ? "#FF0000" : "#fc9e21"}
                                 right={
                                     <TextInput.Icon
                                         icon={secureConfirmPassword ? 'eye' : 'eye-off'}
                                         onPress={() => setSecureConfirmPassword(!secureConfirmPassword)}
-                                        color="#F57C00"
+                                        color="#fc9e21"
                                     />
                                 }
                             />
@@ -370,8 +370,6 @@ const KayitolScreen: React.FC = () => {
         </View>
     );
 };
-
-const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
     container: {
@@ -453,7 +451,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     dietitianNotFound: {
-        color: '#FF9800',
+        color: '#fc9e21',
         marginLeft: 8,
         fontWeight: '500',
     },
@@ -481,7 +479,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     loginTextBold: {
-        color: '#F57C00',
+        color: '#fc9e21',
         fontWeight: 'bold',
     },
     errorText: {

@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     loginTextBold: {
-        color: '#F57C00',
+        color: '#fc9e21',
         fontWeight: 'bold',
     },
 });

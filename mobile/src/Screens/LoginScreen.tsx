@@ -22,7 +22,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({navigation}: Props) => {
     const theme = useTheme();
-    const [clientInfo, setClientInfo] = useState({});
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [secure, setSecure] = useState(true);
@@ -45,11 +44,10 @@ const LoginScreen = ({navigation}: Props) => {
                     useNativeDriver: true
                 })
             ]).start(() => {
-                // Clear message only after animation fades out
                 setErrorMessage(null);
             });
         }
-    }, [errorMessage, errorOpacity]); // Include errorOpacity in dependencies
+    }, [errorMessage, errorOpacity]);
 
     const handleChange = (text: string) => {
         const digits = text.replace(/[^0-9]/g, "").slice(0, 10);
@@ -123,16 +121,7 @@ const LoginScreen = ({navigation}: Props) => {
         }
     };
 
-
-    // handleDietitianLogin is not used in the UI, but keeping it for completeness
-    const handleDietitianLogin = () => {
-        console.log('Diyetisyen girişine yönlendir');
-        // You might want to add navigation logic here if a button existed
-    };
-
     const ErrorMessage = () => {
-        // errorMessage is cleared by the useEffect animation sequence
-        // The component will render null when errorMessage is null
         if (!errorMessage) return null;
 
         return (
@@ -152,7 +141,6 @@ const LoginScreen = ({navigation}: Props) => {
 
     return (
         <View style={styles.container}>
-            {/* Changed StatusBar background to match theme/logo color for consistency */}
             <StatusBar backgroundColor="#F57C00" barStyle="light-content"/>
 
             <KeyboardAvoidingView
@@ -297,7 +285,7 @@ const styles = StyleSheet.create({
     },
     title: {
         textAlign: 'center',
-        color: '#F57C00', // Orange color
+        color: '#fc9e21', // Orange color
         fontWeight: '700',
         marginBottom: 4,
     },
@@ -358,7 +346,7 @@ const styles = StyleSheet.create({
         marginBottom: 20, // Increased margin
     },
     forgotText: {
-        color: '#F57C00', // Orange color
+        color: '#fc9e21', // Orange color
         fontSize: 14,
     },
     loginButton: {
@@ -390,7 +378,7 @@ const styles = StyleSheet.create({
     registerButton: {
         marginBottom: 16, // Added margin bottom
         borderRadius: 8,
-        borderColor: '#F57C00', // Orange border
+        borderColor: '#fc9e21', // Orange border
         borderWidth: 1.5, // Slightly thicker border
     },
     dietitianButton: {

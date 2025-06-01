@@ -68,47 +68,6 @@ const Mesaj = ({navigation}) => {
         }
     };
 
-    const checkForNewMessages = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                console.error('Token Bulunamadı');
-                return;
-            }
-
-            const response = await fetch(`${config[config.environment].apiUrl}/message/getMyMessages`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.status === 500) {
-                return;
-            }
-
-            const data = await response.json();
-
-            if (data && Array.isArray(data)) {
-                setMessages(prevMessages => {
-                    const currentMessageIds = new Set(prevMessages.map(msg => msg.id));
-
-                    const newMessages = data.filter(msg => !currentMessageIds.has(msg.id));
-
-                    if (newMessages.length > 0) {
-                        console.log(`${newMessages.length} yeni mesaj bulundu`);
-                        return [...prevMessages, ...newMessages];
-                    }
-
-                    return prevMessages;
-                });
-            }
-        } catch (err) {
-            console.error('Error: checkForNewMessages ', err);
-        }
-    };
-
     const fetchClientInfo = async () => {
         try {
             const response = await fetch(`${config[config.environment].apiUrl}/client/getClientInfo`, {
@@ -494,7 +453,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     sendButton: {
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         borderRadius: 25,
         width: 45,
         height: 45,

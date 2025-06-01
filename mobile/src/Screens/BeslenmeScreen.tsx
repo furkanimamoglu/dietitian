@@ -101,7 +101,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
             const data = await response.json();
 
-            // Check if response contains showOnScreen and message
             if (data.showOnScreen && data.message) {
                 setError(data.message);
                 setIsEmpty(true);
@@ -109,37 +108,28 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Store the nutrition plan ID for later use
             if (data.nutrition_plan_id) {
                 setNutritionPlanId(data.nutrition_plan_id);
             } else if (data.NutritionPlan && data.NutritionPlan.id) {
                 setNutritionPlanId(data.NutritionPlan.id);
             }
 
-            // Get current day of the week in Turkish
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            console.log('Today is:', today, 'Day in Turkish:', todayTurkish);
-
-            // Find the meal plan data - handle different response structures
             let mealPlanData = null;
 
-            // Option 1: Direct mealPlan property
             if (data.mealPlan) {
                 console.log('Found mealPlan directly in response');
                 mealPlanData = data.mealPlan;
             }
-            // Option 2: Inside NutritionPlan object
             else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
                 console.log('Found mealPlan inside NutritionPlan object');
                 mealPlanData = data.NutritionPlan.mealPlan;
             }
-            // Option 3: The entire response is the meal plan
             else if (data.Kahvaltı || data['Öğle Yemeği'] || data['Akşam Yemeği'] || data.Aparatif) {
                 console.log('The response itself appears to be the meal plan for a day');
-                // In this case, the response is already the day plan
                 updateMealsFromPlan(data);
                 setLoading(false);
                 return;
@@ -148,12 +138,10 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             if (mealPlanData) {
                 console.log('Available days in meal plan:', Object.keys(mealPlanData));
 
-                // Check if we have a meal plan for today
                 if (mealPlanData[todayTurkish]) {
                     console.log('Found meal plan for today:', JSON.stringify(mealPlanData[todayTurkish], null, 2));
                     updateMealsFromPlan(mealPlanData[todayTurkish]);
                 } else {
-                    // For debugging: let's try to look for any day's meal plan
                     const anyDay = Object.keys(mealPlanData)[0];
                     if (anyDay) {
                         console.log('No meal plan for today, using first available day instead:', anyDay);
@@ -189,47 +177,37 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             Aperatifler: []
         };
 
-        // Helper function to process meal items from various formats
         const processMealItems = (mealData: any, mealType: string) => {
             if (!mealData) return;
 
-            // Get the main items depending on format
             let mainItems: string[] = [];
             let alternatives: { [key: string]: string[] } = {};
             let checkedItems: { [key: string]: boolean } = {};
 
-            // New format with 'isim' and 'yenildi' fields
             if (Array.isArray(mealData) && mealData.length > 0 && mealData[0].hasOwnProperty('isim')) {
                 mainItems = mealData.map(item => item.isim);
-                // Store the checked status for each item
                 mealData.forEach(item => {
                     checkedItems[item.isim] = item.yenildi;
                 });
             }
-            // Complex format with main and alternatives
             else if (mealData.main && Array.isArray(mealData.main)) {
                 mainItems = [...mealData.main];
                 alternatives = mealData.alternatives || {};
             }
-            // Simple array format
             else if (Array.isArray(mealData)) {
                 mainItems = [...mealData];
             }
-            // String format (backward compatibility)
             else if (typeof mealData === 'string') {
                 mainItems = mealData.split(', ').map(item => item.trim()).filter(item => item !== '');
             }
 
-            // Convert to MealItem format
             const targetMeal = convertApiMealNameToAppMealName(mealType);
             if (targetMeal && newMeals[targetMeal]) {
-                // Add each main item with its alternatives
                 newMeals[targetMeal] = mainItems.map(item => {
-                    // Find alternatives for this specific item if they exist
                     const itemAlternatives = alternatives[item] || [];
                     return {
                         item,
-                        checked: checkedItems[item] || false, // Use the stored check status
+                        checked: checkedItems[item] || false,
                         portion: '1 porsiyon',
                         alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
                     };
@@ -237,7 +215,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
         };
 
-        // Convert API meal names to app meal names
         const convertApiMealNameToAppMealName = (apiMealName: string): string => {
             switch (apiMealName) {
                 case 'Kahvaltı':
@@ -253,7 +230,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
         };
 
-        // Process each meal type
         if (dayPlan.Kahvaltı) {
             processMealItems(dayPlan.Kahvaltı, 'Kahvaltı');
         }
@@ -278,7 +254,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         newMeals[mealType][index].checked = !newMeals[mealType][index].checked;
         setMeals(newMeals);
 
-        // Update the meal plan on the server with the new yenildi status
         updateMealPlanOnServer(newMeals);
     };
 
@@ -302,26 +277,22 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             setNewPortion('');
             setModalVisible(false);
 
-            // Update the meal plan on the server
             updateMealPlanOnServer(updatedMeals);
         }
     };
 
     const updateMealPlanOnServer = async (updatedMeals: { [key: string]: MealItem[] }) => {
         try {
-            // If we don't have a nutrition plan ID, we can't update
             if (nutritionPlanId === null) {
                 console.error('Nutrition plan ID is missing, cannot update meal plan');
                 Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
                 return;
             }
 
-            // Get current day of the week in Turkish
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            // Convert app meal names to API meal names
             const convertAppMealNameToApiMealName = (appMealName: string): string => {
                 switch (appMealName) {
                     case 'Kahvaltı':
@@ -337,7 +308,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 }
             };
 
-            // Create the updated meal plan structure for today
             const updatedDayPlan: DailyMealPlan = {
                 Kahvaltı: [],
                 'Öğle Yemeği': [],
@@ -345,11 +315,9 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 Aparatif: []
             };
 
-            // Convert each meal type to the API format
             Object.entries(updatedMeals).forEach(([mealType, items]) => {
                 const apiMealType = convertAppMealNameToApiMealName(mealType);
                 if (apiMealType) {
-                    // Convert the items to the new format with 'isim' and 'yenildi' fields
                     updatedDayPlan[apiMealType as keyof DailyMealPlan] = items.map(item => ({
                         isim: item.item,
                         yenildi: item.checked
@@ -357,7 +325,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 }
             });
 
-            // Prepare the data to be sent to the server
             const mealPlanUpdate = {
                 nutrition_plan_id: nutritionPlanId,
                 mealPlan: {
@@ -365,7 +332,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 }
             };
 
-            console.log('Updating meal plan:', mealPlanUpdate);
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
@@ -407,51 +373,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (waterIntake > 0) {
             setWaterIntake(waterIntake - 1);
         }
-    };
-
-    const renderWaterTracker = () => {
-        return (
-            <Surface style={styles.waterCard}>
-                <View style={styles.waterHeader}>
-                    <Avatar.Icon
-                        size={40}
-                        icon="water"
-                        color="#2196F3"
-                        style={{backgroundColor: '#e3f2fd'}}
-                    />
-                    <Text style={styles.waterTitle}>Su Takibi</Text>
-                </View>
-                <Text style={styles.waterSubtitle}>Günlük 8 bardak hedef</Text>
-
-                <View style={styles.waterProgressContainer}>
-                    <TouchableOpacity onPress={reduceWater} style={styles.waterButton}>
-                        <Text style={{color: '#fff', fontWeight: 'bold'}}>-</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.waterBadges}>
-                        {[...Array(maxWaterIntake)].map((_, i) => (
-                            <View
-                                key={i}
-                                style={[
-                                    styles.waterBadge,
-                                    i < waterIntake ? styles.waterBadgeFilled : styles.waterBadgeEmpty
-                                ]}
-                            >
-                                <Text style={{color: i < waterIntake ? "#fff" : "#bde0fe"}}>💧</Text>
-                            </View>
-                        ))}
-                    </View>
-
-                    <TouchableOpacity onPress={addWater} style={styles.waterButton}>
-                        <Text style={{color: '#fff', fontWeight: 'bold'}}>+</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <Text style={styles.waterCount}>
-                    {waterIntake} / {maxWaterIntake} bardak
-                </Text>
-            </Surface>
-        );
     };
 
     const getCompletionText = () => {
@@ -537,8 +458,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                         <ProgressBar progress={progress} color="#4caf50" style={styles.progressBar}/>
                     </View>
                 </Surface>
-
-                {/*renderWaterTracker()*/}
 
                 {/* Yemek kategorileri */}
                 {Object.entries(meals).map(([mealType, items]) => (
@@ -747,7 +666,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         marginBottom: 16,
         fontSize: 16,
-        color: '#ff9800',
+        color: '#fc9e21',
         textAlign: 'center'
     },
     emptyContainer: {
@@ -758,7 +677,7 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#ff9800',
+        color: '#fc9e21',
         marginBottom: 12
     },
     emptyText: {
@@ -770,7 +689,7 @@ const styles = StyleSheet.create({
     },
     contactButton: {
         marginTop: 16,
-        backgroundColor: '#ff9800',
+        backgroundColor: '#fc9e21',
         paddingHorizontal: 16
     },
     retryButton: {
@@ -890,7 +809,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 16,
         bottom: 70,
-        backgroundColor: '#4caf50'
+        backgroundColor: '#fc9e21'
     },
     dialog: {
         borderRadius: 12
@@ -919,70 +838,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '50%',
         marginVertical: 4
-    },
-    waterCard: {
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 12,
-        elevation: 2
-    },
-    waterHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4
-    },
-    waterTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginLeft: 8,
-        color: '#2196F3'
-    },
-    waterSubtitle: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 12
-    },
-    waterProgressContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginVertical: 8
-    },
-    waterButton: {
-        backgroundColor: '#2196F3',
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    waterBadges: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        marginHorizontal: 8
-    },
-    waterBadge: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    waterBadgeFilled: {
-        backgroundColor: '#2196F3'
-    },
-    waterBadgeEmpty: {
-        backgroundColor: '#e1f5fe',
-        borderWidth: 1,
-        borderColor: '#b3e5fc'
-    },
-    waterCount: {
-        textAlign: 'center',
-        color: '#2196F3',
-        fontSize: 16,
-        fontWeight: '600',
-        marginTop: 8
     },
     statsCard: {
         padding: 16,

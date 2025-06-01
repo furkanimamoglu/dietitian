@@ -418,11 +418,11 @@ const BottomNav = ({navigation}: Props) => {
                                         height: 20,
                                         borderRadius: 10,
                                         borderWidth: 2,
-                                        borderColor: '#f57c00',
+                                        borderColor: '#fc9e21',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginRight: 4,
-                                        backgroundColor: selectedMealType === type ? '#f57c00' : '#fff',
+                                        backgroundColor: selectedMealType === type ? '#fc9e21' : '#fff',
                                     }}>
                                         {selectedMealType === type && <View
                                             style={{width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff'}}/>}
@@ -456,7 +456,7 @@ const BottomNav = ({navigation}: Props) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleAddMeal}
-                                style={[styles.closeButton, {backgroundColor: isSubmitting ? '#ccc' : '#f57c00'}]}
+                                style={[styles.closeButton, {backgroundColor: isSubmitting ? '#ccc' : '#fc9e21'}]}
                                 disabled={isSubmitting}
                             >
                                 <Text style={styles.closeButtonText}>{isSubmitting ? 'Ekleniyor...' : 'Ekle'}</Text>
@@ -494,11 +494,11 @@ const BottomNav = ({navigation}: Props) => {
                                         height: 20,
                                         borderRadius: 10,
                                         borderWidth: 2,
-                                        borderColor: '#f57c00',
+                                        borderColor: '#fc9e21',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginRight: 4,
-                                        backgroundColor: selectedExerciseType === type ? '#f57c00' : '#fff',
+                                        backgroundColor: selectedExerciseType === type ? '#fc9e21' : '#fff',
                                     }}>
                                         {selectedExerciseType === type && <View
                                             style={{width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff'}}/>}
@@ -524,7 +524,7 @@ const BottomNav = ({navigation}: Props) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleAddExercise}
-                                style={[styles.closeButton, {backgroundColor: isExerciseSubmitting ? '#ccc' : '#f57c00'}]}
+                                style={[styles.closeButton, {backgroundColor: isExerciseSubmitting ? '#ccc' : '#fc9e21'}]}
                                 disabled={isExerciseSubmitting}
                             >
                                 <Text
@@ -544,9 +544,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         height: 60,
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         borderTopWidth: 1,
-        borderTopColor: '#e65100',
+        borderTopColor: '#ff7355',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         shadowColor: '#000',
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     },
     plusText: {
         fontSize: 38,
-        color: '#f57c00',
+        color: '#fc9e21',
         marginTop: -2,
     },
     floatingMenuRow: {
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     closeButton: {
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,

@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {
     Animated,
     Dimensions,
-    Image,
     StatusBar,
     StyleSheet,
     Text,
@@ -38,7 +37,6 @@ export default function Header({navigation}: Props) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerAnim] = useState(new Animated.Value(screenWidth));
     const [userName, setUserName] = useState<string>('Yükleniyor...');
-    const [userProfile, setUserProfile] = useState<string>('');
 
     const fetchNotifications = async () => {
         try {
@@ -245,7 +243,7 @@ export default function Header({navigation}: Props) {
 
 const styles = StyleSheet.create({
     appbarContainer: {
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         elevation: 4,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
@@ -346,7 +344,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 12,
-        color: '#f57c00'
+        color: '#fc9e21'
     },
     notificationBox: {
         backgroundColor: '#f3f3f3',
@@ -357,7 +355,7 @@ const styles = StyleSheet.create({
     unreadNotification: {
         backgroundColor: '#fff3e0',
         borderLeftWidth: 4,
-        borderLeftColor: '#f57c00',
+        borderLeftColor: '#fc9e21',
     },
     notificationMessage: {
         fontSize: 14,
