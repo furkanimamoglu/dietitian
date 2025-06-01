@@ -67,9 +67,9 @@ const settings = [
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
-const mobilePrimaryColor = '#2c8d32';
-const mobileGradient = 'linear-gradient(to right, #2c8d32, #40b548)';
-const mobileDrawerHeaderBg = 'linear-gradient(45deg, #2c8d32 30%, #40b548 90%)';
+const mobilePrimaryColor = '#fc9e21';
+const mobileGradient = 'linear-gradient(135deg, #fc9e21 0%, #ff7355 50%, #fc9e21 100%)';
+const mobileDrawerHeaderBg = '#fc9e21';
 
 const SearchContainer = styled('div')(({theme}) => ({
     position: 'relative',
@@ -114,7 +114,6 @@ const MobileSearchIcon = styled(IconButton)(({theme}) => ({
     },
 }));
 
-// Logo container with enhanced styling for mobile
 const LogoContainer = styled(Box, {
     shouldForwardProp: (prop) => prop !== 'isMobile',
 })(({theme, isMobile}) => ({
@@ -282,33 +281,31 @@ export default function Header() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'pointer',
-                            backgroundColor: '#f8f7f1', // Bej rengi
-                            padding: isMobile ? '6px 12px' : '15px 30px',
-                            borderRadius: '50%', // Oval şekil
+                            backgroundColor: '#f8f7f1',
+                            padding: isMobile ? '4px 8px' : '15px 30px',
+                            borderRadius: isMobile ? '10%' : '50%',
                             boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
                             transition: 'all 0.3s ease',
-                            '&:hover': {
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                            },
-                            // Logoyu sol üste konumlandırmak için ek stiller (isteğe bağlı, kapsayıcıya bağlı)
-                            position: 'absolute', // Veya 'fixed' eğer viewport'a göre konumlandırma isteniyorsa
-                            top: '20px',
-                            left: '20px',
-                            zIndex: 1000, // Diğer elementlerin üzerinde görünmesini sağlar
+                            position: 'absolute',
+                            top: isMobile ? '10px' : '10px',
+                            left: isMobile ? '85%' : '2.5rem',
+                            transform: isMobile ? 'translateX(-50%)' : 'none',
+                            zIndex: 1000,
                         }}
                     >
                         <Box
                             component="img"
-                            src="/logo.png" // Public klasöründeki logonuzun yolu
+                            src="/logo.png"
                             alt="Diyetia Logo"
                             sx={{
-                                height: "5rem",
-                                width: "auto",
-                                objectFit: "contain",
-                                opacity: 0.8, // Hafif şeffaflık
+                                height: isMobile ? '2.5rem' : '5rem',
+                                width: 'auto',
+                                objectFit: 'contain',
+                                opacity: 0.8,
                             }}
                         />
                     </Box>
+
 
                     {/* Desktop Search Bar */}
                     {!isMobile && (
