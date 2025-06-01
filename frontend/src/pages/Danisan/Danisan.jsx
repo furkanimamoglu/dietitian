@@ -115,8 +115,6 @@ const WaterTrackingCard = ({data, clientId}) => {
                     return date.toISOString().split('T')[0];
                 };
 
-                console.log(`Fetching water data for client ${clientId} from ${formatDate(weekStart)} to ${formatDate(today)}`);
-
                 const response = await axios.get(
                     `${config[config.environment].apiUrl}/nutrition/getClientWater`,
                     {
@@ -131,12 +129,10 @@ const WaterTrackingCard = ({data, clientId}) => {
                     }
                 );
 
-                console.log("Water API response:", response.data);
                 setApiResponse(response.data);
 
                 if (response.data) {
                     const processedData = processWaterData(response.data);
-                    console.log("Processed water data:", processedData);
                     setWaterData(prevData => ({
                         ...prevData,
                         weeklyData: processedData
