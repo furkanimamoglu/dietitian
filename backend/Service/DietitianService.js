@@ -117,7 +117,7 @@ class DietitianService {
             }
 
             const dietitian = await Dietitian.findOne({
-                where: { email: mail }
+                where: {email: mail}
             });
 
             if (!dietitian) {
@@ -137,7 +137,7 @@ class DietitianService {
                 verificationCodeExpires: null
             });
 
-            return { status: "success", message: 'E-posta başarıyla doğrulandı.' };
+            return {status: "success", message: 'E-posta başarıyla doğrulandı.'};
         } catch (error) {
             throw new Exception(error.message || 'Bir hata oluştu.', 400);
         }
@@ -189,7 +189,7 @@ class DietitianService {
                 throw new Exception("Telefon numarası gereklidir.", 400, true);
             }
 
-            await dietitian.update({ phoneNumber });
+            await dietitian.update({phoneNumber});
 
             return dietitian;
         } catch (error) {
@@ -213,7 +213,7 @@ class DietitianService {
                 throw new Exception("E-posta adresi gereklidir.", 400, true);
             }
 
-            await dietitian.update({ email });
+            await dietitian.update({email});
 
             return dietitian;
         } catch (error) {

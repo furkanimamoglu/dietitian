@@ -1,7 +1,12 @@
 const path = require('path');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
-const {NutritionAssignment, NutritionCategory, NutritionPlan, Water} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {
+    NutritionAssignment,
+    NutritionCategory,
+    NutritionPlan,
+    Water
+} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {Op} = require("sequelize");
 
 class NutritionService {
@@ -22,13 +27,13 @@ class NutritionService {
             where: {
                 client_id,
                 ...(start_date && end_date && {
-                    date: { [Op.between]: [start_date, end_date] }
+                    date: {[Op.between]: [start_date, end_date]}
                 }),
                 ...(start_date && !end_date && {
-                    date: { [Op.gte]: start_date }
+                    date: {[Op.gte]: start_date}
                 }),
                 ...(end_date && !start_date && {
-                    date: { [Op.lte]: end_date }
+                    date: {[Op.lte]: end_date}
                 }),
             }
         });

@@ -129,7 +129,7 @@ class DietitianController {
                 });
             }
 
-            const { phoneNumber } = req.body;
+            const {phoneNumber} = req.body;
 
             if (!phoneNumber) {
                 return res.status(400).json({
@@ -161,7 +161,7 @@ class DietitianController {
                 });
             }
 
-            const { email } = req.body;
+            const {email} = req.body;
 
             if (!email) {
                 return res.status(400).json({

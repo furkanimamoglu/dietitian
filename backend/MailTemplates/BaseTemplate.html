@@ -4,7 +4,7 @@ return `
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Diyetia Bilgilendirme</title>
     <style>
         body {
@@ -159,8 +159,14 @@ return `
         }
 
         @media (max-width: 600px) {
-            .container { margin: 10px; }
-            .header, .content { padding: 30px 20px; }
+            .container {
+                margin: 10px;
+            }
+
+            .header, .content {
+                padding: 30px 20px;
+            }
+
             .info-grid {
                 grid-template-columns: 1fr;
             }
@@ -213,7 +219,7 @@ return `
         </div>
 
         <div class="cta-section">
-            <a href="{{CTA_LINK}}" class="cta-button">{{CTA_TEXT}} 🚀</a>
+            <a class="cta-button" href="{{CTA_LINK}}">{{CTA_TEXT}} 🚀</a>
         </div>
     </div>
 

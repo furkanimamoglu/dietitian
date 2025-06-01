@@ -4,7 +4,7 @@ return `
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Diyetia Şifre Sıfırlama</title>
     <style>
         body {
@@ -203,8 +203,14 @@ return `
         }
 
         @media (max-width: 600px) {
-            .container { margin: 10px; }
-            .header, .content { padding: 30px 20px; }
+            .container {
+                margin: 10px;
+            }
+
+            .header, .content {
+                padding: 30px 20px;
+            }
+
             .reset-button {
                 padding: 15px 30px;
                 font-size: 14px;
@@ -233,12 +239,14 @@ return `
 
         <div class="instructions">
             <h3>🔄 Şifrenizi Sıfırlamak İçin:</h3>
-            <p>Hesabınız için yeni bir şifre belirleme talebi aldık. Şifrenizi sıfırlamak için aşağıdaki butona tıklayın.</p>
-            <p>Eğer bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz. Hesabınızda herhangi bir değişiklik yapılmayacaktır.</p>
+            <p>Hesabınız için yeni bir şifre belirleme talebi aldık. Şifrenizi sıfırlamak için aşağıdaki butona
+                tıklayın.</p>
+            <p>Eğer bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz. Hesabınızda herhangi bir
+                değişiklik yapılmayacaktır.</p>
         </div>
 
         <div class="button-container">
-            <a href="${resetLink}" class="reset-button">Şifremi Sıfırla 🔑</a>
+            <a class="reset-button" href="${resetLink}">Şifremi Sıfırla 🔑</a>
         </div>
 
         <div class="timer-warning">

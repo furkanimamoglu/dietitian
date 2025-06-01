@@ -354,7 +354,7 @@ class exerciseController {
                 });
             }
 
-            const { client_id, start_date, end_date } = req.query;
+            const {client_id, start_date, end_date} = req.query;
 
             const result = await ExerciseService.getClientExerciseHistory(dietitian_id, client_id, start_date, end_date);
             res.status(200).json(result);

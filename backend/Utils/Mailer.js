@@ -31,7 +31,7 @@ class Mailer {
                 to,
                 subject,
                 text,
-                ...(html && { html })
+                ...(html && {html})
             };
 
             await Mailer.transporter.sendMail(mailOptions);

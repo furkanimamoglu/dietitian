@@ -66,7 +66,7 @@ class nutritionController {
                 });
             }
 
-            const { start_date, end_date } = req.body;
+            const {start_date, end_date} = req.body;
 
             const result = await NutritionService.getClientWater(client_id, start_date, end_date);
 
@@ -92,7 +92,7 @@ class nutritionController {
                 });
             }
 
-            const { amount } = req.body;
+            const {amount} = req.body;
             const date = moment().format('YYYY-MM-DD');
 
             if (!amount || !date) {
@@ -126,7 +126,7 @@ class nutritionController {
                 });
             }
 
-            const { water_id } = req.query;
+            const {water_id} = req.query;
 
             const result = await NutritionService.deleteClientWater(client_id, water_id);
 
