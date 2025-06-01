@@ -1689,7 +1689,7 @@ export default function Beslenme() {
                     }}
                     className="right-sidebar-panel"
                 >
-                    <Box sx={{padding: '16px 0', backgroundColor: '#fd9200'}}>
+                    <Box sx={{padding: '16px 0', backgroundColor: '#fc9e21'}}>
                         <Typography variant="h6" sx={{
                             textAlign: 'center',
                             color: 'white',
