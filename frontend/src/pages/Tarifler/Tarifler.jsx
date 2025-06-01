@@ -28,9 +28,7 @@ const getYouTubeVideoId = (url) => {
 
 const generatePDF = (recipe) => {
     const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
+        orientation: 'portrait', unit: 'mm', format: 'a4'
     });
 
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.ttf', 'Helvetica', 'normal');
@@ -238,8 +236,7 @@ const generatePDF = (recipe) => {
 
 // Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
-    return (
-        <div
+    return (<div
             className={`category-item ${isChecked ? 'checked' : ''}`}
             onClick={onCheck}
         >
@@ -261,14 +258,12 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
             >
                 <DeleteIcon/>
             </button>
-        </div>
-    );
+        </div>);
 };
 
 // Recipe Card Component
 const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
-    return (
-        <div className="recipe-card">
+    return (<div className="recipe-card">
             <div className="card-image-container" onClick={() => onView(item)}>
                 <img
                     src={item.image || "/placeholder.png"}
@@ -280,30 +275,26 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
                 <h3 className="card-title">{item.title}</h3>
                 <p className="card-description">{item.description}</p>
 
-                {item.nutritional_info && (
+                {item.nutritional_info && Object.values(item.nutritional_info).some((val) => val !== null && val !== undefined && val !== '') && (
                     <div className="card-nutritional-info">
-                        {item.nutritional_info.calories && (
+                        {item.nutritional_info.calories !== null && item.nutritional_info.calories !== undefined && item.nutritional_info.calories !== '' && (
                             <span className="nutri-badge calories">
-                                {item.nutritional_info.calories} Kcal
-                            </span>
-                        )}
-                        {item.nutritional_info.protein && (
+                            {item.nutritional_info.calories} Kcal
+                          </span>)}
+                        {item.nutritional_info.protein !== null && item.nutritional_info.protein !== undefined && item.nutritional_info.protein !== '' && (
                             <span className="nutri-badge protein">
-                                {item.nutritional_info.protein}g Protein
-                            </span>
-                        )}
-                        {item.nutritional_info.carbs && (
+                            {item.nutritional_info.protein}g Protein
+                          </span>)}
+                        {item.nutritional_info.carbs !== null && item.nutritional_info.carbs !== undefined && item.nutritional_info.carbs !== '' && (
                             <span className="nutri-badge carbs">
                                 {item.nutritional_info.carbs}g Karbonhidrat
-                            </span>
-                        )}
-                        {item.nutritional_info.fat && (
-                            <span className="nutri-badge fat">
-                                {item.nutritional_info.fat}g Yağ
-                            </span>
-                        )}
-                    </div>
-                )}
+                              </span>)}
+                        {item.nutritional_info.fat !== null && item.nutritional_info.fat !== undefined && item.nutritional_info.fat !== '' && (
+                                        <span className="nutri-badge fat">
+                        {item.nutritional_info.fat}g Yağ
+                      </span>)}
+                    </div>)}
+
 
                 <div className="card-actions">
                     <button
@@ -329,16 +320,14 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
                     </button>
                 </div>
             </div>
-        </div>
-    );
+        </div>);
 };
 
 // Modal Component
 const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
 
-    return (
-        <div className="modal-overlay">
+    return (<div className="modal-overlay">
             <div className={`modal-container ${fullWidth ? 'full-width' : ''}`}>
                 <div className="modal-header">
                     <h2>{title}</h2>
@@ -350,8 +339,7 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
                     {children}
                 </div>
             </div>
-        </div>
-    );
+        </div>);
 };
 
 export default function Tarifler() {
@@ -382,10 +370,7 @@ export default function Tarifler() {
     const [editCategoryId, setEditCategoryId] = useState('');
     const [editVideoUrl, setEditVideoUrl] = useState('');
     const [editNutritionalInfo, setEditNutritionalInfo] = useState({
-        calories: '',
-        protein: '',
-        carbs: '',
-        fat: ''
+        calories: '', protein: '', carbs: '', fat: ''
     });
 
     // Success popup states
@@ -405,10 +390,7 @@ export default function Tarifler() {
         category_id: '',
         video_url: '',
         nutritional_info: {
-            calories: '',
-            protein: '',
-            carbs: '',
-            fat: ''
+            calories: '', protein: '', carbs: '', fat: ''
         }
     });
 
@@ -499,10 +481,7 @@ export default function Tarifler() {
                     ingredients: recipe.malzemeler,
                     instructions: recipe.hazirlanis,
                     nutritional_info: {
-                        calories: recipe.kcal,
-                        protein: recipe.protein,
-                        carbs: recipe.karbonhidrat,
-                        fat: recipe.yag
+                        calories: recipe.kcal, protein: recipe.protein, carbs: recipe.karbonhidrat, fat: recipe.yag
                     }
                 }));
                 setRecipeData(mappedRecipes);
@@ -521,9 +500,7 @@ export default function Tarifler() {
     }, []);
 
     // Filter categories based on search term
-    const filteredCategories = categoryData?.filter(category =>
-        (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCategories = categoryData?.filter(category => (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase()));
 
     // Filter recipes based on selected categories
     const filteredRecipeData = recipeData.filter(item => {
@@ -537,20 +514,14 @@ export default function Tarifler() {
 
     // Category handlers
     const handleCategoryCheck = (categoryId) => {
-        setCheckedCategories(prev =>
-            prev.includes(categoryId)
-                ? prev.filter(id => id !== categoryId)
-                : [...prev, categoryId]
-        );
+        setCheckedCategories(prev => prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [...prev, categoryId]);
     };
 
     const handleOpenMultiDeleteConfirm = () => {
         if (checkedCategories.length === 0) return;
 
         // Find recipes that would be affected by deleting these categories
-        const recipesToDelete = recipeData.filter(recipe =>
-            checkedCategories.includes(recipe.category_id)
-        );
+        const recipesToDelete = recipeData.filter(recipe => checkedCategories.includes(recipe.category_id));
 
         setAffectedRecipes(recipesToDelete);
         setDeleteMultiCategoriesConfirmModal(true);
@@ -618,8 +589,7 @@ export default function Tarifler() {
         setDeleteConfirmModal(true);
     };
 
-    return (
-        <Default>
+    return (<Default>
             <div className="tarifler-container">
                 {/* Left Panel - Categories */}
                 <div className="categories-panel">
@@ -663,46 +633,33 @@ export default function Tarifler() {
                     </div>
 
                     <div className="categories-list">
-                        {filteredCategories && filteredCategories.length > 0 ? (
-                            filteredCategories.map((category) => (
+                        {filteredCategories && filteredCategories.length > 0 ? (filteredCategories.map((category) => (
                                 <CategoryItem
                                     key={category.id}
                                     category={category}
                                     isChecked={checkedCategories.includes(category.id)}
                                     onCheck={() => handleCategoryCheck(category.id)}
                                     onDelete={handleOpenCategoryDeleteConfirm}
-                                />
-                            ))
-                        ) : (
-                            <div className="no-categories">Kategori bulunamadı.</div>
-                        )}
+                                />))) : (<div className="no-categories">Kategori bulunamadı.</div>)}
                     </div>
                 </div>
 
                 {/* Right Panel - Recipe Cards */}
                 <div className="recipes-panel">
                     <div className="recipe-cards-grid">
-                        {loading ? (
-                            <div className="loading-container">
+                        {loading ? (<div className="loading-container">
                                 <div className="loading-spinner"></div>
                                 <p>Tarifler yükleniyor...</p>
-                            </div>
-                        ) : filteredRecipeData.length > 0 ? (
-                            filteredRecipeData.map((item) => (
-                                <RecipeCard
+                            </div>) : filteredRecipeData.length > 0 ? (filteredRecipeData.map((item) => (<RecipeCard
                                     key={item.id}
                                     item={item}
                                     onPrint={handlePrint}
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewRecipe}
-                                />
-                            ))
-                        ) : (
-                            <div className="no-recipes">
+                                />))) : (<div className="no-recipes">
                                 <p>Bu kategoriye ait tarif bulunamadı.</p>
-                            </div>
-                        )}
+                            </div>)}
                     </div>
                 </div>
             </div>
@@ -714,13 +671,11 @@ export default function Tarifler() {
                 onClose={() => setDetailModal(false)}
             >
                 <div className="recipe-detail-modal">
-                    {detailItem?.image && !getYouTubeVideoId(detailItem.video_url) && (
-                        <img
+                    {detailItem?.image && !getYouTubeVideoId(detailItem.video_url) && (<img
                             src={detailItem.image}
                             alt={detailItem.title}
                             className="recipe-detail-image"
-                        />
-                    )}
+                        />)}
 
                     {detailItem?.video_url && getYouTubeVideoId(detailItem.video_url) && (
                         <div className="recipe-video-container">
@@ -733,53 +688,40 @@ export default function Tarifler() {
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                             ></iframe>
-                        </div>
-                    )}
+                        </div>)}
 
                     <div className="recipe-detail-content">
-                        {detailItem?.description && (
-                            <p className="recipe-description">{detailItem.description}</p>
-                        )}
+                        {detailItem?.description && (<p className="recipe-description">{detailItem.description}</p>)}
 
                         {detailItem?.nutritional_info && (
                             <div className="recipe-detail-section nutritional-info-section">
                                 <h3>Besin Değerleri</h3>
                                 <div className="nutritional-info-grid">
-                                    {detailItem.nutritional_info.calories && (
-                                        <div className="nutritional-info-item">
+                                    {detailItem.nutritional_info.calories && (<div className="nutritional-info-item">
                                             <span className="info-label">Kalori:</span>
                                             <span
                                                 className="info-value">{detailItem.nutritional_info.calories} kcal</span>
-                                        </div>
-                                    )}
-                                    {detailItem.nutritional_info.protein && (
-                                        <div className="nutritional-info-item">
+                                        </div>)}
+                                    {detailItem.nutritional_info.protein && (<div className="nutritional-info-item">
                                             <span className="info-label">Protein:</span>
                                             <span className="info-value">{detailItem.nutritional_info.protein} g</span>
-                                        </div>
-                                    )}
-                                    {detailItem.nutritional_info.carbs && (
-                                        <div className="nutritional-info-item">
+                                        </div>)}
+                                    {detailItem.nutritional_info.carbs && (<div className="nutritional-info-item">
                                             <span className="info-label">Karbonhidrat:</span>
                                             <span className="info-value">{detailItem.nutritional_info.carbs} g</span>
-                                        </div>
-                                    )}
-                                    {detailItem.nutritional_info.fat && (
-                                        <div className="nutritional-info-item">
+                                        </div>)}
+                                    {detailItem.nutritional_info.fat && (<div className="nutritional-info-item">
                                             <span className="info-label">Yağ:</span>
                                             <span className="info-value">{detailItem.nutritional_info.fat} g</span>
-                                        </div>
-                                    )}
+                                        </div>)}
                                 </div>
-                            </div>
-                        )}
+                            </div>)}
 
                         <div className="recipe-detail-section">
                             <h3>Malzemeler</h3>
                             <ul className="recipe-ingredients-list">
                                 {detailItem?.ingredients?.split(',').map((ingredient, index) => (
-                                    <li key={index}>{ingredient.trim()}</li>
-                                ))}
+                                    <li key={index}>{ingredient.trim()}</li>))}
                             </ul>
                         </div>
 
@@ -858,10 +800,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.calories}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            calories: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, calories: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 250"
@@ -875,10 +815,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.protein}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            protein: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, protein: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 15"
@@ -892,10 +830,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.carbs}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            carbs: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, carbs: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 30"
@@ -909,10 +845,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.fat}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            fat: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, fat: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 10"
@@ -955,11 +889,9 @@ export default function Tarifler() {
                             required
                         >
                             <option value="">Kategori Seçin</option>
-                            {categoryData.map(category => (
-                                <option key={category.id} value={category.id}>
+                            {categoryData.map(category => (<option key={category.id} value={category.id}>
                                     {category.name || category.title}
-                                </option>
-                            ))}
+                                </option>))}
                         </select>
                     </div>
                 </div>
@@ -1014,15 +946,11 @@ export default function Tarifler() {
                             };
 
                             // Send POST request to API
-                            axios.post(
-                                `${config[config.environment].apiUrl}/recipe/addRecipe`,
-                                recipeData,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, recipeData, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     // Refresh recipes list
                                     fetchRecipes();
@@ -1040,10 +968,7 @@ export default function Tarifler() {
                                         category_id: '',
                                         video_url: '',
                                         nutritional_info: {
-                                            calories: '',
-                                            protein: '',
-                                            carbs: '',
-                                            fat: ''
+                                            calories: '', protein: '', carbs: '', fat: ''
                                         }
                                     });
                                     setAddRecipeModal(false);
@@ -1104,15 +1029,11 @@ export default function Tarifler() {
                             };
 
                             // Send request to API
-                            axios.post(
-                                `${config[config.environment].apiUrl}/recipe/addRecipeCategory`,
-                                categoryData,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipeCategory`, categoryData, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     // Refresh categories
                                     axios
@@ -1184,20 +1105,15 @@ export default function Tarifler() {
                             }
 
                             // Send DELETE request to API
-                            axios.delete(
-                                `${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     if (response.data.success) {
                                         // Remove deleted recipe from state
-                                        setRecipeData(prevData =>
-                                            prevData.filter(recipe => recipe.id !== itemToDelete.id)
-                                        );
+                                        setRecipeData(prevData => prevData.filter(recipe => recipe.id !== itemToDelete.id));
 
                                         // Show success message
                                         setSuccessMessage(`"${itemToDelete.title}" tarifi başarıyla silindi.`);
@@ -1277,8 +1193,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.calories}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        calories: e.target.value
+                                        ...editNutritionalInfo, calories: e.target.value
                                     })}
                                     placeholder="Örn: 250"
                                 />
@@ -1291,8 +1206,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.protein}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        protein: e.target.value
+                                        ...editNutritionalInfo, protein: e.target.value
                                     })}
                                     placeholder="Örn: 15"
                                 />
@@ -1305,8 +1219,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.carbs}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        carbs: e.target.value
+                                        ...editNutritionalInfo, carbs: e.target.value
                                     })}
                                     placeholder="Örn: 30"
                                 />
@@ -1319,8 +1232,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.fat}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        fat: e.target.value
+                                        ...editNutritionalInfo, fat: e.target.value
                                     })}
                                     placeholder="Örn: 10"
                                 />
@@ -1362,11 +1274,9 @@ export default function Tarifler() {
                             required
                         >
                             <option value="">Kategori Seçin</option>
-                            {categoryData.map(category => (
-                                <option key={category.id} value={category.id}>
+                            {categoryData.map(category => (<option key={category.id} value={category.id}>
                                     {category.name || category.title}
-                                </option>
-                            ))}
+                                </option>))}
                         </select>
                     </div>
                 </div>
@@ -1425,15 +1335,11 @@ export default function Tarifler() {
                             };
 
                             // Send PUT request to API
-                            axios.put(
-                                `${config[config.environment].apiUrl}/recipe/updateRecipe`,
-                                recipeData,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.put(`${config[config.environment].apiUrl}/recipe/updateRecipe`, recipeData, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     // Map the updated recipe to our component's data structure
                                     const updatedRecipe = {
@@ -1454,11 +1360,7 @@ export default function Tarifler() {
                                     };
 
                                     // Update recipeData state
-                                    setRecipeData(prev =>
-                                        prev.map(recipe =>
-                                            recipe.id === selectedRecipe.id ? updatedRecipe : recipe
-                                        )
-                                    );
+                                    setRecipeData(prev => prev.map(recipe => recipe.id === selectedRecipe.id ? updatedRecipe : recipe));
 
                                     // Show success message
                                     setSuccessMessage(`"${editTitle}" tarifi başarıyla güncellendi.`);
@@ -1502,19 +1404,16 @@ export default function Tarifler() {
                     </div>
                     <p className="delete-note">Bu işlem geri alınamaz.</p>
 
-                    {affectedRecipes.length > 0 && (
-                        <div className="affected-recipes">
+                    {affectedRecipes.length > 0 && (<div className="affected-recipes">
                             <p className="delete-note important">
                                 <strong>Önemli:</strong> Bu kategori ile
                                 ilişkili <strong>{affectedRecipes.length}</strong> tarif silinecektir:
                             </p>
                             <ul className="affected-recipes-list">
                                 {affectedRecipes.map(recipe => (
-                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>
-                                ))}
+                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>))}
                             </ul>
-                        </div>
-                    )}
+                        </div>)}
                 </div>
                 <div className="modal-footer">
                     <button
@@ -1537,25 +1436,18 @@ export default function Tarifler() {
                             }
 
                             // Send DELETE request to API
-                            axios.delete(
-                                `${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     if (response.data.success) {
                                         // Remove deleted category from state
-                                        setCategoryData(prevData =>
-                                            prevData.filter(category => category.id !== categoryToDelete.id)
-                                        );
+                                        setCategoryData(prevData => prevData.filter(category => category.id !== categoryToDelete.id));
 
                                         // Remove category from checked categories if it's there
-                                        setCheckedCategories(prev =>
-                                            prev.filter(id => id !== categoryToDelete.id)
-                                        );
+                                        setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
 
                                         // Remove all recipes that belonged to this category from display
                                         fetchRecipes();
@@ -1604,19 +1496,16 @@ export default function Tarifler() {
                     </div>
                     <p className="delete-note">Bu işlem geri alınamaz.</p>
 
-                    {affectedRecipes.length > 0 && (
-                        <div className="affected-recipes">
+                    {affectedRecipes.length > 0 && (<div className="affected-recipes">
                             <p className="delete-note important">
                                 <strong>Önemli:</strong> Bu kategoriler ile
                                 ilişkili <strong>{affectedRecipes.length}</strong> tarif silinecektir:
                             </p>
                             <ul className="affected-recipes-list">
                                 {affectedRecipes.map(recipe => (
-                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>
-                                ))}
+                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>))}
                             </ul>
-                        </div>
-                    )}
+                        </div>)}
                 </div>
                 <div className="modal-footer">
                     <button
@@ -1638,16 +1527,11 @@ export default function Tarifler() {
                             }
 
                             // Create an array of promises for each category deletion
-                            const deletePromises = checkedCategories.map(categoryId =>
-                                axios.delete(
-                                    `${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`,
-                                    {
-                                        headers: {
-                                            Authorization: localStorage.getItem("token"),
-                                        },
-                                    }
-                                )
-                            );
+                            const deletePromises = checkedCategories.map(categoryId => axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            }));
 
                             // Execute all deletion requests
                             Promise.all(deletePromises)
@@ -1657,9 +1541,7 @@ export default function Tarifler() {
 
                                     if (allSuccessful) {
                                         // Remove deleted categories from state
-                                        setCategoryData(prevData =>
-                                            prevData.filter(category => !checkedCategories.includes(category.id))
-                                        );
+                                        setCategoryData(prevData => prevData.filter(category => !checkedCategories.includes(category.id)));
 
                                         // Clear checked categories
                                         setCheckedCategories([]);
@@ -1709,23 +1591,18 @@ export default function Tarifler() {
             </Modal>
 
             {/* Success and Error Popups */}
-            {showSuccessPopup && (
-                <div className="success-popup">
+            {showSuccessPopup && (<div className="success-popup">
                     <div className="success-popup-content">
                         <CheckCircleIcon className="success-icon"/>
                         <p>{successMessage}</p>
                     </div>
-                </div>
-            )}
+                </div>)}
 
-            {showErrorPopup && (
-                <div className="error-popup">
+            {showErrorPopup && (<div className="error-popup">
                     <div className="error-popup-content">
                         <ErrorIcon className="error-icon"/>
                         <p>{errorMessage}</p>
                     </div>
-                </div>
-            )}
-        </Default>
-    );
+                </div>)}
+        </Default>);
 }
