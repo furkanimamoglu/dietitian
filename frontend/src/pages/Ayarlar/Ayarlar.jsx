@@ -272,7 +272,6 @@ export default function Ayarlar() {
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
-                                            mb: 3
                                         }}>
                                             <Avatar
                                                 src="/profile-placeholder.jpg"
@@ -313,7 +312,7 @@ export default function Ayarlar() {
                                             fullWidth
                                             startIcon={<KeyOutlined/>}
                                             onClick={handleOpenPasswordModal}
-                                            sx={{mb: 2}}
+                                            sx={{color: 'white', backgroundColor: '#2d4149'}}
                                         >
                                             Şifremi Değiştir
                                         </Button>
@@ -393,6 +392,7 @@ export default function Ayarlar() {
 
                                         <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 3}}>
                                             <Button
+                                                sx={{color: 'white', backgroundColor: '#2d4149'}}
                                                 variant="contained"
                                                 color="primary"
                                                 startIcon={<Save/>}
