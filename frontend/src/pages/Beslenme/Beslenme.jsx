@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import './Beslenme.css';
 import Default from "../../Components/Layouts/Default.jsx";
+import MealPlanEditor from "../../Components/MealPlanEditor/MealPlanEditor.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
@@ -2083,8 +2084,10 @@ export default function Beslenme() {
                 title="Beslenme Programı Düzenle"
                 onClose={() => setEditProgramModal(false)}
                 fullWidth={true}
+                width="100%"
             >
                 <div className="modal-body">
+                    <MealPlanEditor />
                     <div className="program-details-section">
                         <h3 className="section-title">Program Bilgileri</h3>
                         <div className="input-container">
