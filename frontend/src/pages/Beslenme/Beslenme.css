@@ -349,23 +349,6 @@
     z-index: 1000;
 }
 
-.modal-container {
-    background-color: #fff;
-    border-radius: 8px;
-    width: 90%;
-    margin-top: 1.5rem;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: modalFadeIn 0.3s;
-}
-
-.modal-container.full-width {
-    max-width: 90%;
-    width: 1200px;
-}
-
 @keyframes modalFadeIn {
     from {
         opacity: 0;
@@ -386,7 +369,7 @@
     position: sticky;
     top: 0;
     background-color: #fff;
-    z-index: 10;
+    z-index: 1000;
 }
 
 .modal-header h2 {
@@ -621,7 +604,7 @@ input[type="date"].text-input {
 }
 
 .day-tab.active {
-    color: #3f51b5;
+    color: #f44336;
     border-bottom-color: #3f51b5;
     background-color: #e8eaf6;
 }
@@ -1445,3 +1428,4 @@ input[type="date"].text-input {
         transform: rotate(360deg);
     }
 }
+

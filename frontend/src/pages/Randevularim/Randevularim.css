@@ -10,13 +10,13 @@
 /* Başlık alanı */
 .fc-toolbar-title {
     font-size: 1.5rem;
-    color: #207e20;
+    color: #2d4149;
     font-weight: bold;
 }
 
 /* Gezinme düğmeleri */
 .fc-button {
-    background-color: #207e20 !important;
+    background-color: #2d4149 !important;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -27,17 +27,17 @@
 }
 
 .fc-button:hover {
-    background-color: #008700 !important;
+    background-color: #253237 !important;
 }
 
 .fc-button:disabled {
-    background-color: #ccc !important;
-    color: #666;
+    background-color: #424547 !important;
+    color: #ffffff;
 }
 
 /* Gün başlıkları (header) */
 .fc-col-header-cell {
-    background-color: #fc9e21;
+    background-color: #2d4149;
     color: white;
     font-size: 1rem;
     font-weight: bold;
@@ -112,7 +112,7 @@
 
 /* İş saatleri */
 .fc-timegrid-bg .fc-business-hours {
-    background-color: rgba(76, 175, 80, 0.1);
+    background-color: rgba(0, 230, 8, 0.1);
 }
 
 /* Grid arkaplan */
@@ -121,26 +121,26 @@
 }
 
 .fc-day-today {
-    background-color: #FF5722;
+    background-color: #fd9200;
 }
 
 .fc-daygrid-event-dot {
-    border: #FF5722 solid
+    border: #fd9200 solid
 }
 
 /* Hover efekti */
 .fc-scrollgrid-sync-inner:hover {
-    background-color: rgba(255, 210, 147, 0.59); /* Daha açık yeşil ton */
+    background-color: rgba(248, 235, 220, 0.54); /* Daha açık yeşil ton */
     cursor: pointer;
-    color: #FF5722; /* Daha koyu yeşil yazı rengi */
+    color: #fd9200; /* Daha koyu yeşil yazı rengi */
 }
 
 /* Sol şeritteki saat hücrelerinin çerçevesi */
 .fc-timegrid-slot-label-frame {
-    background-color: #FF9800 !important; /* Yeşil arka plan */
+    background-color: #2d4149  !important; /* Yeşil arka plan */
     color: #fff; /* Beyaz yazı rengi */
     font-weight: bold; /* Kalın yazı */
-    border: 1px solid #FF5722; /* Yeşil çerçeve */
+    border: 1px solid #253237; /* Yeşil çerçeve */
     border-radius: 4px; /* Köşeleri yuvarlat */
     text-align: center; /* Ortalanmış yazı */
     padding: 5px; /* İçerik boşluğu */
@@ -182,4 +182,3 @@
         font-size: 0.7rem;
     }
 }
-

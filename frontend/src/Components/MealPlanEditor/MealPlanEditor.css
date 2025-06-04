@@ -1,0 +1,1095 @@
+/* MUI Style Meal Plan Table CSS */
+
+/* Container */
+.mui-meal-plan-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+    background-color: #fafafa;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Header */
+.mui-meal-plan-header {
+    margin-bottom: 32px;
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #ff9e25 0%, #f44336 100%);
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+}
+
+.mui-meal-plan-title {
+    margin: 0 0 8px 0;
+    font-size: 2.125rem;
+    font-weight: 500;
+    letter-spacing: -0.00833em;
+}
+
+.mui-meal-plan-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+/* Table Container */
+.mui-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+/* Table */
+.mui-meal-plan-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow-x: auto;
+}
+
+/* Table Header */
+.mui-table-header-cell {
+    background: linear-gradient(135deg, #2d4149  0%, #2d4149  100%);
+    color: white;
+    padding: 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.01071em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    border-right: 2px solid #f44336;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.mui-sticky-cell {
+    position: sticky;
+    left: 0;
+    z-index: 11;
+}
+
+.mui-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mui-header-icon {
+    font-size: 1.2em;
+}
+
+.mui-day-header {
+    min-width: 180px;
+}
+
+/* Gün Başlığı ve Kaldırma Butonu */
+.mui-day-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+}
+
+.mui-day-header-content .mui-remove-btn {
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: #f44336; /* Kırmızı renk eklendi */
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.mui-day-header-content .mui-remove-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+    color: #d32f2f; /* Hover durumunda daha koyu kırmızı */
+}
+
+/* Öğün Başlığı ve Kaldırma Butonu */
+.mui-meal-type-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.mui-meal-type-header .mui-remove-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    color: #f44336; /* Kırmızı renk eklendi */
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.mui-meal-type-header .mui-remove-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+    color: #d32f2f; /* Hover durumunda daha koyu kırmızı */
+}
+
+/* Yeni Gün Ekle */
+.mui-add-column-cell {
+    width: 60px;
+    min-width: 60px;
+}
+
+.mui-add-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.mui-add-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.mui-add-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.mui-add-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mui-selector {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 100%;
+}
+
+.mui-selector option {
+    background: white;
+    color: #333;
+}
+
+.mui-cancel-btn {
+    padding: 8px 12px;
+    border-radius: 50%;
+    background: #f44336;
+    border: 1px solid #e53935;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.mui-cancel-btn:hover {
+    background: #d32f2f;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.mui-add-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mui-selector {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 100%;
+}
+
+.mui-selector option {
+    background: white;
+    color: #333;
+}
+
+.mui-cancel-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mui-cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Öğün Ekleme Bölümü - Yeni minimal tasarım */
+.mui-add-meal-type-section {
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mui-add-meal-type-form {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    max-width: 100%;
+    position: relative;
+}
+
+.mui-add-meal-type-form h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    color: #333;
+    text-align: center;
+    font-weight: 500;
+}
+
+.mui-add-meal-type-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.mui-add-meal-type-selector .mui-selector {
+    border: 1px solid #e0e0e0;
+    background: white;
+    color: #333;
+    padding: 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.mui-add-meal-type-selector .mui-selector:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+    outline: none;
+}
+
+.mui-add-new-meal-section {
+    background-color: #f9f9f9;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.mui-add-new-meal-section h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.mui-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.mui-cancel-btn {
+    padding: 8px 12px;
+    border-radius: 50%;
+    background: #f44336;
+    border: 1px solid #e53935;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.mui-cancel-btn:hover {
+    background: #d32f2f;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.mui-modern-add-meal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2d4149;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s ease;
+    width: auto;
+    margin: 8px auto;
+}
+
+.mui-modern-add-meal-btn:hover {
+    background: #2d4149;
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
+    transform: translateY(-1px);
+}
+
+.mui-modern-add-meal-btn:active {
+    transform: translateY(0);
+}
+
+.mui-modern-add-icon {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Table Body */
+.mui-meal-row {
+    transition: background-color 0.2s ease;
+}
+
+.mui-even-row {
+    background-color: #fafafa;
+}
+
+.mui-odd-row {
+    background-color: white;
+}
+
+.mui-meal-row:hover {
+    background-color: #f5f5f5 !important;
+}
+
+/* Meal Type Cell */
+.mui-meal-type-cell {
+    background-color: #f8f9fa;
+    padding: 16px;
+    font-weight: 600;
+    border-right: 2px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    min-width: 140px;
+}
+
+.mui-meal-type-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mui-meal-type-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.mui-meal-type-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.mui-meal-type-name:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    text-decoration: underline;
+}
+
+/* Meal Cell */
+.mui-meal-cell {
+    padding: 12px;
+    vertical-align: top;
+    border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    min-height: 200px;
+}
+
+.mui-meal-cell-content {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Alternative Tabs */
+.mui-alternatives-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Alternative Sections */
+.mui-alternative-section {
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 8px;
+    background-color: #fafafa;
+    margin-bottom: 8px;
+}
+
+.mui-alternative-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.mui-alternative-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mui-alternative-count {
+    font-size: 0.7rem;
+    color: #999;
+    background-color: #e0e0e0;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    margin: 0 5px;
+}
+
+.mui-alternative-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #f44336;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+}
+
+.mui-alternative-delete:hover {
+    transform: scale(1.2);
+}
+
+/* Alternative Select */
+.mui-alternative-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background-color: white;
+    margin-bottom: 8px;
+    transition: border-color 0.2s ease;
+}
+
+.mui-alternative-select:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Meals List */
+.mui-meals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+}
+
+/* Meal Chip */
+.mui-meal-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.mui-meal-chip:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.mui-chip-label {
+    flex-grow: 1;
+    margin-right: 8px;
+}
+
+.mui-chip-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mui-chip-delete:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Add Meal Button */
+.mui-add-meal-btn {
+    width: 100%;
+    padding: 12px;
+    border: 2px dashed #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: auto;
+}
+
+.mui-add-meal-btn:hover {
+    border-style: solid;
+    background-color: rgba(25, 118, 210, 0.04);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add Alternative Button - Hücreye özel alternatif eklemek için */
+.mui-add-alternative-cell-btn {
+    width: 100%;
+    padding: 8px;
+    border: 2px dashed #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.mui-add-alternative-cell-btn:hover {
+    border-style: solid;
+    background-color: rgba(25, 118, 210, 0.04);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add Cell Alternative Form */
+.mui-add-cell-alternative-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+}
+
+/* Add Meal Form */
+.mui-add-meal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.mui-meal-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+/* Miktar/Porsiyon girişi için yeni stil */
+.mui-meal-amount-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    background-color: #fafafa;
+}
+
+.mui-meal-input:focus, .mui-meal-amount-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.mui-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Buttons */
+.mui-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mui-btn-contained {
+    color: #ffffff;
+    background-color: #21af21;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mui-btn-contained:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.mui-btn-outlined {
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #666;
+}
+
+.mui-btn-outlined:hover {
+    background-color: #f5f5f5;
+    border-color: #bdbdbd;
+}
+
+/* Statistics Section */
+.mui-statistics-section {
+    margin-bottom: 32px;
+}
+
+.mui-statistics-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #333;
+    text-align: center;
+}
+
+.mui-statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+/* Statistics Card */
+.mui-statistics-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.mui-statistics-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.mui-statistics-card-content {
+    padding: 24px;
+    text-align: center;
+}
+
+.mui-statistics-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.mui-statistics-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mui-statistics-meal-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.mui-statistics-count {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1976d2;
+    margin: 8px 0;
+    line-height: 1;
+}
+
+.mui-statistics-label {
+    font-size: 0.875rem;
+    color: #666;
+    font-weight: 400;
+}
+
+/* Save Section */
+.mui-save-section {
+    display: flex;
+    justify-content: center;
+    padding: 24px 0;
+}
+
+.mui-save-program-btn {
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mui-save-program-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.mui-save-program-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Meal Control Row (Öğün Ekleme Satırı) */
+.mui-meal-control-row {
+    background-color: #f8f9fa;
+    border-top: 2px dashed #e0e0e0;
+}
+
+.mui-meal-add-cell {
+    padding: 16px;
+    text-align: center;
+}
+
+.mui-add-meal-type-container {
+    display: flex;
+    justify-content: center;
+}
+
+/* Floating Öğün Ekle Button */
+.mui-add-meal-floating-btn {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.mui-add-meal-floating-btn .mui-add-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.mui-add-meal-floating-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(25, 118, 210, 0.4);
+}
+
+.mui-add-meal-floating-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(25, 118, 210, 0.3);
+}
+
+.mui-add-meal-floating-btn:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Öğün Adı Düzenleme */
+.mui-edit-meal-name-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Modern Öğün Ekle Butonu */
+.mui-modern-add-meal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2d4149;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+    transition: all 0.3s ease;
+    width: auto;
+    margin: 8px auto;
+}
+
+.mui-modern-add-meal-btn:hover {
+    background: #253237;
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+    transform: translateY(-1px);
+}
+
+.mui-modern-add-meal-btn:active {
+    transform: translateY(0);
+}
+
+.mui-modern-add-icon {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Kaydet/İptal Action Butonları */
+.mui-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    gap: 15px;
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.mui-save-action-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white !important;
+    padding: 10px 24px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    border-radius: 6px !important;
+    box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+}
+
+.mui-save-action-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #43a047 0%, #388e3c 100%);
+    box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.mui-save-action-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+}
+
+.mui-save-action-btn:disabled {
+    background: #cccccc;
+    color: #888888;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.mui-cancel-action-btn {
+    background: white;
+    color: #666 !important;
+    border: 1px solid #ddd !important;
+    padding: 10px 24px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    border-radius: 6px !important;
+    transition: all 0.3s ease;
+}
+
+.mui-cancel-action-btn:hover {
+    background: #f5f5f5;
+    border-color: #bbb !important;
+}
+
+/* Print Styles */
+@media print {
+    .mui-add-meal-btn,
+    .mui-add-meal-form,
+    .mui-save-section,
+    .mui-remove-btn,
+    .mui-add-btn,
+    .mui-add-column-cell,
+    .mui-add-meal-type-section,
+    .mui-add-alternative-cell-btn,
+    .mui-add-cell-alternative-form {
+        display: none;
+    }
+
+    .mui-meal-plan-container {
+        background: white;
+    }
+
+    .mui-table-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .mui-meal-chip {
+        border: 1px solid #000 !important;
+        background: white !important;
+    }
+
+    .mui-chip-delete {
+        display: none;
+    }
+}
+
+/* Focus Styles for Accessibility */
+.mui-add-meal-btn:focus,
+.mui-btn:focus,
+.mui-meal-input:focus,
+.mui-save-program-btn:focus,
+.mui-add-alternative-cell-btn:focus {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+}
+
+.mui-chip-delete:focus {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .mui-meal-chip {
+        border-width: 2px;
+    }
+
+    .mui-add-meal-btn {
+        border-width: 2px;
+    }
+
+    .mui-table-header-cell {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Statistics Breakdown */
+.mui-statistics-breakdown {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}
+
+.mui-stats-detail {
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 500;
+}

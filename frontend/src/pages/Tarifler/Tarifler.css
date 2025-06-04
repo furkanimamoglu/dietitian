@@ -314,22 +314,6 @@
     z-index: 1000;
 }
 
-.modal-container {
-    background-color: #fff;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: modalFadeIn 0.3s;
-}
-
-.modal-container.full-width {
-    max-width: 90%;
-    width: 1200px;
-}
-
 @keyframes modalFadeIn {
     from {
         opacity: 0;
@@ -350,7 +334,7 @@
     position: sticky;
     top: 0;
     background-color: #fff;
-    z-index: 10;
+    z-index: 1000;
 }
 
 .modal-header h2 {

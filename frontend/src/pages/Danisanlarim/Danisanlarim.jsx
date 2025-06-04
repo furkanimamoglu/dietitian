@@ -1257,6 +1257,8 @@ export default function Danisanlarim() {
                             startIcon={<GroupAdd/>}
                             onClick={openCreateDialog}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1270,6 +1272,8 @@ export default function Danisanlarim() {
                             startIcon={<DownloadIcon/>}
                             onClick={() => setImportDialogOpen(true)}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1283,6 +1287,8 @@ export default function Danisanlarim() {
                             startIcon={<UploadIcon/>}
                             onClick={handleExportCSV}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1296,6 +1302,8 @@ export default function Danisanlarim() {
                             startIcon={<QrCodeIcon/>}
                             onClick={fetchQR}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
