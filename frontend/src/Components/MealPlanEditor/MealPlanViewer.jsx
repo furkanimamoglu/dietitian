@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
 import './MealPlanEditor.css';
-import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
-import FreeBreakfastIcon from '@mui/icons-material/FreeBreakfast';
-import LunchDiningIcon from '@mui/icons-material/LunchDining';
-import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
-import BrunchDiningIcon from '@mui/icons-material/BrunchDining';
 
 /**
  * MealPlanViewer - Salt okunur beslenme planı görüntüleyici bileşeni
@@ -15,14 +10,6 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
     const DAYS_OF_WEEK = [
         "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
     ];
-
-    // Öğünlerin ikonlarını eşleştirme
-    const MEAL_ICONS = {
-        "Kahvaltı": <FreeBreakfastIcon />,
-        "Öğle Yemeği": <LunchDiningIcon />,
-        "Akşam Yemeği": <DinnerDiningIcon />,
-        "Aparatif": <BrunchDiningIcon />
-    };
 
     // Tabloda gösterilen gün
     const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
@@ -82,7 +69,6 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
                             {/* Boş köşe hücresi */}
                             <th className="mui-table-header-cell mui-sticky-cell">
                                 <div className="mui-header-content">
-                                    <RestaurantMenuIcon className="mui-header-icon" />
                                     Öğünler
                                 </div>
                             </th>
@@ -121,7 +107,7 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
                                             }}
                                         ></div>
                                         <div className="mui-meal-type-name">
-                                            {MEAL_ICONS[mealType]} {mealType}
+                                            {mealType}
                                         </div>
                                     </div>
                                 </td>
