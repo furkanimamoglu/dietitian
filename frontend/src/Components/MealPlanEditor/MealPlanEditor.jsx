@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './MealPlanEditor.css';
+import { showErrorToast, showSuccessToast } from '../../utils/toastUtil';
 
 const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
@@ -60,14 +61,46 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
 
     // Gün silme fonksiyonu
     const removeDay = (dayToRemove) => {
+        if (days.length <= 1) {
+            showErrorToast("En az bir gün bulunmalıdır! Son günü silemezsiniz.");
+            return;
+        }
+
         setDays(days.filter(day => day !== dayToRemove));
         setUnusedDays([...unusedDays, dayToRemove]);
+
+        // Gün silindiğinde, o güne ait tüm öğünleri de sil
+        setMealPlan(prev => {
+            const updated = {...prev};
+            delete updated[dayToRemove];
+            return updated;
+        });
+
+        showSuccessToast(`${dayToRemove} günü başarıyla silindi.`);
     };
 
     // Öğün silme fonksiyonu
     const removeMealType = (mealTypeToRemove) => {
+        if (mealTypes.length <= 1) {
+            showErrorToast("En az bir öğün bulunmalıdır! Son öğünü silemezsiniz.");
+            return;
+        }
+
         setMealTypes(mealTypes.filter(meal => meal.id !== mealTypeToRemove.id));
         setUnusedMealTypes([...unusedMealTypes, mealTypeToRemove]);
+
+        // Öğün silindiğinde, o öğüne ait tüm alternatifleri de sil
+        setMealPlan(prev => {
+            const updated = {...prev};
+            days.forEach(day => {
+                if (updated[day] && updated[day][mealTypeToRemove.name]) {
+                    delete updated[day][mealTypeToRemove.name];
+                }
+            });
+            return updated;
+        });
+
+        showSuccessToast(`${mealTypeToRemove.name} öğünü başarıyla silindi.`);
     };
 
     // Gün ekleme fonksiyonu
@@ -684,3 +717,4 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
 };
 
 export default MealPlanEditor;
+
