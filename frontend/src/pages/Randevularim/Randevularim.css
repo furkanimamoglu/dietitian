@@ -112,7 +112,7 @@
 
 /* İş saatleri */
 .fc-timegrid-bg .fc-business-hours {
-    background-color: rgba(76, 175, 80, 0.1);
+    background-color: rgba(0, 230, 8, 0.1);
 }
 
 /* Grid arkaplan */
@@ -130,7 +130,7 @@
 
 /* Hover efekti */
 .fc-scrollgrid-sync-inner:hover {
-    background-color: rgba(37, 50, 55, 0.72); /* Daha açık yeşil ton */
+    background-color: rgba(248, 235, 220, 0.54); /* Daha açık yeşil ton */
     cursor: pointer;
     color: #fd9200; /* Daha koyu yeşil yazı rengi */
 }
