@@ -2086,7 +2086,7 @@ export default function Beslenme() {
                 title="Beslenme Programı Düzenle"
                 onClose={() => setEditProgramModal(false)}
                 fullWidth={true}
-                width="100%"
+                sx={{ width: '100%' }}
             >
                 <div className="modal-body">
                     <MealPlanEditor
