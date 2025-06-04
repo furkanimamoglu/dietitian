@@ -375,7 +375,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(90deg, #2196F3 0%, #42a5f5 100%);
+    background: #2d4149;
     color: white;
     border: none;
     border-radius: 25px;
@@ -390,7 +390,7 @@
 }
 
 .mui-modern-add-meal-btn:hover {
-    background: linear-gradient(90deg, #1976D2 0%, #2196F3 100%);
+    background: #2d4149;
     box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
     transform: translateY(-1px);
 }
@@ -908,7 +908,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+    background: #2d4149;
     color: white;
     border: none;
     border-radius: 25px;
@@ -923,7 +923,7 @@
 }
 
 .mui-modern-add-meal-btn:hover {
-    background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%);
+    background: #253237;
     box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
     transform: translateY(-1px);
 }

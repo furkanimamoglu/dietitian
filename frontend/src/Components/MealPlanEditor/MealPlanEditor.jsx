@@ -652,10 +652,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                 <button
                     className="mui-btn mui-btn-contained mui-save-action-btn"
                     onClick={() => {
-                        // JSON formatında console.log'a yazdır
                         console.log('Beslenme Programı JSON:', JSON.stringify(mealPlan, null, 2));
 
-                        // Normal kaydetme işlemini gerçekleştir
                         onSave(mealPlan);
                     }}
                     disabled={isSaving}
