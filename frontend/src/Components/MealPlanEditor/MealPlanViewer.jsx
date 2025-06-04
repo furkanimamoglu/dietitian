@@ -1,0 +1,204 @@
+import React, { useState } from 'react';
+import './MealPlanEditor.css';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import FreeBreakfastIcon from '@mui/icons-material/FreeBreakfast';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
+import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
+import BrunchDiningIcon from '@mui/icons-material/BrunchDining';
+
+/**
+ * MealPlanViewer - Salt okunur beslenme planı görüntüleyici bileşeni
+ * MealPlanEditor'ün görsel özelliklerini korur ancak düzenleme işlevselliği yoktur
+ */
+const MealPlanViewer = ({ mealPlan, title, description }) => {
+    // Sabitleri tanımla
+    const DAYS_OF_WEEK = [
+        "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
+    ];
+
+    // Öğünlerin ikonlarını eşleştirme
+    const MEAL_ICONS = {
+        "Kahvaltı": <FreeBreakfastIcon />,
+        "Öğle Yemeği": <LunchDiningIcon />,
+        "Akşam Yemeği": <DinnerDiningIcon />,
+        "Aparatif": <BrunchDiningIcon />
+    };
+
+    // Tabloda gösterilen gün
+    const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
+
+    // Bir öğünün tüm yemek öğelerini düz bir dizi olarak döndüren yardımcı fonksiyon
+    const getMealItemsArray = (mealData) => {
+        if (!mealData) return [];
+
+        // Diziyse direkt döndür
+        if (Array.isArray(mealData)) {
+            return [...mealData];
+        }
+
+        // Karmaşık format - ana öğünler ve alternatiflerle
+        if (mealData.main && Array.isArray(mealData.main)) {
+            return [...mealData.main];
+        }
+
+        // String formatı (geriye dönük uyumluluk)
+        if (typeof mealData === 'string') {
+            return mealData.split(',').map(item => item.trim()).filter(item => item !== '');
+        }
+
+        return [];
+    };
+
+    // Bir öğünün alternatiflerini döndüren yardımcı fonksiyon
+    const getMealAlternatives = (mealData, mainItem) => {
+        if (!mealData || typeof mealData !== 'object' || Array.isArray(mealData) || !mealData.alternatives) {
+            return [];
+        }
+
+        return mealData.alternatives[mainItem] || [];
+    };
+
+    // Bir günde bulunan tüm öğünleri döndüren yardımcı fonksiyon
+    const getMealTypesForDay = (day) => {
+        if (!mealPlan || !mealPlan[day]) return [];
+        return Object.keys(mealPlan[day]);
+    };
+
+    return (
+        <div className="mui-meal-plan-container">
+            {/* Başlık ve Açıklama */}
+            {(title || description) && (
+                <div className="mui-meal-plan-header">
+                    {title && <h2 className="mui-meal-plan-title">{title}</h2>}
+                    {description && <p className="mui-meal-plan-subtitle">{description}</p>}
+                </div>
+            )}
+
+            {/* Tablo Kapsayıcı */}
+            <div className="mui-table-container">
+                <table className="mui-meal-plan-table">
+                    <thead>
+                        <tr>
+                            {/* Boş köşe hücresi */}
+                            <th className="mui-table-header-cell mui-sticky-cell">
+                                <div className="mui-header-content">
+                                    <RestaurantMenuIcon className="mui-header-icon" />
+                                    Öğünler
+                                </div>
+                            </th>
+
+                            {/* Günler - Sütun Başlıkları */}
+                            {DAYS_OF_WEEK.map((day) => (
+                                <th
+                                    key={day}
+                                    className={`mui-table-header-cell mui-day-header ${selectedDay === day ? 'active-day' : ''}`}
+                                    onClick={() => setSelectedDay(day)}
+                                >
+                                    <div className="mui-day-header-content">
+                                        {day}
+                                    </div>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {/* Her öğün tipi için bir satır oluştur */}
+                        {getMealTypesForDay(selectedDay).map((mealType, rowIndex) => (
+                            <tr
+                                key={mealType}
+                                className={`mui-meal-row ${rowIndex % 2 === 0 ? 'mui-even-row' : 'mui-odd-row'}`}
+                            >
+                                {/* Öğün Adı Hücresi */}
+                                <td className="mui-meal-type-cell mui-sticky-cell">
+                                    <div className="mui-meal-type-content">
+                                        <div
+                                            className="mui-meal-type-indicator"
+                                            style={{
+                                                backgroundColor: mealType === "Kahvaltı" ? "#FF9800" :
+                                                                 mealType === "Öğle Yemeği" ? "#4CAF50" :
+                                                                 mealType === "Akşam Yemeği" ? "#2196F3" :
+                                                                 "#9C27B0"
+                                            }}
+                                        ></div>
+                                        <div className="mui-meal-type-name">
+                                            {MEAL_ICONS[mealType]} {mealType}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {/* Her gün için o öğündeki yemekleri göster */}
+                                {DAYS_OF_WEEK.map((day) => (
+                                    <td key={`${day}-${mealType}`} className="mui-meal-cell">
+                                        <div className="mui-meal-cell-content">
+                                            <div className="mui-meals-list">
+                                                {/* Ana yemek öğelerini göster */}
+                                                {mealPlan && mealPlan[day] && mealPlan[day][mealType] ?
+                                                    getMealItemsArray(mealPlan[day][mealType]).map((item, index) => (
+                                                        <div key={index} className="mui-meal-item-wrapper">
+                                                            <div
+                                                                className="mui-meal-chip"
+                                                                style={{
+                                                                    borderColor: mealType === "Kahvaltı" ? "#FF9800" :
+                                                                                 mealType === "Öğle Yemeği" ? "#4CAF50" :
+                                                                                 mealType === "Akşam Yemeği" ? "#2196F3" :
+                                                                                 "#9C27B0",
+                                                                    backgroundColor: "white"
+                                                                }}
+                                                            >
+                                                                <span className="mui-chip-label">{item}</span>
+                                                            </div>
+
+                                                            {/* Alternatifler */}
+                                                            {mealPlan[day][mealType] && typeof mealPlan[day][mealType] === 'object' &&
+                                                             !Array.isArray(mealPlan[day][mealType]) &&
+                                                             mealPlan[day][mealType].alternatives &&
+                                                             mealPlan[day][mealType].alternatives[item] && (
+                                                                <div style={{ marginLeft: '15px', marginTop: '4px', marginBottom: '8px' }}>
+                                                                    {getMealAlternatives(mealPlan[day][mealType], item).map((alt, altIndex) => (
+                                                                        <div
+                                                                            key={altIndex}
+                                                                            className="mui-meal-chip"
+                                                                            style={{
+                                                                                borderColor: '#FF9E80',
+                                                                                backgroundColor: '#FFF8E1',
+                                                                                fontSize: '0.8rem',
+                                                                                margin: '2px 0'
+                                                                            }}
+                                                                        >
+                                                                            <i style={{ fontSize: '0.75rem', marginRight: '5px', color: '#757575' }}>
+                                                                                alternatif:
+                                                                            </i>
+                                                                            <span className="mui-chip-label">{alt}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )) : (
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            height: '100%',
+                                                            color: '#aaa',
+                                                            fontStyle: 'italic',
+                                                            fontSize: '0.9rem'
+                                                        }}>
+                                                            Öğün içeriği girilmemiş
+                                                        </div>
+                                                    )
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+export default MealPlanViewer;

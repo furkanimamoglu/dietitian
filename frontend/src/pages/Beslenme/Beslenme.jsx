@@ -26,6 +26,8 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
 
+import MealPlanViewer from "../../Components/MealPlanEditor/MealPlanViewer.jsx";
+
 import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 import {
@@ -2129,12 +2131,10 @@ export default function Beslenme() {
                 fullWidth={true}
             >
                 <div className="modal-body meal-plan-view-modal" ref={mealPlanRef}>
-                    <ViewMealPlan
+                    <MealPlanViewer
                         mealPlan={selectedProgram?.mealPlan}
-                        programTitle={selectedProgram?.title}
-                        onClose={() => setViewProgramModal(false)}
-                        onExportPdf={handleExportPdf}
-                        selectedProgram={selectedProgram}
+                        title={selectedProgram?.title}
+                        description={selectedProgram?.description}
                     />
                 </div>
                 <div className="modal-footer">
