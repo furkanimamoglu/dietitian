@@ -114,17 +114,6 @@ const MobileSearchIcon = styled(IconButton)(({theme}) => ({
     },
 }));
 
-const LogoContainer = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'isMobile',
-})(({theme, isMobile}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    flexGrow: isMobile ? 1 : 0,
-    padding: isMobile ? theme.spacing(0.7, 1) : 0,
-    borderRadius: isMobile ? theme.spacing(1) : 0,
-    marginLeft: isMobile ? theme.spacing(0.5) : 0,
-}));
-
 export default function Header() {
     const navigate = useNavigate();
     const theme = useTheme();
@@ -275,37 +264,30 @@ export default function Header() {
 
                     {/* Logo / Marka Adı */}
                     <Box
-                        onClick={() => navigate('/anasayfa')}
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
+                            justifyContent: 'flex-start',
                             cursor: 'pointer',
-                            backgroundColor: '#f8f7f1',
-                            padding: isMobile ? '4px 8px' : '15px 30px',
-                            borderRadius: isMobile ? '10%' : '50%',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                            transition: 'all 0.3s ease',
-                            position: 'absolute',
-                            top: isMobile ? '10px' : '10px',
-                            left: isMobile ? '85%' : '2.5rem',
-                            transform: isMobile ? 'translateX(-50%)' : 'none',
+                            position: 'relative',
+                            height: isMobile ? '3.5rem' : '4.5rem',
+                            ml: isMobile ? 0 : 4,
                             zIndex: 1000,
                         }}
+                        onClick={() => navigate('/anasayfa')}
                     >
                         <Box
                             component="img"
                             src="/logo.png"
                             alt="Diyetia Logo"
                             sx={{
-                                height: isMobile ? '2.5rem' : '6rem',
+                                height: isMobile ? '2.2rem' : '3rem',
                                 width: 'auto',
                                 objectFit: 'contain',
-                                opacity: 0.8,
+                                opacity: 0.95,
                             }}
                         />
                     </Box>
-
 
                     {/* Desktop Search Bar */}
                     {!isMobile && (
