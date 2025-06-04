@@ -416,7 +416,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                         {days.map(day => (
                             <th key={day} className="mui-table-header-cell mui-day-header">
                                 <div className="mui-day-header-content">
-                                    <span>{day}</span>
                                     <div className="mui-day-actions">
                                         <button
                                             className="mui-day-action-btn mui-copy-btn"
@@ -435,9 +434,10 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                                                 `${copiedDay} gününü buraya yapıştır`
                                             }
                                         >
-                                            📌
+                                            📄
                                         </button>
                                     </div>
+                                    <span>{day}</span>
                                     <button
                                         className="mui-remove-btn"
                                         onClick={() => removeDay(day)}

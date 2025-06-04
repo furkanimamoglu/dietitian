@@ -92,10 +92,17 @@
 /* Gün Başlığı ve Kaldırma Butonu */
 .mui-day-header-content {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     position: relative;
+}
+
+/* Gün Kopyalama/Yapıştırma Butonları */
+.mui-day-actions {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 6px;
 }
 
 .mui-day-header-content .mui-remove-btn {
@@ -390,8 +397,8 @@
 }
 
 .mui-modern-add-meal-btn:hover {
-    background: #2d4149;
-    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
+    background: #253237;
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
     transform: translateY(-1px);
 }
 
@@ -1010,7 +1017,7 @@
 .mui-day-actions {
     display: flex;
     gap: 2px;
-    margin-left: 8px;
+    margin-bottom: 6px;
 }
 
 .mui-day-action-btn {
