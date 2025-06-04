@@ -653,7 +653,13 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                 </button>
                 <button
                     className="mui-btn mui-btn-contained mui-save-action-btn"
-                    onClick={onSave}
+                    onClick={() => {
+                        // JSON formatında console.log'a yazdır
+                        console.log('Beslenme Programı JSON:', JSON.stringify(mealPlan, null, 2));
+
+                        // Normal kaydetme işlemini gerçekleştir
+                        onSave(mealPlan);
+                    }}
                     disabled={isSaving}
                 >
                     {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
@@ -664,3 +670,4 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
 };
 
 export default MealPlanEditor;
+
