@@ -62,6 +62,7 @@ export default function Navbar() {
                 <Box
                     sx={{
                         display: "flex",
+                        mt: "0.31rem",
                         ml: "2.5rem",
                         mr: "2.5rem",
                         justifyContent: "center",
