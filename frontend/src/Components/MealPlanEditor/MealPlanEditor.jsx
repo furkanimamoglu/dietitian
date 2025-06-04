@@ -33,6 +33,9 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
     const [editingMealType, setEditingMealType] = useState(null);
     const [editedMealName, setEditedMealName] = useState('');
 
+    // Gün kopyalama/yapıştırma için state
+    const [copiedDay, setCopiedDay] = useState(null);
+
     // Yeni alternatif ekleme için state
     const [editingCellAlternative, setEditingCellAlternative] = useState(null); // format: "day-mealType"
     const [newAlternativeName, setNewAlternativeName] = useState('');
@@ -352,6 +355,42 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
         }, 100);
     }
 
+    // Gün kopyalama fonksiyonu
+    const copyDay = (dayToCopy) => {
+        // Kopyalanan günün detaylarını state'e kaydet
+        setCopiedDay(dayToCopy);
+        showSuccessToast(`${dayToCopy} günü kopyalandı. Şimdi başka bir güne yapıştırabilirsiniz.`);
+    };
+
+    // Gün yapıştırma fonksiyonu
+    const pasteDay = (targetDay) => {
+        if (!copiedDay) {
+            showErrorToast("Önce bir gün kopyalamalısınız!");
+            return;
+        }
+
+        if (copiedDay === targetDay) {
+            showErrorToast("Aynı güne yapıştırma işlemi yapamazsınız!");
+            return;
+        }
+
+        // Kopyalanan günün verilerini hedef güne yapıştırma
+        setMealPlan(prev => {
+            const updated = {...prev};
+
+            // Hedef günün mevcut öğün tiplerini koruyarak, kopyalanan günün içeriğini yapıştır
+            mealTypes.forEach(meal => {
+                if (updated[copiedDay] && updated[copiedDay][meal.name]) {
+                    updated[targetDay][meal.name] = JSON.parse(JSON.stringify(updated[copiedDay][meal.name]));
+                }
+            });
+
+            return updated;
+        });
+
+        showSuccessToast(`${copiedDay} günündeki içerik ${targetDay} gününe başarıyla yapıştırıldı.`);
+    };
+
     return (
         <div className="mui-meal-plan-container">
             {/* Header */}
@@ -378,6 +417,27 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                             <th key={day} className="mui-table-header-cell mui-day-header">
                                 <div className="mui-day-header-content">
                                     <span>{day}</span>
+                                    <div className="mui-day-actions">
+                                        <button
+                                            className="mui-day-action-btn mui-copy-btn"
+                                            onClick={() => copyDay(day)}
+                                            title="Bu günü kopyala"
+                                        >
+                                            📋
+                                        </button>
+                                        <button
+                                            className={`mui-day-action-btn mui-paste-btn ${copiedDay ? 'active' : ''}`}
+                                            onClick={() => pasteDay(day)}
+                                            disabled={!copiedDay || copiedDay === day}
+                                            title={
+                                                !copiedDay ? "Önce bir gün kopyalamalısınız" :
+                                                copiedDay === day ? "Aynı güne yapıştıramazsınız" :
+                                                `${copiedDay} gününü buraya yapıştır`
+                                            }
+                                        >
+                                            📌
+                                        </button>
+                                    </div>
                                     <button
                                         className="mui-remove-btn"
                                         onClick={() => removeDay(day)}
@@ -717,4 +777,3 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
 };
 
 export default MealPlanEditor;
-
