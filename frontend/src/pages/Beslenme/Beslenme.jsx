@@ -1100,7 +1100,7 @@ export default function Beslenme() {
     // Fetch nutrition categories
     useEffect(() => {
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionCategories`, {
+            .get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -1118,7 +1118,7 @@ export default function Beslenme() {
     const fetchNutritionPlans = () => {
         setLoading(true);
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionPlans`, {
+            .get(`${config[config.environment].apiUrl}/nutrition/getNutritionPlans`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -1170,7 +1170,7 @@ export default function Beslenme() {
 
     const handleMultiDelete = () => {
         const deletePromises = checkedCategories.map(categoryId =>
-            axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
+            axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionCategory?category_id=${categoryId}`, {
                 headers: {Authorization: localStorage.getItem("token")}
             })
         );
@@ -1213,7 +1213,7 @@ export default function Beslenme() {
     const handleSingleCategoryDelete = () => {
         if (!categoryToDelete) return;
 
-        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryToDelete.id}`, {
+        axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionCategory?category_id=${categoryToDelete.id}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {
@@ -1242,7 +1242,7 @@ export default function Beslenme() {
             category_name: newCategoryTitle.trim()
         };
 
-        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
+        axios.post(`${config[config.environment].apiUrl}/nutrition/addNutritionCategory`, newCategory, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
@@ -1272,7 +1272,7 @@ export default function Beslenme() {
             });
         });
 
-        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
+        axios.post(`${config[config.environment].apiUrl}/nutrition/addNutritionPlan`, planData, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
@@ -1335,7 +1335,7 @@ export default function Beslenme() {
 
         console.log("Assigning nutrition plan with data:", addData);
 
-        axios.post(`${config[config.environment].apiUrl}/dietitian/assignNutritionPlanToClient`, addData, {
+        axios.post(`${config[config.environment].apiUrl}/nutrition/assignNutritionPlanToClient`, addData, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
@@ -1456,11 +1456,11 @@ export default function Beslenme() {
 
             if (selectedProgram && selectedProgram.id) {
                 // Update existing plan
-                url = `${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`;
+                url = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
                 method = 'put';
             } else {
                 // Create new plan
-                url = `${config[config.environment].apiUrl}/dietitian/addNutritionPlan`;
+                url = `${config[config.environment].apiUrl}/nutrition/addNutritionPlan`;
                 method = 'post';
             }
 
@@ -1564,7 +1564,7 @@ export default function Beslenme() {
     const handleDelete = () => {
         if (!itemToDelete) return;
 
-        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionPlan?nutrition_plan_id=${itemToDelete.id}`, {
+        axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionPlan?nutrition_plan_id=${itemToDelete.id}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {

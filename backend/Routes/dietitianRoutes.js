@@ -31,15 +31,4 @@ router.get('/getMyNotes', dietitianController.getMyNotes);
 router.post('/addNote', dietitianController.addNote);
 router.delete('/deleteNote', dietitianController.deleteNote);
 
-router.get('/getNutritionCategories', dietitianController.getNutritionCategories);
-router.delete('/deleteNutritionCategory', dietitianController.deleteNutritionCategory);
-router.post('/addNutritionCategory', dietitianController.addNutritionCategory);
-router.put('/updateNutritionPlan', dietitianController.updateNutritionPlan);
-router.post('/getNutritionAssignmentPlanByClient', dietitianController.getNutritionAssignmentPlanByClient);
-
-router.post('/assignNutritionPlanToClient', dietitianController.assignNutritionPlanToClient);
-router.post('/addNutritionPlan', dietitianController.addNutritionPlan);
-router.get('/getNutritionPlans', dietitianController.getNutritionPlans);
-router.delete('/deleteNutritionPlan', dietitianController.deleteNutritionPlan);
-
 module.exports = router;

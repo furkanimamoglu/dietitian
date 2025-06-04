@@ -1160,7 +1160,7 @@ function Danisan() {
                 setNutritionPlanLoading(true);
                 try {
                     const response = await axios.post(
-                        config[config.environment].apiUrl + "/dietitian/getNutritionAssignmentPlanByClient",
+                        config[config.environment].apiUrl + "/nutrition/getNutritionAssignmentPlanByClient",
                         {
                             client_id: id,
                             range: "all"
