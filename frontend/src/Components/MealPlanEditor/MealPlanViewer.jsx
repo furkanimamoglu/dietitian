@@ -51,6 +51,32 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
         return Object.keys(mealPlan[day]);
     };
 
+    // Eski formatı destekleme (geriye dönük uyumluluk) için
+    const normalizeMealItem = (item) => {
+        // Eğer item bir nesne ise ve name özelliği varsa, yeni format olarak kabul et
+        if (item && typeof item === 'object' && item.name) {
+            return item;
+        }
+
+        // Eğer string ise, porsiyon bilgisini ayrıştır ve yeni formata çevir
+        if (typeof item === 'string') {
+            const parts = item.split(':');
+            if (parts.length > 1) {
+                return {
+                    name: parts[0].trim(),
+                    portion: parts.slice(1).join(':').trim()
+                };
+            }
+            return {
+                name: item.trim(),
+                portion: null
+            };
+        }
+
+        // Geçersiz veya boş değerse boş nesne döndür
+        return { name: '', portion: null };
+    };
+
     return (
         <div className="mui-meal-plan-container">
             {/* Başlık ve Açıklama */}
@@ -119,48 +145,64 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
                                             <div className="mui-meals-list">
                                                 {/* Ana yemek öğelerini göster */}
                                                 {mealPlan && mealPlan[day] && mealPlan[day][mealType] ?
-                                                    getMealItemsArray(mealPlan[day][mealType]).map((item, index) => (
-                                                        <div key={index} className="mui-meal-item-wrapper">
-                                                            <div
-                                                                className="mui-meal-chip"
-                                                                style={{
-                                                                    borderColor: mealType === "Kahvaltı" ? "#FF9800" :
-                                                                                 mealType === "Öğle Yemeği" ? "#4CAF50" :
-                                                                                 mealType === "Akşam Yemeği" ? "#2196F3" :
-                                                                                 "#9C27B0",
-                                                                    backgroundColor: "white"
-                                                                }}
-                                                            >
-                                                                <span className="mui-chip-label">{item}</span>
-                                                            </div>
-
-                                                            {/* Alternatifler */}
-                                                            {mealPlan[day][mealType] && typeof mealPlan[day][mealType] === 'object' &&
-                                                             !Array.isArray(mealPlan[day][mealType]) &&
-                                                             mealPlan[day][mealType].alternatives &&
-                                                             mealPlan[day][mealType].alternatives[item] && (
-                                                                <div style={{ marginLeft: '15px', marginTop: '4px', marginBottom: '8px' }}>
-                                                                    {getMealAlternatives(mealPlan[day][mealType], item).map((alt, altIndex) => (
-                                                                        <div
-                                                                            key={altIndex}
-                                                                            className="mui-meal-chip"
-                                                                            style={{
-                                                                                borderColor: '#FF9E80',
-                                                                                backgroundColor: '#FFF8E1',
-                                                                                fontSize: '0.8rem',
-                                                                                margin: '2px 0'
-                                                                            }}
-                                                                        >
-                                                                            <i style={{ fontSize: '0.75rem', marginRight: '5px', color: '#757575' }}>
-                                                                                alternatif:
-                                                                            </i>
-                                                                            <span className="mui-chip-label">{alt}</span>
-                                                                        </div>
-                                                                    ))}
+                                                    getMealItemsArray(mealPlan[day][mealType]).map((item, index) => {
+                                                        const normalizedItem = normalizeMealItem(item);
+                                                        return (
+                                                            <div key={index} className="mui-meal-item-wrapper">
+                                                                <div
+                                                                    className="mui-meal-chip"
+                                                                    style={{
+                                                                        borderColor: mealType === "Kahvaltı" ? "#FF9800" :
+                                                                                    mealType === "Öğle Yemeği" ? "#4CAF50" :
+                                                                                    mealType === "Akşam Yemeği" ? "#2196F3" :
+                                                                                    "#9C27B0",
+                                                                        backgroundColor: "white"
+                                                                    }}
+                                                                >
+                                                                    <span className="mui-chip-label">{normalizedItem.name}</span>
+                                                                    {normalizedItem.portion && (
+                                                                        <span className="mui-portion-label">
+                                                                            {normalizedItem.portion}
+                                                                        </span>
+                                                                    )}
                                                                 </div>
-                                                            )}
-                                                        </div>
-                                                    )) : (
+
+                                                                {/* Alternatifler */}
+                                                                {mealPlan[day][mealType] && typeof mealPlan[day][mealType] === 'object' &&
+                                                                !Array.isArray(mealPlan[day][mealType]) &&
+                                                                mealPlan[day][mealType].alternatives &&
+                                                                mealPlan[day][mealType].alternatives[item] && (
+                                                                    <div style={{ marginLeft: '15px', marginTop: '4px', marginBottom: '8px' }}>
+                                                                        {getMealAlternatives(mealPlan[day][mealType], item).map((alt, altIndex) => {
+                                                                            const normalizedAlt = normalizeMealItem(alt);
+                                                                            return (
+                                                                                <div
+                                                                                    key={altIndex}
+                                                                                    className="mui-meal-chip"
+                                                                                    style={{
+                                                                                        borderColor: '#FF9E80',
+                                                                                        backgroundColor: '#FFF8E1',
+                                                                                        fontSize: '0.8rem',
+                                                                                        margin: '2px 0'
+                                                                                    }}
+                                                                                >
+                                                                                    <i style={{ fontSize: '0.75rem', marginRight: '5px', color: '#757575' }}>
+                                                                                        alternatif:
+                                                                                    </i>
+                                                                                    <span className="mui-chip-label">{normalizedAlt.name}</span>
+                                                                                    {normalizedAlt.portion && (
+                                                                                        <span className="mui-portion-label">
+                                                                                            {normalizedAlt.portion}
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }) : (
                                                         <div style={{
                                                             display: 'flex',
                                                             alignItems: 'center',

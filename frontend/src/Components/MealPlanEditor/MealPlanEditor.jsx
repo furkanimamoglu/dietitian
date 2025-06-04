@@ -192,25 +192,34 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
 
     const [editingCell, setEditingCell] = useState(null);
     const [newMealInput, setNewMealInput] = useState('');
+    const [newMealAmount, setNewMealAmount] = useState(''); // Yeni miktar/porsiyon alanı için state
 
     // Add new meal to specific alternative
-    const addMeal = (day, mealType, alternative, mealText) => {
+    const addMeal = (day, mealType, alternative, mealText, mealAmount) => {
         if (!mealText || !mealText.trim()) {
             setNewMealInput('');
+            setNewMealAmount('');
             setEditingCell(null);
             return;
         }
+
+        // Yeni veri formatı: {name: "yemek adı", portion: "miktar"} şeklinde
+        const mealItem = {
+            name: mealText.trim(),
+            portion: mealAmount ? mealAmount.trim() : null
+        };
 
         setMealPlan(prev => {
             const updated = {...prev};
             if (!updated[day][mealType][alternative]) {
                 updated[day][mealType][alternative] = [];
             }
-            updated[day][mealType][alternative] = [...updated[day][mealType][alternative], mealText.trim()];
+            updated[day][mealType][alternative] = [...updated[day][mealType][alternative], mealItem];
             return updated;
         });
 
         setNewMealInput('');
+        setNewMealAmount('');
         setEditingCell(null);
     };
 
@@ -230,6 +239,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
     const startEditing = (day, mealType, alternative) => {
         setEditingCell(`${day}-${mealType}-${alternative}`);
         setNewMealInput('');
+        setNewMealAmount('');
     };
 
     // Start adding a new alternative
@@ -242,6 +252,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
     const cancelEditing = () => {
         setEditingCell(null);
         setNewMealInput('');
+        setNewMealAmount('');
     };
 
     // Cancel adding alternative
@@ -254,7 +265,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
     const handleKeyPress = (e, day, mealType, alternative) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            addMeal(day, mealType, alternative, newMealInput);
+            addMeal(day, mealType, alternative, newMealInput, newMealAmount);
         } else if (e.key === 'Escape') {
             cancelEditing();
         }
@@ -465,7 +476,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                                                                     borderColor: mealType.color,
                                                                 }}
                                                             >
-                                                                <span className="mui-chip-label">{meal}</span>
+                                                                <span className="mui-chip-label">{meal.name}{meal.portion ? `: ${meal.portion}` : ''}</span>
                                                                 <button
                                                                     className="mui-chip-delete"
                                                                     onClick={() => removeMeal(day, mealType.name, alternative, mealIndex)}
@@ -489,10 +500,17 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                                                                 className="mui-meal-input"
                                                                 autoFocus
                                                             />
+                                                            <input
+                                                                type="text"
+                                                                value={newMealAmount}
+                                                                onChange={(e) => setNewMealAmount(e.target.value)}
+                                                                placeholder="Miktar / Porsiyon"
+                                                                className="mui-meal-amount-input"
+                                                            />
                                                             <div className="mui-form-actions">
                                                                 <button
                                                                     className="mui-btn mui-btn-contained"
-                                                                    onClick={() => addMeal(day, mealType.name, alternative, newMealInput)}
+                                                                    onClick={() => addMeal(day, mealType.name, alternative, newMealInput, newMealAmount)}
                                                                     style={{ backgroundColor: mealType.color }}
                                                                 >
                                                                     💾 Ekle
@@ -666,4 +684,3 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
 };
 
 export default MealPlanEditor;
-
