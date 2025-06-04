@@ -88,6 +88,210 @@
     min-width: 180px;
 }
 
+/* Gün Başlığı ve Kaldırma Butonu */
+.mui-day-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+}
+
+.mui-day-header-content .mui-remove-btn {
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.mui-day-header-content .mui-remove-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Öğün Başlığı ve Kaldırma Butonu */
+.mui-meal-type-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.mui-meal-type-header .mui-remove-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    color: #666;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.mui-meal-type-header .mui-remove-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+/* Yeni Gün Ekle */
+.mui-add-column-cell {
+    width: 60px;
+    min-width: 60px;
+}
+
+.mui-add-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.mui-add-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.mui-add-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.mui-add-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mui-selector {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 100%;
+}
+
+.mui-selector option {
+    background: white;
+    color: #333;
+}
+
+.mui-cancel-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mui-cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Öğün Ekleme Bölümü */
+.mui-add-meal-type-section {
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mui-add-meal-type-form {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    max-width: 100%;
+}
+
+.mui-add-meal-type-form h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: #333;
+    text-align: center;
+}
+
+.mui-add-meal-type-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mui-add-meal-type-selector .mui-selector {
+    border: 1px solid #e0e0e0;
+    background: white;
+    color: #333;
+    padding: 10px;
+}
+
+.mui-add-meal-type-selector .mui-cancel-btn {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    padding: 8px;
+}
+
+.mui-add-meal-type-btn {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mui-add-meal-type-btn:hover:not(:disabled) {
+    background: #e0e0e0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.mui-add-meal-type-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Table Body */
 .mui-meal-row {
     transition: background-color 0.2s ease;
@@ -131,6 +335,15 @@
 .mui-meal-type-name {
     font-size: 0.875rem;
     font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.mui-meal-type-name:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    text-decoration: underline;
 }
 
 /* Meal Cell */
@@ -147,6 +360,13 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* Alternative Tabs */
+.mui-alternatives-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /* Alternative Sections */
@@ -183,6 +403,26 @@
     border-radius: 10px;
     min-width: 20px;
     text-align: center;
+    margin: 0 5px;
+}
+
+.mui-alternative-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #f44336;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+}
+
+.mui-alternative-delete:hover {
+    transform: scale(1.2);
 }
 
 /* Alternative Select */
@@ -275,6 +515,39 @@
     background-color: rgba(25, 118, 210, 0.04);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add Alternative Button - Hücreye özel alternatif eklemek için */
+.mui-add-alternative-cell-btn {
+    width: 100%;
+    padding: 8px;
+    border: 2px dashed #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.mui-add-alternative-cell-btn:hover {
+    border-style: solid;
+    background-color: rgba(25, 118, 210, 0.04);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add Cell Alternative Form */
+.mui-add-cell-alternative-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
 }
 
 /* Add Meal Form */
@@ -453,116 +726,80 @@
     box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Meal Control Row (Öğün Ekleme Satırı) */
+.mui-meal-control-row {
+    background-color: #f8f9fa;
+    border-top: 2px dashed #e0e0e0;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.mui-meal-add-cell {
+    padding: 16px;
+    text-align: center;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .mui-meal-plan-container {
-        padding: 16px;
-    }
-
-    .mui-table-container {
-        overflow-x: auto;
-    }
-
-    .mui-day-header {
-        min-width: 150px;
-    }
+.mui-add-meal-type-container {
+    display: flex;
+    justify-content: center;
 }
 
-@media (max-width: 768px) {
-    .mui-meal-plan-title {
-        font-size: 1.75rem;
-    }
-
-    .mui-meal-plan-subtitle {
-        font-size: 0.875rem;
-    }
-
-    .mui-statistics-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 12px;
-    }
-
-    .mui-statistics-card-content {
-        padding: 16px;
-    }
-
-    .mui-statistics-count {
-        font-size: 2rem;
-    }
-
-    .mui-day-header {
-        min-width: 120px;
-        font-size: 0.75rem;
-    }
-
-    .mui-meal-cell {
-        padding: 8px;
-    }
-
-    .mui-meal-type-cell {
-        padding: 12px 8px;
-    }
-
-    .mui-meal-type-name {
-        font-size: 0.75rem;
-    }
+/* Floating Öğün Ekle Button */
+.mui-add-meal-floating-btn {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(25, 118, 210, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
 }
 
-@media (max-width: 480px) {
-    .mui-meal-plan-header {
-        padding: 16px;
-    }
+.mui-add-meal-floating-btn .mui-add-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
 
-    .mui-meal-plan-title {
-        font-size: 1.5rem;
-    }
+.mui-add-meal-floating-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(25, 118, 210, 0.4);
+}
 
-    .mui-form-actions {
-        flex-direction: column;
-    }
+.mui-add-meal-floating-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(25, 118, 210, 0.3);
+}
 
-    .mui-btn {
-        justify-content: center;
-    }
+.mui-add-meal-floating-btn:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    box-shadow: none;
+}
 
-    .mui-statistics-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .mui-save-program-btn {
-        padding: 12px 24px;
-        font-size: 0.875rem;
-    }
+/* Öğün Adı Düzenleme */
+.mui-edit-meal-name-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
 }
 
 /* Print Styles */
 @media print {
     .mui-add-meal-btn,
     .mui-add-meal-form,
-    .mui-save-section {
+    .mui-save-section,
+    .mui-remove-btn,
+    .mui-add-btn,
+    .mui-add-column-cell,
+    .mui-add-meal-type-section,
+    .mui-add-alternative-cell-btn,
+    .mui-add-cell-alternative-form {
         display: none;
     }
 
@@ -589,7 +826,8 @@
 .mui-add-meal-btn:focus,
 .mui-btn:focus,
 .mui-meal-input:focus,
-.mui-save-program-btn:focus {
+.mui-save-program-btn:focus,
+.mui-add-alternative-cell-btn:focus {
     outline: 2px solid #1976d2;
     outline-offset: 2px;
 }

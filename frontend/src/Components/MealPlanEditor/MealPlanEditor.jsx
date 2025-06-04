@@ -2,80 +2,253 @@ import React, { useState } from 'react';
 import './MealPlanEditor.css';
 
 const MealPlanEditor = () => {
-    const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-    const mealTypes = [
-        { name: 'Sabah', color: '#FFC107', icon: '🌅' },
-        { name: 'Öğle', color: '#FF9800', icon: '☀️' },
-        { name: 'Akşam', color: '#9C27B0', icon: '🌙' },
-        { name: 'Aperatif', color: '#E91E63', icon: '🥂' }
+    // Tüm günler ve öğün tiplerinin listesi (varsayılan)
+    const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const defaultMealTypes = [
+        { id: '1', name: 'Sabah', color: '#FFC107', order: 0 },
+        { id: '2', name: 'Öğle', color: '#FF9800', order: 1 },
+        { id: '3', name: 'Akşam', color: '#9C27B0', order: 2 },
+        { id: '4', name: 'Aperatif', color: '#E91E63', order: 3 }
     ];
 
-    // Meal plan state with alternatives
+    // Her hücre içindeki ana menü
+    const defaultMainMenu = 'Ana Menü';
+
+    // Orijinal günlerin sırası için indeks haritası
+    const dayOrderMap = Object.fromEntries(defaultDays.map((day, index) => [day, index]));
+
+    // Aktif olan günler ve öğünler için state
+    const [days, setDays] = useState([...defaultDays]);
+    const [mealTypes, setMealTypes] = useState([...defaultMealTypes]);
+
+    // Kullanılmayan günler ve öğünler için state
+    const [unusedDays, setUnusedDays] = useState([]);
+    const [unusedMealTypes, setUnusedMealTypes] = useState([]);
+
+    // Yeni gün/öğün ekleme durumu için state
+    const [showAddDay, setShowAddDay] = useState(false);
+    const [showAddMeal, setShowAddMeal] = useState(false);
+
+    // Öğün düzenleme için state
+    const [editingMealType, setEditingMealType] = useState(null);
+    const [editedMealName, setEditedMealName] = useState('');
+
+    // Yeni alternatif ekleme için state
+    const [editingCellAlternative, setEditingCellAlternative] = useState(null); // format: "day-mealType"
+    const [newAlternativeName, setNewAlternativeName] = useState('');
+
+    // Meal plan state - her hücre için birden fazla alternatif içerebilir
     const [mealPlan, setMealPlan] = useState(() => {
         const initialPlan = {};
-        days.forEach(day => {
+        defaultDays.forEach(day => {
             initialPlan[day] = {};
-            mealTypes.forEach(meal => {
+            defaultMealTypes.forEach(meal => {
                 initialPlan[day][meal.name] = {
-                    'Ana Menü': [],
-                    'Alternatif 1': [],
-                    'Alternatif 2': []
+                    [defaultMainMenu]: [] // Başlangıçta sadece Ana Menü var
                 };
             });
         });
         return initialPlan;
     });
 
+    // Alternatif listeleri - her hücre için ayrı alternatif listesi tutuyoruz
+    const getAlternativesForCell = (day, mealType) => {
+        if (mealPlan[day] && mealPlan[day][mealType]) {
+            return Object.keys(mealPlan[day][mealType]);
+        }
+        return [defaultMainMenu];
+    };
+
+    // Gün silme fonksiyonu
+    const removeDay = (dayToRemove) => {
+        setDays(days.filter(day => day !== dayToRemove));
+        setUnusedDays([...unusedDays, dayToRemove]);
+    };
+
+    // Öğün silme fonksiyonu
+    const removeMealType = (mealTypeToRemove) => {
+        setMealTypes(mealTypes.filter(meal => meal.id !== mealTypeToRemove.id));
+        setUnusedMealTypes([...unusedMealTypes, mealTypeToRemove]);
+    };
+
+    // Gün ekleme fonksiyonu
+    const addDay = (dayToAdd) => {
+        // Mevcut günlere ekleme yaparken orijinal sırayı korumak için
+        const newDaysArray = [...days, dayToAdd].sort((a, b) => dayOrderMap[a] - dayOrderMap[b]);
+        setDays(newDaysArray);
+        setUnusedDays(unusedDays.filter(day => day !== dayToAdd));
+        setShowAddDay(false);
+
+        // Yeni gün için öğün planlarını da oluştur
+        setMealPlan(prev => {
+            const updated = {...prev};
+            updated[dayToAdd] = {};
+            mealTypes.forEach(meal => {
+                updated[dayToAdd][meal.name] = {
+                    [defaultMainMenu]: [] // Başlangıçta sadece Ana Menü var
+                };
+            });
+            return updated;
+        });
+    };
+
+    // Öğün ekleme fonksiyonu
+    const addMealType = (mealTypeToAdd) => {
+        // Öğünleri order numarasına göre sıralayarak ekle
+        const newMealTypes = [...mealTypes, mealTypeToAdd].sort((a, b) => a.order - b.order);
+        setMealTypes(newMealTypes);
+        setUnusedMealTypes(unusedMealTypes.filter(meal => meal.id !== mealTypeToAdd.id));
+        setShowAddMeal(false);
+
+        // Yeni öğun için tüm günlerdeki planlamayı güncelle
+        setMealPlan(prev => {
+            const updated = {...prev};
+            days.forEach(day => {
+                if (!updated[day]) updated[day] = {};
+                updated[day][mealTypeToAdd.name] = {
+                    [defaultMainMenu]: [] // Başlangıçta sadece Ana Menü var
+                };
+            });
+            return updated;
+        });
+    };
+
+    // Öğün adı düzenleme fonksiyonu
+    const startEditingMealName = (mealType) => {
+        setEditingMealType(mealType);
+        setEditedMealName(mealType.name);
+    };
+
+    // Öğün adını kaydetme
+    const saveMealName = () => {
+        if (!editedMealName.trim()) return;
+
+        const oldName = editingMealType.name;
+        const newName = editedMealName.trim();
+
+        // Öğün listesini güncelle
+        setMealTypes(mealTypes.map(meal =>
+            meal.id === editingMealType.id
+                ? { ...meal, name: newName }
+                : meal
+        ));
+
+        // Meal planı güncelle - öğün adı değiştiğinde
+        setMealPlan(prev => {
+            const updated = {...prev};
+            days.forEach(day => {
+                if (updated[day]) {
+                    updated[day][newName] = {...prev[day][oldName]};
+                    delete updated[day][oldName];
+                }
+            });
+            return updated;
+        });
+
+        setEditingMealType(null);
+        setEditedMealName('');
+    };
+
+    // Hücreye özel alternatif ekleme fonksiyonu
+    const addCellAlternative = (day, mealType) => {
+        if (!newAlternativeName.trim()) return;
+
+        const alternativeName = newAlternativeName.trim();
+
+        // Aynı isimli alternatif varsa ekleme
+        const cellAlternatives = getAlternativesForCell(day, mealType);
+        if (cellAlternatives.includes(alternativeName)) {
+            setNewAlternativeName('');
+            setEditingCellAlternative(null);
+            return;
+        }
+
+        // Hücrenin alternatiflerini güncelle
+        setMealPlan(prev => {
+            const updated = {...prev};
+            if (!updated[day][mealType][alternativeName]) {
+                updated[day][mealType][alternativeName] = [];
+            }
+            return updated;
+        });
+
+        setNewAlternativeName('');
+        setEditingCellAlternative(null);
+    };
+
+    // Alternatif silme fonksiyonu
+    const removeCellAlternative = (day, mealType, alternativeToRemove) => {
+        // Ana Menü silinemez
+        if (alternativeToRemove === defaultMainMenu) return;
+
+        setMealPlan(prev => {
+            const updated = {...prev};
+            if (updated[day]?.[mealType]) {
+                const { [alternativeToRemove]: removed, ...rest } = updated[day][mealType];
+                updated[day][mealType] = rest;
+            }
+            return updated;
+        });
+    };
+
     const [editingCell, setEditingCell] = useState(null);
     const [newMealInput, setNewMealInput] = useState('');
-    const [selectedAlternative, setSelectedAlternative] = useState('Ana Menü');
-
-    const alternativeOptions = ['Ana Menü', 'Alternatif 1', 'Alternatif 2'];
 
     // Add new meal to specific alternative
     const addMeal = (day, mealType, alternative, mealText) => {
-        if (mealText && mealText.trim()) {
-            setMealPlan(prev => ({
-                ...prev,
-                [day]: {
-                    ...prev[day],
-                    [mealType]: {
-                        ...prev[day][mealType],
-                        [alternative]: [...prev[day][mealType][alternative], mealText.trim()]
-                    }
-                }
-            }));
+        if (!mealText || !mealText.trim()) {
             setNewMealInput('');
             setEditingCell(null);
+            return;
         }
+
+        setMealPlan(prev => {
+            const updated = {...prev};
+            if (!updated[day][mealType][alternative]) {
+                updated[day][mealType][alternative] = [];
+            }
+            updated[day][mealType][alternative] = [...updated[day][mealType][alternative], mealText.trim()];
+            return updated;
+        });
+
+        setNewMealInput('');
+        setEditingCell(null);
     };
 
     // Remove meal from specific alternative
     const removeMeal = (day, mealType, alternative, index) => {
-        setMealPlan(prev => ({
-            ...prev,
-            [day]: {
-                ...prev[day],
-                [mealType]: {
-                    ...prev[day][mealType],
-                    [alternative]: prev[day][mealType][alternative].filter((_, i) => i !== index)
-                }
-            }
-        }));
+        setMealPlan(prev => {
+            const updated = {...prev};
+            updated[day][mealType][alternative] = [
+                ...updated[day][mealType][alternative].slice(0, index),
+                ...updated[day][mealType][alternative].slice(index + 1)
+            ];
+            return updated;
+        });
     };
 
     // Start editing for a specific alternative
     const startEditing = (day, mealType, alternative) => {
         setEditingCell(`${day}-${mealType}-${alternative}`);
         setNewMealInput('');
-        setSelectedAlternative(alternative);
+    };
+
+    // Start adding a new alternative
+    const startAddingAlternative = (day, mealType) => {
+        setEditingCellAlternative(`${day}-${mealType}`);
+        setNewAlternativeName('');
     };
 
     // Cancel editing
     const cancelEditing = () => {
         setEditingCell(null);
         setNewMealInput('');
-        setSelectedAlternative('Ana Menü');
+    };
+
+    // Cancel adding alternative
+    const cancelAddingAlternative = () => {
+        setEditingCellAlternative(null);
+        setNewAlternativeName('');
     };
 
     // Handle key press
@@ -87,6 +260,54 @@ const MealPlanEditor = () => {
             cancelEditing();
         }
     };
+
+    // Handle key press for alternative input
+    const handleAlternativeKeyPress = (e, day, mealType) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addCellAlternative(day, mealType);
+        } else if (e.key === 'Escape') {
+            cancelAddingAlternative();
+        }
+    };
+
+    // Öğun ekleme fonksiyonu - yeni sürüm
+    const addNewMealType = () => {
+        // Yeni öğün için rastgele renk oluştur
+        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+
+        // "Yeni Öğün" şeklinde isim ver
+        const newName = `Yeni Öğün ${mealTypes.length + 1}`;
+
+        // Yeni öğün oluştur
+        const newMealType = {
+            id: `new-${Date.now()}`,
+            name: newName,
+            color: randomColor,
+            order: mealTypes.length
+        };
+
+        // Öğünü ekle
+        const newMealTypes = [...mealTypes, newMealType].sort((a, b) => a.order - b.order);
+        setMealTypes(newMealTypes);
+
+        // Yeni öğun için tüm günlerdeki planlamayı güncelle
+        setMealPlan(prev => {
+            const updated = {...prev};
+            days.forEach(day => {
+                if (!updated[day]) updated[day] = {};
+                updated[day][newName] = {
+                    [defaultMainMenu]: []
+                };
+            });
+            return updated;
+        });
+
+        // Öğün eklendikten sonra düzenleme moduna geç
+        setTimeout(() => {
+            startEditingMealName(newMealType);
+        }, 100);
+    }
 
     return (
         <div className="mui-meal-plan-container">
@@ -113,9 +334,49 @@ const MealPlanEditor = () => {
                         </th>
                         {days.map(day => (
                             <th key={day} className="mui-table-header-cell mui-day-header">
-                                {day}
+                                <div className="mui-day-header-content">
+                                    <span>{day}</span>
+                                    <button
+                                        className="mui-remove-btn"
+                                        onClick={() => removeDay(day)}
+                                        title="Bu günü kaldır"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
                             </th>
                         ))}
+                        <th className="mui-table-header-cell mui-add-column-cell">
+                            {showAddDay ? (
+                                <div className="mui-add-selector">
+                                    <select
+                                        className="mui-selector"
+                                        onChange={(e) => e.target.value && addDay(e.target.value)}
+                                        value=""
+                                    >
+                                        <option value="">Gün seçin...</option>
+                                        {unusedDays.map(day => (
+                                            <option key={day} value={day}>{day}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        className="mui-cancel-btn"
+                                        onClick={() => setShowAddDay(false)}
+                                    >
+                                        İptal
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    className="mui-add-btn"
+                                    onClick={() => setShowAddDay(true)}
+                                    disabled={unusedDays.length === 0}
+                                    title={unusedDays.length === 0 ? "Eklenecek gün kalmadı" : "Yeni gün ekle"}
+                                >
+                                    +
+                                </button>
+                            )}
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -123,150 +384,300 @@ const MealPlanEditor = () => {
                         <tr key={mealType.name} className={`mui-meal-row ${index % 2 === 0 ? 'mui-even-row' : 'mui-odd-row'}`}>
                             <td className="mui-meal-type-cell mui-sticky-cell">
                                 <div className="mui-meal-type-content">
-                                    <div
-                                        className="mui-meal-type-indicator"
-                                        style={{ backgroundColor: mealType.color }}
-                                    />
-                                    <span className="mui-meal-type-name">
-                      {mealType.icon} {mealType.name}
-                    </span>
+                                    {editingMealType && editingMealType.id === mealType.id ? (
+                                        <div className="mui-edit-meal-name-form">
+                                            <input
+                                                type="text"
+                                                value={editedMealName}
+                                                onChange={(e) => setEditedMealName(e.target.value)}
+                                                className="mui-meal-input"
+                                                autoFocus
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') saveMealName();
+                                                    else if (e.key === 'Escape') setEditingMealType(null);
+                                                }}
+                                            />
+                                            <div className="mui-form-actions">
+                                                <button
+                                                    className="mui-btn mui-btn-contained mui-btn-small"
+                                                    onClick={saveMealName}
+                                                    style={{ backgroundColor: mealType.color }}
+                                                >
+                                                    ✓
+                                                </button>
+                                                <button
+                                                    className="mui-btn mui-btn-outlined mui-btn-small"
+                                                    onClick={() => setEditingMealType(null)}
+                                                >
+                                                    ✗
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mui-meal-type-header">
+                                            <span
+                                                className="mui-meal-type-name"
+                                                onClick={() => startEditingMealName(mealType)}
+                                                title="Öğün adını düzenlemek için tıklayın"
+                                            >
+                                                {mealType.name}
+                                            </span>
+                                            <button
+                                                className="mui-remove-btn"
+                                                onClick={() => removeMealType(mealType)}
+                                                title="Bu öğünü kaldır"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </td>
                             {days.map(day => (
                                 <td key={`${day}-${mealType.name}`} className="mui-meal-cell">
                                     <div className="mui-meal-cell-content">
-                                        {/* Alternative Sections */}
-                                        {alternativeOptions.map(alternative => (
-                                            <div key={alternative} className="mui-alternative-section">
-                                                <div className="mui-alternative-header">
-                                                    <span className="mui-alternative-title">{alternative}</span>
-                                                    <span className="mui-alternative-count">
-                              ({mealPlan[day][mealType.name][alternative].length})
-                            </span>
-                                                </div>
-
-                                                {/* Existing meals for this alternative */}
-                                                <div className="mui-meals-list">
-                                                    {mealPlan[day][mealType.name][alternative].map((meal, mealIndex) => (
-                                                        <div
-                                                            key={mealIndex}
-                                                            className="mui-meal-chip"
-                                                            style={{
-                                                                backgroundColor: `${mealType.color}20`,
-                                                                borderColor: mealType.color,
-                                                            }}
-                                                        >
-                                                            <span className="mui-chip-label">{meal}</span>
+                                        {/* Alternatif Sekmeleri */}
+                                        <div className="mui-alternatives-tabs">
+                                            {getAlternativesForCell(day, mealType.name).map(alternative => (
+                                                <div key={alternative} className="mui-alternative-section">
+                                                    <div className="mui-alternative-header">
+                                                        <span className="mui-alternative-title">{alternative}</span>
+                                                        <span className="mui-alternative-count">
+                                                            ({mealPlan[day]?.[mealType.name]?.[alternative]?.length || 0})
+                                                        </span>
+                                                        {alternative !== defaultMainMenu && (
                                                             <button
-                                                                className="mui-chip-delete"
-                                                                onClick={() => removeMeal(day, mealType.name, alternative, mealIndex)}
-                                                                style={{ color: mealType.color }}
+                                                                className="mui-alternative-delete"
+                                                                onClick={() => removeCellAlternative(day, mealType.name, alternative)}
+                                                                title="Bu alternatifi kaldır"
                                                             >
                                                                 ×
                                                             </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                {/* Add meal section */}
-                                                {editingCell === `${day}-${mealType.name}-${alternative}` ? (
-                                                    <div className="mui-add-meal-form">
-                                                        <input
-                                                            type="text"
-                                                            value={newMealInput}
-                                                            onChange={(e) => setNewMealInput(e.target.value)}
-                                                            onKeyDown={(e) => handleKeyPress(e, day, mealType.name, alternative)}
-                                                            placeholder="Yemek adını giriniz..."
-                                                            className="mui-meal-input"
-                                                            autoFocus
-                                                        />
-                                                        <div className="mui-form-actions">
-                                                            <button
-                                                                className="mui-btn mui-btn-contained"
-                                                                onClick={() => addMeal(day, mealType.name, alternative, newMealInput)}
-                                                                style={{ backgroundColor: mealType.color }}
-                                                            >
-                                                                💾 Ekle
-                                                            </button>
-                                                            <button
-                                                                className="mui-btn mui-btn-outlined"
-                                                                onClick={cancelEditing}
-                                                            >
-                                                                ❌ İptal
-                                                            </button>
-                                                        </div>
+                                                        )}
                                                     </div>
-                                                ) : (
+
+                                                    {/* Existing meals for this alternative */}
+                                                    <div className="mui-meals-list">
+                                                        {mealPlan[day]?.[mealType.name]?.[alternative]?.map((meal, mealIndex) => (
+                                                            <div
+                                                                key={mealIndex}
+                                                                className="mui-meal-chip"
+                                                                style={{
+                                                                    backgroundColor: `${mealType.color}20`,
+                                                                    borderColor: mealType.color,
+                                                                }}
+                                                            >
+                                                                <span className="mui-chip-label">{meal}</span>
+                                                                <button
+                                                                    className="mui-chip-delete"
+                                                                    onClick={() => removeMeal(day, mealType.name, alternative, mealIndex)}
+                                                                    style={{ color: mealType.color }}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Add meal section */}
+                                                    {editingCell === `${day}-${mealType.name}-${alternative}` ? (
+                                                        <div className="mui-add-meal-form">
+                                                            <input
+                                                                type="text"
+                                                                value={newMealInput}
+                                                                onChange={(e) => setNewMealInput(e.target.value)}
+                                                                onKeyDown={(e) => handleKeyPress(e, day, mealType.name, alternative)}
+                                                                placeholder="Yemek adını giriniz..."
+                                                                className="mui-meal-input"
+                                                                autoFocus
+                                                            />
+                                                            <div className="mui-form-actions">
+                                                                <button
+                                                                    className="mui-btn mui-btn-contained"
+                                                                    onClick={() => addMeal(day, mealType.name, alternative, newMealInput)}
+                                                                    style={{ backgroundColor: mealType.color }}
+                                                                >
+                                                                    💾 Ekle
+                                                                </button>
+                                                                <button
+                                                                    className="mui-btn mui-btn-outlined"
+                                                                    onClick={cancelEditing}
+                                                                >
+                                                                    ❌ İptal
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            className="mui-add-meal-btn"
+                                                            onClick={() => startEditing(day, mealType.name, alternative)}
+                                                            style={{
+                                                                borderColor: `${mealType.color}50`,
+                                                                color: mealType.color,
+                                                            }}
+                                                        >
+                                                            + Yemek Ekle
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Hücreye özel alternatif ekleme bölümü */}
+                                        {editingCellAlternative === `${day}-${mealType.name}` ? (
+                                            <div className="mui-add-cell-alternative-form">
+                                                <input
+                                                    type="text"
+                                                    value={newAlternativeName}
+                                                    onChange={(e) => setNewAlternativeName(e.target.value)}
+                                                    onKeyDown={(e) => handleAlternativeKeyPress(e, day, mealType.name)}
+                                                    placeholder="Alternatif adı..."
+                                                    className="mui-meal-input"
+                                                    autoFocus
+                                                />
+                                                <div className="mui-form-actions">
                                                     <button
-                                                        className="mui-add-meal-btn"
-                                                        onClick={() => startEditing(day, mealType.name, alternative)}
-                                                        style={{
-                                                            borderColor: `${mealType.color}50`,
-                                                            color: mealType.color,
-                                                        }}
+                                                        className="mui-btn mui-btn-contained"
+                                                        onClick={() => addCellAlternative(day, mealType.name)}
+                                                        style={{ backgroundColor: mealType.color }}
                                                     >
-                                                        + Yemek Ekle
+                                                        ✓ Ekle
                                                     </button>
-                                                )}
+                                                    <button
+                                                        className="mui-btn mui-btn-outlined"
+                                                        onClick={cancelAddingAlternative}
+                                                    >
+                                                        ✗ İptal
+                                                    </button>
+                                                </div>
                                             </div>
-                                        ))}
+                                        ) : (
+                                            <button
+                                                className="mui-add-alternative-cell-btn"
+                                                onClick={() => startAddingAlternative(day, mealType.name)}
+                                                title="Bu öğün için yeni bir alternatif menü ekle"
+                                                style={{
+                                                    borderColor: `${mealType.color}50`,
+                                                    color: mealType.color,
+                                                }}
+                                            >
+                                                + Alternatif Ekle
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             ))}
                         </tr>
                     ))}
-                    </tbody>
-                </table>
-            </div>
+                    <tr className="mui-meal-control-row">
+                        <td colSpan={days.length + 2} className="mui-meal-add-cell">
+                            {showAddMeal ? (
+                                <div className="mui-add-meal-type-container">
+                                    <div className="mui-add-meal-type-form">
+                                        <h4>Yeni Öğün Ekle</h4>
+                                        {unusedMealTypes.length > 0 ? (
+                                            <div className="mui-add-meal-type-selector">
+                                                <select
+                                                    className="mui-selector"
+                                                    onChange={(e) => e.target.value && addMealType(JSON.parse(e.target.value))}
+                                                    value=""
+                                                >
+                                                    <option value="">Varolan öğünlerden seçin...</option>
+                                                    {unusedMealTypes.map(mealType => (
+                                                        <option key={mealType.id} value={JSON.stringify(mealType)}>
+                                                            {mealType.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        ) : null}
+                                        <div className="mui-add-new-meal-section">
+                                            <h5>Yeni öğün oluştur</h5>
+                                            <input
+                                                type="text"
+                                                className="mui-meal-input"
+                                                placeholder="Öğün adı..."
+                                                value={editedMealName}
+                                                onChange={(e) => setEditedMealName(e.target.value)}
+                                            />
+                                            <div className="mui-form-actions">
+                                                <button
+                                                    className="mui-btn mui-btn-contained"
+                                                    onClick={() => {
+                                                        if (editedMealName.trim()) {
+                                                            // Yeni öğün için rastgele renk oluştur
+                                                            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
 
-            {/* Statistics Cards */}
-            <div className="mui-statistics-section">
-                <h3 className="mui-statistics-title">
-                    Öğün İstatistikleri
-                </h3>
-                <div className="mui-statistics-grid">
-                    {mealTypes.map(mealType => {
-                        const totalMeals = days.reduce((total, day) => {
-                            return total + alternativeOptions.reduce((altTotal, alt) => {
-                                return altTotal + mealPlan[day][mealType.name][alt].length;
-                            }, 0);
-                        }, 0);
+                                                            // Yeni öğün oluştur
+                                                            const newMealType = {
+                                                                id: `new-${Date.now()}`,
+                                                                name: editedMealName.trim(),
+                                                                color: randomColor,
+                                                                order: mealTypes.length
+                                                            };
 
-                        const mainMeals = days.reduce((total, day) =>
-                            total + mealPlan[day][mealType.name]['Ana Menü'].length, 0
-                        );
-
-                        const alternativeMeals = totalMeals - mainMeals;
-
-                        return (
-                            <div key={mealType.name} className="mui-statistics-card">
-                                <div className="mui-statistics-card-content">
-                                    <div className="mui-statistics-header">
-                                        <div
-                                            className="mui-statistics-icon"
-                                            style={{ backgroundColor: mealType.color }}
-                                        >
-                                            {mealType.icon}
+                                                            // Öğünü ekle
+                                                            addMealType(newMealType);
+                                                            setEditedMealName('');
+                                                        }
+                                                    }}
+                                                >
+                                                    Ekle
+                                                </button>
+                                            </div>
                                         </div>
-                                        <span className="mui-statistics-meal-name">
-                      {mealType.name}
-                    </span>
-                                    </div>
-                                    <div className="mui-statistics-count">
-                                        {totalMeals}
-                                    </div>
-                                    <div className="mui-statistics-breakdown">
-                                        <div className="mui-stats-detail">Ana: {mainMeals}</div>
-                                        <div className="mui-stats-detail">Alt: {alternativeMeals}</div>
-                                    </div>
-                                    <div className="mui-statistics-label">
-                                        toplam öğün
+                                        <button
+                                            className="mui-cancel-btn"
+                                            onClick={() => {
+                                                setShowAddMeal(false);
+                                                setEditedMealName('');
+                                            }}
+                                        >
+                                            İptal
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                            ) : (
+                                <button
+                                    className="mui-add-meal-floating-btn"
+                                    onClick={() => setShowAddMeal(true)}
+                                >
+                                    <span className="mui-add-icon">+</span>
+                                    <span>Öğün Ekle</span>
+                                </button>
+                            )}
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td className="mui-meal-type-cell">
+                                <button
+                                    className="mui-add-btn"
+                                    onClick={() => {
+                                        // Yeni öğün için rastgele renk oluştur
+                                        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+
+                                        // Yeni öğün oluştur
+                                        const newMealType = {
+                                            id: `new-${Date.now()}`,
+                                            name: "Yeni Öğün",
+                                            color: randomColor,
+                                            order: mealTypes.length
+                                        };
+
+                                        // Öğünü ekle
+                                        addMealType(newMealType);
+                                    }}
+                                    title="Hızlı Öğün Ekle"
+                                >
+                                    +
+                                </button>
+                            </td>
+                            <td colSpan={days.length + 1}></td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
 
             {/* Save Button */}
