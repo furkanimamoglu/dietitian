@@ -1233,7 +1233,7 @@ export default function Egzersizler() {
                     }}
                     className="right-sidebar-panel"
                 >
-                    <Box sx={{padding: '16px 0', backgroundColor: '#fc9e21'}}>
+                    <Box sx={{padding: '16px 0', color: 'white', backgroundColor: '#2d4149'}}>
                         <Typography variant="h6" sx={{
                             textAlign: 'center',
                             color: 'white',

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './MealPlanEditor.css';
 
 const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
-    // Tüm günler ve öğün tiplerinin listesi (varsayılan)
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
         { id: '1', name: 'Sabah', color: '#FFC107', order: 0 },
@@ -328,7 +327,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                     <tr>
                         <th className="mui-table-header-cell mui-sticky-cell">
                             <div className="mui-header-content">
-                                <span className="mui-header-icon">🍽️</span>
                                 <span>Öğün / Gün</span>
                             </div>
                         </th>

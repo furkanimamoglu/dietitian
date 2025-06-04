@@ -51,10 +51,10 @@ export default function Navbar() {
                     position: 'sticky',
                     top: '3.8rem',
                     mt: "1rem",
-                    boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 4px 6px rgba(0,0,0,0.2)",
+                    boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.2)" : "0 1px 0.5rem #2d4149",
                     transition: "background-color 0.3s ease, box-shadow 0.3s ease",
                     zIndex: 100,
-                    borderRadius: 3,
+                    borderRadius: 2,
                     justifyContent: "center",
                     width: "100%"
                 }}
@@ -78,7 +78,7 @@ export default function Navbar() {
                                         my: 2,
                                         mx: 1.5,
                                         fontWeight: isActive ? "600" : "500",
-                                        color: isActive ? "#ff7355" : "#045504",
+                                        color: isActive ? "#ff7355" : "#2d4149",
                                         display: "flex",
                                         alignItems: "center",
                                         padding: "8px 16px",

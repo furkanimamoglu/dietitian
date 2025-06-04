@@ -1503,7 +1503,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1521,7 +1521,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1539,7 +1539,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1557,7 +1557,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1575,7 +1575,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1593,7 +1593,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1644,7 +1644,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1662,7 +1662,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2" sx={{whiteSpace: 'pre-line'}}>
@@ -1680,7 +1680,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1698,7 +1698,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1716,7 +1716,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1734,7 +1734,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1785,7 +1785,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1803,7 +1803,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1821,7 +1821,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1839,7 +1839,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -2041,20 +2041,16 @@ function Danisan() {
                                                 <Button
                                                     variant="contained"
                                                     size="small"
-                                                    color="primary"
-                                                    startIcon={<AddIcon/>}
+                                                    color="secondary"
+                                                    startIcon={<AddIcon />}
                                                     onClick={handleOpenMeasurementDialog}
+                                                    sx={{ color: "#fff", fontWeight: "bold" }}
                                                 >
                                                     Yeni Ölçüm
                                                 </Button>
                                             </Box>
                                         }
-                                        sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
+                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white', borderBottom: '1px solid', borderColor: 'divider'}}
                                     />
                                     <CardContent>
                                         <Box sx={{
@@ -2144,8 +2140,8 @@ function Danisan() {
                                         title="Vücut Analizi"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -2759,8 +2755,8 @@ function Danisan() {
                                 title="Atanmış Planlar"
                                 titleTypographyProps={{variant: 'h5', fontWeight: 'bold'}}
                                 sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
+                                    bgcolor: '#2d4149',
+                                    color: 'white',
                                     borderBottom: '1px solid',
                                     borderColor: 'divider'
                                 }}
@@ -2911,8 +2907,8 @@ function Danisan() {
                                         title="Yaklaşan Randevular"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -2997,7 +2993,8 @@ function Danisan() {
                                         title="Geçmiş Randevular"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'grey.200',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3074,11 +3071,8 @@ function Danisan() {
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         subheader={pastAppointments.length > 0 ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
                                         sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
-                                            '& .MuiCardHeader-subheader': {
-                                                color: 'primary.contrastText'
-                                            },
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3107,7 +3101,8 @@ function Danisan() {
                                         title="Randevu İstatistikleri"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'grey.200',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3246,8 +3241,8 @@ function Danisan() {
                                     title="Aktif Egzersiz Programı"
                                     titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                     sx={{
-                                        bgcolor: 'success.light',
-                                        color: 'success.contrastText',
+                                        bgcolor: '#2d4149',
+                                        color: 'white',
                                         borderBottom: '1px solid',
                                         borderColor: 'divider'
                                     }}
@@ -3374,8 +3369,8 @@ function Danisan() {
                                 title="Atanmış Tüm Egzersizler"
                                 titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                 sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
+                                    bgcolor: '#2d4149',
+                                    color: 'white',
                                     borderBottom: '1px solid',
                                     borderColor: 'divider'
                                 }}
@@ -3472,8 +3467,8 @@ function Danisan() {
                                 title="Tamamlanan Egzersiz Geçmişi"
                                 titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                 sx={{
-                                    bgcolor: 'success.light',
-                                    color: 'success.contrastText',
+                                    bgcolor: '#2d4149',
+                                    color: 'white',
                                     borderBottom: '1px solid',
                                     borderColor: 'divider'
                                 }}
@@ -3851,7 +3846,8 @@ function Danisan() {
                                         Fatura: {activeInvoice.description || 'Açıklama yok'}</Typography>}
                                     subheader={<Typography variant="body2" color="text.secondary">Fatura
                                         No: {activeInvoice.id}</Typography>}
-                                    sx={{borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.100'}}
+                                    sx={{borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#2d4149',
+                                        color: 'white',}}
                                 />
                                 <CardContent>
                                     <Typography variant="body2" sx={{mb: 1}}>
@@ -3904,7 +3900,8 @@ function Danisan() {
                                                         action={<Chip label={statusLabel} color={statusColor}
                                                                       size="small"/>}
                                                         sx={{
-                                                            bgcolor: 'grey.100',
+                                                            bgcolor: '#2d4149',
+                                                            color: 'white',
                                                             borderBottom: '1px solid',
                                                             borderColor: 'divider'
                                                         }}
