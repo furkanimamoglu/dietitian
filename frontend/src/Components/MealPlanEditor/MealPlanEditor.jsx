@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './MealPlanEditor.css';
 
-const MealPlanEditor = () => {
+const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
     // Tüm günler ve öğün tiplerinin listesi (varsayılan)
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
@@ -569,124 +569,94 @@ const MealPlanEditor = () => {
                             ))}
                         </tr>
                     ))}
-                    <tr className="mui-meal-control-row">
-                        <td colSpan={days.length + 2} className="mui-meal-add-cell">
-                            {showAddMeal ? (
-                                <div className="mui-add-meal-type-container">
-                                    <div className="mui-add-meal-type-form">
-                                        <h4>Yeni Öğün Ekle</h4>
-                                        {unusedMealTypes.length > 0 ? (
-                                            <div className="mui-add-meal-type-selector">
-                                                <select
-                                                    className="mui-selector"
-                                                    onChange={(e) => e.target.value && addMealType(JSON.parse(e.target.value))}
-                                                    value=""
-                                                >
-                                                    <option value="">Varolan öğünlerden seçin...</option>
-                                                    {unusedMealTypes.map(mealType => (
-                                                        <option key={mealType.id} value={JSON.stringify(mealType)}>
-                                                            {mealType.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        ) : null}
-                                        <div className="mui-add-new-meal-section">
-                                            <h5>Yeni öğün oluştur</h5>
-                                            <input
-                                                type="text"
-                                                className="mui-meal-input"
-                                                placeholder="Öğün adı..."
-                                                value={editedMealName}
-                                                onChange={(e) => setEditedMealName(e.target.value)}
-                                            />
-                                            <div className="mui-form-actions">
-                                                <button
-                                                    className="mui-btn mui-btn-contained"
-                                                    onClick={() => {
-                                                        if (editedMealName.trim()) {
-                                                            // Yeni öğün için rastgele renk oluştur
-                                                            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-
-                                                            // Yeni öğün oluştur
-                                                            const newMealType = {
-                                                                id: `new-${Date.now()}`,
-                                                                name: editedMealName.trim(),
-                                                                color: randomColor,
-                                                                order: mealTypes.length
-                                                            };
-
-                                                            // Öğünü ekle
-                                                            addMealType(newMealType);
-                                                            setEditedMealName('');
-                                                        }
-                                                    }}
-                                                >
-                                                    Ekle
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <button
-                                            className="mui-cancel-btn"
-                                            onClick={() => {
-                                                setShowAddMeal(false);
-                                                setEditedMealName('');
-                                            }}
-                                        >
-                                            İptal
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <button
-                                    className="mui-add-meal-floating-btn"
-                                    onClick={() => setShowAddMeal(true)}
-                                >
-                                    <span className="mui-add-icon">+</span>
-                                    <span>Öğün Ekle</span>
-                                </button>
-                            )}
-                        </td>
-                    </tr>
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <td className="mui-meal-type-cell">
-                                <button
-                                    className="mui-add-btn"
-                                    onClick={() => {
-                                        // Yeni öğün için rastgele renk oluştur
-                                        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-
-                                        // Yeni öğün oluştur
-                                        const newMealType = {
-                                            id: `new-${Date.now()}`,
-                                            name: "Yeni Öğün",
-                                            color: randomColor,
-                                            order: mealTypes.length
-                                        };
-
-                                        // Öğünü ekle
-                                        addMealType(newMealType);
-                                    }}
-                                    title="Hızlı Öğün Ekle"
-                                >
-                                    +
-                                </button>
-                            </td>
-                            <td colSpan={days.length + 1}></td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
 
-            {/* Save Button */}
-            <div className="mui-save-section">
+            {/* Yeni Öğün ekle butonu - tablonun dışına alındı */}
+            <div className="mui-add-meal-section">
+                {showAddMeal ? (
+                    <div className="mui-add-meal-type-container">
+                        <div className="mui-add-meal-type-form">
+                            <button
+                                className="mui-cancel-btn"
+                                onClick={() => {
+                                    setShowAddMeal(false);
+                                    setEditedMealName('');
+                                }}
+                            >
+                                ×
+                            </button>
+                            <h4>Yeni Öğün Ekle</h4>
+                            <input
+                                type="text"
+                                className="mui-meal-input"
+                                placeholder="Öğün adını girin..."
+                                value={editedMealName}
+                                onChange={(e) => setEditedMealName(e.target.value)}
+                                autoFocus
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter' && editedMealName.trim()) {
+                                        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                                        const newMealType = {
+                                            id: `new-${Date.now()}`,
+                                            name: editedMealName.trim(),
+                                            color: randomColor,
+                                            order: mealTypes.length
+                                        };
+                                        addMealType(newMealType);
+                                        setEditedMealName('');
+                                    }
+                                }}
+                            />
+                            <div className="mui-form-actions">
+                                <button
+                                    className="mui-btn mui-btn-contained"
+                                    onClick={() => {
+                                        if (editedMealName.trim()) {
+                                            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                                            const newMealType = {
+                                                id: `new-${Date.now()}`,
+                                                name: editedMealName.trim(),
+                                                color: randomColor,
+                                                order: mealTypes.length
+                                            };
+                                            addMealType(newMealType);
+                                            setEditedMealName('');
+                                        }
+                                    }}
+                                    disabled={!editedMealName.trim()}
+                                >
+                                    Ekle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        className="mui-modern-add-meal-btn"
+                        onClick={() => setShowAddMeal(true)}
+                    >
+                        <span className="mui-modern-add-icon">+</span>
+                        <span>Öğün Ekle</span>
+                    </button>
+                )}
+            </div>
+
+            {/* Kaydet/İptal butonlarını bileşen içine taşıdım */}
+            <div className="mui-editor-actions">
                 <button
-                    className="mui-save-program-btn"
-                    onClick={() => console.log('Saving meal plan:', mealPlan)}
+                    className="mui-btn mui-btn-outlined mui-cancel-action-btn"
+                    onClick={onCancel}
                 >
-                    💾 Programı Kaydet
+                    İptal
+                </button>
+                <button
+                    className="mui-btn mui-btn-contained mui-save-action-btn"
+                    onClick={onSave}
+                    disabled={isSaving}
+                >
+                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
             </div>
         </div>
@@ -694,4 +664,3 @@ const MealPlanEditor = () => {
 };
 
 export default MealPlanEditor;
-

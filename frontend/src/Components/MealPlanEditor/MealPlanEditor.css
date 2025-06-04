@@ -106,7 +106,7 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
     border: none;
-    color: white;
+    color: #f44336; /* Kırmızı renk eklendi */
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -121,6 +121,7 @@
     opacity: 1;
     background: rgba(255, 255, 255, 0.4);
     transform: scale(1.1);
+    color: #d32f2f; /* Hover durumunda daha koyu kırmızı */
 }
 
 /* Öğün Başlığı ve Kaldırma Butonu */
@@ -137,7 +138,7 @@
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.05);
     border: none;
-    color: #666;
+    color: #f44336; /* Kırmızı renk eklendi */
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -152,6 +153,7 @@
     opacity: 1;
     background: rgba(0, 0, 0, 0.1);
     transform: scale(1.1);
+    color: #d32f2f; /* Hover durumunda daha koyu kırmızı */
 }
 
 /* Yeni Gün Ekle */
@@ -207,6 +209,54 @@
 }
 
 .mui-cancel-btn {
+    padding: 8px 12px;
+    border-radius: 50%;
+    background: #f44336;
+    border: 1px solid #e53935;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.mui-cancel-btn:hover {
+    background: #d32f2f;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.mui-add-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mui-selector {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 100%;
+}
+
+.mui-selector option {
+    background: white;
+    color: #333;
+}
+
+.mui-cancel-btn {
     padding: 4px 8px;
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.2);
@@ -221,7 +271,7 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
-/* Öğün Ekleme Bölümü */
+/* Öğün Ekleme Bölümü - Yeni minimal tasarım */
 .mui-add-meal-type-section {
     margin: 24px 0;
     display: flex;
@@ -231,25 +281,28 @@
 
 .mui-add-meal-type-form {
     background: white;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 16px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    width: 280px;
     max-width: 100%;
+    position: relative;
 }
 
 .mui-add-meal-type-form h4 {
     margin-top: 0;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     font-size: 1rem;
     color: #333;
     text-align: center;
+    font-weight: 500;
 }
 
 .mui-add-meal-type-selector {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
 .mui-add-meal-type-selector .mui-selector {
@@ -257,39 +310,97 @@
     background: white;
     color: #333;
     padding: 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
 }
 
-.mui-add-meal-type-selector .mui-cancel-btn {
-    background: #f5f5f5;
-    border: 1px solid #e0e0e0;
-    color: #666;
-    padding: 8px;
+.mui-add-meal-type-selector .mui-selector:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+    outline: none;
 }
 
-.mui-add-meal-type-btn {
-    background: #f5f5f5;
-    border: 1px solid #e0e0e0;
-    color: #666;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 0.875rem;
+.mui-add-new-meal-section {
+    background-color: #f9f9f9;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.mui-add-new-meal-section h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.mui-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.mui-cancel-btn {
+    padding: 8px 12px;
+    border-radius: 50%;
+    background: #f44336;
+    border: 1px solid #e53935;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.mui-cancel-btn:hover {
+    background: #d32f2f;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.mui-modern-add-meal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #2196F3 0%, #42a5f5 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s ease;
+    width: auto;
+    margin: 8px auto;
 }
 
-.mui-add-meal-type-btn:hover:not(:disabled) {
-    background: #e0e0e0;
+.mui-modern-add-meal-btn:hover {
+    background: linear-gradient(90deg, #1976D2 0%, #2196F3 100%);
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.4);
     transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
-.mui-add-meal-type-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.mui-modern-add-meal-btn:active {
+    transform: translateY(0);
+}
+
+.mui-modern-add-icon {
+    font-size: 1.1rem;
+    font-weight: bold;
 }
 
 /* Table Body */
@@ -595,7 +706,8 @@
 }
 
 .mui-btn-contained {
-    color: white;
+    color: #ffffff;
+    background-color: #21af21;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -787,6 +899,98 @@
     flex-direction: column;
     gap: 8px;
     width: 100%;
+}
+
+/* Modern Öğün Ekle Butonu */
+.mui-modern-add-meal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+    transition: all 0.3s ease;
+    width: auto;
+    margin: 8px auto;
+}
+
+.mui-modern-add-meal-btn:hover {
+    background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%);
+    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+    transform: translateY(-1px);
+}
+
+.mui-modern-add-meal-btn:active {
+    transform: translateY(0);
+}
+
+.mui-modern-add-icon {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Kaydet/İptal Action Butonları */
+.mui-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    gap: 15px;
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.mui-save-action-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white !important;
+    padding: 10px 24px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    border-radius: 6px !important;
+    box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+}
+
+.mui-save-action-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #43a047 0%, #388e3c 100%);
+    box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.mui-save-action-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+}
+
+.mui-save-action-btn:disabled {
+    background: #cccccc;
+    color: #888888;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.mui-cancel-action-btn {
+    background: white;
+    color: #666 !important;
+    border: 1px solid #ddd !important;
+    padding: 10px 24px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    border-radius: 6px !important;
+    transition: all 0.3s ease;
+}
+
+.mui-cancel-action-btn:hover {
+    background: #f5f5f5;
+    border-color: #bbb !important;
 }
 
 /* Print Styles */

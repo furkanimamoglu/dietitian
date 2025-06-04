@@ -2087,73 +2087,11 @@ export default function Beslenme() {
                 width="100%"
             >
                 <div className="modal-body">
-                    <MealPlanEditor />
-                    <div className="program-details-section">
-                        <h3 className="section-title">Program Bilgileri</h3>
-                        <div className="input-container">
-                            <label htmlFor="editTitle">Program Adı</label>
-                            <input
-                                type="text"
-                                id="editTitle"
-                                className="text-input"
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                placeholder="Program adını giriniz"
-                            />
-                        </div>
-                        <div className="input-container">
-                            <label htmlFor="editDescription">Açıklama</label>
-                            <textarea
-                                id="editDescription"
-                                className="text-input textarea"
-                                value={editDescription}
-                                onChange={(e) => setEditDescription(e.target.value)}
-                                placeholder="Program açıklaması giriniz"
-                                rows={3}
-                            />
-                        </div>
-                        <div className="input-container">
-                            <label htmlFor="editCategory">Kategori</label>
-                            <select
-                                id="editCategory"
-                                className="text-input"
-                                value={editCategoryId}
-                                onChange={(e) => setEditCategoryId(e.target.value)}
-                            >
-                                <option value="">Kategori Seçin</option>
-                                {categoryData.map(category => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name || category.title}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="meal-plan-section">
-                        <h3 className="section-title">Öğün Planı</h3>
-                        <MealPlanTable
-                            mealPlan={mealPlan}
-                            onMealChange={handleMealChange}
-                            selectedDay={selectedDay}
-                            onDayChange={handleDayChange}
-                        />
-                    </div>
-                </div>
-                <div className="modal-footer">
-                    <button
-                        className="modal-btn cancel-btn"
-                        onClick={() => setEditProgramModal(false)}
-                    >
-                        İptal
-                    </button>
-                    <button
-                        className="modal-btn confirm-btn"
-                        onClick={handleSaveMealPlan}
-                        disabled={isSaving}
-                    >
-                        {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
-                    </button>
+                    <MealPlanEditor
+                        onSave={handleSaveMealPlan}
+                        onCancel={() => setEditProgramModal(false)}
+                        isSaving={isSaving}
+                    />
                 </div>
             </Modal>
 
