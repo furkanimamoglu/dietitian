@@ -393,22 +393,72 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         showSuccessToast(`${copiedDay} günündeki içerik ${targetDay} gününe başarıyla yapıştırıldı.`);
     };
 
+    // Plan başlığı, açıklama ve kategori için state tanımlıyorum
+    const [title, setTitle] = useState(editTitle);
+    const [description, setDescription] = useState(editDescription);
+    const [categoryId, setCategoryId] = useState(editCategoryId);
+    const [categories, setCategories] = useState([]);
+
+    // Kategorileri yüklemek için
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
+                    headers: {
+                        'Authorization': localStorage.getItem("token")
+                    }
+                });
+
+                if (response.data && Array.isArray(response.data)) {
+                    setCategories(response.data);
+                }
+            } catch (error) {
+                console.error("Kategoriler yüklenirken hata oluştu:", error);
+                showErrorToast("Kategoriler yüklenemedi!");
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     const saveMealPlan = async () => {
         try {
-            const planData = {
-                title: editTitle,
-                description: editDescription,
-                image: "/placeholder.png",
-                category_id: editCategoryId,
-                mealPlan: mealPlan
-            };
-
-            if (existingPlanId) {
-                planData.nutrition_plan_id = existingPlanId;
+            // Girişlerin doğruluğunu kontrol et
+            if (!title || title.trim() === "") {
+                showErrorToast("Lütfen bir plan başlığı giriniz.");
+                return;
             }
 
-            const endpoint = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
+            if (!categoryId) {
+                showErrorToast("Lütfen bir kategori seçiniz.");
+                return;
+            }
 
+            // Boş gün kontrolü
+            let isEmpty = true;
+            for (const day in mealPlan) {
+                if (Object.keys(mealPlan[day]).length > 0) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+
+            if (isEmpty) {
+                showErrorToast("En az bir güne öğün eklenmelidir.");
+                return;
+            }
+
+            // Request için veriyi hazırla
+            const planData = {
+                nutrition_plan_id: existingPlanId || null,
+                title: title,
+                description: description || "",
+                image: "/placeholder.png",
+                category_id: parseInt(categoryId),
+                mealPlan: JSON.stringify(mealPlan)
+            };
+
+            const endpoint = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
             const method = 'put';
 
             const response = await axios({
@@ -422,7 +472,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
             if (response.status === 200) {
                 showSuccessToast(`Beslenme planı başarıyla güncellendi.`);
-                onSave(mealPlan);
+                onSave(response.data);
             }
         } catch (error) {
             console.error("Beslenme planı kaydetme hatası:", error);
@@ -456,6 +506,58 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 <p className="mui-meal-plan-subtitle">
                     Her gün için öğün planınızı düzenleyin
                 </p>
+            </div>
+
+            {/* Plan Detayları Formu */}
+            <div className="mui-plan-details-form">
+                <div className="mui-form-row">
+                    <div className="mui-form-group">
+                        <label htmlFor="plan-title">Plan Başlığı <span className="required">*</span></label>
+                        <input
+                            type="text"
+                            id="plan-title"
+                            className="mui-form-control"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            placeholder="Beslenme planı başlığı"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="mui-form-row">
+                    <div className="mui-form-group">
+                        <label htmlFor="plan-description">Açıklama</label>
+                        <textarea
+                            id="plan-description"
+                            className="mui-form-control"
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            placeholder="Beslenme planı hakkında açıklama"
+                            rows={2}
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div className="mui-form-row">
+                    <div className="mui-form-group">
+                        <label htmlFor="plan-category">Kategori <span className="required">*</span></label>
+                        <select
+                            id="plan-category"
+                            className="mui-form-control"
+                            value={categoryId}
+                            onChange={e => setCategoryId(e.target.value)}
+                            required
+                        >
+                            <option value="">Kategori Seçin</option>
+                            {categories.map(category => (
+                                <option key={category.category_id} value={category.category_id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {/* Main Table */}
