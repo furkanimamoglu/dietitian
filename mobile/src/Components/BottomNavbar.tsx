@@ -81,7 +81,7 @@ const BottomNav = ({navigation}: Props) => {
                 return;
             }
 
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
