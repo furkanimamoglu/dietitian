@@ -2093,6 +2093,10 @@ export default function Beslenme() {
                         onSave={handleSaveMealPlan}
                         onCancel={() => setEditProgramModal(false)}
                         isSaving={isSaving}
+                        editTitle={editTitle}
+                        editDescription={editDescription}
+                        editCategoryId={editCategoryId}
+                        existingPlanId={selectedProgram?.id}
                     />
                 </div>
             </Modal>

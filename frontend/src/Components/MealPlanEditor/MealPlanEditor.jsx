@@ -5,6 +5,20 @@ import axios from 'axios';
 import config from '../../config';
 
 const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlanId = null }) => {  // Props güncelledim
+    // Plan başlığı, açıklama ve kategori için state tanımlıyorum
+    // Bu state'leri mealPlan tanımlamasından önce oluşturuyorum ki diğer işlemler düzgün çalışsın
+    const [title, setTitle] = useState(editTitle);
+    const [description, setDescription] = useState(editDescription);
+    const [categoryId, setCategoryId] = useState(editCategoryId);
+    const [categories, setCategories] = useState([]);
+
+    // useEffect ile props değiştiğinde state'leri güncelliyorum
+    useEffect(() => {
+        setTitle(editTitle);
+        setDescription(editDescription);
+        setCategoryId(editCategoryId);
+    }, [editTitle, editDescription, editCategoryId]);
+
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
         { id: '1', name: 'Sabah', color: '#FFC107', order: 0 },
@@ -393,12 +407,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         showSuccessToast(`${copiedDay} günündeki içerik ${targetDay} gününe başarıyla yapıştırıldı.`);
     };
 
-    // Plan başlığı, açıklama ve kategori için state tanımlıyorum
-    const [title, setTitle] = useState(editTitle);
-    const [description, setDescription] = useState(editDescription);
-    const [categoryId, setCategoryId] = useState(editCategoryId);
-    const [categories, setCategories] = useState([]);
-
     // Kategorileri yüklemek için
     useEffect(() => {
         const fetchCategories = async () => {
@@ -450,12 +458,12 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
             // Request için veriyi hazırla
             const planData = {
-                nutrition_plan_id: existingPlanId || null,
+                nutrition_plan_id: existingPlanId ? parseInt(existingPlanId) : null,
                 title: title,
                 description: description || "",
                 image: "/placeholder.png",
                 category_id: parseInt(categoryId),
-                mealPlan: JSON.stringify(mealPlan)
+                mealPlan: mealPlan
             };
 
             const endpoint = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
