@@ -214,14 +214,137 @@ const pdfStyles = StyleSheet.create({
     }
 });
 
-// PDF Document Component for Nutrition Plan
 const NutritionPlanDocument = ({program}) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
     const dietitianName = "Dr. Furkan İmamoğlu";
+    const mealPlanData = program?.mealPlan || {};
+    const hasMealPlan = Object.keys(mealPlanData).length > 0;
+
     return (
         <Document>
+            <Page size="A4" style={pdfStyles.page}>
+                {/* Başlık ve Logo */}
+                <View style={pdfStyles.header}>
+                    <View style={pdfStyles.headerContent}>
+                        <Text style={pdfStyles.headerTitle}>{program?.title || 'Beslenme Programı'}</Text>
+                        <View style={pdfStyles.headerInfo}>
+                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
+                            <Text>Diyetisyen: {dietitianName}</Text>
+                        </View>
+                    </View>
+                    <View style={pdfStyles.logoContainer}>
+                        <Text style={pdfStyles.logo}>DIYET</Text>
+                    </View>
+                </View>
 
+                {/* Program Bilgileri */}
+                <View style={pdfStyles.infoSection}>
+                    <View style={pdfStyles.infoBox}>
+                        <Text style={pdfStyles.infoTitle}>Program Adı</Text>
+                        <Text style={pdfStyles.infoContent}>{program?.title || 'İsimsiz Program'}</Text>
+                    </View>
+                    <View style={pdfStyles.infoBox}>
+                        <Text style={pdfStyles.infoTitle}>Kategori</Text>
+                        <Text style={pdfStyles.infoContent}>{program?.category_name || 'Genel'}</Text>
+                    </View>
+                    <View style={pdfStyles.infoBox}>
+                        <Text style={pdfStyles.infoTitle}>Açıklama</Text>
+                        <Text style={pdfStyles.infoContent}>{program?.description || 'Açıklama yok'}</Text>
+                    </View>
+                </View>
+
+                {/* Günler ve Yemekler */}
+                <View style={pdfStyles.daysContainer}>
+                    {hasMealPlan ? (
+                        Object.keys(mealPlanData).map((day, index) => {
+                            const dayData = mealPlanData[day] || {};
+                            const hasMeals = Object.keys(dayData).length > 0;
+
+                            return (
+                        <View style={pdfStyles.dayCard} key={`day-${index}`}>
+                            <View style={pdfStyles.dayHeader}>
+                                <Text style={pdfStyles.dayHeaderText}>{day}</Text>
+                            </View>
+                            <View style={pdfStyles.dayContent}>
+                                        {hasMeals ? (
+                                            Object.keys(dayData).map((meal, mealIndex) => {
+                                                const mealData = dayData[meal];
+                                    let items = [];
+                                    let alternatives = {};
+
+                                    // Veri yapısını debug etmek için
+                                    console.log('Meal data for', meal, ':', mealData);
+
+                                                // Farklı veri formatlarını işleme
+                                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData)) {
+                                        if (mealData.main) {
+                                            // Ana öğünleri ve alternatifleri ayıkla
+                                                    items = Array.isArray(mealData.main) ? mealData.main : [];
+                                        alternatives = mealData.alternatives || {};
+                                        } else {
+                                            // Eğer main yoksa, objenin kendisinden öğeleri al
+                                            // Alternatives alanını ayır, diğer alanları items olarak kabul et
+                                            const { alternatives: alts, ...rest } = mealData;
+                                            items = Object.values(rest).filter(item => item && typeof item === 'string');
+                                            alternatives = alts || {};
+                                        }
+                                    } else if (Array.isArray(mealData)) {
+                                        items = mealData;
+                                    } else if (typeof mealData === 'string') {
+                                                    items = mealData.split(',')
+                                                        .map(item => item.trim())
+                                                        .filter(item => item !== '');
+                                    } else if (mealData) {
+                                        // Diğer olası durumları kapsayacak son bir kontrol
+                                        items = [String(mealData)];
+                                    }
+
+                                    return (
+                                        <View style={pdfStyles.mealSection} key={`meal-${mealIndex}`}>
+                                            <Text style={pdfStyles.mealTitle}>{meal}</Text>
+                                            {items && items.length > 0 ? (
+                                                items.map((item, itemIndex) => (
+                                                    <View key={`item-${itemIndex}`}>
+                                                        <Text style={pdfStyles.mealItem}>
+                                                            <Text style={pdfStyles.mealItemBullet}>•</Text> {item}
+                                                        </Text>
+                                                        {alternatives && alternatives[item] && (
+                                                            <Text style={pdfStyles.alternativeItem}>
+                                                                <Text style={pdfStyles.alternativePrefix}>Alternatif: </Text>
+                                                                {alternatives[item]}
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                ))
+                                            ) : (
+                                                <Text style={pdfStyles.noMealText}>Öğün belirtilmemiş</Text>
+                                            )}
+                                        </View>
+                                    );
+                                            })
+                                        ) : (
+                                            <Text style={pdfStyles.noMealText}>Bu gün için öğün planı bulunmuyor</Text>
+                                        )}
+                            </View>
+                        </View>
+                            );
+                        })
+                    ) : (
+                        <View style={[pdfStyles.dayCard, { width: '100%', alignItems: 'center', padding: 20 }]}>
+                            <Text style={pdfStyles.noMealText}>Bu beslenme programında günlük öğün planı bulunmuyor</Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* Altbilgi */}
+                <View style={pdfStyles.footer}>
+                    <Text style={pdfStyles.footerText}>
+                        Bu beslenme programı {dietitianName} tarafından hazırlanmıştır.
+                    </Text>
+                    <Text style={pdfStyles.footerWebsite}>www.diyetprogrami.com</Text>
+                </View>
+            </Page>
         </Document>
     );
 };
