@@ -58,14 +58,11 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [selectedMealCategory, setSelectedMealCategory] = useState<string>('Ana Menü');
     const [newMeal, setNewMeal] = useState('');
     const [newPortion, setNewPortion] = useState('');
-    const [waterIntake, setWaterIntake] = useState(2);
-    const [maxWaterIntake, setMaxWaterIntake] = useState(8);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isEmpty, setIsEmpty] = useState(false);
     const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
-// Removed unused state variable `newCategory`.
 
     useEffect(() => {
         fetchTodayMeal();
@@ -76,7 +73,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             setLoading(true);
             setError(null);
 
-            // Gerçek API çağrısı
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
