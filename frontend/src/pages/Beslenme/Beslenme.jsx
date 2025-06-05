@@ -217,7 +217,7 @@ const pdfStyles = StyleSheet.create({
 const NutritionPlanDocument = ({program}) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Dr. Furkan İmamoğlu";
+    const dietitianName = "İsim girilmedi";
     const mealPlanData = program?.mealPlan || {};
     const hasMealPlan = Object.keys(mealPlanData).length > 0;
 
