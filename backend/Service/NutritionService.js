@@ -2,6 +2,7 @@ const path = require('path');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const {
+    Client,
     NutritionAssignment,
     NutritionCategory,
     NutritionPlan,
@@ -94,45 +95,39 @@ class NutritionService {
             throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
         }
 
-        // Transform the meal plan structure to include "yenildi" field for each meal item
-        const transformedMealPlan = {};
+        let updatedMealPlan = null;
         if (plan.mealPlan) {
-            Object.keys(plan.mealPlan).forEach(day => {
-                transformedMealPlan[day] = {};
-                Object.keys(plan.mealPlan[day] || {}).forEach(mealType => {
-                    // Get the meal items based on the format
-                    let mealItems = [];
-                    const mealData = plan.mealPlan[day][mealType];
+                updatedMealPlan = plan.mealPlan;
 
-                    // Handle complex format with main and alternatives
-                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
-                        mealItems = [...mealData.main];
-                    }
-                    // Handle simple array format
-                    else if (Array.isArray(mealData)) {
-                        mealItems = [...mealData];
-                    }
-                    // Handle string format (backward compatibility)
-                    else if (typeof mealData === 'string') {
-                        mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-                    }
+                Object.keys(updatedMealPlan).forEach(day => {
+                    Object.keys(updatedMealPlan[day]).forEach(mealType => {
+                        const mealTypeData = updatedMealPlan[day][mealType];
 
-                    transformedMealPlan[day][mealType] = mealItems.map(item => ({
-                        isim: item,
-                        yenildi: false
-                    }));
+                        if (typeof mealTypeData === 'object') {
+                            Object.keys(mealTypeData).forEach(menu => {
+                                if (Array.isArray(mealTypeData[menu])) {
+                                    mealTypeData[menu] = mealTypeData[menu].map(meal => {
+                                        return { ...meal, eaten: false };
+                                    });
+                                }
+                            });
+                        } else if (Array.isArray(mealTypeData)) {
+                            updatedMealPlan[day][mealType] = mealTypeData.map(meal => {
+                                return { ...meal, eaten: false };
+                            });
+                        }
+                    });
                 });
+
+            return await NutritionAssignment.create({
+                client_id,
+                nutrition_plan_id,
+                start_date,
+                end_date,
+                note,
+                mealPlan: updatedMealPlan
             });
         }
-
-        return await NutritionAssignment.create({
-            client_id,
-            nutrition_plan_id,
-            start_date,
-            end_date,
-            note,
-            mealPlan: transformedMealPlan
-        });
     }
 
     static async getNutritionPlans(dietitian_id) {

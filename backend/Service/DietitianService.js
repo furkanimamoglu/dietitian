@@ -14,9 +14,6 @@ const {DIETITIAN, CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 const {
     Dietitian,
     Client,
-    NutritionPlan,
-    NutritionCategory,
-    NutritionAssignment,
     Notes
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {Op} = require('sequelize');
