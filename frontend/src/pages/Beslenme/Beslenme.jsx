@@ -27,6 +27,7 @@ import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 import MealPlanViewer from "../../Components/MealPlanEditor/MealPlanViewer.jsx";
+import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalPDFLink.jsx";
 
 import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
 
@@ -218,153 +219,9 @@ const NutritionPlanDocument = ({program}) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
     const dietitianName = "Dr. Furkan İmamoğlu";
-
-    // Helper function to get meal items
-    const getMealItems = (mealData) => {
-        if (!mealData) return [];
-
-        if (mealData.main && Array.isArray(mealData.main)) {
-            return {
-                mainItems: mealData.main,
-                hasAlternatives: mealData.alternatives && Object.keys(mealData.alternatives).length > 0,
-                alternatives: mealData.alternatives
-            };
-        }
-
-        // For simple array format
-        if (Array.isArray(mealData)) {
-            return {
-                mainItems: mealData,
-                hasAlternatives: false
-            };
-        }
-
-        // For string format (backward compatibility)
-        if (typeof mealData === 'string') {
-            return {
-                mainItems: mealData.split(',').map(item => item.trim()).filter(item => item !== ''),
-                hasAlternatives: false
-            };
-        }
-
-        return {
-            mainItems: [],
-            hasAlternatives: false
-        };
-    };
-
-    const DAYS_OF_WEEK = [
-        "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
-    ];
-
-    const MEALS = [
-        "Kahvaltı", "Öğle Yemeği", "Akşam Yemeği", "Aparatif"
-    ];
-
     return (
         <Document>
-            <Page size="A4" style={pdfStyles.page}>
-                <View style={pdfStyles.header}>
-                    <View style={pdfStyles.headerContent}>
-                        <Text style={pdfStyles.headerTitle}>{program.title} Beslenme Programı</Text>
-                        <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
-                        </View>
-                    </View>
-                    <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>Diyetia</Text>
-                    </View>
-                </View>
 
-                <View style={pdfStyles.infoSection}>
-                    <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
-                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
-                        <Text style={pdfStyles.infoContent}>Beslenme ve Diyet Uzmanı</Text>
-                        <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
-                        <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
-                    </View>
-
-                    <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Program Açıklaması</Text>
-                        <Text
-                            style={pdfStyles.infoContent}>{program.description || "Bu beslenme programı sağlıklı bir yaşam için özel olarak hazırlanmıştır. Programdaki öğünleri düzenli olarak takip etmeniz önerilir."}</Text>
-                        <Text style={pdfStyles.infoContent}>Günlük su tüketiminin en az 2 litre olması önerilir.</Text>
-                        <Text style={pdfStyles.infoContent}>Öğünler arasında en az 3-4 saat olmalıdır.</Text>
-                    </View>
-                </View>
-
-                <View style={pdfStyles.daysContainer}>
-                    {DAYS_OF_WEEK.map((day) => (
-                        <View style={pdfStyles.dayCard} key={day}>
-                            <View style={[
-                                pdfStyles.dayHeader,
-                                day === "Cumartesi" || day === "Pazar"
-                                    ? {backgroundColor: '#FF9800'}
-                                    : null
-                            ]}>
-                                <Text style={pdfStyles.dayHeaderText}>{day}</Text>
-                            </View>
-                            <View style={pdfStyles.dayContent}>
-                                {MEALS.map((meal) => {
-                                    const {mainItems, hasAlternatives, alternatives} = getMealItems(
-                                        program.mealPlan && program.mealPlan[day]
-                                            ? program.mealPlan[day][meal]
-                                            : null
-                                    );
-
-                                    // Limit the number of items to display to prevent overflow
-                                    const displayItems = mainItems.slice(0, 10);
-                                    const hasMoreItems = mainItems.length > 10;
-
-                                    return (
-                                        <View style={pdfStyles.mealSection} key={meal}>
-                                            <Text style={pdfStyles.mealTitle}>{meal}</Text>
-                                            {displayItems.length > 0 ? (
-                                                <>
-                                                    {displayItems.map((item, idx) => (
-                                                        <View key={idx}>
-                                                            <Text style={pdfStyles.mealItem}>
-                                                                <Text style={pdfStyles.mealItemBullet}>• </Text>
-                                                                {item}
-                                                            </Text>
-
-                                                            {hasAlternatives && alternatives && alternatives[item] &&
-                                                                // Limit alternatives to 1 to save space
-                                                                alternatives[item].slice(0, 1).map((alt, altIdx) => (
-                                                                    <Text style={pdfStyles.alternativeItem}
-                                                                          key={altIdx}>
-                                                                        <Text
-                                                                            style={pdfStyles.alternativePrefix}>alt: </Text>
-                                                                        {alt}
-                                                                    </Text>
-                                                                ))
-                                                            }
-                                                        </View>
-                                                    ))}
-                                                    {hasMoreItems && (
-                                                        <Text style={pdfStyles.mealItem}>
-                                                            <Text style={pdfStyles.mealItemBullet}>• </Text>
-                                                            ... ve {mainItems.length - 4} öğe daha
-                                                        </Text>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <Text style={pdfStyles.noMealText}>Veri girilmemiş</Text>
-                                            )}
-                                        </View>
-                                    );
-                                })}
-                            </View>
-                        </View>
-                    ))}
-                </View>
-
-                <View style={pdfStyles.footer}>
-                    <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
-                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
-                </View>
-            </Page>
         </Document>
     );
 };
@@ -428,10 +285,11 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                     >
                         <PersonAddIcon/>
                     </button>
-                    <PDFDownloadLink
+                    <ConditionalPDFLink
                         document={<NutritionPlanDocument program={item}/>}
                         fileName={`${item.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                        style={{textDecoration: 'none'}}
+                        buttonClass="action-button print-btn"
+                        buttonTitle="Yazdır"
                     >
                         {({blob, url, loading, error}) => (
                             <button
@@ -446,7 +304,7 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                                 <PrintIcon/>
                             </button>
                         )}
-                    </PDFDownloadLink>
+                    </ConditionalPDFLink>
                     <button
                         className="action-button edit-btn"
                         title="Düzenle"
@@ -907,18 +765,22 @@ const ViewMealPlan = ({mealPlan, programTitle, onExportPdf, selectedProgram}) =>
     return (
         <div className="view-meal-plan-container">
             <div className="view-meal-plan-header">
-                <PDFDownloadLink
-                    document={<NutritionPlanDocument program={selectedProgram}/>}
-                    fileName={`${programTitle.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                    style={{textDecoration: 'none'}}
+                <ConditionalPDFLink
+                    document={<NutritionPlanDocument program={programDetails}/>}
+                    fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
+                    buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
+                    buttonTitle="PDF İndir"
                 >
                     {({blob, url, loading, error}) => (
-                        <button className="export-pdf-button" disabled={loading}>
-                            <FileDownloadIcon/>
-                            {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
-                        </button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FileDownloadIcon/>}
+                            disabled={loading}
+                        >
+                            {loading ? 'Hazırlanıyor...' : 'PDF İndir'}
+                        </Button>
                     )}
-                </PDFDownloadLink>
+                </ConditionalPDFLink>
             </div>
 
             <div className="view-meal-plan-days">
@@ -1412,14 +1274,10 @@ export default function Beslenme() {
         setEditProgramModal(true);
     };
 
-    // Bu fonksiyon, MealPlanEditor bileşeninden dönen yanıtı işler
-// Bu dosya geçici olarak kullanılacak ve sonra silinecek
     const handleSaveMealPlan = (responseData) => {
         setIsSaving(false);
         try {
-            // MealPlanEditor'den gelen yanıtı işle
 
-            // Yerel state'i güncelle
             if (selectedProgram && selectedProgram.id) {
                 setBeslenmeData(prev =>
                     prev.map(item =>
@@ -1435,23 +1293,18 @@ export default function Beslenme() {
                     )
                 );
             } else {
-                // Yeni öğe oluşturulduysa tüm verileri yeniden çek
                 fetchNutritionPlans();
             }
 
-            // Modalı kapat
             setEditProgramModal(false);
 
-            // Başarı mesajı göster
             setSuccessMessage(`"${editTitle}" programı başarıyla ${selectedProgram && selectedProgram.id ? 'güncellendi' : 'oluşturuldu'}.`);
             setShowSuccessPopup(true);
 
-            // Formu sıfırla
             setEditTitle('');
             setEditDescription('');
             setEditCategoryId('');
 
-            // Beslenme planını sıfırla
             const emptyPlan = {};
             DAYS_OF_WEEK.forEach(day => {
                 emptyPlan[day] = {};
@@ -2594,11 +2447,11 @@ export default function Beslenme() {
                                                             const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
                                                             if (programDetails) {
                                                                 return (
-                                                                    <PDFDownloadLink
-                                                                        document={<NutritionPlanDocument
-                                                                            program={programDetails}/>}
+                                                                    <ConditionalPDFLink
+                                                                        document={<NutritionPlanDocument program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                                                                        style={{textDecoration: 'none'}}
+                                                                        buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
+                                                                        buttonTitle="PDF İndir"
                                                                     >
                                                                         {({blob, url, loading, error}) => (
                                                                             <Button
@@ -2609,7 +2462,7 @@ export default function Beslenme() {
                                                                                 {loading ? 'Hazırlanıyor...' : 'PDF İndir'}
                                                                             </Button>
                                                                         )}
-                                                                    </PDFDownloadLink>
+                                                                    </ConditionalPDFLink>
                                                                 );
                                                             }
                                                             return null;
