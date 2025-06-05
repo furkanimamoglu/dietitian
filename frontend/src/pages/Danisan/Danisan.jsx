@@ -1380,6 +1380,65 @@ function Danisan() {
     const renderMealItems = (mealItems) => {
         if (!mealItems) return "Öğün girilmemiş.";
 
+        if (typeof mealItems === 'object' && !Array.isArray(mealItems)) {
+            return (
+                <>
+                    {Object.entries(mealItems).map(([menuName, items], menuIndex) => (
+                        <Box key={menuIndex} sx={{ mb: menuIndex < Object.keys(mealItems).length - 1 ? 2 : 0 }}>
+                                <Typography
+                                    variant="subtitle2"
+                                    fontWeight="medium"
+                                    sx={{
+                                        mb: 1,
+                                        textAlign: 'center',
+                                        width: '100%',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                        color: 'white',
+                                        bgcolor: 'rgba(45,65,73,0.76)',
+                                        borderRadius: 1
+                                    }}>
+                                    {menuName}
+                                </Typography>
+
+                            {Array.isArray(items) && items.length > 0 ? (
+                                items.map((item, itemIndex) => (
+                                    <Typography
+                                        key={itemIndex}
+                                        variant="body2"
+                                        component="div"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            mb: itemIndex < items.length - 1 ? 0.5 : 0,
+                                            ...(item.eaten ? { textDecoration: 'line-through', color: 'text.secondary' } : {})
+                                        }}
+                                    >
+                                        {item.eaten ?
+                                            <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} /> :
+                                            <RadioButtonUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }} />
+                                        }
+                                        {item.name}
+                                        {item.portion && (
+                                            <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                                                ({item.portion})
+                                            </Typography>
+                                        )}
+                                    </Typography>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="text.secondary">
+                                    Bu menüde öğün girilmemiş.
+                                </Typography>
+                            )}
+                        </Box>
+                    ))}
+                </>
+            );
+        }
+
+        // Eski format - isim ve yenildi özellikleri olan nesneler dizisi
         if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
             return (
                 <>
@@ -1406,6 +1465,7 @@ function Danisan() {
             );
         }
 
+        // Diğer eski formatlar için kontroller
         if (typeof mealItems === 'string') {
             return mealItems;
         }
