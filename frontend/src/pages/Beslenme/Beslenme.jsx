@@ -314,8 +314,8 @@ const NutritionPlanDocument = ({program}) => {
                                     );
 
                                     // Limit the number of items to display to prevent overflow
-                                    const displayItems = mainItems.slice(0, 4);
-                                    const hasMoreItems = mainItems.length > 4;
+                                    const displayItems = mainItems.slice(0, 10);
+                                    const hasMoreItems = mainItems.length > 10;
 
                                     return (
                                         <View style={pdfStyles.mealSection} key={meal}>
@@ -1412,123 +1412,59 @@ export default function Beslenme() {
         setEditProgramModal(true);
     };
 
-    const handleSaveMealPlan = async () => {
-        setIsSaving(true);
+    // Bu fonksiyon, MealPlanEditor bileşeninden dönen yanıtı işler
+// Bu dosya geçici olarak kullanılacak ve sonra silinecek
+    const handleSaveMealPlan = (responseData) => {
+        setIsSaving(false);
         try {
-            const data = {
-                title: editTitle,
-                description: editDescription,
-                category_id: editCategoryId,
-                mealPlan: {}
-            };
+            // MealPlanEditor'den gelen yanıtı işle
 
+            // Yerel state'i güncelle
             if (selectedProgram && selectedProgram.id) {
-                data.nutrition_plan_id = selectedProgram.id;
-            }
-
-            DAYS_OF_WEEK.forEach(day => {
-                data.mealPlan[day] = {};
-                MEALS.forEach(meal => {
-                    data.mealPlan[day][meal] = [];
-
-                    if (mealPlan && mealPlan[day] && mealPlan[day][meal]) {
-                        const mealData = mealPlan[day][meal];
-
-                        // Already has the complex format with main and alternatives
-                        if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
-                            data.mealPlan[day][meal] = {...mealData};
-                        }
-                        // Simple array format -> keep as is (API will handle it)
-                        else if (Array.isArray(mealData)) {
-                            data.mealPlan[day][meal] = [...mealData];
-                        }
-                        // Handle string format (for backward compatibility)
-                        else if (typeof mealData === 'string') {
-                            data.mealPlan[day][meal] = mealData
-                                .split(',')
-                                .map(item => item.trim())
-                                .filter(item => item !== '');
-                        }
-                    }
-                });
-            });
-
-            // Define API URL based on whether we're updating or creating
-            let url;
-            let method;
-
-            if (selectedProgram && selectedProgram.id) {
-                // Update existing plan
-                url = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
-                method = 'put';
+                setBeslenmeData(prev =>
+                    prev.map(item =>
+                        item.id === selectedProgram.id
+                            ? {
+                                ...item,
+                                title: editTitle,
+                                description: editDescription,
+                                category_id: editCategoryId,
+                                mealPlan: responseData.mealPlan || responseData
+                            }
+                            : item
+                    )
+                );
             } else {
-                // Create new plan
-                url = `${config[config.environment].apiUrl}/nutrition/addNutritionPlan`;
-                method = 'post';
+                // Yeni öğe oluşturulduysa tüm verileri yeniden çek
+                fetchNutritionPlans();
             }
 
-            // Make the API request
-            const response = await axios({
-                method,
-                url,
-                data,
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                }
-            });
+            // Modalı kapat
+            setEditProgramModal(false);
 
-            // Refresh data after successful operation
-            if (response.status === 200 || response.status === 201 || response.data.ok) {
-                // Update local state with the updated data if it's an update
-                if (selectedProgram && selectedProgram.id) {
-                    setBeslenmeData(prev =>
-                        prev.map(item =>
-                            item.id === selectedProgram.id
-                                ? {
-                                    ...item,
-                                    title: editTitle,
-                                    description: editDescription,
-                                    category_id: editCategoryId,
-                                    mealPlan: data.mealPlan
-                                }
-                                : item
-                        )
-                    );
-                } else {
-                    // Fetch all data again if it's a new item
-                    fetchNutritionPlans();
-                }
+            // Başarı mesajı göster
+            setSuccessMessage(`"${editTitle}" programı başarıyla ${selectedProgram && selectedProgram.id ? 'güncellendi' : 'oluşturuldu'}.`);
+            setShowSuccessPopup(true);
 
-                // Close the modal
-                setEditProgramModal(false);
+            // Formu sıfırla
+            setEditTitle('');
+            setEditDescription('');
+            setEditCategoryId('');
 
-                // Show success message
-                setSuccessMessage(`"${editTitle}" programı başarıyla ${selectedProgram && selectedProgram.id ? 'güncellendi' : 'oluşturuldu'}.`);
-                setShowSuccessPopup(true);
-
-                // Reset form
-                setEditTitle('');
-                setEditDescription('');
-                setEditCategoryId('');
-
-                // Reset meal plan
-                const emptyPlan = {};
-                DAYS_OF_WEEK.forEach(day => {
-                    emptyPlan[day] = {};
-                    MEALS.forEach(meal => {
-                        emptyPlan[day][meal] = [];
-                    });
+            // Beslenme planını sıfırla
+            const emptyPlan = {};
+            DAYS_OF_WEEK.forEach(day => {
+                emptyPlan[day] = {};
+                MEALS.forEach(meal => {
+                    emptyPlan[day][meal] = [];
                 });
-                setMealPlan(emptyPlan);
-
-                setSelectedProgram(null);
-            }
+            });
+            setMealPlan(emptyPlan);
+            setSelectedProgram(null);
         } catch (error) {
-            console.error('Hata:', error);
-            console.error('Hata detayları:', error.response?.data || 'Detay yok');
-            alert(`Program ${selectedProgram && selectedProgram.id ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu. Lütfen tekrar deneyin.`);
-        } finally {
-            setIsSaving(false);
+            console.error("Beslenme planı işleme hatası:", error);
+            setErrorMessage("Beslenme planı kaydedilirken bir hata oluştu.");
+            setShowErrorPopup(true);
         }
     };
 
