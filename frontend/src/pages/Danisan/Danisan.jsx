@@ -755,14 +755,13 @@ function Danisan() {
         return () => timer && clearTimeout(timer);
     }, [showSuccessPopup, showErrorPopup]);
 
-    // Danisan.jsx içerisinde state tanımlamalarını ekleyin (diğer state'lerin yanına)
     const [measurementForm, setMeasurementForm] = useState({
         boy: '',
         kilo: '',
         bel: '',
         kalca: '',
         gogus: '',
-        digergogus: '',
+        digerbel: '',
         kol: '',
         bacak: '',
         yag: '',
@@ -894,8 +893,11 @@ function Danisan() {
         boy: '',
         kilo: '',
         bel: '',
+        digerbel: '',
         kalca: '',
         gogus: '',
+        kol: '',
+        bacak: '',
         yag: '',
         kas: '',
         su: ''
@@ -914,8 +916,11 @@ function Danisan() {
             boy: measurement.boy || '',
             kilo: measurement.kilo || '',
             bel: measurement.bel || '',
+            digerbel: measurement.digerbel || '',
             kalca: measurement.kalca || '',
             gogus: measurement.gogus || '',
+            kol: measurement.kol || '',
+            bacak: measurement.bacak || '',
             yag: measurement.yag || '',
             kas: measurement.kas || '',
             su: measurement.su || ''
@@ -2145,11 +2150,11 @@ function Danisan() {
                                                                 <TableCell
                                                                     align="right">{measurement.bel || '-'}</TableCell>
                                                                 <TableCell
+                                                                    align="right">{measurement.digerbel || '-'}</TableCell>
+                                                                <TableCell
                                                                     align="right">{measurement.kalca || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.gogus || '-'}</TableCell>
-                                                                <TableCell
-                                                                    align="right">{measurement.gogusdiger || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.kol || '-'}</TableCell>
                                                                 <TableCell

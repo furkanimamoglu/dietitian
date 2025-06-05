@@ -43,9 +43,14 @@ class MeasurementService {
             throw new Exception("Danışan bulunamadı.", 404, true);
         }
 
+        const sanitizedData = {};
+        for (const key in measurementData) {
+            sanitizedData[key] = (measurementData[key] === undefined || measurementData[key] === null || measurementData[key] === '') ? 0 : measurementData[key];
+        }
+
         return await Measurement.create({
             client_id: client_id,
-            ...measurementData
+            ...sanitizedData
         });
     }
 
