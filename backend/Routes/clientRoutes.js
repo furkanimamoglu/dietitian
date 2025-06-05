@@ -17,7 +17,7 @@ router.get('/readMyAllNotifications', clientController.readMyAllNotifications);
 router.get('/getMyKVKKStatus', clientController.getMyKVKKStatus);
 router.put('/approveKVKK', clientController.approveKVKK);
 
-router.get('/getTodayMeal', clientController.getTodayMeal);
+router.get('/getTodayMealPlan', clientController.getTodayMealPlan);
 router.get('/getMyLatestMeasurement', clientController.getMyLatestMeasurement);
 
 router.post('/updateMealPlan', clientController.updateMealPlan);

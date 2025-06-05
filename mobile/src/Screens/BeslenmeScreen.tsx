@@ -76,93 +76,13 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             setLoading(true);
             setError(null);
 
-            // Test amaçlı - gerçek API entegrasyonu için kaldırın
-            // Örnek veriyi kullanarak UI'ı göstermek için
-            const sampleMealPlan = {
-                "Pazartesi": {
-                    "Kahvaltı": {
-                        "Ana Menü": [
-                            {
-                                "name": "Yulaf Ezmesi",
-                                "portion": "1 kase",
-                                "eaten": false
-                            },
-                            {
-                                "name": "Yumurta",
-                                "portion": "2 adet",
-                                "eaten": true
-                            }
-                        ],
-                        "Alternatifler": [
-                            {
-                                "name": "Peynir",
-                                "portion": "30g",
-                                "eaten": false
-                            }
-                        ]
-                    },
-                    "Öğle Yemeği": {
-                        "Ana Menü": [
-                            {
-                                "name": "Izgara Tavuk",
-                                "portion": "150g",
-                                "eaten": false
-                            },
-                            {
-                                "name": "Salata",
-                                "portion": "1 porsiyon",
-                                "eaten": false
-                            }
-                        ]
-                    },
-                    "Akşam Yemeği": {
-                        "Ana Menü": [
-                            {
-                                "name": "Sebze Çorbası",
-                                "portion": "1 kase",
-                                "eaten": false
-                            }
-                        ]
-                    },
-                    "Aparatif": {
-                        "Ana Menü": [
-                            {
-                                "name": "Elma",
-                                "portion": "1 adet",
-                                "eaten": false
-                            }
-                        ]
-                    }
-                },
-                "Salı": {
-                    "Kahvaltı": {
-                        "Ana Menü": []
-                    },
-                    "Öğle Yemeği": {
-                        "Ana Menü": []
-                    },
-                    "Akşam Yemeği": {
-                        "Ana Menü": []
-                    },
-                    "Aparatif": {
-                        "Ana Menü": []
-                    }
-                }
-            };
-
-            setMealPlan(sampleMealPlan);
-            setCurrentDay("Pazartesi");
-            setSelectedMealType(Object.keys(sampleMealPlan["Pazartesi"])[0]);
-            setLoading(false);
-
-            /*
-            // Gerçek API çağrısı - Test için yukarıdaki örnek veri ile değiştirilmiştir
+            // Gerçek API çağrısı
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
                 return;
             }
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -185,27 +105,38 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 setNutritionPlanId(data.NutritionPlan.id);
             }
 
+            // Güncel günü bul ve ayarla
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            setCurrentDay(todayTurkish);
-            setMealPlan(data.mealPlan || {});
+            // Beslenme planı verilerini ayarla
+            setMealPlan(data);
 
-            // Eğer veri boşsa
-            if (!data.mealPlan || Object.keys(data.mealPlan).length === 0) {
-                setIsEmpty(true);
-                setError('Beslenme planı bulunamadı.');
-            } else {
-                // Mevcut günde tanımlı öğün varsa ilk öğünü seçili yap
-                const currentDayMeals = data.mealPlan[todayTurkish];
-                if (currentDayMeals && Object.keys(currentDayMeals).length > 0) {
-                    setSelectedMealType(Object.keys(currentDayMeals)[0]);
+            // Eğer planda bugün varsa o günü göster, yoksa plandaki ilk günü göster
+            if (data && data[todayTurkish]) {
+                setCurrentDay(todayTurkish);
+                // Günün ilk öğünü varsa onu seç
+                if (Object.keys(data[todayTurkish]).length > 0) {
+                    setSelectedMealType(Object.keys(data[todayTurkish])[0]);
+                }
+            } else if (data && Object.keys(data).length > 0) {
+                // Plandaki ilk günü bul
+                const firstAvailableDay = Object.keys(data)[0];
+                setCurrentDay(firstAvailableDay);
+                // İlk günün ilk öğününü seç
+                if (Object.keys(data[firstAvailableDay]).length > 0) {
+                    setSelectedMealType(Object.keys(data[firstAvailableDay])[0]);
                 }
             }
 
+            // Eğer veri boşsa
+            if (!data || Object.keys(data).length === 0) {
+                setIsEmpty(true);
+                setError('Beslenme planı bulunamadı.');
+            }
+
             setLoading(false);
-            */
         } catch (error) {
             console.error('Error fetching meal plan:', error);
             setError('Beslenme planı yüklenemedi. Lütfen tekrar deneyin.');
