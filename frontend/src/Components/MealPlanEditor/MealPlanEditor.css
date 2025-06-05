@@ -1,5 +1,78 @@
 /* MUI Style Meal Plan Table CSS */
 
+/* Plan Detayları Formu */
+.mui-plan-details-form {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.mui-form-row {
+    margin-bottom: 20px;
+}
+
+.mui-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.mui-form-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.mui-form-control {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.mui-form-control:focus {
+    outline: none;
+    border-color: #ff9e25;
+    box-shadow: 0 0 0 2px rgba(255, 158, 37, 0.2);
+    background-color: white;
+}
+
+.mui-form-control::placeholder {
+    color: #aaa;
+}
+
+.required {
+    color: #f44336;
+    margin-left: 4px;
+}
+
+textarea.mui-form-control {
+    resize: vertical;
+    min-height: 60px;
+}
+
+select.mui-form-control {
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23555' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 30px;
+}
+
+select.mui-form-control option {
+    padding: 10px;
+}
+
 /* Container */
 .mui-meal-plan-container {
     max-width: 100%;

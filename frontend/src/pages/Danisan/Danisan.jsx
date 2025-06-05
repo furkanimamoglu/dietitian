@@ -1380,6 +1380,65 @@ function Danisan() {
     const renderMealItems = (mealItems) => {
         if (!mealItems) return "Öğün girilmemiş.";
 
+        if (typeof mealItems === 'object' && !Array.isArray(mealItems)) {
+            return (
+                <>
+                    {Object.entries(mealItems).map(([menuName, items], menuIndex) => (
+                        <Box key={menuIndex} sx={{ mb: menuIndex < Object.keys(mealItems).length - 1 ? 2 : 0 }}>
+                                <Typography
+                                    variant="subtitle2"
+                                    fontWeight="medium"
+                                    sx={{
+                                        mb: 1,
+                                        textAlign: 'center',
+                                        width: '100%',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                        color: 'white',
+                                        bgcolor: 'rgba(45,65,73,0.76)',
+                                        borderRadius: 1
+                                    }}>
+                                    {menuName}
+                                </Typography>
+
+                            {Array.isArray(items) && items.length > 0 ? (
+                                items.map((item, itemIndex) => (
+                                    <Typography
+                                        key={itemIndex}
+                                        variant="body2"
+                                        component="div"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            mb: itemIndex < items.length - 1 ? 0.5 : 0,
+                                            ...(item.eaten ? { textDecoration: 'line-through', color: 'text.secondary' } : {})
+                                        }}
+                                    >
+                                        {item.eaten ?
+                                            <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} /> :
+                                            <RadioButtonUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }} />
+                                        }
+                                        {item.name}
+                                        {item.portion && (
+                                            <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                                                ({item.portion})
+                                            </Typography>
+                                        )}
+                                    </Typography>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="text.secondary">
+                                    Bu menüde öğün girilmemiş.
+                                </Typography>
+                            )}
+                        </Box>
+                    ))}
+                </>
+            );
+        }
+
+        // Eski format - isim ve yenildi özellikleri olan nesneler dizisi
         if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
             return (
                 <>
@@ -1406,6 +1465,7 @@ function Danisan() {
             );
         }
 
+        // Diğer eski formatlar için kontroller
         if (typeof mealItems === 'string') {
             return mealItems;
         }
@@ -2337,69 +2397,67 @@ function Danisan() {
 
                                 <Box sx={{overflowX: 'auto'}}>
                                     <Box sx={{minWidth: 900, p: 2}}>
+                                        {nutritionPlan && nutritionPlan.length > 0 && (
+                                            <>
+                                                {/* Gün başlıkları satırı */}
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
                                                 <Box sx={{textAlign: 'center', p: 1}}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Öğün</Typography>
+                                                            <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>Öğün</Typography>
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={10}>
                                                 <Grid container>
-                                                    <Grid item xs={1.7}>
+                                                            {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, index) => (
+                                                                <Grid item xs={1.7} key={`day-${index}`}>
                                                         <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Pzt</Typography>
+                                                                        <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                                                            {day.substr(0, 3)}
+                                                                        </Typography>
                                                         </Box>
                                                     </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Sal</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Çar</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Per</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Cum</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Cmt</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Paz</Typography>
-                                                        </Box>
-                                                    </Grid>
+                                                            ))}
                                                 </Grid>
                                             </Grid>
                                         </Grid>
 
                                         <Divider sx={{my: 1}}/>
 
-                                        {/* Kahvaltı */}
+                                                {/* Öğün satırları - dinamik olarak mealPlan'den alınıyor */}
+                                                {nutritionPlan[selectedPlanIndex]?.mealPlan &&
+                                                  Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).length > 0 &&
+                                                  (() => {
+                                                    // İlk günün öğünlerini al (tüm günlerde aynı öğünler olduğunu varsayıyoruz)
+                                                    const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
+                                                    const meals = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay] || {});
+
+                                                    // Öğün renklerini belirle
+                                                    const mealColors = {
+                                                        'Kahvaltı': 'primary.light',
+                                                        'Öğle Yemeği': 'warning.light',
+                                                        'Akşam Yemeği': 'error.light',
+                                                        'Aparatif': 'info.light',
+                                                        // Diğer öğünler için varsayılan renk
+                                                        'default': 'secondary.light'
+                                                    };
+
+                                                    // Öğün görüntü adları
+                                                    const mealDisplayNames = {
+                                                        'Kahvaltı': 'Kahvaltı',
+                                                        'Öğle Yemeği': 'Öğle',
+                                                        'Akşam Yemeği': 'Akşam',
+                                                        'Aparatif': 'Ara Öğün'
+                                                    };
+
+                                                    return meals.map((meal, mealIndex) => (
+                                                        <React.Fragment key={`meal-row-${mealIndex}`}>
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
                                                 <Box sx={{
-                                                    bgcolor: 'primary.light',
-                                                    color: 'primary.contrastText',
+                                                                        bgcolor: mealColors[meal] || mealColors.default,
+                                                                        color: meal === 'Aparatif' ? 'info.contrastText' :
+                                                                               meal === 'Akşam Yemeği' ? 'error.contrastText' :
+                                                                               meal === 'Öğle Yemeği' ? 'warning.contrastText' : 'primary.contrastText',
                                                     p: 1,
                                                     borderRadius: 1,
                                                     height: '100%',
@@ -2407,342 +2465,47 @@ function Danisan() {
                                                     alignItems: 'center',
                                                     justifyContent: 'center'
                                                 }}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Kahvaltı</Typography>
+                                                                        <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                                                            {mealDisplayNames[meal] || meal}
+                                                                        </Typography>
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={10}>
                                                 <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
+                                                                        {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, dayIndex) => (
+                                                                            <Grid item xs={1.7} key={`${meal}-${day}-${dayIndex}`}>
                                                         <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
+                                                                                    {renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.[day]?.[meal]) ||
+                                                                                     <Typography variant="body2">Öğün girilmemiş.</Typography>}
                                                         </Paper>
                                                     </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
+                                                                        ))}
                                                     </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
-                                        </Grid>
+                                                            {mealIndex < meals.length - 1 && <Divider sx={{my: 1}} />}
+                                                        </React.Fragment>
+                                                    ));
+                                                  })()
+                                                }
+                                            </>
+                                        )}
 
-                                        <Divider sx={{my: 1}}/>
-
-                                        {/* Öğle Yemeği */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
+                                        {(!nutritionPlan || nutritionPlan.length === 0) && (
                                                 <Box sx={{
-                                                    bgcolor: 'warning.light',
-                                                    color: 'warning.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
                                                     display: 'flex',
+                                                justifyContent: 'center',
                                                     alignItems: 'center',
-                                                    justifyContent: 'center'
+                                                height: 200,
+                                                border: '1px dashed',
+                                                borderColor: 'grey.400',
+                                                borderRadius: 1
                                                 }}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Öğle</Typography>
+                                                <Typography color="text.secondary">
+                                                    Beslenme planı bulunamadı.
+                                                </Typography>
                                                 </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-
-                                        <Divider sx={{my: 1}}/>
-
-                                        {/* Akşam Yemeği */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
-                                                <Box sx={{
-                                                    bgcolor: 'error.light',
-                                                    color: 'error.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Akşam</Typography>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-
-                                        <Divider sx={{my: 1}}/>
-
-                                        {/* Ara Öğün */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
-                                                <Box sx={{
-                                                    bgcolor: 'info.light',
-                                                    color: 'info.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                    <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>Ara
-                                                        Öğün</Typography>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
+                                        )}
                                     </Box>
                                 </Box>
                                 <Divider/>
