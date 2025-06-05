@@ -409,7 +409,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
             const endpoint = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
 
-            const method = 'post';
+            const method = 'put';
 
             const response = await axios({
                 method,
