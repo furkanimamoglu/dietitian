@@ -77,7 +77,6 @@ export default function Header({navigation}: Props) {
         }
     }, [unreadNotificationsCount]);
 
-    // Sayfa yüklendiğinde header efekti
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -230,7 +229,6 @@ export default function Header({navigation}: Props) {
         }).start(() => setDrawerOpen(false));
     };
 
-    // canGoBack kontrolü artık daha güvenli bir şekilde yapılıyor
     const canGoBack = (() => {
         try {
             return navigation && navigation.canGoBack();
@@ -240,7 +238,6 @@ export default function Header({navigation}: Props) {
         }
     })();
 
-    // Bildirim yoksa gösterilecek bileşen
     const EmptyNotifications = () => (
         <View style={styles.emptyNotificationsContainer}>
             <Icon name="bell-off-outline" size={50} color="#ddd" />
