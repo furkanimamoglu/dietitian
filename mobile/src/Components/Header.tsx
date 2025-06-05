@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
     Animated,
     Dimensions,
@@ -7,16 +7,21 @@ import {
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    View
+    View,
+    Image,
+    Platform,
+    Easing,
 } from 'react-native';
 import {Appbar} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import LinearGradient from 'react-native-linear-gradient';
 import config from '../../config';
 
 const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
 type Props = {
     navigation: NativeStackNavigationProp<RootStackParamList>;
@@ -37,6 +42,57 @@ export default function Header({navigation}: Props) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerAnim] = useState(new Animated.Value(screenWidth));
     const [userName, setUserName] = useState<string>('Yükleniyor...');
+
+    // Yeni animasyonlar
+    const bellShakeAnim = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(0.9)).current;
+
+    // Bildirim geldiğinde zil animasyonu
+    useEffect(() => {
+        if (unreadNotificationsCount > 0) {
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(bellShakeAnim, {
+                        toValue: 1,
+                        duration: 300,
+                        useNativeDriver: true,
+                        easing: Easing.linear,
+                    }),
+                    Animated.timing(bellShakeAnim, {
+                        toValue: -1,
+                        duration: 300,
+                        useNativeDriver: true,
+                        easing: Easing.linear,
+                    }),
+                    Animated.timing(bellShakeAnim, {
+                        toValue: 0,
+                        duration: 300,
+                        useNativeDriver: true,
+                        easing: Easing.linear,
+                    }),
+                ]),
+                { iterations: 2 }
+            ).start();
+        }
+    }, [unreadNotificationsCount]);
+
+    // Sayfa yüklendiğinde header efekti
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+                easing: Easing.out(Easing.back(1.7)),
+            }),
+        ]).start();
+    }, []);
 
     const fetchNotifications = async () => {
         try {
@@ -121,15 +177,24 @@ export default function Header({navigation}: Props) {
         fetchClientInfo();
         checkToken();
         fetchNotifications();
+
+        // Periyodik yenileme için interval
+        const interval = setInterval(() => {
+            fetchUnreadMessages();
+            fetchNotifications();
+        }, 30000); // Her 30 saniyede bir güncelle
+
+        return () => clearInterval(interval);
     }, []);
 
     const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
 
     const openDrawer = () => {
         setDrawerOpen(true);
-        Animated.timing(drawerAnim, {
+        Animated.spring(drawerAnim, {
             toValue: 0,
-            duration: 300,
+            speed: 12,
+            bounciness: 8,
             useNativeDriver: false,
         }).start();
     };
@@ -165,73 +230,201 @@ export default function Header({navigation}: Props) {
         }).start(() => setDrawerOpen(false));
     };
 
-    const canGoBack = navigation.canGoBack();
+    // canGoBack kontrolü artık daha güvenli bir şekilde yapılıyor
+    const canGoBack = (() => {
+        try {
+            return navigation && navigation.canGoBack();
+        } catch (error) {
+            console.log('Navigation canGoBack error:', error);
+            return false;
+        }
+    })();
+
+    // Bildirim yoksa gösterilecek bileşen
+    const EmptyNotifications = () => (
+        <View style={styles.emptyNotificationsContainer}>
+            <Icon name="bell-off-outline" size={50} color="#ddd" />
+            <Text style={styles.emptyNotificationsText}>Henüz bildiriminiz yok</Text>
+        </View>
+    );
+
+    const formatNotificationDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+
+        // Bugün ise saat göster
+        if (date.toDateString() === now.toDateString()) {
+            return `Bugün ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // Dün ise "Dün" yaz
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        if (date.toDateString() === yesterday.toDateString()) {
+            return `Dün ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // Diğer durumlar için tarih göster
+        return date.toLocaleDateString('tr-TR');
+    };
 
     return (
         <>
-            <Appbar.Header style={styles.appbarContainer}>
-                <StatusBar backgroundColor="#2e7d32" barStyle="light-content"/>
-                <View style={styles.appbarInner}>
-                    <View style={styles.leftSection}>
-                        {canGoBack && (
-                            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                                <Icon name="arrow-left" size={24} color="#fff"/>
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity onPress={() => navigation.navigate('Profil')} style={styles.avatarWrapper}>
-                            <View style={styles.avatarContent}>
-                                <View style={styles.avatarPlaceholder}>
-                                    <Text style={styles.avatarInitial}>{userName?.charAt(0).toUpperCase()}</Text>
-                                </View>
-                                <Text style={styles.avatarLabel}>{userName}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.rightIconsWrapper}>
-                        <View style={styles.rightIcons}>
-                            <TouchableOpacity onPress={() => navigation.navigate('Mesaj')}
-                                              style={styles.notificationWrapper}>
-                                <Icon name="message-outline" size={24} color="#ffffff" style={styles.icon}/>
-                                {
-                                    messageCount > 0 && (
-                                        <View style={styles.notificationBadge}>
-                                            <Text style={styles.notificationText}>{messageCount}</Text>
-                                        </View>
-                                    )
-                                }
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={openDrawer} style={styles.notificationWrapper}>
-                                <Icon name="bell-outline" size={24} color="#ffffff" style={styles.icon}/>
-                                {unreadNotificationsCount > 0 && (
-                                    <View style={styles.notificationBadge}>
-                                        <Text style={styles.notificationText}>{unreadNotificationsCount}</Text>
+            <StatusBar backgroundColor="#ff8c00" barStyle="light-content"/>
+            <Animated.View style={{
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }]
+            }}>
+                <LinearGradient
+                    colors={['#ff8c00', '#fc9e21', '#ffb347']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 0}}
+                    style={styles.appbarContainer}>
+                    <View style={styles.appbarInner}>
+                        <View style={styles.leftSection}>
+                            {canGoBack && (
+                                <TouchableOpacity
+                                    onPress={() => navigation.goBack()}
+                                    style={styles.backButton}
+                                    activeOpacity={0.7}>
+                                    <View style={styles.iconBackground}>
+                                        <Icon name="arrow-left" size={22} color="#fff"/>
                                     </View>
-                                )}
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('Profil')}
+                                style={styles.avatarWrapper}
+                                activeOpacity={0.8}>
+                                <View style={styles.avatarContent}>
+                                    <View style={styles.avatarPlaceholder}>
+                                        <Text style={styles.avatarInitial}>{userName?.charAt(0).toUpperCase()}</Text>
+                                    </View>
+                                    <Text style={styles.avatarLabel} numberOfLines={1}>
+                                        {userName}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
+
+                        <View style={styles.rightIconsWrapper}>
+                            <View style={styles.rightIcons}>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('Mesaj')}
+                                    style={styles.iconButton}
+                                    activeOpacity={0.7}>
+                                    <View style={styles.iconBackground}>
+                                        <Icon name="message-outline" size={22} color="#ffffff" />
+                                    </View>
+                                    {messageCount > 0 && (
+                                        <Animated.View
+                                            style={[
+                                                styles.notificationBadge,
+                                                { transform: [{ scale: messageCount > 0 ? 1.1 : 1 }] }
+                                            ]}>
+                                            <Text style={styles.notificationText}>{messageCount}</Text>
+                                        </Animated.View>
+                                    )}
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={openDrawer}
+                                    style={styles.iconButton}
+                                    activeOpacity={0.7}>
+                                    <View style={styles.iconBackground}>
+                                        <Animated.View style={{
+                                            transform: [{ rotate: bellShakeAnim.interpolate({
+                                                inputRange: [-1, 1],
+                                                outputRange: ['-20deg', '20deg']
+                                            }) }]
+                                        }}>
+                                            <Icon name="bell-outline" size={22} color="#ffffff" />
+                                        </Animated.View>
+                                    </View>
+                                    {unreadNotificationsCount > 0 && (
+                                        <Animated.View
+                                            style={[
+                                                styles.notificationBadge,
+                                                { transform: [{ scale: unreadNotificationsCount > 0 ? 1.1 : 1 }] }
+                                            ]}>
+                                            <Text style={styles.notificationText}>{unreadNotificationsCount}</Text>
+                                        </Animated.View>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     </View>
-                </View>
-            </Appbar.Header>
+                </LinearGradient>
+            </Animated.View>
 
             {drawerOpen && (
                 <TouchableWithoutFeedback onPress={closeDrawer}>
                     <View style={styles.fullScreen}>
-                        <Animated.View style={[styles.drawer, {transform: [{translateX: drawerAnim}]}]}>
-                            <View style={styles.drawerContent}>
+                        <Animated.View style={[
+                            styles.overlay,
+                            {opacity: drawerAnim.interpolate({
+                                inputRange: [0, screenWidth],
+                                outputRange: [0.5, 0]
+                            })}
+                        ]} />
+                        <Animated.View
+                            style={[
+                                styles.drawer,
+                                {transform: [{translateX: drawerAnim}]}
+                            ]}>
+                            <View style={styles.drawerHeader}>
                                 <Text style={styles.drawerTitle}>Bildirimler</Text>
-                                {notifications.map((notification) => (
-                                    <View key={notification.id} style={[
-                                        styles.notificationBox,
-                                        !notification.isRead && styles.unreadNotification
-                                    ]}>
-                                        <Text style={styles.notificationMessage}>{notification.message}</Text>
-                                        <Text style={styles.notificationDate}>
-                                            {new Date(notification.createdAt).toLocaleDateString('tr-TR')}
-                                        </Text>
-                                    </View>
-                                ))}
+                                <TouchableOpacity
+                                    onPress={closeDrawer}
+                                    style={styles.closeButton}>
+                                    <Icon name="close" size={22} color="#666" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.drawerContent}>
+                                {notifications.length > 0 ? (
+                                    notifications.map((notification, index) => (
+                                        <Animated.View
+                                            key={notification.id}
+                                            entering={Animated.stagger(
+                                                50,
+                                                Animated.spring({
+                                                    damping: 12,
+                                                    stiffness: 100,
+                                                }).withCallback((finished) => {
+                                                    'worklet';
+                                                    if (finished) {
+                                                        console.log('Animation finished');
+                                                    }
+                                                })
+                                            )}
+                                            style={[
+                                                styles.notificationBox,
+                                                !notification.isRead && styles.unreadNotification
+                                            ]}>
+                                            <View style={styles.notificationIconContainer}>
+                                                <Icon
+                                                    name={!notification.isRead ? "bell-ring-outline" : "bell-outline"}
+                                                    size={22}
+                                                    color={!notification.isRead ? "#fc9e21" : "#999"}
+                                                />
+                                            </View>
+                                            <View style={styles.notificationContent}>
+                                                <Text style={[
+                                                    styles.notificationMessage,
+                                                    !notification.isRead && styles.unreadText
+                                                ]}>
+                                                    {notification.message}
+                                                </Text>
+                                                <Text style={styles.notificationDate}>
+                                                    {formatNotificationDate(notification.createdAt)}
+                                                </Text>
+                                            </View>
+                                        </Animated.View>
+                                    ))
+                                ) : (
+                                    <EmptyNotifications />
+                                )}
                             </View>
                         </Animated.View>
                     </View>
@@ -243,8 +436,11 @@ export default function Header({navigation}: Props) {
 
 const styles = StyleSheet.create({
     appbarContainer: {
-        backgroundColor: '#fc9e21',
-        elevation: 4,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         overflow: 'hidden',
@@ -254,14 +450,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 16,
-        paddingVertical: 10,
+        paddingVertical: 12,
     },
     leftSection: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     backButton: {
-        marginRight: 8,
+        marginRight: 12,
     },
     avatarWrapper: {
         marginLeft: 4,
@@ -269,23 +465,19 @@ const styles = StyleSheet.create({
     avatarContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#ffffff22',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 28,
-        gap: 8,
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: '#ffffff',
+        gap: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     avatarLabel: {
         color: '#fff',
         fontSize: 16,
-        fontWeight: '700'
+        fontWeight: '700',
+        maxWidth: 120,
     },
     rightIconsWrapper: {
         flexDirection: 'row',
@@ -294,89 +486,175 @@ const styles = StyleSheet.create({
     },
     rightIcons: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 16,
     },
-    icon: {
-        marginLeft: 12,
-    },
-    notificationWrapper: {
+    iconButton: {
         position: 'relative',
+    },
+    iconBackground: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     notificationBadge: {
         position: 'absolute',
         top: -4,
-        right: -2,
+        right: -4,
         backgroundColor: '#d32f2f',
-        borderRadius: 8,
-        paddingHorizontal: 4,
-        paddingVertical: 1,
-        minWidth: 16,
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: '#fff',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 2,
+            },
+            android: {
+                elevation: 3,
+            },
+        }),
     },
     notificationText: {
         color: '#fff',
         fontSize: 10,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
     },
     fullScreen: {
         ...StyleSheet.absoluteFillObject,
         zIndex: 100,
     },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: '#000',
+    },
     drawer: {
         position: 'absolute',
-        top: 60,
+        top: 0,
         right: 0,
         width: '80%',
         height: '100%',
         backgroundColor: '#fff',
         elevation: 10,
         zIndex: 101,
-        padding: 16,
         borderTopLeftRadius: 20,
         borderBottomLeftRadius: 20,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: -2, height: 0 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+            },
+            android: {
+                elevation: 10,
+            },
+        }),
+    },
+    drawerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    closeButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#f0f0f0',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     drawerContent: {
         flex: 1,
-        gap: 12,
+        padding: 16,
     },
     drawerTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 12,
-        color: '#fc9e21'
+        color: '#fc9e21',
     },
     notificationBox: {
-        backgroundColor: '#f3f3f3',
-        padding: 12,
+        flexDirection: 'row',
+        backgroundColor: '#f9f9f9',
+        padding: 16,
         borderRadius: 12,
-        marginBottom: 8,
+        marginBottom: 10,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+            },
+            android: {
+                elevation: 2,
+            },
+        }),
     },
     unreadNotification: {
         backgroundColor: '#fff3e0',
         borderLeftWidth: 4,
         borderLeftColor: '#fc9e21',
     },
+    notificationIconContainer: {
+        width: 40,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    notificationContent: {
+        flex: 1,
+    },
     notificationMessage: {
         fontSize: 14,
-        marginBottom: 4,
+        marginBottom: 6,
+        color: '#333',
+    },
+    unreadText: {
+        fontWeight: '600',
+        color: '#000',
     },
     notificationDate: {
         fontSize: 12,
-        color: '#666',
+        color: '#888',
     },
-
     avatarPlaceholder: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#ccc',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#fff',
     },
     avatarInitial: {
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
-    }
+    },
+    emptyNotificationsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+    },
+    emptyNotificationsText: {
+        marginTop: 10,
+        color: '#999',
+        fontSize: 16,
+    },
 });
