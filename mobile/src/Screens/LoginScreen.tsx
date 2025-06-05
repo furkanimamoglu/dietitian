@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
     Animated,
     Dimensions,
@@ -8,7 +8,8 @@ import {
     StatusBar,
     StyleSheet,
     TouchableOpacity,
-    View
+    View,
+    Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Button, Card, Surface, Text, TextInput, useTheme} from 'react-native-paper';
@@ -17,6 +18,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config.js';
 import {RootStackParamList} from '../App';
+import LinearGradient from 'react-native-linear-gradient';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -27,7 +29,33 @@ const LoginScreen = ({navigation}: Props) => {
     const [secure, setSecure] = useState(true);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    // Animasyon değerleri
     const errorOpacity = useState(new Animated.Value(0))[0];
+    const formTranslateY = useRef(new Animated.Value(30)).current;
+    const formOpacity = useRef(new Animated.Value(0)).current;
+    const logoScale = useRef(new Animated.Value(0.8)).current;
+
+    // Sayfa açılışında animasyonu başlat
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(formOpacity, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true
+            }),
+            Animated.timing(formTranslateY, {
+                toValue: 0,
+                duration: 800,
+                useNativeDriver: true
+            }),
+            Animated.timing(logoScale, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true
+            })
+        ]).start();
+    }, []);
 
     useEffect(() => {
         if (errorMessage) {
@@ -70,8 +98,6 @@ const LoginScreen = ({navigation}: Props) => {
                     validateStatus: () => true,
                 }
             );
-
-            console.log(loginResponse)
 
             if (loginResponse.status !== 200) {
                 if (loginResponse.status === 400) {
@@ -129,19 +155,25 @@ const LoginScreen = ({navigation}: Props) => {
                 <Surface style={styles.errorSurface}>
                     <Icon name="alert-circle" size={24} color="#D32F2F" style={styles.errorIcon}/>
                     <Text style={styles.errorText}>{errorMessage}</Text>
-                    {/* Optional: Remove close button if you want it to only disappear after the animation */}
-                    {/* <TouchableOpacity onPress={() => setErrorMessage(null)} style={styles.closeButton}>
-                        <Icon name="close" size={20} color="#666" />
-                    </TouchableOpacity> */}
                 </Surface>
             </Animated.View>
         );
     };
 
-
     return (
         <View style={styles.container}>
-            <StatusBar backgroundColor="#F57C00" barStyle="light-content"/>
+            <StatusBar backgroundColor="#FF6B00" barStyle="light-content"/>
+
+            {/* Gradient Arka Plan */}
+            <LinearGradient
+                colors={['#FF8E53', '#FF6B00']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+                style={styles.gradient}
+            />
+
+            {/* Arka Plan Desen Efekti */}
+            <View style={styles.patternOverlay} />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -151,101 +183,105 @@ const LoginScreen = ({navigation}: Props) => {
                     contentContainerStyle={styles.scrollView}
                     keyboardShouldPersistTaps="handled"
                 >
-                    <View style={styles.logoContainer}>
-                        <Icon name="leaf" size={80} color="#F57C00" style={styles.logo}/>
-                        <Text variant="headlineMedium" style={styles.title}>Diyetia</Text>
+                    {/* Logo ve Başlık Bölümü */}
+                    <Animated.View style={[styles.logoContainer, {transform: [{scale: logoScale}]}]}>
+                        <View style={styles.logoCircle}>
+                            <Icon name="leaf" size={60} color="#FFFFFF" style={styles.logo}/>
+                        </View>
+                        <Text variant="headlineLarge" style={styles.title}>Diyetia</Text>
                         <Text variant="bodyMedium" style={styles.subtitle}>Sağlıklı yaşam yolculuğunuz için</Text>
-                    </View>
+                    </Animated.View>
 
-                    {/* Error Message Component */}
+                    {/* Hata Mesajı */}
                     <ErrorMessage/>
 
-                    <Card style={styles.formCard}>
-                        <Card.Content>
-                            <TextInput
-                                label="Telefon"
-                                mode="outlined"
-                                value={phone}
-                                onChangeText={handleChange}
-                                keyboardType="phone-pad"
-                                maxLength={10}
-                                placeholder="5xxxxxxxxx"
-                                left={<TextInput.Affix text="+90"/>}
-                                style={styles.input}
-                                outlineColor="#DDD"
-                                activeOutlineColor="#F57C00"
-                                textContentType="telephoneNumber"
-                                autoComplete="tel"
-                            />
+                    {/* Form Kartı */}
+                    <Animated.View
+                        style={[
+                            {opacity: formOpacity, transform: [{translateY: formTranslateY}]}
+                        ]}
+                    >
+                        <Card style={styles.formCard}>
+                            <Card.Content>
+                                <Text style={styles.formTitle}>Hesabınıza Giriş Yapın</Text>
 
-                            <TextInput
-                                label="Şifre"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry={secure}
-                                right={
-                                    <TextInput.Icon
-                                        icon={secure ? 'eye' : 'eye-off'}
-                                        onPress={() => setSecure(!secure)}
-                                        color="#F57C00"
-                                    />
-                                }
-                                mode="outlined"
-                                style={styles.input}
-                                outlineColor="#DDD"
-                                activeOutlineColor="#F57C00"
-                                textContentType="password"
-                                autoComplete="password"
-                            />
+                                <TextInput
+                                    label="Telefon"
+                                    mode="outlined"
+                                    value={phone}
+                                    onChangeText={handleChange}
+                                    keyboardType="phone-pad"
+                                    maxLength={10}
+                                    placeholder="5xxxxxxxxx"
+                                    left={<TextInput.Affix text="+90"/>}
+                                    style={styles.input}
+                                    outlineColor="#DDD"
+                                    activeOutlineColor="#FF6B00"
+                                    textContentType="telephoneNumber"
+                                    autoComplete="tel"
+                                    theme={{ roundness: 12 }}
+                                />
 
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('SifremiUnuttum', undefined)}
-                                style={styles.forgotContainer}
-                            >
-                                <Text style={styles.forgotText}>Şifremi unuttum?</Text>
-                            </TouchableOpacity>
+                                <TextInput
+                                    label="Şifre"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={secure}
+                                    right={
+                                        <TextInput.Icon
+                                            icon={secure ? 'eye' : 'eye-off'}
+                                            onPress={() => setSecure(!secure)}
+                                            color="#FF6B00"
+                                        />
+                                    }
+                                    mode="outlined"
+                                    style={styles.input}
+                                    outlineColor="#DDD"
+                                    activeOutlineColor="#FF6B00"
+                                    textContentType="password"
+                                    autoComplete="password"
+                                    theme={{ roundness: 12 }}
+                                />
 
-                            <Button
-                                mode="contained"
-                                onPress={handleLogin}
-                                loading={loading}
-                                disabled={loading || !phone || !password} // Disable if fields are empty or loading
-                                style={styles.loginButton}
-                                buttonColor="#F57C00"
-                                contentStyle={styles.buttonContent}
-                                labelStyle={styles.buttonLabel}
-                            >
-                                Giriş Yap
-                            </Button>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('SifremiUnuttum', undefined)}
+                                    style={styles.forgotContainer}
+                                >
+                                    <Text style={styles.forgotText}>Şifremi unuttum?</Text>
+                                </TouchableOpacity>
 
-                            <View style={styles.orContainer}>
-                                <View style={styles.divider}/>
-                                <Text style={styles.orText}>veya</Text>
-                                <View style={styles.divider}/>
-                            </View>
+                                <Button
+                                    mode="contained"
+                                    onPress={handleLogin}
+                                    loading={loading}
+                                    disabled={loading || !phone || !password}
+                                    style={styles.loginButton}
+                                    buttonColor="#FF6B00"
+                                    contentStyle={styles.buttonContent}
+                                    labelStyle={styles.buttonLabel}
+                                >
+                                    {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
+                                </Button>
 
-                            <Button
-                                mode="outlined"
-                                onPress={() => navigation.navigate('Kayitol', {})}
-                                style={styles.registerButton}
-                                textColor="#F57C00"
-                                contentStyle={styles.buttonContent}
-                                labelStyle={styles.buttonLabel}
-                            >
-                                Hesap Oluştur
-                            </Button>
+                                <View style={styles.orContainer}>
+                                    <View style={styles.divider}/>
+                                    <Text style={styles.orText}>veya</Text>
+                                    <View style={styles.divider}/>
+                                </View>
 
-                            {/* You might want a button for dietitian login here if needed */}
-                            {/* <Button
-                                mode="text"
-                                onPress={handleDietitianLogin}
-                                style={styles.dietitianButton}
-                                textColor="#F57C00"
-                            >
-                                Diyetisyen Girişi
-                            </Button> */}
-                        </Card.Content>
-                    </Card>
+                                <Button
+                                    mode="outlined"
+                                    onPress={() => navigation.navigate('Kayitol', {})}
+                                    style={styles.registerButton}
+                                    textColor="#FF6B00"
+                                    contentStyle={styles.buttonContent}
+                                    labelStyle={styles.buttonLabel}
+                                >
+                                    Yeni Hesap Oluştur
+                                </Button>
+                            </Card.Content>
+                        </Card>
+                    </Animated.View>
 
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>© 2025 Diyetia.com</Text>
@@ -261,138 +297,190 @@ const {width, height} = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff9f2', // Light creamy background
+        backgroundColor: '#ffffff',
+    },
+    gradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: height * 0.5,
+    },
+    patternOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: height * 0.5,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        opacity: 0.8
     },
     keyboardAvoidingView: {
         flex: 1,
     },
     scrollView: {
         flexGrow: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         padding: 24,
-        paddingBottom: 40, // Added padding bottom
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 36,
+    },
+    logoCircle: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: 'rgba(255,255,255,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16,
+        borderWidth: 2,
+        borderColor: 'rgba(255,255,255,0.5)',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.30,
+        shadowRadius: 10,
+        elevation: 8,
     },
     logo: {
-        backgroundColor: 'rgba(245, 124, 0, 0.1)', // Lightened background for icon
-        padding: 16,
-        borderRadius: 50,
-        marginBottom: 16,
-        elevation: 2, // Added subtle elevation
+        padding: 10,
     },
     title: {
         textAlign: 'center',
-        color: '#fc9e21', // Orange color
+        color: '#ffffff',
         fontWeight: '700',
         marginBottom: 4,
+        fontSize: 36,
+        letterSpacing: 1,
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: {width: 0, height: 2},
+        textShadowRadius: 3,
     },
     subtitle: {
         textAlign: 'center',
-        color: '#777',
-        marginBottom: 16,
+        color: '#ffffff',
+        fontSize: 16,
+        opacity: 0.9
+    },
+    formTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 20,
+        textAlign: 'center'
     },
     errorContainer: {
         width: '100%',
-        marginBottom: 16,
+        marginBottom: 20,
         alignItems: 'center',
-        // Position absolute if you want it to overlay content,
-        // but current placement within ScrollView is fine too.
-        // position: 'absolute',
-        // top: 20, // Adjust as needed
-        // zIndex: 10,
-        // paddingHorizontal: 24, // Ensure it aligns with scrollview padding
     },
     errorSurface: {
-        width: '100%', // Take full width of container
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFEBEE', // Light red background
-        borderRadius: 8,
-        padding: 12,
-        elevation: 1,
+        backgroundColor: '#FFEBEE',
+        borderRadius: 12,
+        padding: 14,
+        elevation: 3,
         borderLeftWidth: 4,
-        borderLeftColor: '#D32F2F', // Darker red border
+        borderLeftColor: '#D32F2F',
+        shadowColor: "#D32F2F",
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.15,
+        shadowRadius: 3,
     },
     errorIcon: {
         marginRight: 10,
     },
     errorText: {
-        flex: 1, // Allows text to wrap
-        color: '#D32F2F', // Darker red text
+        flex: 1,
+        color: '#D32F2F',
         fontSize: 14,
-    },
-    closeButton: {
-        padding: 4, // Make touch area easier
+        fontWeight: '500'
     },
     formCard: {
-        borderRadius: 16,
-        elevation: 4,
-        padding: 8, // Added padding inside card
+        borderRadius: 20,
+        elevation: 8,
+        padding: 8,
         backgroundColor: '#FFFFFF',
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 8,
+        marginBottom: 16
     },
     input: {
         marginBottom: 16,
-        backgroundColor: '#fff', // Ensure white background
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        fontSize: 16,
     },
     forgotContainer: {
         alignItems: 'flex-end',
-        marginBottom: 20, // Increased margin
+        marginBottom: 20,
+        marginTop: -5
     },
     forgotText: {
-        color: '#fc9e21', // Orange color
+        color: '#FF6B00',
         fontSize: 14,
+        fontWeight: '500',
     },
     loginButton: {
-        marginBottom: 16,
-        borderRadius: 8,
-        elevation: 2,
+        marginBottom: 5,
+        borderRadius: 12,
+        elevation: 3,
+        shadowColor: "#FF6B00",
+        shadowOffset: {width: 0, height: 3},
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        paddingVertical: 5
     },
     buttonContent: {
-        height: 48, // Set button height
+        height: 52,
+        paddingVertical: 8,
+        paddingHorizontal: 16
     },
     buttonLabel: {
         fontSize: 16,
-        fontWeight: '600', // Semi-bold
+        fontWeight: '600',
+        letterSpacing: 0.5,
+        lineHeight: 16
     },
     orContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 16, // Vertical margin
+        marginVertical: 16,
     },
     divider: {
         flex: 1,
         height: 1,
-        backgroundColor: '#ddd', // Light grey divider
+        backgroundColor: '#ddd',
     },
     orText: {
-        paddingHorizontal: 10,
-        color: '#777', // Grey text
+        paddingHorizontal: 14,
+        color: '#777',
+        fontWeight: '500'
     },
     registerButton: {
-        marginBottom: 16, // Added margin bottom
-        borderRadius: 8,
-        borderColor: '#fc9e21', // Orange border
-        borderWidth: 1.5, // Slightly thicker border
-    },
-    dietitianButton: {
-        alignSelf: 'center', // Center the button
-        marginTop: 8,
+        marginBottom: 16,
+        borderRadius: 12,
+        borderColor: '#FF6B00',
+        borderWidth: 1.5,
     },
     footer: {
-        marginTop: 24,
+        marginTop: 5,
         alignItems: 'center',
     },
     footerText: {
-        color: '#888', // Darker grey
+        color: '#555',
         fontSize: 12,
+        fontWeight: '500'
     },
 });
 
 export default LoginScreen;
+
