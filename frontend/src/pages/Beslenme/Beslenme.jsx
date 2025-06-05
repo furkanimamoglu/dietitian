@@ -449,16 +449,13 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         onMealChange(day, meal, updatedData);
     };
 
-    // Helper function to add an alternative for a main item
     const addAlternative = (day, meal, mainItem, alternativeItem) => {
         if (!alternativeItem.trim() || !mainItem) return;
 
         const currentData = mealPlan[day][meal];
         let updatedData;
 
-        // Convert to complex format if needed
         if (Array.isArray(currentData)) {
-            // Convert simple array to complex format
             updatedData = {
                 main: [...currentData],
                 alternatives: {
@@ -466,7 +463,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                 }
             };
         } else if (currentData && currentData.main) {
-            // Add to existing complex format
             const newAlternatives = {...currentData.alternatives};
 
             if (newAlternatives[mainItem]) {
@@ -727,109 +723,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                         </div>
                     );
                 })}
-            </div>
-        </div>
-    );
-};
-
-const ViewMealPlan = ({mealPlan, programTitle, onExportPdf, selectedProgram}) => {
-    const getMealContent = (mealData) => {
-        if (!mealData) return {mainItems: [], hasAlternatives: false};
-
-        if (Array.isArray(mealData)) {
-            return {
-                mainItems: mealData,
-                hasAlternatives: false
-            };
-        }
-
-        if (mealData.main && Array.isArray(mealData.main)) {
-            return {
-                mainItems: mealData.main,
-                hasAlternatives: mealData.alternatives && Object.keys(mealData.alternatives).length > 0,
-                alternatives: mealData.alternatives
-            };
-        }
-
-        if (typeof mealData === 'string') {
-            const items = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-            return {
-                mainItems: items,
-                hasAlternatives: false
-            };
-        }
-
-        return {mainItems: [], hasAlternatives: false};
-    };
-
-    return (
-        <div className="view-meal-plan-container">
-            <div className="view-meal-plan-header">
-                <ConditionalPDFLink
-                    document={<NutritionPlanDocument program={programDetails}/>}
-                    fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                    buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
-                    buttonTitle="PDF İndir"
-                >
-                    {({blob, url, loading, error}) => (
-                        <Button
-                            variant="outlined"
-                            startIcon={<FileDownloadIcon/>}
-                            disabled={loading}
-                        >
-                            {loading ? 'Hazırlanıyor...' : 'PDF İndir'}
-                        </Button>
-                    )}
-                </ConditionalPDFLink>
-            </div>
-
-            <div className="view-meal-plan-days">
-                {DAYS_OF_WEEK.map(day => (
-                    <div key={day} className="day-card">
-                        <div className="day-header">{day}</div>
-                        <div className="day-meals">
-                            {MEALS.map(meal => {
-                                const {mainItems, hasAlternatives, alternatives} = getMealContent(
-                                    mealPlan && mealPlan[day] ? mealPlan[day][meal] : null
-                                );
-
-                                return (
-                                    <div key={meal} className="meal-block">
-                                        <div className="meal-name">{meal}</div>
-                                        <div className="meal-content">
-                                            {mainItems.length > 0 ? (
-                                                <div>
-                                                    <ul className="meal-items-list">
-                                                        {mainItems.map((item, index) => (
-                                                            <li key={index} className="meal-item-with-alternatives">
-                                                                <span className="main-meal-item">{item}</span>
-
-                                                                {hasAlternatives && alternatives && alternatives[item] && (
-                                                                    <ul className="alternatives-list">
-                                                                        {alternatives[item].map((alt, altIndex) => (
-                                                                            <li key={altIndex}
-                                                                                className="alternative-item">
-                                                                                <span
-                                                                                    className="alternative-prefix">alternatif: </span>
-                                                                                {alt}
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
-                                                                )}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ) : (
-                                                <p className="no-meal-data">Veri girilmemiş</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
             </div>
         </div>
     );
@@ -1232,11 +1125,7 @@ export default function Beslenme() {
 
     const handlePrint = (item) => {
         console.log("Printing:", item);
-        // We'll use the same PDF component for printing
-        // This will be handled by the PDFDownloadLink component
     };
-
-    // Remove the generatePDF function since we're using react-pdf now
 
     const handleEdit = (item) => {
         setSelectedProgram(item);
@@ -1321,31 +1210,9 @@ export default function Beslenme() {
         }
     };
 
-    // Meal plan handlers
-    const handleMealChange = (day, meal, value) => {
-        setMealPlan(prev => ({
-            ...prev,
-            [day]: {
-                ...prev[day],
-                [meal]: value
-            }
-        }));
-    };
-
-    const handleDayChange = (day) => {
-        setSelectedDay(day);
-    };
-
-    // View meal plan handler
     const handleViewProgram = (item) => {
         setSelectedProgram(item);
         setViewProgramModal(true);
-    };
-
-    // Export PDF handler
-    const handleExportPdf = () => {
-        // No need to call generatePDF anymore
-        // The PDF is generated by react-pdf
     };
 
     const handleOpenDeleteConfirm = (item) => {
@@ -1360,16 +1227,12 @@ export default function Beslenme() {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {
-                // Store name for success message
                 const planName = itemToDelete.title;
 
-                // Update local state after successful deletion
                 setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== itemToDelete.id));
-                // Close the modal and reset the item to delete
                 setDeleteConfirmModal(false);
                 setItemToDelete(null);
 
-                // Show success popup
                 setSuccessMessage(`"${planName}" programı başarıyla silindi.`);
                 setShowSuccessPopup(true);
             })
@@ -1885,7 +1748,7 @@ export default function Beslenme() {
                         editTitle={editTitle}
                         editDescription={editDescription}
                         editCategoryId={editCategoryId}
-                        existingPlanId={selectedProgram?.id}
+                        existingPlan={selectedProgram}
                     />
                 </div>
             </Modal>
