@@ -4,7 +4,7 @@ import { showErrorToast, showSuccessToast } from '../../utils/toastUtil';
 import axios from 'axios';
 import config from '../../config';
 
-const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlanId = null, existingMealPlan = null }) => {  // existingMealPlan prop'unu ekledim
+const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlanId = null, existingMealPlan = null }) => {
     // Plan başlığı, açıklama ve kategori için state tanımlıyorum
     // Bu state'leri mealPlan tanımlamasından önce oluşturuyorum ki diğer işlemler düzgün çalışsın
     const [title, setTitle] = useState(editTitle);
@@ -49,62 +49,44 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     const [editingMealType, setEditingMealType] = useState(null);
     const [editedMealName, setEditedMealName] = useState('');
 
-    // Gün kopyalama/yapıştırma için state
     const [copiedDay, setCopiedDay] = useState(null);
 
-    // Yeni alternatif ekleme için state
     const [editingCellAlternative, setEditingCellAlternative] = useState(null); // format: "day-mealType"
     const [newAlternativeName, setNewAlternativeName] = useState('');
 
-    // Meal plan state - her hücre için birden fazla alternatif içerebilir
     const [mealPlan, setMealPlan] = useState(() => {
-        // Eğer mevcut bir meal plan geldiyse onu kullan
         if (existingMealPlan && typeof existingMealPlan === 'object' && !Array.isArray(existingMealPlan) && Object.keys(existingMealPlan).length > 0) {
-            console.log("Mevcut meal plan yükleniyor:", existingMealPlan);
 
-            // Mevcut planı normalize et - tüm günler ve öğünleri içerdiğinden emin ol
             const normalizedPlan = {};
 
             defaultDays.forEach(day => {
                 normalizedPlan[day] = {};
-
-                // Eğer bu gün mevcut planda varsa
                 if (existingMealPlan[day]) {
-                    // Öğünleri kontrol et ve ekle
                     defaultMealTypes.forEach(mealType => {
-                        // Öğün adını kullan
                         const mealName = mealType.name;
 
-                        // Eğer bu öğün mevcut günde varsa, o değeri kullan
                         if (existingMealPlan[day][mealName]) {
-                            // Eski format ile uyumluluk - string, array veya obje olabilir
                             const currentMealData = existingMealPlan[day][mealName];
 
-                            // Yeni formatta normalize et
                             if (typeof currentMealData === 'string') {
-                                // String formatını parse et
                                 const items = currentMealData.trim() ?
                                     currentMealData.split(',').map(item => item.trim()) : [];
                                 normalizedPlan[day][mealName] = {
                                     [defaultMainMenu]: items
                                 };
                             } else if (Array.isArray(currentMealData)) {
-                                // Array formatını koruyarak yeni formata dönüştür
                                 normalizedPlan[day][mealName] = {
                                     [defaultMainMenu]: [...currentMealData]
                                 };
                             } else if (currentMealData && typeof currentMealData === 'object') {
-                                // Karmaşık format - main ve alternatives içerebilir
                                 normalizedPlan[day][mealName] = {};
 
-                                // Ana menü öğeleri (main array veya alternatives objesi)
                                 if (currentMealData.main && Array.isArray(currentMealData.main)) {
                                     normalizedPlan[day][mealName][defaultMainMenu] = [...currentMealData.main];
                                 } else {
                                     normalizedPlan[day][mealName][defaultMainMenu] = [];
                                 }
 
-                                // Alternatifler
                                 if (currentMealData.alternatives && typeof currentMealData.alternatives === 'object') {
                                     Object.entries(currentMealData.alternatives).forEach(([mainItem, alternativeItems]) => {
                                         if (Array.isArray(alternativeItems)) {
@@ -113,20 +95,17 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                     });
                                 }
                             } else {
-                                // Tanımsız veya diğer formatlar - boş değer
                                 normalizedPlan[day][mealName] = {
                                     [defaultMainMenu]: []
                                 };
                             }
                         } else {
-                            // Öğün mevcut değilse boş oluştur
                             normalizedPlan[day][mealName] = {
                                 [defaultMainMenu]: []
                             };
                         }
                     });
                 } else {
-                    // Gün mevcut değilse tüm öğünleri boş oluştur
                     defaultMealTypes.forEach(mealType => {
                         normalizedPlan[day][mealType.name] = {
                             [defaultMainMenu]: []
@@ -138,22 +117,19 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             return normalizedPlan;
         }
 
-        // Mevcut plan yoksa boş plan oluştur
         const initialPlan = {};
         defaultDays.forEach(day => {
             initialPlan[day] = {};
             defaultMealTypes.forEach(meal => {
                 initialPlan[day][meal.name] = {
-                    [defaultMainMenu]: [] // Başlangıçta sadece Ana Menü var
+                    [defaultMainMenu]: []
                 };
             });
         });
         return initialPlan;
     });
 
-    // Kategorileri yükle
     useEffect(() => {
-        // Kategorileri API'den çek
         axios.get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
@@ -166,7 +142,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         });
     }, []);
 
-    // Alternatif listeleri - her hücre için ayrı alternatif listesi tutuyoruz
     const getAlternativesForCell = (day, mealType) => {
         if (mealPlan[day] && mealPlan[day][mealType]) {
             return Object.keys(mealPlan[day][mealType]);
@@ -174,7 +149,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         return [defaultMainMenu];
     };
 
-    // Gün silme fonksiyonu
     const removeDay = (dayToRemove) => {
         if (days.length <= 1) {
             showErrorToast("En az bir gün bulunmalıdır! Son günü silemezsiniz.");
@@ -184,7 +158,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         setDays(days.filter(day => day !== dayToRemove));
         setUnusedDays([...unusedDays, dayToRemove]);
 
-        // Gün silindiğinde, o güne ait tüm öğünleri de sil
         setMealPlan(prev => {
             const updated = {...prev};
             delete updated[dayToRemove];
@@ -194,7 +167,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         showSuccessToast(`${dayToRemove} günü başarıyla silindi.`);
     };
 
-    // Öğün silme fonksiyonu
     const removeMealType = (mealTypeToRemove) => {
         if (mealTypes.length <= 1) {
             showErrorToast("En az bir öğün bulunmalıdır! Son öğünü silemezsiniz.");
@@ -204,7 +176,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         setMealTypes(mealTypes.filter(meal => meal.id !== mealTypeToRemove.id));
         setUnusedMealTypes([...unusedMealTypes, mealTypeToRemove]);
 
-        // Öğün silindiğinde, o öğüne ait tüm alternatifleri de sil
         setMealPlan(prev => {
             const updated = {...prev};
             days.forEach(day => {
@@ -218,21 +189,18 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         showSuccessToast(`${mealTypeToRemove.name} öğünü başarıyla silindi.`);
     };
 
-    // Gün ekleme fonksiyonu
     const addDay = (dayToAdd) => {
-        // Mevcut günlere ekleme yaparken orijinal sırayı korumak için
         const newDaysArray = [...days, dayToAdd].sort((a, b) => dayOrderMap[a] - dayOrderMap[b]);
         setDays(newDaysArray);
         setUnusedDays(unusedDays.filter(day => day !== dayToAdd));
         setShowAddDay(false);
 
-        // Yeni gün için öğün planlarını da oluştur
         setMealPlan(prev => {
             const updated = {...prev};
             updated[dayToAdd] = {};
             mealTypes.forEach(meal => {
                 updated[dayToAdd][meal.name] = {
-                    [defaultMainMenu]: [] // Başlangıçta sadece Ana Menü var
+                    [defaultMainMenu]: []
                 };
             });
             return updated;
@@ -241,46 +209,40 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     // Öğün ekleme fonksiyonu
     const addMealType = (mealTypeToAdd) => {
-        // Öğünleri order numarasına göre sıralayarak ekle
         const newMealTypes = [...mealTypes, mealTypeToAdd].sort((a, b) => a.order - b.order);
         setMealTypes(newMealTypes);
         setUnusedMealTypes(unusedMealTypes.filter(meal => meal.id !== mealTypeToAdd.id));
         setShowAddMeal(false);
 
-        // Yeni öğun için tüm günlerdeki planlamayı güncelle
         setMealPlan(prev => {
             const updated = {...prev};
             days.forEach(day => {
                 if (!updated[day]) updated[day] = {};
                 updated[day][mealTypeToAdd.name] = {
-                    [defaultMainMenu]: [] // Başlangıçta sadece Ana Menü var
+                    [defaultMainMenu]: []
                 };
             });
             return updated;
         });
     };
 
-    // Öğün adı düzenleme fonksiyonu
     const startEditingMealName = (mealType) => {
         setEditingMealType(mealType);
         setEditedMealName(mealType.name);
     };
 
-    // Öğün adını kaydetme
     const saveMealName = () => {
         if (!editedMealName.trim()) return;
 
         const oldName = editingMealType.name;
         const newName = editedMealName.trim();
 
-        // Öğün listesini güncelle
         setMealTypes(mealTypes.map(meal =>
             meal.id === editingMealType.id
                 ? { ...meal, name: newName }
                 : meal
         ));
 
-        // Meal planı güncelle - öğün adı değiştiğinde
         setMealPlan(prev => {
             const updated = {...prev};
             days.forEach(day => {
@@ -296,13 +258,11 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         setEditedMealName('');
     };
 
-    // Hücreye özel alternatif ekleme fonksiyonu
     const addCellAlternative = (day, mealType) => {
         if (!newAlternativeName.trim()) return;
 
         const alternativeName = newAlternativeName.trim();
 
-        // Aynı isimli alternatif varsa ekleme
         const cellAlternatives = getAlternativesForCell(day, mealType);
         if (cellAlternatives.includes(alternativeName)) {
             setNewAlternativeName('');
@@ -310,7 +270,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             return;
         }
 
-        // Hücrenin alternatiflerini güncelle
         setMealPlan(prev => {
             const updated = {...prev};
             if (!updated[day][mealType][alternativeName]) {
@@ -323,9 +282,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         setEditingCellAlternative(null);
     };
 
-    // Alternatif silme fonksiyonu
     const removeCellAlternative = (day, mealType, alternativeToRemove) => {
-        // Ana Menü silinemez
         if (alternativeToRemove === defaultMainMenu) return;
 
         setMealPlan(prev => {
@@ -340,9 +297,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     const [editingCell, setEditingCell] = useState(null);
     const [newMealInput, setNewMealInput] = useState('');
-    const [newMealAmount, setNewMealAmount] = useState(''); // Yeni miktar/porsiyon alanı için state
+    const [newMealAmount, setNewMealAmount] = useState('');
 
-    // Add new meal to specific alternative
     const addMeal = (day, mealType, alternative, mealText, mealAmount) => {
         if (!mealText || !mealText.trim()) {
             setNewMealInput('');
@@ -351,7 +307,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             return;
         }
 
-        // Yeni veri formatı: {name: "yemek adı", portion: "miktar"} şeklinde
         const mealItem = {
             name: mealText.trim(),
             portion: mealAmount ? mealAmount.trim() : null
@@ -371,7 +326,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         setEditingCell(null);
     };
 
-    // Remove meal from specific alternative
     const removeMeal = (day, mealType, alternative, index) => {
         setMealPlan(prev => {
             const updated = {...prev};
@@ -383,33 +337,28 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         });
     };
 
-    // Start editing for a specific alternative
     const startEditing = (day, mealType, alternative) => {
         setEditingCell(`${day}-${mealType}-${alternative}`);
         setNewMealInput('');
         setNewMealAmount('');
     };
 
-    // Start adding a new alternative
     const startAddingAlternative = (day, mealType) => {
         setEditingCellAlternative(`${day}-${mealType}`);
         setNewAlternativeName('');
     };
 
-    // Cancel editing
     const cancelEditing = () => {
         setEditingCell(null);
         setNewMealInput('');
         setNewMealAmount('');
     };
 
-    // Cancel adding alternative
     const cancelAddingAlternative = () => {
         setEditingCellAlternative(null);
         setNewAlternativeName('');
     };
 
-    // Handle key press
     const handleKeyPress = (e, day, mealType, alternative) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -419,7 +368,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         }
     };
 
-    // Handle key press for alternative input
     const handleAlternativeKeyPress = (e, day, mealType) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -429,15 +377,11 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         }
     };
 
-    // Öğun ekleme fonksiyonu - yeni sürüm
     const addNewMealType = () => {
-        // Yeni öğün için rastgele renk oluştur
         const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
 
-        // "Yeni Öğün" şeklinde isim ver
         const newName = `Yeni Öğün ${mealTypes.length + 1}`;
 
-        // Yeni öğün oluştur
         const newMealType = {
             id: `new-${Date.now()}`,
             name: newName,
@@ -445,11 +389,9 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             order: mealTypes.length
         };
 
-        // Öğünü ekle
         const newMealTypes = [...mealTypes, newMealType].sort((a, b) => a.order - b.order);
         setMealTypes(newMealTypes);
 
-        // Yeni öğun için tüm günlerdeki planlamayı güncelle
         setMealPlan(prev => {
             const updated = {...prev};
             days.forEach(day => {
@@ -461,20 +403,16 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             return updated;
         });
 
-        // Öğün eklendikten sonra düzenleme moduna geç
         setTimeout(() => {
             startEditingMealName(newMealType);
         }, 100);
     }
 
-    // Gün kopyalama fonksiyonu
     const copyDay = (dayToCopy) => {
-        // Kopyalanan günün detaylarını state'e kaydet
         setCopiedDay(dayToCopy);
         showSuccessToast(`${dayToCopy} günü kopyalandı. Şimdi başka bir güne yapıştırabilirsiniz.`);
     };
 
-    // Gün yapıştırma fonksiyonu
     const pasteDay = (targetDay) => {
         if (!copiedDay) {
             showErrorToast("Önce bir gün kopyalamalısınız!");
@@ -486,11 +424,9 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             return;
         }
 
-        // Kopyalanan günün verilerini hedef güne yapıştırma
         setMealPlan(prev => {
             const updated = {...prev};
 
-            // Hedef günün mevcut öğün tiplerini koruyarak, kopyalanan günün içeriğini yapıştır
             mealTypes.forEach(meal => {
                 if (updated[copiedDay] && updated[copiedDay][meal.name]) {
                     updated[targetDay][meal.name] = JSON.parse(JSON.stringify(updated[copiedDay][meal.name]));
@@ -505,7 +441,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     const saveMealPlan = async () => {
         try {
-            // Girişlerin doğruluğunu kontrol et
             if (!title || title.trim() === "") {
                 showErrorToast("Lütfen bir plan başlığı giriniz.");
                 return;
@@ -516,7 +451,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 return;
             }
 
-            // Boş gün kontrolü
             let isEmpty = true;
             for (const day in mealPlan) {
                 if (Object.keys(mealPlan[day]).length > 0) {
@@ -530,7 +464,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 return;
             }
 
-            // Request için veriyi hazırla
             const planData = {
                 nutrition_plan_id: existingPlanId ? parseInt(existingPlanId) : null,
                 title: title,
@@ -562,7 +495,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         }
     };
 
-    // Dışarı tıklanınca kapanma işlemi için referans
     const containerRef = useRef(null);
 
     useEffect(() => {
