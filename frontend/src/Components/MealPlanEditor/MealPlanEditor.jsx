@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './MealPlanEditor.css';
 import { showErrorToast, showSuccessToast } from '../../utils/toastUtil';
+import axios from 'axios';
+import config from '../../config';
 
-const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
+const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlanId = null }) => {  // Props güncelledim
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
         { id: '1', name: 'Sabah', color: '#FFC107', order: 0 },
@@ -391,8 +393,61 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
         showSuccessToast(`${copiedDay} günündeki içerik ${targetDay} gününe başarıyla yapıştırıldı.`);
     };
 
+    const saveMealPlan = async () => {
+        try {
+            const planData = {
+                title: editTitle,
+                description: editDescription,
+                image: "/placeholder.png",
+                category_id: editCategoryId,
+                mealPlan: mealPlan
+            };
+
+            if (existingPlanId) {
+                planData.nutrition_plan_id = existingPlanId;
+            }
+
+            const endpoint = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
+
+            const method = 'post';
+
+            const response = await axios({
+                method,
+                url: endpoint,
+                data: planData,
+                headers: {
+                    'Authorization': localStorage.getItem("token")
+                }
+            });
+
+            if (response.status === 200) {
+                showSuccessToast(`Beslenme planı başarıyla güncellendi.`);
+                onSave(mealPlan);
+            }
+        } catch (error) {
+            console.error("Beslenme planı kaydetme hatası:", error);
+            showErrorToast(`Beslenme planı güncellenemedi. Lütfen tekrar deneyin.`);
+        }
+    };
+
+    // Dışarı tıklanınca kapanma işlemi için referans
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                onCancel();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [containerRef, onCancel]);
+
     return (
-        <div className="mui-meal-plan-container">
+        <div className="mui-meal-plan-container" ref={containerRef}>
             {/* Header */}
             <div className="mui-meal-plan-header">
                 <h2 className="mui-meal-plan-title">
@@ -450,23 +505,26 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                         ))}
                         <th className="mui-table-header-cell mui-add-column-cell">
                             {showAddDay ? (
-                                <div className="mui-add-selector">
-                                    <select
-                                        className="mui-selector"
-                                        onChange={(e) => e.target.value && addDay(e.target.value)}
-                                        value=""
-                                    >
-                                        <option value="">Gün seçin...</option>
+                                <div className="mui-add-day-panel">
+                                    <div className="mui-add-day-header">
+                                        <span>Eklemek istediğiniz günü seçin</span>
+                                    </div>
+                                    <div className="mui-day-buttons">
                                         {unusedDays.map(day => (
-                                            <option key={day} value={day}>{day}</option>
+                                            <button
+                                                key={day}
+                                                className="mui-day-select-btn"
+                                                onClick={() => addDay(day)}
+                                            >
+                                                <span className="mui-day-name">{day}</span>
+                                            </button>
                                         ))}
-                                    </select>
-                                    <button
-                                        className="mui-cancel-btn"
-                                        onClick={() => setShowAddDay(false)}
-                                    >
-                                        İptal
-                                    </button>
+                                    </div>
+                                    {unusedDays.length === 0 && (
+                                        <div className="mui-no-days-message">
+                                            Eklenecek başka gün kalmadı
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <button
@@ -762,11 +820,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving }) => {  // Props ekledim
                 </button>
                 <button
                     className="mui-btn mui-btn-contained mui-save-action-btn"
-                    onClick={() => {
-                        console.log('Beslenme Programı JSON:', JSON.stringify(mealPlan, null, 2));
-
-                        onSave(mealPlan);
-                    }}
+                    onClick={() => saveMealPlan()}
                     disabled={isSaving}
                 >
                     {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
