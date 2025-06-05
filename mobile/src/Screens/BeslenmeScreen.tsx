@@ -101,32 +101,25 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 setNutritionPlanId(data.NutritionPlan.id);
             }
 
-            // Güncel günü bul ve ayarla
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            // Beslenme planı verilerini ayarla
             setMealPlan(data);
 
-            // Eğer planda bugün varsa o günü göster, yoksa plandaki ilk günü göster
             if (data && data[todayTurkish]) {
                 setCurrentDay(todayTurkish);
-                // Günün ilk öğünü varsa onu seç
                 if (Object.keys(data[todayTurkish]).length > 0) {
                     setSelectedMealType(Object.keys(data[todayTurkish])[0]);
                 }
             } else if (data && Object.keys(data).length > 0) {
-                // Plandaki ilk günü bul
                 const firstAvailableDay = Object.keys(data)[0];
                 setCurrentDay(firstAvailableDay);
-                // İlk günün ilk öğününü seç
                 if (Object.keys(data[firstAvailableDay]).length > 0) {
                     setSelectedMealType(Object.keys(data[firstAvailableDay])[0]);
                 }
             }
 
-            // Eğer veri boşsa
             if (!data || Object.keys(data).length === 0) {
                 setIsEmpty(true);
                 setError('Beslenme planı bulunamadı.');
