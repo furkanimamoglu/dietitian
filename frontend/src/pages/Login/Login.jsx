@@ -114,7 +114,7 @@ function Login() {
                             width: 56,
                             height: 56,
                             mb: 2,
-                            background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
+                            background: "linear-gradient(135deg, #ff7355 0%, #fc9e21 100%)",
                             boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)"
                         }}>
                             <LockOutlinedIcon fontSize="large"/>
@@ -192,7 +192,7 @@ function Login() {
                                     mt: 1,
                                     mb: 3,
                                     py: 1.5,
-                                    background: "linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)",
+                                    background: "linear-gradient(135deg, #ff7355 0%, #fc9e21 100%)",
                                     boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)",
                                     borderRadius: "30px",
                                     textTransform: "none",

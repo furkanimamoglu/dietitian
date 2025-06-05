@@ -29,7 +29,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import MealPlanViewer from "../../Components/MealPlanEditor/MealPlanViewer.jsx";
 import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalPDFLink.jsx";
 
-import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
+import {Document, Font, Page, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 import {
     Autocomplete,

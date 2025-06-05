@@ -98,7 +98,7 @@
 }
 
 .form-input:focus {
-    border-color: #1976d2;
+    border-color: #1e951e;
     box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
 }
 
@@ -111,7 +111,7 @@
 }
 
 .phone-input-container:focus-within {
-    border-color: #1976d2;
+    border-color: #1e951e;
     box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
 }
 
@@ -150,7 +150,7 @@
 }
 
 .password-input-container:focus-within {
-    border-color: #1976d2;
+    border-color: #1e951e;
     box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
 }
 

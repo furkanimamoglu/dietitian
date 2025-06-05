@@ -79,6 +79,8 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
+
 const initialWaterTrackingData = {
     dailyGoal: 2500, // ml
     weeklyData: [
@@ -556,8 +558,7 @@ function Danisan() {
 
             setDeleteConfirmDialogOpen(false);
 
-            setSuccessMessage("Randevu başarıyla silindi.");
-            setShowSuccessPopup(true);
+            showSuccessToast("Randevu başarıyla silindi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Randevu silinirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -587,8 +588,7 @@ function Danisan() {
 
         // Sadece state'i güncelliyoruz
         setBloodTestFiles(prevFiles => [newFile, ...prevFiles]);
-        setSuccessMessage("Kan tahlili dosyası başarıyla yüklendi.");
-        setShowSuccessPopup(true);
+        showSuccessToast("Kan tahlili dosyası başarıyla yüklendi.");
 
         // Burada API çağrısı ile sunucuya dosyayı gönderebilirsiniz 
         // Örnek: saveBloodTestFileToServer(file, id);
@@ -606,8 +606,7 @@ function Danisan() {
         setBloodTestFiles(updatedFiles);
 
 
-        setSuccessMessage("Kan tahlili dosyası başarıyla silindi.");
-        setShowSuccessPopup(true);
+        showSuccessToast("Kan tahlili dosyası başarıyla silindi.");
     };
 
     // Anamnez dialogs için state tanımlamaları
@@ -710,8 +709,7 @@ function Danisan() {
             fetchAnamnezData();
             setIsAnamnezDialogOpen(false);
 
-            setSuccessMessage("Anamnez bilgileri başarıyla kaydedildi.");
-            setShowSuccessPopup(true);
+            showSuccessToast("Anamnez bilgileri başarıyla kaydedildi.");
         } catch (error) {
             console.error("Anamnez kaydedilirken hata oluştu:", error);
             setErrorMessage(error.response?.data?.message || "Anamnez kaydedilirken bir hata oluştu.");
@@ -829,8 +827,7 @@ function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            setSuccessMessage("Ölçüm başarıyla silindi.");
-            setShowSuccessPopup(true);
+            showSuccessToast("Ölçüm başarıyla silindi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Ölçüm silinirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -883,9 +880,7 @@ function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            setSuccessMessage("Yeni ölçüm başarıyla eklendi.");
-            setShowSuccessPopup(true);
-
+            showSuccessToast("Yeni ölçüm başarıyla eklendi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Ölçüm eklenirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -983,9 +978,7 @@ function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            setSuccessMessage("Ölçüm başarıyla güncellendi.");
-            setShowSuccessPopup(true);
-
+            showSuccessToast("Ölçüm başarıyla güncellendi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Ölçüm güncellenirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -3818,8 +3811,7 @@ function Danisan() {
             setAppointments(appointmentsResponse.data);
             setAppointmentsLoading(false);
 
-            setSuccessMessage(`Randevu başarıyla oluşturuldu.`);
-            setShowSuccessPopup(true);
+            showSuccessToast("Randevu başarıyla oluşturuldu.");
         } catch (err) {
             setErrorMessage(err.response.data.message);
             setShowErrorPopup(true);
@@ -4040,25 +4032,6 @@ function Danisan() {
                     </Grid>
                 </Grid>
             </Box>
-            {/* Success Popup */}
-            {showSuccessPopup && (
-                <div className="success-popup">
-                    <div className="success-popup-content">
-                        <CheckCircleIcon className="success-icon"/>
-                        <p>{successMessage}</p>
-                    </div>
-                </div>
-            )}
-
-            {/* Error Popup */}
-            {showErrorPopup && (
-                <div className="error-popup">
-                    <div className="error-popup-content">
-                        <ErrorIcon className="error-icon"/>
-                        <p>{errorMessage}</p>
-                    </div>
-                </div>
-            )}
 
             {/* Ölçüm Ekleme Dialog */}
             <Dialog open={isMeasurementDialogOpen} onClose={handleCloseMeasurementDialog} fullWidth maxWidth="md">
