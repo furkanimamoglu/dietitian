@@ -65,7 +65,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [isEmpty, setIsEmpty] = useState(false);
     const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
-    const [newCategory, setNewCategory] = useState('');
+// Removed unused state variable `newCategory`.
 
     useEffect(() => {
         fetchTodayMeal();
