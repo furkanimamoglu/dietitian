@@ -292,7 +292,7 @@ const BottomNav = ({navigation}: Props) => {
                     <TouchableOpacity
                         style={styles.floatingButton}
                         onPress={() => {
-                            navigation.replace('Randevu');
+                            navigation.navigate('Randevu');
                             setMenuOpen(false);
                         }}
                         activeOpacity={0.8}
@@ -348,7 +348,7 @@ const BottomNav = ({navigation}: Props) => {
             <View style={styles.bottomNavbar}>
                 <TouchableOpacity onPress={() => {
                     if (route.name !== 'Egzersiz') {
-                        navigation.replace('Egzersiz');
+                        navigation.navigate('Egzersiz');
                     }
                 }}
                                   style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
@@ -357,7 +357,7 @@ const BottomNav = ({navigation}: Props) => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
                     if (route.name !== 'Beslenme') {
-                        navigation.replace('Beslenme');
+                        navigation.navigate('Beslenme');
                     }
                 }}
                                   style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
@@ -372,7 +372,7 @@ const BottomNav = ({navigation}: Props) => {
 
                 <TouchableOpacity onPress={() => {
                     if (route.name !== 'Randevu') {
-                        navigation.replace('Randevu');
+                        navigation.navigate('Randevu');
                     }
                 }}
                                   style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
@@ -380,13 +380,13 @@ const BottomNav = ({navigation}: Props) => {
                     <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
-                    if (route.name !== 'AnaSayfa') {
-                        navigation.replace('AnaSayfa');
+                    if (route.name !== 'Tarif') {
+                        navigation.navigate('Tarif');
                     }
                 }}
-                                  style={[styles.navItem, isActive('AnaSayfa') && styles.activeNavItem]}>
-                    <Icon name="home" size={24} color={isActive('AnaSayfa') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('AnaSayfa') && styles.activeLabel]}>Ana Sayfa</Text>
+                                  style={[styles.navItem, isActive('Tarif') && styles.activeNavItem]}>
+                    <Icon name="book-open-variant" size={24} color={isActive('Tarif') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Tarif') && styles.activeLabel]}>Tarif</Text>
                 </TouchableOpacity>
             </View>
 
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
         height: 60,
         backgroundColor: '#fc9e21',
         borderTopWidth: 1,
-        borderTopColor: '#ff7355',
+        borderTopColor: '#cccccc',  // Turuncu çizgiyi (#ff7355) gri gölgelendirme (#cccccc) olarak değiştirdim
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         shadowColor: '#000',
@@ -703,3 +703,4 @@ const styles = StyleSheet.create({
 });
 
 export default BottomNav;
+
