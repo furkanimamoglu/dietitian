@@ -347,6 +347,15 @@ const BottomNav = ({navigation}: Props) => {
 
             <View style={styles.bottomNavbar}>
                 <TouchableOpacity onPress={() => {
+                    if (route.name !== 'Randevu') {
+                        navigation.navigate('Randevu');
+                    }
+                }}
+                                  style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
+                    <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {
                     if (route.name !== 'Egzersiz') {
                         navigation.navigate('Egzersiz');
                     }
@@ -355,6 +364,12 @@ const BottomNav = ({navigation}: Props) => {
                     <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
                 </TouchableOpacity>
+
+                {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
+                <TouchableOpacity onPress={toggleMenu} style={styles.navCenterButton}>
+                    <Text style={styles.plusText}>+</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity onPress={() => {
                     if (route.name !== 'Beslenme') {
                         navigation.navigate('Beslenme');
@@ -363,21 +378,6 @@ const BottomNav = ({navigation}: Props) => {
                                   style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
                     <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'}/>
                     <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
-                </TouchableOpacity>
-
-                {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
-                <TouchableOpacity onPress={toggleMenu} style={styles.navCenterButton}>
-                    <Text style={styles.plusText}>+</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => {
-                    if (route.name !== 'Randevu') {
-                        navigation.navigate('Randevu');
-                    }
-                }}
-                                  style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
-                    <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
                     if (route.name !== 'Tarif') {
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         zIndex: 10,
         gap: 10,
-        paddingLeft: 0,
+        paddingLeft: 30,
         paddingRight: 15,
     },
     floatingButton: {
