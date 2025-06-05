@@ -4,7 +4,7 @@ import { showErrorToast, showSuccessToast } from '../../utils/toastUtil';
 import axios from 'axios';
 import config from '../../config';
 
-const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlanId = null }) => {  // Props güncelledim
+const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlanId = null, existingMealPlan = null }) => {  // existingMealPlan prop'unu ekledim
     // Plan başlığı, açıklama ve kategori için state tanımlıyorum
     // Bu state'leri mealPlan tanımlamasından önce oluşturuyorum ki diğer işlemler düzgün çalışsın
     const [title, setTitle] = useState(editTitle);
@@ -21,10 +21,10 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
-        { id: '1', name: 'Sabah', color: '#FFC107', order: 0 },
-        { id: '2', name: 'Öğle', color: '#FF9800', order: 1 },
-        { id: '3', name: 'Akşam', color: '#9C27B0', order: 2 },
-        { id: '4', name: 'Aperatif', color: '#E91E63', order: 3 }
+        { id: '1', name: 'Kahvaltı', color: '#FFC107', order: 0 },
+        { id: '2', name: 'Öğle Yemeği', color: '#FF9800', order: 1 },
+        { id: '3', name: 'Akşam Yemeği', color: '#9C27B0', order: 2 },
+        { id: '4', name: 'Aparatif', color: '#E91E63', order: 3 }
     ];
 
     // Her hücre içindeki ana menü
@@ -58,6 +58,87 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     // Meal plan state - her hücre için birden fazla alternatif içerebilir
     const [mealPlan, setMealPlan] = useState(() => {
+        // Eğer mevcut bir meal plan geldiyse onu kullan
+        if (existingMealPlan && typeof existingMealPlan === 'object' && !Array.isArray(existingMealPlan) && Object.keys(existingMealPlan).length > 0) {
+            console.log("Mevcut meal plan yükleniyor:", existingMealPlan);
+
+            // Mevcut planı normalize et - tüm günler ve öğünleri içerdiğinden emin ol
+            const normalizedPlan = {};
+
+            defaultDays.forEach(day => {
+                normalizedPlan[day] = {};
+
+                // Eğer bu gün mevcut planda varsa
+                if (existingMealPlan[day]) {
+                    // Öğünleri kontrol et ve ekle
+                    defaultMealTypes.forEach(mealType => {
+                        // Öğün adını kullan
+                        const mealName = mealType.name;
+
+                        // Eğer bu öğün mevcut günde varsa, o değeri kullan
+                        if (existingMealPlan[day][mealName]) {
+                            // Eski format ile uyumluluk - string, array veya obje olabilir
+                            const currentMealData = existingMealPlan[day][mealName];
+
+                            // Yeni formatta normalize et
+                            if (typeof currentMealData === 'string') {
+                                // String formatını parse et
+                                const items = currentMealData.trim() ?
+                                    currentMealData.split(',').map(item => item.trim()) : [];
+                                normalizedPlan[day][mealName] = {
+                                    [defaultMainMenu]: items
+                                };
+                            } else if (Array.isArray(currentMealData)) {
+                                // Array formatını koruyarak yeni formata dönüştür
+                                normalizedPlan[day][mealName] = {
+                                    [defaultMainMenu]: [...currentMealData]
+                                };
+                            } else if (currentMealData && typeof currentMealData === 'object') {
+                                // Karmaşık format - main ve alternatives içerebilir
+                                normalizedPlan[day][mealName] = {};
+
+                                // Ana menü öğeleri (main array veya alternatives objesi)
+                                if (currentMealData.main && Array.isArray(currentMealData.main)) {
+                                    normalizedPlan[day][mealName][defaultMainMenu] = [...currentMealData.main];
+                                } else {
+                                    normalizedPlan[day][mealName][defaultMainMenu] = [];
+                                }
+
+                                // Alternatifler
+                                if (currentMealData.alternatives && typeof currentMealData.alternatives === 'object') {
+                                    Object.entries(currentMealData.alternatives).forEach(([mainItem, alternativeItems]) => {
+                                        if (Array.isArray(alternativeItems)) {
+                                            normalizedPlan[day][mealName][mainItem] = [...alternativeItems];
+                                        }
+                                    });
+                                }
+                            } else {
+                                // Tanımsız veya diğer formatlar - boş değer
+                                normalizedPlan[day][mealName] = {
+                                    [defaultMainMenu]: []
+                                };
+                            }
+                        } else {
+                            // Öğün mevcut değilse boş oluştur
+                            normalizedPlan[day][mealName] = {
+                                [defaultMainMenu]: []
+                            };
+                        }
+                    });
+                } else {
+                    // Gün mevcut değilse tüm öğünleri boş oluştur
+                    defaultMealTypes.forEach(mealType => {
+                        normalizedPlan[day][mealType.name] = {
+                            [defaultMainMenu]: []
+                        };
+                    });
+                }
+            });
+
+            return normalizedPlan;
+        }
+
+        // Mevcut plan yoksa boş plan oluştur
         const initialPlan = {};
         defaultDays.forEach(day => {
             initialPlan[day] = {};
@@ -69,6 +150,21 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         });
         return initialPlan;
     });
+
+    // Kategorileri yükle
+    useEffect(() => {
+        // Kategorileri API'den çek
+        axios.get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
+            headers: {Authorization: localStorage.getItem("token")}
+        })
+        .then(response => {
+            setCategories(response.data || []);
+        })
+        .catch(error => {
+            console.error("Kategoriler yüklenirken hata oluştu:", error);
+            showErrorToast("Kategoriler yüklenirken bir hata oluştu.");
+        });
+    }, []);
 
     // Alternatif listeleri - her hücre için ayrı alternatif listesi tutuyoruz
     const getAlternativesForCell = (day, mealType) => {
@@ -406,28 +502,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
         showSuccessToast(`${copiedDay} günündeki içerik ${targetDay} gününe başarıyla yapıştırıldı.`);
     };
-
-    // Kategorileri yüklemek için
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
-                    headers: {
-                        'Authorization': localStorage.getItem("token")
-                    }
-                });
-
-                if (response.data && Array.isArray(response.data)) {
-                    setCategories(response.data);
-                }
-            } catch (error) {
-                console.error("Kategoriler yüklenirken hata oluştu:", error);
-                showErrorToast("Kategoriler yüklenemedi!");
-            }
-        };
-
-        fetchCategories();
-    }, []);
 
     const saveMealPlan = async () => {
         try {
@@ -941,3 +1015,4 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 };
 
 export default MealPlanEditor;
+
