@@ -22,23 +22,30 @@ const {width, height} = Dimensions.get('window');
 const OnboardingContent = [
     {
         icon: "nutrition",
-        title: "Hoş Geldiniz!",
-        description: "Bu uygulama sayesinde danışanlarının beslenmesini kolayca takip edebilir, öğünlerini planlayabilir ve hedeflerine ulaşmalarında rehberlik edebilirsin.",
+        title: "Hoş Geldin!",
+        description: "Yeni bir başlangıç için hazırsın! Diyetia ile diyetisyeninin desteğini her an yanında hissedecek, sağlıklı yaşam yolculuğunda yalnız yürümeyeceksin.",
         color: ["#FFB75E", "#ED8F03"]
     },
     {
-        icon: "account-supervisor",
-        title: "Danışanlarını Yönet",
-        description: "Tüm danışanlarını tek bir yerden takip et, beslenme programlarını düzenle ve ilerleme raporlarını anında gör.",
+        icon: "food-apple",
+        title: "Sana Özel Plan",
+        description: "Diyetisyenin senin için bir beslenme planı hazırladığında. Ne zaman ne yiyeceğini kolayca görebilir, alternatifler arasından sana en uygun olanı seçebilirsin.",
         color: ["#FF8E53", "#FF6B00"]
     },
     {
         icon: "chart-line",
-        title: "Gelişimi Takip Et",
-        description: "Danışanlarının kilo, vücut ölçüleri ve beslenme alışkanlıklarındaki değişimleri analiz et ve daha iyi sonuçlar için öneriler sun.",
+        title: "İlerlemeni Takip Et",
+        description: "Kilon, ölçülerin ve alışkanlıkların artık seninle birlikte şekilleniyor. Küçük adımlarla büyük farklar yaratacak, her gelişmeni grafiklerle kolayca göreceksin.",
         color: ["#FFB75E", "#ED8F03"]
+    },
+    {
+        icon: "bell-ring",
+        title: "Motivasyon Hep Yanında",
+        description: "Hatırlatmalar, hedefler ve diyetisyeninden gelen destek mesajlarıyla motive kal. Unutma, bu yolculukta birlikteyiz!",
+        color: ["#FFA500", "#FF6347"]
     }
 ];
+
 
 const OnboardingScreen = ({navigation}: Props) => {
     const swiperRef = useRef<Swiper>(null);

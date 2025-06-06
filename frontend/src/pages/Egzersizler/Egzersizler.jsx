@@ -1290,11 +1290,12 @@ export default function Egzersizler() {
                                     filteredDanisanList.map((danisan) => (
                                         <React.Fragment key={danisan.id}>
                                             <ListItem
-                                                button
+                                                component="div"
                                                 onClick={() => getClientExercises(danisan.id)}
                                                 sx={{
                                                     borderRadius: '8px',
                                                     my: 0.5,
+                                                    cursor: 'pointer',
                                                     '&:hover': {
                                                         backgroundColor: 'rgba(25, 118, 210, 0.08)'
                                                     }

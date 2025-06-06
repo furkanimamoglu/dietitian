@@ -498,11 +498,10 @@ export default function Tarifler() {
                 },
             })
             .then((response) => {
-                // Map API response to component's expected data structure
                 const mappedRecipes = response.data.map(recipe => ({
                     id: recipe.id,
                     title: recipe.name,
-                    description: recipe.description || "",  // Map description field
+                    description: recipe.description || "",
                     category_id: recipe.category_id,
                     image: "/placeholder.png",  // API doesn't provide image
                     video_url: recipe.hasVideo ? recipe.video : "",
@@ -798,11 +797,12 @@ export default function Tarifler() {
                                     filteredDanisanList.map((danisan) => (
                                         <React.Fragment key={danisan.id}>
                                             <ListItem
-                                                button
+                                                component="div"
                                                 onClick={() => getClientRecipes(danisan.id)}
                                                 sx={{
                                                     borderRadius: '8px',
                                                     my: 0.5,
+                                                    cursor: 'pointer',
                                                     '&:hover': {
                                                         backgroundColor: 'rgba(25, 118, 210, 0.08)'
                                                     }
@@ -962,7 +962,6 @@ export default function Tarifler() {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setNewRecipe({...newRecipe, image: file});
-                                        setImagePreview(reader.result);
                                     };
                                     reader.readAsDataURL(file);
                                 }
@@ -1131,28 +1130,25 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Prepare data for API
-                            const formData = new FormData();
-                            formData.append('category_id', parseInt(newRecipe.category_id));
-                            formData.append('name', newRecipe.title);
-                            formData.append('description', newRecipe.description);
-                            formData.append('hazirlanis', newRecipe.instructions);
-                            formData.append('malzemeler', newRecipe.ingredients);
-                            formData.append('kcal', newRecipe.nutritional_info.calories || 0);
-                            formData.append('protein', newRecipe.nutritional_info.protein || 0);
-                            formData.append('karbonhidrat', newRecipe.nutritional_info.carbs || 0);
-                            formData.append('yag', newRecipe.nutritional_info.fat || 0);
-
-                            // Resim verisi ekleme
-                            if (newRecipe.image) {
-                                formData.append('image', newRecipe.image);
-                            }
+                            // Prepare data for API - JSON formatında
+                            const requestData = {
+                                category_id: parseInt(newRecipe.category_id),
+                                name: newRecipe.title,
+                                description: newRecipe.description,
+                                hazirlanis: newRecipe.instructions,
+                                malzemeler: newRecipe.ingredients,
+                                kcal: newRecipe.nutritional_info.calories || 0,
+                                protein: newRecipe.nutritional_info.protein || 0,
+                                karbonhidrat: newRecipe.nutritional_info.carbs || 0,
+                                yag: newRecipe.nutritional_info.fat || 0,
+                                image: newRecipe.image || "/placeholder.png"
+                            };
 
                             // Send POST request to API
-                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, formData, {
+                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, requestData, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
-                                    'Content-Type': 'multipart/form-data'
+                                    'Content-Type': 'application/json'
                                 },
                             })
                                 .then(response => {
@@ -1553,14 +1549,13 @@ export default function Tarifler() {
                             // Set saving state
                             setIsSaving(true);
 
-                            // Prepare data for API
+                            // Prepare data for API - JSON formatında
                             const recipeData = {
                                 recipe_id: selectedRecipe.id,
                                 category_id: parseInt(editCategoryId),
                                 name: editTitle,
                                 description: editDescription,
-                                hasVideo: !!editImage,
-                                video: editImage || null,
+                                image: "", // Şimdilik resim desteği olmadığı için boş
                                 hazirlanis: editInstructions,
                                 malzemeler: editIngredients,
                                 kcal: editNutritionalInfo.calories || 0,
@@ -1573,6 +1568,7 @@ export default function Tarifler() {
                             axios.put(`${config[config.environment].apiUrl}/recipe/updateRecipe`, recipeData, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
+                                    'Content-Type': 'application/json'
                                 },
                             })
                                 .then(response => {
