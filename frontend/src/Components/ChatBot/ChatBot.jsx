@@ -66,7 +66,7 @@ const ChatBot = () => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { text: 'Merhaba! Ben Tia. Size beslenme programları, yemek tarifleri ve egzersizler konusunda yardımcı olabilirim. Size nasıl yardımcı olabilirim?', sender: 'bot', formatted: true }
+    { text: 'Merhaba! Ben Tia. Size beslenme programları hazırlamak, yemek tarifleri oluşturmak ve egzersiz detayları hakkında yardımcı olmak için buradayım. Ne yapmamı istersiniz?', sender: 'bot', formatted: true }
   ]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -155,7 +155,7 @@ const ChatBot = () => {
 
   return (
     <>
-      <Tooltip title="Tia - Diyetisyen Asistanı" placement="left">
+      <Tooltip title="Asistan Tia" placement="left">
         <Fab
           style={{ backgroundColor: '#ff9e25' }}
           aria-label="chat"
@@ -177,7 +177,7 @@ const ChatBot = () => {
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box display="flex" alignItems="center">
               <SmartToyIcon sx={{ mr: 1, color: '#ff9e25' }} />
-              <Typography sx={{ color: '#ff9e25' }} variant="h6">Tia - Diyetisyen Asistanı</Typography>
+              <Typography sx={{ color: '#fd9200' }} variant="h6">Asistan Tia</Typography>
             </Box>
             <IconButton edge="end" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
