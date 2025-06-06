@@ -3,29 +3,40 @@
   bottom: 70px;
   right: 20px;
   z-index: 1000;
+  background-color: #ff9e25 !important;
+  color: #fff !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.chat-fab:hover {
+  background-color: #f44336 !important;
+  transform: scale(1.05);
 }
 
 .chat-dialog {
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   overflow: hidden;
   height: 80vh;
   max-height: 550px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 158, 37, 0.2);
 }
 
 .chat-dialog-title {
-  background: linear-gradient(135deg, #fc9e21 0%, #ff7355 50%, #fc9e21 100%);
-  color: white;
+  background: #2d4149 !important;
+  color: #fff !important;
   padding: 16px !important;
+  border-bottom: 2px solid #ff9e25;
 }
 
 .chat-dialog-content {
   flex: 1;
   padding: 16px !important;
   overflow-y: auto;
-  background-color: #f5f5f5;
+  background-color: #f5f5f0; /* Bej tonuna yakın */
 }
 
 .message-container {
@@ -34,7 +45,7 @@
 }
 
 .message {
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   max-width: 75%;
   display: flex;
 }
@@ -48,42 +59,62 @@
 }
 
 .message-bubble {
-  padding: 12px !important;
-  border-radius: 15px !important;
+  padding: 14px !important;
+  border-radius: 18px !important;
   display: flex !important;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08) !important;
 }
 
 .bot-message .message-bubble {
-  background-color: #e3f2fd !important;
-  border-top-left-radius: 5px !important;
+  background-color: #253237 !important;
+  color: #fff !important;
+  border-bottom-left-radius: 4px !important;
 }
 
 .user-message .message-bubble {
-  background-color: #e8f5e9 !important;
-  border-top-right-radius: 5px !important;
+  background: linear-gradient(135deg, #ff9e25 0%, #f44336 100%) !important;
+  color: #fff !important;
+  border-bottom-right-radius: 4px !important;
 }
 
 .message-icon {
   margin-top: 2px;
-  opacity: 0.7;
+  opacity: 0.9;
+  color: inherit;
 }
 
 .chat-input-container {
   display: flex;
   padding: 16px;
   background-color: #fff;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e0e0d8; /* Bej tonu */
   position: relative;
 }
 
 .chat-input {
   margin-right: 10px !important;
+  border-radius: 20px !important;
+}
+
+.chat-input .MuiOutlinedInput-root {
+  border-radius: 20px !important;
+  background-color: #f5f5f0; /* Bej tonu */
+}
+
+.chat-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #ff9e25 !important;
 }
 
 .send-button {
   align-self: flex-end;
+  background-color: #ff9e25 !important;
+  color: white !important;
+}
+
+.send-button:hover {
+  background-color: #f44336 !important;
 }
 
 /* Biçimlendirilmiş mesajlar için ek stiller */
@@ -99,36 +130,59 @@
 }
 
 .formatted-message li {
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
-.formatted-message strong {
+.bot-message .formatted-message strong {
   font-weight: 600;
-  color: #d55e00;
+  color: #ff9e25;
 }
 
-.formatted-message h1,
-.formatted-message h2,
-.formatted-message h3 {
-  margin: 10px 0;
-  color: #fc9e21;
+.user-message .formatted-message strong {
+  font-weight: 600;
+  color: #fff;
 }
 
-.formatted-message h1 {
+.bot-message .formatted-message h1,
+.bot-message .formatted-message h2,
+.bot-message .formatted-message h3 {
+  margin: 12px 0;
+  color: #ff9e25;
+}
+
+.bot-message .formatted-message h1 {
   font-size: 1.5rem;
-  border-bottom: 1px solid rgba(252, 158, 33, 0.3);
+  border-bottom: 1px solid rgba(255, 158, 37, 0.4);
   padding-bottom: 5px;
 }
 
-.formatted-message h2 {
+.bot-message .formatted-message h2 {
   font-size: 1.3rem;
 }
 
-.formatted-message h3 {
+.bot-message .formatted-message h3 {
   font-size: 1.1rem;
 }
 
-.formatted-message em {
+.bot-message .formatted-message em {
   font-style: italic;
-  color: #227093;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Özel scrollbar stili */
+.chat-dialog-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-dialog-content::-webkit-scrollbar-track {
+  background: #f5f5f0;
+}
+
+.chat-dialog-content::-webkit-scrollbar-thumb {
+  background: rgba(45, 65, 73, 0.5);
+  border-radius: 3px;
+}
+
+.chat-dialog-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(45, 65, 73, 0.8);
 }

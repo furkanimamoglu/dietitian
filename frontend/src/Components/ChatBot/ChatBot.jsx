@@ -66,7 +66,7 @@ const ChatBot = () => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { text: 'Merhaba! Ben Tia. Size nasıl yardımcı olabilirim?', sender: 'bot' }
+    { text: 'Merhaba! Ben Tia. Size beslenme programları, yemek tarifleri ve egzersizler konusunda yardımcı olabilirim. Size nasıl yardımcı olabilirim?', sender: 'bot', formatted: true }
   ]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -99,7 +99,7 @@ const ChatBot = () => {
     setLoading(true);
 
     try {
-      const systemInstruction = "Sen Diyetia'nın yapay zeka asistanı Tia'sın. Sadece Türkçe dilinde yanıt ver. Başka herhangi bir dilde cevap verme. Her koşulda Türkçe dilini kullan. Karşında ki kişi bir diyetisyen ve sana yalnızca Beslenme Programları, Yemek Tarifleri, Egzersizler hakkında sorular sorabilir. Bunlar dışında bir şey sorarsa yalnızca bu alanlarda yardımcı olabileceğini söyle. Yanıtlarını markdown formatında ver - başlıklar için **, alt başlıklar için ##, listeler için * kullan. Metin düzenlemesine özen göster, düzgün biçimlendirilmiş, okunaklı yanıtlar ver.";
+      const systemInstruction = "Sen Diyetia'nın yapay zeka asistanı Tia'sın. Sadece Türkçe dilinde yanıt ver. Başka herhangi bir dilde cevap verme. Her koşulda Türkçe dilini kullan. Karşında ki kişi bir diyetisyen ve sana yalnızca Beslenme Programları, Yemek Tarifleri, Egzersizler hakkında sorular sorabilir. Bunlar dışında bir şey sorarsa yalnızca bu alanlarda yardımcı olabileceğini söyle. Yanıtlarını markdown formatında ver - başlıklar için **, alt başlıklar için ##, listeler için * kullan. Metin düzenlemesine özen göster, düzgün biçimlendirilmiş, okunaklı yanıtlar ver. Özellikle tarif ve beslenme programlarında listeleri düzenli şekilde madde işaretleriyle (*)  yaz.";
 
       const response = await fetch(`${API_URL}?key=${API_KEY}`, {
         method: 'POST',
@@ -126,7 +126,7 @@ const ChatBot = () => {
         const botResponse = {
           text: data.candidates[0].content.parts[0].text,
           sender: 'bot',
-          formatted: true // Bu yanıtın biçimlendirilmiş olduğunu işaretle
+          formatted: true
         };
         setMessages(prev => [...prev, botResponse]);
       } else {
@@ -155,9 +155,9 @@ const ChatBot = () => {
 
   return (
     <>
-      <Tooltip title="Yardımcı Asistan" placement="left">
+      <Tooltip title="Tia - Diyetisyen Asistanı" placement="left">
         <Fab
-          color="secondary"
+          style={{ backgroundColor: '#ff9e25' }}
           aria-label="chat"
           className="chat-fab"
           onClick={handleClickOpen}
@@ -176,8 +176,8 @@ const ChatBot = () => {
         <DialogTitle className="chat-dialog-title">
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box display="flex" alignItems="center">
-              <SmartToyIcon sx={{ mr: 1 }} />
-              <Typography variant="h6">Asistan Tia</Typography>
+              <SmartToyIcon sx={{ mr: 1, color: '#ff9e25' }} />
+              <Typography sx={{ color: '#ff9e25' }} variant="h6">Tia - Diyetisyen Asistanı</Typography>
             </Box>
             <IconButton edge="end" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
@@ -192,7 +192,7 @@ const ChatBot = () => {
                 key={index}
                 className={`message ${message.sender === 'bot' ? 'bot-message' : 'user-message'}`}
               >
-                <Paper elevation={1} className="message-bubble">
+                <Paper elevation={2} className="message-bubble">
                   {message.sender === 'bot' ? (
                     <SmartToyIcon className="message-icon" fontSize="small" />
                   ) : (
@@ -212,9 +212,9 @@ const ChatBot = () => {
             ))}
             {loading && (
               <Box className="message bot-message">
-                <Paper elevation={1} className="message-bubble">
+                <Paper elevation={2} className="message-bubble">
                   <SmartToyIcon className="message-icon" fontSize="small" />
-                  <CircularProgress size={20} thickness={4} />
+                  <CircularProgress size={20} thickness={4} sx={{ color: '#ff9e25' }} />
                 </Paper>
               </Box>
             )}
@@ -236,12 +236,20 @@ const ChatBot = () => {
             className="chat-input"
             multiline
             maxRows={3}
+            sx={{
+              '& .MuiOutlinedInput-root.Mui-focused': {
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#ff9e25',
+                }
+              }
+            }}
           />
           <IconButton
             color="primary"
             onClick={handleSend}
             disabled={loading || !input.trim()}
             className="send-button"
+            sx={{ backgroundColor: '#ff9e25', color: 'white', '&:hover': {backgroundColor: '#f44336'} }}
           >
             <SendIcon />
           </IconButton>
