@@ -62,28 +62,24 @@ const Tarif = ({navigation}) => {
         return myRecipes.map(item => {
             const recipe = item.Recipe;
 
-            // Malzemeleri diziye dönüştür
             const ingredients = recipe.malzemeler ? recipe.malzemeler.split(',').map(item => item.trim()) : [];
 
-            // Hazırlanış adımlarını diziye dönüştür
             const steps = recipe.hazirlanis ? recipe.hazirlanis.split('.').filter(step => step.trim() !== '').map(step => step.trim()) : [];
 
             return {
                 id: recipe.id,
                 name: recipe.name,
-                category: recipe.category?.name || 'Kişisel Tarif', // Kategorinin API'den alınması
+                category: recipe.category?.name || 'Kişisel Tarif',
                 calories: recipe.kcal || 0,
-                prepTime: '- dk', // API'den hazırlama süresi yoksa varsayılan değer
+                prepTime: '- dk',
                 description: recipe.description || 'Açıklama bulunmuyor',
                 ingredients: ingredients,
                 steps: steps,
-                // Besin değerleri
                 nutritionInfo: {
                     protein: recipe.protein || 0,
                     carbs: recipe.karbonhidrat || 0,
                     fat: recipe.yag || 0
                 },
-                // Dietisyen notu
                 note: item.note
             };
         });
