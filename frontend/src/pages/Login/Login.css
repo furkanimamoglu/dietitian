@@ -98,8 +98,8 @@
 }
 
 .form-input:focus {
-    border-color: #1e951e;
-    box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
+    border-color: #fc9e21;
+    box-shadow: 0 0 0 1px rgba(252, 158, 33, 0.2);
 }
 
 /* Telefon girişi stili */
@@ -111,8 +111,8 @@
 }
 
 .phone-input-container:focus-within {
-    border-color: #1e951e;
-    box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
+    border-color: #fc9e21;
+    box-shadow: 0 0 0 1px rgba(252, 158, 33, 0.2);
 }
 
 .phone-prefix {
@@ -150,8 +150,8 @@
 }
 
 .password-input-container:focus-within {
-    border-color: #1e951e;
-    box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
+    border-color: #fc9e21;
+    box-shadow: 0 0 0 1px rgba(252, 158, 33, 0.2);
 }
 
 .password-input-container .form-input {
@@ -190,14 +190,14 @@
     background: linear-gradient(45deg, #ff7355 30%, #fc9e21 90%);
     border: none;
     border-radius: 30px;
-    box-shadow: 0 3px 5px 2px rgba(76, 175, 80, .3);
+    box-shadow: 0 3px 5px 2px rgba(252, 158, 33, .3);
     cursor: pointer;
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .login-button:hover {
     background: linear-gradient(45deg, #ff7355 30%, #fc9e21 90%);
-    box-shadow: 0 4px 6px 2px rgba(76, 175, 80, .4);
+    box-shadow: 0 4px 6px 2px rgba(252, 158, 33, .4);
 }
 
 .login-button:disabled {
