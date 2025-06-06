@@ -36,15 +36,6 @@ import {
     Typography
 } from '@mui/material';
 
-const getYouTubeVideoId = (url) => {
-    if (!url) return null;
-
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-
-    return (match && match[2].length === 11) ? match[2] : null;
-};
-
 const generatePDF = (recipe) => {
     const doc = new jsPDF({
         orientation: 'portrait', unit: 'mm', format: 'a4'
@@ -404,7 +395,8 @@ export default function Tarifler() {
     const [editIngredients, setEditIngredients] = useState('');
     const [editInstructions, setEditInstructions] = useState('');
     const [editCategoryId, setEditCategoryId] = useState('');
-    const [editVideoUrl, setEditVideoUrl] = useState('');
+    const [editImage, setEditImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
     const [editNutritionalInfo, setEditNutritionalInfo] = useState({
         calories: '', protein: '', carbs: '', fat: ''
     });
@@ -424,7 +416,7 @@ export default function Tarifler() {
         ingredients: '',
         instructions: '',
         category_id: '',
-        video_url: '',
+        image: null,
         nutritional_info: {
             calories: '', protein: '', carbs: '', fat: ''
         }
@@ -602,7 +594,7 @@ export default function Tarifler() {
         setEditIngredients(item.ingredients || '');
         setEditInstructions(item.instructions || '');
         setEditCategoryId(item.category_id || '');
-        setEditVideoUrl(item.video_url || '');
+        setEditImage(item.image || '');
 
         // Set nutritional info or initialize with empty values
         const nutritionalInfo = item.nutritional_info || {};
@@ -678,7 +670,10 @@ export default function Tarifler() {
                             <button
                                 className="action-btn add-plan-btn"
                                 title="Tarif Ekle"
-                                onClick={() => setAddRecipeModal(true)}
+                                onClick={() => {
+                                    setImagePreview(''); // Resim önizlemeyi temizle
+                                    setAddRecipeModal(true);
+                                }}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Tarif</span>
@@ -860,24 +855,11 @@ export default function Tarifler() {
                 onClose={() => setDetailModal(false)}
             >
                 <div className="recipe-detail-modal">
-                    {detailItem?.image && !getYouTubeVideoId(detailItem.video_url) && (<img
+                    {detailItem?.image && (<img
                             src={detailItem.image}
                             alt={detailItem.title}
                             className="recipe-detail-image"
                         />)}
-
-                    {detailItem?.video_url && getYouTubeVideoId(detailItem.video_url) && (
-                        <div className="recipe-video-container">
-                            <iframe
-                                width="100%"
-                                height="315"
-                                src={`https://www.youtube.com/embed/${getYouTubeVideoId(detailItem.video_url)}`}
-                                title="Recipe Video"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            ></iframe>
-                        </div>)}
 
                     <div className="recipe-detail-content">
                         {detailItem?.description && (<p className="recipe-description">{detailItem.description}</p>)}
@@ -967,15 +949,45 @@ export default function Tarifler() {
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="recipeVideoUrl">Video URL (Youtube)</label>
+                        <label htmlFor="recipeImage">Tarif Resmi</label>
                         <input
-                            type="text"
-                            id="recipeVideoUrl"
+                            type="file"
+                            id="recipeImage"
                             className="text-input"
-                            value={newRecipe.video_url}
-                            onChange={(e) => setNewRecipe({...newRecipe, video_url: e.target.value})}
-                            placeholder="https://www.youtube.com/watch?v=..."
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setNewRecipe({...newRecipe, image: file});
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
                         />
+                        <label htmlFor="recipeImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Tarif önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setNewRecipe({...newRecipe, image: null});
+                                        setImagePreview('');
+                                        document.getElementById('recipeImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="nutritional-info-container">
@@ -1120,24 +1132,27 @@ export default function Tarifler() {
                             }
 
                             // Prepare data for API
-                            const recipeData = {
-                                category_id: parseInt(newRecipe.category_id),
-                                name: newRecipe.title,
-                                description: newRecipe.description,
-                                hasVideo: !!newRecipe.video_url,
-                                video: newRecipe.video_url || null,
-                                hazirlanis: newRecipe.instructions,
-                                malzemeler: newRecipe.ingredients,
-                                kcal: newRecipe.nutritional_info.calories || 0,
-                                protein: newRecipe.nutritional_info.protein || 0,
-                                karbonhidrat: newRecipe.nutritional_info.carbs || 0,
-                                yag: newRecipe.nutritional_info.fat || 0
-                            };
+                            const formData = new FormData();
+                            formData.append('category_id', parseInt(newRecipe.category_id));
+                            formData.append('name', newRecipe.title);
+                            formData.append('description', newRecipe.description);
+                            formData.append('hazirlanis', newRecipe.instructions);
+                            formData.append('malzemeler', newRecipe.ingredients);
+                            formData.append('kcal', newRecipe.nutritional_info.calories || 0);
+                            formData.append('protein', newRecipe.nutritional_info.protein || 0);
+                            formData.append('karbonhidrat', newRecipe.nutritional_info.carbs || 0);
+                            formData.append('yag', newRecipe.nutritional_info.fat || 0);
+
+                            // Resim verisi ekleme
+                            if (newRecipe.image) {
+                                formData.append('image', newRecipe.image);
+                            }
 
                             // Send POST request to API
-                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, recipeData, {
+                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, formData, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
+                                    'Content-Type': 'multipart/form-data'
                                 },
                             })
                                 .then(response => {
@@ -1155,11 +1170,12 @@ export default function Tarifler() {
                                         ingredients: '',
                                         instructions: '',
                                         category_id: '',
-                                        video_url: '',
+                                        image: null,
                                         nutritional_info: {
                                             calories: '', protein: '', carbs: '', fat: ''
                                         }
                                     });
+                                    setImagePreview(''); // Resim önizlemeyi temizle
                                     setAddRecipeModal(false);
                                 })
                                 .catch(error => {
@@ -1360,15 +1376,45 @@ export default function Tarifler() {
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="editVideoUrl">Video URL (Youtube)</label>
+                        <label htmlFor="editImage">Tarif Resmi</label>
                         <input
-                            type="text"
-                            id="editVideoUrl"
+                            type="file"
+                            id="editImage"
                             className="text-input"
-                            value={editVideoUrl}
-                            onChange={(e) => setEditVideoUrl(e.target.value)}
-                            placeholder="https://www.youtube.com/watch?v=..."
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setEditImage(file);
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
                         />
+                        <label htmlFor="editImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın veya sürükleyin'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Tarif önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setEditImage(null);
+                                        setImagePreview('');
+                                        document.getElementById('editImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="nutritional-info-container">
@@ -1513,8 +1559,8 @@ export default function Tarifler() {
                                 category_id: parseInt(editCategoryId),
                                 name: editTitle,
                                 description: editDescription,
-                                hasVideo: !!editVideoUrl,
-                                video: editVideoUrl || null,
+                                hasVideo: !!editImage,
+                                video: editImage || null,
                                 hazirlanis: editInstructions,
                                 malzemeler: editIngredients,
                                 kcal: editNutritionalInfo.calories || 0,
