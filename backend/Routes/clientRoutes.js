@@ -18,6 +18,7 @@ router.get('/getMyKVKKStatus', clientController.getMyKVKKStatus);
 router.put('/approveKVKK', clientController.approveKVKK);
 
 router.get('/getTodayMealPlan', clientController.getTodayMealPlan);
+router.get('/getMyRecipes', clientController.getMyRecipes);
 router.get('/getMyLatestMeasurement', clientController.getMyLatestMeasurement);
 
 router.post('/updateMealPlan', clientController.updateMealPlan);

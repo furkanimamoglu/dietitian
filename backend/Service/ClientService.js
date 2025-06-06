@@ -7,7 +7,9 @@ const {
     NutritionAssignment,
     NutritionPlan,
     Measurement,
-    Recipe
+    RecipeAssignment,
+    Recipe,
+    RecipeCategory
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const jwt = require('jsonwebtoken');
@@ -212,13 +214,25 @@ class ClientService {
             throw new Exception("Yetkisiz Erişim.", 400, true);
         }
 
-        const recipes = await Recipe.findAll({
-            where: {client_id: client_id, isPublic: true},
-            order: [['createdAt', 'DESC']]
+        const recipes = await RecipeAssignment.findAll({
+            where: {client_id: client_id},
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: Recipe,
+                    as: 'Recipe',
+                    include: [
+                        {
+                            model: RecipeCategory,
+                            as: 'category'
+                        }
+                    ]
+                }
+            ]
         });
 
         if (!recipes || recipes.length === 0) {
-            throw new Exception("Kayıtlı tarif bulunamadı.", 404, true);
+            throw new Exception("Kayıtlı tarifiniz bulunamadı.", 404, true);
         }
 
         return recipes;

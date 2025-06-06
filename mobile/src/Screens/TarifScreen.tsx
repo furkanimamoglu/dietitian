@@ -1,144 +1,102 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import config from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Mock tarif data
-const mockRecipes = [
-  {
-    id: 1,
-    name: 'Avokado ve Kinoa Salatası',
-    category: 'Salata',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-    calories: 320,
-    prepTime: '15 dk',
-    description: 'Protein açısından zengin, sağlıklı yağlar içeren lezzetli bir salata. Öğle yemeği için ideal bir seçim.',
-    ingredients: [
-      '1 adet olgun avokado',
-      '1 su bardağı pişmiş kinoa',
-      '1/2 kırmızı soğan (ince doğranmış)',
-      '1 avuç taze fesleğen yaprakları',
-      '1 limon suyu',
-      '2 yemek kaşığı zeytinyağı',
-      'Tuz ve karabiber'
-    ],
-    steps: [
-      'Kinoayı tarife göre haşlayın ve soğumaya bırakın.',
-      'Avokadoyu küp küp doğrayın.',
-      'Bütün malzemeleri bir kaseye alıp karıştırın.',
-      'Üzerine zeytinyağı ve limon suyunu ekleyip servis edin.'
-    ]
-  },
-  {
-    id: 2,
-    name: 'Fırında Baharatlı Somon',
-    category: 'Ana Yemek',
-    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-    calories: 450,
-    prepTime: '25 dk',
-    description: 'Omega-3 bakımından zengin, akşam yemeği için ideal bir somon tarifi. Yanında yeşil salata ile servis edebilirsiniz.',
-    ingredients: [
-      '2 adet somon fileto',
-      '2 diş sarımsak (ezilmiş)',
-      '1 limon suyu',
-      '1 tatlı kaşığı kekik',
-      '1 tatlı kaşığı pul biber',
-      '3 yemek kaşığı zeytinyağı',
-      'Tuz ve karabiber'
-    ],
-    steps: [
-      'Fırını 180 dereceye ısıtın.',
-      'Somonu yağlı kağıt üzerine yerleştirin.',
-      'Üzerine baharatları ve limon suyunu ekleyin.',
-      'Yaklaşık 20 dakika pişirin ve sıcak servis edin.'
-    ]
-  },
-  {
-    id: 3,
-    name: 'Yulaf ve Meyve Karışımı',
-    category: 'Kahvaltı',
-    image: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-    calories: 280,
-    prepTime: '5 dk',
-    description: 'Güne sağlıklı başlamanızı sağlayacak, lif bakımından zengin bir kahvaltı.',
-    ingredients: [
-      '1/2 su bardağı yulaf ezmesi',
-      '1 su bardağı süt veya badem sütü',
-      '1 tatlı kaşığı bal',
-      '1/2 muz',
-      'Bir avuç çilek',
-      'Bir avuç yaban mersini',
-      '1 tatlı kaşığı chia tohumu'
-    ],
-    steps: [
-      'Yulaf ve sütü bir kaseye alın.',
-      'Üzerine meyveleri ve bal ekleyin.',
-      'Chia tohumlarını serpip karıştırın.'
-    ]
-  },
-  {
-    id: 4,
-    name: 'Mercimek Çorbası',
-    category: 'Çorba',
-    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-    calories: 220,
-    prepTime: '35 dk',
-    description: 'Protein açısından zengin, tok tutan lezzetli bir çorba. Kış aylarında bağışıklık sistemi için ideal.',
-    ingredients: [
-      '1 su bardağı kırmızı mercimek',
-      '1 adet soğan (doğranmış)',
-      '2 diş sarımsak',
-      '1 adet havuç',
-      '1 yemek kaşığı domates salçası',
-      '2 yemek kaşığı zeytinyağı',
-      'Tuz, karabiber ve pul biber'
-    ],
-    steps: [
-      'Soğan ve sarımsağı zeytinyağında kavurun.',
-      'Havucu ekleyip 2-3 dakika pişirin.',
-      'Yıkanmış mercimeği ve salçayı ekleyin.',
-      'Üzerine su ekleyip yaklaşık 30 dakika pişirin.',
-      'Blenderdan geçirip, baharatlarını ekleyin.'
-    ]
-  },
-  {
-    id: 5,
-    name: 'Fırında Sebze Karışımı',
-    category: 'Vegan',
-    image: 'https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-    calories: 180,
-    prepTime: '40 dk',
-    description: 'Vitamin deposu sebze karışımı. Ara öğünlerde yanında yoğurt ile tüketilebilir.',
-    ingredients: [
-      '1 adet patlıcan',
-      '2 adet kabak',
-      '1 adet kırmızı biber',
-      '1 adet sarı biber',
-      '1 adet soğan',
-      '3 yemek kaşığı zeytinyağı',
-      'Kekik, tuz, karabiber'
-    ],
-    steps: [
-      'Fırını 200 dereceye ısıtın.',
-      'Sebzeleri büyük parçalar halinde doğrayın.',
-      'Zeytinyağı ve baharatlarla harmanlayın.',
-      'Fırın tepsisine yerleştirip yaklaşık 30-35 dakika pişirin.',
-      'Ara sıra karıştırarak tüm sebzelerin eşit pişmesini sağlayın.'
-    ]
-  }
-];
+// Placeholder görsel URL'si
+const PLACEHOLDER_IMAGE = require('../../public/placeholder.png');
 
 const Tarif = ({navigation}) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Tümü');
     const [activeRecipe, setActiveRecipe] = useState(null);
+    const [myRecipes, setMyRecipes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchMyRecipes = async () => {
+            try {
+                setLoading(true);
+                const token = await AsyncStorage.getItem('token');
+
+                if (!token) {
+                    console.error('Token bulunamadı');
+                    setError('Oturum bilgileriniz bulunamadı. Lütfen tekrar giriş yapın.');
+                    setLoading(false);
+                    navigation.replace('Login');
+                    return;
+                }
+
+                const response = await fetch(`${config[config.environment].apiUrl}/client/getMyRecipes`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Tarifler yüklenirken bir hata oluştu.');
+                }
+
+                const data = await response.json();
+                setMyRecipes(data);
+                setLoading(false);
+            } catch (err) {
+                console.error('Tarif yükleme hatası:', err);
+                setError('Tarifler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+                setLoading(false);
+            }
+        };
+
+        fetchMyRecipes();
+    }, []);
+
+    const formatRecipes = () => {
+        if (!myRecipes || myRecipes.length === 0) return [];
+
+        return myRecipes.map(item => {
+            const recipe = item.Recipe;
+
+            // Malzemeleri diziye dönüştür
+            const ingredients = recipe.malzemeler ? recipe.malzemeler.split(',').map(item => item.trim()) : [];
+
+            // Hazırlanış adımlarını diziye dönüştür
+            const steps = recipe.hazirlanis ? recipe.hazirlanis.split('.').filter(step => step.trim() !== '').map(step => step.trim()) : [];
+
+            return {
+                id: recipe.id,
+                name: recipe.name,
+                category: recipe.category?.name || 'Kişisel Tarif', // Kategorinin API'den alınması
+                calories: recipe.kcal || 0,
+                prepTime: '- dk', // API'den hazırlama süresi yoksa varsayılan değer
+                description: recipe.description || 'Açıklama bulunmuyor',
+                ingredients: ingredients,
+                steps: steps,
+                // Besin değerleri
+                nutritionInfo: {
+                    protein: recipe.protein || 0,
+                    carbs: recipe.karbonhidrat || 0,
+                    fat: recipe.yag || 0
+                },
+                // Dietisyen notu
+                note: item.note
+            };
+        });
+    };
+
+    // Formatlanan tarifleri al
+    const formattedRecipes = formatRecipes();
 
     // Tüm tarif kategorilerini al
-    const allCategories = ['Tümü', ...new Set(mockRecipes.map(recipe => recipe.category))];
+    const allCategories = ['Tümü', ...new Set(formattedRecipes.map(recipe => recipe.category))];
 
     // Tarif arama ve filtreleme
-    const filteredRecipes = mockRecipes.filter(recipe => {
+    const filteredRecipes = formattedRecipes.filter(recipe => {
         const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === 'Tümü' || recipe.category === selectedCategory;
         return matchesSearch && matchesCategory;
@@ -157,9 +115,19 @@ const Tarif = ({navigation}) => {
             <Header navigation={navigation}/>
 
             <ScrollView style={styles.content}>
-                {!activeRecipe ? (
+                {loading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#fc9e21" />
+                        <Text style={styles.loadingText}>Tarifler yükleniyor...</Text>
+                    </View>
+                ) : error ? (
+                    <View style={styles.errorContainer}>
+                        <Icon name="alert-circle-outline" size={60} color="#ff6b6b" />
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : !activeRecipe ? (
                     <>
-                        <Text style={styles.pageTitle}>Tarifler</Text>
+                        <Text style={styles.pageTitle}>Tariflerim</Text>
 
                         {/* Arama çubuğu */}
                         <View style={styles.searchBar}>
@@ -173,31 +141,33 @@ const Tarif = ({navigation}) => {
                         </View>
 
                         {/* Kategori filtreleme */}
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            style={styles.categoriesContainer}
-                        >
-                            {allCategories.map((category) => (
-                                <TouchableOpacity
-                                    key={category}
-                                    style={[
-                                        styles.categoryButton,
-                                        selectedCategory === category && styles.categoryButtonActive
-                                    ]}
-                                    onPress={() => setSelectedCategory(category)}
-                                >
-                                    <Text
+                        {allCategories.length > 1 && (
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                style={styles.categoriesContainer}
+                            >
+                                {allCategories.map((category) => (
+                                    <TouchableOpacity
+                                        key={category}
                                         style={[
-                                            styles.categoryText,
-                                            selectedCategory === category && styles.categoryTextActive
+                                            styles.categoryButton,
+                                            selectedCategory === category && styles.categoryButtonActive
                                         ]}
+                                        onPress={() => setSelectedCategory(category)}
                                     >
-                                        {category}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
+                                        <Text
+                                            style={[
+                                                styles.categoryText,
+                                                selectedCategory === category && styles.categoryTextActive
+                                            ]}
+                                        >
+                                            {category}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        )}
 
                         {/* Tarif kartları */}
                         {filteredRecipes.length > 0 ? (
@@ -208,7 +178,18 @@ const Tarif = ({navigation}) => {
                                         style={styles.recipeCard}
                                         onPress={() => handleRecipePress(recipe)}
                                     >
-                                        <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+                                        {recipe.image ? (
+                                            <Image
+                                                source={{ uri: recipe.image }}
+                                                style={styles.recipeImage}
+                                                defaultSource={PLACEHOLDER_IMAGE}
+                                            />
+                                        ) : (
+                                            <Image
+                                                source={PLACEHOLDER_IMAGE}
+                                                style={styles.recipeImage}
+                                            />
+                                        )}
                                         <View style={styles.recipeInfo}>
                                             <View style={styles.recipeBadge}>
                                                 <Text style={styles.recipeBadgeText}>{recipe.category}</Text>
@@ -224,6 +205,13 @@ const Tarif = ({navigation}) => {
                                                     <Text style={styles.recipeDetailText}>{recipe.prepTime}</Text>
                                                 </View>
                                             </View>
+
+                                            {recipe.note && (
+                                                <View style={styles.noteContainer}>
+                                                    <Icon name="note-text-outline" size={14} color="#666" />
+                                                    <Text style={styles.noteText}>Diyetisyen Notu: {recipe.note}</Text>
+                                                </View>
+                                            )}
                                         </View>
                                     </TouchableOpacity>
                                 ))}
@@ -231,7 +219,11 @@ const Tarif = ({navigation}) => {
                         ) : (
                             <View style={styles.emptyState}>
                                 <Icon name="food-variant-off" size={60} color="#ccc" />
-                                <Text style={styles.emptyStateText}>Tarif bulunamadı</Text>
+                                <Text style={styles.emptyStateText}>
+                                    {myRecipes.length === 0
+                                        ? "Size atanan tarif bulunmamaktadır"
+                                        : "Arama kriterlerinize uygun tarif bulunamadı"}
+                                </Text>
                             </View>
                         )}
                     </>
@@ -243,7 +235,18 @@ const Tarif = ({navigation}) => {
                             <Text style={styles.backButtonText}>Tariflere Dön</Text>
                         </TouchableOpacity>
 
-                        <Image source={{ uri: activeRecipe.image }} style={styles.recipeDetailImage} />
+                        {activeRecipe.image ? (
+                            <Image
+                                source={{ uri: activeRecipe.image }}
+                                style={styles.recipeDetailImage}
+                                defaultSource={PLACEHOLDER_IMAGE}
+                            />
+                        ) : (
+                            <Image
+                                source={PLACEHOLDER_IMAGE}
+                                style={styles.recipeDetailImage}
+                            />
+                        )}
 
                         <View style={styles.recipeDetailHeader}>
                             <View style={styles.recipeBadge}>
@@ -261,6 +264,22 @@ const Tarif = ({navigation}) => {
                                     <Text style={styles.recipeDetailInfoText}>{activeRecipe.prepTime}</Text>
                                 </View>
                             </View>
+
+                            {/* Besin değerleri */}
+                            <View style={styles.nutritionContainer}>
+                                <View style={styles.nutritionItem}>
+                                    <Text style={styles.nutritionLabel}>Protein</Text>
+                                    <Text style={styles.nutritionValue}>{activeRecipe.nutritionInfo?.protein || 0}g</Text>
+                                </View>
+                                <View style={styles.nutritionItem}>
+                                    <Text style={styles.nutritionLabel}>Karbonhidrat</Text>
+                                    <Text style={styles.nutritionValue}>{activeRecipe.nutritionInfo?.carbs || 0}g</Text>
+                                </View>
+                                <View style={styles.nutritionItem}>
+                                    <Text style={styles.nutritionLabel}>Yağ</Text>
+                                    <Text style={styles.nutritionValue}>{activeRecipe.nutritionInfo?.fat || 0}g</Text>
+                                </View>
+                            </View>
                         </View>
 
                         <View style={styles.recipeSection}>
@@ -268,6 +287,15 @@ const Tarif = ({navigation}) => {
                                 {activeRecipe.description}
                             </Text>
                         </View>
+
+                        {activeRecipe.note && (
+                            <View style={styles.recipeSection}>
+                                <Text style={styles.recipeSectionTitle}>Diyetisyen Notu</Text>
+                                <View style={styles.noteBox}>
+                                    <Text style={styles.noteBoxText}>{activeRecipe.note}</Text>
+                                </View>
+                            </View>
+                        )}
 
                         <View style={styles.recipeSection}>
                             <Text style={styles.recipeSectionTitle}>Malzemeler</Text>
@@ -516,6 +544,70 @@ const styles = StyleSheet.create({
         fontSize: 15,
         lineHeight: 22,
         color: '#444',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#666',
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+    },
+    errorText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#ff6b6b',
+        textAlign: 'center',
+    },
+    noteContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f9f9f9',
+        padding: 10,
+        borderRadius: 8,
+        marginTop: 8,
+    },
+    noteText: {
+        marginLeft: 6,
+        fontSize: 14,
+        color: '#666',
+    },
+    nutritionContainer: {
+        flexDirection: 'row',
+        marginTop: 12,
+    },
+    nutritionItem: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    nutritionLabel: {
+        fontSize: 12,
+        color: '#888',
+    },
+    nutritionValue: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    noteBox: {
+        backgroundColor: '#f0f8ff',
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 8,
+        borderWidth: 1,
+        borderColor: '#bcd4e6',
+    },
+    noteBoxText: {
+        fontSize: 14,
+        color: '#333',
     },
 });
 

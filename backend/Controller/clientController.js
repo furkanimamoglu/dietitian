@@ -158,6 +158,30 @@ class ClientController {
         }
     }
 
+    static async getMyRecipes(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.getMyRecipes(client_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
     static async getMyLatestMeasurement(req, res) {
         try {
             const token = req.headers.authorization;
