@@ -1843,7 +1843,6 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Send assignment request to API
                             axios.post(`${config[config.environment].apiUrl}/recipe/assignRecipeToClient?recipe_id=${selectedRecipe.id}&client_id=${selectedUser}`,
                                 { note: assignmentNote },
                                 {
@@ -1857,14 +1856,12 @@ export default function Tarifler() {
                                     setSuccessMessage(`"${selectedRecipe.title}" tarifi "${selectedClientName}" danışanına başarıyla atandı.`);
                                     setShowSuccessPopup(true);
 
-                                    // Reset form and close modal
                                     setSelectedUser(null);
                                     setAssignmentNote('');
                                     setAddToUserModal(false);
                                 })
                                 .catch(error => {
                                     console.error("Error assigning recipe:", error);
-                                    // Check if the error response contains our specific message
                                     if (error.response && error.response.data && error.response.data.message) {
                                         setErrorMessage(error.response.data.message);
                                     } else {
