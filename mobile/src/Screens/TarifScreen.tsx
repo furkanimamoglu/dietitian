@@ -6,7 +6,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import config from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Placeholder görsel URL'si
 const PLACEHOLDER_IMAGE = require('../../public/placeholder.png');
 
 const Tarif = ({navigation}) => {
@@ -85,13 +84,10 @@ const Tarif = ({navigation}) => {
         });
     };
 
-    // Formatlanan tarifleri al
     const formattedRecipes = formatRecipes();
 
-    // Tüm tarif kategorilerini al
     const allCategories = ['Tümü', ...new Set(formattedRecipes.map(recipe => recipe.category))];
 
-    // Tarif arama ve filtreleme
     const filteredRecipes = formattedRecipes.filter(recipe => {
         const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === 'Tümü' || recipe.category === selectedCategory;

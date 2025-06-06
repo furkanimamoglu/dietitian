@@ -1864,7 +1864,12 @@ export default function Tarifler() {
                                 })
                                 .catch(error => {
                                     console.error("Error assigning recipe:", error);
-                                    setErrorMessage("Tarif atanırken bir hata oluştu.");
+                                    // Check if the error response contains our specific message
+                                    if (error.response && error.response.data && error.response.data.message) {
+                                        setErrorMessage(error.response.data.message);
+                                    } else {
+                                        setErrorMessage("Tarif atanırken bir hata oluştu.");
+                                    }
                                     setShowErrorPopup(true);
                                 });
                         }}
