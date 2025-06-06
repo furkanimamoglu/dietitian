@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,43 +15,57 @@ const Tarif = ({navigation}) => {
     const [myRecipes, setMyRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Tarif verilerini yükleyen fonksiyon
+    const fetchMyRecipes = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+
+            if (!token) {
+                console.error('Token bulunamadı');
+                setError('Oturum bilgileriniz bulunamadı. Lütfen tekrar giriş yapın.');
+                setLoading(false);
+                navigation.replace('Login');
+                return;
+            }
+
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyRecipes`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Tarifler yüklenirken bir hata oluştu.');
+            }
+
+            const data = await response.json();
+            setMyRecipes(data);
+            setLoading(false);
+        } catch (err) {
+            console.error('Tarif yükleme hatası:', err);
+            setError('Tarifler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+            setLoading(false);
+        }
+    };
+
+    // Çekerek yenileme işlevi
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            await fetchMyRecipes();
+        } catch (error) {
+            console.error('Yenileme hatası:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchMyRecipes = async () => {
-            try {
-                setLoading(true);
-                const token = await AsyncStorage.getItem('token');
-
-                if (!token) {
-                    console.error('Token bulunamadı');
-                    setError('Oturum bilgileriniz bulunamadı. Lütfen tekrar giriş yapın.');
-                    setLoading(false);
-                    navigation.replace('Login');
-                    return;
-                }
-
-                const response = await fetch(`${config[config.environment].apiUrl}/client/getMyRecipes`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': token,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Tarifler yüklenirken bir hata oluştu.');
-                }
-
-                const data = await response.json();
-                setMyRecipes(data);
-                setLoading(false);
-            } catch (err) {
-                console.error('Tarif yükleme hatası:', err);
-                setError('Tarifler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
-                setLoading(false);
-            }
-        };
-
+        setLoading(true);
         fetchMyRecipes();
     }, []);
 
@@ -106,7 +120,16 @@ const Tarif = ({navigation}) => {
         <View style={styles.container}>
             <Header navigation={navigation}/>
 
-            <ScrollView style={styles.content}>
+            <ScrollView
+                style={styles.content}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor="#fc9e21"
+                    />
+                }
+            >
                 {loading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#fc9e21" />
@@ -604,3 +627,4 @@ const styles = StyleSheet.create({
 });
 
 export default Tarif;
+
