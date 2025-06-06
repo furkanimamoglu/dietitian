@@ -18,6 +18,7 @@ const NutritionCategory = require(path.join(__dirname, 'NutritionCategory'));
 const NutritionAssignment = require(path.join(__dirname, 'NutritionAssignment'));
 const Recipe = require(path.join(__dirname, 'Recipe'));
 const RecipeCategory = require(path.join(__dirname, 'RecipeCategory'));
+const RecipeAssignment = require(path.join(__dirname, 'RecipeAssignment'));
 const Notes = require(path.join(__dirname, 'Notes'));
 const Package = require(path.join(__dirname, 'Package'));
 const PackageItems = require(path.join(__dirname, 'PackageItems'));
@@ -223,6 +224,26 @@ ExerciseAssignment.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
+Client.hasMany(RecipeAssignment, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+    hooks: true,
+});
+RecipeAssignment.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
+RecipeAssignment.belongsTo(Recipe, {
+    foreignKey: 'recipe_id',
+    as: 'Recipe'
+});
+Recipe.hasMany(RecipeAssignment, {
+    foreignKey: 'recipe_id',
+    as: 'assignments',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+
 Client.hasMany(Measurement, {
     foreignKey: 'client_id',
     onDelete: 'CASCADE',
@@ -324,6 +345,15 @@ DietitianSubPackage.hasMany(DietitianSub, {
     as: 'dietitianSubs'
 });
 
+Dietitian.hasMany(RecipeAssignment, {
+    foreignKey: 'dietitian_id',
+    onDelete: 'CASCADE',
+    hooks: true
+});
+RecipeAssignment.belongsTo(Dietitian, {
+    foreignKey: 'dietitian_id',
+});
+
 module.exports = {
     sequelize,
     Dietitian,
@@ -344,6 +374,7 @@ module.exports = {
     Notes,
     Recipe,
     RecipeCategory,
+    RecipeAssignment,
     Package,
     PackageItems,
     Measurement,

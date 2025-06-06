@@ -14,8 +14,27 @@ import CloseIcon from '@mui/icons-material/Close';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonIcon from '@mui/icons-material/Person';
+import DescriptionIcon from "@mui/icons-material/Description";
+import NoteIcon from '@mui/icons-material/Note';
+
 import {jsPDF} from "jspdf";
 import 'jspdf-autotable';
+import {
+    Avatar,
+    Box,
+    CircularProgress,
+    Divider,
+    InputAdornment,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Paper,
+    TextField,
+    Typography
+} from '@mui/material';
 
 const getYouTubeVideoId = (url) => {
     if (!url) return null;
@@ -262,7 +281,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
 };
 
 // Recipe Card Component
-const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
+const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
     return (<div className="recipe-card">
             <div className="card-image-container" onClick={() => onView(item)}>
                 <img
@@ -297,6 +316,13 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
 
 
                 <div className="card-actions">
+                    <button
+                        className="action-button add-user-btn"
+                        title="Danışana Ata"
+                        onClick={() => onAssign(item)}
+                    >
+                        <PersonAddIcon />
+                    </button>
                     <button
                         className="action-button print-btn"
                         title="Yazdır"
@@ -349,6 +375,16 @@ export default function Tarifler() {
     const [recipeData, setRecipeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
+
+    // Danışan ara için state
+    const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
+    const [filteredDanisanList, setFilteredDanisanList] = useState([]);
+
+    // Danışana atanmış tarifler için state'ler
+    const [clientRecipesModal, setClientRecipesModal] = useState(false);
+    const [selectedClientRecipes, setSelectedClientRecipes] = useState([]);
+    const [loadingClientRecipes, setLoadingClientRecipes] = useState(false);
+    const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
@@ -589,6 +625,40 @@ export default function Tarifler() {
         setDeleteConfirmModal(true);
     };
 
+    // Danışanların filtrelenmesi için useEffect
+    useEffect(() => {
+        if (danisanList.length > 0) {
+            setFilteredDanisanList(
+                danisanList.filter(danisan =>
+                    danisan.name.toLowerCase().includes(danisanSearchTerm.toLowerCase())
+                )
+            );
+        }
+    }, [danisanList, danisanSearchTerm]);
+
+    // Danışana atanan tarifleri getiren fonksiyon
+    const getClientRecipes = (clientId) => {
+        const danisan = danisanList.find(d => d.id === clientId);
+        setSelectedClientInfo(danisan);
+        setLoadingClientRecipes(true);
+
+        // Danışana atanmış tarifleri al
+        axios.get(`${config[config.environment].apiUrl}/recipe/getAssignedRecipesByClient?client_id=${clientId}`, {
+            headers: {Authorization: localStorage.getItem("token")}
+        })
+            .then(response => {
+                setSelectedClientRecipes(response.data || []);
+                setLoadingClientRecipes(false);
+                setClientRecipesModal(true);
+            })
+            .catch(error => {
+                console.error("Error fetching client recipes:", error);
+                setLoadingClientRecipes(false);
+                setErrorMessage("Danışan tarifleri yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            });
+    }
+
     return (<Default>
             <div className="tarifler-container">
                 {/* Left Panel - Categories */}
@@ -644,7 +714,7 @@ export default function Tarifler() {
                     </div>
                 </div>
 
-                {/* Right Panel - Recipe Cards */}
+                {/* Middle Panel - Recipe Cards */}
                 <div className="recipes-panel">
                     <div className="recipe-cards-grid">
                         {loading ? (<div className="loading-container">
@@ -657,11 +727,130 @@ export default function Tarifler() {
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewRecipe}
+                                    onAssign={handleOpenAddToUserModal}
                                 />))) : (<div className="no-recipes">
-                                <p>Bu kategoriye ait tarif bulunamadı.</p>
+                                <p>Bu kategoriya ait tarif bulunamadı.</p>
                             </div>)}
                     </div>
                 </div>
+
+                {/* Right Panel - Sidebar */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        flex: '0 0 260px',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        height: 'calc(76vh)',
+                        maxHeight: 'calc(100vh - 100px)'
+                    }}
+                    className="right-sidebar-panel"
+                >
+                    <Box sx={{padding: '16px 0', color: 'white', backgroundColor: '#2d4149'}}>
+                        <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <PersonIcon sx={{mr: 1}}/> Tarif Yönetimi
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{padding: '16px'}}>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Danışan ara..."
+                            value={danisanSearchTerm}
+                            onChange={(e) => setDanisanSearchTerm(e.target.value)}
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{color: "rgba(0, 0, 0, 0.54)"}}/>
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{mb: 2}}
+                        />
+
+                        {loading ? (
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3}}>
+                                <CircularProgress size={28} sx={{mb: 2}}/>
+                                <Typography variant="body2" color="text.primary">
+                                    Danışanlar yükleniyor...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <List
+                                sx={{
+                                    width: '100%',
+                                    maxHeight: 'calc(100vh - 200px)',
+                                    overflowY: 'auto',
+                                    '&::-webkit-scrollbar': {
+                                        width: '6px',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: 'rgba(0,0,0,0.2)',
+                                        borderRadius: '3px'
+                                    }
+                                }}
+                                dense
+                            >
+                                {filteredDanisanList.length > 0 ? (
+                                    filteredDanisanList.map((danisan) => (
+                                        <React.Fragment key={danisan.id}>
+                                            <ListItem
+                                                button
+                                                onClick={() => getClientRecipes(danisan.id)}
+                                                sx={{
+                                                    borderRadius: '8px',
+                                                    my: 0.5,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                                                    }
+                                                }}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            width: 40,
+                                                            height: 40
+                                                        }}
+                                                        src={danisan.image || ''}
+                                                    >
+                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={danisan.name}
+                                                    primaryTypographyProps={{fontWeight: 'medium'}}
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li"/>
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 4
+                                    }}>
+                                        <PersonIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
+                                        <Typography variant="body2" color="text.secondary" align="center">
+                                            Danışan bulunamadı.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </List>
+                        )}
+                    </Box>
+                </Paper>
             </div>
 
             {/* Detail Modal */}
@@ -1586,6 +1775,238 @@ export default function Tarifler() {
                         }}
                     >
                         Sil
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Danışana Ata Modal */}
+            <Modal
+                isOpen={addToUserModal}
+                title="Danışana Tarif Ata"
+                onClose={() => setAddToUserModal(false)}
+            >
+                <div className="modal-body styled-form">
+                    <div className="input-container">
+                        <label htmlFor="selectUser">Danışan Seçin *</label>
+                        <select
+                            id="selectUser"
+                            className="text-input"
+                            value={selectedUser || ""}
+                            onChange={(e) => setSelectedUser(e.target.value)}
+                            required
+                        >
+                            <option value="">Danışan Seçin</option>
+                            {danisanList.map(client => (
+                                <option key={client.id} value={client.id}>
+                                    {client.name} {client.surname}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="assignmentNote">Not (İsteğe bağlı)</label>
+                        <textarea
+                            id="assignmentNote"
+                            className="text-input textarea"
+                            value={assignmentNote}
+                            onChange={(e) => setAssignmentNote(e.target.value)}
+                            placeholder="Danışana özel not ekleyebilirsiniz"
+                            rows={3}
+                        />
+                    </div>
+
+                    {selectedRecipe && (
+                        <div className="recipe-preview">
+                            <h3 className="preview-title">Seçilen Tarif:</h3>
+                            <div className="preview-content">
+                                <p className="preview-recipe-name">{selectedRecipe.title}</p>
+                                {selectedRecipe.description && (
+                                    <p className="preview-description">{selectedRecipe.description}</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn cancel-btn"
+                        onClick={() => setAddToUserModal(false)}
+                    >
+                        İptal
+                    </button>
+                    <button
+                        className="modal-btn confirm-btn"
+                        onClick={() => {
+                            if (!selectedUser) {
+                                setErrorMessage("Lütfen bir danışan seçin.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+
+                            // Send assignment request to API
+                            axios.post(`${config[config.environment].apiUrl}/recipe/assignRecipeToClient?recipe_id=${selectedRecipe.id}&client_id=${selectedUser}`,
+                                { note: assignmentNote },
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                })
+                                .then(response => {
+                                    const selectedClientName = danisanList.find(client => client.id == selectedUser)?.name;
+
+                                    setSuccessMessage(`"${selectedRecipe.title}" tarifi "${selectedClientName}" danışanına başarıyla atandı.`);
+                                    setShowSuccessPopup(true);
+
+                                    // Reset form and close modal
+                                    setSelectedUser(null);
+                                    setAssignmentNote('');
+                                    setAddToUserModal(false);
+                                })
+                                .catch(error => {
+                                    console.error("Error assigning recipe:", error);
+                                    setErrorMessage("Tarif atanırken bir hata oluştu.");
+                                    setShowErrorPopup(true);
+                                });
+                        }}
+                        disabled={!selectedUser}
+                    >
+                        Ata
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Danışana Atanmış Tarifler Modalı */}
+            <Modal
+                isOpen={clientRecipesModal}
+                title={`${selectedClientInfo?.name || 'Danışan'} - Atanmış Tarifler`}
+                onClose={() => setClientRecipesModal(false)}
+            >
+                <div className="modal-body">
+                    {loadingClientRecipes ? (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            py: 5
+                        }}>
+                            <CircularProgress size={40} sx={{color: '#087708', mb: 2}}/>
+                            <Typography variant="body1" color="text.secondary">Tarifler yükleniyor...</Typography>
+                        </Box>
+                    ) : selectedClientRecipes.length > 0 ? (
+                        <Box sx={{
+                            bgcolor: 'background.paper',
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}>
+                            <List sx={{width: '100%'}}>
+                                {selectedClientRecipes.map((item) => (
+                                    <React.Fragment key={item.id}>
+                                        <ListItem
+                                            alignItems="flex-start"
+                                            sx={{
+                                                py: 2,
+                                                transition: 'background-color 0.2s',
+                                                '&:hover': {
+                                                    backgroundColor: '#f5f5f5'
+                                                }
+                                            }}
+                                        >
+                                            <ListItemAvatar>
+                                                <Avatar sx={{
+                                                    bgcolor: '#ff9e25',
+                                                    width: 48,
+                                                    height: 48,
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                }}>
+                                                    {item.Recipe?.name?.charAt(0) || "T"}
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary={
+                                                    <Typography
+                                                        variant="h6"
+                                                        fontWeight="500"
+                                                        sx={{
+                                                            color: '#ff9800',
+                                                            fontSize: '1.1rem',
+                                                            mb: 0.5
+                                                        }}
+                                                    >
+                                                        {item.Recipe?.name || "Tarif"}
+                                                    </Typography>
+                                                }
+                                                secondary={
+                                                    <React.Fragment>
+                                                        <Typography
+                                                            component="span"
+                                                            variant="body2"
+                                                            color="text.primary"
+                                                            sx={{display: 'block', mb: 1}}
+                                                        >
+                                                            {item.Recipe?.description || "Bu tarif için açıklama bulunmamaktadır."}
+                                                        </Typography>
+
+                                                        {item.note && (
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'flex-start',
+                                                                bgcolor: '#fffde7',
+                                                                borderRadius: '8px',
+                                                                p: 1.5,
+                                                                mt: 1,
+                                                                borderLeft: '3px solid #fbc02d'
+                                                            }}>
+                                                                <NoteIcon fontSize="small" sx={{
+                                                                    mr: 1,
+                                                                    color: '#f57f17',
+                                                                    fontSize: '18px',
+                                                                    mt: 0.3
+                                                                }}/>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {item.note}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </React.Fragment>
+                                                }
+                                            />
+                                        </ListItem>
+                                        <Divider variant="inset" component="li"/>
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </Box>
+                    ) : (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            py: 6,
+                            px: 3,
+                            bgcolor: '#f8f9fa',
+                            borderRadius: 2,
+                            border: '1px dashed #bdbdbd'
+                        }}>
+                            <DescriptionIcon sx={{fontSize: 60, color: '#bdbdbd', mb: 2}}/>
+                            <Typography variant="h6" color="text.secondary" align="center" gutterBottom>
+                                Bu danışana atanmış tarif bulunmamaktadır
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" align="center"
+                                        sx={{mt: 1, maxWidth: 500}}>
+                                Tariflere göz atarak danışanınıza uygun tarifler atayabilirsiniz.
+                            </Typography>
+                        </Box>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn close-btn"
+                        onClick={() => setClientRecipesModal(false)}
+                    >
+                        Kapat
                     </button>
                 </div>
             </Modal>

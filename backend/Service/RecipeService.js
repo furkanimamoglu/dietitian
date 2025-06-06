@@ -1,7 +1,7 @@
 const path = require('path');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
-const {Recipe, RecipeCategory} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+const {Recipe, RecipeCategory, RecipeAssignment} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 
 class RecipeService {
 
@@ -20,7 +20,7 @@ class RecipeService {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
 
-        if (!recipeData || !recipeData.name || !recipeData.hasVideo || !recipeData.hazirlanis || !recipeData.malzemeler) {
+        if (!recipeData || !recipeData.name || !recipeData.hazirlanis || !recipeData.malzemeler) {
             throw new Exception("Eksik tarif verisi.", 400, true);
         }
 
@@ -136,6 +136,50 @@ class RecipeService {
         await recipe.destroy();
 
         return {success: true, message: "Tarif Kategorisi başarıyla silindi."};
+    }
+
+    static async assignRecipeToClient(dietitian_id, client_id, recipe_id, note) {
+        if (!dietitian_id || !client_id || !recipe_id) {
+            throw new Exception("Eksik veri.", 400, true);
+        }
+
+        const existingAssignment = await RecipeAssignment.findOne({
+            where: {
+                dietitian_id: dietitian_id,
+                client_id: client_id,
+                recipe_id: recipe_id
+            }
+        });
+
+        if (existingAssignment) {
+            throw new Exception("Bu tarif zaten bu danışana daha önce atanmış.", 409, true);
+        }
+
+        return await RecipeAssignment.create({
+            dietitian_id: dietitian_id,
+            client_id: client_id,
+            recipe_id: recipe_id,
+            note: note
+        });
+    }
+
+    static async getAssignedRecipesByClient(dietitian_id, client_id) {
+        if (!dietitian_id || !client_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        return await RecipeAssignment.findAll({
+            where: {
+                dietitian_id: dietitian_id,
+                client_id: client_id
+            },
+            include: [
+                {
+                    model: Recipe,
+                    as: 'Recipe'
+            }
+            ]
+        });
     }
 
 }

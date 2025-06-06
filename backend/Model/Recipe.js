@@ -58,6 +58,11 @@ const Recipe = sequelize.define('Recipe', {
                 }
             }
         },
+        isPublic: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
         description: {
             type: DataTypes.TEXT,
             allowNull: true,
@@ -68,15 +73,9 @@ const Recipe = sequelize.define('Recipe', {
                 }
             }
         },
-        hasVideo: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        video: {
+        image: {
             type: DataTypes.STRING,
-            allowNull: true,
-            defaultValue: "https://youtube.com"
+            allowNull: true
         },
         hazirlanis: {
             type: DataTypes.TEXT,

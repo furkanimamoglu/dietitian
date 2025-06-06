@@ -2,7 +2,7 @@ const path = require("path");
 
 const RecipeService = require(path.join(__dirname, "..", "Service", "RecipeService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class recipeController {
 
@@ -47,9 +47,8 @@ class recipeController {
                 name,
                 description,
                 category_id,
-                hasVideo,
-                video,
                 hazirlanis,
+                image,
                 malzemeler,
                 kcal,
                 protein,
@@ -61,8 +60,7 @@ class recipeController {
                 name,
                 description,
                 category_id,
-                hasVideo,
-                video,
+                image,
                 hazirlanis,
                 malzemeler,
                 kcal,
@@ -98,8 +96,7 @@ class recipeController {
                 name,
                 description,
                 category_id,
-                hasVideo,
-                video,
+                image,
                 hazirlanis,
                 malzemeler,
                 kcal,
@@ -112,8 +109,7 @@ class recipeController {
                 name,
                 description,
                 category_id,
-                hasVideo,
-                video,
+                image,
                 hazirlanis,
                 malzemeler,
                 kcal,
@@ -246,6 +242,59 @@ class recipeController {
             const {recipe_category_id} = req.query;
 
             const result = await RecipeService.deleteRecipeCategory(dietitian_id, recipe_category_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async assignRecipeToClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {recipe_id, client_id} = req.query;
+            const {note} = req.body;
+
+            const result = await RecipeService.assignRecipeToClient(dietitian_id, recipe_id, client_id, note);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async getAssignedRecipesByClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {client_id} = req.query;
+
+            const result = await RecipeService.getAssignedRecipesByClient(dietitian_id, client_id);
 
             res.status(200).json(result);
         } catch (error) {
