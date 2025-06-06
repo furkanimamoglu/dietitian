@@ -1,0 +1,134 @@
+.chat-fab {
+  position: fixed !important;
+  bottom: 70px;
+  right: 20px;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.chat-dialog {
+  border-radius: 10px !important;
+  overflow: hidden;
+  height: 80vh;
+  max-height: 550px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-dialog-title {
+  background: linear-gradient(135deg, #fc9e21 0%, #ff7355 50%, #fc9e21 100%);
+  color: white;
+  padding: 16px !important;
+}
+
+.chat-dialog-content {
+  flex: 1;
+  padding: 16px !important;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+}
+
+.message-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin-bottom: 12px;
+  max-width: 75%;
+  display: flex;
+}
+
+.bot-message {
+  align-self: flex-start;
+}
+
+.user-message {
+  align-self: flex-end;
+}
+
+.message-bubble {
+  padding: 12px !important;
+  border-radius: 15px !important;
+  display: flex !important;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.bot-message .message-bubble {
+  background-color: #e3f2fd !important;
+  border-top-left-radius: 5px !important;
+}
+
+.user-message .message-bubble {
+  background-color: #e8f5e9 !important;
+  border-top-right-radius: 5px !important;
+}
+
+.message-icon {
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+.chat-input-container {
+  display: flex;
+  padding: 16px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  position: relative;
+}
+
+.chat-input {
+  margin-right: 10px !important;
+}
+
+.send-button {
+  align-self: flex-end;
+}
+
+/* Biçimlendirilmiş mesajlar için ek stiller */
+.formatted-message {
+  line-height: 1.5 !important;
+  width: 100%;
+}
+
+.formatted-message ul,
+.formatted-message ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.formatted-message li {
+  margin-bottom: 5px;
+}
+
+.formatted-message strong {
+  font-weight: 600;
+  color: #d55e00;
+}
+
+.formatted-message h1,
+.formatted-message h2,
+.formatted-message h3 {
+  margin: 10px 0;
+  color: #fc9e21;
+}
+
+.formatted-message h1 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid rgba(252, 158, 33, 0.3);
+  padding-bottom: 5px;
+}
+
+.formatted-message h2 {
+  font-size: 1.3rem;
+}
+
+.formatted-message h3 {
+  font-size: 1.1rem;
+}
+
+.formatted-message em {
+  font-style: italic;
+  color: #227093;
+}
