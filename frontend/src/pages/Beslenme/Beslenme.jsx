@@ -823,6 +823,7 @@ export default function Beslenme() {
     const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [planSearchTerm, setPlanSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
     const [clientProgramsModal, setClientProgramsModal] = useState(false);
@@ -975,10 +976,9 @@ export default function Beslenme() {
     );
 
     const filteredBeslenmeData = beslenmeData.filter(item => {
-        if (checkedCategories.length === 0) {
-            return true;
-        }
-        return checkedCategories.includes(item.category_id);
+        const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(item.category_id);
+        const matchesTitle = item.title.toLowerCase().includes(planSearchTerm.toLowerCase());
+        return matchesCategory && matchesTitle;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -1413,6 +1413,35 @@ export default function Beslenme() {
 
                 {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
+                    <div className="search-filter-bar" style={{ width: '100%', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 16, background: '#fff' }}>
+                            <TextField
+                                variant="outlined"
+                                size="small"
+                                    placeholder="Plan Adına Göre Ara"
+                                    value={planSearchTerm}
+                                    onChange={(e) => setPlanSearchTerm(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon color="action" />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: planSearchTerm && (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                size="small"
+                                        onClick={() => setPlanSearchTerm('')}
+                                                edge="end"
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
+                            style={{ maxWidth: 300, flex: 1, background: '#fff' }}
+                            />
+                        {/* Buraya ek filtreler eklenebilir */}
+                    </div>
                     <div className="nutrition-cards-grid">
                         {loading ? (
                             <div className="loading-container">

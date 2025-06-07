@@ -2,7 +2,7 @@
 .beslenme-container {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
 /* Left Panel - Categories */
@@ -208,9 +208,9 @@
 
 .nutrition-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-    padding-bottom: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    padding-bottom: 0.5rem;
 }
 
 /* No Programs Message */
@@ -1474,4 +1474,24 @@ input[type="date"].text-input {
 
 .file-upload-icon {
     margin-right: 5px;
+}
+
+.search-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.search-box {
+    flex: 1;
+    position: relative;
+}
+
+.filter-box {
+    width: 200px;
+}
+
+.filter-select {
+    width: 100%;
 }
