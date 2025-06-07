@@ -273,18 +273,13 @@ const NutritionPlanDocument = ({program}) => {
                                     let items = [];
                                     let alternatives = {};
 
-                                    // Veri yapısını debug etmek için
                                     console.log('Meal data for', meal, ':', mealData);
 
-                                                // Farklı veri formatlarını işleme
                                     if (mealData && typeof mealData === 'object' && !Array.isArray(mealData)) {
                                         if (mealData.main) {
-                                            // Ana öğünleri ve alternatifleri ayıkla
                                                     items = Array.isArray(mealData.main) ? mealData.main : [];
                                         alternatives = mealData.alternatives || {};
                                         } else {
-                                            // Eğer main yoksa, objenin kendisinden öğeleri al
-                                            // Alternatives alanını ayır, diğer alanları items olarak kabul et
                                             const { alternatives: alts, ...rest } = mealData;
                                             items = Object.values(rest).filter(item => item && typeof item === 'string');
                                             alternatives = alts || {};
@@ -296,7 +291,6 @@ const NutritionPlanDocument = ({program}) => {
                                                         .map(item => item.trim())
                                                         .filter(item => item !== '');
                                     } else if (mealData) {
-                                        // Diğer olası durumları kapsayacak son bir kontrol
                                         items = [String(mealData)];
                                     }
 
@@ -385,7 +379,6 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-// Nutrition Card Component
 const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
     return (
         <div className="nutrition-card">
@@ -448,7 +441,6 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
     );
 };
 
-// Modal Component
 const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
 
@@ -469,55 +461,25 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     );
 };
 
-// Meal Plan Table Component
-const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
-    // Helper function to get all meal items as a flat array
-    const getMealItemsArray = (mealData) => {
-        if (!mealData) return [];
-
-        // For simple array format
-        if (Array.isArray(mealData)) {
-            return [...mealData];
-        }
-
-        // For complex format with main and alternatives
-        if (mealData.main && Array.isArray(mealData.main)) {
-            return [...mealData.main];
-        }
-
-        // For string format (backward compatibility)
-        if (typeof mealData === 'string') {
-            return mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-        }
-
-        return [];
-    };
-
-    // Helper function to add a main meal item
     const addMainItem = (day, meal, newItem) => {
         if (!newItem.trim()) return;
 
         const currentData = mealPlan[day][meal];
         let updatedData;
 
-        // Handle different formats
         if (Array.isArray(currentData)) {
-            // Simple array format
             updatedData = [...currentData, newItem.trim()];
         } else if (currentData && currentData.main) {
-            // Complex format with main and alternatives
             updatedData = {
                 ...currentData,
                 main: [...currentData.main, newItem.trim()]
             };
         } else if (typeof currentData === 'string') {
-            // String format (backward compatibility)
             const items = currentData ?
                 currentData.split(',').map(item => item.trim()).filter(item => item !== '') :
                 [];
             updatedData = [...items, newItem.trim()];
         } else {
-            // Initialize new complex format
             updatedData = {
                 main: [newItem.trim()],
                 alternatives: {}
@@ -527,23 +489,18 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         onMealChange(day, meal, updatedData);
     };
 
-    // Helper function to remove a main meal item
     const removeMainItem = (day, meal, indexToRemove) => {
         const currentData = mealPlan[day][meal];
         let updatedData;
         let removedItemName = '';
 
-        // Handle different formats
         if (Array.isArray(currentData)) {
-            // Simple array format
             removedItemName = currentData[indexToRemove];
             updatedData = currentData.filter((_, index) => index !== indexToRemove);
         } else if (currentData && currentData.main) {
-            // Complex format with main and alternatives
             removedItemName = currentData.main[indexToRemove];
             const newMain = currentData.main.filter((_, index) => index !== indexToRemove);
 
-            // Also remove alternatives for this item if they exist
             const newAlternatives = {...currentData.alternatives};
             if (newAlternatives[removedItemName]) {
                 delete newAlternatives[removedItemName];
@@ -554,13 +511,11 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                 alternatives: newAlternatives
             };
         } else if (typeof currentData === 'string') {
-            // String format (backward compatibility)
             const items = currentData.split(',').map(item => item.trim()).filter(item => item !== '');
             removedItemName = items[indexToRemove];
             updatedData = items.filter((_, index) => index !== indexToRemove);
         }
 
-        // Close alternatives UI if the removed item was selected
         if (selectedMainItem === removedItemName && showAlternatives[meal]) {
             setShowAlternatives(prev => ({
                 ...prev,
@@ -599,7 +554,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                 alternatives: newAlternatives
             };
         } else if (typeof currentData === 'string') {
-            // Convert string format to complex format
             const items = currentData ?
                 currentData.split(',').map(item => item.trim()).filter(item => item !== '') :
                 [];
@@ -615,7 +569,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         onMealChange(day, meal, updatedData);
     };
 
-    // Helper function to remove an alternative
     const removeAlternative = (day, meal, mainItem, alternativeIndex) => {
         const currentData = mealPlan[day][meal];
 
@@ -626,7 +579,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         const newAlternatives = {...currentData.alternatives};
         newAlternatives[mainItem] = newAlternatives[mainItem].filter((_, index) => index !== alternativeIndex);
 
-        // Remove the alternatives entry if empty
         if (newAlternatives[mainItem].length === 0) {
             delete newAlternatives[mainItem];
         }
@@ -645,7 +597,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
     const [recipes, setRecipes] = useState([]);
     const [newMealInputs, setNewMealInputs] = useState({});
 
-    // Fetch recipes when component mounts
     useEffect(() => {
         axios.get(`${config[config.environment].apiUrl}/recipe/getMyRecipes`, {
             headers: {Authorization: localStorage.getItem("token")}
@@ -658,7 +609,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
             });
     }, []);
 
-    // Toggle showing alternatives for a specific meal
     const toggleAlternatives = (meal) => {
         setShowAlternatives(prev => ({
             ...prev,
@@ -666,7 +616,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         }));
     };
 
-    // Handle meal input change
     const handleMealInputChange = (meal, newValue) => {
         setNewMealInputs(prev => ({
             ...prev,
@@ -674,12 +623,10 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         }));
     };
 
-    // Add meal when selecting or typing a value
     const handleAddMealItem = (meal, value) => {
         if (!value) return;
 
         addMainItem(selectedDay, meal, value);
-        // Clear the input after adding
         setNewMealInputs(prev => ({
             ...prev,
             [meal]: ''
@@ -861,13 +808,11 @@ export default function Beslenme() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // Danışana atanmış programlar için yeni state'ler
     const [clientProgramsModal, setClientProgramsModal] = useState(false);
     const [selectedClientPrograms, setSelectedClientPrograms] = useState([]);
     const [loadingClientPrograms, setLoadingClientPrograms] = useState(false);
     const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
-    // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -881,20 +826,16 @@ export default function Beslenme() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    // Edit program states
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [editCategoryId, setEditCategoryId] = useState('');
 
-    // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
@@ -905,7 +846,6 @@ export default function Beslenme() {
         }
     }, [showSuccessPopup]);
 
-    // Auto-hide error popup after 5 seconds
     useEffect(() => {
         if (showErrorPopup) {
             const timer = setTimeout(() => {
@@ -916,14 +856,12 @@ export default function Beslenme() {
         }
     }, [showErrorPopup]);
 
-    // New plan state
     const [newPlan, setNewPlan] = useState({
         title: '',
         description: '',
         category_id: ''
     });
 
-    // Delete confirmation modal states
     const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
@@ -931,10 +869,8 @@ export default function Beslenme() {
     const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
     const [affectedPlans, setAffectedPlans] = useState([]);
 
-    // Meal planning states
     const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
     const [mealPlan, setMealPlan] = useState(() => {
-        // Initialize empty meal plan structure
         const initialPlan = {};
         DAYS_OF_WEEK.forEach(day => {
             initialPlan[day] = {};
@@ -948,10 +884,8 @@ export default function Beslenme() {
     const [viewProgramModal, setViewProgramModal] = useState(false);
     const mealPlanRef = useRef(null);
 
-    // Edit form state
     const [isSaving, setIsSaving] = useState(false);
 
-    // Fetch clients data
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/dietitian/getAllMyClients`, {
@@ -967,7 +901,6 @@ export default function Beslenme() {
             });
     }, []);
 
-    // Filtreleme için danışan listesini izle
     useEffect(() => {
         if (danisanList.length > 0) {
             setFilteredDanisanList(
@@ -978,7 +911,6 @@ export default function Beslenme() {
         }
     }, [danisanList, danisanSearchTerm]);
 
-    // Fetch nutrition categories
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
@@ -995,7 +927,6 @@ export default function Beslenme() {
             });
     }, []);
 
-    // Fetch nutrition plans
     const fetchNutritionPlans = () => {
         setLoading(true);
         axios
@@ -2187,7 +2118,6 @@ export default function Beslenme() {
                             <Box sx={{mt: 2}}>
                                 <Grid container spacing={3}>
                                     {selectedClientPrograms.map((program, index) => {
-                                        // Tarih formatını düzeltme
                                         const formatDate = (dateStr) => {
                                             if (!dateStr) return "Belirtilmemiş";
                                             const date = new Date(dateStr);
@@ -2198,7 +2128,6 @@ export default function Beslenme() {
                                             });
                                         };
 
-                                        // Başlangıç ve bitiş tarihleri arasındaki gün sayısını hesaplama
                                         const calculateDaysBetween = (start, end) => {
                                             if (!start || !end) return null;
                                             const startDate = new Date(start);
@@ -2209,7 +2138,6 @@ export default function Beslenme() {
 
                                         const daysBetween = calculateDaysBetween(program.start_date, program.end_date);
 
-                                        // Program durumunu hesaplama
                                         const getProgramStatus = () => {
                                             const today = new Date();
                                             const startDate = new Date(program.start_date);
@@ -2226,7 +2154,6 @@ export default function Beslenme() {
 
                                         const status = getProgramStatus();
 
-                                        // İlerleme çubuğu yüzdesini hesaplama
                                         const calculateProgress = () => {
                                             const today = new Date();
                                             const startDate = new Date(program.start_date);
