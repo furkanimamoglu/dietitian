@@ -4,6 +4,7 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 import {showErrorToast} from '../../utils/toastUtil';
+import { saveRecipe, updateRecipe } from './helpers.js';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -1130,59 +1131,90 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Prepare data for API - JSON formatında
-                            const requestData = {
-                                category_id: parseInt(newRecipe.category_id),
-                                name: newRecipe.title,
-                                description: newRecipe.description,
-                                hazirlanis: newRecipe.instructions,
-                                malzemeler: newRecipe.ingredients,
-                                kcal: newRecipe.nutritional_info.calories || 0,
-                                protein: newRecipe.nutritional_info.protein || 0,
-                                karbonhidrat: newRecipe.nutritional_info.carbs || 0,
-                                yag: newRecipe.nutritional_info.fat || 0,
-                                image: newRecipe.image || "/placeholder.png"
-                            };
+                            // Resim yükleme işlemini başlat
+                            if (newRecipe.image && newRecipe.image instanceof File) {
+                                setIsSaving(true); // Yükleme durumunu göster
 
-                            // Send POST request to API
-                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, requestData, {
-                                headers: {
-                                    Authorization: localStorage.getItem("token"),
-                                    'Content-Type': 'application/json'
-                                },
-                            })
+                                // Form data oluştur
+                                const formData = new FormData();
+                                formData.append('image', newRecipe.image);
+
+                                // Resmi yükle
+                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                        'Content-Type': 'multipart/form-data'
+                                    },
+                                })
                                 .then(response => {
-                                    // Refresh recipes list
-                                    fetchRecipes();
+                                    // Yükleme başarılı, resim URL'sini al
+                                    debugger;
+                                    const imageUrl = response.data.imageUrl;
 
-                                    // Show success message
-                                    setSuccessMessage("Tarif başarıyla eklendi.");
-                                    setShowSuccessPopup(true);
+                                    // Tarif verilerini hazırla ve resim URL'sini ekle
+                                    const requestData = {
+                                        category_id: parseInt(newRecipe.category_id),
+                                        name: newRecipe.title,
+                                        description: newRecipe.description,
+                                        hazirlanis: newRecipe.instructions,
+                                        malzemeler: newRecipe.ingredients,
+                                        kcal: newRecipe.nutritional_info.calories || 0,
+                                        protein: newRecipe.nutritional_info.protein || 0,
+                                        karbonhidrat: newRecipe.nutritional_info.carbs || 0,
+                                        yag: newRecipe.nutritional_info.fat || 0,
+                                        image: imageUrl
+                                    };
 
-                                    // Reset form and close modal
-                                    setNewRecipe({
-                                        title: '',
-                                        description: '',
-                                        ingredients: '',
-                                        instructions: '',
-                                        category_id: '',
-                                        image: null,
-                                        nutritional_info: {
-                                            calories: '', protein: '', carbs: '', fat: ''
-                                        }
+                                    // Tarif kaydetme isteğini gönder
+                                    saveRecipe(requestData, {
+                                        setSuccessMessage,
+                                        setShowSuccessPopup,
+                                        setNewRecipe,
+                                        setImagePreview,
+                                        setAddRecipeModal,
+                                        setIsSaving,
+                                        setErrorMessage,
+                                        setShowErrorPopup,
+                                        fetchRecipes
                                     });
-                                    setImagePreview(''); // Resim önizlemeyi temizle
-                                    setAddRecipeModal(false);
                                 })
                                 .catch(error => {
-                                    console.error("Error adding recipe:", error);
-                                    setErrorMessage("Tarif eklenirken bir hata oluştu.");
+                                    console.error("Error uploading image:", error);
+                                    setErrorMessage("Resim yüklenirken bir hata oluştu.");
                                     setShowErrorPopup(true);
+                                    setIsSaving(false);
                                 });
+                            } else {
+                                // Resim yok, doğrudan tarifi kaydet
+                                const requestData = {
+                                    category_id: parseInt(newRecipe.category_id),
+                                    name: newRecipe.title,
+                                    description: newRecipe.description,
+                                    hazirlanis: newRecipe.instructions,
+                                    malzemeler: newRecipe.ingredients,
+                                    kcal: newRecipe.nutritional_info.calories || 0,
+                                    protein: newRecipe.nutritional_info.protein || 0,
+                                    karbonhidrat: newRecipe.nutritional_info.carbs || 0,
+                                    yag: newRecipe.nutritional_info.fat || 0,
+                                    image: "/placeholder.png"
+                                };
+
+                                saveRecipe(requestData, {
+                                    setSuccessMessage,
+                                    setShowSuccessPopup,
+                                    setNewRecipe,
+                                    setImagePreview,
+                                    setAddRecipeModal,
+                                    setIsSaving,
+                                    setErrorMessage,
+                                    setShowErrorPopup,
+                                    fetchRecipes
+                                });
+                            }
                         }}
-                        disabled={!newRecipe.title.trim() || !newRecipe.category_id}
+                        disabled={!newRecipe.title.trim() || !newRecipe.category_id || isSaving}
                     >
-                        Ekle
+                        {isSaving ? 'Kaydediliyor...' : 'Ekle'}
                     </button>
                 </div>
             </Modal>
@@ -1549,64 +1581,81 @@ export default function Tarifler() {
                             // Set saving state
                             setIsSaving(true);
 
-                            // Prepare data for API - JSON formatında
-                            const recipeData = {
-                                recipe_id: selectedRecipe.id,
-                                category_id: parseInt(editCategoryId),
-                                name: editTitle,
-                                description: editDescription,
-                                image: "", // Şimdilik resim desteği olmadığı için boş
-                                hazirlanis: editInstructions,
-                                malzemeler: editIngredients,
-                                kcal: editNutritionalInfo.calories || 0,
-                                protein: editNutritionalInfo.protein || 0,
-                                karbonhidrat: editNutritionalInfo.carbs || 0,
-                                yag: editNutritionalInfo.fat || 0
-                            };
+                            // Resim varsa ve yeni bir dosya ise, önce resmi yükle
+                            if (editImage && editImage instanceof File) {
+                                // Form data oluştur
+                                const formData = new FormData();
+                                formData.append('image', editImage);
 
-                            // Send PUT request to API
-                            axios.put(`${config[config.environment].apiUrl}/recipe/updateRecipe`, recipeData, {
-                                headers: {
-                                    Authorization: localStorage.getItem("token"),
-                                    'Content-Type': 'application/json'
-                                },
-                            })
+                                // Resmi yükle
+                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                        'Content-Type': 'multipart/form-data'
+                                    },
+                                })
                                 .then(response => {
-                                    // Map the updated recipe to our component's data structure
-                                    const updatedRecipe = {
-                                        id: response.data.id,
-                                        title: response.data.name,
-                                        description: response.data.description || "",  // Map description field
-                                        category_id: response.data.category_id,
-                                        image: "/placeholder.png",  // API doesn't handle image
-                                        video_url: response.data.hasVideo ? response.data.video : "",
-                                        ingredients: response.data.malzemeler,
-                                        instructions: response.data.hazirlanis,
-                                        nutritional_info: {
-                                            calories: response.data.kcal,
-                                            protein: response.data.protein,
-                                            carbs: response.data.karbonhidrat,
-                                            fat: response.data.yag
-                                        }
+                                    // Yükleme başarılı, resim URL'sini al
+                                    const imageUrl = response.data.imageUrl;
+
+                                    // Tarif verilerini güncelle
+                                    const recipeData = {
+                                        recipe_id: selectedRecipe.id,
+                                        category_id: parseInt(editCategoryId),
+                                        name: editTitle,
+                                        description: editDescription,
+                                        image: imageUrl,
+                                        hazirlanis: editInstructions,
+                                        malzemeler: editIngredients,
+                                        kcal: editNutritionalInfo.calories || 0,
+                                        protein: editNutritionalInfo.protein || 0,
+                                        karbonhidrat: editNutritionalInfo.carbs || 0,
+                                        yag: editNutritionalInfo.fat || 0
                                     };
 
-                                    // Update recipeData state
-                                    setRecipeData(prev => prev.map(recipe => recipe.id === selectedRecipe.id ? updatedRecipe : recipe));
-
-                                    // Show success message
-                                    setSuccessMessage(`"${editTitle}" tarifi başarıyla güncellendi.`);
-                                    setShowSuccessPopup(true);
-
-                                    // Reset saving state and close modal
-                                    setIsSaving(false);
-                                    setEditRecipeModal(false);
+                                    // Tarifi güncelle
+                                    updateRecipe(recipeData, {
+                                        setRecipeData,
+                                        setSuccessMessage,
+                                        setShowSuccessPopup,
+                                        setIsSaving,
+                                        setEditRecipeModal,
+                                        setErrorMessage,
+                                        setShowErrorPopup
+                                    });
                                 })
                                 .catch(error => {
-                                    console.error("Error updating recipe:", error);
-                                    setErrorMessage("Tarif güncellenirken bir hata oluştu.");
+                                    console.error("Error uploading image:", error);
+                                    setErrorMessage("Resim yüklenirken bir hata oluştu.");
                                     setShowErrorPopup(true);
                                     setIsSaving(false);
                                 });
+                            } else {
+                                // Resim değişmedi veya yok, doğrudan tarifi güncelle
+                                const recipeData = {
+                                    recipe_id: selectedRecipe.id,
+                                    category_id: parseInt(editCategoryId),
+                                    name: editTitle,
+                                    description: editDescription,
+                                    image: typeof editImage === 'string' ? editImage : "/placeholder.png",
+                                    hazirlanis: editInstructions,
+                                    malzemeler: editIngredients,
+                                    kcal: editNutritionalInfo.calories || 0,
+                                    protein: editNutritionalInfo.protein || 0,
+                                    karbonhidrat: editNutritionalInfo.carbs || 0,
+                                    yag: editNutritionalInfo.fat || 0
+                                };
+
+                                updateRecipe(recipeData, {
+                                    setRecipeData,
+                                    setSuccessMessage,
+                                    setShowSuccessPopup,
+                                    setIsSaving,
+                                    setEditRecipeModal,
+                                    setErrorMessage,
+                                    setShowErrorPopup
+                                });
+                            }
                         }}
                         disabled={!editTitle.trim() || !editCategoryId || isSaving}
                     >
