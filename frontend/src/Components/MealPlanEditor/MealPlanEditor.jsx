@@ -9,6 +9,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     const [description, setDescription] = useState(existingPlan?.description || editDescription);
     const [categoryId, setCategoryId] = useState(existingPlan?.category_id || editCategoryId);
     const [categories, setCategories] = useState([]);
+    const [planImage, setPlanImage] = useState(existingPlan?.image && !existingPlan.image.includes('placeholder.png') ? existingPlan.image : null);
+    const [imagePreview, setImagePreview] = useState(existingPlan?.image && !existingPlan.image.includes('placeholder.png') ? existingPlan.image : '')
 
     useEffect(() => {
         if (!existingPlan) {
@@ -513,16 +515,41 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 return;
             }
 
+            if (isSaving) return;
+
+            let imageUrl = existingPlan?.image || "/placeholder.png";
+
+            if (planImage && planImage instanceof File) {
+                const formData = new FormData();
+                formData.append('image', planImage);
+
+                try {
+                    const uploadResponse = await axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+
+                    if (uploadResponse.data && uploadResponse.data.imageUrl) {
+                        imageUrl = uploadResponse.data.imageUrl;
+                    }
+                } catch (uploadError) {
+                    console.error("Resim yükleme hatası:", uploadError);
+                    showErrorToast("Resim yüklenirken bir hata oluştu. Plan kaydedilecek ancak varsayılan görsel kullanılacak.");
+                }
+            }
+
             const planData = {
-                nutrition_plan_id: existingPlan?.id ? parseInt(existingPlan.id) : null, // Düzeltildi
+                nutrition_plan_id: existingPlan?.id ? parseInt(existingPlan.id) : null,
                 title: title,
                 description: description || "",
-                image: "/placeholder.png",
+                image: imageUrl, // Resim URL'sini kullan
                 category_id: parseInt(categoryId),
                 mealPlan: mealPlan
             };
 
-            console.log('Saving meal plan:', planData); // Debug için
+            console.log('Saving meal plan:', planData);
 
             const endpoint = `${config[config.environment].apiUrl}/nutrition/updateNutritionPlan`;
             const method = 'put';
@@ -537,7 +564,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             });
 
             if (response.status === 200) {
-                showSuccessToast(`Beslenme planı başarıyla güncellendi.`);
                 onSave(response.data);
             }
         } catch (error) {
@@ -621,6 +647,50 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                 </option>
                             ))}
                         </select>
+                    </div>
+                </div>
+
+                <div className="mui-form-row">
+                    <div className="mui-form-group">
+                        <label htmlFor="plan-image">Plan Görseli</label>
+                        <input
+                            type="file"
+                            id="plan-image"
+                            className="mui-form-control"
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setPlanImage(file);
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
+                        />
+                        <label htmlFor="plan-image" className="file-upload-label">
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Plan önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setPlanImage(null);
+                                        setImagePreview('');
+                                        document.getElementById('plan-image').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
