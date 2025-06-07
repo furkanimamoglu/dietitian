@@ -993,6 +993,31 @@ const styles = StyleSheet.create({
         color: '#757575',
         fontStyle: 'italic'
     },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+        backgroundColor: '#fff',
+        marginTop: 30,
+        marginHorizontal: 20,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    errorText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#5a6268',
+        textAlign: 'center',
+        fontWeight: '500',
+        lineHeight: 24,
+        paddingHorizontal: 10,
+    },
 });
 
 export default AnaSayfa;
+

@@ -445,14 +445,14 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
         if (error) {
             return (
-                <View style={styles.noticeContainer}>
+                <View style={styles.errorContainer}>
                     <Avatar.Icon
                         size={60}
                         icon="information"
                         color="#ff9800"
                         style={{backgroundColor: '#fff3e0'}}
                     />
-                    <Text style={styles.noticeText}>{error}</Text>
+                    <Text style={styles.errorText}>{error}</Text>
                     <Button
                         mode="contained"
                         onPress={fetchTodayMeal}
@@ -1003,7 +1003,31 @@ const styles = StyleSheet.create({
     smallAddButton: {
         marginLeft: 8,
         backgroundColor: '#e8f5e9'
-    }
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+        backgroundColor: '#fff',
+        marginTop: 30,
+        marginHorizontal: 20,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    errorText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#5a6268',
+        textAlign: 'center',
+        fontWeight: '500',
+        lineHeight: 24,
+        paddingHorizontal: 10,
+    },
 });
 
 export default Beslenme;

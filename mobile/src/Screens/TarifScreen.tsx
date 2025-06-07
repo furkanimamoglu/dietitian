@@ -17,7 +17,6 @@ const Tarif = ({navigation}) => {
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Tarif verilerini yükleyen fonksiyon
     const fetchMyRecipes = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -29,6 +28,7 @@ const Tarif = ({navigation}) => {
                 navigation.replace('Login');
                 return;
             }
+            setError(null); // Hata mesajını temizle
 
             const response = await fetch(`${config[config.environment].apiUrl}/client/getMyRecipes`, {
                 method: 'GET',
@@ -37,6 +37,14 @@ const Tarif = ({navigation}) => {
                     'Content-Type': 'application/json',
                 },
             });
+
+            if (response.status === 404) {
+                // 404 durumunda özel mesaj göster, hata olarak değerlendirme
+                setMyRecipes([]);
+                setError('✨ Henüz sizin için özel tarifler eklenmemiş. Diyetisyeniniz yakında lezzetli tarifler paylaşacak! ✨');
+                setLoading(false);
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error('Tarifler yüklenirken bir hata oluştu.');
@@ -52,7 +60,6 @@ const Tarif = ({navigation}) => {
         }
     };
 
-    // Çekerek yenileme işlevi
     const onRefresh = async () => {
         setRefreshing(true);
         try {
@@ -75,7 +82,7 @@ const Tarif = ({navigation}) => {
         return myRecipes.map(item => {
             const recipe = item.Recipe;
 
-            const ingredients = recipe.malzemeler ? recipe.malzemeler.split(',').map(item => item.trim()) : [];
+            const ingredients = recipe.malzemeler ? recipe.malzemeler.split(',').map(malzeme => malzeme.trim()) : [];
 
             const steps = recipe.hazirlanis ? recipe.hazirlanis.split('.').filter(step => step.trim() !== '').map(step => step.trim()) : [];
 
@@ -93,6 +100,7 @@ const Tarif = ({navigation}) => {
                     carbs: recipe.karbonhidrat || 0,
                     fat: recipe.yag || 0
                 },
+                image: recipe.image || null,
                 note: item.note
             };
         });
@@ -236,7 +244,7 @@ const Tarif = ({navigation}) => {
                                 <Icon name="food-variant-off" size={60} color="#ccc" />
                                 <Text style={styles.emptyStateText}>
                                     {myRecipes.length === 0
-                                        ? "Size atanan tarif bulunmamaktadır"
+                                        ? "Size atanmış tarif bulunamadı. Diyetisyeninizden sizinle tarifler paylaşmasını isteyebilirsiniz."
                                         : "Arama kriterlerinize uygun tarif bulunamadı"}
                                 </Text>
                             </View>
@@ -575,12 +583,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 40,
+        backgroundColor: '#fff',
+        marginTop: 30,
+        marginHorizontal: 20,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
     },
     errorText: {
         marginTop: 16,
         fontSize: 16,
-        color: '#ff6b6b',
+        color: '#5a6268',
         textAlign: 'center',
+        fontWeight: '500',
+        lineHeight: 24,
+        paddingHorizontal: 10,
     },
     noteContainer: {
         flexDirection: 'row',
@@ -627,4 +647,3 @@ const styles = StyleSheet.create({
 });
 
 export default Tarif;
-
