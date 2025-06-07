@@ -62,7 +62,7 @@ const storage = diskStorage({
 const upload = multer({ storage });
 
 // Dosya Yükleme Uç Noktası (Güvenli)
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post('/api/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ showOnScreen: true, message: 'Yüklenecek dosya eklenmedi.' });
     }
