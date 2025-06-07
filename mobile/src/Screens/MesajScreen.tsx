@@ -255,12 +255,10 @@ const Mesaj = ({navigation}) => {
     const renderMessageItem = useCallback(({item}) => {
         const isUser = item.sender === 'CLIENT';
 
-        // Standart resim URL kontrolü
         const isImage = item.message && item.message.startsWith('http') &&
             (item.message.endsWith('.jpg') || item.message.endsWith('.jpeg') ||
                 item.message.endsWith('.png') || item.message.endsWith('.gif'));
 
-        // [RESIM:URL] formatındaki mesajları algılama
         const resimMatch = item.message && item.message.match(/^\[RESIM:(http[^[\]]+)\]$/);
         const isResimFormat = !!resimMatch;
         const resimUrl = isResimFormat ? resimMatch[1] : null;
