@@ -504,8 +504,7 @@ export default function Tarifler() {
                     title: recipe.name,
                     description: recipe.description || "",
                     category_id: recipe.category_id,
-                    image: "/placeholder.png",  // API doesn't provide image
-                    video_url: recipe.hasVideo ? recipe.video : "",
+                    image: recipe.image || "/placeholder.png",
                     ingredients: recipe.malzemeler,
                     instructions: recipe.hazirlanis,
                     nutritional_info: {
@@ -1637,7 +1636,7 @@ export default function Tarifler() {
                                     category_id: parseInt(editCategoryId),
                                     name: editTitle,
                                     description: editDescription,
-                                    image: typeof editImage === 'string' ? editImage : "/placeholder.png",
+                                    image: typeof editImage === 'string' && editImage ? editImage : (selectedRecipe.image || "/placeholder.png"),
                                     hazirlanis: editInstructions,
                                     malzemeler: editIngredients,
                                     kcal: editNutritionalInfo.calories || 0,
