@@ -15,6 +15,8 @@ router.post('/changeClientStatus', dietitianController.changeClientStatus);
 
 router.get('/getDietitianInfo', dietitianController.getDietitianInfo);
 
+router.get('/getDietitianSubscriptionDetails', dietitianController.getDietitianSubscriptionDetails);
+
 router.post('/registerClient', dietitianController.registerClient);
 router.delete('/deleteClient', dietitianController.deleteClient);
 router.put('/updateClient', dietitianController.updateClient);

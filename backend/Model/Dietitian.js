@@ -10,11 +10,6 @@ const Dietitian = sequelize.define('Dietitian', {
         allowNull: false,
         primaryKey: true
     },
-    subscription_type: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: "free"
-    },
     phoneNumber: {
         type: DataTypes.BIGINT,
         allowNull: false,
@@ -90,17 +85,29 @@ const Dietitian = sequelize.define('Dietitian', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
-    currency: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
+    subscription_type: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: "free"
+    },
+    subscription_start_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
         validate: {
-            notNull: {
-                msg: 'Para birimi alanı boş bırakılamaz.'
-            },
-            isInt: {
-                msg: 'Para birimi sayısal bir değer olmalıdır.'
-            },
+            isDate: {
+                msg: 'Abonelik başlangıç tarihi geçerli bir tarih olmalıdır.'
+            }
+        }
+    },
+    subscription_end_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+        validate: {
+            isDate: {
+                msg: 'Abonelik bitiş tarihi geçerli bir tarih olmalıdır.'
+            }
         }
     },
     gender: {
@@ -133,6 +140,12 @@ const Dietitian = sequelize.define('Dietitian', {
         }
     }
 
+});
+
+Dietitian.addHook('beforeSave', (dietitian) => {
+    if (dietitian.subscription_end_date && new Date() > dietitian.subscription_end_date) {
+        dietitian.subscription_type = "free";
+    }
 });
 
 module.exports = Dietitian;

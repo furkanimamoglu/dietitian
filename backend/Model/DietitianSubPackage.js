@@ -71,6 +71,26 @@ const DietitianSubPackage = sequelize.define('DietitianSubscription', {
             }
         }
     },
+    sms_allowed: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        validate: {
+            isBoolean: {
+                msg: 'SMS desteği (true/false) olmalıdır.'
+            }
+        }
+    },
+    special_support: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        validate: {
+            isBoolean: {
+                msg: 'Özel destek hizmeti (true/false) olmalıdır.'
+            }
+        }
+    },
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,

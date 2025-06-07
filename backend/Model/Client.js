@@ -118,7 +118,12 @@ const Client = sequelize.define('Client', {
                     msg: 'KVKK onayı alanı boş bırakılamaz.'
                 }
             }
-        }
+        },
+        dailyWaterIntake: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 2500
+        },
     }
 );
 

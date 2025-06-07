@@ -14,7 +14,8 @@ const {DIETITIAN, CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 const {
     Dietitian,
     Client,
-    Notes
+    Notes,
+    DietitianSubPackage
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {Op} = require('sequelize');
 const moment = require("moment");
@@ -547,6 +548,32 @@ class DietitianService {
             });
         } catch (error) {
             throw new Exception("Not eklenirken bir hata oluştu.", 500, true);
+        }
+    }
+
+    static async getDietitianSubscriptionDetails(dietitian_id) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401, true);
+            }
+
+            const dietitian = await Dietitian.findByPk(dietitian_id, {
+                attributes: ['subscription_start_date', 'subscription_end_date', 'subscription_type'],
+                include: [{
+                    model: DietitianSubPackage,
+                    attributes: ['client_limit', 'appointment_limit', 'nutrition_plan_limit', 'exercise_limit',
+                        'recipe_limit', 'sms_allowed', 'special_support'],
+                    as: 'subscription'
+                }]
+            });
+
+            if (!dietitian) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            return dietitian;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
         }
     }
 

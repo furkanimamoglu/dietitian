@@ -1,7 +1,7 @@
 /**
  * @enum
  * @readonly
- * @type {Readonly<{ADMIN: string, USER: string, MODERATOR: string}>}
+ * @type {Readonly<{CLIENT: string, DIETITIAN: string}>}
  */
 const Role = Object.freeze({
     CLIENT: "CLIENT",
