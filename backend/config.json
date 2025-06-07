@@ -1,5 +1,6 @@
 {
   "base_url": "http://localhost:3000",
+  "image_url": "http://localhost:3000/uploads/",
   "app_scheme": "diyetia",
   "database_connection": {
     "host": "localhost",

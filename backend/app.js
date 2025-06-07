@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require("path");
+const fs = require('fs');
 
 const config = require(path.join(__dirname, 'config.json'));
 const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
@@ -27,6 +28,8 @@ const exerciseRoutes = require(path.join(__dirname, "Routes", "exerciseRoutes"))
 const anamnesRoutes = require(path.join(__dirname, "Routes", "anamnesRoutes"));
 const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
 const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
+const {diskStorage} = require("multer");
+const multer = require("multer");
 
 app.use(bodyParser.json());
 
@@ -42,6 +45,45 @@ app.use((req, res, next) => {
     next();
 });
 
+
+// Static Files
+app.use('/uploads', express.static('uploads'));
+
+const storage = diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, 'uploads'));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage });
+
+// Dosya Yükleme Uç Noktası (Güvenli)
+app.post('/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ showOnScreen: true, message: 'Yüklenecek dosya eklenmedi.' });
+    }
+
+    const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExt = path.extname(req.file.originalname).toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+        fs.unlink(req.file.path, () => {});
+        return res.status(400).json({ showOnScreen: true, message: 'Sadece resim dosyaları yüklenebilir.' });
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (req.file.size > maxSize) {
+        fs.unlink(req.file.path, () => {});
+        return res.status(400).json({ showOnScreen: true, message: 'Dosya boyutu 5MB\'ı geçemez.' });
+    }
+
+    const imageUrl = `${config.image_url}${req.file.filename}`;
+    res.json({ imageUrl });
+});
+
 // Routers
 app.use('/api/dietitian', dietitianRoutes);
 app.use('/api/client', clientRoutes);
@@ -55,6 +97,7 @@ app.use('/api/message', messageRoutes);
 app.use('/api/measurement', measurementRoutes);
 app.use('/api/package', packageRoutes);
 app.use('/api/nutrition', nutritionRoutes);
+
 
 // Working Directory
 try {
