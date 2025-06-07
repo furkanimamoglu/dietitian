@@ -347,7 +347,13 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
     return (
         <div className="exercise-card">
             <div className="card-image-container" onClick={() => onView(item)}>
-                {item.video ? (
+                {item.image ? (
+                    <img
+                        src={item.image}
+                        alt={item.exercise_name}
+                        className="card-image"
+                    />
+                ) : item.video ? (
                     <div className="video-placeholder">
                         <FitnessCenterIcon className="exercise-icon"/>
                         <span>Video Mevcut</span>
@@ -355,7 +361,7 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
                 ) : (
                     <div className="video-placeholder">
                         <FitnessCenterIcon className="exercise-icon"/>
-                        <span>Video Yok</span>
+                        <span>Görsel Yok</span>
                     </div>
                 )}
             </div>
@@ -446,6 +452,7 @@ export default function Egzersizler() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [imagePreview, setImagePreview] = useState('');
 
     // Add difficulty filter state
     const [difficultyFilter, setDifficultyFilter] = useState(0); // 0 means no filter, 1-5 for difficulty levels
@@ -489,7 +496,7 @@ export default function Egzersizler() {
         exercise_name: '',
         exercise_description: '',
         category_id: '',
-        video: '',
+        image: '',
         duration: 30,
         difficulty: 3,
         equipment: '',
@@ -502,7 +509,7 @@ export default function Egzersizler() {
         exercise_name: '',
         exercise_description: '',
         category_id: '',
-        video: '',
+        image: '',
         duration: 30,
         difficulty: 3,
         equipment: '',
@@ -843,18 +850,19 @@ export default function Egzersizler() {
     const handleEdit = (item) => {
         setSelectedExercise(item);
 
-        // Set form fields with current values
         setEditExerciseData({
             exercise_id: item.id,
             exercise_name: item.exercise_name || '',
             exercise_description: item.exercise_description || '',
             category_id: item.category_id || '',
-            video: item.video || '',
             duration: item.duration || 30,
             difficulty: item.difficulty || 3,
             equipment: item.equipment || '',
-            calories_burned: item.calories_burned || 0
+            calories_burned: item.calories_burned || 0,
+            image: item.image || null
         });
+
+        setImagePreview(item.image || '');
 
         setEditExerciseModal(true);
     };
@@ -918,42 +926,84 @@ export default function Egzersizler() {
     };
 
     const handleAddExercise = () => {
-        if (!newExercise.exercise_name.trim() || !newExercise.category_id) return;
+        // Gerekli alanların kontrolü
+        if (!newExercise.exercise_name.trim() || !newExercise.category_id) {
+            setErrorMessage("Egzersiz adı ve kategori alanları zorunludur.");
+            setShowErrorPopup(true);
+            return;
+        }
 
         setIsSaving(true);
 
-        axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, newExercise, {
-            headers: {Authorization: localStorage.getItem("token")}
-        })
-            .then(response => {
-                // Add the new exercise to the state
-                setEgzersizData([...egzersizData, response.data]);
+        // 1. Kullanıcı bir resim seçti mi kontrol et
+        // Eğer 'newExercise.image' bir File objesi ise, önce yükleme yap.
+        if (newExercise.image && newExercise.image instanceof File) {
+            const formData = new FormData();
+            formData.append('image', newExercise.image);
 
-                // Reset form
-                setNewExercise({
-                    exercise_name: '',
-                    exercise_description: '',
-                    category_id: '',
-                    video: '',
-                    duration: 30,
-                    difficulty: 3,
-                    equipment: '',
-                    calories_burned: 0
+            // 2. Resmi /upload endpoint'ine yükle
+            axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                    'Content-Type': 'multipart/form-data'
+                },
+            })
+                .then(uploadResponse => {
+                    // 3. Yükleme başarılı olursa, dönen resim URL'ini al
+                    const imageUrl = uploadResponse.data.imageUrl; // API'nızın 'imageUrl' döndürdüğünü varsayıyoruz
+
+                    // 4. 'addExercise' isteği için veriyi hazırla (File objesi yerine imageUrl ile)
+                    const exerciseDataToSend = {
+                        ...newExercise,
+                        image: imageUrl
+                    };
+
+                    // 5. Egzersizi eklemek için API çağrısını yap
+                    return axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, exerciseDataToSend, {
+                        headers: { Authorization: localStorage.getItem("token") }
+                    });
+                })
+                .then(addResponse => {
+                    // Ekleme başarılı sonrası işlemler
+                    setEgzersizData(prevData => [...prevData, addResponse.data]);
+                    setAddExerciseModal(false);
+                    setSuccessMessage(`"${addResponse.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
+                    setShowSuccessPopup(true);
+                    // Formu ve state'i temizle
+                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setImagePreview('');
+                })
+                .catch(error => {
+                    console.error("Egzersiz eklenirken bir hata oluştu:", error);
+                    setErrorMessage("Egzersiz eklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+                    setShowErrorPopup(true);
+                })
+                .finally(() => {
+                    setIsSaving(false);
                 });
-                setAddExerciseModal(false);
 
-                // Show success message
-                setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
-                setShowSuccessPopup(true);
+        } else {
+            // Kullanıcı resim seçmediyse, doğrudan ekleme yap
+            axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, newExercise, {
+                headers: { Authorization: localStorage.getItem("token") }
             })
-            .catch(error => {
-                console.error("Error adding exercise:", error);
-                setErrorMessage("Egzersiz eklenirken bir hata oluştu.");
-                setShowErrorPopup(true);
-            })
-            .finally(() => {
-                setIsSaving(false);
-            });
+                .then(response => {
+                    setEgzersizData(prevData => [...prevData, response.data]);
+                    setAddExerciseModal(false);
+                    setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
+                    setShowSuccessPopup(true);
+                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setImagePreview('');
+                })
+                .catch(error => {
+                    console.error("Error adding exercise:", error);
+                    setErrorMessage("Egzersiz eklenirken bir hata oluştu.");
+                    setShowErrorPopup(true);
+                })
+                .finally(() => {
+                    setIsSaving(false);
+                });
+        }
     };
 
     const handleSaveExercise = () => {
@@ -961,44 +1011,106 @@ export default function Egzersizler() {
 
         setIsSaving(true);
 
-        axios.put(`${config[config.environment].apiUrl}/exercise/updateExercise`, editExerciseData, {
-            headers: {Authorization: localStorage.getItem("token")}
-        })
-            .then(response => {
-                // Update the exercise in the state
-                setEgzersizData(prev =>
-                    prev.map(item =>
-                        item.id === editExerciseData.exercise_id ? response.data : item
-                    )
-                );
+        if (editExerciseData.image && editExerciseData.image instanceof File) {
+            const formData = new FormData();
+            formData.append('image', editExerciseData.image);
 
-                // Close modal and reset form
-                setEditExerciseModal(false);
-                setSelectedExercise(null);
-                setEditExerciseData({
-                    exercise_id: '',
-                    exercise_name: '',
-                    exercise_description: '',
-                    category_id: '',
-                    video: '',
-                    duration: 30,
-                    difficulty: 3,
-                    equipment: '',
-                    calories_burned: 0
+            axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                    'Content-Type': 'multipart/form-data'
+                },
+            })
+                .then(response => {
+                    const imageUrl = response.data.imageUrl;
+
+                    const exerciseData = {
+                        ...editExerciseData,
+                        image: imageUrl
+                    };
+
+                    return axios.put(`${config[config.environment].apiUrl}/exercise/updateExercise`, exerciseData, {
+                        headers: {Authorization: localStorage.getItem("token")}
+                    });
+                })
+                .then(response => {
+                    setEgzersizData(prev =>
+                        prev.map(item =>
+                            item.id === editExerciseData.exercise_id ? response.data : item
+                        )
+                    );
+
+                    setEditExerciseModal(false);
+                    setSelectedExercise(null);
+                    setEditExerciseData({
+                        exercise_id: '',
+                        exercise_name: '',
+                        exercise_description: '',
+                        category_id: '',
+                        duration: 30,
+                        difficulty: 3,
+                        equipment: '',
+                        calories_burned: 0,
+                        image: null
+                    });
+                    setImagePreview('');
+
+                    setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla güncellendi.`);
+                    setShowSuccessPopup(true);
+                })
+                .catch(error => {
+                    console.error("Error updating exercise:", error);
+                    setErrorMessage("Egzersiz güncellenirken bir hata oluştu.");
+                    setShowErrorPopup(true);
+                })
+                .finally(() => {
+                    setIsSaving(false);
                 });
+        } else {
+            const exerciseData = {
+                ...editExerciseData,
+                image: typeof editExerciseData.image === 'string' && editExerciseData.image ?
+                    editExerciseData.image : (selectedExercise.image || null)
+            };
 
-                // Show success message
-                setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla güncellendi.`);
-                setShowSuccessPopup(true);
+            axios.put(`${config[config.environment].apiUrl}/exercise/updateExercise`, exerciseData, {
+                headers: {Authorization: localStorage.getItem("token")}
             })
-            .catch(error => {
-                console.error("Error updating exercise:", error);
-                setErrorMessage("Egzersiz güncellenirken bir hata oluştu.");
-                setShowErrorPopup(true);
-            })
-            .finally(() => {
-                setIsSaving(false);
-            });
+                .then(response => {
+                    setEgzersizData(prev =>
+                        prev.map(item =>
+                            item.id === editExerciseData.exercise_id ? response.data : item
+                        )
+                    );
+
+                    setEditExerciseModal(false);
+                    setSelectedExercise(null);
+                    setEditExerciseData({
+                        exercise_id: '',
+                        exercise_name: '',
+                        exercise_description: '',
+                        category_id: '',
+                        video: '',
+                        duration: 30,
+                        difficulty: 3,
+                        equipment: '',
+                        calories_burned: 0,
+                        image: null
+                    });
+                    setImagePreview('');
+
+                    setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla güncellendi.`);
+                    setShowSuccessPopup(true);
+                })
+                .catch(error => {
+                    console.error("Error updating exercise:", error);
+                    setErrorMessage("Egzersiz güncellenirken bir hata oluştu.");
+                    setShowErrorPopup(true);
+                })
+                .finally(() => {
+                    setIsSaving(false);
+                });
+        }
     };
 
     const handleAddToUser = () => {
@@ -1384,6 +1496,13 @@ export default function Egzersizler() {
                 onClose={() => setDetailModal(false)}
             >
                 <div className="detail-modal-content">
+                    {detailItem?.image && (
+                        <img
+                            src={detailItem.image}
+                            alt={detailItem.exercise_name}
+                            className="recipe-detail-image"
+                        />
+                    )}
                     <p className="detail-description">{detailItem?.exercise_description}</p>
 
                     <div className="exercise-detail-info">
@@ -1685,15 +1804,45 @@ export default function Egzersizler() {
                         </select>
                     </div>
                     <div className="input-container">
-                        <label htmlFor="exerciseVideo">Video URL (Opsiyonel)</label>
+                        <label htmlFor="exerciseImage">Egzersiz Resmi</label>
                         <input
-                            type="text"
-                            id="exerciseVideo"
+                            type="file"
+                            id="exerciseImage"
                             className="text-input"
-                            value={newExercise.video}
-                            onChange={(e) => setNewExercise({...newExercise, video: e.target.value})}
-                            placeholder="Video URL adresi giriniz"
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setNewExercise({...newExercise, image: file});
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
                         />
+                        <label htmlFor="exerciseImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Egzersiz önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setNewExercise({...newExercise, image: null});
+                                        setImagePreview('');
+                                        document.getElementById('exerciseImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div className="exercise-details-row">
                         <div className="input-container half-width">
@@ -1820,15 +1969,45 @@ export default function Egzersizler() {
                         </select>
                     </div>
                     <div className="input-container">
-                        <label htmlFor="editExerciseVideo">Video URL (Opsiyonel)</label>
+                        <label htmlFor="editExerciseImage">Egzersiz Resmi</label>
                         <input
-                            type="text"
-                            id="editExerciseVideo"
+                            type="file"
+                            id="editExerciseImage"
                             className="text-input"
-                            value={editExerciseData.video}
-                            onChange={(e) => setEditExerciseData({...editExerciseData, video: e.target.value})}
-                            placeholder="Video URL adresi giriniz"
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setEditExerciseData({...editExerciseData, image: file});
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
                         />
+                        <label htmlFor="editExerciseImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Egzersiz önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setEditExerciseData({...editExerciseData, image: null});
+                                        setImagePreview('');
+                                        document.getElementById('editExerciseImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div className="exercise-details-row">
                         <div className="input-container half-width">
@@ -2617,4 +2796,3 @@ export default function Egzersizler() {
         </Default>
     );
 }
-
