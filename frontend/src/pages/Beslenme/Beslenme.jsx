@@ -1087,13 +1087,39 @@ export default function Beslenme() {
             });
     };
 
-    const handleAddPlan = () => {
+    const handleAddPlan = async () => {
         if (!newPlan.title.trim() || !newPlan.category_id) return;
+
+        let imageUrl = '';
+        if (planImage) {
+            const formData = new FormData();
+            formData.append('image', planImage);
+
+            try {
+                const uploadRes = await axios.post(
+                    `${config[config.environment].apiUrl}/upload`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+                imageUrl = uploadRes.data.imageUrl;
+            } catch (err) {
+                console.error("Resim yüklenirken hata oluştu:", err);
+                setErrorMessage("Resim yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+                return;
+            }
+        }
 
         const planData = {
             title: newPlan.title.trim(),
             description: newPlan.description.trim(),
             category_id: newPlan.category_id,
+            image: imageUrl,
             mealPlan: {}
         };
 
@@ -1609,7 +1635,7 @@ export default function Beslenme() {
                                 if (file) {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
-                                        setEditImage(file);
+                                        setPlanImage(file);
                                         setImagePreview(reader.result);
                                     };
                                     reader.readAsDataURL(file);
