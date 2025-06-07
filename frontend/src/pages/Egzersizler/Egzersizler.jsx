@@ -56,13 +56,11 @@ import {
     Typography
 } from '@mui/material';
 
-// Register a custom font with Turkish character support
 Font.register({
     family: 'Open Sans',
     src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
 });
 
-// Define styles for PDF
 const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
@@ -218,11 +216,10 @@ const pdfStyles = StyleSheet.create({
     }
 });
 
-// PDF Document Component for Exercise
 const ExerciseDocument = ({exercise, assignmentData}) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Dr. Furkan İmamoğlu"; // Bu kısım dinamik olarak değiştirilebilir
+    const dietitianName = "Belirtilmemiş";
 
     return (
         <Document>
@@ -313,7 +310,6 @@ const ExerciseDocument = ({exercise, assignmentData}) => {
     );
 };
 
-// Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     return (
         <div
@@ -342,7 +338,6 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-// Exercise Card Component
 const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
     return (
         <div className="exercise-card">
@@ -423,7 +418,6 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
     );
 };
 
-// Modal Component
 const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
 
@@ -455,13 +449,10 @@ export default function Egzersizler() {
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
 
-    // Add difficulty filter state
-    const [difficultyFilter, setDifficultyFilter] = useState(0); // 0 means no filter, 1-5 for difficulty levels
+    const [difficultyFilter, setDifficultyFilter] = useState(0);
 
-    // Add calorie filter state
-    const [calorieFilter, setCalorieFilter] = useState(null); // null means no filter
+    const [calorieFilter, setCalorieFilter] = useState(null);
 
-    // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -475,24 +466,19 @@ export default function Egzersizler() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Delete confirmation modal states
     const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
     const [affectedExercises, setAffectedExercises] = useState([]);
-    // Add state for multiple categories deletion
     const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
 
-    // New exercise state
     const [newExercise, setNewExercise] = useState({
         exercise_name: '',
         exercise_description: '',
@@ -504,7 +490,6 @@ export default function Egzersizler() {
         calories_burned: 0
     });
 
-    // Edit exercise states
     const [editExerciseData, setEditExerciseData] = useState({
         exercise_id: '',
         exercise_name: '',
@@ -517,7 +502,6 @@ export default function Egzersizler() {
         calories_burned: 0
     });
 
-    // Danışana atanmış egzersiz programları için state'ler
     const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [filteredDanisanList, setFilteredDanisanList] = useState([]);
     const [clientExercisesModal, setClientExercisesModal] = useState(false);
@@ -525,18 +509,15 @@ export default function Egzersizler() {
     const [loadingClientExercises, setLoadingClientExercises] = useState(false);
     const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
-    // Silme onay modalı için state'ler
     const [deleteAssignmentConfirmModal, setDeleteAssignmentConfirmModal] = useState(false);
     const [assignmentToDelete, setAssignmentToDelete] = useState(null);
 
-    // Add new state for exercise history
     const [exerciseHistory, setExerciseHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [historyStartDate, setHistoryStartDate] = useState('');
     const [historyEndDate, setHistoryEndDate] = useState('');
     const [activeTab, setActiveTab] = useState(0);
 
-    // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
@@ -547,7 +528,6 @@ export default function Egzersizler() {
         }
     }, [showSuccessPopup]);
 
-    // Auto-hide error popup after 5 seconds
     useEffect(() => {
         if (showErrorPopup) {
             const timer = setTimeout(() => {
@@ -558,7 +538,6 @@ export default function Egzersizler() {
         }
     }, [showErrorPopup]);
 
-    // Fetch categories
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/exercise/getMyExerciseCategories`, {
@@ -575,13 +554,11 @@ export default function Egzersizler() {
             });
     }, []);
 
-    // Danışana atanmış egzersiz programları için fonksiyon
     const getClientExercises = (clientId) => {
         const danisan = danisanList.find(d => d.id === clientId);
         setSelectedClientInfo(danisan);
         setLoadingClientExercises(true);
 
-        // Set default dates for history filter (last 30 days)
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - 30);
@@ -596,7 +573,6 @@ export default function Egzersizler() {
         setHistoryStartDate(formatDate(startDate));
         setHistoryEndDate(formatDate(endDate));
 
-        // Get assigned exercises
         axios.get(`${config[config.environment].apiUrl}/exercise/getClientExercises?client_id=${clientId}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
@@ -605,7 +581,6 @@ export default function Egzersizler() {
                 setLoadingClientExercises(false);
                 setClientExercisesModal(true);
 
-                // Also fetch exercise history
                 fetchExerciseHistory(clientId, formatDate(startDate), formatDate(endDate));
             })
             .catch(error => {
@@ -616,7 +591,6 @@ export default function Egzersizler() {
             });
     }
 
-    // Add function to fetch exercise history
     const fetchExerciseHistory = (clientId, startDate, endDate) => {
         setLoadingHistory(true);
         axios.get(`${config[config.environment].apiUrl}/exercise/getClientExerciseHistory?client_id=${clientId}&start_date=${startDate}&end_date=${endDate}`, {
@@ -634,7 +608,6 @@ export default function Egzersizler() {
             });
     }
 
-    // Modify this to handle date changes automatically
     const handleHistoryDateChange = (dateType, newValue) => {
         const formattedDate = newValue ? newValue.toISOString().split('T')[0] : '';
 
@@ -651,12 +624,10 @@ export default function Egzersizler() {
         }
     };
 
-    // Add function to handle tab changes
     const handleChangeTab = (event, newValue) => {
         setActiveTab(newValue);
     }
 
-    // Fetch exercises
     const fetchExercises = () => {
         setLoading(true);
         axios
@@ -705,30 +676,23 @@ export default function Egzersizler() {
         }
     }, [danisanList, danisanSearchTerm]);
 
-    // Filter categories based on search term
     const filteredCategories = categoryData.filter(category =>
         (category?.name || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Filter exercise programs based on selected categories, search term, difficulty, and calories
     const filteredExerciseData = egzersizData.filter(item => {
-        // Check name/description search filter
         const searchMatch = !exerciseSearchTerm ||
             item.exercise_name.toLowerCase().includes(exerciseSearchTerm.toLowerCase()) ||
             (item.exercise_description && item.exercise_description.toLowerCase().includes(exerciseSearchTerm.toLowerCase()));
 
-        // First check category filter
         const categoryMatch = checkedCategories.length === 0 ||
             checkedCategories.some(id => {
-                // Handle both string and number comparisons
                 const itemCategoryId = String(item.category_id || '');
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
 
-        // Then check difficulty filter
         const difficultyMatch = difficultyFilter === 0 || item.difficulty === difficultyFilter;
 
-        // Check calorie filter
         let calorieMatch = true;
         if (calorieFilter !== null) {
             const calories = item.calories_burned || 0;
@@ -756,11 +720,9 @@ export default function Egzersizler() {
             }
         }
 
-        // Item must match all filters
         return searchMatch && categoryMatch && difficultyMatch && calorieMatch;
     });
 
-    // Category handlers
     const handleCategoryCheck = (categoryId) => {
         setCheckedCategories(prev =>
             prev.includes(categoryId)
@@ -773,7 +735,6 @@ export default function Egzersizler() {
         const category = categoryData.find(cat => cat.id === categoryId);
         if (!category) return;
 
-        // Find exercises that would be affected by deleting this category
         const exercisesToDelete = egzersizData.filter(exercise => exercise.category_id === categoryId);
 
         setCategoryToDelete(category);
@@ -781,11 +742,9 @@ export default function Egzersizler() {
         setDeleteCategoryConfirmModal(true);
     };
 
-    // Add handler for multiple categories deletion
     const handleOpenMultiDeleteConfirm = () => {
         if (checkedCategories.length === 0) return;
 
-        // Find exercises that would be affected by deleting these categories
         const exercisesToDelete = egzersizData.filter(exercise =>
             checkedCategories.includes(exercise.category_id)
         );
@@ -801,17 +760,14 @@ export default function Egzersizler() {
             exercise_category_name: newCategoryTitle.trim()
         };
 
-        // Make API call to add the category
         axios.post(`${config[config.environment].apiUrl}/exercise/addExerciseCategory`, newCategory, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
-                // Add the new category to the state
                 setCategoryData([...categoryData, response.data]);
                 setNewCategoryTitle('');
                 setAddCategoryModal(false);
 
-                // Show success message
                 setSuccessMessage(`"${newCategory.exercise_category_name}" kategorisi başarıyla eklendi.`);
                 setShowSuccessPopup(true);
             })
@@ -822,7 +778,6 @@ export default function Egzersizler() {
             });
     };
 
-    // Exercise card handlers
     const handleOpenDetailModal = (item) => {
         setDetailItem(item);
         setDetailModal(true);
@@ -849,7 +804,6 @@ export default function Egzersizler() {
     };
 
     const handlePrint = (item) => {
-        // PDF generation is now handled by the PDFDownloadLink component
         console.log("Printing exercise:", item);
     };
 
@@ -908,16 +862,13 @@ export default function Egzersizler() {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {
-                // Update local state after successful deletion
                 setCategoryData(prev => prev.filter(cat => cat.id !== categoryToDelete.id));
                 setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
-                // Also remove any exercises that were in the deleted category
                 setEgzersizData(prev => prev.filter(exercise => exercise.category_id !== categoryToDelete.id));
                 setDeleteCategoryConfirmModal(false);
                 setCategoryToDelete(null);
                 setAffectedExercises([]);
 
-                // Show success popup
                 setSuccessMessage(`"${categoryToDelete.name}" kategorisi başarıyla silindi.`);
                 setShowSuccessPopup(true);
             })
@@ -932,7 +883,6 @@ export default function Egzersizler() {
     };
 
     const handleAddExercise = () => {
-        // Gerekli alanların kontrolü
         if (!newExercise.exercise_name.trim() || !newExercise.category_id) {
             setErrorMessage("Egzersiz adı ve kategori alanları zorunludur.");
             setShowErrorPopup(true);
@@ -941,13 +891,10 @@ export default function Egzersizler() {
 
         setIsSaving(true);
 
-        // 1. Kullanıcı bir resim seçti mi kontrol et
-        // Eğer 'newExercise.image' bir File objesi ise, önce yükleme yap.
         if (newExercise.image && newExercise.image instanceof File) {
             const formData = new FormData();
             formData.append('image', newExercise.image);
 
-            // 2. Resmi /upload endpoint'ine yükle
             axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
@@ -955,27 +902,22 @@ export default function Egzersizler() {
                 },
             })
                 .then(uploadResponse => {
-                    // 3. Yükleme başarılı olursa, dönen resim URL'ini al
-                    const imageUrl = uploadResponse.data.imageUrl; // API'nızın 'imageUrl' döndürdüğünü varsayıyoruz
+                    const imageUrl = uploadResponse.data.imageUrl;
 
-                    // 4. 'addExercise' isteği için veriyi hazırla (File objesi yerine imageUrl ile)
                     const exerciseDataToSend = {
                         ...newExercise,
                         image: imageUrl
                     };
 
-                    // 5. Egzersizi eklemek için API çağrısını yap
                     return axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, exerciseDataToSend, {
                         headers: { Authorization: localStorage.getItem("token") }
                     });
                 })
                 .then(addResponse => {
-                    // Ekleme başarılı sonrası işlemler
                     setEgzersizData(prevData => [...prevData, addResponse.data]);
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${addResponse.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    // Formu ve state'i temizle
                     setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
                     setImagePreview('');
                 })
@@ -989,7 +931,6 @@ export default function Egzersizler() {
                 });
 
         } else {
-            // Kullanıcı resim seçmediyse, doğrudan ekleme yap
             axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, newExercise, {
                 headers: { Authorization: localStorage.getItem("token") }
             })
@@ -1169,7 +1110,6 @@ export default function Egzersizler() {
     const handleDeleteAssignedExercise = (assignmentId) => {
         if (!assignmentId) return;
 
-        // Modal ile silme onayı iste
         setAssignmentToDelete(assignmentId);
         setDeleteAssignmentConfirmModal(true);
     };
@@ -1200,8 +1140,6 @@ export default function Egzersizler() {
                 setAssignmentToDelete(null);
             });
     };
-
-    // PDF generation is now handled by the ExerciseDocument component with react-pdf
 
     return (
         <Default>
@@ -1716,7 +1654,6 @@ export default function Egzersizler() {
                                 return;
                             }
 
-                            // Create an array of promises for each category deletion
                             const deletePromises = checkedCategories.map(categoryId =>
                                 axios.delete(
                                     `${config[config.environment].apiUrl}/exercise/deleteExerciseCategory?exercise_category_id=${categoryId}`,
@@ -1728,33 +1665,25 @@ export default function Egzersizler() {
                                 )
                             );
 
-                            // Execute all deletion requests
                             Promise.all(deletePromises)
                                 .then(responses => {
-                                    // Check if all deletions were successful
                                     const allSuccessful = responses.every(response => response.status === 200);
 
                                     if (allSuccessful) {
-                                        // Remove deleted categories from state
                                         setCategoryData(prevData =>
                                             prevData.filter(category => !checkedCategories.includes(category.id))
                                         );
 
-                                        // Clear checked categories
                                         setCheckedCategories([]);
 
-                                        // Refresh exercises to remove those from deleted categories
                                         fetchExercises();
 
-                                        // Show success message
                                         setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Some deletions failed
                                         setErrorMessage("Bazı kategoriler silinemedi.");
                                         setShowErrorPopup(true);
 
-                                        // Refresh categories to get updated list
                                         axios
                                             .get(`${config[config.environment].apiUrl}/exercise/getMyExerciseCategories`, {
                                                 headers: {
@@ -1767,7 +1696,6 @@ export default function Egzersizler() {
                                             });
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteMultiCategoriesConfirmModal(false);
                                     setAffectedExercises([]);
                                 })
@@ -1776,7 +1704,6 @@ export default function Egzersizler() {
                                     setErrorMessage("Kategoriler silinirken bir hata oluştu.");
                                     setShowErrorPopup(true);
 
-                                    // Close modal but don't clear checkedCategories
                                     setDeleteMultiCategoriesConfirmModal(false);
                                     setAffectedExercises([]);
                                 });
@@ -1842,7 +1769,6 @@ export default function Egzersizler() {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setNewExercise({...newExercise, image: file});
@@ -2007,7 +1933,6 @@ export default function Egzersizler() {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setEditExerciseData({...editExerciseData, image: file});
@@ -2291,7 +2216,6 @@ export default function Egzersizler() {
                     </Box>
 
                     {activeTab === 0 ? (
-                        // Assigned exercises tab
                         loadingClientExercises ? (
                             <Box sx={{
                                 display: 'flex',
@@ -2529,7 +2453,6 @@ export default function Egzersizler() {
                             </Box>
                         )
                     ) : (
-                        // Exercise history tab
                         <div>
                             <Box sx={{mb: 3, p: 2, bgcolor: '#ffffff', borderRadius: 2, border: '1px solid #e0e0e0'}}>
                                 <Typography variant="subtitle1" sx={{
