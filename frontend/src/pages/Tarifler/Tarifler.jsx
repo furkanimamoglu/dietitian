@@ -1147,7 +1147,6 @@ export default function Tarifler() {
                                 })
                                 .then(response => {
                                     // Yükleme başarılı, resim URL'sini al
-                                    debugger;
                                     const imageUrl = response.data.imageUrl;
 
                                     // Tarif verilerini hazırla ve resim URL'sini ekle
