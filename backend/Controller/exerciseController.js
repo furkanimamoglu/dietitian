@@ -71,7 +71,7 @@ class exerciseController {
                 category_id,
                 exercise_name,
                 exercise_description,
-                video,
+                image,
                 duration,
                 difficulty,
                 equipment,
@@ -82,7 +82,7 @@ class exerciseController {
                 category_id,
                 exercise_name,
                 exercise_description,
-                video,
+                image,
                 duration,
                 difficulty,
                 equipment,
@@ -116,7 +116,7 @@ class exerciseController {
                 exercise_name,
                 exercise_description,
                 category_id,
-                video,
+                image,
                 duration,
                 difficulty,
                 equipment,
@@ -127,7 +127,7 @@ class exerciseController {
                 exercise_name,
                 exercise_description,
                 category_id,
-                video,
+                image,
                 duration,
                 difficulty,
                 equipment,
@@ -354,7 +354,7 @@ class exerciseController {
                 });
             }
 
-            const { client_id, start_date, end_date } = req.query;
+            const {client_id, start_date, end_date} = req.query;
 
             const result = await ExerciseService.getClientExerciseHistory(dietitian_id, client_id, start_date, end_date);
             res.status(200).json(result);

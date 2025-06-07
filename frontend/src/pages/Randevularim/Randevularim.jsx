@@ -1,8 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import axios from "axios";
 import "./Randevularim.css";
-import {toast} from 'react-hot-toast';
-import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 import FullCalendar from "@fullcalendar/react";
 import "@fullcalendar/core";
@@ -34,7 +33,9 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 
 import config from "../../config.js";
-import {Close, Delete} from "@mui/icons-material";
+import Close from "@mui/icons-material/Close";
+import Delete from "@mui/icons-material/Delete";
+
 
 export default function Randevularim() {
     const [randevular, setRandevular] = useState([]);
@@ -44,7 +45,6 @@ export default function Randevularim() {
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
-    // Validasyon durumları için state'ler
     const [validationErrors, setValidationErrors] = useState({
         title: false,
         start: false,
@@ -87,7 +87,12 @@ export default function Randevularim() {
                         client_id: appointment.client_id,
                         status: appointment.status,
                     },
-                    color: appointment.status === "approved" ? "#4CAF50" : "#FF9800"
+                    color:
+                        appointment.status === "approved"
+                            ? "#4CAF50"
+                            : appointment.status === "cancelled"
+                                ? "#F44336"
+                                : "#FF9800"
                 }));
 
                 setRandevular(formattedAppointments);

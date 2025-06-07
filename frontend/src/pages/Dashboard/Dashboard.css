@@ -127,11 +127,6 @@
     border-radius: 6px;
 }
 
-.action-button:hover {
-    color: #2980b9;
-    background-color: rgba(52, 152, 219, 0.1);
-}
-
 .card-content {
     padding: 20px 24px;
     flex: 1;

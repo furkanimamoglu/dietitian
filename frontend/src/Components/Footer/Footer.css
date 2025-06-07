@@ -1,13 +1,16 @@
 .footer {
-    background: linear-gradient(135deg, #2c8a46 0%, #3d8a3d 50%, #2c8a46 100%);
-    color: white;
+    background: linear-gradient(135deg, #fc9e21 0%, #ff7355 50%, #fc9e21 100%);
+    color: #fff;
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
-    box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
     z-index: 100;
-    padding: 6px 0;
+    padding: 8px 0;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .footer-bottom {

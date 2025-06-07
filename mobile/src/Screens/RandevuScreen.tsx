@@ -133,12 +133,16 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
     const [filterStatus, setFilterStatus] = useState('all');
 
     const formatDate = useCallback((date: Date) => {
-        return date.toISOString().split('T')[0];
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }, []);
+
 
     const timeSlots = useMemo(() => {
         const slots = [];
-        for (let h = 8; h <= 18; h++) {
+        for (let h = 8; h <= 17; h++) {
             for (let m = 0; m < 60; m += 30) {
                 const hh = h.toString().padStart(2, '0');
                 const mm = m.toString().padStart(2, '0');
@@ -179,7 +183,13 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     return;
                 }
 
-                const startDateTime = new Date(`${formatDate(selectedDate)}T${selectedTime}`);
+                const [hour, minute] = selectedTime.split(':').map(Number);
+
+                const year = selectedDate.getUTCFullYear();
+                const month = selectedDate.getUTCMonth(); // 0 tabanlı
+                const day = selectedDate.getUTCDate();
+
+                const startDateTime = new Date(Date.UTC(year, month, day, hour, minute));
                 const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
                 const response = await fetch(`${config[config.environment].apiUrl}/appointment/addAppointmentAsClient`, {
@@ -190,8 +200,8 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                     },
                     body: JSON.stringify({
                         title: description,
-                        start: startDateTime.toISOString(),
-                        end: endDateTime.toISOString()
+                        start: startDateTime,
+                        end: endDateTime
                     })
                 });
 
@@ -262,8 +272,8 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                             <Avatar.Icon
                                 size={36}
                                 icon={isToday ? "calendar-today" : "calendar"}
-                                style={[styles.calendarIcon, {backgroundColor: isToday ? "#FF9800" : "#E3F2FD"}]}
-                                color={isToday ? "#ffffff" : "#FF9800"}
+                                style={[styles.calendarIcon, {backgroundColor: isToday ? "#fc9e21" : "#E3F2FD"}]}
+                                color={isToday ? "#ffffff" : "#fc9e21"}
                             />
                             <View style={styles.dateTimeText}>
                                 <Text style={styles.dateText}>{formatDisplayDate(item.start)}</Text>
@@ -418,7 +428,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                                                 selectedTime === time && styles.selectedTimeChip,
                                                 isDisabled && styles.disabledTimeChip
                                             ]}
-                                            selectedColor="#4CAF50"
+                                            selectedColor="#fc9e21"
                                         >
                                             {time}
                                         </Chip>
@@ -434,17 +444,17 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                                 multiline
                                 numberOfLines={2}
                                 style={styles.input}
-                                theme={{colors: {primary: '#4CAF50'}}}
+                                theme={{colors: {primary: '#fc9e21'}}}
                             />
                         </Dialog.Content>
 
                         <Dialog.Actions>
-                            <Button onPress={closeDialog} color="#F57C00">İptal</Button>
+                            <Button onPress={closeDialog} color="#fc9e21">İptal</Button>
                             <Button
                                 mode="contained"
                                 onPress={addAppointment}
                                 disabled={!selectedTime || !description.trim()}
-                                color="#4CAF50"
+                                color="#fc9e21"
                             >
                                 Randevu Oluştur
                             </Button>
@@ -510,7 +520,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E3F2FD'
     },
     activeChipText: {
-        color: '#4CAF50',
+        color: '#fc9e21',
         fontWeight: 'bold'
     },
     cardSurface: {
@@ -523,7 +533,7 @@ const styles = StyleSheet.create({
     },
     todayCard: {
         borderLeftWidth: 4,
-        borderLeftColor: '#4CAF50'
+        borderLeftColor: '#fc9e21'
     },
     cardContent: {
         padding: 8
@@ -567,16 +577,16 @@ const styles = StyleSheet.create({
         height: 30
     },
     confirmedChip: {
-        borderColor: '#4CAF50'
+        borderColor: '#ff7355'
     },
     pendingChip: {
-        borderColor: '#FF9800'
+        borderColor: '#fc9e21'
     },
     confirmedText: {
-        color: '#388E3C'
+        color: '#ff7355'
     },
     pendingText: {
-        color: '#F57C00'
+        color: '#ff7355'
     },
     emptyContainer: {
         alignItems: 'center',
@@ -596,7 +606,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 16,
         bottom: 80,
-        backgroundColor: '#4CAF50'
+        backgroundColor: '#fc9e21'
     },
     dialog: {
         borderRadius: 16
@@ -604,7 +614,7 @@ const styles = StyleSheet.create({
     dialogTitle: {
         textAlign: 'center',
         fontWeight: 'bold',
-        color: '#4CAF50'
+        color: '#fc9e21'
     },
     input: {
         marginBottom: 16,
@@ -612,7 +622,7 @@ const styles = StyleSheet.create({
     },
     dateButton: {
         marginBottom: 16,
-        borderColor: '#4CAF50'
+        borderColor: '#fc9e21'
     },
     timeLabel: {
         fontWeight: 'bold',
@@ -629,10 +639,34 @@ const styles = StyleSheet.create({
     },
     selectedTimeChip: {
         backgroundColor: '#E8F5E9',
-        borderColor: '#4CAF50'
+        borderColor: '#fc9e21'
     },
     disabledTimeChip: {
         backgroundColor: '#f0f0f0'
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+        backgroundColor: '#fff',
+        marginTop: 30,
+        marginHorizontal: 20,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    errorText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#5a6268',
+        textAlign: 'center',
+        fontWeight: '500',
+        lineHeight: 24,
+        paddingHorizontal: 10,
     }
 });
 

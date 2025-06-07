@@ -15,4 +15,7 @@ router.post('/addRecipeCategory', recipeController.addRecipeCategory);
 router.put('/updateRecipeCategory', recipeController.updateRecipeCategory);
 router.delete('/deleteRecipeCategory', recipeController.deleteRecipeCategory);
 
+router.post('/assignRecipeToClient', recipeController.assignRecipeToClient);
+router.get('/getAssignedRecipesByClient', recipeController.getAssignedRecipesByClient);
+
 module.exports = router;

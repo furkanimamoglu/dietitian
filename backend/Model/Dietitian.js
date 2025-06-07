@@ -12,14 +12,8 @@ const Dietitian = sequelize.define('Dietitian', {
     },
     subscription_type: {
         type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: "free",
-        validate: {
-            isIn: {
-                args: [["free","student","starter", "premium"]],
-                msg: 'Abonelik türü yalnızca "free", "student", "starter" veya "premium" olabilir.'
-            }
-        }
+        allowNull: true,
+        defaultValue: "free"
     },
     phoneNumber: {
         type: DataTypes.BIGINT,
@@ -46,6 +40,7 @@ const Dietitian = sequelize.define('Dietitian', {
     },
     email: {
         type: DataTypes.STRING,
+        allowNull: false,
         unique: {
             msg: 'Bu e-posta zaten kullanılıyor.'
         },
@@ -54,6 +49,14 @@ const Dietitian = sequelize.define('Dietitian', {
                 msg: 'E-posta adresi geçerli olmalıdır.'
             }
         }
+    },
+    verificationCode: {
+        type: DataTypes.BIGINT,
+        allowNull: true
+    },
+    verificationCodeExpires: {
+        type: DataTypes.DATE,
+        allowNull: true
     },
     password: {
         type: DataTypes.STRING,
@@ -85,7 +88,7 @@ const Dietitian = sequelize.define('Dietitian', {
     },
     status: {
         type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        defaultValue: false,
     },
     currency: {
         type: DataTypes.INTEGER,

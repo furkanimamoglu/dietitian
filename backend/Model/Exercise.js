@@ -68,7 +68,7 @@ const Exercise = sequelize.define('Exercise', {
                 }
             }
         },
-        video: {
+        image: {
             type: DataTypes.STRING,
             allowNull: true,
             defaultValue: null

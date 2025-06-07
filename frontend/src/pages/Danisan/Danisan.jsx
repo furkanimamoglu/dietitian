@@ -9,6 +9,7 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Alert,
     Avatar,
     Box,
     Button,
@@ -25,6 +26,7 @@ import {
     Grid,
     IconButton,
     InputAdornment,
+    LinearProgress,
     List,
     ListItem,
     ListItemAvatar,
@@ -41,12 +43,10 @@ import {
     TableRow,
     Tabs,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
-    useTheme,
-    LinearProgress,
-    Tooltip,
-    Alert
+    useTheme
 } from "@mui/material";
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -55,7 +55,6 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -69,66 +68,55 @@ import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import Person from '@mui/icons-material/Person';
 import Cake from '@mui/icons-material/Cake';
-import Work from '@mui/icons-material/Work';
-import Favorite from '@mui/icons-material/Favorite';
 import Email from '@mui/icons-material/Email';
 import Phone from '@mui/icons-material/Phone';
-import LocationCity from '@mui/icons-material/LocationCity';
-import OpacityIcon from '@mui/icons-material/Opacity';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import HistoryIcon from '@mui/icons-material/History';
 
-// Water tracking data - moved outside the component
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
+
 const initialWaterTrackingData = {
     dailyGoal: 2500, // ml
     weeklyData: [
-        { day: 'Pazartesi', consumed: 2200, completed: false },
-        { day: 'Salı', consumed: 2500, completed: true },
-        { day: 'Çarşamba', consumed: 2700, completed: true },
-        { day: 'Perşembe', consumed: 1800, completed: false },
-        { day: 'Cuma', consumed: 2600, completed: true },
-        { day: 'Cumartesi', consumed: 2500, completed: true },
-        { day: 'Pazar', consumed: 1500, completed: false },
+        {day: 'Pazartesi', consumed: 2200, completed: false},
+        {day: 'Salı', consumed: 2500, completed: true},
+        {day: 'Çarşamba', consumed: 2700, completed: true},
+        {day: 'Perşembe', consumed: 1800, completed: false},
+        {day: 'Cuma', consumed: 2600, completed: true},
+        {day: 'Cumartesi', consumed: 2500, completed: true},
+        {day: 'Pazar', consumed: 1500, completed: false},
     ]
 };
 
-// Water tracking component - moved outside the main component
-const WaterTrackingCard = ({ data, clientId }) => {
+const WaterTrackingCard = ({data, clientId}) => {
     const [waterData, setWaterData] = useState(data);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [apiResponse, setApiResponse] = useState(null); // Store raw API response for debugging
+    const [apiResponse, setApiResponse] = useState(null);
 
-    const currentDay = new Date().getDay(); // 0 is Sunday, 1 is Monday, etc.
-    const mappedDay = currentDay === 0 ? 6 : currentDay - 1; // Convert to 0-6 where 0 is Monday
-    
+    const currentDay = new Date().getDay();
+    const mappedDay = currentDay === 0 ? 6 : currentDay - 1;
+
     useEffect(() => {
         const fetchWaterData = async () => {
             setIsLoading(true);
             setError(null);
-            
+
             try {
-                // Get current date
                 const today = new Date();
-                // Get date from 6 days ago for weekly data
                 const weekStart = new Date(today);
                 weekStart.setDate(today.getDate() - 6);
-                
-                // Format dates as YYYY-MM-DD
+
                 const formatDate = (date) => {
                     return date.toISOString().split('T')[0];
                 };
-                
-                console.log(`Fetching water data for client ${clientId} from ${formatDate(weekStart)} to ${formatDate(today)}`);
-                
+
                 const response = await axios.get(
                     `${config[config.environment].apiUrl}/nutrition/getClientWater`,
                     {
@@ -142,14 +130,11 @@ const WaterTrackingCard = ({ data, clientId }) => {
                         }
                     }
                 );
-                
-                console.log("Water API response:", response.data);
+
                 setApiResponse(response.data);
-                
+
                 if (response.data) {
-                    // Process the response data
                     const processedData = processWaterData(response.data);
-                    console.log("Processed water data:", processedData);
                     setWaterData(prevData => ({
                         ...prevData,
                         weeklyData: processedData
@@ -162,61 +147,53 @@ const WaterTrackingCard = ({ data, clientId }) => {
                 setIsLoading(false);
             }
         };
-        
-        // Process API response into the format needed for display
+
         const processWaterData = (apiData) => {
             const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-            const dailyGoal = data.dailyGoal; // Use the goal from props
-            
-            // Create default data structure with 0 consumed for all days
+            const dailyGoal = data.dailyGoal;
+
             const processedData = dayNames.map(day => ({
                 day,
                 consumed: 0,
                 completed: false
             }));
-            
-            // If we have API data, update the corresponding days
+
             if (Array.isArray(apiData)) {
-                // Önce tarihe göre verileri gruplayalım
                 const groupedByDate = {};
-                
+
                 apiData.forEach(item => {
                     if (item.date) {
                         if (!groupedByDate[item.date]) {
                             groupedByDate[item.date] = 0;
                         }
-                        // Tüm olası alan adlarını kontrol ederek su miktarını ekleyelim
                         const amount = item.amount || item.consumed || item.amount_ml || 0;
                         groupedByDate[item.date] += parseInt(amount, 10);
                     }
                 });
-                
-                // Şimdi gruplanmış verileri işleyelim
+
                 Object.entries(groupedByDate).forEach(([dateStr, totalAmount]) => {
                     const date = new Date(dateStr);
-                    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1; // Convert to 0-6 where 0 is Monday
-                    
+                    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+
                     if (dayIndex >= 0 && dayIndex < 7) {
                         processedData[dayIndex].consumed = totalAmount;
                         processedData[dayIndex].completed = totalAmount >= dailyGoal;
                     }
                 });
             } else if (apiData && typeof apiData === 'object') {
-                // Handle case where API returns an object with dates as keys
                 Object.entries(apiData).forEach(([dateKey, value]) => {
                     try {
                         const date = new Date(dateKey);
                         const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
-                        
+
                         if (dayIndex >= 0 && dayIndex < 7) {
-                            // Try to extract amount from different possible structures
                             let amount = 0;
                             if (typeof value === 'number') {
                                 amount = value;
                             } else if (typeof value === 'object') {
                                 amount = value.amount || value.consumed || value.amount_ml || 0;
                             }
-                            
+
                             processedData[dayIndex].consumed = parseInt(amount, 10);
                             processedData[dayIndex].completed = parseInt(amount, 10) >= dailyGoal;
                         }
@@ -225,28 +202,28 @@ const WaterTrackingCard = ({ data, clientId }) => {
                     }
                 });
             }
-            
+
             return processedData;
         };
-        
+
         if (clientId) {
             fetchWaterData();
         }
     }, [clientId, data.dailyGoal]);
-    
+
     const totalConsumed = waterData.weeklyData.reduce((sum, day) => sum + day.consumed, 0);
     const totalGoal = waterData.dailyGoal * 7;
     const weeklyCompletionPercentage = Math.min(Math.round((totalConsumed / totalGoal) * 100), 100);
-    
+
     if (isLoading) {
         return (
-            <Card elevation={3} sx={{ mb: 3 }}>
+            <Card elevation={3} sx={{mb: 3}}>
                 <CardHeader
                     title="Su Takibi"
-                    titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                    titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                     avatar={
-                        <Avatar sx={{ bgcolor: 'info.main' }}>
-                            <WaterDropIcon />
+                        <Avatar sx={{bgcolor: 'info.main'}}>
+                            <WaterDropIcon/>
                         </Avatar>
                     }
                     sx={{
@@ -257,23 +234,23 @@ const WaterTrackingCard = ({ data, clientId }) => {
                     }}
                 />
                 <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
-                        <CircularProgress />
+                    <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4}}>
+                        <CircularProgress/>
                     </Box>
                 </CardContent>
             </Card>
         );
     }
-    
+
     if (error) {
         return (
-            <Card elevation={3} sx={{ mb: 3 }}>
+            <Card elevation={3} sx={{mb: 3}}>
                 <CardHeader
                     title="Su Takibi"
-                    titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                    titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                     avatar={
-                        <Avatar sx={{ bgcolor: 'error.main' }}>
-                            <ErrorIcon />
+                        <Avatar sx={{bgcolor: 'error.main'}}>
+                            <ErrorIcon/>
                         </Avatar>
                     }
                     sx={{
@@ -284,22 +261,22 @@ const WaterTrackingCard = ({ data, clientId }) => {
                     }}
                 />
                 <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', py: 2}}>
                         <Typography color="error">{error}</Typography>
                     </Box>
                 </CardContent>
             </Card>
         );
     }
-    
+
     return (
-        <Card elevation={3} sx={{ mb: 3 }}>
+        <Card elevation={3} sx={{mb: 3}}>
             <CardHeader
                 title="Su Takibi"
-                titleTypographyProps={{ variant: 'h6', fontWeight: 'bold' }}
+                titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                 avatar={
-                    <Avatar sx={{ bgcolor: 'info.main' }}>
-                        <WaterDropIcon />
+                    <Avatar sx={{bgcolor: 'info.main'}}>
+                        <WaterDropIcon/>
                     </Avatar>
                 }
                 sx={{
@@ -310,8 +287,8 @@ const WaterTrackingCard = ({ data, clientId }) => {
                 }}
             />
             <CardContent>
-                <Box sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box sx={{mb: 3}}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1}}>
                         <Typography variant="subtitle1" fontWeight="bold">
                             Haftalık Su Tüketimi
                         </Typography>
@@ -319,20 +296,20 @@ const WaterTrackingCard = ({ data, clientId }) => {
                             {weeklyCompletionPercentage}%
                         </Typography>
                     </Box>
-                    <LinearProgress 
-                        variant="determinate" 
-                        value={weeklyCompletionPercentage} 
-                        sx={{ 
-                            height: 10, 
+                    <LinearProgress
+                        variant="determinate"
+                        value={weeklyCompletionPercentage}
+                        sx={{
+                            height: 10,
                             borderRadius: 5,
                             bgcolor: 'info.lighter',
                             '& .MuiLinearProgress-bar': {
                                 bgcolor: 'info.main',
                                 borderRadius: 5
                             }
-                        }} 
+                        }}
                     />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 0.5}}>
                         <Typography variant="caption" color="text.secondary">
                             {totalConsumed} ml
                         </Typography>
@@ -345,20 +322,20 @@ const WaterTrackingCard = ({ data, clientId }) => {
                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                     Günlük Takip
                 </Typography>
-                <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     mb: 2,
-                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                    flexWrap: {xs: 'wrap', sm: 'nowrap'},
                     gap: 1
                 }}>
                     {waterData.weeklyData.map((day, index) => (
                         <Tooltip key={index} title={`${day.day}: ${day.consumed} ml / ${waterData.dailyGoal} ml`}>
-                            <Box 
-                                sx={{ 
+                            <Box
+                                sx={{
                                     flex: '1 1 auto',
-                                    minWidth: { xs: '30%', sm: 'auto' },
-                                    mb: { xs: 2, sm: 0 },
+                                    minWidth: {xs: '30%', sm: 'auto'},
+                                    mb: {xs: 2, sm: 0},
                                     p: 1,
                                     bgcolor: index === mappedDay ? 'rgba(41, 182, 246, 0.08)' : 'transparent',
                                     borderRadius: 2,
@@ -374,9 +351,9 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                     }
                                 }}
                             >
-                                <Typography 
-                                    variant="caption" 
-                                    sx={{ 
+                                <Typography
+                                    variant="caption"
+                                    sx={{
                                         fontWeight: index === mappedDay ? 'bold' : 'normal',
                                         color: index === mappedDay ? 'info.main' : 'text.secondary',
                                         mb: 0.5
@@ -384,9 +361,9 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                 >
                                     {day.day.substring(0, 3)}
                                 </Typography>
-                                
+
                                 {/* Su şişesi görünümü */}
-                                <Box sx={{ 
+                                <Box sx={{
                                     position: 'relative',
                                     width: 30,
                                     height: 60,
@@ -398,7 +375,7 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                     boxShadow: day.completed ? '0 2px 8px rgba(41, 182, 246, 0.2)' : 'none'
                                 }}>
                                     {/* Su seviyesi */}
-                                    <Box sx={{ 
+                                    <Box sx={{
                                         position: 'absolute',
                                         bottom: 0,
                                         left: 0,
@@ -406,11 +383,11 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                         height: `${Math.min(Math.round((day.consumed / waterData.dailyGoal) * 100), 100)}%`,
                                         bgcolor: day.completed ? 'info.main' : 'info.light',
                                         transition: 'height 0.5s ease'
-                                    }} />
-                                    
+                                    }}/>
+
                                     {/* Su dalgası efekti */}
                                     {day.consumed > 0 && (
-                                        <Box sx={{ 
+                                        <Box sx={{
                                             position: 'absolute',
                                             bottom: 0,
                                             left: 0,
@@ -420,13 +397,13 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                             borderRadius: '50%',
                                             transform: 'scale(1.5)',
                                             opacity: 0.7
-                                        }} />
+                                        }}/>
                                     )}
                                 </Box>
-                                
+
                                 {/* Tamamlanma işareti */}
                                 {day.completed && (
-                                    <Box sx={{ 
+                                    <Box sx={{
                                         position: 'absolute',
                                         top: 18,
                                         right: 8,
@@ -439,13 +416,13 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                         alignItems: 'center',
                                         justifyContent: 'center'
                                     }}>
-                                        <CheckCircleIcon sx={{ fontSize: 12 }} />
+                                        <CheckCircleIcon sx={{fontSize: 12}}/>
                                     </Box>
                                 )}
-                                
-                                <Typography 
-                                    variant="caption" 
-                                    sx={{ 
+
+                                <Typography
+                                    variant="caption"
+                                    sx={{
                                         fontWeight: 'bold',
                                         color: day.completed ? 'success.main' : (
                                             day.consumed > 0 ? 'info.main' : 'text.secondary'
@@ -454,8 +431,8 @@ const WaterTrackingCard = ({ data, clientId }) => {
                                 >
                                     {day.consumed} ml
                                 </Typography>
-                                <Typography 
-                                    variant="caption" 
+                                <Typography
+                                    variant="caption"
                                     color="text.secondary"
                                 >
                                     {Math.round((day.consumed / waterData.dailyGoal) * 100)}%
@@ -465,18 +442,19 @@ const WaterTrackingCard = ({ data, clientId }) => {
                     ))}
                 </Box>
 
-                <Box sx={{ p: 2, bgcolor: 'info.lighter', borderRadius: 2, mt: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <LocalDrinkIcon sx={{ color: 'info.main', mr: 1 }} />
+                <Box sx={{p: 2, bgcolor: 'info.lighter', borderRadius: 2, mt: 2}}>
+                    <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                        <LocalDrinkIcon sx={{color: 'info.main', mr: 1}}/>
                         <Typography variant="subtitle1" fontWeight="bold">
                             Günlük Su İhtiyacı
                         </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
+                    <Typography variant="body2" sx={{mb: 1}}>
                         Günlük hedef: <strong>{waterData.dailyGoal} ml</strong> ({waterData.dailyGoal / 1000} litre)
                     </Typography>
                     <Typography variant="body2">
-                        Bugün tüketilen: <strong>{waterData.weeklyData[mappedDay].consumed} ml</strong> ({Math.round((waterData.weeklyData[mappedDay].consumed / waterData.dailyGoal) * 100)}%)
+                        Bugün
+                        tüketilen: <strong>{waterData.weeklyData[mappedDay].consumed} ml</strong> ({Math.round((waterData.weeklyData[mappedDay].consumed / waterData.dailyGoal) * 100)}%)
                     </Typography>
                 </Box>
             </CardContent>
@@ -580,8 +558,7 @@ function Danisan() {
 
             setDeleteConfirmDialogOpen(false);
 
-            setSuccessMessage("Randevu başarıyla silindi.");
-            setShowSuccessPopup(true);
+            showSuccessToast("Randevu başarıyla silindi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Randevu silinirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -611,8 +588,7 @@ function Danisan() {
 
         // Sadece state'i güncelliyoruz
         setBloodTestFiles(prevFiles => [newFile, ...prevFiles]);
-        setSuccessMessage("Kan tahlili dosyası başarıyla yüklendi.");
-        setShowSuccessPopup(true);
+        showSuccessToast("Kan tahlili dosyası başarıyla yüklendi.");
 
         // Burada API çağrısı ile sunucuya dosyayı gönderebilirsiniz 
         // Örnek: saveBloodTestFileToServer(file, id);
@@ -630,8 +606,7 @@ function Danisan() {
         setBloodTestFiles(updatedFiles);
 
 
-        setSuccessMessage("Kan tahlili dosyası başarıyla silindi.");
-        setShowSuccessPopup(true);
+        showSuccessToast("Kan tahlili dosyası başarıyla silindi.");
     };
 
     // Anamnez dialogs için state tanımlamaları
@@ -734,8 +709,7 @@ function Danisan() {
             fetchAnamnezData();
             setIsAnamnezDialogOpen(false);
 
-            setSuccessMessage("Anamnez bilgileri başarıyla kaydedildi.");
-            setShowSuccessPopup(true);
+            showSuccessToast("Anamnez bilgileri başarıyla kaydedildi.");
         } catch (error) {
             console.error("Anamnez kaydedilirken hata oluştu:", error);
             setErrorMessage(error.response?.data?.message || "Anamnez kaydedilirken bir hata oluştu.");
@@ -781,13 +755,15 @@ function Danisan() {
         return () => timer && clearTimeout(timer);
     }, [showSuccessPopup, showErrorPopup]);
 
-    // Danisan.jsx içerisinde state tanımlamalarını ekleyin (diğer state'lerin yanına)
     const [measurementForm, setMeasurementForm] = useState({
         boy: '',
         kilo: '',
         bel: '',
         kalca: '',
         gogus: '',
+        digerbel: '',
+        kol: '',
+        bacak: '',
         yag: '',
         kas: '',
         su: ''
@@ -812,6 +788,9 @@ function Danisan() {
             bel: '',
             kalca: '',
             gogus: '',
+            diger: '',
+            kol: '',
+            bacak: '',
             yag: '',
             kas: '',
             su: ''
@@ -831,7 +810,7 @@ function Danisan() {
                     }
                 }
             );
-            
+
             setMeasurementsLoading(true);
             const response = await axios.get(
                 config[config.environment].apiUrl + "/measurement/getClientMeasurement",
@@ -847,8 +826,7 @@ function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            setSuccessMessage("Ölçüm başarıyla silindi.");
-            setShowSuccessPopup(true);
+            showSuccessToast("Ölçüm başarıyla silindi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Ölçüm silinirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -901,9 +879,7 @@ function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            setSuccessMessage("Yeni ölçüm başarıyla eklendi.");
-            setShowSuccessPopup(true);
-
+            showSuccessToast("Yeni ölçüm başarıyla eklendi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Ölçüm eklenirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -917,8 +893,11 @@ function Danisan() {
         boy: '',
         kilo: '',
         bel: '',
+        digerbel: '',
         kalca: '',
         gogus: '',
+        kol: '',
+        bacak: '',
         yag: '',
         kas: '',
         su: ''
@@ -937,8 +916,11 @@ function Danisan() {
             boy: measurement.boy || '',
             kilo: measurement.kilo || '',
             bel: measurement.bel || '',
+            digerbel: measurement.digerbel || '',
             kalca: measurement.kalca || '',
             gogus: measurement.gogus || '',
+            kol: measurement.kol || '',
+            bacak: measurement.bacak || '',
             yag: measurement.yag || '',
             kas: measurement.kas || '',
             su: measurement.su || ''
@@ -1001,9 +983,7 @@ function Danisan() {
             setMeasurements(response.data);
             setMeasurementsLoading(false);
 
-            setSuccessMessage("Ölçüm başarıyla güncellendi.");
-            setShowSuccessPopup(true);
-
+            showSuccessToast("Ölçüm başarıyla güncellendi.");
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Ölçüm güncellenirken bir hata oluştu.");
             setShowErrorPopup(true);
@@ -1073,13 +1053,13 @@ function Danisan() {
 
     const calculateBMI = useMemo(() => {
         if (!measurements || measurements.length === 0) return null;
-        
+
         // Use either the height from measurements or from danisan profile
         const height = measurements[0].boy || danisan?.boy;
         const weight = measurements[0].kilo;
-        
+
         if (!height || !weight) return null;
-        
+
         const heightInM = height / 100;
         const bmi = (weight / (heightInM * heightInM)).toFixed(1);
 
@@ -1178,7 +1158,7 @@ function Danisan() {
                 setNutritionPlanLoading(true);
                 try {
                     const response = await axios.post(
-                        config[config.environment].apiUrl + "/dietitian/getNutritionAssignmentPlanByClient",
+                        config[config.environment].apiUrl + "/nutrition/getNutritionAssignmentPlanByClient",
                         {
                             client_id: id,
                             range: "all"
@@ -1356,20 +1336,20 @@ function Danisan() {
             const endDate = new Date();
             const startDate = new Date();
             startDate.setDate(endDate.getDate() - 30);
-            
+
             const formatDate = (date) => {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
             };
-            
+
             const formattedStartDate = formatDate(startDate);
             const formattedEndDate = formatDate(endDate);
-            
+
             setHistoryStartDate(formattedStartDate);
             setHistoryEndDate(formattedEndDate);
-            
+
             fetchExerciseHistory(formattedStartDate, formattedEndDate);
         }
     }, [activeTab, id, historyStartDate, historyEndDate]);
@@ -1398,6 +1378,65 @@ function Danisan() {
     const renderMealItems = (mealItems) => {
         if (!mealItems) return "Öğün girilmemiş.";
 
+        if (typeof mealItems === 'object' && !Array.isArray(mealItems)) {
+            return (
+                <>
+                    {Object.entries(mealItems).map(([menuName, items], menuIndex) => (
+                        <Box key={menuIndex} sx={{ mb: menuIndex < Object.keys(mealItems).length - 1 ? 2 : 0 }}>
+                                <Typography
+                                    variant="subtitle2"
+                                    fontWeight="medium"
+                                    sx={{
+                                        mb: 1,
+                                        textAlign: 'center',
+                                        width: '100%',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                        color: 'white',
+                                        bgcolor: 'rgba(45,65,73,0.76)',
+                                        borderRadius: 1
+                                    }}>
+                                    {menuName}
+                                </Typography>
+
+                            {Array.isArray(items) && items.length > 0 ? (
+                                items.map((item, itemIndex) => (
+                                    <Typography
+                                        key={itemIndex}
+                                        variant="body2"
+                                        component="div"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            mb: itemIndex < items.length - 1 ? 0.5 : 0,
+                                            ...(item.eaten ? { textDecoration: 'line-through', color: 'text.secondary' } : {})
+                                        }}
+                                    >
+                                        {item.eaten ?
+                                            <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} /> :
+                                            <RadioButtonUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }} />
+                                        }
+                                        {item.name}
+                                        {item.portion && (
+                                            <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                                                ({item.portion})
+                                            </Typography>
+                                        )}
+                                    </Typography>
+                                ))
+                            ) : (
+                                <Typography variant="body2" color="text.secondary">
+                                    Bu menüde öğün girilmemiş.
+                                </Typography>
+                            )}
+                        </Box>
+                    ))}
+                </>
+            );
+        }
+
+        // Eski format - isim ve yenildi özellikleri olan nesneler dizisi
         if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
             return (
                 <>
@@ -1424,6 +1463,7 @@ function Danisan() {
             );
         }
 
+        // Diğer eski formatlar için kontroller
         if (typeof mealItems === 'string') {
             return mealItems;
         }
@@ -1521,7 +1561,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1539,7 +1579,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1557,7 +1597,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1575,7 +1615,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1593,7 +1633,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1611,7 +1651,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1662,7 +1702,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1680,7 +1720,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2" sx={{whiteSpace: 'pre-line'}}>
@@ -1698,7 +1738,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1716,7 +1756,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1734,7 +1774,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1752,7 +1792,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1803,7 +1843,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1821,7 +1861,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1839,7 +1879,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1857,7 +1897,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{bgcolor: 'grey.100', py: 1}}
+                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1980,7 +2020,8 @@ function Danisan() {
                                                                             Kan Tahlili
                                                                             - {new Date(file.uploadDate).toLocaleDateString('tr-TR')}
                                                                         </Typography>
-                                                                        <Typography variant="caption" color="text.secondary">
+                                                                        <Typography variant="caption"
+                                                                                    color="text.secondary">
                                                                             {file.fileName || 'Tahlil Dosyası'}
                                                                         </Typography>
                                                                     </Box>
@@ -2048,7 +2089,7 @@ function Danisan() {
                         <Typography variant="h5" sx={{mb: 3, fontWeight: 'bold', color: theme.palette.primary.main}}>
                         </Typography>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} md={8}>
                                 <Card elevation={3} sx={{height: '100%'}}>
                                     <CardHeader
                                         title="Vücut Ölçümleri"
@@ -2058,20 +2099,16 @@ function Danisan() {
                                                 <Button
                                                     variant="contained"
                                                     size="small"
-                                                    color="primary"
-                                                    startIcon={<AddIcon/>}
+                                                    color="secondary"
+                                                    startIcon={<AddIcon />}
                                                     onClick={handleOpenMeasurementDialog}
+                                                    sx={{ color: "#fff", fontWeight: "bold" }}
                                                 >
                                                     Yeni Ölçüm
                                                 </Button>
                                             </Box>
                                         }
-                                        sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
+                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white', borderBottom: '1px solid', borderColor: 'divider'}}
                                     />
                                     <CardContent>
                                         <Box sx={{
@@ -2089,8 +2126,11 @@ function Danisan() {
                                                             <TableCell align="right">Boy (cm)</TableCell>
                                                             <TableCell align="right">Kilo (kg)</TableCell>
                                                             <TableCell align="right">Bel (cm)</TableCell>
+                                                            <TableCell align="right">Bel (cm)</TableCell>
                                                             <TableCell align="right">Kalça (cm)</TableCell>
                                                             <TableCell align="right">Göğüs (cm)</TableCell>
+                                                            <TableCell align="right">Kol (cm)</TableCell>
+                                                            <TableCell align="right">Bacak (cm)</TableCell>
                                                             <TableCell align="right">Yağ (%)</TableCell>
                                                             <TableCell align="right">Kas (%)</TableCell>
                                                             <TableCell align="right">Su (%)</TableCell>
@@ -2110,16 +2150,23 @@ function Danisan() {
                                                                 <TableCell
                                                                     align="right">{measurement.bel || '-'}</TableCell>
                                                                 <TableCell
+                                                                    align="right">{measurement.digerbel || '-'}</TableCell>
+                                                                <TableCell
                                                                     align="right">{measurement.kalca || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.gogus || '-'}</TableCell>
+                                                                <TableCell
+                                                                    align="right">{measurement.kol || '-'}</TableCell>
+                                                                <TableCell
+                                                                    align="right">{measurement.bacak || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.yag || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.kas || '-'}</TableCell>
                                                                 <TableCell
                                                                     align="right">{measurement.su || '-'}</TableCell>
-                                                                <TableCell sx={{ display: 'flex', justifyContent: 'center' }}
+                                                                <TableCell
+                                                                    sx={{display: 'flex', justifyContent: 'center'}}
                                                                     align="center">
                                                                     <IconButton
                                                                         color="primary"
@@ -2130,7 +2177,7 @@ function Danisan() {
                                                                     </IconButton>
                                                                     <IconButton
                                                                         color="secondary"
-                                                                        sx={{ color: 'red' }}
+                                                                        sx={{color: 'red'}}
                                                                         onClick={() => deleteMeasurement(measurement)}
                                                                     >
                                                                         <DeleteIcon/>
@@ -2145,14 +2192,14 @@ function Danisan() {
                                     </CardContent>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} md={4}>
                                 <Card elevation={3} sx={{height: '100%'}}>
                                     <CardHeader
                                         title="Vücut Analizi"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -2348,69 +2395,67 @@ function Danisan() {
 
                                 <Box sx={{overflowX: 'auto'}}>
                                     <Box sx={{minWidth: 900, p: 2}}>
+                                        {nutritionPlan && nutritionPlan.length > 0 && (
+                                            <>
+                                                {/* Gün başlıkları satırı */}
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
                                                 <Box sx={{textAlign: 'center', p: 1}}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Öğün</Typography>
+                                                            <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>Öğün</Typography>
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={10}>
                                                 <Grid container>
-                                                    <Grid item xs={1.7}>
+                                                            {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, index) => (
+                                                                <Grid item xs={1.7} key={`day-${index}`}>
                                                         <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Pzt</Typography>
+                                                                        <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                                                            {day.substr(0, 3)}
+                                                                        </Typography>
                                                         </Box>
                                                     </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Sal</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Çar</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Per</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Cum</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Cmt</Typography>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1"
-                                                                        sx={{fontWeight: 'bold'}}>Paz</Typography>
-                                                        </Box>
-                                                    </Grid>
+                                                            ))}
                                                 </Grid>
                                             </Grid>
                                         </Grid>
 
                                         <Divider sx={{my: 1}}/>
 
-                                        {/* Kahvaltı */}
+                                                {/* Öğün satırları - dinamik olarak mealPlan'den alınıyor */}
+                                                {nutritionPlan[selectedPlanIndex]?.mealPlan &&
+                                                  Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).length > 0 &&
+                                                  (() => {
+                                                    // İlk günün öğünlerini al (tüm günlerde aynı öğünler olduğunu varsayıyoruz)
+                                                    const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
+                                                    const meals = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay] || {});
+
+                                                    // Öğün renklerini belirle
+                                                    const mealColors = {
+                                                        'Kahvaltı': 'primary.light',
+                                                        'Öğle Yemeği': 'warning.light',
+                                                        'Akşam Yemeği': 'error.light',
+                                                        'Aparatif': 'info.light',
+                                                        // Diğer öğünler için varsayılan renk
+                                                        'default': 'secondary.light'
+                                                    };
+
+                                                    // Öğün görüntü adları
+                                                    const mealDisplayNames = {
+                                                        'Kahvaltı': 'Kahvaltı',
+                                                        'Öğle Yemeği': 'Öğle',
+                                                        'Akşam Yemeği': 'Akşam',
+                                                        'Aparatif': 'Ara Öğün'
+                                                    };
+
+                                                    return meals.map((meal, mealIndex) => (
+                                                        <React.Fragment key={`meal-row-${mealIndex}`}>
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
                                                 <Box sx={{
-                                                    bgcolor: 'primary.light',
-                                                    color: 'primary.contrastText',
+                                                                        bgcolor: mealColors[meal] || mealColors.default,
+                                                                        color: meal === 'Aparatif' ? 'info.contrastText' :
+                                                                               meal === 'Akşam Yemeği' ? 'error.contrastText' :
+                                                                               meal === 'Öğle Yemeği' ? 'warning.contrastText' : 'primary.contrastText',
                                                     p: 1,
                                                     borderRadius: 1,
                                                     height: '100%',
@@ -2418,342 +2463,47 @@ function Danisan() {
                                                     alignItems: 'center',
                                                     justifyContent: 'center'
                                                 }}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Kahvaltı</Typography>
+                                                                        <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                                                                            {mealDisplayNames[meal] || meal}
+                                                                        </Typography>
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={10}>
                                                 <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
+                                                                        {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, dayIndex) => (
+                                                                            <Grid item xs={1.7} key={`${meal}-${day}-${dayIndex}`}>
                                                         <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
+                                                                                    {renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.[day]?.[meal]) ||
+                                                                                     <Typography variant="body2">Öğün girilmemiş.</Typography>}
                                                         </Paper>
                                                     </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
+                                                                        ))}
                                                     </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Kahvaltı)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
-                                        </Grid>
+                                                            {mealIndex < meals.length - 1 && <Divider sx={{my: 1}} />}
+                                                        </React.Fragment>
+                                                    ));
+                                                  })()
+                                                }
+                                            </>
+                                        )}
 
-                                        <Divider sx={{my: 1}}/>
-
-                                        {/* Öğle Yemeği */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
+                                        {(!nutritionPlan || nutritionPlan.length === 0) && (
                                                 <Box sx={{
-                                                    bgcolor: 'warning.light',
-                                                    color: 'warning.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
                                                     display: 'flex',
+                                                justifyContent: 'center',
                                                     alignItems: 'center',
-                                                    justifyContent: 'center'
+                                                height: 200,
+                                                border: '1px dashed',
+                                                borderColor: 'grey.400',
+                                                borderRadius: 1
                                                 }}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Öğle</Typography>
+                                                <Typography color="text.secondary">
+                                                    Beslenme planı bulunamadı.
+                                                </Typography>
                                                 </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Öğle Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-
-                                        <Divider sx={{my: 1}}/>
-
-                                        {/* Akşam Yemeği */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
-                                                <Box sx={{
-                                                    bgcolor: 'error.light',
-                                                    color: 'error.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                    <Typography variant="subtitle1"
-                                                                sx={{fontWeight: 'bold'}}>Akşam</Typography>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.["Akşam Yemeği"])
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-
-                                        <Divider sx={{my: 1}}/>
-
-                                        {/* Ara Öğün */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
-                                                <Box sx={{
-                                                    bgcolor: 'info.light',
-                                                    color: 'info.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                    <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>Ara
-                                                        Öğün</Typography>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazartesi?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Salı?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Çarşamba?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Perşembe?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cuma?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Cumartesi?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                    <Grid item xs={1.7}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                            {nutritionPlan && nutritionPlan.length > 0
-                                                                ? renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.Pazar?.Aparatif)
-                                                                : <Typography variant="body2">Öğün
-                                                                    girilmemiş.</Typography>
-                                                            }
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
+                                        )}
                                     </Box>
                                 </Box>
                                 <Divider/>
@@ -2766,8 +2516,8 @@ function Danisan() {
                                 title="Atanmış Planlar"
                                 titleTypographyProps={{variant: 'h5', fontWeight: 'bold'}}
                                 sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
+                                    bgcolor: '#2d4149',
+                                    color: 'white',
                                     borderBottom: '1px solid',
                                     borderColor: 'divider'
                                 }}
@@ -2879,7 +2629,7 @@ function Danisan() {
                         </Card>
 
                         {/* Water Tracking Card */}
-                        <WaterTrackingCard data={waterTrackingData} clientId={id} />
+                        <WaterTrackingCard data={waterTrackingData} clientId={id}/>
                     </Box>
                 );
             case 'randevu':
@@ -2918,8 +2668,8 @@ function Danisan() {
                                         title="Yaklaşan Randevular"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3004,7 +2754,8 @@ function Danisan() {
                                         title="Geçmiş Randevular"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'grey.200',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3081,11 +2832,8 @@ function Danisan() {
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         subheader={pastAppointments.length > 0 ? new Date(pastAppointments[0].start).toLocaleDateString('tr-TR') : ''}
                                         sx={{
-                                            bgcolor: 'primary.light',
-                                            color: 'primary.contrastText',
-                                            '& .MuiCardHeader-subheader': {
-                                                color: 'primary.contrastText'
-                                            },
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3114,7 +2862,8 @@ function Danisan() {
                                         title="Randevu İstatistikleri"
                                         titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                         sx={{
-                                            bgcolor: 'grey.200',
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
                                             borderBottom: '1px solid',
                                             borderColor: 'divider'
                                         }}
@@ -3253,8 +3002,8 @@ function Danisan() {
                                     title="Aktif Egzersiz Programı"
                                     titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                     sx={{
-                                        bgcolor: 'success.light',
-                                        color: 'success.contrastText',
+                                        bgcolor: '#2d4149',
+                                        color: 'white',
                                         borderBottom: '1px solid',
                                         borderColor: 'divider'
                                     }}
@@ -3381,8 +3130,8 @@ function Danisan() {
                                 title="Atanmış Tüm Egzersizler"
                                 titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
                                 sx={{
-                                    bgcolor: 'primary.light',
-                                    color: 'primary.contrastText',
+                                    bgcolor: '#2d4149',
+                                    color: 'white',
                                     borderBottom: '1px solid',
                                     borderColor: 'divider'
                                 }}
@@ -3405,378 +3154,433 @@ function Danisan() {
                                                     <TableCell><strong>Durum</strong></TableCell>
                                                 </TableRow>
                                             </TableHead>
-                                                    <TableBody>
-                                                        {assignedExercises.length > 10 && (
-                                                            <TableRow>
-                                                                <TableCell colSpan={6} sx={{textAlign: 'center', py: 2, bgcolor: 'rgba(0, 0, 0, 0.02)'}}>
-                                                                    <Typography variant="body2" color="text.secondary">
-                                                                        Toplam {assignedExercises.length} egzersizden son 10 tanesi görüntüleniyor
-                                                                    </Typography>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        )}
-                                                        {assignedExercises.slice(-10).map((exercise) => (
-                                                            <TableRow
-                                                                key={exercise.id}
-                                                                sx={{
-                                                                    '&:last-child td, &:last-child th': {border: 0},
-                                                                    bgcolor: isActiveExercise(exercise) ? 'rgba(76, 175, 80, 0.08)' : 'inherit'
-                                                                }}
-                                                            >
-                                                                <TableCell component="th" scope="row">
-                                                                    <Typography variant="body2" fontWeight="medium">
-                                                                        {exercise.Exercise?.exercise_name}
-                                                                    </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {new Date(exercise.start_date).toLocaleDateString('tr-TR')} - {new Date(exercise.end_date).toLocaleDateString('tr-TR')}
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {exercise.Exercise?.duration || '-'} dk
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {exercise.Exercise?.difficulty || '-'}/5
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {exercise.Exercise?.calories_burned || '-'} kcal
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Chip
-                                                                        size="small"
-                                                                        label={isActiveExercise(exercise) ? "Aktif" : "Pasif"}
-                                                                        color={isActiveExercise(exercise) ? "success" : "default"}
-                                                                    />
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </TableContainer>
-                                        ) : (
-                                            <Box sx={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                py: 4
-                                            }}>
-                                                <FitnessCenterIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
-                                                <Typography color="text.secondary" align="center">
-                                                    Bu danışana atanmış egzersiz programı bulunmamaktadır.
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                            <TableBody>
+                                                {assignedExercises.length > 10 && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={6} sx={{
+                                                            textAlign: 'center',
+                                                            py: 2,
+                                                            bgcolor: 'rgba(0, 0, 0, 0.02)'
+                                                        }}>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Toplam {assignedExercises.length} egzersizden son 10
+                                                                tanesi görüntüleniyor
+                                                            </Typography>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                {assignedExercises.slice(-10).map((exercise) => (
+                                                    <TableRow
+                                                        key={exercise.id}
+                                                        sx={{
+                                                            '&:last-child td, &:last-child th': {border: 0},
+                                                            bgcolor: isActiveExercise(exercise) ? 'rgba(76, 175, 80, 0.08)' : 'inherit'
+                                                        }}
+                                                    >
+                                                        <TableCell component="th" scope="row">
+                                                            <Typography variant="body2" fontWeight="medium">
+                                                                {exercise.Exercise?.exercise_name}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {new Date(exercise.start_date).toLocaleDateString('tr-TR')} - {new Date(exercise.end_date).toLocaleDateString('tr-TR')}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {exercise.Exercise?.duration || '-'} dk
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {exercise.Exercise?.difficulty || '-'}/5
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {exercise.Exercise?.calories_burned || '-'} kcal
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Chip
+                                                                size="small"
+                                                                label={isActiveExercise(exercise) ? "Aktif" : "Pasif"}
+                                                                color={isActiveExercise(exercise) ? "success" : "default"}
+                                                            />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        py: 4
+                                    }}>
+                                        <FitnessCenterIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
+                                        <Typography color="text.secondary" align="center">
+                                            Bu danışana atanmış egzersiz programı bulunmamaktadır.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                                {/* Egzersiz Geçmişi - Add as separate section */}
-                                <Card elevation={3} sx={{borderRadius: 2, mt: 3}}>
-                                    <CardHeader
-                                        title="Tamamlanan Egzersiz Geçmişi"
-                                        titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
-                                        sx={{
-                                            bgcolor: 'success.light',
-                                            color: 'success.contrastText',
-                                            borderBottom: '1px solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    />
-                                    <CardContent>
-                                        <Box sx={{ mb: 3, p: 2, bgcolor: '#ffffff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
-                                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500, color: '#424242', display: 'flex', alignItems: 'center' }}>
-                                                <FilterAltIcon sx={{ mr: 1, fontSize: 20, color: '#757575' }} />
-                                                Tarih Aralığı Filtreleme
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end' }}>
-                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                    <Box sx={{ flex: '1 1 200px' }}>
-                                                        <DatePicker
-                                                            label="Başlangıç Tarihi"
-                                                            value={historyStartDate ? new Date(historyStartDate) : null}
-                                                            onChange={(newValue) => handleHistoryDateChange('start', newValue)}
-                                                            slotProps={{
-                                                                textField: {
-                                                                    fullWidth: true,
-                                                                    variant: "outlined",
-                                                                    size: "small",
-                                                                    sx: { 
-                                                                        backgroundColor: '#fff',
-                                                                        borderRadius: 1,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: theme.palette.primary.main,
-                                                                            },
-                                                                        }
-                                                                    }
+                        {/* Egzersiz Geçmişi - Add as separate section */}
+                        <Card elevation={3} sx={{borderRadius: 2, mt: 3}}>
+                            <CardHeader
+                                title="Tamamlanan Egzersiz Geçmişi"
+                                titleTypographyProps={{variant: 'h6', fontWeight: 'bold'}}
+                                sx={{
+                                    bgcolor: '#2d4149',
+                                    color: 'white',
+                                    borderBottom: '1px solid',
+                                    borderColor: 'divider'
+                                }}
+                            />
+                            <CardContent>
+                                <Box sx={{
+                                    mb: 3,
+                                    p: 2,
+                                    bgcolor: '#ffffff',
+                                    borderRadius: 2,
+                                    border: '1px solid #e0e0e0'
+                                }}>
+                                    <Typography variant="subtitle1" sx={{
+                                        mb: 2,
+                                        fontWeight: 500,
+                                        color: '#424242',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}>
+                                        <FilterAltIcon sx={{mr: 1, fontSize: 20, color: '#757575'}}/>
+                                        Tarih Aralığı Filtreleme
+                                    </Typography>
+                                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end'}}>
+                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                            <Box sx={{flex: '1 1 200px'}}>
+                                                <DatePicker
+                                                    label="Başlangıç Tarihi"
+                                                    value={historyStartDate ? new Date(historyStartDate) : null}
+                                                    onChange={(newValue) => handleHistoryDateChange('start', newValue)}
+                                                    slotProps={{
+                                                        textField: {
+                                                            fullWidth: true,
+                                                            variant: "outlined",
+                                                            size: "small",
+                                                            sx: {
+                                                                backgroundColor: '#fff',
+                                                                borderRadius: 1,
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    '&:hover fieldset': {
+                                                                        borderColor: theme.palette.primary.main,
+                                                                    },
                                                                 }
-                                                            }}
-                                                        />
-                                                    </Box>
-                                                    <Box sx={{ flex: '1 1 200px' }}>
-                                                        <DatePicker
-                                                            label="Bitiş Tarihi"
-                                                            value={historyEndDate ? new Date(historyEndDate) : null}
-                                                            onChange={(newValue) => handleHistoryDateChange('end', newValue)}
-                                                            slotProps={{
-                                                                textField: {
-                                                                    fullWidth: true,
-                                                                    variant: "outlined",
-                                                                    size: "small",
-                                                                    sx: { 
-                                                                        backgroundColor: '#fff',
-                                                                        borderRadius: 1,
-                                                                        '& .MuiOutlinedInput-root': {
-                                                                            '&:hover fieldset': {
-                                                                                borderColor: theme.palette.primary.main,
-                                                                            },
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }}
-                                                        />
-                                                    </Box>
-                                                </LocalizationProvider>
+                                                            }
+                                                        }
+                                                    }}
+                                                />
                                             </Box>
-                                        </Box>
-                                        
-                                        {loadingExerciseHistory ? (
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 5 }}>
-                                                <CircularProgress sx={{ color: theme.palette.primary.main, mb: 2 }} />
-                                                <Typography variant="body1" color="text.secondary">Egzersiz geçmişi yükleniyor...</Typography>
-                                            </Box>
-                                        ) : exerciseHistory.filter(item => item.status === 'completed').length > 0 ? (
-                                            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                                                {exerciseHistory
-                                                    .filter(item => item.status === 'completed')
-                                                    .map((item) => (
-                                                    <React.Fragment key={item.id}>
-                                                        <ListItem 
-                                                            alignItems="flex-start"
-                                                            sx={{ 
-                                                                py: 2, 
-                                                                transition: 'background-color 0.2s',
-                                                                '&:hover': {
-                                                                    backgroundColor: '#f5f5f5'
+                                            <Box sx={{flex: '1 1 200px'}}>
+                                                <DatePicker
+                                                    label="Bitiş Tarihi"
+                                                    value={historyEndDate ? new Date(historyEndDate) : null}
+                                                    onChange={(newValue) => handleHistoryDateChange('end', newValue)}
+                                                    slotProps={{
+                                                        textField: {
+                                                            fullWidth: true,
+                                                            variant: "outlined",
+                                                            size: "small",
+                                                            sx: {
+                                                                backgroundColor: '#fff',
+                                                                borderRadius: 1,
+                                                                '& .MuiOutlinedInput-root': {
+                                                                    '&:hover fieldset': {
+                                                                        borderColor: theme.palette.primary.main,
+                                                                    },
                                                                 }
-                                                            }}
-                                                        >
-                                                            <ListItemAvatar>
-                                                                <Avatar sx={{ 
-                                                                    bgcolor: '#43a047',
-                                                                    width: 48,
-                                                                    height: 48,
-                                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                            </Box>
+                                        </LocalizationProvider>
+                                    </Box>
+                                </Box>
+
+                                {loadingExerciseHistory ? (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 5
+                                    }}>
+                                        <CircularProgress sx={{color: theme.palette.primary.main, mb: 2}}/>
+                                        <Typography variant="body1" color="text.secondary">Egzersiz geçmişi
+                                            yükleniyor...</Typography>
+                                    </Box>
+                                ) : exerciseHistory.filter(item => item.status === 'completed').length > 0 ? (
+                                    <List sx={{width: '100%', bgcolor: 'background.paper'}}>
+                                        {exerciseHistory
+                                            .filter(item => item.status === 'completed')
+                                            .map((item) => (
+                                                <React.Fragment key={item.id}>
+                                                    <ListItem
+                                                        alignItems="flex-start"
+                                                        sx={{
+                                                            py: 2,
+                                                            transition: 'background-color 0.2s',
+                                                            '&:hover': {
+                                                                backgroundColor: '#f5f5f5'
+                                                            }
+                                                        }}
+                                                    >
+                                                        <ListItemAvatar>
+                                                            <Avatar sx={{
+                                                                bgcolor: '#43a047',
+                                                                width: 48,
+                                                                height: 48,
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                            }}>
+                                                                <CheckCircleIcon/>
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText
+                                                            primary={
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
+                                                                    alignItems: 'center'
                                                                 }}>
-                                                                    <CheckCircleIcon />
-                                                                </Avatar>
-                                                            </ListItemAvatar>
-                                                            <ListItemText
-                                                                primary={
-                                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                        <Typography 
-                                                                            variant="h6" 
-                                                                            fontWeight="500"
-                                                                            sx={{ 
-                                                                                color: '#2e7d32',
-                                                                                fontSize: '1.1rem'
-                                                                            }}
-                                                                        >
-                                                                            {item.Exercise?.exercise_name || "Egzersiz"}
+                                                                    <Typography
+                                                                        variant="h6"
+                                                                        fontWeight="500"
+                                                                        sx={{
+                                                                            color: '#2e7d32',
+                                                                            fontSize: '1.1rem'
+                                                                        }}
+                                                                    >
+                                                                        {item.Exercise?.exercise_name || "Egzersiz"}
+                                                                    </Typography>
+                                                                    <Chip
+                                                                        label="Tamamlandı"
+                                                                        color="success"
+                                                                        size="small"
+                                                                        icon={<CheckCircleIcon/>}
+                                                                        sx={{fontWeight: 'medium'}}
+                                                                    />
+                                                                </Box>
+                                                            }
+                                                            secondary={
+                                                                <React.Fragment>
+                                                                    <Box sx={{
+                                                                        mt: 1,
+                                                                        py: 1,
+                                                                        px: 1.5,
+                                                                        bgcolor: '#e8f5e9',
+                                                                        borderRadius: 1,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center'
+                                                                    }}>
+                                                                        <EventIcon sx={{
+                                                                            color: '#2e7d32',
+                                                                            mr: 1,
+                                                                            fontSize: 20
+                                                                        }}/>
+                                                                        <Typography component="span" variant="body2"
+                                                                                    fontWeight="medium" color="#2e7d32">
+                                                                            Tamamlanma
+                                                                            Tarihi: {new Date(item.updatedAt).toLocaleString('tr-TR')}
                                                                         </Typography>
-                                                                        <Chip 
-                                                                            label="Tamamlandı" 
-                                                                            color="success" 
-                                                                            size="small" 
-                                                                            icon={<CheckCircleIcon />}
-                                                                            sx={{ fontWeight: 'medium' }}
-                                                                        />
                                                                     </Box>
-                                                                }
-                                                                secondary={
-                                                                    <React.Fragment>
-                                                                        <Box sx={{ 
-                                                                            mt: 1, 
-                                                                            py: 1,
-                                                                            px: 1.5,
-                                                                            bgcolor: '#e8f5e9', 
-                                                                            borderRadius: 1,
-                                                                            display: 'flex',
-                                                                            alignItems: 'center'
-                                                                        }}>
-                                                                            <EventIcon sx={{ color: '#2e7d32', mr: 1, fontSize: 20 }} />
-                                                                            <Typography component="span" variant="body2" fontWeight="medium" color="#2e7d32">
-                                                                                Tamamlanma Tarihi: {new Date(item.updatedAt).toLocaleString('tr-TR')}
-                                                                            </Typography>
-                                                                        </Box>
-                                                                        
-                                                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1.5 }}>
+
+                                                                    <Box sx={{
+                                                                        display: 'flex',
+                                                                        flexWrap: 'wrap',
+                                                                        gap: 0.5,
+                                                                        mt: 1.5
+                                                                    }}>
+                                                                        <Chip
+                                                                            size="small"
+                                                                            icon={<AccessTimeIcon fontSize="small"/>}
+                                                                            label={`Süre: ${item.duration || item.Exercise?.duration || 0} dakika`}
+                                                                            sx={{
+                                                                                mr: 1,
+                                                                                mb: 1,
+                                                                                bgcolor: '#e3f2fd',
+                                                                                color: '#1565c0',
+                                                                                fontWeight: 500
+                                                                            }}
+                                                                        />
+
+                                                                        {item.Exercise?.calories_burned && (
                                                                             <Chip
                                                                                 size="small"
-                                                                                icon={<AccessTimeIcon fontSize="small" />}
-                                                                                label={`Süre: ${item.duration || item.Exercise?.duration || 0} dakika`}
-                                                                                sx={{ mr: 1, mb: 1, bgcolor: '#e3f2fd', color: '#1565c0', fontWeight: 500 }}
+                                                                                icon={<LocalFireDepartmentIcon
+                                                                                    fontSize="small"/>}
+                                                                                label={`${item.Exercise.calories_burned} kcal`}
+                                                                                sx={{
+                                                                                    mr: 1,
+                                                                                    mb: 1,
+                                                                                    bgcolor: '#ffebee',
+                                                                                    color: '#c62828',
+                                                                                    fontWeight: 500
+                                                                                }}
                                                                             />
-                                                                            
-                                                                            {item.Exercise?.calories_burned && (
-                                                                                <Chip
-                                                                                    size="small"
-                                                                                    icon={<LocalFireDepartmentIcon fontSize="small" />}
-                                                                                    label={`${item.Exercise.calories_burned} kcal`}
-                                                                                    sx={{ mr: 1, mb: 1, bgcolor: '#ffebee', color: '#c62828', fontWeight: 500 }}
-                                                                                />
-                                                                            )}
-                                                                            
-                                                                            {item.Exercise?.difficulty && (
-                                                                                <Chip
-                                                                                    size="small"
-                                                                                    label={`Zorluk: ${item.Exercise.difficulty}/5`}
-                                                                                    color={item.Exercise.difficulty > 3 ? "error" : item.Exercise.difficulty > 1 ? "warning" : "success"}
-                                                                                    variant="outlined"
-                                                                                    sx={{ mr: 1, mb: 1, fontWeight: 500 }}
-                                                                                />
-                                                                            )}
-                                                                        </Box>
-                                                                    </React.Fragment>
-                                                                }
-                                                            />
-                                                        </ListItem>
-                                                        <Divider variant="inset" component="li" />
-                                                    </React.Fragment>
-                                                ))}
-                                            </List>
-                                        ) : (
-                                            <Box sx={{ 
-                                                display: 'flex', 
-                                                flexDirection: 'column', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'center', 
-                                                py: 6,
-                                                px: 3,
-                                                bgcolor: '#f8f9fa',
-                                                borderRadius: 2,
-                                                border: '1px dashed #bdbdbd'
-                                            }}>
-                                                <EventBusyIcon sx={{ fontSize: 60, color: '#bdbdbd', mb: 2 }} />
-                                                <Typography variant="h6" color="text.secondary" align="center">
-                                                    Seçilen tarih aralığında tamamlanmış egzersiz bulunmamaktadır
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1, maxWidth: 600 }}>
-                                                    Danışanınız henüz herhangi bir egzersizi tamamlamamış veya seçtiğiniz tarih aralığında tamamlanmış egzersiz bulunmuyor. Farklı bir tarih aralığı seçebilir veya danışanınızın egzersizleri tamamlamasını bekleyebilirsiniz.
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                                
-                                {/* Egzersiz Atama Popup'ı */}
-                                <Dialog open={isAssignExerciseDialogOpen} onClose={handleCloseAssignExerciseDialog}>
-                                    <DialogTitle>Yeni Egzersiz Ata</DialogTitle>
-                                    <Box component="form" onSubmit={handleAssignExercise}>
-                                        <DialogContent dividers>
-                                            <Grid container spacing={2}>
-                                                <Grid item xs={12}>
-                                                    <Typography variant="subtitle2" gutterBottom>Egzersiz Seçin</Typography>
-                                                    {availableExercisesLoading ? (
-                                                        <Box sx={{display: 'flex', justifyContent: 'center', py: 2}}>
-                                                            <CircularProgress size={24}/>
-                                                        </Box>
-                                                    ) : (
-                                                        <TextField
-                                                            select
-                                                            name="exercise_id"
-                                                            value={assignForm.exercise_id}
-                                                            onChange={handleAssignFormChange}
-                                                            fullWidth
-                                                            required
-                                                            size="small"
-                                                            placeholder="Egzersiz seçin"
-                                                            InputProps={{
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <FitnessCenterIcon fontSize="small"/>
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                            sx={{mb: 2}}
-                                                        >
-                                                            <MenuItem value="" disabled>Egzersiz seçin</MenuItem>
-                                                            {availableExercises.map((exercise) => (
-                                                                <MenuItem key={exercise.id} value={exercise.id}>
-                                                                    {exercise.exercise_name}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </TextField>
-                                                    )}
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <Typography variant="subtitle2" gutterBottom>Not</Typography>
-                                                    <TextField
-                                                        name="note"
-                                                        value={assignForm.note}
-                                                        onChange={handleAssignFormChange}
-                                                        fullWidth
-                                                        size="small"
-                                                        placeholder="Not (isteğe bağlı)"
-                                                        sx={{mb: 2}}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                        <DatePicker
-                                                            label="Başlangıç Tarihi"
-                                                            name="start_date"
-                                                            value={assignForm.start_date ? new Date(assignForm.start_date) : null}
-                                                            onChange={(newValue) => {
-                                                                setAssignForm(prev => ({
-                                                                    ...prev,
-                                                                    start_date: newValue ? newValue.toISOString().split('T')[0] : ''
-                                                                }))
-                                                            }}
-                                                            slotProps={{
-                                                                textField: {
-                                                                    fullWidth: true,
-                                                                    required: true,
-                                                                    size: "small"
-                                                                }
-                                                            }}
+                                                                        )}
+
+                                                                        {item.Exercise?.difficulty && (
+                                                                            <Chip
+                                                                                size="small"
+                                                                                label={`Zorluk: ${item.Exercise.difficulty}/5`}
+                                                                                color={item.Exercise.difficulty > 3 ? "error" : item.Exercise.difficulty > 1 ? "warning" : "success"}
+                                                                                variant="outlined"
+                                                                                sx={{mr: 1, mb: 1, fontWeight: 500}}
+                                                                            />
+                                                                        )}
+                                                                    </Box>
+                                                                </React.Fragment>
+                                                            }
                                                         />
-                                                    </LocalizationProvider>
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                        <DatePicker
-                                                            label="Bitiş Tarihi"
-                                                            name="end_date"
-                                                            value={assignForm.end_date ? new Date(assignForm.end_date) : null}
-                                                            onChange={(newValue) => {
-                                                                setAssignForm(prev => ({
-                                                                    ...prev,
-                                                                    end_date: newValue ? newValue.toISOString().split('T')[0] : ''
-                                                                }))
-                                                            }}
-                                                            slotProps={{
-                                                                textField: {
-                                                                    fullWidth: true,
-                                                                    required: true,
-                                                                    size: "small"
-                                                                }
-                                                            }}
-                                                        />
-                                                    </LocalizationProvider>
-                                                </Grid>
-                                            </Grid>
-                                        </DialogContent>
-                                        <DialogActions>
-                                            <Button onClick={handleCloseAssignExerciseDialog} color="secondary">
-                                                İptal
-                                            </Button>
-                                            <Button type="submit" variant="contained" color="primary" disabled={assignLoading}>
-                                                {assignLoading ? <CircularProgress size={24}/> : "Egzersiz Ata"}
-                                            </Button>
-                                        </DialogActions>
+                                                    </ListItem>
+                                                    <Divider variant="inset" component="li"/>
+                                                </React.Fragment>
+                                            ))}
+                                    </List>
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 6,
+                                        px: 3,
+                                        bgcolor: '#f8f9fa',
+                                        borderRadius: 2,
+                                        border: '1px dashed #bdbdbd'
+                                    }}>
+                                        <EventBusyIcon sx={{fontSize: 60, color: '#bdbdbd', mb: 2}}/>
+                                        <Typography variant="h6" color="text.secondary" align="center">
+                                            Seçilen tarih aralığında tamamlanmış egzersiz bulunmamaktadır
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" align="center"
+                                                    sx={{mt: 1, maxWidth: 600}}>
+                                            Danışanınız henüz herhangi bir egzersizi tamamlamamış veya seçtiğiniz tarih
+                                            aralığında tamamlanmış egzersiz bulunmuyor. Farklı bir tarih aralığı
+                                            seçebilir veya danışanınızın egzersizleri tamamlamasını bekleyebilirsiniz.
+                                        </Typography>
                                     </Box>
-                                </Dialog>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Egzersiz Atama Popup'ı */}
+                        <Dialog open={isAssignExerciseDialogOpen} onClose={handleCloseAssignExerciseDialog}>
+                            <DialogTitle>Yeni Egzersiz Ata</DialogTitle>
+                            <Box component="form" onSubmit={handleAssignExercise}>
+                                <DialogContent dividers>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <Typography variant="subtitle2" gutterBottom>Egzersiz Seçin</Typography>
+                                            {availableExercisesLoading ? (
+                                                <Box sx={{display: 'flex', justifyContent: 'center', py: 2}}>
+                                                    <CircularProgress size={24}/>
+                                                </Box>
+                                            ) : (
+                                                <TextField
+                                                    select
+                                                    name="exercise_id"
+                                                    value={assignForm.exercise_id}
+                                                    onChange={handleAssignFormChange}
+                                                    fullWidth
+                                                    required
+                                                    size="small"
+                                                    placeholder="Egzersiz seçin"
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <FitnessCenterIcon fontSize="small"/>
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                    sx={{mb: 2}}
+                                                >
+                                                    <MenuItem value="" disabled>Egzersiz seçin</MenuItem>
+                                                    {availableExercises.map((exercise) => (
+                                                        <MenuItem key={exercise.id} value={exercise.id}>
+                                                            {exercise.exercise_name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            )}
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="subtitle2" gutterBottom>Not</Typography>
+                                            <TextField
+                                                name="note"
+                                                value={assignForm.note}
+                                                onChange={handleAssignFormChange}
+                                                fullWidth
+                                                size="small"
+                                                placeholder="Not (isteğe bağlı)"
+                                                sx={{mb: 2}}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                <DatePicker
+                                                    label="Başlangıç Tarihi"
+                                                    name="start_date"
+                                                    value={assignForm.start_date ? new Date(assignForm.start_date) : null}
+                                                    onChange={(newValue) => {
+                                                        setAssignForm(prev => ({
+                                                            ...prev,
+                                                            start_date: newValue ? newValue.toISOString().split('T')[0] : ''
+                                                        }))
+                                                    }}
+                                                    slotProps={{
+                                                        textField: {
+                                                            fullWidth: true,
+                                                            required: true,
+                                                            size: "small"
+                                                        }
+                                                    }}
+                                                />
+                                            </LocalizationProvider>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                <DatePicker
+                                                    label="Bitiş Tarihi"
+                                                    name="end_date"
+                                                    value={assignForm.end_date ? new Date(assignForm.end_date) : null}
+                                                    onChange={(newValue) => {
+                                                        setAssignForm(prev => ({
+                                                            ...prev,
+                                                            end_date: newValue ? newValue.toISOString().split('T')[0] : ''
+                                                        }))
+                                                    }}
+                                                    slotProps={{
+                                                        textField: {
+                                                            fullWidth: true,
+                                                            required: true,
+                                                            size: "small"
+                                                        }
+                                                    }}
+                                                />
+                                            </LocalizationProvider>
+                                        </Grid>
+                                    </Grid>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={handleCloseAssignExerciseDialog} color="secondary">
+                                        İptal
+                                    </Button>
+                                    <Button type="submit" variant="contained" color="primary" disabled={assignLoading}>
+                                        {assignLoading ? <CircularProgress size={24}/> : "Egzersiz Ata"}
+                                    </Button>
+                                </DialogActions>
                             </Box>
-                        );
+                        </Dialog>
+                    </Box>
+                );
             case 'odeme':
                 const today = new Date();
                 const activeInvoice = clientInvoices.find(inv => {
@@ -3803,7 +3607,8 @@ function Danisan() {
                                         Fatura: {activeInvoice.description || 'Açıklama yok'}</Typography>}
                                     subheader={<Typography variant="body2" color="text.secondary">Fatura
                                         No: {activeInvoice.id}</Typography>}
-                                    sx={{borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.100'}}
+                                    sx={{borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#2d4149',
+                                        color: 'white',}}
                                 />
                                 <CardContent>
                                     <Typography variant="body2" sx={{mb: 1}}>
@@ -3856,7 +3661,8 @@ function Danisan() {
                                                         action={<Chip label={statusLabel} color={statusColor}
                                                                       size="small"/>}
                                                         sx={{
-                                                            bgcolor: 'grey.100',
+                                                            bgcolor: '#2d4149',
+                                                            color: 'white',
                                                             borderBottom: '1px solid',
                                                             borderColor: 'divider'
                                                         }}
@@ -4010,8 +3816,7 @@ function Danisan() {
             setAppointments(appointmentsResponse.data);
             setAppointmentsLoading(false);
 
-            setSuccessMessage(`Randevu başarıyla oluşturuldu.`);
-            setShowSuccessPopup(true);
+            showSuccessToast("Randevu başarıyla oluşturuldu.");
         } catch (err) {
             setErrorMessage(err.response.data.message);
             setShowErrorPopup(true);
@@ -4021,31 +3826,31 @@ function Danisan() {
     // Function to fetch exercise history
     const fetchExerciseHistory = (startDate, endDate) => {
         if (!id || !startDate || !endDate) return;
-        
+
         setLoadingExerciseHistory(true);
         axios.get(`${config[config.environment].apiUrl}/exercise/getClientExerciseHistory`, {
-            headers: { Authorization: localStorage.getItem("token") },
+            headers: {Authorization: localStorage.getItem("token")},
             params: {
                 client_id: id,
                 start_date: startDate,
                 end_date: endDate
             }
         })
-        .then(response => {
-            setExerciseHistory(response.data || []);
-            setLoadingExerciseHistory(false);
-        })
-        .catch(error => {
-            console.error("Error fetching exercise history:", error);
-            setLoadingExerciseHistory(false);
-            setExerciseHistory([]);
-        });
+            .then(response => {
+                setExerciseHistory(response.data || []);
+                setLoadingExerciseHistory(false);
+            })
+            .catch(error => {
+                console.error("Error fetching exercise history:", error);
+                setLoadingExerciseHistory(false);
+                setExerciseHistory([]);
+            });
     };
 
     // Handle date changes for history filtering
     const handleHistoryDateChange = (dateType, newValue) => {
         const formattedDate = newValue ? newValue.toISOString().split('T')[0] : '';
-        
+
         if (dateType === 'start') {
             setHistoryStartDate(formattedDate);
             if (formattedDate && historyEndDate) {
@@ -4112,7 +3917,7 @@ function Danisan() {
                                     {danisan.name} {danisan.surname}
                                 </Typography>
                                 <Divider sx={{width: '100%', my: 2}}/>
-                                
+
                                 {/* Danışan Bilgileri - Yeni Tasarım */}
                                 <List sx={{width: '100%', p: 0}}>
                                     <ListItem sx={{
@@ -4123,15 +3928,16 @@ function Danisan() {
                                     }}>
                                         <ListItemAvatar>
                                             <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
-                                                <Person fontSize="small" />
+                                                <Person fontSize="small"/>
                                             </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText 
-                                            primary={<Typography variant="body2" color="text.secondary">Cinsiyet</Typography>}
+                                        <ListItemText
+                                            primary={<Typography variant="body2"
+                                                                 color="text.secondary">Cinsiyet</Typography>}
                                             secondary={<Typography variant="body1">{danisan.gender || '-'}</Typography>}
                                         />
                                     </ListItem>
-                                    
+
                                     <ListItem sx={{
                                         py: 1,
                                         px: 0,
@@ -4140,15 +3946,17 @@ function Danisan() {
                                     }}>
                                         <ListItemAvatar>
                                             <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
-                                                <Cake fontSize="small" />
+                                                <Cake fontSize="small"/>
                                             </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText 
-                                            primary={<Typography variant="body2" color="text.secondary">Doğum Tarihi</Typography>}
-                                            secondary={<Typography variant="body1">{danisan.birthDate || '-'}</Typography>}
+                                        <ListItemText
+                                            primary={<Typography variant="body2" color="text.secondary">Doğum
+                                                Tarihi</Typography>}
+                                            secondary={<Typography
+                                                variant="body1">{danisan.birthDate || '-'}</Typography>}
                                         />
                                     </ListItem>
-                                    
+
                                     <ListItem sx={{
                                         py: 1,
                                         px: 0,
@@ -4157,15 +3965,17 @@ function Danisan() {
                                     }}>
                                         <ListItemAvatar>
                                             <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
-                                                <Email fontSize="small" />
+                                                <Email fontSize="small"/>
                                             </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText 
-                                            primary={<Typography variant="body2" color="text.secondary">E-posta</Typography>}
-                                            secondary={<Typography variant="body1" noWrap>{danisan.email || '-'}</Typography>}
+                                        <ListItemText
+                                            primary={<Typography variant="body2"
+                                                                 color="text.secondary">E-posta</Typography>}
+                                            secondary={<Typography variant="body1"
+                                                                   noWrap>{danisan.email || '-'}</Typography>}
                                         />
                                     </ListItem>
-                                    
+
                                     <ListItem sx={{
                                         py: 1,
                                         px: 0,
@@ -4174,12 +3984,14 @@ function Danisan() {
                                     }}>
                                         <ListItemAvatar>
                                             <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
-                                                <Phone fontSize="small" />
+                                                <Phone fontSize="small"/>
                                             </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText 
-                                            primary={<Typography variant="body2" color="text.secondary">Telefon</Typography>}
-                                            secondary={<Typography variant="body1">{danisan.phoneNumber || '-'}</Typography>}
+                                        <ListItemText
+                                            primary={<Typography variant="body2"
+                                                                 color="text.secondary">Telefon</Typography>}
+                                            secondary={<Typography
+                                                variant="body1">{danisan.phoneNumber || '-'}</Typography>}
                                         />
                                     </ListItem>
                                 </List>
@@ -4225,25 +4037,6 @@ function Danisan() {
                     </Grid>
                 </Grid>
             </Box>
-            {/* Success Popup */}
-            {showSuccessPopup && (
-                <div className="success-popup">
-                    <div className="success-popup-content">
-                        <CheckCircleIcon className="success-icon"/>
-                        <p>{successMessage}</p>
-                    </div>
-                </div>
-            )}
-
-            {/* Error Popup */}
-            {showErrorPopup && (
-                <div className="error-popup">
-                    <div className="error-popup-content">
-                        <ErrorIcon className="error-icon"/>
-                        <p>{errorMessage}</p>
-                    </div>
-                </div>
-            )}
 
             {/* Ölçüm Ekleme Dialog */}
             <Dialog open={isMeasurementDialogOpen} onClose={handleCloseMeasurementDialog} fullWidth maxWidth="md">
@@ -4287,7 +4080,19 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.bel}
                                     onChange={handleMeasurementFormChange}
-                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bel Çevresi"
+                                    name="digerbel"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.digerbel}
+                                    onChange={handleMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4301,7 +4106,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.kalca}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4315,7 +4119,32 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.gogus}
                                     onChange={handleMeasurementFormChange}
-                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kol Çevresi"
+                                    name="kol"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.kol}
+                                    onChange={handleMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bacak Çevresi"
+                                    name="bacak"
+                                    type="number"
+                                    fullWidth
+                                    value={measurementForm.bacak}
+                                    onChange={handleMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4329,7 +4158,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.yag}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4343,7 +4171,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.kas}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4357,7 +4184,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.su}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4424,7 +4250,19 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.bel}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bel Çevresi"
+                                    name="digerbel"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.digerbel}
+                                    onChange={handleEditMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4438,7 +4276,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.kalca}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4452,7 +4289,32 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.gogus}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Kol Çevresi"
+                                    name="kol"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.kol}
+                                    onChange={handleEditMeasurementFormChange}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="Bacak Çevresi"
+                                    name="bacak"
+                                    type="number"
+                                    fullWidth
+                                    value={editMeasurementForm.bacak}
+                                    onChange={handleEditMeasurementFormChange}
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4466,7 +4328,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.yag}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4480,7 +4341,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.kas}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}
@@ -4494,7 +4354,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.su}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
                                     }}

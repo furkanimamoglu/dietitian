@@ -64,123 +64,39 @@ const Measurement = sequelize.define('Measurement', {
     },
     bel: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Bel ölçüsü bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Bel ölçüsü en az 10 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Bel ölçüsü en fazla 300 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Bel ölçüsü gereklidir."
-            }
-        }
+        allowNull: true,
     },
     kalca: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Kalça ölçüsü bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Kalça ölçüsü en az 10 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Kalça ölçüsü en fazla 200 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Kalça ölçüsü gereklidir."
-            }
-        }
+        allowNull: true,
     },
     gogus: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Göğüs ölçüsü bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Göğüs ölçüsü en az 30 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Göğüs ölçüsü en fazla 200 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Göğüs ölçüsü gereklidir."
-            }
-        }
+        allowNull: true,
+    },
+    digerbel: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
+    },
+    kol: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
+    },
+    bacak: {
+        type: DataTypes.BIGINT,
+        allowNull: true,
     },
     yag: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Vücut yağ oranı bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [1],
-                msg: "Vücut yağ oranı en az %1 olmalıdır."
-            },
-            max: {
-                args: [70],
-                msg: "Vücut yağ oranı en fazla %70 olmalıdır."
-            },
-            notNull: {
-                msg: "Vücut yağ oranı gereklidir."
-            }
-        }
+        allowNull: true
     },
     kas: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Kas kütlesi bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Kas kütlesi en az %10 olmalıdır."
-            },
-            max: {
-                args: [80],
-                msg: "Kas kütlesi en fazla %80 olmalıdır."
-            },
-            notNull: {
-                msg: "Kas kütlesi gereklidir."
-            }
-        }
+        allowNull: true
     },
     su: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Vücut su oranı bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [20],
-                msg: "Vücut su oranı en az %20 olmalıdır."
-            },
-            max: {
-                args: [90],
-                msg: "Vücut su oranı en fazla %90 olmalıdır."
-            },
-            notNull: {
-                msg: "Vücut su oranı gereklidir."
-            }
-        }
+        allowNull: true
     }
 });
 

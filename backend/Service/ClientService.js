@@ -6,7 +6,10 @@ const {
     Notification,
     NutritionAssignment,
     NutritionPlan,
-    Measurement
+    Measurement,
+    RecipeAssignment,
+    Recipe,
+    RecipeCategory
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const jwt = require('jsonwebtoken');
@@ -54,7 +57,7 @@ class ClientService {
         }
     }
 
-    static async register(dietitian_id, name, phoneNumber, password, ipAddress) {
+    static async register(dietitian_id, name, gender, phoneNumber, password, ipAddress) {
         try {
             if (!dietitian_id) {
                 throw new Exception('Diyetisyen bulunamadı.', 400, true);
@@ -67,6 +70,7 @@ class ClientService {
             const client = await Client.create({
                 dietitian_id: dietitian_id,
                 name: name,
+                gender: gender,
                 phoneNumber: phoneNumber,
                 password: password,
                 role: CLIENT,
@@ -75,7 +79,7 @@ class ClientService {
 
             const token = jwt.sign(
                 {
-                    client_id: client.id,
+                    id: client.id,
                     dietitian_id: client.dietitian_id,
                     phoneNumber: client.phoneNumber,
                     role: CLIENT
@@ -183,7 +187,7 @@ class ClientService {
         }
     }
 
-    static async getTodayMeal(clientId, todayDate) {
+    static async getTodayMealPlan(clientId, todayDate) {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: clientId,
@@ -202,46 +206,36 @@ class ClientService {
             throw new Exception("Bugün için atanmış bir beslenme planı bulunamadı. Lütfen diyetisyeninizden size bir beslenme programı atamasını talep edin.", 404, true);
         }
 
-        // If the assignment doesn't have a mealPlan yet, or has the old format, we need to transform it
-        if (!assignment.mealPlan) {
-            // If no mealPlan exists in assignment, create a new one based on NutritionPlan's mealPlan
-            if (assignment.NutritionPlan && assignment.NutritionPlan.mealPlan) {
-                const transformedMealPlan = {};
-                Object.keys(assignment.NutritionPlan.mealPlan).forEach(day => {
-                    transformedMealPlan[day] = {};
-                    Object.keys(assignment.NutritionPlan.mealPlan[day] || {}).forEach(mealType => {
-                        // Get the meal items based on the format
-                        let mealItems = [];
-                        const mealData = assignment.NutritionPlan.mealPlan[day][mealType];
+        return assignment.mealPlan;
+    }
 
-                        // Handle complex format with main and alternatives
-                        if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
-                            mealItems = [...mealData.main];
-                        }
-                        // Handle simple array format
-                        else if (Array.isArray(mealData)) {
-                            mealItems = [...mealData];
-                        }
-                        // Handle string format (backward compatibility)
-                        else if (typeof mealData === 'string') {
-                            mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-                        }
-
-                        // Transform to new format with "yenildi" field
-                        transformedMealPlan[day][mealType] = mealItems.map(item => ({
-                            isim: item,
-                            yenildi: false
-                        }));
-                    });
-                });
-
-                // Update the assignment with the new format
-                assignment.mealPlan = transformedMealPlan;
-                await assignment.save();
-            }
+    static async getMyRecipes(client_id) {
+        if (!client_id) {
+            throw new Exception("Yetkisiz Erişim.", 400, true);
         }
 
-        return assignment;
+        const recipes = await RecipeAssignment.findAll({
+            where: {client_id: client_id},
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: Recipe,
+                    as: 'Recipe',
+                    include: [
+                        {
+                            model: RecipeCategory,
+                            as: 'category'
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!recipes || recipes.length === 0) {
+            throw new Exception("Kayıtlı tarifiniz bulunamadı.", 404, true);
+        }
+
+        return recipes;
     }
 
     static async updateMealPlan(client_id, nutrition_plan_id, newMealPlan) {

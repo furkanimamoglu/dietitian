@@ -1,5 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Default from "../../Components/Layouts/Default.jsx";
+import "./Mesaj.css";
+
 import {
     Avatar,
     Badge,
@@ -7,9 +9,6 @@ import {
     Button,
     Chip,
     CircularProgress,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     Divider,
     Fade,
     Grid,
@@ -27,6 +26,7 @@ import {
     useTheme,
     Zoom
 } from "@mui/material";
+
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
@@ -38,14 +38,11 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import WcIcon from '@mui/icons-material/Wc';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import ImageIcon from '@mui/icons-material/Image';
-import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import axios from "axios";
 import config from "../../config.js";
-import "./Mesaj.css";
 
 export default function Mesaj() {
     const [danisanList, setDanisanList] = useState([]);
@@ -68,10 +65,24 @@ export default function Mesaj() {
     const intervalRef = useRef();
 
     useEffect(() => {
+        // Mesajlar yüklendiğinde veya değiştiğinde en alta kaydır
         if (messageListRef.current) {
-            messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+            // setTimeout kullanarak DOM güncellemesinin tamamlanması için süre veriyoruz
+            setTimeout(() => {
+                messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+            }, 100);
         }
     }, [messages]);
+
+    // Danışan seçildiğinde ve mesajlar ilk yüklendiğinde de kaydırma yap
+    useEffect(() => {
+        if (selectedDanisan && messageListRef.current) {
+            // Danışan seçildiğinde ve mesajlar yüklendiğinde en alta kaydır
+            setTimeout(() => {
+                messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+            }, 300);
+        }
+    }, [selectedDanisan]);
 
     const checkNewMessages = useCallback(async (partnerId) => {
         if (!partnerId) return;
@@ -104,15 +115,12 @@ export default function Mesaj() {
                 isRead: msg.isRead
             }));
 
-            // En yüksek mesaj ID'sini bul
             const latestMessageId = Math.max(...formattedMessages.map(msg => msg.id));
 
-            // İlk yükleme değilse ve yeni mesaj yoksa işlem yapma
             if (lastMessageId !== null && latestMessageId <= lastMessageId) {
                 return;
             }
 
-            // Sadece yeni mesajları filtrele
             const newMessages = formattedMessages.filter(msg =>
                 lastMessageId === null || msg.id > lastMessageId
             );
@@ -120,7 +128,6 @@ export default function Mesaj() {
             if (newMessages.length > 0) {
                 console.log(`${newMessages.length} yeni mesaj alındı`);
 
-                // İlk yükleme ise tüm mesajları set et, değilse sadece yeni mesajları ekle
                 if (lastMessageId === null) {
                     setMessages(formattedMessages);
                 } else {
@@ -187,7 +194,7 @@ export default function Mesaj() {
             const responses = await Promise.all(promises);
 
             const newUnreadCounts = danisanList.reduce((acc, danisan, index) => {
-                acc[danisan.id] = responses[index]?.data.unreadMessageCount|| 0;
+                acc[danisan.id] = responses[index]?.data.unreadMessageCount || 0;
                 return acc;
             }, {});
 
@@ -196,7 +203,6 @@ export default function Mesaj() {
             console.error("Okunmamış mesaj sayısını alırken hata:", error);
         }
     }, [danisanList]);
-
 
 
     useEffect(() => {
@@ -380,6 +386,12 @@ export default function Mesaj() {
         const isImage = file.type.startsWith('image/');
         const maxSize = 5 * 1024 * 1024; // 5MB
 
+        // Sadece resim dosyalarına izin ver
+        if (!isImage) {
+            alert('Sadece resim dosyaları yükleyebilirsiniz.');
+            return;
+        }
+
         if (file.size > maxSize) {
             alert('Dosya boyutu 5MB\'dan küçük olmalıdır.');
             return;
@@ -389,49 +401,108 @@ export default function Mesaj() {
         setUploadProgress(0);
 
         try {
-            await simulateFileUpload(file, (progress) => {
-                setUploadProgress(progress);
-            });
+            const formData = new FormData();
+            formData.append('image', file);
 
-            const fileUrl = URL.createObjectURL(file);
-            const newMsg = {
-                id: Date.now(),
-                text: isImage ? null : 'Dosya gönderildi: ' + file.name,
-                sender: "DIETITIAN",
-                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
-                file: {
-                    url: fileUrl,
-                    name: file.name,
-                    type: file.type,
-                    isImage
+            // Dosyayı yükle
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/upload",
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: localStorage.getItem("token"),
+                    },
+                    onUploadProgress: (progressEvent) => {
+                        const percentCompleted = Math.round(
+                            (progressEvent.loaded * 100) / progressEvent.total
+                        );
+                        setUploadProgress(percentCompleted);
+                    },
                 }
-            };
+            );
 
-            setMessages(prev => [...prev, newMsg]);
+            if (response.data && response.data.imageUrl) {
+                const imageUrl = response.data.imageUrl;
+
+                // Resim URL'sini içeren mesaj metni oluştur
+                const messageText = `[RESIM:${imageUrl}]`;
+
+                // Mesajı gönder
+                const messageData = {
+                    receiver_id: selectedDanisan.id,
+                    message: messageText,
+                    isRead: false
+                };
+
+                // UI için geçici mesaj oluştur
+                const tempId = Date.now();
+                const newMsg = {
+                    id: tempId,
+                    text: null, // Metin yerine resim gösterileceği için null
+                    sender: "DIETITIAN",
+                    timestamp: new Date().toLocaleString('tr-TR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    file: {
+                        url: imageUrl,
+                        name: file.name,
+                        type: file.type,
+                        isImage: true
+                    }
+                };
+
+                // Mesajı UI'a ekle
+                setMessages(prev => [...prev, newMsg]);
+
+                // API ile resim mesajını gönder
+                try {
+                    const msgResponse = await axios.post(
+                        config[config.environment].apiUrl + "/message/sendMessage",
+                        messageData,
+                        {
+                            headers: {
+                                Authorization: localStorage.getItem("token")
+                            }
+                        }
+                    );
+
+                    // Başarılı gönderimden sonra gerçek mesaj ID'sini güncelle
+                    if (msgResponse.data && msgResponse.data.id) {
+                        setMessages(prev =>
+                            prev.map(msg =>
+                                msg.id === tempId
+                                    ? {...msg, id: msgResponse.data.id}
+                                    : msg
+                            )
+                        );
+
+                        // LastMessageId'yi güncelle
+                        setLastMessageId(msgResponse.data.id);
+                    }
+                } catch (msgError) {
+                    console.error("Resim mesajı gönderirken hata:", msgError);
+                    // Hata durumunda mesajı kaldır
+                    setMessages(prev => prev.filter(msg => msg.id !== tempId));
+                }
+            } else {
+                throw new Error('Resim URL\'i alınamadı.');
+            }
         } catch (error) {
-            console.error('Dosya yükleme hatası:', error);
-            alert('Dosya yüklenirken bir hata oluştu.');
+            console.error('Resim yükleme hatası:', error);
+            alert('Resim yüklenirken bir hata oluştu.');
         } finally {
             setIsUploading(false);
             setFileUploadDialog(false);
         }
     };
 
-    const simulateFileUpload = (file, progressCallback) => {
-        return new Promise((resolve) => {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                progressCallback(progress);
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    resolve();
-                }
-            }, 200);
-        });
-    };
-
     const renderMessage = (message) => {
+        // Dosya özelliği varsa onu göster
         if (message.file) {
             if (message.file.isImage) {
                 return (
@@ -461,6 +532,25 @@ export default function Mesaj() {
                 );
             }
         }
+
+        // Metinde [RESIM:URL] formatını kontrol et
+        if (message.text && typeof message.text === 'string') {
+            const imageMatch = message.text.match(/^\[RESIM:(.*?)\]$/);
+            if (imageMatch) {
+                const imageUrl = imageMatch[1];
+                return (
+                    <Box sx={{maxWidth: '300px', maxHeight: '300px', overflow: 'hidden', borderRadius: '8px'}}>
+                        <img
+                            src={imageUrl}
+                            alt="Gönderilen resim"
+                            style={{width: '100%', height: 'auto', display: 'block'}}
+                        />
+                    </Box>
+                );
+            }
+        }
+
+        // Normal mesaj metni göster
         return (
             <Typography variant="body1">
                 {message.text}
@@ -630,10 +720,7 @@ export default function Mesaj() {
                                                                         {message.timestamp}
                                                                     </Typography>
                                                                     {message.sender === "DIETITIAN" && (
-                                                                        <CheckCircleIcon sx={{
-                                                                            fontSize: 12,
-                                                                            color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary'
-                                                                        }}/>
+                                                                        <CheckCircleIcon sx={{fontSize: 12, color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary'}}/>
                                                                     )}
                                                                 </Box>
                                                             </Box>
@@ -684,6 +771,15 @@ export default function Mesaj() {
                                                                 onClick={(e) => setEmojiPickerAnchor(e.currentTarget)}
                                                             >
                                                                 <EmojiEmotionsIcon/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Resim gönder">
+                                                            <IconButton
+                                                                size="small"
+                                                                color="primary"
+                                                                onClick={() => fileInputRef.current?.click()}
+                                                            >
+                                                                <AttachFileIcon/>
                                                             </IconButton>
                                                         </Tooltip>
                                                     </InputAdornment>
@@ -861,67 +957,39 @@ export default function Mesaj() {
                 </Box>
             </Menu>
 
-            {/* File Upload Dialog */}
-            <Dialog
-                open={fileUploadDialog}
-                onClose={() => !isUploading && setFileUploadDialog(false)}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle>
-                    Dosya/Resim Yükle
-                    {!isUploading && (
-                        <IconButton
-                            aria-label="close"
-                            onClick={() => setFileUploadDialog(false)}
-                            sx={{
-                                position: 'absolute',
-                                right: 8,
-                                top: 8,
-                            }}
-                        >
-                            <CloseIcon/>
-                        </IconButton>
-                    )}
-                </DialogTitle>
-                <DialogContent>
-                    {isUploading ? (
-                        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 3}}>
-                            <CircularProgress variant="determinate" value={uploadProgress}/>
-                            <Typography variant="body2" color="text.secondary">
-                                Yükleniyor... {uploadProgress}%
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, py: 2}}>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                style={{display: 'none'}}
-                                onChange={handleFileSelect}
-                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
-                            />
-                            <Button
-                                variant="outlined"
-                                startIcon={<ImageIcon/>}
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                Resim Seç
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                startIcon={<AttachFileIcon/>}
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                Dosya Seç
-                            </Button>
-                            <Typography variant="caption" color="text.secondary" align="center">
-                                Maksimum dosya boyutu: 5MB
-                            </Typography>
-                        </Box>
-                    )}
-                </DialogContent>
-            </Dialog>
+            {/* Gizli dosya giriş alanı */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                style={{display: 'none'}}
+                onChange={handleFileSelect}
+                accept="image/*" // Sadece resim dosyalarını kabul et
+            />
+
+            {/* Resim yükleme işlemi sırasında gösterilecek ilerleme bildirimi */}
+            {isUploading && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        bottom: '80px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(255,255,255,0.95)',
+                        borderRadius: '8px',
+                        padding: '10px 20px',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        zIndex: 1000
+                    }}
+                >
+                    <CircularProgress variant="determinate" value={uploadProgress} size={24}/>
+                    <Typography variant="body2">
+                        Resim yükleniyor... {uploadProgress}%
+                    </Typography>
+                </Box>
+            )}
         </Default>
     );
 }

@@ -68,47 +68,6 @@ const Mesaj = ({navigation}) => {
         }
     };
 
-    const checkForNewMessages = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                console.error('Token Bulunamadı');
-                return;
-            }
-
-            const response = await fetch(`${config[config.environment].apiUrl}/message/getMyMessages`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.status === 500) {
-                return;
-            }
-
-            const data = await response.json();
-
-            if (data && Array.isArray(data)) {
-                setMessages(prevMessages => {
-                    const currentMessageIds = new Set(prevMessages.map(msg => msg.id));
-
-                    const newMessages = data.filter(msg => !currentMessageIds.has(msg.id));
-
-                    if (newMessages.length > 0) {
-                        console.log(`${newMessages.length} yeni mesaj bulundu`);
-                        return [...prevMessages, ...newMessages];
-                    }
-
-                    return prevMessages;
-                });
-            }
-        } catch (err) {
-            console.error('Error: checkForNewMessages ', err);
-        }
-    };
-
     const fetchClientInfo = async () => {
         try {
             const response = await fetch(`${config[config.environment].apiUrl}/client/getClientInfo`, {
@@ -296,12 +255,42 @@ const Mesaj = ({navigation}) => {
     const renderMessageItem = useCallback(({item}) => {
         const isUser = item.sender === 'CLIENT';
 
+        // Standart resim URL kontrolü
+        const isImage = item.message && item.message.startsWith('http') &&
+            (item.message.endsWith('.jpg') || item.message.endsWith('.jpeg') ||
+                item.message.endsWith('.png') || item.message.endsWith('.gif'));
+
+        // [RESIM:URL] formatındaki mesajları algılama
+        const resimMatch = item.message && item.message.match(/^\[RESIM:(http[^[\]]+)\]$/);
+        const isResimFormat = !!resimMatch;
+        const resimUrl = isResimFormat ? resimMatch[1] : null;
+
         return (
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
-                    {item.message && <Text style={styles.messageText}>{item.message}</Text>}
+                    {!isImage && !isResimFormat && item.message && <Text style={styles.messageText}>{item.message}</Text>}
 
-                    {/* item.image && (
+                    {isImage && (
+                        <TouchableOpacity onPress={() => handleImagePress(item.message)} activeOpacity={0.8}>
+                            <Image
+                                source={{uri: item.message}}
+                                style={styles.sentImage}
+                                resizeMode="cover"
+                            />
+                        </TouchableOpacity>
+                    )}
+
+                    {isResimFormat && (
+                        <TouchableOpacity onPress={() => handleImagePress(resimUrl)} activeOpacity={0.8}>
+                            <Image
+                                source={{uri: resimUrl}}
+                                style={styles.sentImage}
+                                resizeMode="cover"
+                            />
+                        </TouchableOpacity>
+                    )}
+
+                    {item.image && (
                         <TouchableOpacity onPress={() => handleImagePress(item.image)} activeOpacity={0.8}>
                             <Image
                                 source={{uri: item.image}}
@@ -309,7 +298,7 @@ const Mesaj = ({navigation}) => {
                                 resizeMode="cover"
                             />
                         </TouchableOpacity>
-                    ) */}
+                    )}
 
                     <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.diyetisyenTimestamp]}>
                         {item.createdAt}
@@ -359,7 +348,6 @@ const Mesaj = ({navigation}) => {
                             style={styles.input}
                             multiline
                         />
-                        {/*
                         <View style={styles.inputActions}>
                             <TouchableOpacity style={styles.iconButton} onPress={openCamera} disabled={loading}>
                                 <Icon name="camera" size={24} color={loading ? "#ccc" : "#555"}/>
@@ -369,7 +357,6 @@ const Mesaj = ({navigation}) => {
                                 <Icon name="image" size={24} color={loading ? "#ccc" : "#555"}/>
                             </TouchableOpacity>
                         </View>
-                        */}
                     </View>
 
                     <TouchableOpacity
@@ -494,7 +481,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     sendButton: {
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         borderRadius: 25,
         width: 45,
         height: 45,

@@ -2,6 +2,7 @@ import React from 'react';
 import './Footer.css';
 import {Box, Container, Typography} from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import ChatBot from '../ChatBot/ChatBot';
 
 export default function Footer() {
     return (
@@ -15,6 +16,7 @@ export default function Footer() {
                     </Typography>
                 </Box>
             </Container>
+            <ChatBot />
         </Box>
     );
 };

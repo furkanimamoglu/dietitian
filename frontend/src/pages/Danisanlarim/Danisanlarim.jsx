@@ -1,6 +1,7 @@
-import React, {useCallback, useEffect, useState, useMemo} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+
 import {
     Alert,
     Box,
@@ -19,50 +20,49 @@ import {
     Select,
     Snackbar,
     Stack,
-    TextField,
-    Typography,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
+    TextField,
+    Typography
 } from "@mui/material";
-import {
-    DataGrid,
-    GridToolbarContainer,
-    GridToolbarQuickFilter
-} from "@mui/x-data-grid";
+
+import {DataGrid, GridToolbarContainer, GridToolbarQuickFilter} from "@mui/x-data-grid";
+
 import {trTR} from "@mui/x-data-grid/locales";
-import {
-    ArrowForward,
-    Cancel,
-    CheckCircle,
-    CheckCircleOutline,
-    Close as CloseIcon,
-    Delete as DeleteIcon,
-    Edit as EditIcon,
-    Female as FemaleIcon,
-    Group as GroupIcon,
-    GroupAdd,
-    Male as MaleIcon,
-    QrCode as QrCodeIcon,
-    Visibility,
-    VisibilityOff, VpnKey,
-    Upload as UploadIcon,
-    Download as DownloadIcon
-} from "@mui/icons-material";
+
+import ArrowForward from "@mui/icons-material/ArrowForward";
+import Cancel from "@mui/icons-material/Cancel";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import FemaleIcon from "@mui/icons-material/Female";
+import GroupIcon from "@mui/icons-material/Group";
+import MaleIcon from "@mui/icons-material/Male";
+import QrCodeIcon from "@mui/icons-material/QrCode";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import VpnKey from "@mui/icons-material/VpnKey";
+import UploadIcon from "@mui/icons-material/Upload";
+import DownloadIcon from "@mui/icons-material/Download";
+import GroupAdd from "@mui/icons-material/GroupAdd";
+
 import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
 import config from "../../config.js";
 import PersonIcon from "@mui/icons-material/Person";
-import { Document, Page, Image, PDFDownloadLink, PDFViewer, StyleSheet, View, Text, Font } from '@react-pdf/renderer';
+import {Document, Font, Image, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
 import Papa from 'papaparse';
 
 Font.register({
     family: 'Open Sans',
     fonts: [
-        { src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf' }
+        {src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'}
     ]
 });
 
@@ -135,21 +135,21 @@ const styles = StyleSheet.create({
     }
 });
 
-const QRDocument = ({ qrData }) => (
+const QRDocument = ({qrData}) => (
     <Document>
         <Page size="A4" style={styles.page}>
             <Text style={styles.header}>Diyetisyen QR Kodu</Text>
-            
+
             <Text style={styles.instructionText}>
-                Bu QR kodu <Text style={styles.highlight}>danışanlarınıza</Text> göstererek, sizi diyetisyen olarak 
+                Bu QR kodu <Text style={styles.highlight}>danışanlarınıza</Text> göstererek, sizi diyetisyen olarak
                 uygulamalarına eklemelerini sağlayabilirsiniz.
             </Text>
 
             <View style={styles.qrContainer}>
-                <Image style={styles.qrImage} src={qrData} />
+                <Image style={styles.qrImage} src={qrData}/>
                 <Text style={styles.logo}>Diyetia</Text>
             </View>
-            
+
             <Text style={styles.footer}>
                 Diyetia.com - Sağlıklı beslenme için teknolojik çözümler
             </Text>
@@ -178,7 +178,7 @@ export default function Danisanlarim() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
     const [activeFilter, setActiveFilter] = useState(null); // 'all', 'active', 'inactive', 'female', 'male', 'other'
-    
+
     // CSV Import states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
     const [csvData, setCsvData] = useState([]);
@@ -372,6 +372,41 @@ export default function Danisanlarim() {
         }
     };
 
+    const handleChangeStatus = async (client) => {
+        try {
+            // Mevcut durumun tersini ayarla
+            const newStatus = client.status === "Aktif" ? "Pasif" : "Aktif";
+
+            await axios.post(
+                `${config[config.environment].apiUrl}/dietitian/changeClientStatus`,
+                {
+                    client_id: client.id,
+                    status: newStatus
+                },
+                {headers: {Authorization: localStorage.getItem("token")}}
+            );
+
+            // Yerel veriyi güncelle
+            setClients(prev => prev.map(c =>
+                c.id === client.id ? {...c, status: newStatus} : c
+            ));
+
+            setSnackbar({
+                open: true,
+                message: `${client.name} durumu ${newStatus === "Aktif" ? "aktif" : "pasif"} olarak değiştirildi`,
+                severity: "success"
+            });
+
+        } catch (error) {
+            console.error("Durum değiştirme hatası:", error);
+            setSnackbar({
+                open: true,
+                message: "Danışan durumu değiştirilemedi",
+                severity: "error"
+            });
+        }
+    };
+
     const openCreateDialog = () => setCreateDialogOpen(true);
 
     const closeCreateDialog = () => {
@@ -478,12 +513,12 @@ export default function Danisanlarim() {
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewClient(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setNewClient(prev => ({...prev, [name]: value}));
 
         // Kullanıcı yazmaya başladığında o alanın hatasını temizle
         if (formErrors[name]) {
-            setFormErrors(prev => ({ ...prev, [name]: "" }));
+            setFormErrors(prev => ({...prev, [name]: ""}));
         }
     };
 
@@ -526,7 +561,7 @@ export default function Danisanlarim() {
                     name: newClient.name.trim(),
                     email: newClient.email.trim()
                 },
-                { headers: { Authorization: localStorage.getItem("token") } }
+                {headers: {Authorization: localStorage.getItem("token")}}
             );
 
             setClients(prev => [...prev, response.data]);
@@ -584,7 +619,7 @@ export default function Danisanlarim() {
             width: 90,
             type: "singleSelect",
             valueOptions: ["Aktif", "Pasif"],
-            editable: true,
+            editable: false,
             renderCell: (params) => {
                 if (params.row.status === "Aktif") {
                     return <CheckCircle sx={{color: green[500]}}/>;
@@ -651,7 +686,7 @@ export default function Danisanlarim() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 160,
+            width: 240, // Genişliği arttırdım
             sortable: false,
             editable: false,
             renderCell: (params) => (
@@ -660,14 +695,28 @@ export default function Danisanlarim() {
                         size="small"
                         variant="outlined"
                         onClick={() => navigate(`/danisan/${params.row.id}`)}
+                        title="Detayları Görüntüle"
                     >
                         <Visibility fontSize="small"/>
                     </Button>
                     <Button
                         size="small"
                         variant="outlined"
+                        color={params.row.status === "Aktif" ? "error" : "success"}
+                        onClick={() => handleChangeStatus(params.row)}
+                        title={params.row.status === "Aktif" ? "Pasifleştir" : "Aktifleştir"}
+                    >
+                        {params.row.status === "Aktif" ?
+                            <Cancel fontSize="small"/> :
+                            <CheckCircle fontSize="small"/>
+                        }
+                    </Button>
+                    <Button
+                        size="small"
+                        variant="outlined"
                         color="error"
                         onClick={() => openDeleteDialog(params.row)}
+                        title="Sil"
                     >
                         <DeleteIcon fontSize="small"/>
                     </Button>
@@ -683,7 +732,7 @@ export default function Danisanlarim() {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            complete: function(results) {
+            complete: function (results) {
                 // Check if we have valid data
                 if (results.data && results.data.length > 0) {
                     const parsedData = results.data.map((row, index) => {
@@ -693,7 +742,7 @@ export default function Danisanlarim() {
                         if (phoneNumber.startsWith('0')) {
                             phoneNumber = phoneNumber.substring(1);
                         }
-                        
+
                         return {
                             id: `temp_${index}`,
                             name: row.isim || "",
@@ -704,7 +753,7 @@ export default function Danisanlarim() {
                             status: "Aktif"
                         };
                     });
-                    
+
                     setCsvData(parsedData);
                     validateCsvData(parsedData);
                     setImportDialogOpen(false);
@@ -717,7 +766,7 @@ export default function Danisanlarim() {
                     });
                 }
             },
-            error: function(error) {
+            error: function (error) {
                 setSnackbar({
                     open: true,
                     message: `CSV okuma hatası: ${error.message}`,
@@ -729,27 +778,27 @@ export default function Danisanlarim() {
 
     const validateCsvData = (data) => {
         const errors = {};
-        
+
         data.forEach((row, index) => {
             const rowErrors = {};
-            
+
             // İsim validasyonu
             if (!row.name || row.name.trim() === "") {
                 rowErrors.name = "İsim zorunludur";
             }
-            
+
             // Telefon validasyonu
             if (!row.phoneNumber || row.phoneNumber.trim() === "") {
                 rowErrors.phoneNumber = "Telefon numarası zorunludur";
             } else if (!/^[0-9]{10}$/.test(row.phoneNumber.replace(/\D/g, ''))) {
                 rowErrors.phoneNumber = "Geçerli bir telefon numarası giriniz";
             }
-            
+
             // Cinsiyet validasyonu
             if (!row.gender || !["Erkek", "Kadın", "Diğer"].includes(row.gender)) {
                 rowErrors.gender = "Geçerli bir cinsiyet seçiniz (Erkek, Kadın, Diğer)";
             }
-            
+
             // Email validasyonu (opsiyonel)
             if (row.email && row.email.trim() !== "") {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -757,12 +806,12 @@ export default function Danisanlarim() {
                     rowErrors.email = "Geçerli bir e-posta adresi giriniz";
                 }
             }
-            
+
             if (Object.keys(rowErrors).length > 0) {
                 errors[index] = rowErrors;
             }
         });
-        
+
         setCsvErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -771,15 +820,15 @@ export default function Danisanlarim() {
         const updatedData = [...csvData];
         updatedData[index][field] = value;
         setCsvData(updatedData);
-        
+
         // Validate the updated row
         const rowErrors = {};
         const row = updatedData[index];
-        
+
         if (field === "name" && (!value || value.trim() === "")) {
             rowErrors.name = "İsim zorunludur";
         }
-        
+
         if (field === "phoneNumber") {
             if (!value || value.trim() === "") {
                 rowErrors.phoneNumber = "Telefon numarası zorunludur";
@@ -787,18 +836,18 @@ export default function Danisanlarim() {
                 rowErrors.phoneNumber = "Geçerli bir telefon numarası giriniz";
             }
         }
-        
+
         if (field === "gender" && (!value || !["Erkek", "Kadın", "Diğer"].includes(value))) {
             rowErrors.gender = "Geçerli bir cinsiyet seçiniz";
         }
-        
+
         if (field === "email" && value && value.trim() !== "") {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(value)) {
                 rowErrors.email = "Geçerli bir e-posta adresi giriniz";
             }
         }
-        
+
         const newErrors = {...csvErrors};
         if (Object.keys(rowErrors).length > 0) {
             newErrors[index] = {...(newErrors[index] || {}), ...rowErrors};
@@ -810,18 +859,18 @@ export default function Danisanlarim() {
                 }
             }
         }
-        
+
         setCsvErrors(newErrors);
     };
 
     const handleCsvRowDelete = (index) => {
         const updatedData = csvData.filter((_, i) => i !== index);
         setCsvData(updatedData);
-        
+
         // Update errors
         const newErrors = {...csvErrors};
         delete newErrors[index];
-        
+
         // Reindex errors if necessary
         const reindexedErrors = {};
         Object.keys(newErrors).forEach(key => {
@@ -832,7 +881,7 @@ export default function Danisanlarim() {
                 reindexedErrors[key] = newErrors[key];
             }
         });
-        
+
         setCsvErrors(reindexedErrors);
     };
 
@@ -845,11 +894,11 @@ export default function Danisanlarim() {
             });
             return;
         }
-        
+
         try {
             let successCount = 0;
             let failCount = 0;
-            
+
             // Process each client one by one
             for (const client of csvData) {
                 try {
@@ -862,9 +911,9 @@ export default function Danisanlarim() {
                             gender: client.gender,
                             email: client.email ? client.email.trim() : ""
                         },
-                        { headers: { Authorization: localStorage.getItem("token") } }
+                        {headers: {Authorization: localStorage.getItem("token")}}
                     );
-                    
+
                     setClients(prev => [...prev, response.data]);
                     successCount++;
                 } catch (err) {
@@ -872,16 +921,16 @@ export default function Danisanlarim() {
                     failCount++;
                 }
             }
-            
+
             setSnackbar({
                 open: true,
                 message: `${successCount} danışan başarıyla eklendi. ${failCount > 0 ? `${failCount} danışan eklenemedi.` : ''}`,
                 severity: failCount > 0 ? "warning" : "success"
             });
-            
+
             setImportPreviewOpen(false);
             setCsvData([]);
-            
+
         } catch (error) {
             console.error("Toplu danışan eklenirken hata oluştu:", error);
             setSnackbar({
@@ -911,19 +960,19 @@ export default function Danisanlarim() {
             mail: client.email || "",
             durum: client.status ? "Aktif" : "Pasif",
         }));
-        
+
         // Convert to CSV
         const csv = Papa.unparse(dataToExport);
-        
+
         // Create download link
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
-        
+
         // Set file name with current date
         const date = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
         const fileName = `danisanlar_${date}.csv`;
-        
+
         link.href = url;
         link.setAttribute('download', fileName);
         document.body.appendChild(link);
@@ -1201,13 +1250,15 @@ export default function Danisanlarim() {
                 </Box>
 
                 {/* Action Buttons - Add here, aligned to the right */}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
                     <Stack direction="row" spacing={2}>
                         <Button
                             variant="contained"
                             startIcon={<GroupAdd/>}
                             onClick={openCreateDialog}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1221,6 +1272,8 @@ export default function Danisanlarim() {
                             startIcon={<DownloadIcon/>}
                             onClick={() => setImportDialogOpen(true)}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1234,6 +1287,8 @@ export default function Danisanlarim() {
                             startIcon={<UploadIcon/>}
                             onClick={handleExportCSV}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1247,6 +1302,8 @@ export default function Danisanlarim() {
                             startIcon={<QrCodeIcon/>}
                             onClick={fetchQR}
                             sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
                                 borderRadius: 10,
                                 textTransform: "none",
                                 boxShadow: 3
@@ -1291,8 +1348,8 @@ export default function Danisanlarim() {
                 </Paper>
 
                 {/* Import Dialog */}
-                <Dialog 
-                    open={importDialogOpen} 
+                <Dialog
+                    open={importDialogOpen}
                     onClose={() => setImportDialogOpen(false)}
                     maxWidth="sm"
                     fullWidth
@@ -1305,7 +1362,7 @@ export default function Danisanlarim() {
                         alignItems: 'center'
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <DownloadIcon />
+                            <DownloadIcon/>
                             <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 İçe Aktar
                             </Typography>
@@ -1326,17 +1383,20 @@ export default function Danisanlarim() {
                             </Typography>
                             <ul>
                                 <li><Typography variant="body2">isim - Danışan Adı Soyadı (zorunlu)</Typography></li>
-                                <li><Typography variant="body2">telefon - Telefon Numarası (zorunlu, 10 haneli)</Typography></li>
-                                <li><Typography variant="body2">cinsiyet - Cinsiyet (zorunlu, "Erkek", "Kadın" veya "Diğer")</Typography></li>
+                                <li><Typography variant="body2">telefon - Telefon Numarası (zorunlu, 10
+                                    haneli)</Typography></li>
+                                <li><Typography variant="body2">cinsiyet - Cinsiyet (zorunlu, "Erkek", "Kadın" veya
+                                    "Diğer")</Typography></li>
                                 <li><Typography variant="body2">mail - E-posta Adresi (opsiyonel)</Typography></li>
                             </ul>
                             <Typography variant="body2" color="text.secondary">
-                                Not: Şifreler otomatik olarak oluşturulacaktır ve tüm danışanlar aktif olarak eklenecektir.
+                                Not: Şifreler otomatik olarak oluşturulacaktır ve tüm danışanlar aktif olarak
+                                eklenecektir.
                             </Typography>
                             <Button
                                 variant="contained"
                                 component="label"
-                                startIcon={<DownloadIcon />}
+                                startIcon={<DownloadIcon/>}
                                 sx={{mt: 2}}
                             >
                                 Excel Dosyası Seç
@@ -1350,7 +1410,13 @@ export default function Danisanlarim() {
                             <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
                                 Örnek Excel formatı:
                             </Typography>
-                            <code style={{backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', display: 'block', overflowX: 'auto'}}>
+                            <code style={{
+                                backgroundColor: '#f5f5f5',
+                                padding: '10px',
+                                borderRadius: '4px',
+                                display: 'block',
+                                overflowX: 'auto'
+                            }}>
                                 isim,telefon,cinsiyet,mail<br/>
                                 "Ahmet Yılmaz","5551234567","Erkek","ahmet@example.com"<br/>
                                 "Ayşe Demir","5559876543","Kadın","ayse@example.com"
@@ -1374,7 +1440,7 @@ export default function Danisanlarim() {
                         alignItems: 'center'
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <GroupAdd sx={{color: 'orange'}} />
+                            <GroupAdd sx={{color: 'orange'}}/>
                             <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 İçe Aktarılacak Danışanlar
                             </Typography>
@@ -1431,12 +1497,14 @@ export default function Danisanlarim() {
                                                     error={csvErrors[index]?.phoneNumber !== undefined}
                                                     helperText={csvErrors[index]?.phoneNumber}
                                                     InputProps={{
-                                                        startAdornment: <InputAdornment position="start">+90</InputAdornment>,
+                                                        startAdornment: <InputAdornment
+                                                            position="start">+90</InputAdornment>,
                                                     }}
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <FormControl fullWidth size="small" error={csvErrors[index]?.gender !== undefined}>
+                                                <FormControl fullWidth size="small"
+                                                             error={csvErrors[index]?.gender !== undefined}>
                                                     <Select
                                                         value={row.gender || ''}
                                                         onChange={(e) => handleCsvRowChange(index, 'gender', e.target.value)}
@@ -1479,7 +1547,7 @@ export default function Danisanlarim() {
                                                                         handleCsvRowChange(index, 'password', newPassword);
                                                                     }}
                                                                 >
-                                                                    <VpnKey fontSize="small" />
+                                                                    <VpnKey fontSize="small"/>
                                                                 </IconButton>
                                                             </InputAdornment>
                                                         ),
@@ -1491,7 +1559,7 @@ export default function Danisanlarim() {
                                                     color="error"
                                                     onClick={() => handleCsvRowDelete(index)}
                                                 >
-                                                    <DeleteIcon />
+                                                    <DeleteIcon/>
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
@@ -1668,7 +1736,7 @@ export default function Danisanlarim() {
                         alignItems: 'center'
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <QrCodeIcon />
+                            <QrCodeIcon/>
                             <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 QR Kodunuz
                             </Typography>
@@ -1694,15 +1762,15 @@ export default function Danisanlarim() {
                             Kapat
                         </Button>
                         {qrData && (
-                            <PDFDownloadLink 
-                                document={<QRDocument qrData={qrData} />} 
+                            <PDFDownloadLink
+                                document={<QRDocument qrData={qrData}/>}
                                 fileName="diyetisyen-qr.pdf"
-                                style={{ textDecoration: 'none' }}
+                                style={{textDecoration: 'none'}}
                             >
-                                {({ blob, url, loading, error }) => 
-                                    <Button 
-                                        variant="contained" 
-                                        color="primary" 
+                                {({blob, url, loading, error}) =>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
                                         disabled={loading}
                                     >
                                         {loading ? 'Yükleniyor...' : 'PDF İndir'}
@@ -1727,9 +1795,9 @@ export default function Danisanlarim() {
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <GroupAdd/>
-                            <Typography variant="h6" color="primary.main" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <GroupAdd sx={{ color: 'orange' }} />
+                            <Typography variant="h6" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
                                 Yeni Danışan Ekle
                             </Typography>
                         </Box>
@@ -1756,7 +1824,7 @@ export default function Danisanlarim() {
                                     error={!!formErrors.name}
                                     helperText={formErrors.name || "Danışanın tam adını giriniz"}
                                     autoComplete="name"
-                                    inputProps={{ maxLength: 50 }}
+                                    inputProps={{maxLength: 50}}
                                 />
 
 
@@ -1796,14 +1864,14 @@ export default function Danisanlarim() {
                                                     edge="end"
                                                     title={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
                                                 >
-                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    {showPassword ? <VisibilityOff/> : <Visibility/>}
                                                 </IconButton>
                                                 <IconButton
                                                     onClick={generatePassword}
                                                     edge="end"
                                                     title="Otomatik şifre üret"
                                                 >
-                                                    <VpnKey />
+                                                    <VpnKey/>
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
@@ -1841,7 +1909,7 @@ export default function Danisanlarim() {
                                         <MenuItem value="Diğer">Diğer</MenuItem>
                                     </Select>
                                     {formErrors.gender && (
-                                        <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
+                                        <Typography color="error" variant="caption" sx={{ml: 2, mt: 0.5}}>
                                             {formErrors.gender}
                                         </Typography>
                                     )}

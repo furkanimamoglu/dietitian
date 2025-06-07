@@ -81,7 +81,7 @@ const BottomNav = ({navigation}: Props) => {
                 return;
             }
 
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -292,7 +292,7 @@ const BottomNav = ({navigation}: Props) => {
                     <TouchableOpacity
                         style={styles.floatingButton}
                         onPress={() => {
-                            navigation.replace('Randevu');
+                            navigation.navigate('Randevu');
                             setMenuOpen(false);
                         }}
                         activeOpacity={0.8}
@@ -347,22 +347,22 @@ const BottomNav = ({navigation}: Props) => {
 
             <View style={styles.bottomNavbar}>
                 <TouchableOpacity onPress={() => {
-                    if (route.name !== 'Egzersiz') {
-                        navigation.replace('Egzersiz');
+                    if (route.name !== 'Randevu') {
+                        navigation.navigate('Randevu');
                     }
                 }}
-                style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
-                    <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
+                                  style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
+                    <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
-                    if (route.name !== 'Beslenme') {
-                        navigation.replace('Beslenme');
+                    if (route.name !== 'Egzersiz') {
+                        navigation.navigate('Egzersiz');
                     }
                 }}
-                                  style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
-                    <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
+                                  style={[styles.navItem, isActive('Egzersiz') && styles.activeNavItem]}>
+                    <Icon name="dumbbell" size={24} color={isActive('Egzersiz') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Egzersiz') && styles.activeLabel]}>Egzersiz</Text>
                 </TouchableOpacity>
 
                 {/* TODO: Bu buton harici bir yere tıklanınca da ek butonlarını kapatması gerekiyor */}
@@ -371,22 +371,22 @@ const BottomNav = ({navigation}: Props) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => {
-                    if (route.name !== 'Randevu') {
-                        navigation.replace('Randevu');
+                    if (route.name !== 'Beslenme') {
+                        navigation.navigate('Beslenme');
                     }
                 }}
-                                  style={[styles.navItem, isActive('Randevu') && styles.activeNavItem]}>
-                    <Icon name="calendar" size={24} color={isActive('Randevu') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('Randevu') && styles.activeLabel]}>Randevular</Text>
+                                  style={[styles.navItem, isActive('Beslenme') && styles.activeNavItem]}>
+                    <Icon name="food" size={24} color={isActive('Beslenme') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Beslenme') && styles.activeLabel]}>Beslenme</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
-                    if (route.name !== 'AnaSayfa') {
-                        navigation.replace('AnaSayfa');
+                    if (route.name !== 'Tarif') {
+                        navigation.navigate('Tarif');
                     }
                 }}
-                                  style={[styles.navItem, isActive('AnaSayfa') && styles.activeNavItem]}>
-                    <Icon name="home" size={24} color={isActive('AnaSayfa') ? '#ffffff' : '#ffffff80'}/>
-                    <Text style={[styles.label, isActive('AnaSayfa') && styles.activeLabel]}>Ana Sayfa</Text>
+                                  style={[styles.navItem, isActive('Tarif') && styles.activeNavItem]}>
+                    <Icon name="book-open-variant" size={24} color={isActive('Tarif') ? '#ffffff' : '#ffffff80'}/>
+                    <Text style={[styles.label, isActive('Tarif') && styles.activeLabel]}>Tarif</Text>
                 </TouchableOpacity>
             </View>
 
@@ -418,11 +418,11 @@ const BottomNav = ({navigation}: Props) => {
                                         height: 20,
                                         borderRadius: 10,
                                         borderWidth: 2,
-                                        borderColor: '#f57c00',
+                                        borderColor: '#fc9e21',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginRight: 4,
-                                        backgroundColor: selectedMealType === type ? '#f57c00' : '#fff',
+                                        backgroundColor: selectedMealType === type ? '#fc9e21' : '#fff',
                                     }}>
                                         {selectedMealType === type && <View
                                             style={{width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff'}}/>}
@@ -456,7 +456,7 @@ const BottomNav = ({navigation}: Props) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleAddMeal}
-                                style={[styles.closeButton, {backgroundColor: isSubmitting ? '#ccc' : '#f57c00'}]}
+                                style={[styles.closeButton, {backgroundColor: isSubmitting ? '#ccc' : '#fc9e21'}]}
                                 disabled={isSubmitting}
                             >
                                 <Text style={styles.closeButtonText}>{isSubmitting ? 'Ekleniyor...' : 'Ekle'}</Text>
@@ -494,11 +494,11 @@ const BottomNav = ({navigation}: Props) => {
                                         height: 20,
                                         borderRadius: 10,
                                         borderWidth: 2,
-                                        borderColor: '#f57c00',
+                                        borderColor: '#fc9e21',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginRight: 4,
-                                        backgroundColor: selectedExerciseType === type ? '#f57c00' : '#fff',
+                                        backgroundColor: selectedExerciseType === type ? '#fc9e21' : '#fff',
                                     }}>
                                         {selectedExerciseType === type && <View
                                             style={{width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff'}}/>}
@@ -524,7 +524,7 @@ const BottomNav = ({navigation}: Props) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={handleAddExercise}
-                                style={[styles.closeButton, {backgroundColor: isExerciseSubmitting ? '#ccc' : '#f57c00'}]}
+                                style={[styles.closeButton, {backgroundColor: isExerciseSubmitting ? '#ccc' : '#fc9e21'}]}
                                 disabled={isExerciseSubmitting}
                             >
                                 <Text
@@ -544,9 +544,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         height: 60,
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         borderTopWidth: 1,
-        borderTopColor: '#e65100',
+        borderTopColor: '#cccccc',  // Turuncu çizgiyi (#ff7355) gri gölgelendirme (#cccccc) olarak değiştirdim
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         shadowColor: '#000',
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     },
     plusText: {
         fontSize: 38,
-        color: '#f57c00',
+        color: '#fc9e21',
         marginTop: -2,
     },
     floatingMenuRow: {
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         zIndex: 10,
         gap: 10,
-        paddingLeft: 0,
+        paddingLeft: 30,
         paddingRight: 15,
     },
     floatingButton: {
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     closeButton: {
-        backgroundColor: '#f57c00',
+        backgroundColor: '#fc9e21',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,
@@ -703,3 +703,4 @@ const styles = StyleSheet.create({
 });
 
 export default BottomNav;
+

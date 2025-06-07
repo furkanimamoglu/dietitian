@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {BackHandler, useColorScheme} from 'react-native';
+import {BackHandler, SafeAreaView, useColorScheme} from 'react-native';
 import {DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {PaperProvider} from 'react-native-paper';
@@ -38,8 +38,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const linking = {
     prefixes: [
-        `${config.app_scheme}://`,
-        config.base_url
+        `${config[config.environment].app_scheme}://`,
+        config[config.environment].apiUrl
     ],
     config: {
         screens: {
@@ -61,8 +61,8 @@ const linking = {
 
 const App = () => {
     const colorScheme = useColorScheme();
-    const paperTheme = colorScheme === 'dark' ? customDarkTheme : customLightTheme;
-    const navTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+    const paperTheme = customLightTheme;
+    const navTheme = DefaultTheme;
 
     const navigationRef = useNavigationContainerRef();
 
@@ -83,74 +83,76 @@ const App = () => {
 
     return (
         <PaperProvider theme={paperTheme}>
-            <NavigationContainer
-                ref={navigationRef}
-                theme={navTheme}
-                linking={linking}
-            >
-                <Stack.Navigator initialRouteName="Onboarding">
-                    <Stack.Screen
-                        name="Onboarding"
-                        component={OnboardingScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Login"
-                        component={LoginScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Tarif"
-                        component={TarifScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Egzersiz"
-                        component={EgzersizScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Profil"
-                        component={ProfilScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Beslenme"
-                        component={BeslenmeScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Randevu"
-                        component={RandevuScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Rapor"
-                        component={RaporScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="AnaSayfa"
-                        component={AnaSayfaScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Mesaj"
-                        component={MesajScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="Kayitol"
-                        component={KayitolScreen}
-                        options={{headerShown: false}}
-                    />
-                    <Stack.Screen
-                        name="SifremiUnuttum"
-                        component={SifremiUnuttumScreen}
-                        options={{headerShown: false}}
-                    />
-                </Stack.Navigator>
-            </NavigationContainer>
+            <SafeAreaView style={{flex: 1}}>
+                <NavigationContainer
+                    ref={navigationRef}
+                    theme={navTheme}
+                    linking={linking}
+                >
+                    <Stack.Navigator initialRouteName="Onboarding">
+                        <Stack.Screen
+                            name="Onboarding"
+                            component={OnboardingScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Login"
+                            component={LoginScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Tarif"
+                            component={TarifScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Egzersiz"
+                            component={EgzersizScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Profil"
+                            component={ProfilScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Beslenme"
+                            component={BeslenmeScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Randevu"
+                            component={RandevuScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Rapor"
+                            component={RaporScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="AnaSayfa"
+                            component={AnaSayfaScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Mesaj"
+                            component={MesajScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Kayitol"
+                            component={KayitolScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="SifremiUnuttum"
+                            component={SifremiUnuttumScreen}
+                            options={{headerShown: false}}
+                        />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </SafeAreaView>
         </PaperProvider>
     );
 };

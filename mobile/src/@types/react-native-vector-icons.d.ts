@@ -1,6 +1,6 @@
 declare module 'react-native-vector-icons/MaterialCommunityIcons' {
     import {Component} from 'react';
-    import {TextStyle, TextProps, ViewStyle} from 'react-native';
+    import {TextProps, TextStyle, ViewStyle} from 'react-native';
 
     export interface IconProps extends TextProps {
         name: string;

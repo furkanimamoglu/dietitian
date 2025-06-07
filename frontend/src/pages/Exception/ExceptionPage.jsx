@@ -1,6 +1,6 @@
 import React from 'react';
 import './ExceptionPage.css';
-import {green} from "@mui/material/colors";
+import green from "@mui/material/colors/green";
 import {Box, Button, Paper, Typography} from "@mui/material";
 import DefaultExcept from "../../Components/Layouts/DefaultExcept.jsx";
 

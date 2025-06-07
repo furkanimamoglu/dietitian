@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import './Beslenme.css';
 import Default from "../../Components/Layouts/Default.jsx";
+import MealPlanEditor from "../../Components/MealPlanEditor/MealPlanEditor.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
@@ -24,48 +25,50 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Font, Image } from '@react-pdf/renderer';
+
+import MealPlanViewer from "../../Components/MealPlanEditor/MealPlanViewer.jsx";
+import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalPDFLink.jsx";
+
+import {Document, Font, Page, StyleSheet, Text, View} from '@react-pdf/renderer';
+
 import {
     Autocomplete,
-    TextField,
     Avatar,
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+    Chip,
     CircularProgress,
-    Paper,
-    Typography,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     Divider,
+    Grid,
+    IconButton,
+    InputAdornment,
+    LinearProgress,
     List,
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Box,
-    InputAdornment,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    IconButton,
-    Card,
-    CardContent,
-    CardActions,
-    CardHeader,
-    Chip,
-    Grid,
-    LinearProgress,
-    Stack
+    Paper,
+    Stack,
+    TextField,
+    Typography
 } from '@mui/material';
 
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 
-// Register a custom font with Turkish character support
 Font.register({
     family: 'Open Sans',
     src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
 });
 
-// Define styles for PDF
 const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
@@ -211,153 +214,127 @@ const pdfStyles = StyleSheet.create({
     }
 });
 
-// PDF Document Component for Nutrition Plan
-const NutritionPlanDocument = ({ program }) => {
+const NutritionPlanDocument = ({program}) => {
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Dr. Furkan İmamoğlu";
-
-    // Helper function to get meal items
-    const getMealItems = (mealData) => {
-        if (!mealData) return [];
-
-        if (mealData.main && Array.isArray(mealData.main)) {
-            return {
-                mainItems: mealData.main,
-                hasAlternatives: mealData.alternatives && Object.keys(mealData.alternatives).length > 0,
-                alternatives: mealData.alternatives
-            };
-        }
-
-        // For simple array format
-        if (Array.isArray(mealData)) {
-            return {
-                mainItems: mealData,
-                hasAlternatives: false
-            };
-        }
-
-        // For string format (backward compatibility)
-        if (typeof mealData === 'string') {
-            return {
-                mainItems: mealData.split(',').map(item => item.trim()).filter(item => item !== ''),
-                hasAlternatives: false
-            };
-        }
-
-        return {
-            mainItems: [],
-            hasAlternatives: false
-        };
-    };
-
-    const DAYS_OF_WEEK = [
-        "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
-    ];
-
-    const MEALS = [
-        "Kahvaltı", "Öğle Yemeği", "Akşam Yemeği", "Aparatif"
-    ];
+    const dietitianName = "İsim girilmedi";
+    const mealPlanData = program?.mealPlan || {};
+    const hasMealPlan = Object.keys(mealPlanData).length > 0;
 
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
+                {/* Başlık ve Logo */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
-                        <Text style={pdfStyles.headerTitle}>{program.title} Beslenme Programı</Text>
+                        <Text style={pdfStyles.headerTitle}>{program?.title || 'Beslenme Programı'}</Text>
                         <View style={pdfStyles.headerInfo}>
                             <Text>Oluşturulma Tarihi: {dateStr}</Text>
+                            <Text>Diyetisyen: {dietitianName}</Text>
                         </View>
                     </View>
                     <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>Diyetia</Text>
+                        <Text style={pdfStyles.logo}>DIYET</Text>
                     </View>
                 </View>
-                
+
+                {/* Program Bilgileri */}
                 <View style={pdfStyles.infoSection}>
                     <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
-                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
-                        <Text style={pdfStyles.infoContent}>Beslenme ve Diyet Uzmanı</Text>
-                        <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
-                        <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
+                        <Text style={pdfStyles.infoTitle}>Program Adı</Text>
+                        <Text style={pdfStyles.infoContent}>{program?.title || 'İsimsiz Program'}</Text>
                     </View>
-                    
                     <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Program Açıklaması</Text>
-                        <Text style={pdfStyles.infoContent}>{program.description || "Bu beslenme programı sağlıklı bir yaşam için özel olarak hazırlanmıştır. Programdaki öğünleri düzenli olarak takip etmeniz önerilir."}</Text>
-                        <Text style={pdfStyles.infoContent}>Günlük su tüketiminin en az 2 litre olması önerilir.</Text>
-                        <Text style={pdfStyles.infoContent}>Öğünler arasında en az 3-4 saat olmalıdır.</Text>
+                        <Text style={pdfStyles.infoTitle}>Kategori</Text>
+                        <Text style={pdfStyles.infoContent}>{program?.category_name || 'Genel'}</Text>
+                    </View>
+                    <View style={pdfStyles.infoBox}>
+                        <Text style={pdfStyles.infoTitle}>Açıklama</Text>
+                        <Text style={pdfStyles.infoContent}>{program?.description || 'Açıklama yok'}</Text>
                     </View>
                 </View>
-                
+
+                {/* Günler ve Yemekler */}
                 <View style={pdfStyles.daysContainer}>
-                    {DAYS_OF_WEEK.map((day) => (
-                        <View style={pdfStyles.dayCard} key={day}>
-                            <View style={[
-                                pdfStyles.dayHeader,
-                                day === "Cumartesi" || day === "Pazar" 
-                                    ? {backgroundColor: '#FF9800'} 
-                                    : null
-                            ]}>
+                    {hasMealPlan ? (
+                        Object.keys(mealPlanData).map((day, index) => {
+                            const dayData = mealPlanData[day] || {};
+                            const hasMeals = Object.keys(dayData).length > 0;
+
+                            return (
+                        <View style={pdfStyles.dayCard} key={`day-${index}`}>
+                            <View style={pdfStyles.dayHeader}>
                                 <Text style={pdfStyles.dayHeaderText}>{day}</Text>
                             </View>
                             <View style={pdfStyles.dayContent}>
-                                {MEALS.map((meal) => {
-                                    const { mainItems, hasAlternatives, alternatives } = getMealItems(
-                                        program.mealPlan && program.mealPlan[day] 
-                                            ? program.mealPlan[day][meal] 
-                                            : null
-                                    );
-                                    
-                                    // Limit the number of items to display to prevent overflow
-                                    const displayItems = mainItems.slice(0, 4);
-                                    const hasMoreItems = mainItems.length > 4;
-                                    
+                                        {hasMeals ? (
+                                            Object.keys(dayData).map((meal, mealIndex) => {
+                                                const mealData = dayData[meal];
+                                    let items = [];
+                                    let alternatives = {};
+
+                                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData)) {
+                                        if (mealData.main) {
+                                                    items = Array.isArray(mealData.main) ? mealData.main : [];
+                                        alternatives = mealData.alternatives || {};
+                                        } else {
+                                            const { alternatives: alts, ...rest } = mealData;
+                                            items = Object.values(rest).filter(item => item && typeof item === 'string');
+                                            alternatives = alts || {};
+                                        }
+                                    } else if (Array.isArray(mealData)) {
+                                        items = mealData;
+                                    } else if (typeof mealData === 'string') {
+                                                    items = mealData.split(',')
+                                                        .map(item => item.trim())
+                                                        .filter(item => item !== '');
+                                    } else if (mealData) {
+                                        items = [String(mealData)];
+                                    }
+
                                     return (
-                                        <View style={pdfStyles.mealSection} key={meal}>
+                                        <View style={pdfStyles.mealSection} key={`meal-${mealIndex}`}>
                                             <Text style={pdfStyles.mealTitle}>{meal}</Text>
-                                            {displayItems.length > 0 ? (
-                                                <>
-                                                    {displayItems.map((item, idx) => (
-                                                        <View key={idx}>
-                                                            <Text style={pdfStyles.mealItem}>
-                                                                <Text style={pdfStyles.mealItemBullet}>• </Text>
-                                                                {item}
-                                                            </Text>
-                                                            
-                                                            {hasAlternatives && alternatives && alternatives[item] && 
-                                                                // Limit alternatives to 1 to save space
-                                                                alternatives[item].slice(0, 1).map((alt, altIdx) => (
-                                                                    <Text style={pdfStyles.alternativeItem} key={altIdx}>
-                                                                        <Text style={pdfStyles.alternativePrefix}>alt: </Text>
-                                                                        {alt}
-                                                                    </Text>
-                                                                ))
-                                                            }
-                                                        </View>
-                                                    ))}
-                                                    {hasMoreItems && (
+                                            {items && items.length > 0 ? (
+                                                items.map((item, itemIndex) => (
+                                                    <View key={`item-${itemIndex}`}>
                                                         <Text style={pdfStyles.mealItem}>
-                                                            <Text style={pdfStyles.mealItemBullet}>• </Text>
-                                                            ... ve {mainItems.length - 4} öğe daha
+                                                            <Text style={pdfStyles.mealItemBullet}>•</Text> {item}
                                                         </Text>
-                                                    )}
-                                                </>
+                                                        {alternatives && alternatives[item] && (
+                                                            <Text style={pdfStyles.alternativeItem}>
+                                                                <Text style={pdfStyles.alternativePrefix}>Alternatif: </Text>
+                                                                {alternatives[item]}
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                ))
                                             ) : (
-                                                <Text style={pdfStyles.noMealText}>Veri girilmemiş</Text>
+                                                <Text style={pdfStyles.noMealText}>Öğün belirtilmemiş</Text>
                                             )}
                                         </View>
                                     );
-                                })}
+                                            })
+                                        ) : (
+                                            <Text style={pdfStyles.noMealText}>Bu gün için öğün planı bulunmuyor</Text>
+                                        )}
                             </View>
                         </View>
-                    ))}
+                            );
+                        })
+                    ) : (
+                        <View style={[pdfStyles.dayCard, { width: '100%', alignItems: 'center', padding: 20 }]}>
+                            <Text style={pdfStyles.noMealText}>Bu beslenme programında günlük öğün planı bulunmuyor</Text>
+                        </View>
+                    )}
                 </View>
-                
+
+                {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
-                    <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
-                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
+                    <Text style={pdfStyles.footerText}>
+                        Bu beslenme programı {dietitianName} tarafından hazırlanmıştır.
+                    </Text>
+                    <Text style={pdfStyles.footerWebsite}>www.diyetprogrami.com</Text>
                 </View>
             </Page>
         </Document>
@@ -400,7 +377,6 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-// Nutrition Card Component
 const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
     return (
         <div className="nutrition-card">
@@ -423,25 +399,26 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                     >
                         <PersonAddIcon/>
                     </button>
-                    <PDFDownloadLink
-                        document={<NutritionPlanDocument program={item} />}
+                    <ConditionalPDFLink
+                        document={<NutritionPlanDocument program={item}/>}
                         fileName={`${item.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                        style={{ textDecoration: 'none' }}
+                        buttonClass="action-button print-btn"
+                        buttonTitle="Yazdır"
                     >
-                        {({ blob, url, loading, error }) => (
-                    <button
-                        className="action-button print-btn"
-                        title="Yazdır"
+                        {({blob, url, loading, error}) => (
+                            <button
+                                className="action-button print-btn"
+                                title="Yazdır"
                                 disabled={loading}
                                 onClick={(e) => {
                                     if (loading) e.preventDefault();
                                     else onPrint(item);
                                 }}
-                    >
-                        <PrintIcon/>
-                    </button>
+                            >
+                                <PrintIcon/>
+                            </button>
                         )}
-                    </PDFDownloadLink>
+                    </ConditionalPDFLink>
                     <button
                         className="action-button edit-btn"
                         title="Düzenle"
@@ -462,7 +439,6 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
     );
 };
 
-// Modal Component
 const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
 
@@ -483,23 +459,18 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     );
 };
 
-// Meal Plan Table Component
 const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
-    // Helper function to get all meal items as a flat array
     const getMealItemsArray = (mealData) => {
         if (!mealData) return [];
 
-        // For simple array format
         if (Array.isArray(mealData)) {
             return [...mealData];
         }
 
-        // For complex format with main and alternatives
         if (mealData.main && Array.isArray(mealData.main)) {
             return [...mealData.main];
         }
 
-        // For string format (backward compatibility)
         if (typeof mealData === 'string') {
             return mealData.split(',').map(item => item.trim()).filter(item => item !== '');
         }
@@ -507,31 +478,25 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         return [];
     };
 
-    // Helper function to add a main meal item
     const addMainItem = (day, meal, newItem) => {
         if (!newItem.trim()) return;
 
         const currentData = mealPlan[day][meal];
         let updatedData;
 
-        // Handle different formats
         if (Array.isArray(currentData)) {
-            // Simple array format
             updatedData = [...currentData, newItem.trim()];
         } else if (currentData && currentData.main) {
-            // Complex format with main and alternatives
             updatedData = {
                 ...currentData,
                 main: [...currentData.main, newItem.trim()]
             };
         } else if (typeof currentData === 'string') {
-            // String format (backward compatibility)
             const items = currentData ?
                 currentData.split(',').map(item => item.trim()).filter(item => item !== '') :
                 [];
             updatedData = [...items, newItem.trim()];
         } else {
-            // Initialize new complex format
             updatedData = {
                 main: [newItem.trim()],
                 alternatives: {}
@@ -541,23 +506,18 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         onMealChange(day, meal, updatedData);
     };
 
-    // Helper function to remove a main meal item
     const removeMainItem = (day, meal, indexToRemove) => {
         const currentData = mealPlan[day][meal];
         let updatedData;
         let removedItemName = '';
 
-        // Handle different formats
         if (Array.isArray(currentData)) {
-            // Simple array format
             removedItemName = currentData[indexToRemove];
             updatedData = currentData.filter((_, index) => index !== indexToRemove);
         } else if (currentData && currentData.main) {
-            // Complex format with main and alternatives
             removedItemName = currentData.main[indexToRemove];
             const newMain = currentData.main.filter((_, index) => index !== indexToRemove);
 
-            // Also remove alternatives for this item if they exist
             const newAlternatives = {...currentData.alternatives};
             if (newAlternatives[removedItemName]) {
                 delete newAlternatives[removedItemName];
@@ -568,13 +528,11 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                 alternatives: newAlternatives
             };
         } else if (typeof currentData === 'string') {
-            // String format (backward compatibility)
             const items = currentData.split(',').map(item => item.trim()).filter(item => item !== '');
             removedItemName = items[indexToRemove];
             updatedData = items.filter((_, index) => index !== indexToRemove);
         }
 
-        // Close alternatives UI if the removed item was selected
         if (selectedMainItem === removedItemName && showAlternatives[meal]) {
             setShowAlternatives(prev => ({
                 ...prev,
@@ -586,16 +544,13 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         onMealChange(day, meal, updatedData);
     };
 
-    // Helper function to add an alternative for a main item
     const addAlternative = (day, meal, mainItem, alternativeItem) => {
         if (!alternativeItem.trim() || !mainItem) return;
 
         const currentData = mealPlan[day][meal];
         let updatedData;
 
-        // Convert to complex format if needed
         if (Array.isArray(currentData)) {
-            // Convert simple array to complex format
             updatedData = {
                 main: [...currentData],
                 alternatives: {
@@ -603,7 +558,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                 }
             };
         } else if (currentData && currentData.main) {
-            // Add to existing complex format
             const newAlternatives = {...currentData.alternatives};
 
             if (newAlternatives[mainItem]) {
@@ -617,7 +571,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
                 alternatives: newAlternatives
             };
         } else if (typeof currentData === 'string') {
-            // Convert string format to complex format
             const items = currentData ?
                 currentData.split(',').map(item => item.trim()).filter(item => item !== '') :
                 [];
@@ -633,7 +586,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         onMealChange(day, meal, updatedData);
     };
 
-    // Helper function to remove an alternative
     const removeAlternative = (day, meal, mainItem, alternativeIndex) => {
         const currentData = mealPlan[day][meal];
 
@@ -644,7 +596,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         const newAlternatives = {...currentData.alternatives};
         newAlternatives[mainItem] = newAlternatives[mainItem].filter((_, index) => index !== alternativeIndex);
 
-        // Remove the alternatives entry if empty
         if (newAlternatives[mainItem].length === 0) {
             delete newAlternatives[mainItem];
         }
@@ -663,7 +614,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
     const [recipes, setRecipes] = useState([]);
     const [newMealInputs, setNewMealInputs] = useState({});
 
-    // Fetch recipes when component mounts
     useEffect(() => {
         axios.get(`${config[config.environment].apiUrl}/recipe/getMyRecipes`, {
             headers: {Authorization: localStorage.getItem("token")}
@@ -676,7 +626,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
             });
     }, []);
 
-    // Toggle showing alternatives for a specific meal
     const toggleAlternatives = (meal) => {
         setShowAlternatives(prev => ({
             ...prev,
@@ -684,7 +633,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         }));
     };
 
-    // Handle meal input change
     const handleMealInputChange = (meal, newValue) => {
         setNewMealInputs(prev => ({
             ...prev,
@@ -692,12 +640,10 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
         }));
     };
 
-    // Add meal when selecting or typing a value
     const handleAddMealItem = (meal, value) => {
         if (!value) return;
 
         addMainItem(selectedDay, meal, value);
-        // Clear the input after adding
         setNewMealInputs(prev => ({
             ...prev,
             [meal]: ''
@@ -869,105 +815,6 @@ const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
     );
 };
 
-const ViewMealPlan = ({mealPlan, programTitle, onExportPdf, selectedProgram}) => {
-    const getMealContent = (mealData) => {
-        if (!mealData) return {mainItems: [], hasAlternatives: false};
-
-        if (Array.isArray(mealData)) {
-            return {
-                mainItems: mealData,
-                hasAlternatives: false
-            };
-        }
-
-        if (mealData.main && Array.isArray(mealData.main)) {
-            return {
-                mainItems: mealData.main,
-                hasAlternatives: mealData.alternatives && Object.keys(mealData.alternatives).length > 0,
-                alternatives: mealData.alternatives
-            };
-        }
-
-        if (typeof mealData === 'string') {
-            const items = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-            return {
-                mainItems: items,
-                hasAlternatives: false
-            };
-        }
-
-        return {mainItems: [], hasAlternatives: false};
-    };
-
-    return (
-        <div className="view-meal-plan-container">
-            <div className="view-meal-plan-header">
-                <PDFDownloadLink
-                    document={<NutritionPlanDocument program={selectedProgram} />} 
-                    fileName={`${programTitle.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                    style={{ textDecoration: 'none' }}
-                >
-                    {({ blob, url, loading, error }) => (
-                        <button className="export-pdf-button" disabled={loading}>
-                            <FileDownloadIcon />
-                            {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
-                </button>
-                    )}
-                </PDFDownloadLink>
-            </div>
-
-            <div className="view-meal-plan-days">
-                {DAYS_OF_WEEK.map(day => (
-                    <div key={day} className="day-card">
-                        <div className="day-header">{day}</div>
-                        <div className="day-meals">
-                            {MEALS.map(meal => {
-                                const {mainItems, hasAlternatives, alternatives} = getMealContent(
-                                    mealPlan && mealPlan[day] ? mealPlan[day][meal] : null
-                                );
-
-                                return (
-                                    <div key={meal} className="meal-block">
-                                        <div className="meal-name">{meal}</div>
-                                        <div className="meal-content">
-                                            {mainItems.length > 0 ? (
-                                                <div>
-                                                    <ul className="meal-items-list">
-                                                        {mainItems.map((item, index) => (
-                                                            <li key={index} className="meal-item-with-alternatives">
-                                                                <span className="main-meal-item">{item}</span>
-
-                                                                {hasAlternatives && alternatives && alternatives[item] && (
-                                                                    <ul className="alternatives-list">
-                                                                        {alternatives[item].map((alt, altIndex) => (
-                                                                            <li key={altIndex}
-                                                                                className="alternative-item">
-                                                                                <span
-                                                                                    className="alternative-prefix">alternatif: </span>
-                                                                                {alt}
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
-                                                                )}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ) : (
-                                                <p className="no-meal-data">Veri girilmemiş</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
 export default function Beslenme() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
@@ -976,15 +823,14 @@ export default function Beslenme() {
     const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [planSearchTerm, setPlanSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // Danışana atanmış programlar için yeni state'ler
     const [clientProgramsModal, setClientProgramsModal] = useState(false);
     const [selectedClientPrograms, setSelectedClientPrograms] = useState([]);
     const [loadingClientPrograms, setLoadingClientPrograms] = useState(false);
     const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
-    // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -998,20 +844,16 @@ export default function Beslenme() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    // Edit program states
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [editCategoryId, setEditCategoryId] = useState('');
 
-    // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
@@ -1022,7 +864,6 @@ export default function Beslenme() {
         }
     }, [showSuccessPopup]);
 
-    // Auto-hide error popup after 5 seconds
     useEffect(() => {
         if (showErrorPopup) {
             const timer = setTimeout(() => {
@@ -1033,14 +874,12 @@ export default function Beslenme() {
         }
     }, [showErrorPopup]);
 
-    // New plan state
     const [newPlan, setNewPlan] = useState({
         title: '',
         description: '',
         category_id: ''
     });
 
-    // Delete confirmation modal states
     const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
@@ -1048,10 +887,8 @@ export default function Beslenme() {
     const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
     const [affectedPlans, setAffectedPlans] = useState([]);
 
-    // Meal planning states
     const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
     const [mealPlan, setMealPlan] = useState(() => {
-        // Initialize empty meal plan structure
         const initialPlan = {};
         DAYS_OF_WEEK.forEach(day => {
             initialPlan[day] = {};
@@ -1065,10 +902,11 @@ export default function Beslenme() {
     const [viewProgramModal, setViewProgramModal] = useState(false);
     const mealPlanRef = useRef(null);
 
-    // Edit form state
     const [isSaving, setIsSaving] = useState(false);
+    const [imagePreview, setImagePreview] = useState('');
+    const [planImage, setPlanImage] = useState(null);
+    const [editImage, setEditImage] = useState(null);
 
-    // Fetch clients data
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/dietitian/getAllMyClients`, {
@@ -1084,7 +922,6 @@ export default function Beslenme() {
             });
     }, []);
 
-    // Filtreleme için danışan listesini izle
     useEffect(() => {
         if (danisanList.length > 0) {
             setFilteredDanisanList(
@@ -1095,10 +932,9 @@ export default function Beslenme() {
         }
     }, [danisanList, danisanSearchTerm]);
 
-    // Fetch nutrition categories
     useEffect(() => {
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionCategories`, {
+            .get(`${config[config.environment].apiUrl}/nutrition/getNutritionCategories`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -1112,11 +948,10 @@ export default function Beslenme() {
             });
     }, []);
 
-    // Fetch nutrition plans
     const fetchNutritionPlans = () => {
         setLoading(true);
         axios
-            .get(`${config[config.environment].apiUrl}/dietitian/getNutritionPlans`, {
+            .get(`${config[config.environment].apiUrl}/nutrition/getNutritionPlans`, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                 },
@@ -1141,10 +976,9 @@ export default function Beslenme() {
     );
 
     const filteredBeslenmeData = beslenmeData.filter(item => {
-        if (checkedCategories.length === 0) {
-            return true;
-        }
-        return checkedCategories.includes(item.category_id);
+        const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(item.category_id);
+        const matchesTitle = item.title.toLowerCase().includes(planSearchTerm.toLowerCase());
+        return matchesCategory && matchesTitle;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -1168,7 +1002,7 @@ export default function Beslenme() {
 
     const handleMultiDelete = () => {
         const deletePromises = checkedCategories.map(categoryId =>
-            axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryId}`, {
+            axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionCategory?category_id=${categoryId}`, {
                 headers: {Authorization: localStorage.getItem("token")}
             })
         );
@@ -1211,7 +1045,7 @@ export default function Beslenme() {
     const handleSingleCategoryDelete = () => {
         if (!categoryToDelete) return;
 
-        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionCategory?category_id=${categoryToDelete.id}`, {
+        axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionCategory?category_id=${categoryToDelete.id}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {
@@ -1240,7 +1074,7 @@ export default function Beslenme() {
             category_name: newCategoryTitle.trim()
         };
 
-        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionCategory`, newCategory, {
+        axios.post(`${config[config.environment].apiUrl}/nutrition/addNutritionCategory`, newCategory, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
@@ -1253,13 +1087,39 @@ export default function Beslenme() {
             });
     };
 
-    const handleAddPlan = () => {
+    const handleAddPlan = async () => {
         if (!newPlan.title.trim() || !newPlan.category_id) return;
+
+        let imageUrl = '';
+        if (planImage) {
+            const formData = new FormData();
+            formData.append('image', planImage);
+
+            try {
+                const uploadRes = await axios.post(
+                    `${config[config.environment].apiUrl}/upload`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+                imageUrl = uploadRes.data.imageUrl;
+            } catch (err) {
+                console.error("Resim yüklenirken hata oluştu:", err);
+                setErrorMessage("Resim yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+                return;
+            }
+        }
 
         const planData = {
             title: newPlan.title.trim(),
             description: newPlan.description.trim(),
             category_id: newPlan.category_id,
+            image: imageUrl,
             mealPlan: {}
         };
 
@@ -1270,7 +1130,7 @@ export default function Beslenme() {
             });
         });
 
-        axios.post(`${config[config.environment].apiUrl}/dietitian/addNutritionPlan`, planData, {
+        axios.post(`${config[config.environment].apiUrl}/nutrition/addNutritionPlan`, planData, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
@@ -1333,7 +1193,7 @@ export default function Beslenme() {
 
         console.log("Assigning nutrition plan with data:", addData);
 
-        axios.post(`${config[config.environment].apiUrl}/dietitian/assignNutritionPlanToClient`, addData, {
+        axios.post(`${config[config.environment].apiUrl}/nutrition/assignNutritionPlanToClient`, addData, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
@@ -1365,11 +1225,7 @@ export default function Beslenme() {
 
     const handlePrint = (item) => {
         console.log("Printing:", item);
-        // We'll use the same PDF component for printing
-        // This will be handled by the PDFDownloadLink component
     };
-
-    // Remove the generatePDF function since we're using react-pdf now
 
     const handleEdit = (item) => {
         setSelectedProgram(item);
@@ -1389,11 +1245,9 @@ export default function Beslenme() {
                         main: [...initialPlan[day][meal].main],
                         alternatives: {...initialPlan[day][meal].alternatives}
                     };
-                }
-                else if (initialPlan[day] && initialPlan[day][meal] && Array.isArray(initialPlan[day][meal])) {
+                } else if (initialPlan[day] && initialPlan[day][meal] && Array.isArray(initialPlan[day][meal])) {
                     fullPlan[day][meal] = [...initialPlan[day][meal]];
-                }
-                else if (initialPlan[day] && initialPlan[day][meal] && typeof initialPlan[day][meal] === 'string') {
+                } else if (initialPlan[day] && initialPlan[day][meal] && typeof initialPlan[day][meal] === 'string') {
                     fullPlan[day][meal] = initialPlan[day][meal]
                         .split(',')
                         .map(item => item.trim())
@@ -1409,151 +1263,41 @@ export default function Beslenme() {
         setEditProgramModal(true);
     };
 
-    const handleSaveMealPlan = async () => {
-        setIsSaving(true);
+    const handleSaveMealPlan = (responseData) => {
+        setIsSaving(false);
         try {
-            const data = {
-                title: editTitle,
-                description: editDescription,
-                category_id: editCategoryId,
-                mealPlan: {}
-            };
+            fetchNutritionPlans();
 
-            if (selectedProgram && selectedProgram.id) {
-                data.nutrition_plan_id = selectedProgram.id;
-            }
+            setEditProgramModal(false);
 
+            setSuccessMessage(`"${editTitle}" programı başarıyla ${selectedProgram && selectedProgram.id ? 'güncellendi' : 'oluşturuldu'}.`);
+            setShowSuccessPopup(true);
+
+            setEditTitle('');
+            setEditDescription('');
+            setEditCategoryId('');
+            setImagePreview('');
+            setEditImage(null);
+
+            const emptyPlan = {};
             DAYS_OF_WEEK.forEach(day => {
-                data.mealPlan[day] = {};
+                emptyPlan[day] = {};
                 MEALS.forEach(meal => {
-                    data.mealPlan[day][meal] = [];
-
-                    if (mealPlan && mealPlan[day] && mealPlan[day][meal]) {
-                        const mealData = mealPlan[day][meal];
-
-                        // Already has the complex format with main and alternatives
-                        if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
-                            data.mealPlan[day][meal] = {...mealData};
-                        }
-                        // Simple array format -> keep as is (API will handle it)
-                        else if (Array.isArray(mealData)) {
-                            data.mealPlan[day][meal] = [...mealData];
-                        }
-                        // Handle string format (for backward compatibility)
-                        else if (typeof mealData === 'string') {
-                            data.mealPlan[day][meal] = mealData
-                                .split(',')
-                                .map(item => item.trim())
-                                .filter(item => item !== '');
-                        }
-                    }
+                    emptyPlan[day][meal] = [];
                 });
             });
-
-            // Define API URL based on whether we're updating or creating
-            let url;
-            let method;
-
-            if (selectedProgram && selectedProgram.id) {
-                // Update existing plan
-                url = `${config[config.environment].apiUrl}/dietitian/updateNutritionPlan`;
-                method = 'put';
-            } else {
-                // Create new plan
-                url = `${config[config.environment].apiUrl}/dietitian/addNutritionPlan`;
-                method = 'post';
-            }
-
-            // Make the API request
-            const response = await axios({
-                method,
-                url,
-                data,
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                }
-            });
-
-            // Refresh data after successful operation
-            if (response.status === 200 || response.status === 201 || response.data.ok) {
-                // Update local state with the updated data if it's an update
-                if (selectedProgram && selectedProgram.id) {
-                    setBeslenmeData(prev =>
-                        prev.map(item =>
-                            item.id === selectedProgram.id
-                                ? {
-                                    ...item,
-                                    title: editTitle,
-                                    description: editDescription,
-                                    category_id: editCategoryId,
-                                    mealPlan: data.mealPlan
-                                }
-                                : item
-                        )
-                    );
-                } else {
-                    // Fetch all data again if it's a new item
-                    fetchNutritionPlans();
-                }
-
-                // Close the modal
-                setEditProgramModal(false);
-
-                // Show success message
-                setSuccessMessage(`"${editTitle}" programı başarıyla ${selectedProgram && selectedProgram.id ? 'güncellendi' : 'oluşturuldu'}.`);
-                setShowSuccessPopup(true);
-
-                // Reset form
-                setEditTitle('');
-                setEditDescription('');
-                setEditCategoryId('');
-
-                // Reset meal plan
-                const emptyPlan = {};
-                DAYS_OF_WEEK.forEach(day => {
-                    emptyPlan[day] = {};
-                    MEALS.forEach(meal => {
-                        emptyPlan[day][meal] = [];
-                    });
-                });
-                setMealPlan(emptyPlan);
-
-                setSelectedProgram(null);
-            }
+            setMealPlan(emptyPlan);
+            setSelectedProgram(null);
         } catch (error) {
-            console.error('Hata:', error);
-            console.error('Hata detayları:', error.response?.data || 'Detay yok');
-            alert(`Program ${selectedProgram && selectedProgram.id ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu. Lütfen tekrar deneyin.`);
-        } finally {
-            setIsSaving(false);
+            console.error("Beslenme planı işleme hatası:", error);
+            setErrorMessage("Beslenme planı kaydedilirken bir hata oluştu.");
+            setShowErrorPopup(true);
         }
     };
 
-    // Meal plan handlers
-    const handleMealChange = (day, meal, value) => {
-        setMealPlan(prev => ({
-            ...prev,
-            [day]: {
-                ...prev[day],
-                [meal]: value
-            }
-        }));
-    };
-
-    const handleDayChange = (day) => {
-        setSelectedDay(day);
-    };
-
-    // View meal plan handler
     const handleViewProgram = (item) => {
         setSelectedProgram(item);
         setViewProgramModal(true);
-    };
-
-    // Export PDF handler
-    const handleExportPdf = () => {
-        // No need to call generatePDF anymore
-        // The PDF is generated by react-pdf
     };
 
     const handleOpenDeleteConfirm = (item) => {
@@ -1564,20 +1308,16 @@ export default function Beslenme() {
     const handleDelete = () => {
         if (!itemToDelete) return;
 
-        axios.delete(`${config[config.environment].apiUrl}/dietitian/deleteNutritionPlan?nutrition_plan_id=${itemToDelete.id}`, {
+        axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionPlan?nutrition_plan_id=${itemToDelete.id}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(() => {
-                // Store name for success message
                 const planName = itemToDelete.title;
 
-                // Update local state after successful deletion
                 setBeslenmeData(prev => prev.filter(dataItem => dataItem.id !== itemToDelete.id));
-                // Close the modal and reset the item to delete
                 setDeleteConfirmModal(false);
                 setItemToDelete(null);
 
-                // Show success popup
                 setSuccessMessage(`"${planName}" programı başarıyla silindi.`);
                 setShowSuccessPopup(true);
             })
@@ -1586,6 +1326,28 @@ export default function Beslenme() {
                 setDeleteConfirmModal(false);
                 setItemToDelete(null);
             });
+    };
+
+    const setDateRange = (weeks) => {
+        const today = new Date();
+        const start = new Date(today);
+        const end = new Date(today);
+
+        if (weeks === 'month') {
+            end.setMonth(end.getMonth() + 1);
+        } else {
+            end.setDate(end.getDate() + (7 * weeks));
+        }
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
     };
 
     return (
@@ -1651,6 +1413,35 @@ export default function Beslenme() {
 
                 {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
+                    <div className="search-filter-bar" style={{ width: '100%', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 16, background: '#fff' }}>
+                            <TextField
+                                variant="outlined"
+                                size="small"
+                                    placeholder="Plan Adına Göre Ara"
+                                    value={planSearchTerm}
+                                    onChange={(e) => setPlanSearchTerm(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon color="action" />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: planSearchTerm && (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                size="small"
+                                        onClick={() => setPlanSearchTerm('')}
+                                                edge="end"
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
+                            style={{ maxWidth: 300, flex: 1, background: '#fff' }}
+                            />
+                        {/* Buraya ek filtreler eklenebilir */}
+                    </div>
                     <div className="nutrition-cards-grid">
                         {loading ? (
                             <div className="loading-container">
@@ -1689,7 +1480,7 @@ export default function Beslenme() {
                     }}
                     className="right-sidebar-panel"
                 >
-                    <Box sx={{ padding: '16px 0', backgroundColor: '#087708' }}>
+                    <Box sx={{padding: '16px 0', color: 'white', backgroundColor: '#2d4149'}}>
                         <Typography variant="h6" sx={{
                             textAlign: 'center',
                             color: 'white',
@@ -1697,11 +1488,11 @@ export default function Beslenme() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <PeopleIcon sx={{ mr: 1 }} /> Plan Yönetimi
+                            <PeopleIcon sx={{mr: 1}}/> Plan Yönetimi
                         </Typography>
                     </Box>
 
-                    <Box sx={{ padding: '16px' }}>
+                    <Box sx={{padding: '16px'}}>
                         <TextField
                             variant="outlined"
                             placeholder="Danışan ara..."
@@ -1712,16 +1503,16 @@ export default function Beslenme() {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: "rgba(0, 0, 0, 0.54)" }} />
+                                        <SearchIcon sx={{color: "rgba(0, 0, 0, 0.54)"}}/>
                                     </InputAdornment>
                                 ),
                             }}
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                         />
 
                         {loading ? (
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3 }}>
-                                <CircularProgress size={28} sx={{ mb: 2 }} />
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3}}>
+                                <CircularProgress size={28} sx={{mb: 2}}/>
                                 <Typography variant="body2" color="text.primary">
                                     Danışanlar yükleniyor...
                                 </Typography>
@@ -1751,7 +1542,7 @@ export default function Beslenme() {
                                                     setSelectedClientInfo(danisan);
                                                     setLoadingClientPrograms(true);
                                                     axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${danisan.id}`, {
-                                                        headers: { Authorization: localStorage.getItem("token") }
+                                                        headers: {Authorization: localStorage.getItem("token")}
                                                     })
                                                         .then(response => {
                                                             setSelectedClientPrograms(response.data || []);
@@ -1787,10 +1578,10 @@ export default function Beslenme() {
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     primary={danisan.name}
-                                                    primaryTypographyProps={{ fontWeight: 'medium' }}
+                                                    primaryTypographyProps={{fontWeight: 'medium'}}
                                                 />
                                             </ListItem>
-                                            <Divider variant="inset" component="li" />
+                                            <Divider variant="inset" component="li"/>
                                         </React.Fragment>
                                     ))
                                 ) : (
@@ -1801,7 +1592,7 @@ export default function Beslenme() {
                                         justifyContent: 'center',
                                         py: 4
                                     }}>
-                                        <PersonIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+                                        <PersonIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
                                         <Typography variant="body2" color="text.secondary" align="center">
                                             Danışan bulunamadı.
                                         </Typography>
@@ -1857,6 +1648,46 @@ export default function Beslenme() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="nutritionImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        <input
+                            type="file"
+                            id="nutritionImage"
+                            className="text-input"
+                            accept="image/*"
+                                style={{ display: 'none' }}
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setPlanImage(file);
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
+                        />
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Program önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setEditImage(null);
+                                        setImagePreview('');
+                                        document.getElementById('nutritionImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="modal-footer">
@@ -1928,6 +1759,41 @@ export default function Beslenme() {
                     </p>
                     <div className="input-container">
                         <label htmlFor="userSelect">Danışan Seçin</label>
+                        <div className="date-period-buttons">
+                            <Typography variant="h5" sx={{mb: 1, mt: 2}}>
+                                Hızlı Süre Seç:
+                            </Typography>
+                            <Stack direction="row" spacing={1} sx={{mb: 2}}>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(1)}
+                                >
+                                    1 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(2)}
+                                >
+                                    2 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(3)}
+                                >
+                                    3 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange('month')}
+                                >
+                                    1 Ay
+                                </Button>
+                            </Stack>
+                        </div>
                         <select
                             id="userSelect"
                             className="text-input"
@@ -1936,7 +1802,7 @@ export default function Beslenme() {
                                 const userId = e.target.value;
                                 if (userId) {
                                     const numUserId = parseInt(userId, 10);
-                                    
+
                                     const user = danisanList.find(u => String(u.id) === String(numUserId));
                                     if (user) {
                                         setSelectedUser(user);
@@ -2026,74 +1892,18 @@ export default function Beslenme() {
                 title="Beslenme Programı Düzenle"
                 onClose={() => setEditProgramModal(false)}
                 fullWidth={true}
+                sx={{ width: '100%' }}
             >
                 <div className="modal-body">
-                    <div className="program-details-section">
-                        <h3 className="section-title">Program Bilgileri</h3>
-                        <div className="input-container">
-                            <label htmlFor="editTitle">Program Adı</label>
-                            <input
-                                type="text"
-                                id="editTitle"
-                                className="text-input"
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                placeholder="Program adını giriniz"
-                            />
-                        </div>
-                        <div className="input-container">
-                            <label htmlFor="editDescription">Açıklama</label>
-                            <textarea
-                                id="editDescription"
-                                className="text-input textarea"
-                                value={editDescription}
-                                onChange={(e) => setEditDescription(e.target.value)}
-                                placeholder="Program açıklaması giriniz"
-                                rows={3}
-                            />
-                        </div>
-                        <div className="input-container">
-                            <label htmlFor="editCategory">Kategori</label>
-                            <select
-                                id="editCategory"
-                                className="text-input"
-                                value={editCategoryId}
-                                onChange={(e) => setEditCategoryId(e.target.value)}
-                            >
-                                <option value="">Kategori Seçin</option>
-                                {categoryData.map(category => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name || category.title}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="meal-plan-section">
-                        <h3 className="section-title">Öğün Planı</h3>
-                        <MealPlanTable
-                            mealPlan={mealPlan}
-                            onMealChange={handleMealChange}
-                            selectedDay={selectedDay}
-                            onDayChange={handleDayChange}
-                        />
-                    </div>
-                </div>
-                <div className="modal-footer">
-                    <button
-                        className="modal-btn cancel-btn"
-                        onClick={() => setEditProgramModal(false)}
-                    >
-                        İptal
-                    </button>
-                    <button
-                        className="modal-btn confirm-btn"
-                        onClick={handleSaveMealPlan}
-                        disabled={isSaving}
-                    >
-                        {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
-                    </button>
+                    <MealPlanEditor
+                        onSave={handleSaveMealPlan}
+                        onCancel={() => setEditProgramModal(false)}
+                        isSaving={isSaving}
+                        editTitle={editTitle}
+                        editDescription={editDescription}
+                        editCategoryId={editCategoryId}
+                        existingPlan={selectedProgram}
+                    />
                 </div>
             </Modal>
 
@@ -2131,12 +1941,10 @@ export default function Beslenme() {
                 fullWidth={true}
             >
                 <div className="modal-body meal-plan-view-modal" ref={mealPlanRef}>
-                    <ViewMealPlan
+                    <MealPlanViewer
                         mealPlan={selectedProgram?.mealPlan}
-                        programTitle={selectedProgram?.title}
-                        onClose={() => setViewProgramModal(false)}
-                        onExportPdf={handleExportPdf}
-                        selectedProgram={selectedProgram}
+                        title={selectedProgram?.title}
+                        description={selectedProgram?.description}
                     />
                 </div>
                 <div className="modal-footer">
@@ -2346,10 +2154,10 @@ export default function Beslenme() {
                         onClick={() => setClientProgramsModal(false)}
                         aria-label="close"
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
-                <DialogContent sx={{ p: 3 }}>
+                <DialogContent sx={{p: 3}}>
                     {loadingClientPrograms ? (
                         <Box sx={{
                             display: 'flex',
@@ -2358,7 +2166,7 @@ export default function Beslenme() {
                             justifyContent: 'center',
                             my: 5
                         }}>
-                            <CircularProgress size={40} sx={{ mb: 2 }} />
+                            <CircularProgress size={40} sx={{mb: 2}}/>
                             <Typography variant="body1" color="text.secondary">
                                 Programlar yükleniyor...
                             </Typography>
@@ -2397,7 +2205,7 @@ export default function Beslenme() {
                                     </Typography>
                                     <Stack direction="row" spacing={1} alignItems="center" mt={1}>
                                         <Chip
-                                            icon={<EventIcon fontSize="small" />}
+                                            icon={<EventIcon fontSize="small"/>}
                                             label={`${selectedClientPrograms.length} Aktif Program`}
                                             color="primary"
                                             variant="outlined"
@@ -2407,10 +2215,9 @@ export default function Beslenme() {
                                 </Box>
                             </Paper>
 
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{mt: 2}}>
                                 <Grid container spacing={3}>
                                     {selectedClientPrograms.map((program, index) => {
-                                        // Tarih formatını düzeltme
                                         const formatDate = (dateStr) => {
                                             if (!dateStr) return "Belirtilmemiş";
                                             const date = new Date(dateStr);
@@ -2421,7 +2228,6 @@ export default function Beslenme() {
                                             });
                                         };
 
-                                        // Başlangıç ve bitiş tarihleri arasındaki gün sayısını hesaplama
                                         const calculateDaysBetween = (start, end) => {
                                             if (!start || !end) return null;
                                             const startDate = new Date(start);
@@ -2432,24 +2238,22 @@ export default function Beslenme() {
 
                                         const daysBetween = calculateDaysBetween(program.start_date, program.end_date);
 
-                                        // Program durumunu hesaplama
                                         const getProgramStatus = () => {
                                             const today = new Date();
                                             const startDate = new Date(program.start_date);
                                             const endDate = new Date(program.end_date);
 
                                             if (today < startDate) {
-                                                return { status: "Başlamamış", color: "#3f51b5", chipColor: "primary" };
+                                                return {status: "Başlamamış", color: "#3f51b5", chipColor: "primary"};
                                             } else if (today > endDate) {
-                                                return { status: "Tamamlandı", color: "#4caf50", chipColor: "success" };
+                                                return {status: "Tamamlandı", color: "#4caf50", chipColor: "success"};
                                             } else {
-                                                return { status: "Devam Ediyor", color: "#ff9800", chipColor: "warning" };
+                                                return {status: "Devam Ediyor", color: "#ff9800", chipColor: "warning"};
                                             }
                                         };
 
                                         const status = getProgramStatus();
 
-                                        // İlerleme çubuğu yüzdesini hesaplama
                                         const calculateProgress = () => {
                                             const today = new Date();
                                             const startDate = new Date(program.start_date);
@@ -2486,11 +2290,11 @@ export default function Beslenme() {
                                                                 label={status.status}
                                                                 color={status.chipColor}
                                                                 size="small"
-                                                                sx={{ fontWeight: 'medium' }}
+                                                                sx={{fontWeight: 'medium'}}
                                                             />
                                                         }
                                                     />
-                                                    <CardContent sx={{ pt: 0 }}>
+                                                    <CardContent sx={{pt: 0}}>
                                                         <Paper
                                                             elevation={0}
                                                             sx={{
@@ -2510,11 +2314,15 @@ export default function Beslenme() {
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Başlangıç
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mt: 0.5
+                                                                }}>
                                                                     <CalendarTodayIcon
                                                                         color="primary"
                                                                         fontSize="small"
-                                                                        sx={{ mr: 0.5 }}
+                                                                        sx={{mr: 0.5}}
                                                                     />
                                                                     <Typography variant="body1" fontWeight="medium">
                                                                         {formatDate(program.start_date)}
@@ -2522,7 +2330,7 @@ export default function Beslenme() {
                                                                 </Box>
                                                             </Box>
 
-                                                            <Divider orientation="vertical" flexItem />
+                                                            <Divider orientation="vertical" flexItem/>
 
                                                             <Box sx={{
                                                                 display: 'flex',
@@ -2532,11 +2340,15 @@ export default function Beslenme() {
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Bitiş
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mt: 0.5
+                                                                }}>
                                                                     <EventAvailableIcon
                                                                         color="primary"
                                                                         fontSize="small"
-                                                                        sx={{ mr: 0.5 }}
+                                                                        sx={{mr: 0.5}}
                                                                     />
                                                                     <Typography variant="body1" fontWeight="medium">
                                                                         {formatDate(program.end_date)}
@@ -2544,7 +2356,7 @@ export default function Beslenme() {
                                                                 </Box>
                                                             </Box>
 
-                                                            <Divider orientation="vertical" flexItem />
+                                                            <Divider orientation="vertical" flexItem/>
 
                                                             <Box sx={{
                                                                 display: 'flex',
@@ -2554,11 +2366,15 @@ export default function Beslenme() {
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Süre
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    mt: 0.5
+                                                                }}>
                                                                     <AccessTimeIcon
                                                                         color="primary"
                                                                         fontSize="small"
-                                                                        sx={{ mr: 0.5 }}
+                                                                        sx={{mr: 0.5}}
                                                                     />
                                                                     <Typography variant="body1" fontWeight="medium">
                                                                         {daysBetween} gün
@@ -2567,7 +2383,7 @@ export default function Beslenme() {
                                                             </Box>
                                                         </Paper>
 
-                                                        <Box sx={{ mb: 2 }}>
+                                                        <Box sx={{mb: 2}}>
                                                             <Box sx={{
                                                                 display: 'flex',
                                                                 justifyContent: 'space-between',
@@ -2585,7 +2401,7 @@ export default function Beslenme() {
                                                                 value={progressPercent}
                                                                 color={
                                                                     status.chipColor === "success" ? "success" :
-                                                                    status.chipColor === "primary" ? "primary" : "warning"
+                                                                        status.chipColor === "primary" ? "primary" : "warning"
                                                                 }
                                                                 sx={{
                                                                     height: 8,
@@ -2604,7 +2420,7 @@ export default function Beslenme() {
                                                                 <DescriptionIcon
                                                                     fontSize="small"
                                                                     color="action"
-                                                                    sx={{ mt: 0.3, mr: 1 }}
+                                                                    sx={{mt: 0.3, mr: 1}}
                                                                 />
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     {program.description || "Açıklama bulunmuyor."}
@@ -2625,38 +2441,41 @@ export default function Beslenme() {
                                                                     alignItems: 'center',
                                                                     mb: 0.5
                                                                 }}>
-                                                                    <NoteIcon fontSize="small" sx={{ mr: 1 }} color="warning" />
+                                                                    <NoteIcon fontSize="small" sx={{mr: 1}}
+                                                                              color="warning"/>
                                                                     <Typography variant="body2" fontWeight="medium">
                                                                         Diyetisyen Notu
                                                                     </Typography>
                                                                 </Box>
-                                                                <Typography variant="body2" color="text.secondary" sx={{ pl: 3.5 }}>
+                                                                <Typography variant="body2" color="text.secondary"
+                                                                            sx={{pl: 3.5}}>
                                                                     {program.note}
                                                                 </Typography>
                                                             </Box>
                                                         )}
                                                     </CardContent>
 
-                                                    <CardActions sx={{ justifyContent: 'flex-end', p: 2, pt: 0 }}>
+                                                    <CardActions sx={{justifyContent: 'flex-end', p: 2, pt: 0}}>
                                                         {(() => {
                                                             const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
                                                             if (programDetails) {
                                                                 return (
-                                                                    <PDFDownloadLink 
-                                                                        document={<NutritionPlanDocument program={programDetails} />} 
+                                                                    <ConditionalPDFLink
+                                                                        document={<NutritionPlanDocument program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
-                                                                        style={{ textDecoration: 'none' }}
+                                                                        buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
+                                                                        buttonTitle="PDF İndir"
                                                                     >
-                                                                        {({ blob, url, loading, error }) => (
-                                                        <Button
-                                                            variant="outlined"
-                                                            startIcon={<FileDownloadIcon />}
+                                                                        {({blob, url, loading, error}) => (
+                                                                            <Button
+                                                                                variant="outlined"
+                                                                                startIcon={<FileDownloadIcon/>}
                                                                                 disabled={loading}
                                                                             >
                                                                                 {loading ? 'Hazırlanıyor...' : 'PDF İndir'}
-                                                        </Button>
+                                                                            </Button>
                                                                         )}
-                                                                    </PDFDownloadLink>
+                                                                    </ConditionalPDFLink>
                                                                 );
                                                             }
                                                             return null;
@@ -2664,7 +2483,7 @@ export default function Beslenme() {
                                                         <Button
                                                             variant="contained"
                                                             color="primary"
-                                                            startIcon={<RestaurantIcon />}
+                                                            startIcon={<RestaurantIcon/>}
                                                             onClick={() => {
                                                                 const programDetails = beslenmeData.find(item => item.id === program.nutrition_plan_id);
                                                                 if (programDetails) {
@@ -2693,11 +2512,11 @@ export default function Beslenme() {
                             py: 5,
                             textAlign: 'center'
                         }}>
-                            <RestaurantIcon sx={{ fontSize: 70, color: '#ccc', mb: 2 }} />
+                            <RestaurantIcon sx={{fontSize: 70, color: '#ccc', mb: 2}}/>
                             <Typography variant="h6" gutterBottom>
                                 Atanmış Program Bulunamadı
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{mb: 3}}>
                                 Bu danışana henüz bir beslenme programı atanmamış.
                             </Typography>
                             <Button

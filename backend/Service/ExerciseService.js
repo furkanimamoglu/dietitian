@@ -1,5 +1,5 @@
 const path = require('path');
-const { Op } = require('sequelize');
+const {Op} = require('sequelize');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const {Exercise, ExerciseCategory, ExerciseAssignment} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
@@ -82,8 +82,8 @@ class ExerciseService {
             throw new Exception("Danışan ID eksik.", 400, true);
         }
 
-        const whereClause = { client_id };
-        
+        const whereClause = {client_id};
+
         if (startDate && endDate) {
             whereClause.updatedAt = {
                 [Op.between]: [new Date(startDate), new Date(endDate)]

@@ -50,7 +50,7 @@
     .odeme-container {
         padding: 12px;
     }
-    
+
     .payment-modal {
         width: 90vw;
         padding: 16px;
@@ -67,4 +67,49 @@
     100% {
         transform: scale(1);
     }
+}
+
+/* Add this to your Odeme.css file */
+
+/* Style for the highlighted tab when the user is on the free plan */
+.payment-tabs .highlighted-tab {
+    background-color: #e3f2fd !important; /* Light blue background */
+    color: #1976d2 !important; /* Primary color text */
+    font-weight: bold !important; /* Bold text */
+    /* Optional: Add a border or box-shadow to make it pop more */
+    border: 1px solid #1976d2;
+    border-bottom: none; /* Avoid double border if Tabs has one */
+}
+
+.payment-tabs .highlighted-tab .MuiTab-wrapper {
+    font-weight: bold !important; /* Ensure wrapper text is bold */
+}
+
+.payment-tabs .highlighted-tab .MuiTab-icon {
+    color: #1976d2 !important; /* Primary color icon */
+}
+
+/* Ensure disabled tabs look disabled */
+.payment-tabs .Mui-disabled {
+    opacity: 0.5;
+    pointer-events: none; /* Prevent clicks */
+}
+
+/* Pulse animation for the highlighted tab (optional, can be distracting) */
+/* Remove if you prefer a static highlight */
+@keyframes pulse-tab {
+    0% {
+        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4); /* Adjust color as needed */
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(33, 150, 243, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+    }
+}
+
+.payment-tabs .highlighted-tab {
+    /* ... existing styles ... */
+    /* animation: pulse-tab 2s infinite; */ /* Uncomment to enable animation */
 }

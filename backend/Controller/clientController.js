@@ -29,7 +29,7 @@ class ClientController {
 
     static async register(req, res) {
         try {
-            const {phoneNumber, password, name, dietitian_id} = req.body;
+            const {phoneNumber, password, name, gender, dietitian_id} = req.body;
             const ipAddress = req.ip;
 
             if (!dietitian_id) {
@@ -46,7 +46,7 @@ class ClientController {
                 });
             }
 
-            const result = await ClientService.register(dietitian_id, name, phoneNumber, password, ipAddress);
+            const result = await ClientService.register(dietitian_id, name, gender, phoneNumber, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,
@@ -132,7 +132,7 @@ class ClientController {
         }
     }
 
-    static async getTodayMeal(req, res) {
+    static async getTodayMealPlan(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
@@ -148,7 +148,31 @@ class ClientController {
             const today = moment().format('YYYY-MM-DD');
             const dayName = moment().locale('tr').format('dddd');
 
-            const result = await ClientService.getTodayMeal(client_id, today, dayName);
+            const result = await ClientService.getTodayMealPlan(client_id, today, dayName);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    static async getMyRecipes(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await ClientService.getMyRecipes(client_id);
+
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({

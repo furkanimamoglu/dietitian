@@ -35,8 +35,7 @@ class MessageService {
             return await Message.count({
                 where: {dietitian_id: user_id, client_id: partner_id, sender: CLIENT, isRead: false}
             });
-        } else if(user_role === DIETITIAN && !partner_id)
-        {
+        } else if (user_role === DIETITIAN && !partner_id) {
             return await Message.count({
                 where: {dietitian_id: user_id, sender: CLIENT, isRead: false},
             })
@@ -91,7 +90,7 @@ class MessageService {
             }
 
             const [updatedCount] = await Message.update(
-                { isRead: true },
+                {isRead: true},
                 {
                     where: {
                         dietitian_id,
@@ -102,7 +101,7 @@ class MessageService {
                 }
             );
 
-            return { updated: updatedCount };
+            return {updated: updatedCount};
         } catch (err) {
             throw Exception("Message Reading Notify failed.", 401, true);
         }

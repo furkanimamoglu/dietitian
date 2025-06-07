@@ -1,4 +1,4 @@
-import { toast } from 'react-hot-toast';
+import {toast} from 'react-hot-toast';
 
 /**
  * Display a success toast notification
@@ -6,10 +6,10 @@ import { toast } from 'react-hot-toast';
  * @param {Object} options - Additional options for the toast
  */
 export const showSuccessToast = (message, options = {}) => {
-  toast.success(message, {
-    duration: 3000,
-    ...options
-  });
+    toast.success(message, {
+        duration: 3000,
+        ...options
+    });
 };
 
 /**
@@ -18,10 +18,10 @@ export const showSuccessToast = (message, options = {}) => {
  * @param {Object} options - Additional options for the toast
  */
 export const showErrorToast = (message, options = {}) => {
-  toast.error(message, {
-    duration: 4000, // Slightly longer duration for errors
-    ...options
-  });
+    toast.error(message, {
+        duration: 4000, // Slightly longer duration for errors
+        ...options
+    });
 };
 
 /**
@@ -30,8 +30,8 @@ export const showErrorToast = (message, options = {}) => {
  * @param {Object} options - Additional options for the toast
  */
 export const showToast = (message, options = {}) => {
-  toast(message, {
-    duration: 3000,
-    ...options
-  });
+    toast(message, {
+        duration: 3000,
+        ...options
+    });
 }; 

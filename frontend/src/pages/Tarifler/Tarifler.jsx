@@ -3,8 +3,8 @@ import './Tarifler.css';
 import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
-import {toast} from 'react-hot-toast';
-import { showSuccessToast, showErrorToast } from '../../utils/toastUtil';
+import {showErrorToast} from '../../utils/toastUtil';
+import { saveRecipe, updateRecipe } from './helpers.js';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,47 +15,47 @@ import CloseIcon from '@mui/icons-material/Close';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonIcon from '@mui/icons-material/Person';
+import DescriptionIcon from "@mui/icons-material/Description";
+import NoteIcon from '@mui/icons-material/Note';
+
 import {jsPDF} from "jspdf";
 import 'jspdf-autotable';
+import {
+    Avatar,
+    Box,
+    CircularProgress,
+    Divider,
+    InputAdornment,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Paper,
+    TextField,
+    Typography
+} from '@mui/material';
 
-// Helper function to get YouTube video ID from URL
-const getYouTubeVideoId = (url) => {
-    if (!url) return null;
-
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-
-    return (match && match[2].length === 11) ? match[2] : null;
-};
-
-// PDF generation function
 const generatePDF = (recipe) => {
-    // Create a new PDF document
     const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
+        orientation: 'portrait', unit: 'mm', format: 'a4'
     });
 
-    // Add Unicode font support for Turkish characters
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.ttf', 'Helvetica', 'normal');
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.bold.ttf', 'Helvetica', 'bold');
     doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.italic.ttf', 'Helvetica', 'italic');
 
-    // Define colors for the PDF
-    const greenColor = [76, 175, 80]; // RGB value for primary green
-    const orangeColor = [255, 152, 0]; // RGB value for orange accent
+    const greenColor = [76, 175, 80];
+    const orangeColor = [255, 152, 0];
 
-    // Add header with green background
     doc.setFillColor(greenColor[0], greenColor[1], greenColor[2]);
     doc.rect(0, 0, doc.internal.pageSize.getWidth(), 40, 'F');
 
-    // Add title with white text
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('Helvetica', 'bold');
 
-    // Make sure text doesn't overflow
     let title = recipe.title || "Tarif";
     const titleWidth = doc.getStringUnitWidth(title) * 24 / doc.internal.scaleFactor;
     const availableWidth = doc.internal.pageSize.getWidth() - 40;
@@ -65,24 +65,20 @@ const generatePDF = (recipe) => {
 
     doc.text(title, 20, 25);
 
-    // Add orange decorative element
     doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
     doc.rect(0, 40, doc.internal.pageSize.getWidth(), 5, 'F');
 
-    // Reset text color to black
     doc.setTextColor(0, 0, 0);
 
-    // Add description
     let yPosition = 60;
     if (recipe.description && recipe.description.trim()) {
         doc.setFontSize(12);
         doc.setFont('Helvetica', 'italic');
         const descriptionLines = doc.splitTextToSize(recipe.description, doc.internal.pageSize.getWidth() - 40);
         doc.text(descriptionLines, 20, yPosition);
-        yPosition += descriptionLines.length * 7 + 10; // Add space after description
+        yPosition += descriptionLines.length * 7 + 10;
     }
 
-    // Add nutritional information if available
     if (recipe.nutritional_info) {
         doc.setFontSize(14);
         doc.setFont('Helvetica', 'bold');
@@ -251,8 +247,7 @@ const generatePDF = (recipe) => {
 
 // Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
-    return (
-        <div
+    return (<div
             className={`category-item ${isChecked ? 'checked' : ''}`}
             onClick={onCheck}
         >
@@ -274,14 +269,12 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
             >
                 <DeleteIcon/>
             </button>
-        </div>
-    );
+        </div>);
 };
 
 // Recipe Card Component
-const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
-    return (
-        <div className="recipe-card">
+const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
+    return (<div className="recipe-card">
             <div className="card-image-container" onClick={() => onView(item)}>
                 <img
                     src={item.image || "/placeholder.png"}
@@ -293,32 +286,35 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
                 <h3 className="card-title">{item.title}</h3>
                 <p className="card-description">{item.description}</p>
 
-                {item.nutritional_info && (
+                {item.nutritional_info && Object.values(item.nutritional_info).some((val) => val !== null && val !== undefined && val !== '') && (
                     <div className="card-nutritional-info">
-                        {item.nutritional_info.calories && (
+                        {item.nutritional_info.calories !== null && item.nutritional_info.calories !== undefined && item.nutritional_info.calories !== '' && (
                             <span className="nutri-badge calories">
-                                {item.nutritional_info.calories} Kcal
-                            </span>
-                        )}
-                        {item.nutritional_info.protein && (
+                            {item.nutritional_info.calories} Kcal
+                          </span>)}
+                        {item.nutritional_info.protein !== null && item.nutritional_info.protein !== undefined && item.nutritional_info.protein !== '' && (
                             <span className="nutri-badge protein">
-                                {item.nutritional_info.protein}g Protein
-                            </span>
-                        )}
-                        {item.nutritional_info.carbs && (
+                            {item.nutritional_info.protein}g Protein
+                          </span>)}
+                        {item.nutritional_info.carbs !== null && item.nutritional_info.carbs !== undefined && item.nutritional_info.carbs !== '' && (
                             <span className="nutri-badge carbs">
                                 {item.nutritional_info.carbs}g Karbonhidrat
-                            </span>
-                        )}
-                        {item.nutritional_info.fat && (
-                            <span className="nutri-badge fat">
-                                {item.nutritional_info.fat}g Yağ
-                            </span>
-                        )}
-                    </div>
-                )}
+                              </span>)}
+                        {item.nutritional_info.fat !== null && item.nutritional_info.fat !== undefined && item.nutritional_info.fat !== '' && (
+                                        <span className="nutri-badge fat">
+                        {item.nutritional_info.fat}g Yağ
+                      </span>)}
+                    </div>)}
+
 
                 <div className="card-actions">
+                    <button
+                        className="action-button add-user-btn"
+                        title="Danışana Ata"
+                        onClick={() => onAssign(item)}
+                    >
+                        <PersonAddIcon />
+                    </button>
                     <button
                         className="action-button print-btn"
                         title="Yazdır"
@@ -342,16 +338,14 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView}) => {
                     </button>
                 </div>
             </div>
-        </div>
-    );
+        </div>);
 };
 
 // Modal Component
 const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
 
-    return (
-        <div className="modal-overlay">
+    return (<div className="modal-overlay">
             <div className={`modal-container ${fullWidth ? 'full-width' : ''}`}>
                 <div className="modal-header">
                     <h2>{title}</h2>
@@ -363,8 +357,7 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
                     {children}
                 </div>
             </div>
-        </div>
-    );
+        </div>);
 };
 
 export default function Tarifler() {
@@ -373,7 +366,18 @@ export default function Tarifler() {
     const [danisanList, setDanisanList] = useState([]);
     const [recipeData, setRecipeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
+
+    // Danışan ara için state
+    const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
+    const [filteredDanisanList, setFilteredDanisanList] = useState([]);
+
+    // Danışana atanmış tarifler için state'ler
+    const [clientRecipesModal, setClientRecipesModal] = useState(false);
+    const [selectedClientRecipes, setSelectedClientRecipes] = useState([]);
+    const [loadingClientRecipes, setLoadingClientRecipes] = useState(false);
+    const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
     // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
@@ -393,12 +397,10 @@ export default function Tarifler() {
     const [editIngredients, setEditIngredients] = useState('');
     const [editInstructions, setEditInstructions] = useState('');
     const [editCategoryId, setEditCategoryId] = useState('');
-    const [editVideoUrl, setEditVideoUrl] = useState('');
+    const [editImage, setEditImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
     const [editNutritionalInfo, setEditNutritionalInfo] = useState({
-        calories: '',
-        protein: '',
-        carbs: '',
-        fat: ''
+        calories: '', protein: '', carbs: '', fat: ''
     });
 
     // Success popup states
@@ -416,12 +418,9 @@ export default function Tarifler() {
         ingredients: '',
         instructions: '',
         category_id: '',
-        video_url: '',
+        image: null,
         nutritional_info: {
-            calories: '',
-            protein: '',
-            carbs: '',
-            fat: ''
+            calories: '', protein: '', carbs: '', fat: ''
         }
     });
 
@@ -501,21 +500,16 @@ export default function Tarifler() {
                 },
             })
             .then((response) => {
-                // Map API response to component's expected data structure
                 const mappedRecipes = response.data.map(recipe => ({
                     id: recipe.id,
                     title: recipe.name,
-                    description: recipe.description || "",  // Map description field
+                    description: recipe.description || "",
                     category_id: recipe.category_id,
-                    image: "/placeholder.png",  // API doesn't provide image
-                    video_url: recipe.hasVideo ? recipe.video : "",
+                    image: recipe.image || "/placeholder.png",
                     ingredients: recipe.malzemeler,
                     instructions: recipe.hazirlanis,
                     nutritional_info: {
-                        calories: recipe.kcal,
-                        protein: recipe.protein,
-                        carbs: recipe.karbonhidrat,
-                        fat: recipe.yag
+                        calories: recipe.kcal, protein: recipe.protein, carbs: recipe.karbonhidrat, fat: recipe.yag
                     }
                 }));
                 setRecipeData(mappedRecipes);
@@ -534,36 +528,32 @@ export default function Tarifler() {
     }, []);
 
     // Filter categories based on search term
-    const filteredCategories = categoryData?.filter(category =>
-        (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCategories = categoryData?.filter(category => (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase()));
 
     // Filter recipes based on selected categories
     const filteredRecipeData = recipeData.filter(item => {
-        // If no categories are checked, show all items
-        if (checkedCategories.length === 0) {
-            return true;
-        }
-        // Otherwise, show only items that belong to checked categories
-        return checkedCategories.includes(item.category_id);
+        // Önce kategori filtresi uygulayalım
+        const passesCategory = checkedCategories.length === 0 || checkedCategories.includes(item.category_id);
+
+        // Sonra arama terimine göre filtreleyelim
+        const passesSearch = !recipeSearchTerm ||
+            item.title.toLowerCase().includes(recipeSearchTerm.toLowerCase()) ||
+            (item.description && item.description.toLowerCase().includes(recipeSearchTerm.toLowerCase())) ||
+            (item.ingredients && item.ingredients.toLowerCase().includes(recipeSearchTerm.toLowerCase()));
+
+        return passesCategory && passesSearch;
     });
 
     // Category handlers
     const handleCategoryCheck = (categoryId) => {
-        setCheckedCategories(prev =>
-            prev.includes(categoryId)
-                ? prev.filter(id => id !== categoryId)
-                : [...prev, categoryId]
-        );
+        setCheckedCategories(prev => prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [...prev, categoryId]);
     };
 
     const handleOpenMultiDeleteConfirm = () => {
         if (checkedCategories.length === 0) return;
 
         // Find recipes that would be affected by deleting these categories
-        const recipesToDelete = recipeData.filter(recipe =>
-            checkedCategories.includes(recipe.category_id)
-        );
+        const recipesToDelete = recipeData.filter(recipe => checkedCategories.includes(recipe.category_id));
 
         setAffectedRecipes(recipesToDelete);
         setDeleteMultiCategoriesConfirmModal(true);
@@ -608,7 +598,7 @@ export default function Tarifler() {
         setEditIngredients(item.ingredients || '');
         setEditInstructions(item.instructions || '');
         setEditCategoryId(item.category_id || '');
-        setEditVideoUrl(item.video_url || '');
+        setEditImage(item.image || '');
 
         // Set nutritional info or initialize with empty values
         const nutritionalInfo = item.nutritional_info || {};
@@ -631,8 +621,41 @@ export default function Tarifler() {
         setDeleteConfirmModal(true);
     };
 
-    return (
-        <Default>
+    // Danışanların filtrelenmesi için useEffect
+    useEffect(() => {
+        if (danisanList.length > 0) {
+            setFilteredDanisanList(
+                danisanList.filter(danisan =>
+                    danisan.name.toLowerCase().includes(danisanSearchTerm.toLowerCase())
+                )
+            );
+        }
+    }, [danisanList, danisanSearchTerm]);
+
+    // Danışana atanan tarifleri getiren fonksiyon
+    const getClientRecipes = (clientId) => {
+        const danisan = danisanList.find(d => d.id === clientId);
+        setSelectedClientInfo(danisan);
+        setLoadingClientRecipes(true);
+
+        // Danışana atanmış tarifleri al
+        axios.get(`${config[config.environment].apiUrl}/recipe/getAssignedRecipesByClient?client_id=${clientId}`, {
+            headers: {Authorization: localStorage.getItem("token")}
+        })
+            .then(response => {
+                setSelectedClientRecipes(response.data || []);
+                setLoadingClientRecipes(false);
+                setClientRecipesModal(true);
+            })
+            .catch(error => {
+                console.error("Error fetching client recipes:", error);
+                setLoadingClientRecipes(false);
+                setErrorMessage("Danışan tarifleri yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+            });
+    }
+
+    return (<Default>
             <div className="tarifler-container">
                 {/* Left Panel - Categories */}
                 <div className="categories-panel">
@@ -651,7 +674,10 @@ export default function Tarifler() {
                             <button
                                 className="action-btn add-plan-btn"
                                 title="Tarif Ekle"
-                                onClick={() => setAddRecipeModal(true)}
+                                onClick={() => {
+                                    setImagePreview(''); // Resim önizlemeyi temizle
+                                    setAddRecipeModal(true);
+                                }}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Tarif</span>
@@ -676,48 +702,182 @@ export default function Tarifler() {
                     </div>
 
                     <div className="categories-list">
-                        {filteredCategories && filteredCategories.length > 0 ? (
-                            filteredCategories.map((category) => (
+                        {filteredCategories && filteredCategories.length > 0 ? (filteredCategories.map((category) => (
                                 <CategoryItem
                                     key={category.id}
                                     category={category}
                                     isChecked={checkedCategories.includes(category.id)}
                                     onCheck={() => handleCategoryCheck(category.id)}
                                     onDelete={handleOpenCategoryDeleteConfirm}
-                                />
-                            ))
-                        ) : (
-                            <div className="no-categories">Kategori bulunamadı.</div>
-                        )}
+                                />))) : (<div className="no-categories">Kategori bulunamadı.</div>)}
                     </div>
                 </div>
 
-                {/* Right Panel - Recipe Cards */}
+                {/* Middle Panel - Recipe Cards */}
                 <div className="recipes-panel">
+                    {/* Arama çubuğu */}
+                    <div className="recipe-search-container enhanced-search" style={{ position: 'sticky', top: 0, zIndex: 10, background: '#fff' }}>
+                        <div className="search-box enhanced-search-box">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Tariflerde ara..."
+                                value={recipeSearchTerm}
+                                onChange={(e) => setRecipeSearchTerm(e.target.value)}
+                            />
+                            {recipeSearchTerm && (
+                                <button
+                                    className="clear-search-btn"
+                                    onClick={() => setRecipeSearchTerm('')}
+                                    tabIndex={-1}
+                                >
+                                    <CloseIcon fontSize="small" />
+                                </button>
+                            )}
+                        </div>
+                        <div className="search-divider" />
+                        {filteredRecipeData.length > 0 && (
+                            <div className="recipe-count enhanced-recipe-count">
+                                <span>{filteredRecipeData.length}</span> tarif gösteriliyor.
+                            </div>
+                        )}
+                    </div>
                     <div className="recipe-cards-grid">
-                        {loading ? (
-                            <div className="loading-container">
+                        {loading ? (<div className="loading-container">
                                 <div className="loading-spinner"></div>
                                 <p>Tarifler yükleniyor...</p>
-                            </div>
-                        ) : filteredRecipeData.length > 0 ? (
-                            filteredRecipeData.map((item) => (
-                                <RecipeCard
+                            </div>) : filteredRecipeData.length > 0 ? (filteredRecipeData.map((item) => (<RecipeCard
                                     key={item.id}
                                     item={item}
                                     onPrint={handlePrint}
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewRecipe}
-                                />
-                            ))
-                        ) : (
-                            <div className="no-recipes">
-                                <p>Bu kategoriye ait tarif bulunamadı.</p>
-                            </div>
-                        )}
+                                    onAssign={handleOpenAddToUserModal}
+                                />))) : (<div className="no-recipes">
+                                <p>Bu kategoriya ait tarif bulunamadı.</p>
+                            </div>)}
                     </div>
                 </div>
+
+                {/* Right Panel - Sidebar */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        flex: '0 0 260px',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        height: 'calc(76vh)',
+                        maxHeight: 'calc(100vh - 100px)'
+                    }}
+                    className="right-sidebar-panel"
+                >
+                    <Box sx={{padding: '16px 0', color: 'white', backgroundColor: '#2d4149'}}>
+                        <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <PersonIcon sx={{mr: 1}}/> Tarif Yönetimi
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{padding: '16px'}}>
+                        <TextField
+                            variant="outlined"
+                            placeholder="Danışan ara..."
+                            value={danisanSearchTerm}
+                            onChange={(e) => setDanisanSearchTerm(e.target.value)}
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{color: "rgba(0, 0, 0, 0.54)"}}/>
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{mb: 2}}
+                        />
+
+                        {loading ? (
+                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3}}>
+                                <CircularProgress size={28} sx={{mb: 2}}/>
+                                <Typography variant="body2" color="text.primary">
+                                    Danışanlar yükleniyor...
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <List
+                                sx={{
+                                    width: '100%',
+                                    maxHeight: 'calc(100vh - 200px)',
+                                    overflowY: 'auto',
+                                    '&::-webkit-scrollbar': {
+                                        width: '6px',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: 'rgba(0,0,0,0.2)',
+                                        borderRadius: '3px'
+                                    }
+                                }}
+                                dense
+                            >
+                                {filteredDanisanList.length > 0 ? (
+                                    filteredDanisanList.map((danisan) => (
+                                        <React.Fragment key={danisan.id}>
+                                            <ListItem
+                                                component="div"
+                                                onClick={() => getClientRecipes(danisan.id)}
+                                                sx={{
+                                                    borderRadius: '8px',
+                                                    my: 0.5,
+                                                    cursor: 'pointer',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                                                    }
+                                                }}
+                                            >
+                                                <ListItemAvatar>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            width: 40,
+                                                            height: 40
+                                                        }}
+                                                        src={danisan.image || ''}
+                                                    >
+                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={danisan.name}
+                                                    primaryTypographyProps={{fontWeight: 'medium'}}
+                                                />
+                                            </ListItem>
+                                            <Divider variant="inset" component="li"/>
+                                        </React.Fragment>
+                                    ))
+                                ) : (
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        py: 4
+                                    }}>
+                                        <PersonIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
+                                        <Typography variant="body2" color="text.secondary" align="center">
+                                            Danışan bulunamadı.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </List>
+                        )}
+                    </Box>
+                </Paper>
             </div>
 
             {/* Detail Modal */}
@@ -727,72 +887,44 @@ export default function Tarifler() {
                 onClose={() => setDetailModal(false)}
             >
                 <div className="recipe-detail-modal">
-                    {detailItem?.image && !getYouTubeVideoId(detailItem.video_url) && (
-                        <img
+                    {detailItem?.image && (<img
                             src={detailItem.image}
                             alt={detailItem.title}
                             className="recipe-detail-image"
-                        />
-                    )}
-
-                    {detailItem?.video_url && getYouTubeVideoId(detailItem.video_url) && (
-                        <div className="recipe-video-container">
-                            <iframe
-                                width="100%"
-                                height="315"
-                                src={`https://www.youtube.com/embed/${getYouTubeVideoId(detailItem.video_url)}`}
-                                title="Recipe Video"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            ></iframe>
-                        </div>
-                    )}
+                        />)}
 
                     <div className="recipe-detail-content">
-                        {detailItem?.description && (
-                            <p className="recipe-description">{detailItem.description}</p>
-                        )}
+                        {detailItem?.description && (<p className="recipe-description">{detailItem.description}</p>)}
 
                         {detailItem?.nutritional_info && (
                             <div className="recipe-detail-section nutritional-info-section">
                                 <h3>Besin Değerleri</h3>
                                 <div className="nutritional-info-grid">
-                                    {detailItem.nutritional_info.calories && (
-                                        <div className="nutritional-info-item">
+                                    {detailItem.nutritional_info.calories && (<div className="nutritional-info-item">
                                             <span className="info-label">Kalori:</span>
                                             <span
                                                 className="info-value">{detailItem.nutritional_info.calories} kcal</span>
-                                        </div>
-                                    )}
-                                    {detailItem.nutritional_info.protein && (
-                                        <div className="nutritional-info-item">
+                                        </div>)}
+                                    {detailItem.nutritional_info.protein && (<div className="nutritional-info-item">
                                             <span className="info-label">Protein:</span>
                                             <span className="info-value">{detailItem.nutritional_info.protein} g</span>
-                                        </div>
-                                    )}
-                                    {detailItem.nutritional_info.carbs && (
-                                        <div className="nutritional-info-item">
+                                        </div>)}
+                                    {detailItem.nutritional_info.carbs && (<div className="nutritional-info-item">
                                             <span className="info-label">Karbonhidrat:</span>
                                             <span className="info-value">{detailItem.nutritional_info.carbs} g</span>
-                                        </div>
-                                    )}
-                                    {detailItem.nutritional_info.fat && (
-                                        <div className="nutritional-info-item">
+                                        </div>)}
+                                    {detailItem.nutritional_info.fat && (<div className="nutritional-info-item">
                                             <span className="info-label">Yağ:</span>
                                             <span className="info-value">{detailItem.nutritional_info.fat} g</span>
-                                        </div>
-                                    )}
+                                        </div>)}
                                 </div>
-                            </div>
-                        )}
+                            </div>)}
 
                         <div className="recipe-detail-section">
                             <h3>Malzemeler</h3>
                             <ul className="recipe-ingredients-list">
                                 {detailItem?.ingredients?.split(',').map((ingredient, index) => (
-                                    <li key={index}>{ingredient.trim()}</li>
-                                ))}
+                                    <li key={index}>{ingredient.trim()}</li>))}
                             </ul>
                         </div>
 
@@ -849,15 +981,44 @@ export default function Tarifler() {
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="recipeVideoUrl">Video URL (Youtube)</label>
+                        <label htmlFor="recipeImage">Tarif Resmi</label>
                         <input
-                            type="text"
-                            id="recipeVideoUrl"
+                            type="file"
+                            id="recipeImage"
                             className="text-input"
-                            value={newRecipe.video_url}
-                            onChange={(e) => setNewRecipe({...newRecipe, video_url: e.target.value})}
-                            placeholder="https://www.youtube.com/watch?v=..."
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setNewRecipe({...newRecipe, image: file});
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
                         />
+                        <label htmlFor="recipeImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Tarif önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setNewRecipe({...newRecipe, image: null});
+                                        setImagePreview('');
+                                        document.getElementById('recipeImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="nutritional-info-container">
@@ -871,10 +1032,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.calories}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            calories: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, calories: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 250"
@@ -888,10 +1047,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.protein}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            protein: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, protein: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 15"
@@ -905,10 +1062,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.carbs}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            carbs: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, carbs: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 30"
@@ -922,10 +1077,8 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={newRecipe.nutritional_info.fat}
                                     onChange={(e) => setNewRecipe({
-                                        ...newRecipe,
-                                        nutritional_info: {
-                                            ...newRecipe.nutritional_info,
-                                            fat: e.target.value
+                                        ...newRecipe, nutritional_info: {
+                                            ...newRecipe.nutritional_info, fat: e.target.value
                                         }
                                     })}
                                     placeholder="Örn: 10"
@@ -968,11 +1121,9 @@ export default function Tarifler() {
                             required
                         >
                             <option value="">Kategori Seçin</option>
-                            {categoryData.map(category => (
-                                <option key={category.id} value={category.id}>
+                            {categoryData.map(category => (<option key={category.id} value={category.id}>
                                     {category.name || category.title}
-                                </option>
-                            ))}
+                                </option>))}
                         </select>
                     </div>
                 </div>
@@ -1011,65 +1162,89 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Prepare data for API
-                            const recipeData = {
-                                category_id: parseInt(newRecipe.category_id),
-                                name: newRecipe.title,
-                                description: newRecipe.description,
-                                hasVideo: !!newRecipe.video_url,
-                                video: newRecipe.video_url || null,
-                                hazirlanis: newRecipe.instructions,
-                                malzemeler: newRecipe.ingredients,
-                                kcal: newRecipe.nutritional_info.calories || 0,
-                                protein: newRecipe.nutritional_info.protein || 0,
-                                karbonhidrat: newRecipe.nutritional_info.carbs || 0,
-                                yag: newRecipe.nutritional_info.fat || 0
-                            };
+                            // Resim yükleme işlemini başlat
+                            if (newRecipe.image && newRecipe.image instanceof File) {
+                                setIsSaving(true); // Yükleme durumunu göster
 
-                            // Send POST request to API
-                            axios.post(
-                                `${config[config.environment].apiUrl}/recipe/addRecipe`,
-                                recipeData,
-                                {
+                                // Form data oluştur
+                                const formData = new FormData();
+                                formData.append('image', newRecipe.image);
+
+                                // Resmi yükle
+                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
+                                        'Content-Type': 'multipart/form-data'
                                     },
-                                }
-                            )
+                                })
                                 .then(response => {
-                                    // Refresh recipes list
-                                    fetchRecipes();
+                                    // Yükleme başarılı, resim URL'sini al
+                                    const imageUrl = response.data.imageUrl;
 
-                                    // Show success message
-                                    setSuccessMessage("Tarif başarıyla eklendi.");
-                                    setShowSuccessPopup(true);
+                                    // Tarif verilerini hazırla ve resim URL'sini ekle
+                                    const requestData = {
+                                        category_id: parseInt(newRecipe.category_id),
+                                        name: newRecipe.title,
+                                        description: newRecipe.description,
+                                        hazirlanis: newRecipe.instructions,
+                                        malzemeler: newRecipe.ingredients,
+                                        kcal: newRecipe.nutritional_info.calories || 0,
+                                        protein: newRecipe.nutritional_info.protein || 0,
+                                        karbonhidrat: newRecipe.nutritional_info.carbs || 0,
+                                        yag: newRecipe.nutritional_info.fat || 0,
+                                        image: imageUrl
+                                    };
 
-                                    // Reset form and close modal
-                                    setNewRecipe({
-                                        title: '',
-                                        description: '',
-                                        ingredients: '',
-                                        instructions: '',
-                                        category_id: '',
-                                        video_url: '',
-                                        nutritional_info: {
-                                            calories: '',
-                                            protein: '',
-                                            carbs: '',
-                                            fat: ''
-                                        }
+                                    // Tarif kaydetme isteğini gönder
+                                    saveRecipe(requestData, {
+                                        setSuccessMessage,
+                                        setShowSuccessPopup,
+                                        setNewRecipe,
+                                        setImagePreview,
+                                        setAddRecipeModal,
+                                        setIsSaving,
+                                        setErrorMessage,
+                                        setShowErrorPopup,
+                                        fetchRecipes
                                     });
-                                    setAddRecipeModal(false);
                                 })
                                 .catch(error => {
-                                    console.error("Error adding recipe:", error);
-                                    setErrorMessage("Tarif eklenirken bir hata oluştu.");
+                                    console.error("Error uploading image:", error);
+                                    setErrorMessage("Resim yüklenirken bir hata oluştu.");
                                     setShowErrorPopup(true);
+                                    setIsSaving(false);
                                 });
+                            } else {
+                                // Resim yok, doğrudan tarifi kaydet
+                                const requestData = {
+                                    category_id: parseInt(newRecipe.category_id),
+                                    name: newRecipe.title,
+                                    description: newRecipe.description,
+                                    hazirlanis: newRecipe.instructions,
+                                    malzemeler: newRecipe.ingredients,
+                                    kcal: newRecipe.nutritional_info.calories || 0,
+                                    protein: newRecipe.nutritional_info.protein || 0,
+                                    karbonhidrat: newRecipe.nutritional_info.carbs || 0,
+                                    yag: newRecipe.nutritional_info.fat || 0,
+                                    image: "/placeholder.png"
+                                };
+
+                                saveRecipe(requestData, {
+                                    setSuccessMessage,
+                                    setShowSuccessPopup,
+                                    setNewRecipe,
+                                    setImagePreview,
+                                    setAddRecipeModal,
+                                    setIsSaving,
+                                    setErrorMessage,
+                                    setShowErrorPopup,
+                                    fetchRecipes
+                                });
+                            }
                         }}
-                        disabled={!newRecipe.title.trim() || !newRecipe.category_id}
+                        disabled={!newRecipe.title.trim() || !newRecipe.category_id || isSaving}
                     >
-                        Ekle
+                        {isSaving ? 'Kaydediliyor...' : 'Ekle'}
                     </button>
                 </div>
             </Modal>
@@ -1117,15 +1292,11 @@ export default function Tarifler() {
                             };
 
                             // Send request to API
-                            axios.post(
-                                `${config[config.environment].apiUrl}/recipe/addRecipeCategory`,
-                                categoryData,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.post(`${config[config.environment].apiUrl}/recipe/addRecipeCategory`, categoryData, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     // Refresh categories
                                     axios
@@ -1197,20 +1368,15 @@ export default function Tarifler() {
                             }
 
                             // Send DELETE request to API
-                            axios.delete(
-                                `${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     if (response.data.success) {
                                         // Remove deleted recipe from state
-                                        setRecipeData(prevData =>
-                                            prevData.filter(recipe => recipe.id !== itemToDelete.id)
-                                        );
+                                        setRecipeData(prevData => prevData.filter(recipe => recipe.id !== itemToDelete.id));
 
                                         // Show success message
                                         setSuccessMessage(`"${itemToDelete.title}" tarifi başarıyla silindi.`);
@@ -1268,15 +1434,45 @@ export default function Tarifler() {
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="editVideoUrl">Video URL (Youtube)</label>
+                        <label htmlFor="editImage">Tarif Resmi</label>
                         <input
-                            type="text"
-                            id="editVideoUrl"
+                            type="file"
+                            id="editImage"
                             className="text-input"
-                            value={editVideoUrl}
-                            onChange={(e) => setEditVideoUrl(e.target.value)}
-                            placeholder="https://www.youtube.com/watch?v=..."
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    // Resmi önizleme için URL'e dönüştür
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setEditImage(file);
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
                         />
+                        <label htmlFor="editImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın veya sürükleyin'}
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Tarif önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setEditImage(null);
+                                        setImagePreview('');
+                                        document.getElementById('editImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="nutritional-info-container">
@@ -1290,8 +1486,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.calories}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        calories: e.target.value
+                                        ...editNutritionalInfo, calories: e.target.value
                                     })}
                                     placeholder="Örn: 250"
                                 />
@@ -1304,8 +1499,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.protein}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        protein: e.target.value
+                                        ...editNutritionalInfo, protein: e.target.value
                                     })}
                                     placeholder="Örn: 15"
                                 />
@@ -1318,8 +1512,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.carbs}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        carbs: e.target.value
+                                        ...editNutritionalInfo, carbs: e.target.value
                                     })}
                                     placeholder="Örn: 30"
                                 />
@@ -1332,8 +1525,7 @@ export default function Tarifler() {
                                     className="text-input"
                                     value={editNutritionalInfo.fat}
                                     onChange={(e) => setEditNutritionalInfo({
-                                        ...editNutritionalInfo,
-                                        fat: e.target.value
+                                        ...editNutritionalInfo, fat: e.target.value
                                     })}
                                     placeholder="Örn: 10"
                                 />
@@ -1375,11 +1567,9 @@ export default function Tarifler() {
                             required
                         >
                             <option value="">Kategori Seçin</option>
-                            {categoryData.map(category => (
-                                <option key={category.id} value={category.id}>
+                            {categoryData.map(category => (<option key={category.id} value={category.id}>
                                     {category.name || category.title}
-                                </option>
-                            ))}
+                                </option>))}
                         </select>
                     </div>
                 </div>
@@ -1421,72 +1611,81 @@ export default function Tarifler() {
                             // Set saving state
                             setIsSaving(true);
 
-                            // Prepare data for API
-                            const recipeData = {
-                                recipe_id: selectedRecipe.id,
-                                category_id: parseInt(editCategoryId),
-                                name: editTitle,
-                                description: editDescription,
-                                hasVideo: !!editVideoUrl,
-                                video: editVideoUrl || null,
-                                hazirlanis: editInstructions,
-                                malzemeler: editIngredients,
-                                kcal: editNutritionalInfo.calories || 0,
-                                protein: editNutritionalInfo.protein || 0,
-                                karbonhidrat: editNutritionalInfo.carbs || 0,
-                                yag: editNutritionalInfo.fat || 0
-                            };
+                            // Resim varsa ve yeni bir dosya ise, önce resmi yükle
+                            if (editImage && editImage instanceof File) {
+                                // Form data oluştur
+                                const formData = new FormData();
+                                formData.append('image', editImage);
 
-                            // Send PUT request to API
-                            axios.put(
-                                `${config[config.environment].apiUrl}/recipe/updateRecipe`,
-                                recipeData,
-                                {
+                                // Resmi yükle
+                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
+                                        'Content-Type': 'multipart/form-data'
                                     },
-                                }
-                            )
+                                })
                                 .then(response => {
-                                    // Map the updated recipe to our component's data structure
-                                    const updatedRecipe = {
-                                        id: response.data.id,
-                                        title: response.data.name,
-                                        description: response.data.description || "",  // Map description field
-                                        category_id: response.data.category_id,
-                                        image: "/placeholder.png",  // API doesn't handle image
-                                        video_url: response.data.hasVideo ? response.data.video : "",
-                                        ingredients: response.data.malzemeler,
-                                        instructions: response.data.hazirlanis,
-                                        nutritional_info: {
-                                            calories: response.data.kcal,
-                                            protein: response.data.protein,
-                                            carbs: response.data.karbonhidrat,
-                                            fat: response.data.yag
-                                        }
+                                    // Yükleme başarılı, resim URL'sini al
+                                    const imageUrl = response.data.imageUrl;
+
+                                    // Tarif verilerini güncelle
+                                    const recipeData = {
+                                        recipe_id: selectedRecipe.id,
+                                        category_id: parseInt(editCategoryId),
+                                        name: editTitle,
+                                        description: editDescription,
+                                        image: imageUrl,
+                                        hazirlanis: editInstructions,
+                                        malzemeler: editIngredients,
+                                        kcal: editNutritionalInfo.calories || 0,
+                                        protein: editNutritionalInfo.protein || 0,
+                                        karbonhidrat: editNutritionalInfo.carbs || 0,
+                                        yag: editNutritionalInfo.fat || 0
                                     };
 
-                                    // Update recipeData state
-                                    setRecipeData(prev =>
-                                        prev.map(recipe =>
-                                            recipe.id === selectedRecipe.id ? updatedRecipe : recipe
-                                        )
-                                    );
-
-                                    // Show success message
-                                    setSuccessMessage(`"${editTitle}" tarifi başarıyla güncellendi.`);
-                                    setShowSuccessPopup(true);
-
-                                    // Reset saving state and close modal
-                                    setIsSaving(false);
-                                    setEditRecipeModal(false);
+                                    // Tarifi güncelle
+                                    updateRecipe(recipeData, {
+                                        setRecipeData,
+                                        setSuccessMessage,
+                                        setShowSuccessPopup,
+                                        setIsSaving,
+                                        setEditRecipeModal,
+                                        setErrorMessage,
+                                        setShowErrorPopup
+                                    });
                                 })
                                 .catch(error => {
-                                    console.error("Error updating recipe:", error);
-                                    setErrorMessage("Tarif güncellenirken bir hata oluştu.");
+                                    console.error("Error uploading image:", error);
+                                    setErrorMessage("Resim yüklenirken bir hata oluştu.");
                                     setShowErrorPopup(true);
                                     setIsSaving(false);
                                 });
+                            } else {
+                                // Resim değişmedi veya yok, doğrudan tarifi güncelle
+                                const recipeData = {
+                                    recipe_id: selectedRecipe.id,
+                                    category_id: parseInt(editCategoryId),
+                                    name: editTitle,
+                                    description: editDescription,
+                                    image: typeof editImage === 'string' && editImage ? editImage : (selectedRecipe.image || "/placeholder.png"),
+                                    hazirlanis: editInstructions,
+                                    malzemeler: editIngredients,
+                                    kcal: editNutritionalInfo.calories || 0,
+                                    protein: editNutritionalInfo.protein || 0,
+                                    karbonhidrat: editNutritionalInfo.carbs || 0,
+                                    yag: editNutritionalInfo.fat || 0
+                                };
+
+                                updateRecipe(recipeData, {
+                                    setRecipeData,
+                                    setSuccessMessage,
+                                    setShowSuccessPopup,
+                                    setIsSaving,
+                                    setEditRecipeModal,
+                                    setErrorMessage,
+                                    setShowErrorPopup
+                                });
+                            }
                         }}
                         disabled={!editTitle.trim() || !editCategoryId || isSaving}
                     >
@@ -1515,19 +1714,16 @@ export default function Tarifler() {
                     </div>
                     <p className="delete-note">Bu işlem geri alınamaz.</p>
 
-                    {affectedRecipes.length > 0 && (
-                        <div className="affected-recipes">
+                    {affectedRecipes.length > 0 && (<div className="affected-recipes">
                             <p className="delete-note important">
                                 <strong>Önemli:</strong> Bu kategori ile
                                 ilişkili <strong>{affectedRecipes.length}</strong> tarif silinecektir:
                             </p>
                             <ul className="affected-recipes-list">
                                 {affectedRecipes.map(recipe => (
-                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>
-                                ))}
+                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>))}
                             </ul>
-                        </div>
-                    )}
+                        </div>)}
                 </div>
                 <div className="modal-footer">
                     <button
@@ -1550,25 +1746,18 @@ export default function Tarifler() {
                             }
 
                             // Send DELETE request to API
-                            axios.delete(
-                                `${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`,
-                                {
-                                    headers: {
-                                        Authorization: localStorage.getItem("token"),
-                                    },
-                                }
-                            )
+                            axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            })
                                 .then(response => {
                                     if (response.data.success) {
                                         // Remove deleted category from state
-                                        setCategoryData(prevData =>
-                                            prevData.filter(category => category.id !== categoryToDelete.id)
-                                        );
+                                        setCategoryData(prevData => prevData.filter(category => category.id !== categoryToDelete.id));
 
                                         // Remove category from checked categories if it's there
-                                        setCheckedCategories(prev =>
-                                            prev.filter(id => id !== categoryToDelete.id)
-                                        );
+                                        setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
 
                                         // Remove all recipes that belonged to this category from display
                                         fetchRecipes();
@@ -1617,19 +1806,16 @@ export default function Tarifler() {
                     </div>
                     <p className="delete-note">Bu işlem geri alınamaz.</p>
 
-                    {affectedRecipes.length > 0 && (
-                        <div className="affected-recipes">
+                    {affectedRecipes.length > 0 && (<div className="affected-recipes">
                             <p className="delete-note important">
                                 <strong>Önemli:</strong> Bu kategoriler ile
                                 ilişkili <strong>{affectedRecipes.length}</strong> tarif silinecektir:
                             </p>
                             <ul className="affected-recipes-list">
                                 {affectedRecipes.map(recipe => (
-                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>
-                                ))}
+                                    <li key={recipe.id}><span className="recipe-title">{recipe.title}</span></li>))}
                             </ul>
-                        </div>
-                    )}
+                        </div>)}
                 </div>
                 <div className="modal-footer">
                     <button
@@ -1651,16 +1837,11 @@ export default function Tarifler() {
                             }
 
                             // Create an array of promises for each category deletion
-                            const deletePromises = checkedCategories.map(categoryId =>
-                                axios.delete(
-                                    `${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`,
-                                    {
-                                        headers: {
-                                            Authorization: localStorage.getItem("token"),
-                                        },
-                                    }
-                                )
-                            );
+                            const deletePromises = checkedCategories.map(categoryId => axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`, {
+                                headers: {
+                                    Authorization: localStorage.getItem("token"),
+                                },
+                            }));
 
                             // Execute all deletion requests
                             Promise.all(deletePromises)
@@ -1670,9 +1851,7 @@ export default function Tarifler() {
 
                                     if (allSuccessful) {
                                         // Remove deleted categories from state
-                                        setCategoryData(prevData =>
-                                            prevData.filter(category => !checkedCategories.includes(category.id))
-                                        );
+                                        setCategoryData(prevData => prevData.filter(category => !checkedCategories.includes(category.id)));
 
                                         // Clear checked categories
                                         setCheckedCategories([]);
@@ -1721,24 +1900,253 @@ export default function Tarifler() {
                 </div>
             </Modal>
 
+            {/* Danışana Ata Modal */}
+            <Modal
+                isOpen={addToUserModal}
+                title="Danışana Tarif Ata"
+                onClose={() => setAddToUserModal(false)}
+            >
+                <div className="modal-body styled-form">
+                    <div className="input-container">
+                        <label htmlFor="selectUser">Danışan Seçin *</label>
+                        <select
+                            id="selectUser"
+                            className="text-input"
+                            value={selectedUser || ""}
+                            onChange={(e) => setSelectedUser(e.target.value)}
+                            required
+                        >
+                            <option value="">Danışan Seçin</option>
+                            {danisanList.map(client => (
+                                <option key={client.id} value={client.id}>
+                                    {client.name} {client.surname}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="assignmentNote">Not (İsteğe bağlı)</label>
+                        <textarea
+                            id="assignmentNote"
+                            className="text-input textarea"
+                            value={assignmentNote}
+                            onChange={(e) => setAssignmentNote(e.target.value)}
+                            placeholder="Danışana özel not ekleyebilirsiniz"
+                            rows={3}
+                        />
+                    </div>
+
+                    {selectedRecipe && (
+                        <div className="recipe-preview">
+                            <h3 className="preview-title">Seçilen Tarif:</h3>
+                            <div className="preview-content">
+                                <p className="preview-recipe-name">{selectedRecipe.title}</p>
+                                {selectedRecipe.description && (
+                                    <p className="preview-description">{selectedRecipe.description}</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn cancel-btn"
+                        onClick={() => setAddToUserModal(false)}
+                    >
+                        İptal
+                    </button>
+                    <button
+                        className="modal-btn confirm-btn"
+                        onClick={() => {
+                            if (!selectedUser) {
+                                setErrorMessage("Lütfen bir danışan seçin.");
+                                setShowErrorPopup(true);
+                                return;
+                            }
+
+                            axios.post(`${config[config.environment].apiUrl}/recipe/assignRecipeToClient?recipe_id=${selectedRecipe.id}&client_id=${selectedUser}`,
+                                { note: assignmentNote },
+                                {
+                                    headers: {
+                                        Authorization: localStorage.getItem("token"),
+                                    },
+                                })
+                                .then(response => {
+                                    const selectedClientName = danisanList.find(client => client.id == selectedUser)?.name;
+
+                                    setSuccessMessage(`"${selectedRecipe.title}" tarifi "${selectedClientName}" danışanına başarıyla atandı.`);
+                                    setShowSuccessPopup(true);
+
+                                    setSelectedUser(null);
+                                    setAssignmentNote('');
+                                    setAddToUserModal(false);
+                                })
+                                .catch(error => {
+                                    console.error("Error assigning recipe:", error);
+                                    if (error.response && error.response.data && error.response.data.message) {
+                                        setErrorMessage(error.response.data.message);
+                                    } else {
+                                        setErrorMessage("Tarif atanırken bir hata oluştu.");
+                                    }
+                                    setShowErrorPopup(true);
+                                });
+                        }}
+                        disabled={!selectedUser}
+                    >
+                        Ata
+                    </button>
+                </div>
+            </Modal>
+
+            {/* Danışana Atanmış Tarifler Modalı */}
+            <Modal
+                isOpen={clientRecipesModal}
+                title={`${selectedClientInfo?.name || 'Danışan'} - Atanmış Tarifler`}
+                onClose={() => setClientRecipesModal(false)}
+            >
+                <div className="modal-body">
+                    {loadingClientRecipes ? (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            py: 5
+                        }}>
+                            <CircularProgress size={40} sx={{color: '#087708', mb: 2}}/>
+                            <Typography variant="body1" color="text.secondary">Tarifler yükleniyor...</Typography>
+                        </Box>
+                    ) : selectedClientRecipes.length > 0 ? (
+                        <Box sx={{
+                            bgcolor: 'background.paper',
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}>
+                            <List sx={{width: '100%'}}>
+                                {selectedClientRecipes.map((item) => (
+                                    <React.Fragment key={item.id}>
+                                        <ListItem
+                                            alignItems="flex-start"
+                                            sx={{
+                                                py: 2,
+                                                transition: 'background-color 0.2s',
+                                                '&:hover': {
+                                                    backgroundColor: '#f5f5f5'
+                                                }
+                                            }}
+                                        >
+                                            <ListItemAvatar>
+                                                <Avatar sx={{
+                                                    bgcolor: '#ff9e25',
+                                                    width: 48,
+                                                    height: 48,
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                }}>
+                                                    {item.Recipe?.name?.charAt(0) || "T"}
+                                                </Avatar>
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary={
+                                                    <Typography
+                                                        variant="h6"
+                                                        fontWeight="500"
+                                                        sx={{
+                                                            color: '#ff9800',
+                                                            fontSize: '1.1rem',
+                                                            mb: 0.5
+                                                        }}
+                                                    >
+                                                        {item.Recipe?.name || "Tarif"}
+                                                    </Typography>
+                                                }
+                                                secondary={
+                                                    <React.Fragment>
+                                                        <Typography
+                                                            component="span"
+                                                            variant="body2"
+                                                            color="text.primary"
+                                                            sx={{display: 'block', mb: 1}}
+                                                        >
+                                                            {item.Recipe?.description || "Bu tarif için açıklama bulunmamaktadır."}
+                                                        </Typography>
+
+                                                        {item.note && (
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'flex-start',
+                                                                bgcolor: '#fffde7',
+                                                                borderRadius: '8px',
+                                                                p: 1.5,
+                                                                mt: 1,
+                                                                borderLeft: '3px solid #fbc02d'
+                                                            }}>
+                                                                <NoteIcon fontSize="small" sx={{
+                                                                    mr: 1,
+                                                                    color: '#f57f17',
+                                                                    fontSize: '18px',
+                                                                    mt: 0.3
+                                                                }}/>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {item.note}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </React.Fragment>
+                                                }
+                                            />
+                                        </ListItem>
+                                        <Divider variant="inset" component="li"/>
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </Box>
+                    ) : (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            py: 6,
+                            px: 3,
+                            bgcolor: '#f8f9fa',
+                            borderRadius: 2,
+                            border: '1px dashed #bdbdbd'
+                        }}>
+                            <DescriptionIcon sx={{fontSize: 60, color: '#bdbdbd', mb: 2}}/>
+                            <Typography variant="h6" color="text.secondary" align="center" gutterBottom>
+                                Bu danışana atanmış tarif bulunmamaktadır
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" align="center"
+                                        sx={{mt: 1, maxWidth: 500}}>
+                                Tariflere göz atarak danışanınıza uygun tarifler atayabilirsiniz.
+                            </Typography>
+                        </Box>
+                    )}
+                </div>
+                <div className="modal-footer">
+                    <button
+                        className="modal-btn close-btn"
+                        onClick={() => setClientRecipesModal(false)}
+                    >
+                        Kapat
+                    </button>
+                </div>
+            </Modal>
+
             {/* Success and Error Popups */}
-            {showSuccessPopup && (
-                <div className="success-popup">
+            {showSuccessPopup && (<div className="success-popup">
                     <div className="success-popup-content">
                         <CheckCircleIcon className="success-icon"/>
                         <p>{successMessage}</p>
                     </div>
-                </div>
-            )}
+                </div>)}
 
-            {showErrorPopup && (
-                <div className="error-popup">
+            {showErrorPopup && (<div className="error-popup">
                     <div className="error-popup-content">
                         <ErrorIcon className="error-icon"/>
                         <p>{errorMessage}</p>
                     </div>
-                </div>
-            )}
-        </Default>
-    );
+                </div>)}
+        </Default>);
 }

@@ -1,6 +1,9 @@
 const path = require('path');
 
 const config = require(path.join(__dirname, '..', 'config.json'));
+const mailer = require(path.join(__dirname, '..', 'Utils', 'Mailer.js'));
+const getDogrulamaEmailTemplate = require(path.join(__dirname, '..', 'MailTemplates', 'Dogrulama.html'));
+
 const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
 
@@ -11,12 +14,10 @@ const {DIETITIAN, CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 const {
     Dietitian,
     Client,
-    NutritionPlan,
-    NutritionCategory,
-    NutritionAssignment,
     Notes
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {Op} = require('sequelize');
+const moment = require("moment");
 
 
 class DietitianService {
@@ -55,17 +56,35 @@ class DietitianService {
         }
     }
 
-    static async register(phoneNumber, password, ipAddress) {
+    static async register(name, phoneNumber, email, password, ipAddress) {
         try {
-            if (!phoneNumber || !password) {
+            if (!name || !phoneNumber || !password || !email) {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
+            const verificationCode = Math.floor(100000 + Math.random() * 900000);
+            const verificationCodeExpires = moment().add(10, 'minutes').toDate();
+
+            const emailSent = await mailer.sendMail(
+                email,
+                'Diyetia Doğrulama Kodu',
+                `Onay kodunuz: ${verificationCode}`,
+                getDogrulamaEmailTemplate(verificationCode)
+            );
+
+            if (!emailSent) {
+                throw new Exception('Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyiniz.', 500);
+            }
+
             const dietitian = await Dietitian.create({
-                phoneNumber: phoneNumber,
-                password: password,
-                role: DIETITIAN,
-                ipAddress: ipAddress
+                name,
+                phoneNumber,
+                email,
+                password,
+                role: 'DIETITIAN',
+                ipAddress,
+                verificationCode,
+                verificationCodeExpires,
             });
 
             const token = jwt.sign(
@@ -85,6 +104,39 @@ class DietitianService {
             };
         } catch (error) {
             throw new Exception(error.message, 400);
+        }
+    }
+
+    static async verifyEmail(mail, verificationCode) {
+        try {
+            if (!mail || !verificationCode) {
+                throw new Exception('E-posta ve doğrulama kodu gereklidir.', 400, true);
+            }
+
+            const dietitian = await Dietitian.findOne({
+                where: {email: mail}
+            });
+
+            if (!dietitian) {
+                throw new Exception('Geçersiz e-posta.', 400, true);
+            }
+
+            if (Number(dietitian.verificationCode) !== verificationCode) {
+                throw new Exception('Geçersiz doğrulama kodu.', 400, true);
+            }
+
+            if (!dietitian.verificationCodeExpires || dietitian.verificationCodeExpires < new Date()) {
+                throw new Exception('Doğrulama kodunun süresi dolmuş.', 400, true);
+            }
+
+            await dietitian.update({
+                verificationCode: null,
+                verificationCodeExpires: null
+            });
+
+            return {status: "success", message: 'E-posta başarıyla doğrulandı.'};
+        } catch (error) {
+            throw new Exception(error.message || 'Bir hata oluştu.', 400);
         }
     }
 
@@ -134,7 +186,7 @@ class DietitianService {
                 throw new Exception("Telefon numarası gereklidir.", 400, true);
             }
 
-            await dietitian.update({ phoneNumber });
+            await dietitian.update({phoneNumber});
 
             return dietitian;
         } catch (error) {
@@ -158,7 +210,7 @@ class DietitianService {
                 throw new Exception("E-posta adresi gereklidir.", 400, true);
             }
 
-            await dietitian.update({ email });
+            await dietitian.update({email});
 
             return dietitian;
         } catch (error) {
@@ -175,6 +227,28 @@ class DietitianService {
             }
 
             await dietitian.destroy();
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
+    static async changeClientStatus(user_id, client_id, status) {
+        try {
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: user_id
+                }
+            });
+
+            if (!client) {
+                throw new Exception('Client bulunamadı veya erişim yetkiniz yok.', 400, true);
+            }
+
+            client.status = status;
+            await client.save();
+
+            return client;
         } catch (error) {
             throw new Exception(error.message, 400);
         }
@@ -402,76 +476,6 @@ class DietitianService {
         }
     }
 
-    static async addNutritionCategory(dietitian_id, category_name) {
-        if (!dietitian_id) {
-            throw {
-                status: 400,
-                showOnScreen: true,
-                message: "Yetkisiz Erişim."
-            };
-        }
-
-        if (!category_name) {
-            throw {
-                status: 400,
-                showOnScreen: true,
-                message: "Kategori adı boş olamaz."
-            };
-        }
-
-        return await NutritionCategory.create({
-            name: category_name,
-            dietitian_id
-        });
-    }
-
-    static async getNutritionCategories(dietitian_id) {
-        if (!dietitian_id) {
-            throw {
-                status: 401,
-                showOnScreen: true,
-                message: "Diyetisyen kimliği geçersiz."
-            };
-        }
-
-        return await NutritionCategory.findAll({
-            where: {dietitian_id},
-            order: [['id', 'ASC']]
-        });
-    }
-
-    static async deleteNutritionCategory(dietitian_id, category_id) {
-        if (!dietitian_id || !category_id) {
-            throw {
-                status: 400,
-                showOnScreen: true,
-                message: "Geçersiz istek. Diyetisyen veya kategori bilgisi eksik."
-            };
-        }
-
-        const category = await NutritionCategory.findOne({
-            where: {
-                id: category_id,
-                dietitian_id: dietitian_id
-            }
-        });
-
-        if (!category) {
-            throw {
-                status: 403,
-                showOnScreen: true,
-                message: "Bu kategori size ait değil veya bulunamadı."
-            };
-        }
-
-        await category.destroy();
-
-        return {
-            success: true,
-            message: "Kategori başarıyla silindi."
-        };
-    }
-
     static async globalSearchbar(user_id, query) {
         try {
             if (!user_id) {
@@ -520,215 +524,6 @@ class DietitianService {
         } catch (error) {
             throw new Error(error.message);
         }
-    }
-
-    static async assignNutritionPlanToClient({dietitian_id, client_id, nutrition_plan_id, start_date, end_date, note}) {
-        const client = await Client.findOne({
-            where: {
-                id: client_id,
-                dietitian_id: dietitian_id
-            }
-        });
-
-        if (!client) {
-            throw new Exception("Bu danışan size ait değil. Atama yapılamaz.", 401, true);
-        }
-
-        const plan = await NutritionPlan.findOne({
-            where: {
-                id: nutrition_plan_id,
-                dietitian_id: dietitian_id
-            }
-        });
-
-        if (!plan) {
-            throw new Exception("Bu plan size ait değil. Atama yapılamaz.", 401, true);
-        }
-
-        const existingAssignment = await NutritionAssignment.findOne({
-            where: {
-                client_id,
-                [Op.or]: [
-                    {
-                        start_date: {[Op.between]: [start_date, end_date]}
-                    },
-                    {
-                        end_date: {[Op.between]: [start_date, end_date]}
-                    },
-                    {
-                        start_date: {[Op.lte]: start_date},
-                        end_date: {[Op.gte]: end_date}
-                    }
-                ]
-            }
-        });
-
-        if (existingAssignment) {
-            throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
-        }
-
-        // Transform the meal plan structure to include "yenildi" field for each meal item
-        const transformedMealPlan = {};
-        if (plan.mealPlan) {
-            Object.keys(plan.mealPlan).forEach(day => {
-                transformedMealPlan[day] = {};
-                Object.keys(plan.mealPlan[day] || {}).forEach(mealType => {
-                    // Get the meal items based on the format
-                    let mealItems = [];
-                    const mealData = plan.mealPlan[day][mealType];
-
-                    // Handle complex format with main and alternatives
-                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData) && mealData.main) {
-                        mealItems = [...mealData.main];
-                    }
-                    // Handle simple array format
-                    else if (Array.isArray(mealData)) {
-                        mealItems = [...mealData];
-                    }
-                    // Handle string format (backward compatibility)
-                    else if (typeof mealData === 'string') {
-                        mealItems = mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-                    }
-
-                    // Transform to new format with "yenildi" field
-                    transformedMealPlan[day][mealType] = mealItems.map(item => ({
-                        isim: item,
-                        yenildi: false
-                    }));
-                });
-            });
-        }
-
-        return await NutritionAssignment.create({
-            client_id,
-            nutrition_plan_id,
-            start_date,
-            end_date,
-            note,
-            mealPlan: transformedMealPlan
-        });
-    }
-
-
-    static async getNutritionPlans(dietitian_id) {
-        if (!dietitian_id) {
-            throw new Exception("Yetkisiz Erişim.", 401, true);
-        }
-
-        return await NutritionPlan.findAll({
-            where: {dietitian_id},
-            order: [['id', 'ASC']]
-        });
-    }
-
-    static async deleteNutritionPlan(dietitian_id, nutrition_plan_id) {
-        if (!dietitian_id) {
-            throw new Exception("Yetkisiz Erişim.", 401, true);
-        }
-
-        const plan = await NutritionPlan.findOne({
-            where: {
-                id: nutrition_plan_id,
-                dietitian_id: dietitian_id
-            }
-        });
-
-        if (!plan) {
-            throw new Exception("Bu plan size ait değil veya bulunamadı.", 403, true);
-        }
-
-        await plan.destroy();
-
-        return {success: true, message: "Beslenme planı başarıyla silindi."};
-    }
-
-    static async addNutritionPlan(dietitian_id, {title, description, image, category_id, mealPlan}) {
-        if (!dietitian_id || !title || !description || !category_id) {
-            throw new Exception("Başlık, açıklama ve kategori zorunludur.", 400, true);
-        }
-
-        const category = await NutritionCategory.findOne({
-            where: {
-                id: category_id,
-                dietitian_id: dietitian_id
-            }
-        });
-
-        if (!category) {
-            throw new Exception("Bu kategori size ait değil.", 403, true);
-        }
-
-        const existing = await NutritionPlan.findOne({
-            where: {
-                title,
-                dietitian_id
-            }
-        });
-
-        if (existing) {
-            throw new Exception("Bu isimde bir plan zaten mevcut.", 409, true);
-        }
-
-        if (mealPlan && typeof mealPlan !== 'object') {
-            throw new Exception("Meal plan geçerli bir JSON formatında olmalıdır.", 400, true);
-        }
-
-        return await NutritionPlan.create({
-            title,
-            description,
-            image: image || '/placeholder.png',
-            category_id,
-            mealPlan,
-            dietitian_id
-        });
-    }
-
-    static async updateNutritionPlan(dietitian_id, nutrition_plan_id, updateData) {
-        if (!dietitian_id) {
-            throw new Exception("Yetkisiz erişim.", 401, true);
-        }
-
-        const {title, description, image, category_id, mealPlan} = updateData;
-
-        const plan = await NutritionPlan.findOne({
-            where: {
-                id: nutrition_plan_id,
-                dietitian_id
-            }
-        });
-
-        if (!plan) {
-            throw new Exception("Bu plan size ait değil veya bulunamadı.", 403, true);
-        }
-
-        if (mealPlan) {
-            if (typeof mealPlan !== 'object') {
-                throw new Exception("mealPlan geçerli bir JSON formatında olmalıdır.", 400, true);
-            }
-        }
-
-        await plan.update({
-            title: title ?? plan.title,
-            description: description ?? plan.description,
-            image: image ?? plan.image,
-            category_id: category_id ?? plan.category_id,
-            mealPlan: mealPlan ?? plan.mealPlan
-        });
-
-        return plan;
-    }
-
-    static async getNutritionAssignmentPlanByClient(dietitian_id, client_id, startDate, endDate) {
-        return await NutritionAssignment.findAll({
-            where: {
-                client_id,
-                ...(startDate && endDate && {
-                    start_date: {[Op.lte]: endDate},
-                    end_date: {[Op.gte]: startDate}
-                })
-            },
-            order: [['start_date', 'ASC']]
-        });
     }
 
     static async getMyNotes(dietitian_id) {

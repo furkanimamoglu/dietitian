@@ -1,0 +1,278 @@
+const getMockEmailTemplate = () => {
+return `
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Diyetia Bilgilendirme</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #FF8F00 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo h1 {
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+        }
+
+        .logo .tagline {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .main-title {
+            color: #2E7D32;
+            font-size: 24px;
+            margin: 0 0 20px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .main-content {
+            background: linear-gradient(135deg, #E8F5E8 0%, #FFF3E0 100%);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: left;
+            margin: 30px 0;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .content-section {
+            margin-bottom: 25px;
+        }
+
+        .content-section h3 {
+            color: #2E7D32;
+            font-size: 18px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .content-section p {
+            color: #555;
+            font-size: 15px;
+            margin: 0 0 10px 0;
+            line-height: 1.6;
+        }
+
+        .highlight-box {
+            background: #FFF3E0;
+            border-left: 4px solid #FF8F00;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: #E65100;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            background: rgba(76, 175, 80, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(76, 175, 80, 0.1);
+        }
+
+        .info-item h4 {
+            color: #2E7D32;
+            font-size: 16px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .info-item p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .footer {
+            background: #f8f8f8;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .footer p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+
+            .header, .content {
+                padding: 30px 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <h1>🥗 Diyetia</h1>
+            <div class="tagline">Profesyonel Beslenme Danışmanlığı Platformu</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <h2 class="main-title">{{MAIN_TITLE}} 🌱</h2>
+
+        <div class="main-content">
+            <div class="content-section">
+                <h3>{{SECTION_1_TITLE}}</h3>
+                <p>{{SECTION_1_CONTENT}}</p>
+                <p>{{SECTION_1_ADDITIONAL_TEXT}}</p>
+            </div>
+
+            <div class="content-section">
+                <h3>{{SECTION_2_TITLE}}</h3>
+                <p>{{SECTION_2_CONTENT}}</p>
+            </div>
+
+            <div class="highlight-box">
+                <p>⚠️ {{IMPORTANT_NOTICE}}</p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <h4>{{INFO_ITEM_1_TITLE}}</h4>
+                    <p>{{INFO_ITEM_1_CONTENT}}</p>
+                </div>
+                <div class="info-item">
+                    <h4>{{INFO_ITEM_2_TITLE}}</h4>
+                    <p>{{INFO_ITEM_2_CONTENT}}</p>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h3>{{FINAL_SECTION_TITLE}}</h3>
+                <p>{{FINAL_SECTION_CONTENT}}</p>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <a class="cta-button" href="{{CTA_LINK}}">{{CTA_TEXT}} 🚀</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>{{FOOTER_COMPANY_NAME}}</strong></p>
+        <p>{{FOOTER_TAGLINE}}</p>
+        <p style="font-size: 12px; color: #999;">
+            {{FOOTER_DISCLAIMER}}
+        </p>
+    </div>
+</div>
+</body>
+</html>
+`;
+};
+
+// Kullanım örneği - Template'i doldurma fonksiyonu
+const fillEmailTemplate = (templateData) => {
+let template = getMockEmailTemplate();
+
+// Tüm placeholder'ları gerçek verilerle değiştir
+Object.keys(templateData).forEach(key => {
+const placeholder = `{{${key}}}`;
+template = template.replace(new RegExp(placeholder, 'g'), templateData[key]);
+});
+
+return template;
+};
+
+// Örnek kullanım:
+/*
+const emailData = {
+MAIN_TITLE: "Hoş Geldiniz",
+SECTION_1_TITLE: "Hesabınız Aktifleştirildi",
+SECTION_1_CONTENT: "Diyetia hesabınız başarıyla oluşturuldu.",
+SECTION_1_ADDITIONAL_TEXT: "Artık tüm özelliklerden yararlanabilirsiniz.",
+SECTION_2_TITLE: "Sonraki Adımlar",
+SECTION_2_CONTENT: "Profilinizi tamamlayarak hemen başlayabilirsiniz.",
+IMPORTANT_NOTICE: "Güvenlik için şifrenizi kimseyle paylaşmayın.",
+INFO_ITEM_1_TITLE: "Hasta Yönetimi",
+INFO_ITEM_1_CONTENT: "Hastalarınızı kolayca yönetebilirsiniz.",
+INFO_ITEM_2_TITLE: "Raporlama",
+INFO_ITEM_2_CONTENT: "Detaylı raporlar oluşturabilirsiniz.",
+FINAL_SECTION_TITLE: "Destek",
+FINAL_SECTION_CONTENT: "Herhangi bir sorunuz olursa bize ulaşın.",
+CTA_TEXT: "Hemen Başla",
+CTA_LINK: "https://diyetia.com/app/anasayfa",
+FOOTER_COMPANY_NAME: "Diyetia Ekibi",
+FOOTER_TAGLINE: "Sağlıklı yaşam için güvenilir ortağınız",
+FOOTER_DISCLAIMER: "Bu e-posta Diyetia tarafından gönderilmiştir."
+};
+
+const finalEmail = fillEmailTemplate(emailData);
+*/
+
+module.exports = { getMockEmailTemplate, fillEmailTemplate };

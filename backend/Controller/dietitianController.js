@@ -1,13 +1,11 @@
 const path = require("path");
 
 const DietitianService = require(path.join(__dirname, "..", "Service", "DietitianService"));
-const Exception = require(path.join(__dirname, "..", "Exception", "Exception"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
 const {Notes} = require(path.join(__dirname, "..", "Model", "MainModel"));
 const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 const moment = require("moment");
-
 
 class DietitianController {
     static async login(req, res) {
@@ -37,22 +35,44 @@ class DietitianController {
 
     static async register(req, res) {
         try {
-            const {phoneNumber, password} = req.body;
+            const {name, phoneNumber, password, email} = req.body;
             const ipAddress = req.ip;
 
-            if (!phoneNumber || !password || !ipAddress) {
+            if (!name || !phoneNumber || !password || !email || !ipAddress) {
                 return res.status(400).json({
                     showOnScreen: true,
                     message: 'Tüm parametreler doldurulmalıdır.'
                 });
             }
 
-            const result = await DietitianService.register(phoneNumber, password, ipAddress);
+            const result = await DietitianService.register(name, phoneNumber, email, password, ipAddress);
 
             res.status(200).json({
                 token: result.token,
                 role: result.role
             });
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
+        }
+    }
+
+    static async verifyEmail(req, res) {
+        try {
+            const {email, verificationCode} = req.body;
+
+            if (!email || !verificationCode) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Mail ve Verification Code parametresi gereklidir.'
+                });
+            }
+
+            const result = await DietitianService.verifyEmail(email, verificationCode);
+
+            res.status(200).json(result);
         } catch (err) {
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
@@ -107,7 +127,7 @@ class DietitianController {
                 });
             }
 
-            const { phoneNumber } = req.body;
+            const {phoneNumber} = req.body;
 
             if (!phoneNumber) {
                 return res.status(400).json({
@@ -139,7 +159,7 @@ class DietitianController {
                 });
             }
 
-            const { email } = req.body;
+            const {email} = req.body;
 
             if (!email) {
                 return res.status(400).json({
@@ -163,6 +183,39 @@ class DietitianController {
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen || true,
                 message: err.message || "Bir hata oluştu."
+            });
+        }
+    }
+
+    static async changeClientStatus(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {client_id, status} = req.body;
+
+            if (!client_id || !status) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm parametreler doldurulmalıdır.'
+                });
+            }
+
+            const result = await DietitianService.changeClientStatus(dietitian_id, client_id, status);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
             });
         }
     }
@@ -406,251 +459,6 @@ class DietitianController {
         }
     }
 
-    static async addNutritionCategory(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {category_name} = req.body;
-
-            const result = await DietitianService.addNutritionCategory(dietitian_id, category_name);
-
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
-            });
-        }
-    }
-
-    static async getNutritionCategories(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {category_name} = req.body;
-
-            if (!token || !dietitian_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const result = await DietitianService.getNutritionCategories(dietitian_id, category_name);
-
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
-            });
-        }
-    }
-
-    static async deleteNutritionCategory(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {category_id} = req.query;
-
-            if (!category_id) {
-                return res.status(400).json({
-                    message: "Geçersiz istek. Kategori id eksik."
-                });
-            }
-            const result = await DietitianService.deleteNutritionCategory(dietitian_id, category_id);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
-            });
-        }
-    }
-
-    static async assignNutritionPlanToClient(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {client_id, nutrition_plan_id, start_date, end_date, note} = req.body;
-
-            if (!dietitian_id || !client_id || !nutrition_plan_id || !start_date || !end_date) {
-                return res.status(400).json({
-                    showOnScreen: true,
-                    message: "Tüm alanlar zorunludur."
-                });
-            }
-
-            const result = await DietitianService.assignNutritionPlanToClient({
-                dietitian_id,
-                client_id,
-                nutrition_plan_id,
-                start_date,
-                end_date,
-                note
-            });
-
-            res.status(200).json(result);
-
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen ?? true,
-                message: error.message || "Bir hata oluştu."
-            });
-        }
-    }
-
-    static async getNutritionPlans(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const result = await DietitianService.getNutritionPlans(dietitian_id);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen ?? true,
-                message: error.message || "Bir hata oluştu."
-            });
-        }
-    }
-
-    static async deleteNutritionPlan(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {nutrition_plan_id} = req.query;
-
-            if (!token || !dietitian_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const result = await DietitianService.deleteNutritionPlan(dietitian_id, nutrition_plan_id);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen ?? true,
-                message: error.message || "Bir hata oluştu."
-            });
-        }
-    }
-
-    static async addNutritionPlan(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {title, description, image, category_id, mealPlan} = req.body;
-
-            const result = await DietitianService.addNutritionPlan(dietitian_id, {
-                title,
-                description,
-                image,
-                category_id,
-                mealPlan
-            });
-
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen ?? true,
-                message: error.message || "Bir hata oluştu."
-            });
-        }
-    }
-
-    static async updateNutritionPlan(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {nutrition_plan_id, title, description, image, category_id, mealPlan} = req.body;
-
-            const result = await DietitianService.updateNutritionPlan(
-                dietitian_id,
-                nutrition_plan_id,
-                {title, description, image, category_id, mealPlan}
-            );
-
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(error.status || 500).json({
-                showOnScreen: error.showOnScreen ?? true,
-                message: error.message || "Bir hata oluştu."
-            });
-        }
-    }
-
     static async getMyActiveClientCount(req, res) {
         try {
             const token = req.headers.authorization;
@@ -671,65 +479,6 @@ class DietitianController {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
-            });
-        }
-    }
-
-    static async getNutritionAssignmentPlanByClient(req, res) {
-        try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
-
-            const {client_id, range} = req.body;
-
-            if (!client_id || !range) {
-                return res.status(400).json({message: "client_id ve range zorunludur."});
-            }
-
-            let startDate, endDate;
-            const now = moment();
-
-            switch (range) {
-                case 'day':
-                    startDate = now.clone().startOf('day').toDate();
-                    endDate = now.clone().endOf('day').toDate();
-                    break;
-                case 'week':
-                    startDate = now.clone().startOf('isoWeek').toDate();
-                    endDate = now.clone().endOf('isoWeek').toDate();
-                    break;
-                case 'month':
-                    startDate = now.clone().startOf('month').toDate();
-                    endDate = now.clone().endOf('month').toDate();
-                    break;
-                case 'all':
-                    startDate = null;
-                    endDate = null;
-                    break;
-                default:
-                    return res.status(400).json({message: "Geçersiz range: 'day', 'week' veya 'month' olmalı."});
-            }
-
-            const plans = await DietitianService.getNutritionAssignmentPlanByClient(
-                dietitian_id,
-                client_id,
-                startDate,
-                endDate
-            );
-
-            return res.status(200).json(plans);
-        } catch (error) {
-            return res.status(error.status || 500).json({
-                message: error.message || "Bir hata oluştu.",
-                showOnScreen: error.showOnScreen ?? true
             });
         }
     }

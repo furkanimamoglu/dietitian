@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View} from 'react-native';
 import {
     Avatar,
     Button,
@@ -23,54 +23,41 @@ import BottomNavbar from '../Components/BottomNavbar';
 import config from '../../config.js';
 
 interface MealItem {
-    item: string;
-    checked: boolean;
-    portion: string;
-    protein?: number;
-    calorie?: number;
-    alternatives?: string[];
+    name: string;
+    eaten: boolean;
+    portion: string | null;
 }
 
-interface DailyMealPlan {
-    Kahvaltı: string[] | string | { main: string[], alternatives: { [key: string]: string[] } } | {
-        isim: string,
-        yenildi: boolean
-    }[];
-    'Öğle Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } } | {
-        isim: string,
-        yenildi: boolean
-    }[];
-    'Akşam Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } } | {
-        isim: string,
-        yenildi: boolean
-    }[];
-    Aparatif: string[] | string | { main: string[], alternatives: { [key: string]: string[] } } | {
-        isim: string,
-        yenildi: boolean
-    }[];
+interface MealCategory {
+    [category: string]: MealItem[];
+}
+
+interface DailyMeal {
+    [mealName: string]: MealCategory;
+}
+
+interface WeeklyMealPlan {
+    [day: string]: DailyMeal;
 }
 
 const mealIcons: { [key: string]: string } = {
     'Kahvaltı': 'coffee',
-    'Öğle': 'food-variant',
-    'Akşam': 'food-fork-drink',
-    'Aperatifler': 'food-apple'
+    'Öğle Yemeği': 'food-variant',
+    'Akşam Yemeği': 'food-fork-drink',
+    'Aparatif': 'food-apple',
+    'Ara Öğün': 'food',
+    'Ara Öğün Deneme': 'food-apple-outline',
+    // Varsayılan icon için 'food' kullanılacak
 };
 
 const Beslenme = ({navigation}: { navigation: any }) => {
-    const [meals, setMeals] = useState<{ [key: string]: MealItem[] }>({
-        Kahvaltı: [],
-        Öğle: [],
-        Akşam: [],
-        Aperatifler: [],
-    });
-
+    const [currentDay, setCurrentDay] = useState<string>('Pazartesi');
+    const [mealPlan, setMealPlan] = useState<WeeklyMealPlan>({});
     const [modalVisible, setModalVisible] = useState(false);
-    const [selectedMealType, setSelectedMealType] = useState('Kahvaltı');
+    const [selectedMealType, setSelectedMealType] = useState<string>('');
+    const [selectedMealCategory, setSelectedMealCategory] = useState<string>('Ana Menü');
     const [newMeal, setNewMeal] = useState('');
     const [newPortion, setNewPortion] = useState('');
-    const [waterIntake, setWaterIntake] = useState(2);
-    const [maxWaterIntake, setMaxWaterIntake] = useState(8);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isEmpty, setIsEmpty] = useState(false);
@@ -91,7 +78,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 console.error('Token Bulunamadı');
                 return;
             }
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -101,7 +88,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
             const data = await response.json();
 
-            // Check if response contains showOnScreen and message
             if (data.showOnScreen && data.message) {
                 setError(data.message);
                 setIsEmpty(true);
@@ -109,65 +95,34 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Store the nutrition plan ID for later use
             if (data.nutrition_plan_id) {
                 setNutritionPlanId(data.nutrition_plan_id);
             } else if (data.NutritionPlan && data.NutritionPlan.id) {
                 setNutritionPlanId(data.NutritionPlan.id);
             }
 
-            // Get current day of the week in Turkish
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            console.log('Today is:', today, 'Day in Turkish:', todayTurkish);
+            setMealPlan(data);
 
-            // Find the meal plan data - handle different response structures
-            let mealPlanData = null;
-
-            // Option 1: Direct mealPlan property
-            if (data.mealPlan) {
-                console.log('Found mealPlan directly in response');
-                mealPlanData = data.mealPlan;
-            }
-            // Option 2: Inside NutritionPlan object
-            else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
-                console.log('Found mealPlan inside NutritionPlan object');
-                mealPlanData = data.NutritionPlan.mealPlan;
-            }
-            // Option 3: The entire response is the meal plan
-            else if (data.Kahvaltı || data['Öğle Yemeği'] || data['Akşam Yemeği'] || data.Aparatif) {
-                console.log('The response itself appears to be the meal plan for a day');
-                // In this case, the response is already the day plan
-                updateMealsFromPlan(data);
-                setLoading(false);
-                return;
-            }
-
-            if (mealPlanData) {
-                console.log('Available days in meal plan:', Object.keys(mealPlanData));
-
-                // Check if we have a meal plan for today
-                if (mealPlanData[todayTurkish]) {
-                    console.log('Found meal plan for today:', JSON.stringify(mealPlanData[todayTurkish], null, 2));
-                    updateMealsFromPlan(mealPlanData[todayTurkish]);
-                } else {
-                    // For debugging: let's try to look for any day's meal plan
-                    const anyDay = Object.keys(mealPlanData)[0];
-                    if (anyDay) {
-                        console.log('No meal plan for today, using first available day instead:', anyDay);
-                        updateMealsFromPlan(mealPlanData[anyDay]);
-                    } else {
-                        console.log('No meal plan found for any day');
-                        setError('Beslenme planı bulunamadı.');
-                        setIsEmpty(true);
-                    }
+            if (data && data[todayTurkish]) {
+                setCurrentDay(todayTurkish);
+                if (Object.keys(data[todayTurkish]).length > 0) {
+                    setSelectedMealType(Object.keys(data[todayTurkish])[0]);
                 }
-            } else {
-                console.log('No meal plan structure found in response');
-                setError('Beslenme planı verisi bulunamadı.');
+            } else if (data && Object.keys(data).length > 0) {
+                const firstAvailableDay = Object.keys(data)[0];
+                setCurrentDay(firstAvailableDay);
+                if (Object.keys(data[firstAvailableDay]).length > 0) {
+                    setSelectedMealType(Object.keys(data[firstAvailableDay])[0]);
+                }
+            }
+
+            if (!data || Object.keys(data).length === 0) {
                 setIsEmpty(true);
+                setError('Beslenme planı bulunamadı.');
             }
 
             setLoading(false);
@@ -181,7 +136,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         }
     };
 
-    const updateMealsFromPlan = (dayPlan: DailyMealPlan) => {
+    const updateMealsFromPlan = (dayPlan: DailyMeal) => {
         const newMeals: { [key: string]: MealItem[] } = {
             Kahvaltı: [],
             Öğle: [],
@@ -189,47 +144,34 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             Aperatifler: []
         };
 
-        // Helper function to process meal items from various formats
         const processMealItems = (mealData: any, mealType: string) => {
             if (!mealData) return;
 
-            // Get the main items depending on format
             let mainItems: string[] = [];
             let alternatives: { [key: string]: string[] } = {};
             let checkedItems: { [key: string]: boolean } = {};
 
-            // New format with 'isim' and 'yenildi' fields
             if (Array.isArray(mealData) && mealData.length > 0 && mealData[0].hasOwnProperty('isim')) {
                 mainItems = mealData.map(item => item.isim);
-                // Store the checked status for each item
                 mealData.forEach(item => {
                     checkedItems[item.isim] = item.yenildi;
                 });
-            }
-            // Complex format with main and alternatives
-            else if (mealData.main && Array.isArray(mealData.main)) {
+            } else if (mealData.main && Array.isArray(mealData.main)) {
                 mainItems = [...mealData.main];
                 alternatives = mealData.alternatives || {};
-            }
-            // Simple array format
-            else if (Array.isArray(mealData)) {
+            } else if (Array.isArray(mealData)) {
                 mainItems = [...mealData];
-            }
-            // String format (backward compatibility)
-            else if (typeof mealData === 'string') {
+            } else if (typeof mealData === 'string') {
                 mainItems = mealData.split(', ').map(item => item.trim()).filter(item => item !== '');
             }
 
-            // Convert to MealItem format
             const targetMeal = convertApiMealNameToAppMealName(mealType);
             if (targetMeal && newMeals[targetMeal]) {
-                // Add each main item with its alternatives
                 newMeals[targetMeal] = mainItems.map(item => {
-                    // Find alternatives for this specific item if they exist
                     const itemAlternatives = alternatives[item] || [];
                     return {
                         item,
-                        checked: checkedItems[item] || false, // Use the stored check status
+                        checked: checkedItems[item] || false,
                         portion: '1 porsiyon',
                         alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
                     };
@@ -237,7 +179,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
         };
 
-        // Convert API meal names to app meal names
         const convertApiMealNameToAppMealName = (apiMealName: string): string => {
             switch (apiMealName) {
                 case 'Kahvaltı':
@@ -253,7 +194,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
         };
 
-        // Process each meal type
         if (dayPlan.Kahvaltı) {
             processMealItems(dayPlan.Kahvaltı, 'Kahvaltı');
         }
@@ -278,7 +218,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         newMeals[mealType][index].checked = !newMeals[mealType][index].checked;
         setMeals(newMeals);
 
-        // Update the meal plan on the server with the new yenildi status
         updateMealPlanOnServer(newMeals);
     };
 
@@ -302,26 +241,22 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             setNewPortion('');
             setModalVisible(false);
 
-            // Update the meal plan on the server
             updateMealPlanOnServer(updatedMeals);
         }
     };
 
     const updateMealPlanOnServer = async (updatedMeals: { [key: string]: MealItem[] }) => {
         try {
-            // If we don't have a nutrition plan ID, we can't update
             if (nutritionPlanId === null) {
                 console.error('Nutrition plan ID is missing, cannot update meal plan');
                 Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
                 return;
             }
 
-            // Get current day of the week in Turkish
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            // Convert app meal names to API meal names
             const convertAppMealNameToApiMealName = (appMealName: string): string => {
                 switch (appMealName) {
                     case 'Kahvaltı':
@@ -337,27 +272,23 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 }
             };
 
-            // Create the updated meal plan structure for today
-            const updatedDayPlan: DailyMealPlan = {
+            const updatedDayPlan: DailyMeal = {
                 Kahvaltı: [],
                 'Öğle Yemeği': [],
                 'Akşam Yemeği': [],
                 Aparatif: []
             };
 
-            // Convert each meal type to the API format
             Object.entries(updatedMeals).forEach(([mealType, items]) => {
                 const apiMealType = convertAppMealNameToApiMealName(mealType);
                 if (apiMealType) {
-                    // Convert the items to the new format with 'isim' and 'yenildi' fields
-                    updatedDayPlan[apiMealType as keyof DailyMealPlan] = items.map(item => ({
+                    updatedDayPlan[apiMealType as keyof DailyMeal] = items.map(item => ({
                         isim: item.item,
                         yenildi: item.checked
                     }));
                 }
             });
 
-            // Prepare the data to be sent to the server
             const mealPlanUpdate = {
                 nutrition_plan_id: nutritionPlanId,
                 mealPlan: {
@@ -365,7 +296,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 }
             };
 
-            console.log('Updating meal plan:', mealPlanUpdate);
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
@@ -393,69 +323,84 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         }
     };
 
-    const totalItems = Object.values(meals).flat().length;
-    const checkedItems = Object.values(meals).flat().filter(m => m.checked).length;
-    const progress = totalItems > 0 ? checkedItems / totalItems : 0;
+    // Helper functions for the new meal plan structure
+    const getTotalMealItems = (): number => {
+        if (!mealPlan[currentDay]) return 0;
 
-    const addWater = () => {
-        if (waterIntake < maxWaterIntake) {
-            setWaterIntake(waterIntake + 1);
-        }
+        return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
+            return total + Object.values(mealType).reduce((mealTotal, category) => {
+                return mealTotal + category.length;
+            }, 0);
+        }, 0);
     };
 
-    const reduceWater = () => {
-        if (waterIntake > 0) {
-            setWaterIntake(waterIntake - 1);
-        }
+    const getEatenMealItems = (): number => {
+        if (!mealPlan[currentDay]) return 0;
+
+        return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
+            return total + Object.values(mealType).reduce((mealTotal, category) => {
+                return mealTotal + category.filter(item => item.eaten).length;
+            }, 0);
+        }, 0);
     };
 
-    const renderWaterTracker = () => {
-        return (
-            <Surface style={styles.waterCard}>
-                <View style={styles.waterHeader}>
-                    <Avatar.Icon
-                        size={40}
-                        icon="water"
-                        color="#2196F3"
-                        style={{backgroundColor: '#e3f2fd'}}
-                    />
-                    <Text style={styles.waterTitle}>Su Takibi</Text>
-                </View>
-                <Text style={styles.waterSubtitle}>Günlük 8 bardak hedef</Text>
+    const toggleMealItemEaten = (mealType: string, category: string, index: number) => {
+        if (!mealPlan[currentDay] || !mealPlan[currentDay][mealType]) return;
 
-                <View style={styles.waterProgressContainer}>
-                    <TouchableOpacity onPress={reduceWater} style={styles.waterButton}>
-                        <Text style={{color: '#fff', fontWeight: 'bold'}}>-</Text>
-                    </TouchableOpacity>
+        const updatedMealPlan = {...mealPlan};
+        updatedMealPlan[currentDay][mealType][category][index].eaten =
+            !updatedMealPlan[currentDay][mealType][category][index].eaten;
 
-                    <View style={styles.waterBadges}>
-                        {[...Array(maxWaterIntake)].map((_, i) => (
-                            <View
-                                key={i}
-                                style={[
-                                    styles.waterBadge,
-                                    i < waterIntake ? styles.waterBadgeFilled : styles.waterBadgeEmpty
-                                ]}
-                            >
-                                <Text style={{color: i < waterIntake ? "#fff" : "#bde0fe"}}>💧</Text>
-                            </View>
-                        ))}
-                    </View>
+        setMealPlan(updatedMealPlan);
+        // Gerçek uygulamada burada sunucuya güncelleme gönderilir
+    };
 
-                    <TouchableOpacity onPress={addWater} style={styles.waterButton}>
-                        <Text style={{color: '#fff', fontWeight: 'bold'}}>+</Text>
-                    </TouchableOpacity>
-                </View>
+    const addMealItem = () => {
+        if (!newMeal || !selectedMealType || !selectedMealCategory) return;
 
-                <Text style={styles.waterCount}>
-                    {waterIntake} / {maxWaterIntake} bardak
-                </Text>
-            </Surface>
-        );
+        const updatedMealPlan = {...mealPlan};
+
+        // Eğer seçili gün veya öğün yoksa oluştur
+        if (!updatedMealPlan[currentDay]) {
+            updatedMealPlan[currentDay] = {};
+        }
+
+        if (!updatedMealPlan[currentDay][selectedMealType]) {
+            updatedMealPlan[currentDay][selectedMealType] = {};
+        }
+
+        if (!updatedMealPlan[currentDay][selectedMealType][selectedMealCategory]) {
+            updatedMealPlan[currentDay][selectedMealType][selectedMealCategory] = [];
+        }
+
+        // Yeni yemeği ekle
+        updatedMealPlan[currentDay][selectedMealType][selectedMealCategory].push({
+            name: newMeal,
+            eaten: false,
+            portion: newPortion || null
+        });
+
+        setMealPlan(updatedMealPlan);
+        setModalVisible(false);
+        setNewMeal('');
+        setNewPortion('');
+
+        // Gerçek uygulamada burada sunucuya güncelleme gönderilir
+    };
+
+    const handleDayChange = (day: string) => {
+        setCurrentDay(day);
+        // Eğer seçilen günde öğün varsa, ilk öğünü seç
+        if (mealPlan[day] && Object.keys(mealPlan[day]).length > 0) {
+            setSelectedMealType(Object.keys(mealPlan[day])[0]);
+        }
     };
 
     const getCompletionText = () => {
-        const percentage = Math.round(progress * 100);
+        const totalItems = getTotalMealItems();
+        const eatenItems = getEatenMealItems();
+        const percentage = totalItems > 0 ? Math.round((eatenItems / totalItems) * 100) : 0;
+
         if (percentage === 0) return "Henüz başlamadın";
         if (percentage < 30) return "İyi başlangıç";
         if (percentage < 70) return "İyi gidiyorsun";
@@ -500,14 +445,14 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
         if (error) {
             return (
-                <View style={styles.noticeContainer}>
+                <View style={styles.errorContainer}>
                     <Avatar.Icon
                         size={60}
                         icon="information"
                         color="#ff9800"
                         style={{backgroundColor: '#fff3e0'}}
                     />
-                    <Text style={styles.noticeText}>{error}</Text>
+                    <Text style={styles.errorText}>{error}</Text>
                     <Button
                         mode="contained"
                         onPress={fetchTodayMeal}
@@ -519,15 +464,45 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             );
         }
 
-        if (isEmpty) {
+        if (isEmpty || !mealPlan[currentDay]) {
             return renderEmptyMealPlan();
         }
 
+        const totalItems = getTotalMealItems();
+        const eatenItems = getEatenMealItems();
+        const progress = totalItems > 0 ? eatenItems / totalItems : 0;
+        const availableDays = Object.keys(mealPlan);
+
         return (
             <>
+                {/* Gün seçimi */}
+                <View style={styles.daySelector}>
+                    <FlatList
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        data={availableDays}
+                        keyExtractor={(item) => item}
+                        renderItem={({item}) => (
+                            <Chip
+                                selected={item === currentDay}
+                                onPress={() => handleDayChange(item)}
+                                style={[
+                                    styles.dayChip,
+                                    item === currentDay && styles.selectedDayChip
+                                ]}
+                                textStyle={item === currentDay ? styles.selectedDayText : styles.dayText}
+                                mode="outlined"
+                            >
+                                {item}
+                            </Chip>
+                        )}
+                        contentContainerStyle={styles.dayChipsContainer}
+                    />
+                </View>
+
                 <Surface style={styles.headerCard}>
-                    <Text style={styles.sectionTitle}>Günlük Beslenme Planın</Text>
-                    <Text style={styles.sectionSubtitle}>Dengeli beslen, enerjik hisset</Text>
+                    <Text style={styles.sectionTitle}>Beslenme Planın</Text>
+                    <Text style={styles.sectionSubtitle}>{currentDay} - Dengeli beslen, enerjik hisset</Text>
 
                     <View style={styles.progressContainer}>
                         <View style={styles.progressTextRow}>
@@ -538,10 +513,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                     </View>
                 </Surface>
 
-                {/*renderWaterTracker()*/}
-
-                {/* Yemek kategorileri */}
-                {Object.entries(meals).map(([mealType, items]) => (
+                {/* Öğün kartları */}
+                {Object.entries(mealPlan[currentDay]).map(([mealType, mealCategories]) => (
                     <Card key={mealType} style={styles.mealCard} mode="elevated">
                         <Card.Title
                             title={mealType}
@@ -561,61 +534,70 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                     iconColor="#4caf50"
                                     onPress={() => {
                                         setSelectedMealType(mealType);
+                                        setSelectedMealCategory('Ana Menü');
                                         setModalVisible(true);
                                     }}
                                 />
                             )}
                         />
                         <Divider/>
-                        <Card.Content style={styles.cardContent}>
-                            {items.map((meal, index) => (
-                                <View key={index} style={styles.mealItemContainer}>
-                                    <View style={styles.mealItem}>
-                                        <Checkbox.Android
-                                            status={meal.checked ? 'checked' : 'unchecked'}
-                                            onPress={() => toggleCheck(mealType, index)}
-                                            color="#4caf50"
+
+                        {/* Öğün kategorileri */}
+                        {Object.entries(mealCategories).map(([category, meals]) => (
+                            <View key={`${mealType}-${category}`}>
+                                {/* Eğer birden fazla kategori varsa kategori başlığını göster */}
+                                {Object.keys(mealCategories).length > 1 && (
+                                    <View style={styles.categoryHeader}>
+                                        <Text style={styles.categoryTitle}>{category}</Text>
+                                        <IconButton
+                                            icon="plus"
+                                            size={16}
+                                            onPress={() => {
+                                                setSelectedMealType(mealType);
+                                                setSelectedMealCategory(category);
+                                                setModalVisible(true);
+                                            }}
+                                            style={styles.smallAddButton}
                                         />
-                                        <View style={styles.mealInfo}>
-                                            <View style={styles.mealNameRow}>
-                                                <Text style={[
-                                                    styles.mealName,
-                                                    meal.checked && styles.mealChecked
-                                                ]}>
-                                                    {meal.item}
-                                                </Text>
-                                                <Text style={styles.portionText}>
-                                                    {meal.portion}
-                                                </Text>
-                                            </View>
-                                        </View>
                                     </View>
+                                )}
 
-                                    {/* Show alternatives as chips */}
-                                    {meal.alternatives && meal.alternatives.length > 0 && (
-                                        <View style={styles.alternativesContainer}>
-                                            {meal.alternatives.map((alt, altIndex) => (
-                                                <Chip
-                                                    key={altIndex}
-                                                    icon="swap-horizontal"
-                                                    mode="outlined"
-                                                    style={styles.alternativeChip}
-                                                    textStyle={styles.alternativeChipText}
-                                                >
-                                                    {alt}
-                                                </Chip>
-                                            ))}
-                                        </View>
+                                <Card.Content style={styles.cardContent}>
+                                    {meals.length === 0 ? (
+                                        <Text style={styles.emptyMealText}>
+                                            Bu öğün için henüz yemek eklenmemiş
+                                        </Text>
+                                    ) : (
+                                        meals.map((meal, index) => (
+                                            <View key={index} style={styles.mealItemContainer}>
+                                                <View style={styles.mealItem}>
+                                                    <Checkbox.Android
+                                                        status={meal.eaten ? 'checked' : 'unchecked'}
+                                                        onPress={() => toggleMealItemEaten(mealType, category, index)}
+                                                        color="#4caf50"
+                                                    />
+                                                    <View style={styles.mealInfo}>
+                                                        <View style={styles.mealNameRow}>
+                                                            <Text style={[
+                                                                styles.mealName,
+                                                                meal.eaten && styles.mealChecked
+                                                            ]}>
+                                                                {meal.name}
+                                                            </Text>
+                                                            {meal.portion && (
+                                                                <Text style={styles.portionText}>
+                                                                    {meal.portion}
+                                                                </Text>
+                                                            )}
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        ))
                                     )}
-                                </View>
-                            ))}
-
-                            {items.length === 0 && (
-                                <Text style={styles.emptyMealText}>
-                                    Bu öğün için henüz yemek eklenmemiş
-                                </Text>
-                            )}
-                        </Card.Content>
+                                </Card.Content>
+                            </View>
+                        ))}
                     </Card>
                 ))}
 
@@ -670,20 +652,39 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
                 <Portal>
                     <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)} style={styles.dialog}>
-                        <Dialog.Title>Yeni Öğün Ekle</Dialog.Title>
+                        <Dialog.Title>Yeni Yemek Ekle</Dialog.Title>
                         <Dialog.Content>
                             <Text style={styles.dialogLabel}>Öğün Türü</Text>
-                            <RadioButton.Group onValueChange={value => setSelectedMealType(value)}
-                                               value={selectedMealType}>
-                                <View style={styles.radioButtonsContainer}>
-                                    {Object.keys(meals).map(type => (
-                                        <View key={type} style={styles.radioOption}>
-                                            <RadioButton.Android value={type} color="#4caf50"/>
-                                            <Text>{type}</Text>
+                            {mealPlan[currentDay] && (
+                                <RadioButton.Group onValueChange={value => setSelectedMealType(value)}
+                                                value={selectedMealType}>
+                                    <View style={styles.radioButtonsContainer}>
+                                        {Object.keys(mealPlan[currentDay]).map(type => (
+                                            <View key={type} style={styles.radioOption}>
+                                                <RadioButton.Android value={type} color="#4caf50"/>
+                                                <Text>{type}</Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                </RadioButton.Group>
+                            )}
+
+                            {selectedMealType && mealPlan[currentDay] && mealPlan[currentDay][selectedMealType] && (
+                                <>
+                                    <Text style={styles.dialogLabel}>Kategori</Text>
+                                    <RadioButton.Group onValueChange={value => setSelectedMealCategory(value)}
+                                                    value={selectedMealCategory}>
+                                        <View style={styles.radioButtonsContainer}>
+                                            {Object.keys(mealPlan[currentDay][selectedMealType]).map(category => (
+                                                <View key={category} style={styles.radioOption}>
+                                                    <RadioButton.Android value={category} color="#4caf50"/>
+                                                    <Text>{category}</Text>
+                                                </View>
+                                            ))}
                                         </View>
-                                    ))}
-                                </View>
-                            </RadioButton.Group>
+                                    </RadioButton.Group>
+                                </>
+                            )}
 
                             <Text style={styles.dialogLabel}>Yemek Adı</Text>
                             <TextInput
@@ -703,7 +704,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                         </Dialog.Content>
                         <Dialog.Actions>
                             <Button onPress={() => setModalVisible(false)} textColor="#666">İptal</Button>
-                            <Button onPress={addMeal} mode="contained" buttonColor="#4caf50">Ekle</Button>
+                            <Button onPress={addMealItem} mode="contained" buttonColor="#4caf50">Ekle</Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
@@ -747,7 +748,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         marginBottom: 16,
         fontSize: 16,
-        color: '#ff9800',
+        color: '#fc9e21',
         textAlign: 'center'
     },
     emptyContainer: {
@@ -758,7 +759,7 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#ff9800',
+        color: '#fc9e21',
         marginBottom: 12
     },
     emptyText: {
@@ -770,7 +771,7 @@ const styles = StyleSheet.create({
     },
     contactButton: {
         marginTop: 16,
-        backgroundColor: '#ff9800',
+        backgroundColor: '#fc9e21',
         paddingHorizontal: 16
     },
     retryButton: {
@@ -890,7 +891,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 16,
         bottom: 70,
-        backgroundColor: '#4caf50'
+        backgroundColor: '#fc9e21'
     },
     dialog: {
         borderRadius: 12
@@ -919,70 +920,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '50%',
         marginVertical: 4
-    },
-    waterCard: {
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 12,
-        elevation: 2
-    },
-    waterHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4
-    },
-    waterTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginLeft: 8,
-        color: '#2196F3'
-    },
-    waterSubtitle: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 12
-    },
-    waterProgressContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginVertical: 8
-    },
-    waterButton: {
-        backgroundColor: '#2196F3',
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    waterBadges: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        marginHorizontal: 8
-    },
-    waterBadge: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    waterBadgeFilled: {
-        backgroundColor: '#2196F3'
-    },
-    waterBadgeEmpty: {
-        backgroundColor: '#e1f5fe',
-        borderWidth: 1,
-        borderColor: '#b3e5fc'
-    },
-    waterCount: {
-        textAlign: 'center',
-        color: '#2196F3',
-        fontSize: 16,
-        fontWeight: '600',
-        marginTop: 8
     },
     statsCard: {
         padding: 16,
@@ -1018,7 +955,79 @@ const styles = StyleSheet.create({
         color: '#999',
         textAlign: 'center',
         paddingVertical: 12
-    }
+    },
+    daySelector: {
+        paddingVertical: 16,
+        paddingHorizontal: 8,
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+        elevation: 2
+    },
+    dayChipsContainer: {
+        paddingVertical: 8
+    },
+    dayChip: {
+        marginRight: 8,
+        borderRadius: 16
+    },
+    selectedDayChip: {
+        backgroundColor: '#4caf50',
+        borderColor: '#388e3c'
+    },
+    selectedDayText: {
+        color: '#fff',
+        fontWeight: 'bold'
+    },
+    dayText: {
+        color: '#4caf50',
+        fontWeight: '500'
+    },
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        backgroundColor: '#f9f9f9',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0'
+    },
+    categoryTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#333'
+    },
+    smallAddButton: {
+        marginLeft: 8,
+        backgroundColor: '#e8f5e9'
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 40,
+        backgroundColor: '#fff',
+        marginTop: 30,
+        marginHorizontal: 20,
+        borderRadius: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    errorText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#5a6268',
+        textAlign: 'center',
+        fontWeight: '500',
+        lineHeight: 24,
+        paddingHorizontal: 10,
+    },
 });
 
 export default Beslenme;

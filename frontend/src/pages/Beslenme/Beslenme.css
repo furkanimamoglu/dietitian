@@ -2,7 +2,7 @@
 .beslenme-container {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
 /* Left Panel - Categories */
@@ -208,9 +208,9 @@
 
 .nutrition-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-    padding-bottom: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    padding-bottom: 0.5rem;
 }
 
 /* No Programs Message */
@@ -349,23 +349,6 @@
     z-index: 1000;
 }
 
-.modal-container {
-    background-color: #fff;
-    border-radius: 8px;
-    width: 90%;
-    margin-top: 1.5rem;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation: modalFadeIn 0.3s;
-}
-
-.modal-container.full-width {
-    max-width: 90%;
-    width: 1200px;
-}
-
 @keyframes modalFadeIn {
     from {
         opacity: 0;
@@ -386,7 +369,7 @@
     position: sticky;
     top: 0;
     background-color: #fff;
-    z-index: 10;
+    z-index: 1000;
 }
 
 .modal-header h2 {
@@ -621,7 +604,7 @@ input[type="date"].text-input {
 }
 
 .day-tab.active {
-    color: #3f51b5;
+    color: #f44336;
     border-bottom-color: #3f51b5;
     background-color: #e8eaf6;
 }
@@ -1444,4 +1427,71 @@ input[type="date"].text-input {
     to {
         transform: rotate(360deg);
     }
+}
+
+.image-preview-container {
+    position: relative;
+    margin-top: 10px;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-upload-label {
+    display: block;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.file-upload-label.has-file {
+    background-color: #e8f5e9;
+    border-color: #4caf50;
+}
+
+.file-upload-icon {
+    margin-right: 5px;
+}
+
+.search-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.search-box {
+    flex: 1;
+    position: relative;
+}
+
+.filter-box {
+    width: 200px;
+}
+
+.filter-select {
+    width: 100%;
 }

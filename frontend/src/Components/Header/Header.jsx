@@ -67,9 +67,9 @@ const settings = [
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
 
-const mobilePrimaryColor = '#2c8d32';
-const mobileGradient = 'linear-gradient(to right, #2c8d32, #40b548)';
-const mobileDrawerHeaderBg = 'linear-gradient(45deg, #2c8d32 30%, #40b548 90%)';
+const mobilePrimaryColor = '#fc9e21';
+const mobileGradient = 'linear-gradient(135deg, #fc9e21 0%, #ff7355 50%, #fc9e21 100%)';
+const mobileDrawerHeaderBg = '#fc9e21';
 
 const SearchContainer = styled('div')(({theme}) => ({
     position: 'relative',
@@ -114,18 +114,6 @@ const MobileSearchIcon = styled(IconButton)(({theme}) => ({
     },
 }));
 
-// Logo container with enhanced styling for mobile
-const LogoContainer = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'isMobile',
-})(({theme, isMobile}) => ({
-    display: 'flex',
-    alignItems: 'center',
-    flexGrow: isMobile ? 1 : 0,
-    padding: isMobile ? theme.spacing(0.7, 1) : 0,
-    borderRadius: isMobile ? theme.spacing(1) : 0,
-    marginLeft: isMobile ? theme.spacing(0.5) : 0,
-}));
-
 export default function Header() {
     const navigate = useNavigate();
     const theme = useTheme();
@@ -133,7 +121,7 @@ export default function Header() {
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/login';
+            window.location.href = '/girisyap';
         }
     }, []);
 
@@ -156,13 +144,13 @@ export default function Header() {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
-            navigate('/login');
+            navigate('/girisyap');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
         } else if (value === 'odeme') {
             navigate('/odeme');
         } else {
-            navigate('/dashboard');
+            navigate('/anasayfa');
         }
         setAnchorElUser(null);
         setMobileMenuOpen(false);
@@ -242,7 +230,7 @@ export default function Header() {
     }, []);
 
     const navigationItems = [
-        {name: "Ana Sayfa", route: "/dashboard", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
+        {name: "Ana Sayfa", route: "/anasayfa", icon: <HomeIcon sx={{color: "#2c8d32"}}/>},
         {name: "Danışanlarım", route: "/danisanlarim", icon: <PersonIcon sx={{color: "#ff6200"}}/>},
         {name: "Randevularım", route: "/randevularim", icon: <EventIcon sx={{color: "#e8dd00"}}/>},
         {name: "Beslenme", route: "/beslenme", icon: <LocalDiningIcon sx={{color: "#4caf50"}}/>},
@@ -256,7 +244,7 @@ export default function Header() {
         <AppBar
             position="fixed"
             sx={{
-                background: isMobile ? mobileGradient : '#2e7d32',
+                background: isMobile ? mobileGradient : 'linear-gradient(135deg, #fc9e21  0%, #ff7355 50%, #fc9e21 100%)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             }}
         >
@@ -275,37 +263,31 @@ export default function Header() {
                     )}
 
                     {/* Logo / Marka Adı */}
-                    <LogoContainer
-                        onClick={() => navigate('/dashboard')}
-                        isMobile={isMobile}
+                    <Box
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            cursor: 'pointer'
+                            justifyContent: 'flex-start',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            height: isMobile ? '3.5rem' : '4.5rem',
+                            ml: isMobile ? 0 : 4,
+                            zIndex: 1000,
                         }}
+                        onClick={() => navigate('/anasayfa')}
                     >
-                        <SpaIcon
+                        <Box
+                            component="img"
+                            src="/logo.png"
+                            alt="Diyetia Logo"
                             sx={{
-                                display: 'flex',
-                                ml: { xs: 0, md: 4 },
-                                mr: 1,
-                                color: 'white',
-                                fontSize: isMobile ? 22 : 24
+                                height: isMobile ? '2.2rem' : '3rem',
+                                width: 'auto',
+                                objectFit: 'contain',
+                                opacity: 0.95,
                             }}
                         />
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: isMobile ? '1rem' : '1.25rem',
-                                letterSpacing: 1,
-                                color: 'white',
-                                fontFamily: 'Montserrat, sans-serif'
-                            }}
-                        >
-                            Diyetia
-                        </Typography>
-                    </LogoContainer>
+                    </Box>
 
                     {/* Desktop Search Bar */}
                     {!isMobile && (
@@ -331,7 +313,7 @@ export default function Header() {
                                             position: "absolute",
                                             top: "100%",
                                             left: 0,
-                                            backgroundColor: "#f0f9f0",
+                                            backgroundColor: "#ffffff",
                                             zIndex: 1300,
                                             boxShadow: "0px 8px 20px rgba(0,0,0,0.15)",
                                             mt: 1,
@@ -350,7 +332,7 @@ export default function Header() {
                                                     onClick={() => handleResultClick(result.url)}
                                                     sx={{
                                                         "&:hover": {
-                                                            backgroundColor: "#e6f7e6",
+                                                            backgroundColor: "#ffffff",
                                                             boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
                                                         },
                                                         transition: "all 0.3s ease-in-out",
@@ -400,7 +382,7 @@ export default function Header() {
                     {!isMobile && (
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mr: {xs: 2, md: 4}}}>
                             <Tooltip title="Mesajlar" arrow>
-                                <IconButton onClick={() => navigate('/mesaj')} color="inherit">
+                                <IconButton sx={{color: 'white', backgroundColor: '#2d4149'}} onClick={() => navigate('/mesaj')} color="inherit">
                                     <Badge badgeContent={messageCount} color="warning">
                                         <MailIcon sx={{color: 'white'}}/>
                                     </Badge>
@@ -410,7 +392,7 @@ export default function Header() {
                             <Box sx={{flexGrow: 0}}>
                                 <Tooltip title="Diyetisyen" arrow>
                                     <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                        <Avatar alt="Diyetisyen" src="/static/images/avatar/2.jpg"/>
+                                        <Avatar alt="Diyetisyen" sx={{color: 'white', backgroundColor: '#2d4149'}}/>
                                     </IconButton>
                                 </Tooltip>
                                 <Menu

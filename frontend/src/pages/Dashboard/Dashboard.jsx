@@ -1,6 +1,7 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
+
 import {
     Avatar,
     Box,
@@ -19,14 +20,14 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import {
-    Add as AddIcon,
-    CheckCircle as CheckCircleIcon,
-    Delete as DeleteIcon,
-    Event as EventIcon,
-    Notifications as NotificationsIcon,
-    People as PeopleIcon,
-} from '@mui/icons-material';
+
+import AddIcon from '@mui/icons-material/Add';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EventIcon from '@mui/icons-material/Event';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PeopleIcon from '@mui/icons-material/People';
+
 import axios from 'axios';
 import config from "../../config.js";
 
@@ -192,14 +193,14 @@ export default function Dashboard() {
                         }
                     }
                 );
-                
+
                 // Filter out past appointments
                 const now = new Date();
                 const futureAppointments = (response.data || []).filter(appointment => {
                     const appointmentEndTime = new Date(appointment.end);
                     return appointmentEndTime > now;
                 });
-                
+
                 setApprovedAppointments(futureAppointments);
             } catch (error) {
                 console.error("Bugünkü onaylanmış randevular çekilirken bir hata oluştu:", error);
@@ -230,7 +231,7 @@ export default function Dashboard() {
     useEffect(() => {
         timerRef.current = setInterval(() => {
             setCurrentTime(new Date());
-            
+
             // Also check if any appointments have ended and should be removed from the list
             const now = new Date();
             setApprovedAppointments(prev => prev.filter(appointment => {
@@ -388,9 +389,9 @@ export default function Dashboard() {
             const m = String(d.getUTCMinutes()).padStart(2, '0');
             return `${h}:${m}`;
         };
-    
+
         return `${format(startDate)}-${format(endDate)}`;
-    };    
+    };
 
     const calculateTimeRemaining = (appointmentTime) => {
         const now = new Date(); // Use local time
@@ -400,10 +401,10 @@ export default function Dashboard() {
         if (appointmentDate < now) {
             return "Başladı";
         }
-        
+
         const diffMs = appointmentDate - now;
         const diffMins = Math.floor(diffMs / 60000);
-        
+
         if (diffMins < 60) {
             return `${diffMins} dk`;
         } else {
@@ -412,19 +413,19 @@ export default function Dashboard() {
             return `${hours} sa ${mins > 0 ? mins + ' dk' : ''}`;
         }
     };
-    
+
 
     const getCountdownColor = (appointmentTime) => {
         const now = new Date(); // Use local time
         const appointmentDate = new Date(appointmentTime); // Appointment time is already in Turkey time
-        
+
         if (appointmentDate < now) {
             return "error"; // Appointment already started
         }
-        
+
         const diffMs = appointmentDate - now;
         const diffMins = Math.floor(diffMs / 60000);
-        
+
         if (diffMins < 30) {
             return "warning";
         } else if (diffMins < 60) {
@@ -533,7 +534,7 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Bugünkü Randevular"
-                                sx={{pb: 1}}
+                                sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                             />
                             <Divider/>
                             <CardContent sx={{p: 0, '&:last-child': {pb: 0}, maxHeight: 360, overflow: 'auto'}}>
@@ -566,7 +567,7 @@ export default function Dashboard() {
                                                         size="small"
                                                         color={getCountdownColor(appointment.start)}
                                                         label={calculateTimeRemaining(appointment.start)}
-                                                        sx={{ ml: 1 }}
+                                                        sx={{ml: 1}}
                                                     />
                                                 </ListItem>
                                             </React.Fragment>
@@ -610,7 +611,7 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Randevu Talepleri"
-                                sx={{pb: 1}}
+                                sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
                             />
                             <Divider/>
                             <CardContent sx={{p: 0, '&:last-child': {pb: 0}, maxHeight: 360, overflow: 'auto'}}>
