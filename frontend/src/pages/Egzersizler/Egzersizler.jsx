@@ -450,6 +450,7 @@ export default function Egzersizler() {
     const [danisanList, setDanisanList] = useState([]);
     const [egzersizData, setEgzersizData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
@@ -709,8 +710,13 @@ export default function Egzersizler() {
         (category?.name || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Filter exercise programs based on selected categories, difficulty, and calories
+    // Filter exercise programs based on selected categories, search term, difficulty, and calories
     const filteredExerciseData = egzersizData.filter(item => {
+        // Check name/description search filter
+        const searchMatch = !exerciseSearchTerm ||
+            item.exercise_name.toLowerCase().includes(exerciseSearchTerm.toLowerCase()) ||
+            (item.exercise_description && item.exercise_description.toLowerCase().includes(exerciseSearchTerm.toLowerCase()));
+
         // First check category filter
         const categoryMatch = checkedCategories.length === 0 ||
             checkedCategories.some(id => {
@@ -751,7 +757,7 @@ export default function Egzersizler() {
         }
 
         // Item must match all filters
-        return categoryMatch && difficultyMatch && calorieMatch;
+        return searchMatch && categoryMatch && difficultyMatch && calorieMatch;
     });
 
     // Category handlers
@@ -1262,6 +1268,29 @@ export default function Egzersizler() {
                 <div className="programs-panel">
                     {/* Filters section */}
                     <div className="filters-container">
+                        {/* Search filter */}
+                        <div className="filter-group search-filter">
+                            <h3 className="filter-title">Egzersiz Ara:</h3>
+                            <div className="search-input-container">
+                                <SearchIcon className="search-icon" />
+                                <input
+                                    type="text"
+                                    className="exercise-search-input"
+                                    placeholder="Egzersiz adı veya açıklaması..."
+                                    value={exerciseSearchTerm}
+                                    onChange={(e) => setExerciseSearchTerm(e.target.value)}
+                                />
+                                {exerciseSearchTerm && (
+                                    <button
+                                        className="clear-search"
+                                        onClick={() => setExerciseSearchTerm('')}
+                                        title="Aramayı temizle"
+                                    >
+                                        <CloseIcon />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         {/* Difficulty filter */}
                         <div className="filter-group">
                             <h3 className="filter-title">Zorluk Seviyesi:</h3>
