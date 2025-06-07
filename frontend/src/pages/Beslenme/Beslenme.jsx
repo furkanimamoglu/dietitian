@@ -823,6 +823,7 @@ export default function Beslenme() {
     const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [beslenmeData, setBeslenmeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [planSearchTerm, setPlanSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
     const [clientProgramsModal, setClientProgramsModal] = useState(false);
@@ -902,6 +903,9 @@ export default function Beslenme() {
     const mealPlanRef = useRef(null);
 
     const [isSaving, setIsSaving] = useState(false);
+    const [imagePreview, setImagePreview] = useState('');
+    const [planImage, setPlanImage] = useState(null);
+    const [editImage, setEditImage] = useState(null);
 
     useEffect(() => {
         axios
@@ -972,10 +976,9 @@ export default function Beslenme() {
     );
 
     const filteredBeslenmeData = beslenmeData.filter(item => {
-        if (checkedCategories.length === 0) {
-            return true;
-        }
-        return checkedCategories.includes(item.category_id);
+        const matchesCategory = checkedCategories.length === 0 || checkedCategories.includes(item.category_id);
+        const matchesTitle = item.title.toLowerCase().includes(planSearchTerm.toLowerCase());
+        return matchesCategory && matchesTitle;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -1084,13 +1087,39 @@ export default function Beslenme() {
             });
     };
 
-    const handleAddPlan = () => {
+    const handleAddPlan = async () => {
         if (!newPlan.title.trim() || !newPlan.category_id) return;
+
+        let imageUrl = '';
+        if (planImage) {
+            const formData = new FormData();
+            formData.append('image', planImage);
+
+            try {
+                const uploadRes = await axios.post(
+                    `${config[config.environment].apiUrl}/upload`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem("token"),
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+                imageUrl = uploadRes.data.imageUrl;
+            } catch (err) {
+                console.error("Resim yüklenirken hata oluştu:", err);
+                setErrorMessage("Resim yüklenirken bir hata oluştu.");
+                setShowErrorPopup(true);
+                return;
+            }
+        }
 
         const planData = {
             title: newPlan.title.trim(),
             description: newPlan.description.trim(),
             category_id: newPlan.category_id,
+            image: imageUrl,
             mealPlan: {}
         };
 
@@ -1237,24 +1266,7 @@ export default function Beslenme() {
     const handleSaveMealPlan = (responseData) => {
         setIsSaving(false);
         try {
-
-            if (selectedProgram && selectedProgram.id) {
-                setBeslenmeData(prev =>
-                    prev.map(item =>
-                        item.id === selectedProgram.id
-                            ? {
-                                ...item,
-                                title: editTitle,
-                                description: editDescription,
-                                category_id: editCategoryId,
-                                mealPlan: responseData.mealPlan || responseData
-                            }
-                            : item
-                    )
-                );
-            } else {
-                fetchNutritionPlans();
-            }
+            fetchNutritionPlans();
 
             setEditProgramModal(false);
 
@@ -1264,6 +1276,8 @@ export default function Beslenme() {
             setEditTitle('');
             setEditDescription('');
             setEditCategoryId('');
+            setImagePreview('');
+            setEditImage(null);
 
             const emptyPlan = {};
             DAYS_OF_WEEK.forEach(day => {
@@ -1399,6 +1413,35 @@ export default function Beslenme() {
 
                 {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
+                    <div className="search-filter-bar" style={{ width: '100%', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 16, background: '#fff' }}>
+                            <TextField
+                                variant="outlined"
+                                size="small"
+                                    placeholder="Plan Adına Göre Ara"
+                                    value={planSearchTerm}
+                                    onChange={(e) => setPlanSearchTerm(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon color="action" />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: planSearchTerm && (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                size="small"
+                                        onClick={() => setPlanSearchTerm('')}
+                                                edge="end"
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
+                            style={{ maxWidth: 300, flex: 1, background: '#fff' }}
+                            />
+                        {/* Buraya ek filtreler eklenebilir */}
+                    </div>
                     <div className="nutrition-cards-grid">
                         {loading ? (
                             <div className="loading-container">
@@ -1605,6 +1648,46 @@ export default function Beslenme() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="input-container">
+                        <label htmlFor="nutritionImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                            <span className="file-upload-icon">📷</span>
+                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                        <input
+                            type="file"
+                            id="nutritionImage"
+                            className="text-input"
+                            accept="image/*"
+                                style={{ display: 'none' }}
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                        setPlanImage(file);
+                                        setImagePreview(reader.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
+                        />
+                        </label>
+                        {imagePreview && (
+                            <div className="image-preview-container">
+                                <img src={imagePreview} alt="Program önizleme" className="image-preview" />
+                                <button
+                                    type="button"
+                                    className="remove-image-btn"
+                                    onClick={() => {
+                                        setEditImage(null);
+                                        setImagePreview('');
+                                        document.getElementById('nutritionImage').value = '';
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="modal-footer">
