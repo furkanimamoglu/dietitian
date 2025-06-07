@@ -366,6 +366,7 @@ export default function Tarifler() {
     const [danisanList, setDanisanList] = useState([]);
     const [recipeData, setRecipeData] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
     // Danışan ara için state
@@ -531,12 +532,16 @@ export default function Tarifler() {
 
     // Filter recipes based on selected categories
     const filteredRecipeData = recipeData.filter(item => {
-        // If no categories are checked, show all items
-        if (checkedCategories.length === 0) {
-            return true;
-        }
-        // Otherwise, show only items that belong to checked categories
-        return checkedCategories.includes(item.category_id);
+        // Önce kategori filtresi uygulayalım
+        const passesCategory = checkedCategories.length === 0 || checkedCategories.includes(item.category_id);
+
+        // Sonra arama terimine göre filtreleyelim
+        const passesSearch = !recipeSearchTerm ||
+            item.title.toLowerCase().includes(recipeSearchTerm.toLowerCase()) ||
+            (item.description && item.description.toLowerCase().includes(recipeSearchTerm.toLowerCase())) ||
+            (item.ingredients && item.ingredients.toLowerCase().includes(recipeSearchTerm.toLowerCase()));
+
+        return passesCategory && passesSearch;
     });
 
     // Category handlers
@@ -710,6 +715,33 @@ export default function Tarifler() {
 
                 {/* Middle Panel - Recipe Cards */}
                 <div className="recipes-panel">
+                    {/* Arama çubuğu */}
+                    <div className="recipe-search-container enhanced-search" style={{ position: 'sticky', top: 0, zIndex: 10, background: '#fff' }}>
+                        <div className="search-box enhanced-search-box">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Tariflerde ara..."
+                                value={recipeSearchTerm}
+                                onChange={(e) => setRecipeSearchTerm(e.target.value)}
+                            />
+                            {recipeSearchTerm && (
+                                <button
+                                    className="clear-search-btn"
+                                    onClick={() => setRecipeSearchTerm('')}
+                                    tabIndex={-1}
+                                >
+                                    <CloseIcon fontSize="small" />
+                                </button>
+                            )}
+                        </div>
+                        <div className="search-divider" />
+                        {filteredRecipeData.length > 0 && (
+                            <div className="recipe-count enhanced-recipe-count">
+                                <span>{filteredRecipeData.length}</span> tarif gösteriliyor.
+                            </div>
+                        )}
+                    </div>
                     <div className="recipe-cards-grid">
                         {loading ? (<div className="loading-container">
                                 <div className="loading-spinner"></div>

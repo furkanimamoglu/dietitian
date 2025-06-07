@@ -1000,3 +1000,148 @@ select:required:invalid {
     border-color: #4caf50 !important;
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25) !important;
 }
+
+/* Arama çubuğu stilleri */
+.recipe-search-container {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.recipe-search-container .search-box {
+    display: flex;
+    align-items: center;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 0 12px;
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+}
+
+.recipe-search-container .search-icon {
+    color: #757575;
+    margin-right: 8px;
+}
+
+.recipe-search-container .search-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 10px 0;
+    width: 100%;
+    font-size: 14px;
+}
+
+.recipe-search-container .clear-search-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #757575;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recipe-search-container .clear-search-btn:hover {
+    color: #333;
+}
+
+.recipe-search-container .recipe-count {
+    color: #757575;
+    font-size: 14px;
+    margin-left: 16px;
+}
+
+.enhanced-search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 18px;
+    gap: 18px;
+}
+
+.enhanced-search-box {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    padding: 6px 12px;
+    flex: 1 1 0;
+    max-width: 420px;
+    border: 1px solid #e0e0e0;
+    transition: border 0.2s;
+}
+
+.enhanced-search-box:focus-within {
+    border: 1.5px solid #4caf50;
+}
+
+.search-icon {
+    color: #bdbdbd;
+    margin-right: 8px;
+    font-size: 22px;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    flex: 1;
+    padding: 6px 0;
+    color: #222;
+}
+
+.clear-search-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 6px;
+    color: #ff9800;
+    padding: 2px 4px;
+    border-radius: 50%;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+}
+
+.clear-search-btn:hover {
+    background: #fff3e0;
+}
+
+.search-divider {
+    width: 1px;
+    height: 32px;
+    background: #e0e0e0;
+    margin: 0 16px;
+}
+
+.enhanced-recipe-count {
+    font-size: 1rem;
+    color: #4caf50;
+    font-weight: 500;
+    background: #e8f5e9;
+    border-radius: 8px;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.enhanced-recipe-count span {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: #087708;
+}
