@@ -17,6 +17,7 @@ import Finans from "../pages/Finans/Finans.jsx";
 import Odeme from "../pages/Odeme/Odeme.jsx";
 import LandingPage from "../pages/LandingPage/LandingPage.jsx";
 import GizlilikSozlesmesi from "../pages/GizlilikSozlesmesi/GizlilikSozlesmesi.jsx";
+import HesabimiSil from "../pages/HesabimiSil/HesabimiSil.jsx";
 
 export default function Routing() {
     return (
@@ -38,7 +39,8 @@ export default function Routing() {
                 <Route path="/kayitol/*" element={<Register/>}/>
                 <Route path="/sifremiunuttum/*" element={<ForgotPassword/>}/>
                 <Route path="/odeme/*" element={<Odeme/>}/>
-                <Route path={"/gizliliksozlesmesi/*" } element={<GizlilikSozlesmesi/>}/>
+                <Route path="/gizliliksozlesmesi/*" element={<GizlilikSozlesmesi/>}/>
+                <Route path="/hesabimisil/*" element={<HesabimiSil/>}/>
 
                 {/* Error Routes */}
                 <Route path="/*" element={ExceptionPage(404)}/>

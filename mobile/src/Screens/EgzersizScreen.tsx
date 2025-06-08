@@ -54,10 +54,10 @@ const Egzersiz = ({navigation}) => {
 
     const categoryIconMap = useMemo(() => ({
         1: 'run',
-        2: 'yoga',
-        3: 'weightlifting',
+        2: 'weightlifting',
+        3: 'swim',
         4: 'basketball',
-        5: 'swim',
+        5: 'yoga',
         default: 'dumbbell',
     }), []);
 
