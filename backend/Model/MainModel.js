@@ -2,7 +2,6 @@ const path = require('path');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
 const Dietitian = require(path.join(__dirname, 'Dietitian'));
-const DietitianSub = require(path.join(__dirname, 'DietitianSub'));
 const DietitianSubPackage = require(path.join(__dirname, 'DietitianSubPackage'));
 const Client = require(path.join(__dirname, 'Client'));
 const Exercise = require(path.join(__dirname, 'Exercise'));
@@ -307,44 +306,6 @@ Dietitian.belongsTo(DietitianSubPackage, {
     onUpdate: 'NO ACTION'
 });
 
-Dietitian.hasOne(DietitianSub, {
-    foreignKey: {
-        name: 'dietitian_id',
-        allowNull: false
-    },
-    onDelete: 'CASCADE',
-    hooks: true
-});
-
-DietitianSub.belongsTo(Dietitian, {
-    foreignKey: {
-        name: 'dietitian_id',
-        allowNull: false
-    },
-    onDelete: 'NO ACTION',
-    onUpdate: 'CASCADE'
-});
-
-DietitianSub.belongsTo(DietitianSubPackage, {
-    foreignKey: {
-        name: 'package_id',
-        allowNull: false
-    },
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-    as: 'package'
-});
-
-DietitianSubPackage.hasMany(DietitianSub, {
-    foreignKey: {
-        name: 'package_id',
-        allowNull: false
-    },
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-    as: 'dietitianSubs'
-});
-
 Dietitian.hasMany(RecipeAssignment, {
     foreignKey: 'dietitian_id',
     onDelete: 'CASCADE',
@@ -357,7 +318,6 @@ RecipeAssignment.belongsTo(Dietitian, {
 module.exports = {
     sequelize,
     Dietitian,
-    DietitianSub,
     DietitianSubPackage,
     Client,
     Appointment,

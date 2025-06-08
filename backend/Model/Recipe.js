@@ -152,6 +152,7 @@ const Recipe = sequelize.define('Recipe', {
     },
     {
         timestamps: false,
+        tableName: 'Recipes'
     }
 );
 

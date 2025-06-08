@@ -1,0 +1,133 @@
+.hesabimi-sil-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header-banner {
+    background: linear-gradient(135deg, #ff7355 0%, #fc9e21 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-banner::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+    background-size: 100% 100%;
+}
+
+.header-title {
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.header-subtitle {
+    font-weight: 400 !important;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.hesabimi-sil-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 2rem;
+    position: relative;
+    margin-top: -2rem;
+}
+
+.delete-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-info {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #fff3e0;
+    border-radius: 8px;
+    border-left: 4px solid #ff9800;
+}
+
+.form-footer {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .hesabimi-sil-container {
+        padding: 16px;
+    }
+
+    .header-banner {
+        padding: 2rem 1rem;
+    }
+
+    .header-title {
+        font-size: 2rem !important;
+    }
+
+    .header-subtitle {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Animasyonlar */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 0.9;
+    }
+}
+
+/* Submit butonu animasyonu */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 115, 85, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 115, 85, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 115, 85, 0);
+    }
+}
+
+.submit-btn {
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    animation: pulse 1.5s infinite;
+    transform: translateY(-2px);
+}

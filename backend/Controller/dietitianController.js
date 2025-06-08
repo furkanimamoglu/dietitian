@@ -5,8 +5,6 @@ const Security = require(path.join(__dirname, "..", "Utils", "Security"));
 const {Notes} = require(path.join(__dirname, "..", "Model", "MainModel"));
 const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
-const moment = require("moment");
-
 class DietitianController {
     static async login(req, res) {
         try {
@@ -585,6 +583,22 @@ class DietitianController {
             });
         }
     }
+
+    static async getDietitianSubscriptionDetails(req, res) {
+        try {
+            const {dietitian_id} = req.query;
+
+            const result = await DietitianService.getDietitianSubscriptionDetails(dietitian_id);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
 }
 
 module.exports = DietitianController;

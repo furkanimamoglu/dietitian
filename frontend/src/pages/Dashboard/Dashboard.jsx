@@ -664,7 +664,7 @@ export default function Dashboard() {
                                                             variant="contained"
                                                             color="error"
                                                             size="small"
-                                                            onClick={() => handleAppointmentAction(appointment.id, 'denied')}
+                                                            onClick={() => handleAppointmentAction(appointment.id, 'cancelled')}
                                                         >
                                                             Reddet
                                                         </Button>

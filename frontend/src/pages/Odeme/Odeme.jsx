@@ -40,8 +40,10 @@ import StarBorder from "@mui/icons-material/StarBorder";
 import School from "@mui/icons-material/School";
 import Diamond from "@mui/icons-material/Diamond";
 import Cancel from "@mui/icons-material/Cancel";
+import WarningIcon from "@mui/icons-material/Warning";
 
 import axios from "axios";
+import config from "../../config.js";
 
 export default function Odeme() {
     const [activeTab, setActiveTab] = useState(0);
@@ -61,38 +63,30 @@ export default function Odeme() {
     const [dietitianInfo, setDietitianInfo] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // This initial state will be overwritten by the fetch result
     const [subscriptionInfo, setSubscriptionInfo] = useState({
         currentPlan: "Yükleniyor...",
         price: 0,
         billingCycle: "N/A",
         nextPaymentDate: "N/A",
-        autoRenew: true, // Assuming default to true until data loads
-        features: [] // Will be populated by fetch
+        autoRenew: true,
+        features: []
     });
 
-    // Payment methods (static for now, can be fetched later)
     const [paymentMethods] = useState([
         {
             id: 1,
             type: "VISA",
-            lastFour: "4242",
+            lastFour: "****",
             expiryDate: "06/24",
             isDefault: true,
             logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png"
         }
     ]);
 
-    // Fatura geçmişi (static for now, can be fetched later)
     const [invoiceHistory] = useState([
-        {date: '15 Mart 2023', amount: '₺599', status: 'Ödendi', invoice: 'INV-20230315'},
-        {date: '15 Şubat 2023', amount: '₺599', status: 'Ödendi', invoice: 'INV-20230215'},
-        {date: '15 Ocak 2023', amount: '₺599', status: 'Ödendi', invoice: 'INV-20230115'},
-        {date: '15 Aralık 2022', amount: '₺599', status: 'Ödendi', invoice: 'INV-20221215'},
-        {date: '15 Kasım 2022', amount: '₺599', status: 'Ödendi', invoice: 'INV-20221115'}
+        {date: '01 Ocak 2025', amount: '₺1000', status: 'Ödendi', invoice: 'INV-20230315'},
     ]);
 
-    // Plan karşılaştırma (static for now)
     const [plans] = useState([
         {
             name: "Başlangıç",
@@ -110,8 +104,8 @@ export default function Odeme() {
         {
             name: "Öğrenci",
             type: "student",
-            price: 500, // Student price
-            originalPrice: 1000, // Standard price before discount
+            price: 500,
+            originalPrice: 1000,
             discount: "50%",
             features: [
                 {name: "Sınırsız danışan", included: true},
@@ -138,113 +132,105 @@ export default function Odeme() {
         }
     ]);
 
-    // Fatura adresi (static for now, can be fetched/saved later)
     const [billingAddress, setBillingAddress] = useState({
-        name: "Dr. Furkan İmamoğlu",
-        company: "İstanbul Beslenme Kliniği",
-        address: "Bağdat Caddesi No: 123",
-        city: "Kadıköy",
-        state: "İstanbul",
-        zipCode: "34000",
+        name: "Belirtilmedi",
+        company: "Belirtilmedi",
+        address: "Belirtilmedi",
+        city: "Belirtilmedi",
+        state: "Belirtilmedi",
+        zipCode: "Belirtilmedi",
         country: "Türkiye"
     });
 
     const [editedBillingAddress, setEditedBillingAddress] = useState({...billingAddress});
 
-    // Fetch dietitian info
     useEffect(() => {
         const fetchDietitianInfo = async () => {
-            try {
                 setLoading(true);
-                // Mock API response structure if needed for testing
-                // const mockResponse = {
-                //     data: {
-                //         subscription_type: "free", // or "starter", "student", "premium"
-                //         // other dietitian info...
-                //     }
-                // };
-                // const response = mockResponse; // Use mock data
-                const response = await axios.get('/dietitian/getDietitianInfo'); // Use actual API call
-
-                setDietitianInfo(response.data);
-
-                // Update subscription info based on the API response
-                if (response.data && response.data.subscription_type) {
-                    let planName = "";
-                    let planPrice = 0;
-                    let planFeatures = [];
-                    let billingCycle = "Aylık"; // Assuming monthly for paid plans
-
-                    switch (response.data.subscription_type) {
-                        case "starter":
-                            planName = "Başlangıç Diyetisyen Paketi";
-                            planPrice = 500;
-                            planFeatures = plans.find(p => p.type === 'starter')?.features.filter(f => f.included).map(f => f.name) || [];
-                            break;
-                        case "student":
-                            planName = "Öğrenci Diyetisyen Paketi";
-                            planPrice = 500; // Assuming student price is 500
-                            planFeatures = plans.find(p => p.type === 'student')?.features.filter(f => f.included).map(f => f.name) || [];
-                            break;
-                        case "premium":
-                            planName = "Premium Diyetisyen Paketi";
-                            planPrice = 1000;
-                            planFeatures = plans.find(p => p.type === 'premium')?.features.filter(f => f.included).map(f => f.name) || [];
-                            break;
-                        case "free":
-                        default:
-                            planName = "Aktif paketiniz bulunmamaktadır.";
-                            planPrice = 0;
-                            billingCycle = "N/A";
-                            planFeatures = [];
-                            break;
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get(
+                    `${config[config.environment].apiUrl}/dietitian/getDietitianInfo`,
+                    {
+                    headers: {
+                        Authorization: token,
+                        'Content-Type': 'application/json',
+                    },
                     }
+                );
 
-                    setSubscriptionInfo(prev => ({
-                        ...prev,
-                        currentPlan: planName,
-                        price: planPrice,
-                        features: planFeatures,
-                        billingCycle: billingCycle, // Update billing cycle based on plan type
-                        nextPaymentDate: response.data.subscription_type === "free" ? "N/A" : "15 Nisan 2023",
-                        autoRenew: response.data.subscription_type !== "free",
-                    }));
-                } else {
-                    setSubscriptionInfo({
+                const { data } = response;
+                setDietitianInfo(data);
+
+                const defaultSubscription = {
                         currentPlan: "Aktif paketiniz bulunmamaktadır.",
                         price: 0,
                         billingCycle: "N/A",
                         nextPaymentDate: "N/A",
                         autoRenew: false,
                         features: []
+                };
+
+                if (data?.subscription_type) {
+                    const subscriptionType = data.subscription_type;
+                    const isPaidPlan = subscriptionType !== "free";
+                    const planInfo = {
+                        starter: {
+                            name: "Başlangıç Diyetisyen Paketi",
+                            price: 500
+                        },
+                        student: {
+                            name: "Öğrenci Diyetisyen Paketi",
+                            price: 500
+                        },
+                        premium: {
+                            name: "Premium Diyetisyen Paketi",
+                            price: 1000
+                        },
+                        free: defaultSubscription
+                    };
+
+                    const plan = planInfo[subscriptionType] || defaultSubscription;
+
+                    const planFeatures = isPaidPlan
+                        ? plans.find(p => p.type === subscriptionType)?.features
+                              .filter(f => f.included)
+                              .map(f => f.name) || []
+                        : ["Diyetia'yı kullanmak için, paket satın almanız gerekmektedir."];
+
+                    setSubscriptionInfo({
+                        currentPlan: plan.name || defaultSubscription.currentPlan,
+                        price: plan.price || 0,
+                        features: planFeatures,
+                        billingCycle: isPaidPlan ? "Aylık" : "N/A",
+                        nextPaymentDate: isPaidPlan ? " - " : "N/A",
+                        autoRenew: isPaidPlan
+                    });
+                } else {
+                    setSubscriptionInfo({
+                        ...defaultSubscription,
+                        features: ["Diyetia'yı kullanmak için, paket satın almanız gerekmektedir."]
                     });
                 }
-
-
-                setLoading(false);
             } catch (error) {
                 console.error("Error fetching dietitian info:", error);
-                setLoading(false);
-                // Fallback to free plan on error
                 setSubscriptionInfo({
                     currentPlan: "Aktif paketiniz bulunmamaktadır.",
                     price: 0,
                     billingCycle: "N/A",
                     nextPaymentDate: "N/A",
                     autoRenew: false,
-                    features: ["Diyetia\'yı kullanmak için, paket satın almanız gerekmektedir."]
+                    features: ["Diyetia'yı kullanmak için, paket satın almanız gerekmektedir."]
                 });
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchDietitianInfo();
-    }, []);
+    }, [plans]);
 
-    // Get subscription type from dietitian info
     const getCurrentSubscriptionType = () => {
-        // Check dietitianInfo and subscriptionInfo for the type
-        // dietitianInfo.subscription_type is the source of truth from API
-        // subscriptionInfo is the state derived from it for display
         return dietitianInfo?.subscription_type || "free";
     };
 
@@ -257,8 +243,6 @@ export default function Odeme() {
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         }, 500);
-        // In a real app, you would send data to your backend here
-        console.log("Saving settings...");
     };
 
     const handleOpenChangeModal = () => {
@@ -275,7 +259,7 @@ export default function Odeme() {
     };
 
     const handleCloseUpgradeModal = () => {
-        setSelectedPlan(null); // Clear selected plan on close
+        setSelectedPlan(null);
         setOpenUpgradeModal(false);
     };
 
@@ -288,11 +272,9 @@ export default function Odeme() {
 
     const handleAutoRenewChange = (e) => {
         const isChecked = e.target.checked;
-        // In a real app, send this update to the backend
         console.log("Auto renew changed", isChecked);
-        // Optimistically update state (or wait for API response)
         setSubscriptionInfo(prev => ({...prev, autoRenew: isChecked}));
-        handleSaveSettings(); // Indicate settings were saved
+        handleSaveSettings();
     };
 
     const handleOpenBillingAddressModal = () => {
@@ -312,17 +294,13 @@ export default function Odeme() {
     };
 
     const handleSaveBillingAddress = () => {
-        // In a real app, send editedBillingAddress to the backend
         console.log("Saving billing address:", editedBillingAddress);
-        setBillingAddress({...editedBillingAddress}); // Optimistic update
-        handleSaveSettings(); // Indicate settings were saved
+        setBillingAddress({...editedBillingAddress});
+        handleSaveSettings();
         handleCloseBillingAddressModal();
     };
 
-    // Removed handleSaveBillingAddressModal as handleSaveBillingAddress does both now
-
     const handleOpenCancelModal = () => {
-        // Only allow canceling if NOT on the free plan
         if (getCurrentSubscriptionType() !== "free") {
             setOpenCancelModal(true);
         }
@@ -333,17 +311,14 @@ export default function Odeme() {
     };
 
     const handleCancelSubscription = () => {
-        // In a real app, send cancellation request to the backend
         console.log("Cancelling subscription...");
-        handleSaveSettings(); // Indicate cancellation process started/completed
+        handleSaveSettings();
         handleCloseCancelModal();
-        // Potentially update subscriptionInfo to reflect pending cancellation or switch to free immediately
-        // For this example, we'll just show the success message
     };
 
     const isFreePlan = getCurrentSubscriptionType() === "free";
     const planTabLabel = isFreePlan ? "Plan Seçin" : "Plan Karşılaştırma";
-    const invoiceTabDisabled = isFreePlan; // Disable invoice tab if free
+    const invoiceTabDisabled = isFreePlan;
 
     return (
         <Default>
@@ -353,8 +328,19 @@ export default function Odeme() {
                 </Typography>
 
                 {saveSuccess && (
-                    <Alert severity="success" sx={{mb: 2}}>
-                        İşleminiz başarıyla tamamlandı!
+                    <Alert
+                        severity="success"
+                        sx={{mb: 2}}
+                        className="success-alert"
+                        icon={<CheckCircle fontSize="inherit" />}
+                        action={
+                            <Button color="inherit" size="small" onClick={() => setSaveSuccess(false)}>
+                                KAPAT
+                            </Button>
+                        }
+                    >
+                        <AlertTitle>İşlem Başarılı</AlertTitle>
+                        Değişiklikleriniz başarıyla kaydedildi!
                     </Alert>
                 )}
 
@@ -371,14 +357,14 @@ export default function Odeme() {
                             icon={<ReceiptLong/>}
                             iconPosition="start"
                             label="Faturalar ve Ödeme Geçmişi"
-                            disabled={invoiceTabDisabled} // Disable if free plan
-                            sx={invoiceTabDisabled ? {opacity: 0.5} : {}} // Visually indicate disabled
+                            disabled={invoiceTabDisabled}
+                            sx={invoiceTabDisabled ? {opacity: 0.5} : {}}
                         />
                         <Tab
                             icon={<Compare/>}
                             iconPosition="start"
                             label={planTabLabel}
-                            className={isFreePlan ? 'highlighted-tab' : ''} // Apply class for highlighting
+                            className={isFreePlan ? 'highlighted-tab' : ''}
                         />
                     </Tabs>
                 </Box>
@@ -398,7 +384,7 @@ export default function Odeme() {
                                         <Box sx={{display: 'flex', justifyContent: 'center', p: 4}}>
                                             <CircularProgress/>
                                         </Box>
-                                    ) : isFreePlan ? ( // Check isFreePlan here
+                                    ) : isFreePlan ? (
                                         <Paper elevation={0} variant="outlined" sx={{
                                             p: 4,
                                             mb: 4,
@@ -410,29 +396,35 @@ export default function Odeme() {
                                                 <Grid item xs={12} md={8}>
                                                     <Box sx={{color: 'white'}}>
                                                         <Typography variant="h3" gutterBottom fontWeight="bold">
-                                                            Aktif Paketiniz Bulunmamaktadır.
+                                                            Aktif Paketiniz Bulunmamaktadır
                                                         </Typography>
-                                                        <Typography variant="body1" sx={{opacity: 0.9, mb: 2}}>
-                                                            Diyetia'yı kullanmak için, paket satın almanız
-                                                            gerekmektedir.
-                                                        </Typography>
-                                                        <Box sx={{mt: 4, display: 'flex', gap: 1, flexWrap: 'wrap'}}>
-                                                            {subscriptionInfo.features.map((feature, index) => (
-                                                                <Chip
-                                                                    key={index}
-                                                                    label={feature}
-                                                                    size="small"
-                                                                    icon={<Check sx={{color: 'white !important'}}/>}
-                                                                    sx={{
-                                                                        backgroundColor: 'rgba(255,255,255,0.2)',
-                                                                        color: 'white',
-                                                                        '& .MuiChip-icon': {
-                                                                            color: 'white'
-                                                                        },
-                                                                        mb: 1
-                                                                    }}
-                                                                />
-                                                            ))}
+                                                        <Box sx={{
+                                                            p: 2.5,
+                                                            mb: 3,
+                                                            borderRadius: 2,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            background: 'linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0.25))',
+                                                            borderLeft: '4px solid #ffeb3b',
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                                        }}>
+                                                            <WarningIcon sx={{
+                                                                color: '#ffeb3b',
+                                                                fontSize: 24,
+                                                                mr: 1.5,
+                                                                filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.2))'
+                                                            }} />
+                                                            <Typography
+                                                                variant="subtitle1"
+                                                                fontWeight="medium"
+                                                                sx={{
+                                                                    color: 'white',
+                                                                    letterSpacing: '0.2px',
+                                                                    textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                                                }}
+                                                            >
+                                                                Diyetia'yı kullanmak için, paket satın almanız gerekmektedir.
+                                                            </Typography>
                                                         </Box>
                                                     </Box>
                                                 </Grid>
@@ -462,12 +454,11 @@ export default function Odeme() {
                                                             <Typography variant="body2" sx={{mb: 1}}>
                                                                 Hemen premium özelliklere erişin!
                                                             </Typography>
-                                                            {/* Button to go to Plan Comparison tab */}
                                                             <Button
                                                                 variant="contained"
-                                                                color="primary" // Use primary color for better visibility
+                                                                color="primary"
                                                                 sx={{mt: 2}}
-                                                                onClick={() => handleTabChange(null, 2)} // Change tab to Plan Comparison (index 2)
+                                                                onClick={() => handleTabChange(null, 2)}
                                                                 startIcon={<Compare/>}
                                                             >
                                                                 Premium Planları Keşfedin
@@ -477,7 +468,7 @@ export default function Odeme() {
                                                 </Grid>
                                             </Grid>
                                         </Paper>
-                                    ) : ( // Display paid plan info
+                                    ) : (
                                         <Paper elevation={0} variant="outlined" sx={{
                                             p: 4,
                                             mb: 4,
@@ -525,20 +516,7 @@ export default function Odeme() {
 
                                                         <Box sx={{mt: 4}}>
                                                             <Typography variant="body2" sx={{mb: 1}}>
-                                                                Abonelik Başlangıç: <b>15 Ocak
-                                                                2023</b> {/* Mock date */}
-                                                            </Typography>
-                                                            {/* Only show client count if applicable or not unlimited */}
-                                                            {getCurrentSubscriptionType() === 'starter' && (
-                                                                <Typography variant="body2" sx={{mb: 1}}>
-                                                                    Toplam Danışan
-                                                                    Sayınız: <b>{dietitianInfo?.current_clients || 0} /
-                                                                    25</b> {/* Mock client count */}
-                                                                </Typography>
-                                                            )}
-                                                            <Typography variant="body2">
-                                                                Kullanım
-                                                                Durumu: <b>%{getCurrentSubscriptionType() === 'starter' ? Math.round((dietitianInfo?.current_clients || 0) / 25 * 100) : 'N/A'}</b> {/* Mock usage % */}
+                                                                Abonelik Başlangıç: <b> - </b>
                                                             </Typography>
                                                         </Box>
                                                     </Box>
@@ -574,14 +552,12 @@ export default function Odeme() {
                                                                 Sonraki ödeme
                                                                 tarihi: <b>{subscriptionInfo.nextPaymentDate}</b>
                                                             </Typography>
-                                                            {/* Calculate remaining days based on nextPaymentDate (requires parsing date strings) */}
                                                             <Typography variant="body2" sx={{mb: 1}}>
-                                                                Kalan gün: <b>12 gün</b> {/* Mock remaining days */}
+                                                                Kalan gün: <b> - </b>
                                                             </Typography>
-                                                            {/* Button to go to Plan Comparison tab for upgrading/changing */}
                                                             <Button
                                                                 variant="outlined"
-                                                                color="inherit" // Use inherit to get color from parent (white)
+                                                                color="inherit"
                                                                 sx={{
                                                                     mt: 2,
                                                                     color: 'white',
@@ -590,7 +566,7 @@ export default function Odeme() {
                                                                         backgroundColor: 'rgba(255,255,255,0.1)'
                                                                     }
                                                                 }}
-                                                                onClick={() => handleTabChange(null, 2)} // Change tab to Plan Comparison (index 2)
+                                                                onClick={() => handleTabChange(null, 2)}
                                                                 startIcon={<Compare/>}
                                                             >
                                                                 Planları Keşfedin
@@ -765,7 +741,7 @@ export default function Odeme() {
                                         <Box sx={{display: 'flex', justifyContent: 'center', p: 2}}>
                                             <CircularProgress size={24}/>
                                         </Box>
-                                    ) : isFreePlan ? ( // Check isFreePlan here
+                                    ) : isFreePlan ? (
                                         <Box>
                                             <Box sx={{
                                                 display: 'flex',
@@ -786,7 +762,7 @@ export default function Odeme() {
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
-                                                    onClick={() => handleTabChange(null, 2)} // Change tab to Plan Comparison (index 2)
+                                                    onClick={() => handleTabChange(null, 2)}
                                                     sx={{mt: 2}}
                                                     startIcon={<Compare/>}
                                                 >
@@ -794,7 +770,7 @@ export default function Odeme() {
                                                 </Button>
                                             </Box>
                                         </Box>
-                                    ) : ( // Display paid summary
+                                    ) : (
                                         <>
                                             <Box sx={{mb: 3}}>
                                                 <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
@@ -818,15 +794,8 @@ export default function Odeme() {
                                                 <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
                                                     <Typography variant="body2" fontWeight="500">Ödeme
                                                         Yöntemi</Typography>
-                                                    {/* Conditionally show payment method only if available */}
                                                     <Typography
-                                                        variant="body2">{paymentMethods.length > 0 ? `VISA **** ${paymentMethods[0].lastFour}` : 'Belirtilmemiş'}</Typography>
-                                                </Box>
-                                                <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
-                                                    <Typography variant="body2" fontWeight="500">Otomatik
-                                                        Yenileme</Typography>
-                                                    <Typography
-                                                        variant="body2">{subscriptionInfo.autoRenew ? 'Aktif' : 'Pasif'}</Typography>
+                                                        variant="body2">{paymentMethods.length > 0 ? `**** ${paymentMethods[0].lastFour}` : 'Belirtilmemiş'}</Typography>
                                                 </Box>
                                             </Box>
 
@@ -835,15 +804,7 @@ export default function Odeme() {
                                             <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 1}}>
                                                 <Typography variant="body1" fontWeight="500">Aylık Ücret</Typography>
                                                 <Typography variant="body1"
-                                                            fontWeight="500">₺{subscriptionInfo.price}</Typography>
-                                            </Box>
-
-                                            {/* Calculate and display VAT */}
-                                            <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 1}}>
-                                                <Typography variant="body2" color="text.secondary">KDV
-                                                    (%18)</Typography>
-                                                <Typography variant="body2"
-                                                            color="text.secondary">₺{Math.round(subscriptionInfo.price * 0.18)}</Typography>
+                                                            fontWeight="500">{subscriptionInfo.price}₺</Typography>
                                             </Box>
 
                                             <Box sx={{
@@ -855,17 +816,15 @@ export default function Odeme() {
                                                 borderRadius: 1
                                             }}>
                                                 <Typography variant="subtitle1" fontWeight="bold">Toplam</Typography>
-                                                {/* Include VAT in Total? Usually prices shown are inclusive, clarify if needed */}
                                                 <Typography variant="subtitle1"
-                                                            fontWeight="bold">₺{subscriptionInfo.price + Math.round(subscriptionInfo.price * 0.18)}</Typography>
+                                                            fontWeight="bold">{subscriptionInfo.price}₺</Typography>
                                             </Box>
 
                                             <Typography variant="body2" color="text.secondary" sx={{mt: 2}}>
                                                 Tüm fiyatlara KDV dahildir. Faturanız her ayın 15'inde otomatik olarak
-                                                oluşturulacaktır. {/* Update date if fetch provides it */}
+                                                oluşturulacaktır.
                                             </Typography>
 
-                                            {/* Only show download button if invoices exist */}
                                             {invoiceHistory.length > 0 && (
                                                 <Button
                                                     variant="contained"
@@ -887,7 +846,6 @@ export default function Odeme() {
 
                 {/* Faturalar ve Ödeme Geçmişi Tab */}
                 {activeTab === 1 && (
-                    // Conditionally show content or disabled message
                     <Card variant="outlined" className="payment-card">
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
@@ -899,7 +857,7 @@ export default function Odeme() {
                                 <Box sx={{display: 'flex', justifyContent: 'center', p: 4}}>
                                     <CircularProgress/>
                                 </Box>
-                            ) : isFreePlan || invoiceHistory.length === 0 ? ( // Check isFreePlan or empty history
+                            ) : isFreePlan || invoiceHistory.length === 0 ? (
                                 <Box sx={{textAlign: 'center', py: 4}}>
                                     <ReceiptLong sx={{fontSize: 60, color: '#bdbdbd', mb: 2}}/>
                                     <Typography variant="h6" gutterBottom>
@@ -908,14 +866,14 @@ export default function Odeme() {
                                     <Typography variant="body1" color="text.secondary" paragraph>
                                         {isFreePlan ?
                                             "Ücretsiz paketi kullandığınız için henüz fatura oluşturulmamıştır."
-                                            : "Henüz bir fatura kaydı bulunmamaktadır." // Message for paid but no invoices yet
+                                            : "Henüz bir fatura kaydı bulunmamaktadır."
                                         }
                                     </Typography>
-                                    {isFreePlan && ( // Only show button for free plan
+                                    {isFreePlan && (
                                         <Button
                                             variant="contained"
                                             color="primary"
-                                            onClick={() => handleTabChange(null, 2)} // Go to Plan Comparison
+                                            onClick={() => handleTabChange(null, 2)}
                                             sx={{mt: 2}}
                                             startIcon={<Compare/>}
                                         >
@@ -923,63 +881,97 @@ export default function Odeme() {
                                         </Button>
                                     )}
                                 </Box>
-                            ) : ( // Display invoice history for paid plans with history
+                            ) : (
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} lg={8}>
-                                        <Paper variant="outlined" sx={{mb: 3}}>
+                                        <Paper variant="outlined" sx={{
+                                            mb: 3,
+                                            borderRadius: 2,
+                                            overflow: 'hidden',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                                        }}>
                                             <Box sx={{width: '100%', overflowX: 'auto'}}>
-                                                <Box sx={{minWidth: 650, p: 2}}>
-                                                    <Grid container sx={{
+                                                <Box sx={{minWidth: 650}}>
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        bgcolor: '#f5f5f5',
+                                                        p: 2,
                                                         fontWeight: 'bold',
-                                                        p: 1.5,
-                                                        borderBottom: '2px solid #f0f0f0'
+                                                        borderBottom: '2px solid #e0e0e0'
                                                     }}>
-                                                        <Grid item xs={3}>
+                                                        <Box sx={{ width: '25%' }}>
                                                             <Typography variant="subtitle2">Tarih</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
+                                                        </Box>
+                                                        <Box sx={{ width: '25%' }}>
                                                             <Typography variant="subtitle2">Tutar</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
+                                                        </Box>
+                                                        <Box sx={{ width: '25%' }}>
                                                             <Typography variant="subtitle2">Durum</Typography>
-                                                        </Grid>
-                                                        <Grid item xs={3}>
+                                                        </Box>
+                                                        <Box sx={{ width: '25%' }}>
                                                             <Typography variant="subtitle2">İşlemler</Typography>
-                                                        </Grid>
-                                                    </Grid>
+                                                        </Box>
+                                                    </Box>
 
                                                     {invoiceHistory.map((invoice, index) => (
-                                                        <Grid container key={index} sx={{
-                                                            p: 1.5,
-                                                            borderBottom: '1px solid #f0f0f0',
-                                                            '&:hover': {backgroundColor: '#f9f9f9'}
-                                                        }}>
-                                                            <Grid item xs={3}>
+                                                        <Box
+                                                            key={index}
+                                                            sx={{
+                                                                display: 'flex',
+                                                                p: 2,
+                                                                borderBottom: '1px solid #f0f0f0',
+                                                                '&:hover': {
+                                                                    backgroundColor: '#f9f9f9',
+                                                                    transform: 'translateY(-2px)',
+                                                                    transition: 'all 0.2s ease'
+                                                                },
+                                                                '&:last-child': {
+                                                                    borderBottom: 'none'
+                                                                }
+                                                            }}
+                                                            className="invoice-item"
+                                                        >
+                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
                                                                 <Typography variant="body2">{invoice.date}</Typography>
-                                                            </Grid>
-                                                            <Grid item xs={3}>
+                                                            </Box>
+                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
                                                                 <Typography
-                                                                    variant="body2">{invoice.amount}</Typography>
-                                                            </Grid>
-                                                            <Grid item xs={3}>
+                                                                    variant="body2"
+                                                                    sx={{
+                                                                        fontWeight: 'medium',
+                                                                        color: '#1976d2'
+                                                                    }}
+                                                                >
+                                                                    {invoice.amount}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
                                                                 <Chip
                                                                     label={invoice.status}
                                                                     size="small"
                                                                     color="success"
-                                                                    sx={{height: 24}}
+                                                                    sx={{
+                                                                        height: 24,
+                                                                        borderRadius: '6px',
+                                                                        fontWeight: 500
+                                                                    }}
                                                                 />
-                                                            </Grid>
-                                                            <Grid item xs={3}>
+                                                            </Box>
+                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
                                                                 <Button
                                                                     size="small"
                                                                     variant="outlined"
                                                                     startIcon={<Download fontSize="small"/>}
-                                                                    sx={{fontSize: '0.75rem'}}
+                                                                    sx={{
+                                                                        fontSize: '0.75rem',
+                                                                        borderRadius: '8px',
+                                                                        textTransform: 'none'
+                                                                    }}
                                                                 >
-                                                                    İndir
+                                                                    Fatura İndir
                                                                 </Button>
-                                                            </Grid>
-                                                        </Grid>
+                                                            </Box>
+                                                        </Box>
                                                     ))}
                                                 </Box>
                                             </Box>
@@ -987,7 +979,20 @@ export default function Odeme() {
                                     </Grid>
 
                                     <Grid item xs={12} lg={4}>
-                                        <Card variant="outlined" sx={{height: '100%'}}>
+                                        <Card
+                                            variant="outlined"
+                                            sx={{
+                                                height: '100%',
+                                                borderRadius: 2,
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
+                                                    transform: 'translateY(-4px)'
+                                                }
+                                            }}
+                                            className="payment-card"
+                                        >
                                             <CardContent>
                                                 <Typography variant="h6" gutterBottom>
                                                     Fatura Özeti
@@ -995,24 +1000,47 @@ export default function Odeme() {
                                                 <Divider sx={{mb: 3}}/>
 
                                                 <Box sx={{mb: 3}}>
-                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
-                                                        <Typography variant="body2" color="text.secondary">Toplam
-                                                            Fatura</Typography>
-                                                        <Typography variant="body2"
-                                                                    fontWeight="500">{invoiceHistory.length}</Typography>
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        mb: 2,
+                                                        p: 1.5,
+                                                        borderRadius: 1,
+                                                        bgcolor: 'rgba(0,0,0,0.02)'
+                                                    }}>
+                                                        <Typography variant="body2" color="text.secondary">Toplam Fatura</Typography>
+                                                        <Typography variant="body1" fontWeight="500">{invoiceHistory.length}</Typography>
                                                     </Box>
-                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
-                                                        <Typography variant="body2" color="text.secondary">Toplam
-                                                            Ödenen</Typography>
-                                                        {/* Calculate total based on history */}
-                                                        <Typography variant="body2"
-                                                                    fontWeight="500">₺{invoiceHistory.reduce((sum, item) => sum + parseFloat(item.amount.replace('₺', '')), 0)}</Typography>
+
+                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2, p: 1.5}}>
+                                                        <Typography variant="body2" color="text.secondary">Toplam Ödenen</Typography>
+                                                        <Typography variant="body1" fontWeight="500" color="primary">
+                                                            ₺{invoiceHistory.reduce((sum, item) => sum + parseFloat(item.amount.replace('₺', '')), 0)}
+                                                        </Typography>
                                                     </Box>
-                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
-                                                        <Typography variant="body2" color="text.secondary">Son
-                                                            Ödeme</Typography>
-                                                        <Typography variant="body2"
-                                                                    fontWeight="500">{invoiceHistory[0]?.date || 'N/A'}</Typography>
+
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        mb: 2,
+                                                        p: 1.5,
+                                                        borderRadius: 1,
+                                                        bgcolor: 'rgba(0,0,0,0.02)'
+                                                    }}>
+                                                        <Typography variant="body2" color="text.secondary">Son Ödeme</Typography>
+                                                        <Typography variant="body1" fontWeight="500">{invoiceHistory[0]?.date || 'N/A'}</Typography>
+                                                    </Box>
+
+                                                    <Box sx={{
+                                                        mt: 3,
+                                                        p: 2,
+                                                        bgcolor: '#e3f2fd',
+                                                        borderRadius: 2,
+                                                        border: '1px dashed #1976d2'
+                                                    }}>
+                                                        <Typography variant="body2" color="primary" fontWeight="medium">
+                                                            Faturalarınızı buradan indirebilir ve muhasebe işlemleriniz için kullanabilirsiniz.
+                                                        </Typography>
                                                     </Box>
                                                 </Box>
 
@@ -1021,7 +1049,17 @@ export default function Odeme() {
                                                         variant="contained"
                                                         color="primary"
                                                         fullWidth
+                                                        size="large"
                                                         startIcon={<Download/>}
+                                                        sx={{
+                                                            mt: 2,
+                                                            py: 1.5,
+                                                            borderRadius: 2,
+                                                            boxShadow: '0 4px 12px rgba(25,118,210,0.2)',
+                                                            '&:hover': {
+                                                                boxShadow: '0 6px 16px rgba(25,118,210,0.3)'
+                                                            }
+                                                        }}
                                                     >
                                                         Tüm Faturaları İndir
                                                     </Button>
@@ -1040,7 +1078,7 @@ export default function Odeme() {
                     <Card variant="outlined" className="payment-card">
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
-                                {planTabLabel} {/* Use the dynamic label */}
+                                {planTabLabel}
                             </Typography>
                             <Typography variant="body2" color="text.secondary" paragraph>
                                 İhtiyaçlarınıza en uygun planı seçin ve Diyetia'nın tüm potansiyelini kullanın.
@@ -1051,11 +1089,10 @@ export default function Odeme() {
                                 {plans.map((plan, index) => (
                                     <Grid item xs={12} md={4} key={index}>
                                         <Paper
-                                            elevation={0}
-                                            variant="outlined"
+                                            elevation={3}
                                             sx={{
                                                 p: 3,
-                                                borderRadius: 2,
+                                                borderRadius: 3,
                                                 height: '100%',
                                                 display: 'flex',
                                                 flexDirection: 'column',
@@ -1067,44 +1104,42 @@ export default function Odeme() {
                                                         ? 'linear-gradient(135deg, #004d40 0%, #00796b 100%)'
                                                         : 'linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)',
                                                 color: plan.type === "premium" || plan.type === "student" ? 'white' : 'inherit',
-                                                boxShadow: plan.popular ? '0 8px 16px rgba(33, 150, 243, 0.3)' : 'none',
+                                                boxShadow: plan.popular ? '0 8px 24px rgba(33, 150, 243, 0.4)' : 'none',
                                                 transform: plan.popular ? 'scale(1.05)' : 'scale(1)',
                                                 transition: 'all 0.3s ease',
                                                 '&:hover': {
                                                     transform: 'translateY(-5px)',
-                                                    boxShadow: plan.type === "premium"
-                                                        ? '0 12px 20px rgba(26, 35, 126, 0.4)'
-                                                        : plan.type === "student"
-                                                            ? '0 12px 20px rgba(0, 77, 64, 0.4)'
-                                                            : '0 12px 20px rgba(0, 0, 0, 0.1)'
+                                                    boxShadow: '0 16px 32px rgba(0, 0, 0, 0.15)'
                                                 }
                                             }}
+                                            className={`plan-card ${plan.popular ? 'popular' : ''} ${plan.type === getCurrentSubscriptionType() ? 'selected' : ''}`}
                                         >
                                             {plan.popular && (
                                                 <Chip
                                                     label="Popüler"
-                                                    color="primary"
+                                                    color="secondary"
                                                     size="small"
                                                     sx={{
                                                         position: 'absolute',
-                                                        top: -10,
-                                                        right: 20,
+                                                        top: -12,
+                                                        right: 24,
                                                         fontWeight: 'bold',
                                                         backgroundColor: '#ff9800',
-                                                        color: 'white'
+                                                        color: 'white',
+                                                        boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
+                                                        animation: 'pulse 2s infinite'
                                                     }}
                                                 />
                                             )}
 
-                                            {/* Icons for plans */}
+                                            {/* Plan type icons */}
                                             {plan.type === "premium" && (
                                                 <Box sx={{
                                                     position: 'absolute',
                                                     top: 10,
                                                     left: 10,
                                                     display: 'flex',
-                                                    alignItems: 'center',
-                                                    animation: 'pulse 2s infinite'
+                                                    alignItems: 'center'
                                                 }}>
                                                     <Diamond sx={{
                                                         color: '#8c9eff',
@@ -1198,8 +1233,27 @@ export default function Odeme() {
                                                         sx={{
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            mb: 1.5
+                                                            mb: 1.5,
+                                                            pl: 1,
+                                                            pr: 1,
+                                                            py: 0.75,
+                                                            borderRadius: 1,
+                                                            backgroundColor: feature.included
+                                                                ? (plan.type === "premium" || plan.type === "student")
+                                                                    ? 'rgba(255,255,255,0.1)'
+                                                                    : 'rgba(25,118,210,0.05)'
+                                                                : 'transparent',
+                                                            transition: 'all 0.2s',
+                                                            '&:hover': {
+                                                                backgroundColor: feature.included
+                                                                    ? (plan.type === "premium" || plan.type === "student")
+                                                                        ? 'rgba(255,255,255,0.2)'
+                                                                        : 'rgba(25,118,210,0.1)'
+                                                                    : 'transparent',
+                                                                transform: feature.included ? 'translateX(3px)' : 'none'
+                                                            }
                                                         }}
+                                                        className="subscription-feature-chip"
                                                     >
                                                         {feature.included ? (
                                                             <CheckCircle
@@ -1215,15 +1269,14 @@ export default function Odeme() {
                                                                 }}
                                                             />
                                                         ) : (
-                                                            <StarBorder // Or another icon for not included?
+                                                            <StarBorder
                                                                 fontSize="small"
                                                                 color="disabled"
                                                                 sx={{
                                                                     mr: 1,
-                                                                    // Make it visible but indicate not included
                                                                     color: plan.type === "premium" || plan.type === "student"
                                                                         ? 'rgba(255,255,255,0.5)'
-                                                                        : 'rgba(0,0,0,0.3)' // Use a different color for light background
+                                                                        : 'rgba(0,0,0,0.3)'
                                                                 }}
                                                             />
                                                         )}
@@ -1234,6 +1287,7 @@ export default function Odeme() {
                                                                     ? feature.included ? 'white' : 'rgba(255,255,255,0.7)'
                                                                     : feature.included ? 'text.primary' : 'text.secondary'
                                                             }
+                                                            sx={{ fontWeight: feature.included ? 500 : 'normal' }}
                                                         >
                                                             {feature.name}
                                                         </Typography>
@@ -1245,21 +1299,22 @@ export default function Odeme() {
                                                 variant={plan.popular ? "contained" : "outlined"}
                                                 color={
                                                     plan.type === "premium"
-                                                        ? "secondary" // Secondary for Premium to stand out on dark bg
+                                                        ? "secondary"
                                                         : plan.type === "student"
-                                                            ? "secondary" // Secondary for Student
+                                                            ? "secondary"
                                                             : "primary"
                                                 }
                                                 fullWidth
                                                 sx={{
                                                     mt: 3,
+                                                    py: plan.popular ? 1.5 : 1,
                                                     backgroundColor: plan.type === "premium"
                                                         ? '#8c9eff'
                                                         : plan.type === "student"
                                                             ? '#80cbc4'
-                                                            : plan.popular ? undefined : 'white', // Let primary contained handle default popular color
+                                                            : plan.popular ? undefined : 'white',
                                                     color: plan.type === "premium" || plan.type === "student"
-                                                        ? 'white' // Ensure white text on dark custom backgrounds
+                                                        ? 'white'
                                                         : undefined,
                                                     borderColor: plan.type === "premium"
                                                         ? '#8c9eff'
@@ -1271,11 +1326,14 @@ export default function Odeme() {
                                                             ? '#536dfe'
                                                             : plan.type === "student"
                                                                 ? '#4db6ac'
-                                                                : undefined
+                                                                : undefined,
+                                                        transform: 'scale(1.05)'
                                                     },
                                                     fontWeight: plan.popular ? 'bold' : 'normal',
                                                     fontSize: plan.popular ? '1rem' : '0.875rem',
-                                                    padding: plan.popular ? '10px 0' : '8px 0'
+                                                    borderRadius: 3,
+                                                    boxShadow: plan.popular ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
+                                                    transition: 'all 0.3s ease'
                                                 }}
                                                 disabled={
                                                     plan.type === getCurrentSubscriptionType()
@@ -1405,7 +1463,7 @@ export default function Odeme() {
                                     variant="contained"
                                     color="primary"
                                     onClick={() => {
-                                        handleSaveSettings(); // Indicate saving payment method
+                                        handleSaveSettings();
                                         handleCloseChangeModal();
                                     }}
                                 >
@@ -1502,18 +1560,17 @@ export default function Odeme() {
                                                                 ? '#8c9eff'
                                                                 : selectedPlan.type === "student"
                                                                     ? '#80cbc4'
-                                                                    : '#2196F3' // Primary color for light backgrounds
+                                                                    : '#2196F3'
                                                         }}
                                                     />
                                                 ) : (
-                                                    <StarBorder // Or another icon for not included?
+                                                    <StarBorder
                                                         fontSize="small"
                                                         sx={{
                                                             mr: 1,
-                                                            // Make it visible but indicate not included
                                                             color: selectedPlan.type === "premium" || selectedPlan.type === "student"
                                                                 ? 'rgba(255,255,255,0.5)'
-                                                                : 'rgba(0,0,0,0.3)' // Use a different color for light background
+                                                                : 'rgba(0,0,0,0.3)'
                                                         }}
                                                     />
                                                 )}
@@ -1545,7 +1602,7 @@ export default function Odeme() {
                                 </Stepper>
 
                                 {/* Summary section */}
-                                {!loading && ( // Only show if not loading
+                                {!loading && (
                                     <Box sx={{
                                         p: 2,
                                         bgcolor: '#e3f2fd',
@@ -1608,15 +1665,14 @@ export default function Odeme() {
                                     </Box>
                                 )}
 
-                                {/* === START: STUDENT PLAN INSTRUCTION === */}
                                 {selectedPlan?.type === 'student' && (
                                     <Box
                                         sx={{
                                             p: 2,
-                                            bgcolor: '#e8f5e9', // Light green background for info
+                                            bgcolor: '#e8f5e9',
                                             borderRadius: 1,
-                                            mb: 3, // Spacing before buttons
-                                            border: '1px dashed #4caf50', // Green dashed border
+                                            mb: 3,
+                                            border: '1px dashed #4caf50',
                                         }}
                                     >
                                         <Typography variant="body2" paragraph fontWeight="bold" color="success">
@@ -1635,9 +1691,6 @@ export default function Odeme() {
                                         </Typography>
                                     </Box>
                                 )}
-                                {/* === END: STUDENT PLAN INSTRUCTION === */}
-
-
                             </>
                         )}
 
@@ -1657,13 +1710,10 @@ export default function Odeme() {
                                 variant="contained"
                                 color="primary"
                                 onClick={() => {
-                                    // In a real app: Send request to change plan
                                     console.log("Confirming plan change to:", selectedPlan?.name);
-                                    handleSaveSettings(); // Indicate change process started/completed
+                                    handleSaveSettings();
                                     handleCloseUpgradeModal();
-                                    // Potentially update subscriptionInfo after successful API call
                                 }}
-                                // Disable button if no plan is selected (shouldn't happen based on flow, but good practice)
                                 disabled={!selectedPlan}
                             >
                                 Planı Onayla
@@ -1679,10 +1729,24 @@ export default function Odeme() {
                     aria-labelledby="billing-address-modal"
                 >
                     <Box className="payment-modal">
-                        <Typography id="billing-address-modal" variant="h6" component="h2" gutterBottom>
+                        <Typography id="billing-address-modal" variant="h6" component="h2" gutterBottom
+                            sx={{
+                                position: 'relative',
+                                '&:after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    bottom: '-8px',
+                                    left: 0,
+                                    width: '40px',
+                                    height: '3px',
+                                    backgroundColor: '#1976d2',
+                                    borderRadius: '2px'
+                                }
+                            }}
+                        >
                             Fatura Bilgilerini Düzenle
                         </Typography>
-                        <Divider sx={{mb: 3}}/>
+                        <Divider sx={{mb: 3, mt: 2}}/>
 
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
@@ -1693,6 +1757,10 @@ export default function Odeme() {
                                     value={editedBillingAddress.name}
                                     onChange={handleBillingAddressChange}
                                     variant="outlined"
+                                    autoComplete="name"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -1703,6 +1771,10 @@ export default function Odeme() {
                                     value={editedBillingAddress.company}
                                     onChange={handleBillingAddressChange}
                                     variant="outlined"
+                                    autoComplete="organization"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -1715,9 +1787,13 @@ export default function Odeme() {
                                     variant="outlined"
                                     multiline
                                     rows={2}
+                                    autoComplete="street-address"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     label="Şehir"
@@ -1725,9 +1801,13 @@ export default function Odeme() {
                                     value={editedBillingAddress.city}
                                     onChange={handleBillingAddressChange}
                                     variant="outlined"
+                                    autoComplete="address-level2"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     label="İlçe/Eyalet"
@@ -1735,9 +1815,13 @@ export default function Odeme() {
                                     value={editedBillingAddress.state}
                                     onChange={handleBillingAddressChange}
                                     variant="outlined"
+                                    autoComplete="address-level1"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     label="Posta Kodu"
@@ -1745,9 +1829,13 @@ export default function Odeme() {
                                     value={editedBillingAddress.zipCode}
                                     onChange={handleBillingAddressChange}
                                     variant="outlined"
+                                    autoComplete="postal-code"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     label="Ülke"
@@ -1755,29 +1843,52 @@ export default function Odeme() {
                                     value={editedBillingAddress.country}
                                     onChange={handleBillingAddressChange}
                                     variant="outlined"
+                                    autoComplete="country-name"
+                                    InputProps={{
+                                        sx: { borderRadius: 2 }
+                                    }}
                                 />
                             </Grid>
                         </Grid>
 
                         <Box sx={{
                             display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: 1,
-                            mt: 3
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: 2,
+                            mt: 4
                         }}>
-                            <Button
-                                variant="outlined"
-                                onClick={handleCloseBillingAddressModal}
-                            >
-                                İptal
-                            </Button>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleSaveBillingAddress}
-                            >
-                                Kaydet
-                            </Button>
+                            <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
+                                <EditIcon fontSize="small" sx={{ mr: 1 }} />
+                                <Typography variant="caption">
+                                    Fatura bilgileriniz faturalandırma amaçlı kullanılacaktır
+                                </Typography>
+                            </Box>
+
+                            <Box sx={{
+                                display: 'flex',
+                                gap: 1,
+                            }}>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleCloseBillingAddressModal}
+                                    sx={{ borderRadius: 2 }}
+                                >
+                                    İptal
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleSaveBillingAddress}
+                                    sx={{
+                                        borderRadius: 2,
+                                        px: 3,
+                                        boxShadow: '0 4px 8px rgba(25, 118, 210, 0.25)'
+                                    }}
+                                >
+                                    Kaydet
+                                </Button>
+                            </Box>
                         </Box>
                     </Box>
                 </Modal>
@@ -1830,10 +1941,10 @@ export default function Odeme() {
 
                             <Box sx={{
                                 p: 2,
-                                bgcolor: '#fff3e0', // Light orange background
+                                bgcolor: '#fff3e0',
                                 borderRadius: 1,
                                 mb: 3,
-                                border: '1px dashed #ff9800' // Orange dashed border
+                                border: '1px dashed #ff9800'
                             }}>
                                 <Typography variant="body2">
                                     İptal etmek yerine planınızı değiştirmek
