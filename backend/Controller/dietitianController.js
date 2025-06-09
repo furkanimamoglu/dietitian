@@ -623,6 +623,39 @@ class DietitianController {
         }
     }
 
+    static async updateClientWaterLimit(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {client_id, waterLimit} = req.body;
+
+            if (!client_id || waterLimit === undefined) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm parametreler doldurulmalıdır.'
+                });
+            }
+
+            const result = await DietitianService.updateClientWaterLimit(dietitian_id, client_id, waterLimit);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen,
+                message: err.message
+            });
+        }
+    }
+
 }
 
 module.exports = DietitianController;

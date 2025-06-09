@@ -82,15 +82,15 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 const initialWaterTrackingData = {
-    dailyGoal: 2500, // ml
+    dailyGoal: 2500,
     weeklyData: [
-        {day: 'Pazartesi', consumed: 2200, completed: false},
-        {day: 'Salı', consumed: 2500, completed: true},
-        {day: 'Çarşamba', consumed: 2700, completed: true},
-        {day: 'Perşembe', consumed: 1800, completed: false},
-        {day: 'Cuma', consumed: 2600, completed: true},
-        {day: 'Cumartesi', consumed: 2500, completed: true},
-        {day: 'Pazar', consumed: 1500, completed: false},
+        {day: 'Pazartesi', consumed: 0, completed: false},
+        {day: 'Salı', consumed: 0, completed: false},
+        {day: 'Çarşamba', consumed: 0, completed: false},
+        {day: 'Perşembe', consumed: 0, completed: false},
+        {day: 'Cuma', consumed: 0, completed: false},
+        {day: 'Cumartesi', consumed: 0, completed: false},
+        {day: 'Pazar', consumed: 0, completed: false},
     ]
 };
 
@@ -479,7 +479,6 @@ function Danisan() {
     const [currentInvoicePage, setCurrentInvoicePage] = useState(1);
     const invoicesPerPage = 4;
 
-    // Water tracking state - properly placed at the top level of the component
     const [waterTrackingData, setWaterTrackingData] = useState(initialWaterTrackingData);
 
     const [appointments, setAppointments] = useState([]);
@@ -502,7 +501,6 @@ function Danisan() {
     const [availableExercises, setAvailableExercises] = useState([]);
     const [availableExercisesLoading, setAvailableExercisesLoading] = useState(false);
 
-    // Add missing exercise history state variables
     const [exerciseHistory, setExerciseHistory] = useState([]);
     const [loadingExerciseHistory, setLoadingExerciseHistory] = useState(false);
     const [historyStartDate, setHistoryStartDate] = useState('');
@@ -520,11 +518,9 @@ function Danisan() {
         setSelectedFile(file);
     };
 
-    // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -567,7 +563,6 @@ function Danisan() {
         }
     };
 
-    // Kan Tahlili PDF Yükleme İşlevi
     const handleBloodTestFileUpload = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -586,12 +581,9 @@ function Danisan() {
             fileUrl: URL.createObjectURL(file)
         };
 
-        // Sadece state'i güncelliyoruz
         setBloodTestFiles(prevFiles => [newFile, ...prevFiles]);
         showSuccessToast("Kan tahlili dosyası başarıyla yüklendi.");
 
-        // Burada API çağrısı ile sunucuya dosyayı gönderebilirsiniz 
-        // Örnek: saveBloodTestFileToServer(file, id);
     };
 
     const handleDeleteBloodTestFile = (index) => {
@@ -609,7 +601,6 @@ function Danisan() {
         showSuccessToast("Kan tahlili dosyası başarıyla silindi.");
     };
 
-    // Anamnez dialogs için state tanımlamaları
     const [isAnamnezDialogOpen, setIsAnamnezDialogOpen] = useState(false);
     const [anamnezForm, setAnamnezForm] = useState({
         saglik_bilgileri: {
@@ -637,16 +628,13 @@ function Danisan() {
         ozel_notlar: ""
     });
 
-    // Anamnez düzenleme dialogunu açma fonksiyonu
     const handleOpenAnamnezDialog = () => {
-        // Eğer mevcut anamnez verileri varsa, formu bu verilerle dolduralım
         if (anamnezData) {
             setAnamnezForm(anamnezData);
         }
         setIsAnamnezDialogOpen(true);
     };
 
-    // Anamnez form alanlarındaki değişiklikleri yakalar (üst seviye alanlar için)
     const handleAnamnezFormChange = (e) => {
         const {name, value} = e.target;
         setAnamnezForm(prevForm => ({
@@ -655,7 +643,6 @@ function Danisan() {
         }));
     };
 
-    // İç içe geçmiş form alanları için değişiklikleri yakalar (sağlık bilgileri, diyet alışkanlıkları, vb.)
     const handleNestedAnamnezFormChange = (category, field, value) => {
         setAnamnezForm(prevForm => ({
             ...prevForm,
@@ -690,7 +677,6 @@ function Danisan() {
         }
     };
 
-    // Anamnez formunu kaydeder
     const handleSaveAnamnez = async () => {
         try {
             const response = await axios.put(
@@ -705,7 +691,6 @@ function Danisan() {
                 }
             );
 
-            // Verileri güncelleyelim
             fetchAnamnezData();
             setIsAnamnezDialogOpen(false);
 
@@ -717,7 +702,6 @@ function Danisan() {
         }
     };
 
-    // useEffect içerisinde anamnez verilerini çekelim
     useEffect(() => {
         if (activeTab === 'anamnez' && id) {
             fetchAnamnezData();
@@ -740,7 +724,6 @@ function Danisan() {
         // fetchBloodTests();
     }, [id]);
 
-    // Auto-hide success popup after 3 seconds
     useEffect(() => {
         let timer;
         if (showSuccessPopup) {
@@ -836,7 +819,6 @@ function Danisan() {
     const handleCreateMeasurement = async (e) => {
         e.preventDefault();
 
-        // Yüzde toplamı kontrolü
         const yag = parseFloat(measurementForm.yag) || 0;
         const kas = parseFloat(measurementForm.kas) || 0;
         const su = parseFloat(measurementForm.su) || 0;
@@ -936,7 +918,6 @@ function Danisan() {
     const handleUpdateMeasurement = async (e) => {
         e.preventDefault();
 
-        // Yüzde toplamı kontrolü
         const yag = parseFloat(editMeasurementForm.yag) || 0;
         const kas = parseFloat(editMeasurementForm.kas) || 0;
         const su = parseFloat(editMeasurementForm.su) || 0;
@@ -967,7 +948,6 @@ function Danisan() {
 
             handleCloseEditMeasurementDialog();
 
-            // Ölçümleri güncellemek için yeniden çek
             setMeasurementsLoading(true);
             const response = await axios.get(
                 config[config.environment].apiUrl + "/measurement/getClientMeasurement",
@@ -1054,7 +1034,6 @@ function Danisan() {
     const calculateBMI = useMemo(() => {
         if (!measurements || measurements.length === 0) return null;
 
-        // Use either the height from measurements or from danisan profile
         const height = measurements[0].boy || danisan?.boy;
         const weight = measurements[0].kilo;
 
@@ -1063,29 +1042,38 @@ function Danisan() {
         const heightInM = height / 100;
         const bmi = (weight / (heightInM * heightInM)).toFixed(1);
 
-        // BMI kategorisi belirleme
         let category = '';
         let color = '';
 
         if (bmi < 18.5) {
             category = 'Zayıf';
-            color = 'info.main'; // Mavi
+            color = 'info.main';
         } else if (bmi >= 18.5 && bmi < 25) {
             category = 'Normal Kilo';
-            color = 'success.main'; // Yeşil
+            color = 'success.main';
         } else if (bmi >= 25 && bmi < 30) {
             category = 'Fazla Kilolu';
-            color = 'warning.main'; // Sarı
+            color = 'warning.main';
         } else if (bmi >= 30 && bmi < 35) {
             category = 'Hafif Obez';
-            color = 'orange'; // Turuncu
+            color = 'orange';
         } else {
             category = 'Obez';
-            color = 'error.main'; // Kırmızı
+            color = 'error.main';
         }
 
         return {value: bmi, category, color};
     }, [measurements, danisan]);
+
+    useEffect(() => {
+        console.log(danisan);
+        if (danisan && danisan.dailyWaterIntake) {
+            setWaterTrackingData(prevData => ({
+                ...prevData,
+                dailyGoal: danisan.dailyWaterIntake
+            }));
+        }
+    }, [danisan]);
 
     useEffect(() => {
         const fetchDanisanInfo = async () => {
@@ -1106,35 +1094,7 @@ function Danisan() {
                     throw new Error("Danışan bilgisi bulunamadı");
                 }
 
-                const {
-                    name,
-                    surname,
-                    email,
-                    phoneNumber,
-                    gender,
-                    boy,
-                    weight,
-                    status,
-                    birthDate,
-                    job,
-                    maritalStatus,
-                    city,
-                } = response.data;
-
-                setDanisan({
-                    name,
-                    surname,
-                    email,
-                    phoneNumber,
-                    gender,
-                    boy,
-                    weight,
-                    status,
-                    birthDate: birthDate || '-',
-                    job: job || '-',
-                    maritalStatus: maritalStatus || '-',
-                    city: city || '-',
-                });
+                setDanisan(response.data);
             } catch (err) {
                 console.error("Hata:", err.message);
                 navigate('/404');
@@ -1329,10 +1289,8 @@ function Danisan() {
         fetchMeasurements();
     }, [activeTab, id]);
 
-    // Add this after other useEffect hooks
     useEffect(() => {
         if (activeTab === 'egzersiz' && id && !historyStartDate && !historyEndDate) {
-            // Initialize exercise history date range with last 30 days
             const endDate = new Date();
             const startDate = new Date();
             startDate.setDate(endDate.getDate() - 30);
@@ -1436,7 +1394,6 @@ function Danisan() {
             );
         }
 
-        // Eski format - isim ve yenildi özellikleri olan nesneler dizisi
         if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
             return (
                 <>
@@ -1463,7 +1420,6 @@ function Danisan() {
             );
         }
 
-        // Diğer eski formatlar için kontroller
         if (typeof mealItems === 'string') {
             return mealItems;
         }
@@ -2425,11 +2381,9 @@ function Danisan() {
                                                 {nutritionPlan[selectedPlanIndex]?.mealPlan &&
                                                   Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).length > 0 &&
                                                   (() => {
-                                                    // İlk günün öğünlerini al (tüm günlerde aynı öğünler olduğunu varsayıyoruz)
                                                     const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
                                                     const meals = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay] || {});
 
-                                                    // Öğün renklerini belirle
                                                     const mealColors = {
                                                         'Kahvaltı': 'primary.light',
                                                         'Öğle Yemeği': 'warning.light',
@@ -2439,7 +2393,6 @@ function Danisan() {
                                                         'default': 'secondary.light'
                                                     };
 
-                                                    // Öğün görüntü adları
                                                     const mealDisplayNames = {
                                                         'Kahvaltı': 'Kahvaltı',
                                                         'Öğle Yemeği': 'Öğle',
@@ -2529,7 +2482,6 @@ function Danisan() {
                                     </Box>
                                 ) : nutritionPlan && nutritionPlan.length > 0 ? (
                                     nutritionPlan.map((plan, index) => {
-                                        // Calculate how many meals have been eaten in this plan
                                         let totalMeals = 0;
                                         let eatenMeals = 0;
 
@@ -2540,11 +2492,9 @@ function Danisan() {
                                                         const meals = plan.mealPlan[day][mealType];
                                                         if (Array.isArray(meals) && meals.length > 0) {
                                                             if (meals[0].hasOwnProperty('isim')) {
-                                                                // New format with isim and yenildi
                                                                 totalMeals += meals.length;
                                                                 eatenMeals += meals.filter(meal => meal.yenildi).length;
                                                             } else {
-                                                                // Old format
                                                                 totalMeals += meals.length;
                                                             }
                                                         }
@@ -2635,14 +2585,11 @@ function Danisan() {
             case 'randevu':
                 const now = new Date();
                 const upcomingAppointments = appointments.filter(app =>
-                    // Include all appointments with start date in the future (within next 7 days)
-                    // Changed status filter to only exclude canceled appointments
                     (app.status !== 'canceled' && app.status !== 'cancelled') &&
                     new Date(app.start) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) &&
                     new Date(app.start) > now
                 );
                 const pastAppointments = appointments.filter(app =>
-                    // Include all past appointments except cancelled ones
                     (app.status !== 'canceled' && app.status !== 'cancelled') &&
                     (new Date(app.start) <= now)
                 );
@@ -2985,7 +2932,7 @@ function Danisan() {
                                 variant="contained"
                                 color="primary"
                                 startIcon={<AddIcon/>}
-                                onClick={handleOpenAssignExerciseDialog} // Popup açma fonksiyonu
+                                onClick={handleOpenAssignExerciseDialog}
                             >
                                 Yeni Egzersiz Ata
                             </Button>
@@ -3748,7 +3695,6 @@ function Danisan() {
                 }
             );
             setAssignForm({exercise_id: '', start_date: '', end_date: '', note: ''});
-            // Başarıyla atandıktan sonra egzersizleri tekrar çek
             setAssignedExercisesLoading(true);
             const response = await axios.get(
                 config[config.environment].apiUrl + "/exercise/getAssignedExercisesByClient",
@@ -3799,7 +3745,7 @@ function Danisan() {
             );
 
             setIsAddAppointmentDialogOpen(false);
-            setAppointmentForm({title: '', start: '', end: ''}); // Reset form
+            setAppointmentForm({title: '', start: '', end: ''});
 
             setAppointmentsLoading(true);
             const appointmentsResponse = await axios.get(
@@ -3823,7 +3769,6 @@ function Danisan() {
         }
     };
 
-    // Function to fetch exercise history
     const fetchExerciseHistory = (startDate, endDate) => {
         if (!id || !startDate || !endDate) return;
 
@@ -3847,7 +3792,6 @@ function Danisan() {
             });
     };
 
-    // Handle date changes for history filtering
     const handleHistoryDateChange = (dateType, newValue) => {
         const formattedDate = newValue ? newValue.toISOString().split('T')[0] : '';
 

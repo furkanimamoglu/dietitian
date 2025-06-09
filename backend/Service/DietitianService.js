@@ -601,6 +601,32 @@ class DietitianService {
         }
     }
 
+    static async updateClientWaterLimit(dietitian_id, client_id, waterLimit) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: dietitian_id
+                }
+            });
+
+            if (!client) {
+                throw new Exception('Client bulunamadı veya erişim yetkiniz yok.', 400, true);
+            }
+
+            client.dailyWaterIntake = waterLimit;
+            await client.save();
+
+            return client;
+        } catch (error) {
+            throw new Exception(error.message, 400);
+        }
+    }
+
 }
 
 module.exports = DietitianService;
