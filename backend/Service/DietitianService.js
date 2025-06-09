@@ -577,6 +577,30 @@ class DietitianService {
         }
     }
 
+    static async changeDietitianSubscriptionToFree(dietitian_id) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401, true);
+            }
+
+            const dietitian = await Dietitian.findByPk(dietitian_id);
+
+            if (!dietitian) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            await dietitian.update({
+                subscription_start_date: null,
+                subscription_end_date: null,
+                subscription_type: 'free'
+            });
+
+            return {message: "Abonelik başarıyla ücretsiz olarak değiştirildi."};
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
+        }
+    }
+
 }
 
 module.exports = DietitianService;
