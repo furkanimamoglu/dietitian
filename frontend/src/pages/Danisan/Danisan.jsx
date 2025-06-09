@@ -3858,7 +3858,7 @@ function Danisan() {
                                     }}
                                 />
                                 <Typography variant="h5" sx={{fontWeight: 'bold', mb: 1, textAlign: 'center'}}>
-                                    {danisan.name} {danisan.surname}
+                                    {danisan.name}
                                 </Typography>
                                 <Divider sx={{width: '100%', my: 2}}/>
 
@@ -3879,25 +3879,6 @@ function Danisan() {
                                             primary={<Typography variant="body2"
                                                                  color="text.secondary">Cinsiyet</Typography>}
                                             secondary={<Typography variant="body1">{danisan.gender || '-'}</Typography>}
-                                        />
-                                    </ListItem>
-
-                                    <ListItem sx={{
-                                        py: 1,
-                                        px: 0,
-                                        borderBottom: '1px solid',
-                                        borderColor: 'divider'
-                                    }}>
-                                        <ListItemAvatar>
-                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
-                                                <Cake fontSize="small"/>
-                                            </Avatar>
-                                        </ListItemAvatar>
-                                        <ListItemText
-                                            primary={<Typography variant="body2" color="text.secondary">Doğum
-                                                Tarihi</Typography>}
-                                            secondary={<Typography
-                                                variant="body1">{danisan.birthDate || '-'}</Typography>}
                                         />
                                     </ListItem>
 
