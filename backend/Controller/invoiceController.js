@@ -88,7 +88,7 @@ class invoiceController {
                 });
             }
 
-            const {invoice_id, client_id, amount, status, package_id, issueDate, dueDate, description} = req.body;
+            const {invoice_id, client_id, amount, paid_amount, status, package_id, issueDate, dueDate, description} = req.body;
 
             const result = await InvoiceService.updateInvoice(
                 dietitian_id,
@@ -96,6 +96,7 @@ class invoiceController {
                 {
                     client_id,
                     amount,
+                    paid_amount,
                     status,
                     package_id,
                     issueDate,
