@@ -744,7 +744,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
-                            minutesStep={15}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -762,7 +762,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
-                            minutesStep={15}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -884,6 +884,7 @@ export default function Randevularim() {
                             }}
                             ampm={false} // 24 saat formatı için
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -901,6 +902,7 @@ export default function Randevularim() {
                             }}
                             ampm={false} // 24 saat formatı için
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
