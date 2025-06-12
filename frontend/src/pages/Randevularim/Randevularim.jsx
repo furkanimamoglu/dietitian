@@ -547,7 +547,7 @@ export default function Randevularim() {
                         eventResize={handleEventResizeOrDrop}
                         eventDrop={handleEventResizeOrDrop}
                         eventResizableFromStart={true}
-                        eventOverlap={false}
+                        eventOverlap={true}
                         eventContent={(arg) => {
                             const clientId = arg.event.extendedProps?.client_id;
 
