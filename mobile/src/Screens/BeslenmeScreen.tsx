@@ -140,12 +140,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     };
 
     const updateMealsFromPlan = (dayPlan: DailyMeal) => {
-        const newMeals: { [key: string]: MealItem[] } = {
-            Kahvaltı: [],
-            Öğle: [],
-            Akşam: [],
-            Aperatifler: []
-        };
+        // Artık öğün isimleri dinamik olduğundan, sabit bir newMeals objesi oluşturmuyoruz
+        const newMeals: { [key: string]: MealItem[] } = {};
 
         const processMealItems = (mealData: any, mealType: string) => {
             if (!mealData) return;
@@ -168,50 +164,22 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 mainItems = mealData.split(', ').map(item => item.trim()).filter(item => item !== '');
             }
 
-            const targetMeal = convertApiMealNameToAppMealName(mealType);
-            if (targetMeal && newMeals[targetMeal]) {
-                newMeals[targetMeal] = mainItems.map(item => {
-                    const itemAlternatives = alternatives[item] || [];
-                    return {
-                        item,
-                        checked: checkedItems[item] || false,
-                        portion: '1 porsiyon',
-                        alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
-                    };
-                });
-            }
+            // Artık sabit bir dönüşüm yapmak yerine, API'den gelen öğün ismini doğrudan kullanıyoruz
+            newMeals[mealType] = mainItems.map(item => {
+                const itemAlternatives = alternatives[item] || [];
+                return {
+                    item,
+                    checked: checkedItems[item] || false,
+                    portion: '1 porsiyon',
+                    alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
+                };
+            });
         };
 
-        const convertApiMealNameToAppMealName = (apiMealName: string): string => {
-            switch (apiMealName) {
-                case 'Kahvaltı':
-                    return 'Kahvaltı';
-                case 'Öğle Yemeği':
-                    return 'Öğle';
-                case 'Akşam Yemeği':
-                    return 'Akşam';
-                case 'Aparatif':
-                    return 'Aperatifler';
-                default:
-                    return '';
-            }
-        };
-
-        if (dayPlan.Kahvaltı) {
-            processMealItems(dayPlan.Kahvaltı, 'Kahvaltı');
-        }
-
-        if (dayPlan['Öğle Yemeği']) {
-            processMealItems(dayPlan['Öğle Yemeği'], 'Öğle Yemeği');
-        }
-
-        if (dayPlan['Akşam Yemeği']) {
-            processMealItems(dayPlan['Akşam Yemeği'], 'Akşam Yemeği');
-        }
-
-        if (dayPlan.Aparatif) {
-            processMealItems(dayPlan.Aparatif, 'Aparatif');
-        }
+        // Artık dinamik olarak dayPlan içindeki tüm öğün tipleri üzerinde işlem yapıyoruz
+        Object.keys(dayPlan).forEach(mealType => {
+            processMealItems(dayPlan[mealType], mealType);
+        });
 
         setMeals(newMeals);
     };
@@ -256,54 +224,45 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-            const today = new Date().getDay();
-            const todayTurkish = days[today];
-
-            const convertAppMealNameToApiMealName = (appMealName: string): string => {
-                switch (appMealName) {
-                    case 'Kahvaltı':
-                        return 'Kahvaltı';
-                    case 'Öğle':
-                        return 'Öğle Yemeği';
-                    case 'Akşam':
-                        return 'Akşam Yemeği';
-                    case 'Aperatifler':
-                        return 'Aparatif';
-                    default:
-                        return '';
-                }
-            };
-
-            const updatedDayPlan: DailyMeal = {
-                Kahvaltı: [],
-                'Öğle Yemeği': [],
-                'Akşam Yemeği': [],
-                Aparatif: []
-            };
-
-            Object.entries(updatedMeals).forEach(([mealType, items]) => {
-                const apiMealType = convertAppMealNameToApiMealName(mealType);
-                if (apiMealType) {
-                    updatedDayPlan[apiMealType as keyof DailyMeal] = items.map(item => ({
-                        isim: item.item,
-                        yenildi: item.checked
-                    }));
-                }
-            });
-
-            const mealPlanUpdate = {
-                nutrition_plan_id: nutritionPlanId,
-                mealPlan: {
-                    [todayTurkish]: updatedDayPlan
-                }
-            };
-
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
                 return;
             }
+
+            // Mevcut günü al
+            const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            const today = new Date().getDay();
+            const todayTurkish = days[today];
+
+            // Mevcut beslenme planında kullanılan güncel öğün yapısını kopyalayalım
+            // Bu şekilde diğer günlerin verileri korunacak
+            const updatedMealPlan = {...mealPlan};
+
+            // Eğer currentDay için öğün planı yoksa oluştur
+            if (!updatedMealPlan[currentDay]) {
+                updatedMealPlan[currentDay] = {};
+            }
+
+            // Her öğün tipi için işlem yap
+            Object.entries(updatedMeals).forEach(([mealType, items]) => {
+                // Eğer bu öğün tipi için bir kategori yoksa oluştur
+                if (!updatedMealPlan[currentDay][mealType]) {
+                    updatedMealPlan[currentDay][mealType] = { 'Ana Menü': [] };
+                }
+
+                // Ana menüye öğünleri ekle
+                updatedMealPlan[currentDay][mealType]['Ana Menü'] = items.map(item => ({
+                    name: item.item,
+                    eaten: item.checked,
+                    portion: item.portion || null
+                }));
+            });
+
+            const mealPlanUpdate = {
+                nutrition_plan_id: nutritionPlanId,
+                mealPlan: updatedMealPlan
+            };
 
             const response = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
                 method: 'POST',
