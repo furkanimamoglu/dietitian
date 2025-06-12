@@ -23,13 +23,6 @@ type Props = {
     navigation: NavigationProp;
 };
 
-interface DailyMealPlan {
-    Kahvaltı: string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    'Öğle Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    'Akşam Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    Aparatif: string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-}
-
 const BottomNav = ({navigation}: Props) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [showMealPopup, setShowMealPopup] = useState(false);
