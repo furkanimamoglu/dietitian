@@ -25,7 +25,8 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    TextField
+    TextField,
+    InputAdornment
 } from '@mui/material';
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -35,6 +36,7 @@ import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
+import Person from "@mui/icons-material/Person";
 
 
 export default function Randevularim() {
@@ -65,6 +67,25 @@ export default function Randevularim() {
     const calendarRef = useRef(null);
 
     useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setClients(response.data || []);
+
+                // Danışanlar çekildikten sonra randevuları çek
+                fetchAppointments();
+            } catch (error) {
+                console.error("Müşteriler çekilirken bir hata oluştu:", error);
+            }
+        };
+
         const fetchAppointments = async () => {
             try {
                 const response = await axios.get(
@@ -101,26 +122,7 @@ export default function Randevularim() {
             }
         };
 
-        fetchAppointments();
-    }, []);
-
-    useEffect(() => {
-        const fetchClients = async () => {
-            try {
-                const response = await axios.get(
-                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
-                    {
-                        headers: {
-                            Authorization: localStorage.getItem('token')
-                        }
-                    }
-                );
-                setClients(response.data || []);
-            } catch (error) {
-                console.error("Müşteriler çekilirken bir hata oluştu:", error);
-            }
-        };
-
+        // İlk önce danışanları çek
         fetchClients();
     }, []);
 
@@ -204,7 +206,7 @@ export default function Randevularim() {
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
-        // Validasyon durumlarını sıfırla
+
         setValidationErrors({
             title: false,
             start: false,
@@ -546,6 +548,77 @@ export default function Randevularim() {
                         eventDrop={handleEventResizeOrDrop}
                         eventResizableFromStart={true}
                         eventOverlap={false}
+                        eventContent={(arg) => {
+                            const clientId = arg.event.extendedProps?.client_id;
+
+                            const client = clients.find(c => String(c.id) === String(clientId));
+                            const clientName = client ? client.name : "";
+
+                            // Saat formatını ayarlama
+                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString('tr-TR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            }) : '';
+
+                            return (
+                                <div className="appointment-event" style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    padding: '1px',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{
+                                        fontSize: '0.8em',
+                                        fontWeight: 'bold',
+                                        padding: '2px 4px',
+                                        borderRadius: '3px',
+                                        marginBottom: '1px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>
+                                        <Person
+                                            style={{
+                                                fontSize: '0.9em',
+                                                color: '#0020ff',
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                        <span style={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            marginLeft: '2px'
+                                        }}>
+                                            {clientName || "Danışan belirtilmemiş"}
+                                        </span>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.75em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '0 4px'
+                                    }}>
+                                        <span style={{
+                                            fontWeight: 'bold',
+                                            flexShrink: 0
+                                        }}>
+                                            {startTime}
+                                        </span>
+                                        <span style={{
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
+                                        }}>
+                                            {arg.event.title}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        }}
                     />
                 </Box>
             </Grid2>
@@ -619,7 +692,8 @@ export default function Randevularim() {
                         options={clients}
                         getOptionLabel={(option) => option.name}
                         onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
-                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        value={clients.find((client) => String(client.id) === String(eventData.client_id)) || null}
+                        isOptionEqualToValue={(option, value) => String(option.id) === String(value.id)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -627,6 +701,28 @@ export default function Randevularim() {
                                 margin="normal"
                                 error={showValidation && validationErrors.client_id}
                                 helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start">
+                                                <Person color="primary" />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    )
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: 2,
+                                        }
+                                    }
+                                }}
                             />
                         )}
                         fullWidth
@@ -727,7 +823,8 @@ export default function Randevularim() {
                         options={clients}
                         getOptionLabel={(option) => option.name}
                         onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
-                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        value={clients.find((client) => String(client.id) === String(eventData.client_id)) || null}
+                        isOptionEqualToValue={(option, value) => String(option.id) === String(value.id)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -735,6 +832,28 @@ export default function Randevularim() {
                                 margin="normal"
                                 error={showValidation && validationErrors.client_id}
                                 helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start">
+                                                <Person color="primary" />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    )
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: 2,
+                                        }
+                                    }
+                                }}
                             />
                         )}
                         fullWidth
@@ -838,3 +957,4 @@ export default function Randevularim() {
         </Default>
     );
 }
+

@@ -342,6 +342,28 @@ class NutritionService {
         return await waterRecord.destroy();
     }
 
+    static async updateClientWaterGoal(dietitian_id, client_id, daily_goal) {
+        if (!dietitian_id || !client_id || !daily_goal) {
+            throw new Exception("Eksik parametreler.", 400, true);
+        }
+
+        const client = await Client.findOne({
+            where: {
+                id: client_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!client) {
+            throw new Exception("Bu danışan size ait değil.", 401, true);
+        }
+
+        client.dailyWaterIntake = daily_goal;
+        await client.save();
+
+        return client;
+    }
+
 }
 
 module.exports = NutritionService;

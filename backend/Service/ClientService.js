@@ -206,7 +206,7 @@ class ClientService {
             throw new Exception("Bugün için atanmış bir beslenme planı bulunamadı. Lütfen diyetisyeninizden size bir beslenme programı atamasını talep edin.", 404, true);
         }
 
-        return assignment.mealPlan;
+        return assignment;
     }
 
     static async getMyRecipes(client_id) {
