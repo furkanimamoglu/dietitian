@@ -65,6 +65,25 @@ export default function Randevularim() {
     const calendarRef = useRef(null);
 
     useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setClients(response.data || []);
+
+                // Danışanlar çekildikten sonra randevuları çek
+                fetchAppointments();
+            } catch (error) {
+                console.error("Müşteriler çekilirken bir hata oluştu:", error);
+            }
+        };
+
         const fetchAppointments = async () => {
             try {
                 const response = await axios.get(
@@ -101,26 +120,7 @@ export default function Randevularim() {
             }
         };
 
-        fetchAppointments();
-    }, []);
-
-    useEffect(() => {
-        const fetchClients = async () => {
-            try {
-                const response = await axios.get(
-                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
-                    {
-                        headers: {
-                            Authorization: localStorage.getItem('token')
-                        }
-                    }
-                );
-                setClients(response.data || []);
-            } catch (error) {
-                console.error("Müşteriler çekilirken bir hata oluştu:", error);
-            }
-        };
-
+        // İlk önce danışanları çek
         fetchClients();
     }, []);
 
@@ -204,7 +204,7 @@ export default function Randevularim() {
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
-        // Validasyon durumlarını sıfırla
+
         setValidationErrors({
             title: false,
             start: false,
@@ -546,6 +546,35 @@ export default function Randevularim() {
                         eventDrop={handleEventResizeOrDrop}
                         eventResizableFromStart={true}
                         eventOverlap={false}
+                        eventContent={(arg) => {
+                            const clientId = arg.event.extendedProps?.client_id;
+
+                            const client = clients.find(c => String(c.id) === String(clientId));
+                            const clientName = client ? client.name : "";
+
+                            console.log("Randevu bilgileri:", {
+                                title: arg.event.title,
+                                clientId: clientId,
+                                foundClient: client,
+                                availableClients: clients.length
+                            });
+
+                            return (
+                                <div className="appointment-event">
+                                    <div style={{
+                                        fontSize: '0.85em',
+                                        fontWeight: 'bold',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                        padding: '2px 4px',
+                                        borderRadius: '3px',
+                                        marginBottom: '2px'
+                                    }}>
+                                        {clientName || "Danışan belirtilmemiş"}
+                                    </div>
+                                    <div style={{ fontSize: '0.8em' }}>{arg.event.title}</div>
+                                </div>
+                            );
+                        }}
                     />
                 </Box>
             </Grid2>
@@ -619,7 +648,8 @@ export default function Randevularim() {
                         options={clients}
                         getOptionLabel={(option) => option.name}
                         onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
-                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        value={clients.find((client) => String(client.id) === String(eventData.client_id)) || null}
+                        isOptionEqualToValue={(option, value) => String(option.id) === String(value.id)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -727,7 +757,8 @@ export default function Randevularim() {
                         options={clients}
                         getOptionLabel={(option) => option.name}
                         onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
-                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        value={clients.find((client) => String(client.id) === String(eventData.client_id)) || null}
+                        isOptionEqualToValue={(option, value) => String(option.id) === String(value.id)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
