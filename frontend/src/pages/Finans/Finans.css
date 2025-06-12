@@ -1183,6 +1183,6 @@
     border: 1px dashed #cbd5e1;
 }
 
-.status-kısmi-ödendi + .status-indicator {
+.status-kısmi-ödendi .status-indicator {
     background-color: #3498db;
 }
