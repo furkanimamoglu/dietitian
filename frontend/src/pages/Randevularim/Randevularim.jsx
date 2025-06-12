@@ -554,11 +554,12 @@ export default function Randevularim() {
                             const client = clients.find(c => String(c.id) === String(clientId));
                             const clientName = client ? client.name : "";
 
-                            // Saat formatını ayarlama
+                            // Saat formatını ayarlama (UTC zamanını kullanarak)
                             const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString('tr-TR', {
                                 hour: '2-digit',
                                 minute: '2-digit',
-                                hour12: false
+                                hour12: false,
+                                timeZone: 'UTC'
                             }) : '';
 
                             return (

@@ -69,24 +69,15 @@ class AppointmentService {
                 throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
-            const conflictingAppointments = await Appointment.findOne({
-                where: {
-                    dietitian_id,
-                    [Op.and]: [
-                        {start: {[Op.lt]: end}},
-                        {end: {[Op.gt]: start}}
-                    ]
-                }
-            });
-
-            if (conflictingAppointments) {
-                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
-            }
+            const startDate = new Date(start);
+            startDate.setHours(startDate.getHours() + 3);
+            const endDate = new Date(end);
+            endDate.setHours(endDate.getHours() + 3);
 
             return await Appointment.create({
                 title,
-                start,
-                end,
+                start: startDate,
+                end: endDate,
                 dietitian_id,
                 client_id,
             });
@@ -107,21 +98,6 @@ class AppointmentService {
             const existingAppointment = await Appointment.findByPk(appointment_id);
             if (!existingAppointment) {
                 throw new Exception("Güncellemek istediğiniz randevu bulunamadı.");
-            }
-
-            const conflictingAppointments = await Appointment.findOne({
-                where: {
-                    id: {[Op.ne]: appointment_id},
-                    dietitian_id: dietitian_id,
-                    [Op.and]: [
-                        {start: {[Op.lt]: end}},  // diğer randevu senin bitişinden önce başlamışsa
-                        {end: {[Op.gt]: start}}   // ve senin başlangıcından sonra bitiyorsa => çakışma var
-                    ]
-                }
-            });
-
-            if (conflictingAppointments) {
-                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
             await existingAppointment.update({
