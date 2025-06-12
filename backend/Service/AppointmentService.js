@@ -236,7 +236,7 @@ class AppointmentService {
             throw new Exception("Bu randevu zaten değerlendirilmiş.", 400, true);
         }
 
-        if (!['approved', 'denied'].includes(action)) {
+        if (action !== 'approved' && action !== 'cancelled') {
             throw new Exception("Geçersiz işlem türü.", 400, true);
         }
 

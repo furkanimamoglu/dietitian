@@ -574,19 +574,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     const containerRef = useRef(null);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (containerRef.current && !containerRef.current.contains(event.target)) {
-                onCancel();
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [containerRef, onCancel]);
-
     return (
         <div className="mui-meal-plan-container" ref={containerRef}>
             {/* Header */}
