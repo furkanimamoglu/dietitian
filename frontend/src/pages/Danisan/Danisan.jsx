@@ -100,8 +100,57 @@ const WaterTrackingCard = ({data, clientId}) => {
     const [error, setError] = useState(null);
     const [apiResponse, setApiResponse] = useState(null);
 
+    const [isEditGoalDialogOpen, setIsEditGoalDialogOpen] = useState(false);
+    const [newDailyGoal, setNewDailyGoal] = useState(data.dailyGoal || 2500);
+    const [updateGoalLoading, setUpdateGoalLoading] = useState(false);
+
     const currentDay = new Date().getDay();
     const mappedDay = currentDay === 0 ? 6 : currentDay - 1;
+
+    const handleOpenEditGoalDialog = () => {
+        setNewDailyGoal(waterData.dailyGoal);
+        setIsEditGoalDialogOpen(true);
+    };
+
+    const handleCloseEditGoalDialog = () => {
+        setIsEditGoalDialogOpen(false);
+    };
+
+    const handleUpdateDailyGoal = async () => {
+        if (!newDailyGoal || newDailyGoal < 100) {
+            showErrorToast("Lütfen geçerli bir hedef giriniz (en az 100 ml).");
+            return;
+        }
+
+        setUpdateGoalLoading(true);
+        try {
+            await axios.put(
+                `${config[config.environment].apiUrl}/nutrition/updateClientWaterGoal`,
+                {
+                    client_id: clientId,
+                    daily_goal: newDailyGoal
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+
+            setWaterData(prevData => ({
+                ...prevData,
+                dailyGoal: newDailyGoal
+            }));
+
+            setIsEditGoalDialogOpen(false);
+            showSuccessToast("Günlük su hedefi başarıyla güncellendi.");
+        } catch (err) {
+            console.error("Hedef güncellenirken hata:", err);
+            showErrorToast("Günlük su hedefi güncellenirken bir hata oluştu.");
+        } finally {
+            setUpdateGoalLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchWaterData = async () => {
@@ -448,6 +497,24 @@ const WaterTrackingCard = ({data, clientId}) => {
                         <Typography variant="subtitle1" fontWeight="bold">
                             Günlük Su İhtiyacı
                         </Typography>
+                        <Tooltip title="Günlük hedefi düzenle" arrow>
+                            <IconButton
+                                size="small"
+                                sx={{
+                                    bgcolor: 'info.main',
+                                    color: 'white',
+                                    '&:hover': {
+                                        bgcolor: 'info.dark',
+                                    },
+                                    width: 30,
+                                    height: 30,
+                                    ml: 1,
+                                }}
+                                onClick={handleOpenEditGoalDialog}
+                            >
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                     <Typography variant="body2" sx={{mb: 1}}>
                         Günlük hedef: <strong>{waterData.dailyGoal} ml</strong> ({waterData.dailyGoal / 1000} litre)
@@ -458,6 +525,47 @@ const WaterTrackingCard = ({data, clientId}) => {
                     </Typography>
                 </Box>
             </CardContent>
+            <Dialog
+                open={isEditGoalDialogOpen}
+                onClose={handleCloseEditGoalDialog}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>
+                    Günlük Su Hedefini Düzenle
+                </DialogTitle>
+                <DialogContent>
+                    <Box sx={{my: 2}}>
+                        <TextField
+                            fullWidth
+                            label="Günlük Su Hedefi (ml)"
+                            type="number"
+                            value={newDailyGoal}
+                            onChange={(e) => setNewDailyGoal(parseInt(e.target.value, 10) || 0)}
+                            inputProps={{
+                                min: 100,
+                                step: 100
+                            }}
+                            helperText="Minimum 100 ml olmalıdır"
+                        />
+                        <Typography variant="caption" color="text.secondary" sx={{mt: 1, display: 'block'}}>
+                            {newDailyGoal / 1000} litre
+                        </Typography>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseEditGoalDialog}>
+                        İptal
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleUpdateDailyGoal}
+                        disabled={updateGoalLoading}
+                    >
+                        {updateGoalLoading ? <CircularProgress size={24} /> : "Kaydet"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Card>
     );
 };
@@ -1066,7 +1174,6 @@ function Danisan() {
     }, [measurements, danisan]);
 
     useEffect(() => {
-        console.log(danisan);
         if (danisan && danisan.dailyWaterIntake) {
             setWaterTrackingData(prevData => ({
                 ...prevData,

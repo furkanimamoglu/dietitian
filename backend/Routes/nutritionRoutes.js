@@ -21,4 +21,6 @@ router.delete('/deleteClientWater', nutritionController.deleteClientWater);
 router.post('/addClientWater', nutritionController.addClientWater);
 router.get('/getClientWater', nutritionController.getClientWater);
 
+router.put('/updateClientWaterGoal', nutritionController.updateClientWaterGoal);
+
 module.exports = router;
