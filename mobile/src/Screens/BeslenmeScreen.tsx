@@ -8,7 +8,6 @@ import {
     Chip,
     Dialog,
     Divider,
-    FAB,
     IconButton,
     Portal,
     ProgressBar,
@@ -47,7 +46,6 @@ const mealIcons: { [key: string]: string } = {
     'Aparatif': 'food-apple',
     'Ara Öğün': 'food',
     'Ara Öğün Deneme': 'food-apple-outline',
-    // Varsayılan icon için 'food' kullanılacak
 };
 
 const Beslenme = ({navigation}: { navigation: any }) => {
@@ -95,7 +93,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Yeni API yanıt formatına göre nutrition_plan_id'yi doğrudan alıyoruz
             if (data.nutrition_plan_id) {
                 setNutritionPlanId(parseInt(data.nutrition_plan_id));
             } else if (data.NutritionPlan && data.NutritionPlan.id) {
@@ -106,7 +103,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            // Yeni formatta mealPlan doğrudan ana objede yer alıyor
             const mealPlanData = data.mealPlan || {};
             setMealPlan(mealPlanData);
 
@@ -137,13 +133,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         } finally {
             setRefreshing(false);
         }
-    };
-
-    const openModal = () => {
-        setSelectedMealType('Kahvaltı');
-        setNewMeal('');
-        setNewPortion('');
-        setModalVisible(true);
     };
 
     const updateMealPlanOnServerFromNewFormat = async (updatedMealPlan: WeeklyMealPlan) => {
@@ -246,13 +235,11 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         setNewMeal('');
         setNewPortion('');
 
-        // Güncellenmiş beslenme planını sunucuya gönder
         updateMealPlanOnServerFromNewFormat(updatedMealPlan);
     };
 
     const handleDayChange = (day: string) => {
         setCurrentDay(day);
-        // Eğer seçilen günde öğün varsa, ilk öğünü seç
         if (mealPlan[day] && Object.keys(mealPlan[day]).length > 0) {
             setSelectedMealType(Object.keys(mealPlan[day])[0]);
         }
@@ -725,14 +712,14 @@ const styles = StyleSheet.create({
     },
     portionText: {
         fontSize: 14,
-        color: '#fb8c00', // Turuncu tonunda bir renk
+        color: '#fb8c00',
         fontWeight: '500',
         marginLeft: 8
     },
     alternativesContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        paddingLeft: 46, // Align with the text next to checkbox
+        paddingLeft: 46,
         marginTop: -4,
         marginBottom: 8,
         gap: 8
