@@ -95,32 +95,35 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
+            // Yeni API yanıt formatına göre nutrition_plan_id'yi doğrudan alıyoruz
             if (data.nutrition_plan_id) {
-                setNutritionPlanId(data.nutrition_plan_id);
+                setNutritionPlanId(parseInt(data.nutrition_plan_id));
             } else if (data.NutritionPlan && data.NutritionPlan.id) {
-                setNutritionPlanId(data.NutritionPlan.id);
+                setNutritionPlanId(parseInt(data.NutritionPlan.id));
             }
 
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const today = new Date().getDay();
             const todayTurkish = days[today];
 
-            setMealPlan(data);
+            // Yeni formatta mealPlan doğrudan ana objede yer alıyor
+            const mealPlanData = data.mealPlan || {};
+            setMealPlan(mealPlanData);
 
-            if (data && data[todayTurkish]) {
+            if (mealPlanData && mealPlanData[todayTurkish]) {
                 setCurrentDay(todayTurkish);
-                if (Object.keys(data[todayTurkish]).length > 0) {
-                    setSelectedMealType(Object.keys(data[todayTurkish])[0]);
+                if (Object.keys(mealPlanData[todayTurkish]).length > 0) {
+                    setSelectedMealType(Object.keys(mealPlanData[todayTurkish])[0]);
                 }
-            } else if (data && Object.keys(data).length > 0) {
-                const firstAvailableDay = Object.keys(data)[0];
+            } else if (mealPlanData && Object.keys(mealPlanData).length > 0) {
+                const firstAvailableDay = Object.keys(mealPlanData)[0];
                 setCurrentDay(firstAvailableDay);
-                if (Object.keys(data[firstAvailableDay]).length > 0) {
-                    setSelectedMealType(Object.keys(data[firstAvailableDay])[0]);
+                if (Object.keys(mealPlanData[firstAvailableDay]).length > 0) {
+                    setSelectedMealType(Object.keys(mealPlanData[firstAvailableDay])[0]);
                 }
             }
 
-            if (!data || Object.keys(data).length === 0) {
+            if (!mealPlanData || Object.keys(mealPlanData).length === 0) {
                 setIsEmpty(true);
                 setError('Beslenme planı bulunamadı.');
             }
@@ -323,7 +326,46 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         }
     };
 
-    // Helper functions for the new meal plan structure
+    const updateMealPlanOnServerFromNewFormat = async (updatedMealPlan: WeeklyMealPlan) => {
+        try {
+            if (nutritionPlanId === null) {
+                console.error('Nutrition plan ID is missing, cannot update meal plan');
+                Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
+                return;
+            }
+
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                return;
+            }
+
+            const mealPlanUpdate = {
+                nutrition_plan_id: nutritionPlanId,
+                mealPlan: updatedMealPlan
+            };
+
+            const response = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(mealPlanUpdate)
+            });
+
+            const data = await response.json();
+            console.log('Meal plan update response:', data);
+
+            if (!response.ok) {
+                Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Error updating meal plan:', error);
+            Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
+        }
+    };
+
     const getTotalMealItems = (): number => {
         if (!mealPlan[currentDay]) return 0;
 
@@ -352,7 +394,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             !updatedMealPlan[currentDay][mealType][category][index].eaten;
 
         setMealPlan(updatedMealPlan);
-        // Gerçek uygulamada burada sunucuya güncelleme gönderilir
+        // Yenildi/yenilmedi durumunun değişikliğini sunucuya gönder
+        updateMealPlanOnServerFromNewFormat(updatedMealPlan);
     };
 
     const addMealItem = () => {
@@ -385,7 +428,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         setNewMeal('');
         setNewPortion('');
 
-        // Gerçek uygulamada burada sunucuya güncelleme gönderilir
+        // Güncellenmiş beslenme planını sunucuya gönder
+        updateMealPlanOnServerFromNewFormat(updatedMealPlan);
     };
 
     const handleDayChange = (day: string) => {
