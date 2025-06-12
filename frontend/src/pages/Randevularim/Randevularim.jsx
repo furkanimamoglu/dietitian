@@ -25,7 +25,8 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    TextField
+    TextField,
+    InputAdornment
 } from '@mui/material';
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -35,6 +36,7 @@ import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
+import Person from "@mui/icons-material/Person";
 
 
 export default function Randevularim() {
@@ -552,26 +554,68 @@ export default function Randevularim() {
                             const client = clients.find(c => String(c.id) === String(clientId));
                             const clientName = client ? client.name : "";
 
-                            console.log("Randevu bilgileri:", {
-                                title: arg.event.title,
-                                clientId: clientId,
-                                foundClient: client,
-                                availableClients: clients.length
-                            });
+                            // Saat formatını ayarlama
+                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString('tr-TR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            }) : '';
 
                             return (
-                                <div className="appointment-event">
+                                <div className="appointment-event" style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    padding: '1px',
+                                    overflow: 'hidden'
+                                }}>
                                     <div style={{
-                                        fontSize: '0.85em',
+                                        fontSize: '0.8em',
                                         fontWeight: 'bold',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
                                         padding: '2px 4px',
                                         borderRadius: '3px',
-                                        marginBottom: '2px'
+                                        marginBottom: '1px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
                                     }}>
-                                        {clientName || "Danışan belirtilmemiş"}
+                                        <Person
+                                            style={{
+                                                fontSize: '0.9em',
+                                                color: '#0020ff',
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                        <span style={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            marginLeft: '2px'
+                                        }}>
+                                            {clientName || "Danışan belirtilmemiş"}
+                                        </span>
                                     </div>
-                                    <div style={{ fontSize: '0.8em' }}>{arg.event.title}</div>
+                                    <div style={{
+                                        fontSize: '0.75em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '0 4px'
+                                    }}>
+                                        <span style={{
+                                            fontWeight: 'bold',
+                                            flexShrink: 0
+                                        }}>
+                                            {startTime}
+                                        </span>
+                                        <span style={{
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
+                                        }}>
+                                            {arg.event.title}
+                                        </span>
+                                    </div>
                                 </div>
                             );
                         }}
@@ -657,6 +701,28 @@ export default function Randevularim() {
                                 margin="normal"
                                 error={showValidation && validationErrors.client_id}
                                 helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start">
+                                                <Person color="primary" />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    )
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: 2,
+                                        }
+                                    }
+                                }}
                             />
                         )}
                         fullWidth
@@ -766,6 +832,28 @@ export default function Randevularim() {
                                 margin="normal"
                                 error={showValidation && validationErrors.client_id}
                                 helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start">
+                                                <Person color="primary" />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    )
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: 2,
+                                        }
+                                    }
+                                }}
                             />
                         )}
                         fullWidth
@@ -869,3 +957,4 @@ export default function Randevularim() {
         </Default>
     );
 }
+
