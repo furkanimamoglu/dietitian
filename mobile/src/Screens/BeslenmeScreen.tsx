@@ -139,150 +139,11 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         }
     };
 
-    const updateMealsFromPlan = (dayPlan: DailyMeal) => {
-        // Artık öğün isimleri dinamik olduğundan, sabit bir newMeals objesi oluşturmuyoruz
-        const newMeals: { [key: string]: MealItem[] } = {};
-
-        const processMealItems = (mealData: any, mealType: string) => {
-            if (!mealData) return;
-
-            let mainItems: string[] = [];
-            let alternatives: { [key: string]: string[] } = {};
-            let checkedItems: { [key: string]: boolean } = {};
-
-            if (Array.isArray(mealData) && mealData.length > 0 && mealData[0].hasOwnProperty('isim')) {
-                mainItems = mealData.map(item => item.isim);
-                mealData.forEach(item => {
-                    checkedItems[item.isim] = item.yenildi;
-                });
-            } else if (mealData.main && Array.isArray(mealData.main)) {
-                mainItems = [...mealData.main];
-                alternatives = mealData.alternatives || {};
-            } else if (Array.isArray(mealData)) {
-                mainItems = [...mealData];
-            } else if (typeof mealData === 'string') {
-                mainItems = mealData.split(', ').map(item => item.trim()).filter(item => item !== '');
-            }
-
-            // Artık sabit bir dönüşüm yapmak yerine, API'den gelen öğün ismini doğrudan kullanıyoruz
-            newMeals[mealType] = mainItems.map(item => {
-                const itemAlternatives = alternatives[item] || [];
-                return {
-                    item,
-                    checked: checkedItems[item] || false,
-                    portion: '1 porsiyon',
-                    alternatives: itemAlternatives.length > 0 ? itemAlternatives : undefined
-                };
-            });
-        };
-
-        // Artık dinamik olarak dayPlan içindeki tüm öğün tipleri üzerinde işlem yapıyoruz
-        Object.keys(dayPlan).forEach(mealType => {
-            processMealItems(dayPlan[mealType], mealType);
-        });
-
-        setMeals(newMeals);
-    };
-
-    const toggleCheck = (mealType: string, index: number) => {
-        const newMeals = {...meals};
-        newMeals[mealType][index].checked = !newMeals[mealType][index].checked;
-        setMeals(newMeals);
-
-        updateMealPlanOnServer(newMeals);
-    };
-
     const openModal = () => {
         setSelectedMealType('Kahvaltı');
         setNewMeal('');
         setNewPortion('');
         setModalVisible(true);
-    };
-
-    const addMeal = () => {
-        if (newMeal && selectedMealType) {
-            const updatedMeals = {...meals};
-            updatedMeals[selectedMealType].push({
-                item: newMeal,
-                checked: false,
-                portion: newPortion || '1 porsiyon'
-            });
-            setMeals(updatedMeals);
-            setNewMeal('');
-            setNewPortion('');
-            setModalVisible(false);
-
-            updateMealPlanOnServer(updatedMeals);
-        }
-    };
-
-    const updateMealPlanOnServer = async (updatedMeals: { [key: string]: MealItem[] }) => {
-        try {
-            if (nutritionPlanId === null) {
-                console.error('Nutrition plan ID is missing, cannot update meal plan');
-                Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
-                return;
-            }
-
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                console.error('Token Bulunamadı');
-                return;
-            }
-
-            // Mevcut günü al
-            const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-            const today = new Date().getDay();
-            const todayTurkish = days[today];
-
-            // Mevcut beslenme planında kullanılan güncel öğün yapısını kopyalayalım
-            // Bu şekilde diğer günlerin verileri korunacak
-            const updatedMealPlan = {...mealPlan};
-
-            // Eğer currentDay için öğün planı yoksa oluştur
-            if (!updatedMealPlan[currentDay]) {
-                updatedMealPlan[currentDay] = {};
-            }
-
-            // Her öğün tipi için işlem yap
-            Object.entries(updatedMeals).forEach(([mealType, items]) => {
-                // Eğer bu öğün tipi için bir kategori yoksa oluştur
-                if (!updatedMealPlan[currentDay][mealType]) {
-                    updatedMealPlan[currentDay][mealType] = { 'Ana Menü': [] };
-                }
-
-                // Ana menüye öğünleri ekle
-                updatedMealPlan[currentDay][mealType]['Ana Menü'] = items.map(item => ({
-                    name: item.item,
-                    eaten: item.checked,
-                    portion: item.portion || null
-                }));
-            });
-
-            const mealPlanUpdate = {
-                nutrition_plan_id: nutritionPlanId,
-                mealPlan: updatedMealPlan
-            };
-
-            const response = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(mealPlanUpdate)
-            });
-
-            const data = await response.json();
-            console.log('Meal plan update response:', data);
-
-            if (!response.ok) {
-                Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
-            }
-        } catch (error) {
-            console.error('Error updating meal plan:', error);
-            Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
-        }
     };
 
     const updateMealPlanOnServerFromNewFormat = async (updatedMealPlan: WeeklyMealPlan) => {
@@ -353,7 +214,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             !updatedMealPlan[currentDay][mealType][category][index].eaten;
 
         setMealPlan(updatedMealPlan);
-        // Yenildi/yenilmedi durumunun değişikliğini sunucuya gönder
+
         updateMealPlanOnServerFromNewFormat(updatedMealPlan);
     };
 
@@ -362,7 +223,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
         const updatedMealPlan = {...mealPlan};
 
-        // Eğer seçili gün veya öğün yoksa oluştur
         if (!updatedMealPlan[currentDay]) {
             updatedMealPlan[currentDay] = {};
         }
@@ -375,7 +235,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             updatedMealPlan[currentDay][selectedMealType][selectedMealCategory] = [];
         }
 
-        // Yeni yemeği ekle
         updatedMealPlan[currentDay][selectedMealType][selectedMealCategory].push({
             name: newMeal,
             eaten: false,
@@ -521,25 +380,13 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                     <Card key={mealType} style={styles.mealCard} mode="elevated">
                         <Card.Title
                             title={mealType}
-                            titleStyle={styles.cardTitle}
+                            titleStyle={styles.mealTitleText}
                             left={(props) => (
                                 <Avatar.Icon
                                     size={40}
                                     icon={mealIcons[mealType] || 'food'}
                                     color="#4caf50"
                                     style={{backgroundColor: '#e8f5e9'}}
-                                />
-                            )}
-                            right={(props) => (
-                                <IconButton
-                                    {...props}
-                                    icon="plus"
-                                    iconColor="#4caf50"
-                                    onPress={() => {
-                                        setSelectedMealType(mealType);
-                                        setSelectedMealCategory('Ana Menü');
-                                        setModalVisible(true);
-                                    }}
                                 />
                             )}
                         />
@@ -601,6 +448,22 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 </Card.Content>
                             </View>
                         ))}
+
+                        {/* Yeni Öğün Ekle butonu */}
+                        <View style={styles.addMealButtonContainer}>
+                            <Button
+                                mode="contained"
+                                icon="plus"
+                                onPress={() => {
+                                    setSelectedMealType(Object.keys(mealCategories)[0]);
+                                    setSelectedMealCategory('Ana Menü');
+                                    setModalVisible(true);
+                                }}
+                                style={styles.addMealButton}
+                            >
+                                Yeni Öğün Ekle
+                            </Button>
+                        </View>
                     </Card>
                 ))}
 
@@ -641,15 +504,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 <Header navigation={navigation}/>
 
                 {renderFlatListContent()}
-
-                {!isEmpty && (
-                    <FAB
-                        style={styles.fab}
-                        icon="plus"
-                        onPress={openModal}
-                        color="#fff"
-                    />
-                )}
 
                 <BottomNavbar navigation={navigation}/>
 
@@ -871,7 +725,9 @@ const styles = StyleSheet.create({
     },
     portionText: {
         fontSize: 14,
-        color: '#666'
+        color: '#fb8c00', // Turuncu tonunda bir renk
+        fontWeight: '500',
+        marginLeft: 8
     },
     alternativesContainer: {
         flexDirection: 'row',
@@ -1030,6 +886,28 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         lineHeight: 24,
         paddingHorizontal: 10,
+    },
+    addMealButtonContainer: {
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#e0e0e0',
+        backgroundColor: '#fff'
+    },
+    addMealButton: {
+        width: '100%',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#4caf50'
+    },
+    mealTitleText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#2e7d32',
+        marginBottom: 4,
+        textAlign: 'left'
     },
 });
 
