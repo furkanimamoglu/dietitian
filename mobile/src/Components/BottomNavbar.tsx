@@ -23,13 +23,6 @@ type Props = {
     navigation: NavigationProp;
 };
 
-interface DailyMealPlan {
-    Kahvaltı: string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    'Öğle Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    'Akşam Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    Aparatif: string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-}
-
 const BottomNav = ({navigation}: Props) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [showMealPopup, setShowMealPopup] = useState(false);
@@ -135,6 +128,7 @@ const BottomNav = ({navigation}: Props) => {
 
             if (nutritionPlanId === null) {
                 await fetchNutritionPlanId();
+                console.log(nutritionPlanId)
                 if (nutritionPlanId === null) {
                     showToast('Beslenme planı bulunamadı. Lütfen daha sonra tekrar deneyin.', 'error');
                     setIsSubmitting(false);
@@ -449,6 +443,7 @@ const BottomNav = ({navigation}: Props) => {
                                 onChangeText={setNewPortion}
                             />
                         </View>
+
                         <View style={{flexDirection: 'row', justifyContent: 'flex-end', width: '100%'}}>
                             <TouchableOpacity onPress={() => setShowMealPopup(false)}
                                               style={[styles.closeButton, {marginRight: 8}]}>
