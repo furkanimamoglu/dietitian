@@ -689,7 +689,7 @@ const BottomNav = ({navigation}: Props) => {
                     <TouchableOpacity
                         style={styles.floatingButton}
                         onPress={() => {
-                            setShowExercisePopup(true);
+                            navigation.navigate('Egzersiz');
                             setMenuOpen(false);
                         }}
                         activeOpacity={0.8}
