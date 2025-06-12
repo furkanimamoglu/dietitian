@@ -790,6 +790,7 @@ input[type="date"].text-input {
 
 .filter-group {
     display: flex;
+    width: 50%;
     flex-direction: column;
     gap: 0.5rem;
     position: relative;
@@ -1035,6 +1036,7 @@ input[type="date"].text-input {
 }
 
 .search-filter {
+    max-width: 10rem;
     flex: 1;
     min-width: 250px;
 }

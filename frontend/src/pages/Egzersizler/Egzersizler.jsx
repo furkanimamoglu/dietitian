@@ -449,10 +449,6 @@ export default function Egzersizler() {
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
 
-    const [difficultyFilter, setDifficultyFilter] = useState(0);
-
-    const [calorieFilter, setCalorieFilter] = useState(null);
-
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -691,36 +687,7 @@ export default function Egzersizler() {
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
 
-        const difficultyMatch = difficultyFilter === 0 || item.difficulty === difficultyFilter;
-
-        let calorieMatch = true;
-        if (calorieFilter !== null) {
-            const calories = item.calories_burned || 0;
-            switch (calorieFilter) {
-                case '0-50':
-                    calorieMatch = calories >= 0 && calories <= 50;
-                    break;
-                case '50-100':
-                    calorieMatch = calories > 50 && calories <= 100;
-                    break;
-                case '100-200':
-                    calorieMatch = calories > 100 && calories <= 200;
-                    break;
-                case '200-300':
-                    calorieMatch = calories > 200 && calories <= 300;
-                    break;
-                case '300-500':
-                    calorieMatch = calories > 300 && calories <= 500;
-                    break;
-                case '500+':
-                    calorieMatch = calories > 500;
-                    break;
-                default:
-                    calorieMatch = true;
-            }
-        }
-
-        return searchMatch && categoryMatch && difficultyMatch && calorieMatch;
+        return searchMatch && categoryMatch;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -1227,49 +1194,6 @@ export default function Egzersizler() {
                                         <CloseIcon />
                                     </button>
                                 )}
-                            </div>
-                        </div>
-                        {/* Difficulty filter */}
-                        <div className="filter-group">
-                            <h3 className="filter-title">Zorluk Seviyesi:</h3>
-                            <div className="difficulty-options">
-                                <button
-                                    className={`difficulty-btn ${difficultyFilter === 0 ? 'active' : ''}`}
-                                    onClick={() => setDifficultyFilter(0)}
-                                >
-                                    Tümü
-                                </button>
-                                {[1, 2, 3, 4, 5].map(level => (
-                                    <button
-                                        key={level}
-                                        className={`difficulty-btn ${difficultyFilter === level ? 'active' : ''}`}
-                                        onClick={() => setDifficultyFilter(level)}
-                                    >
-                                        {level}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Calorie filter */}
-                        <div className="filter-group">
-                            <h3 className="filter-title">Kalori Aralığı:</h3>
-                            <div className="calorie-options">
-                                <button
-                                    className={`calorie-btn ${calorieFilter === null ? 'active' : ''}`}
-                                    onClick={() => setCalorieFilter(null)}
-                                >
-                                    Tümü
-                                </button>
-                                {['0-50', '50-100', '100-200', '200-300', '300-500', '500+'].map(range => (
-                                    <button
-                                        key={range}
-                                        className={`calorie-btn ${calorieFilter === range ? 'active' : ''}`}
-                                        onClick={() => setCalorieFilter(range)}
-                                    >
-                                        {range}
-                                    </button>
-                                ))}
                             </div>
                         </div>
                     </div>
