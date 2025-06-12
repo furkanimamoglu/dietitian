@@ -128,7 +128,6 @@ const BottomNav = ({navigation}: Props) => {
 
             if (nutritionPlanId === null) {
                 await fetchNutritionPlanId();
-                console.log(nutritionPlanId)
                 if (nutritionPlanId === null) {
                     showToast('Beslenme planı bulunamadı. Lütfen daha sonra tekrar deneyin.', 'error');
                     setIsSubmitting(false);
