@@ -26,7 +26,8 @@ import {
     MenuItem,
     Select,
     TextField,
-    InputAdornment
+    InputAdornment,
+    Alert
 } from '@mui/material';
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -46,6 +47,10 @@ export default function Randevularim() {
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+    // Randevu çakışma kontrolü için yeni state değişkenleri
+    const [appointmentConflict, setAppointmentConflict] = useState(false);
+    const [conflictMessage, setConflictMessage] = useState("");
 
     const [validationErrors, setValidationErrors] = useState({
         title: false,
@@ -186,6 +191,13 @@ export default function Randevularim() {
                 client_id: false
             });
             setShowValidation(false);
+
+            // Randevu çakışma kontrolü yap
+            checkAppointmentConflicts(
+                startDate.toISOString().slice(0, 16),
+                endDate.toISOString().slice(0, 16)
+            );
+
             setRandevuEklePopup(true);
         }
     };
@@ -411,6 +423,68 @@ export default function Randevularim() {
             end: false,
             client_id: false
         });
+        // Çakışma durumunu sıfırla
+        setAppointmentConflict(false);
+        setConflictMessage("");
+    };
+
+    // Randevu çakışmalarını kontrol eden fonksiyon
+    const checkAppointmentConflicts = (start, end, currentAppointmentId = null) => {
+        if (!start || !end) return false;
+
+        const startTime = new Date(start);
+        const endTime = new Date(end);
+
+        // Geçerli bir randevu süresi olup olmadığını kontrol et
+        if (startTime >= endTime) {
+            setAppointmentConflict(true);
+            setConflictMessage("Başlangıç zamanı bitiş zamanından sonra olamaz.");
+            return true;
+        }
+
+        // Mevcut randevularla çakışma kontrolü
+        const conflictingAppointment = randevular.find(appointment => {
+            // Düzenleme durumunda kendisi ile çakışma kontrolü yapılmasın
+            if (currentAppointmentId && String(appointment.id) === String(currentAppointmentId)) {
+                return false;
+            }
+
+            const appointmentStart = new Date(appointment.start);
+            const appointmentEnd = new Date(appointment.end || appointment.start);
+
+            // Çakışma kontrolü:
+            // (StartA < EndB) && (EndA > StartB)
+            return (startTime < appointmentEnd && endTime > appointmentStart);
+        });
+
+        if (conflictingAppointment) {
+            // Çakışan randevunun danışan bilgisini bul
+            const client = clients.find(c => String(c.id) === String(conflictingAppointment.extendedProps?.client_id));
+            const clientName = client ? client.name : "Bilinmeyen Danışan";
+
+            // Çakışan randevu saatini formatla
+            const conflictStartTime = new Date(conflictingAppointment.start).toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const conflictEndTime = conflictingAppointment.end ?
+                new Date(conflictingAppointment.end).toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }) : conflictStartTime;
+
+            setAppointmentConflict(true);
+            setConflictMessage(`Bu saatte "${clientName}" için "${conflictingAppointment.title}" randevusu bulunuyor. (${conflictStartTime} - ${conflictEndTime})`);
+            return true;
+        }
+
+        // Çakışma yok
+        setAppointmentConflict(false);
+        setConflictMessage("");
+        return false;
     };
 
     const handleEventChange = (key, value) => {
@@ -425,6 +499,16 @@ export default function Randevularim() {
                 ...prev,
                 [key]: false
             }));
+        }
+
+        // Başlangıç veya bitiş tarihi değiştiyse çakışma kontrolü yap
+        if ((key === "start" || key === "end") && eventData.start && eventData.end) {
+            const startToCheck = key === "start" ? value : eventData.start;
+            const endToCheck = key === "end" ? value : eventData.end;
+
+            // Düzenleme ekranında ise mevcut randevu ID'sini gönder
+            const currentId = randevuDuzenlePopup ? eventData.id : null;
+            checkAppointmentConflicts(startToCheck, endToCheck, currentId);
         }
     };
 
@@ -743,6 +827,13 @@ export default function Randevularim() {
                             <MenuItem value="denied">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
+
+                    {/* Çakışma mesajı için Alert bileşeni */}
+                    {appointmentConflict && conflictMessage && (
+                        <Alert severity="error" sx={{marginTop: 2}}>
+                            {conflictMessage}
+                        </Alert>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
@@ -874,6 +965,13 @@ export default function Randevularim() {
                             <MenuItem value="denied">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
+
+                    {/* Çakışma mesajı için Alert bileşeni */}
+                    {appointmentConflict && conflictMessage && (
+                        <Alert severity="error" sx={{marginTop: 2}}>
+                            {conflictMessage}
+                        </Alert>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button

@@ -69,15 +69,10 @@ class AppointmentService {
                 throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
-            const startDate = new Date(start);
-            startDate.setHours(startDate.getHours() + 3);
-            const endDate = new Date(end);
-            endDate.setHours(endDate.getHours() + 3);
-
             return await Appointment.create({
                 title,
-                start: startDate,
-                end: endDate,
+                start,
+                end,
                 dietitian_id,
                 client_id,
             });
