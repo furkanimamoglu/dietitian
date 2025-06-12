@@ -1577,6 +1577,13 @@ function Danisan() {
                             </Box>
                         ) : anamnezData ? (
                             <>
+                                <Box sx={{display: 'justify-end', alignItems: 'center', gap: 1}}>
+                                    <Chip
+                                        label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
+                                        size="small"
+                                        sx={{mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff'}}
+                                    />
+                                </Box>
                                 {/* Sağlık Bilgileri Akordiyonu */}
                                 <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 1}}>
                                     <Button
