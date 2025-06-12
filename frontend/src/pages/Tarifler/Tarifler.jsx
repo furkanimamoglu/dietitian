@@ -994,6 +994,7 @@ export default function Tarifler() {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setNewRecipe({...newRecipe, image: file});
+                                        setImagePreview(reader.result); // Önizleme için resmin URL'ini ayarla
                                     };
                                     reader.readAsDataURL(file);
                                 }
@@ -1447,7 +1448,7 @@ export default function Tarifler() {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setEditImage(file);
-                                        setImagePreview(reader.result);
+                                        setImagePreview(reader.result); // Önizleme için resmin URL'ini ayarla
                                     };
                                     reader.readAsDataURL(file);
                                 }
