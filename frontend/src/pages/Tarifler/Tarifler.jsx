@@ -1444,11 +1444,10 @@ export default function Tarifler() {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setEditImage(file);
-                                        setImagePreview(reader.result); // Önizleme için resmin URL'ini ayarla
+                                        setImagePreview(reader.result);
                                     };
                                     reader.readAsDataURL(file);
                                 }
