@@ -61,6 +61,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [isEmpty, setIsEmpty] = useState(false);
     const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [mealToDelete, setMealToDelete] = useState<{mealType: string, category: string, index: number} | null>(null);
 
     useEffect(() => {
         fetchTodayMeal();
@@ -414,20 +416,28 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                                         color="#4caf50"
                                                     />
                                                     <View style={styles.mealInfo}>
-                                                        <View style={styles.mealNameRow}>
-                                                            <Text style={[
-                                                                styles.mealName,
-                                                                meal.eaten && styles.mealChecked
-                                                            ]}>
-                                                                {meal.name}
+                                                        <Text style={[
+                                                            styles.mealName,
+                                                            meal.eaten && styles.mealChecked
+                                                        ]}>
+                                                            {meal.name}
+                                                        </Text>
+                                                        {meal.portion && (
+                                                            <Text style={styles.portionText}>
+                                                                {meal.portion}
                                                             </Text>
-                                                            {meal.portion && (
-                                                                <Text style={styles.portionText}>
-                                                                    {meal.portion}
-                                                                </Text>
-                                                            )}
-                                                        </View>
+                                                        )}
                                                     </View>
+                                                    <IconButton
+                                                        icon="delete"
+                                                        iconColor="#e53935"
+                                                        size={20}
+                                                        onPress={() => {
+                                                            setMealToDelete({mealType, category, index});
+                                                            setDeleteModalVisible(true);
+                                                        }}
+                                                        style={styles.deleteButton}
+                                                    />
                                                 </View>
                                             </View>
                                         ))
@@ -549,6 +559,34 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                         <Dialog.Actions>
                             <Button onPress={() => setModalVisible(false)} textColor="#666">İptal</Button>
                             <Button onPress={addMealItem} mode="contained" buttonColor="#4caf50">Ekle</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+
+                    {/* Silme onayı için modal */}
+                    <Dialog visible={deleteModalVisible} onDismiss={() => setDeleteModalVisible(false)} style={styles.dialog}>
+                        <Dialog.Title>Yemek Sil</Dialog.Title>
+                        <Dialog.Content>
+                            <Text>Bu öğünü silmek istediğinize emin misiniz?</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => setDeleteModalVisible(false)} textColor="#666">İptal</Button>
+                            <Button
+                                onPress={() => {
+                                    if (mealToDelete) {
+                                        const {mealType, category, index} = mealToDelete;
+                                        const updatedMealPlan = {...mealPlan};
+                                        updatedMealPlan[currentDay][mealType][category].splice(index, 1);
+
+                                        setMealPlan(updatedMealPlan);
+                                        setDeleteModalVisible(false);
+
+                                        updateMealPlanOnServerFromNewFormat(updatedMealPlan);
+                                    }
+                                }}
+                                mode="contained" buttonColor="#e53935"
+                            >
+                                Sil
+                            </Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
@@ -896,6 +934,12 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         textAlign: 'left'
     },
+    deleteButton: {
+        margin: 0,
+        padding: 0,
+        marginLeft: 5
+    },
 });
 
 export default Beslenme;
+
