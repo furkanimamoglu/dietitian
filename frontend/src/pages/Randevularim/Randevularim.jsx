@@ -726,15 +726,6 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        label="Randevu Başlığı"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
-                    />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
@@ -811,6 +802,15 @@ export default function Randevularim() {
                             />
                         )}
                         fullWidth
+                    />
+                    <TextField
+                        label="Randevu Notu"
+                        value={eventData.title}
+                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        error={showValidation && validationErrors.title}
+                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -866,15 +866,6 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        label="Randevu Başlığı"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
-                    />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
@@ -951,6 +942,15 @@ export default function Randevularim() {
                             />
                         )}
                         fullWidth
+                    />
+                    <TextField
+                        label="Randevu Notu"
+                        value={eventData.title}
+                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        error={showValidation && validationErrors.title}
+                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
