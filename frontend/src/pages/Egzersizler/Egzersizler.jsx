@@ -344,7 +344,6 @@ const pdfStyles = StyleSheet.create({
         color: '#087708',
         fontWeight: 'bold'
     },
-    // Decorative elements
     decorativeLine: {
         height: 2,
         backgroundColor: 'linear-gradient(90deg, #087708 0%, #ff9800 100%)',
@@ -372,7 +371,6 @@ const ExerciseDocument = ({exercise, assignmentData}) => {
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
     const dietitianName = "Belirtilmemiş";
 
-    // Helper function to get difficulty text
     const getDifficultyText = (difficulty) => {
         const difficultyMap = {
             1: "Çok Kolay",
