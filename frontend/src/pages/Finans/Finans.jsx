@@ -332,7 +332,6 @@ export default function Finans() {
         }
     };
 
-    // Add helper function to get package duration in months
     const getPackageDurationInMonths = (packageType) => {
         switch (packageType) {
             case "Seanslık":
@@ -1018,7 +1017,7 @@ export default function Finans() {
 
             switch (packageType) {
                 case "Seanslık":
-                    dueDate.setDate(dueDate.getDate() + 1); // +1 day
+                    dueDate.setDate(dueDate.getDate()); // +1 day
                     break;
                 case "Aylık":
                     dueDate.setMonth(dueDate.getMonth() + 1); // +1 month
