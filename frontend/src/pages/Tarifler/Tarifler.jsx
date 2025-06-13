@@ -372,7 +372,8 @@ const pdfStyles = StyleSheet.create({
     }
 });
 
-const RecipeDocument = ({recipe, assignmentData}) => {
+
+const RecipeDocument = ({recipe, assignmentData, dietitianInfo}) => {
     if (!recipe) {
         return null;
     }
@@ -414,7 +415,9 @@ const RecipeDocument = ({recipe, assignmentData}) => {
                             <View style={pdfStyles.infoIcon}></View>
                             <Text style={pdfStyles.infoTitle}>Diyetisyen</Text>
                         </View>
-                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianInfo.name}</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianInfo.phoneNumber || "Belirtilmemiş"}</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianInfo.email || "Belirtilmemiş"}</Text>
                     </View>
 
                     {assignmentData && (
@@ -547,7 +550,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
         </div>);
 };
 
-const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
+const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign, dietitianInfo}) => {
     return (<div className="recipe-card">
             <div className="card-image-container" onClick={() => onView(item)}>
                 <img
@@ -590,7 +593,7 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
                         <PersonAddIcon />
                     </button>
                     <PDFDownloadLink
-                        document={<RecipeDocument recipe={item} assignmentData={null}/>}
+                        document={<RecipeDocument recipe={item} assignmentData={null} dietitianInfo={dietitianInfo}/>}
                         fileName={`${item.title ? item.title.replace(/\s+/g, '_') : 'tarif'}_tarifi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -709,6 +712,25 @@ export default function Tarifler() {
     const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
     const [affectedRecipes, setAffectedRecipes] = useState([]);
 
+    const [dietitianInfo, setDietitianInfo] = useState({});
+
+    useEffect(() => {
+        axios
+            .get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                console.log("Dietitian Info:", response.data);
+                setDietitianInfo(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching clients:", error);
+            });
+    }, []);
+
+
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
@@ -746,7 +768,6 @@ export default function Tarifler() {
             });
     }, []);
 
-    // Fetch recipe categories
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
@@ -1014,6 +1035,7 @@ export default function Tarifler() {
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewRecipe}
                                     onAssign={handleOpenAddToUserModal}
+                                    dietitianInfo={dietitianInfo}
                                 />))) : (<div className="no-recipes">
                                 <p>Bu kategoriya ait tarif bulunamadı.</p>
                             </div>)}
