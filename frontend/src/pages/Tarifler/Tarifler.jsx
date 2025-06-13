@@ -592,7 +592,6 @@ export default function Tarifler() {
     const handleEdit = (item) => {
         setSelectedRecipe(item);
 
-        // Set form fields with current values
         setEditTitle(item.title || '');
         setEditDescription(item.description || '');
         setEditIngredients(item.ingredients || '');
@@ -600,7 +599,6 @@ export default function Tarifler() {
         setEditCategoryId(item.category_id || '');
         setEditImage(item.image || '');
 
-        // Set nutritional info or initialize with empty values
         const nutritionalInfo = item.nutritional_info || {};
         setEditNutritionalInfo({
             calories: nutritionalInfo.calories || '',

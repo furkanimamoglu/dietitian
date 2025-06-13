@@ -65,154 +65,305 @@ const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
         backgroundColor: '#fff',
-        padding: 10,
+        padding: 20,
         fontFamily: 'Open Sans'
     },
+    // Gradient header effect with shadow
     header: {
         backgroundColor: '#087708',
-        padding: 5,
-        marginBottom: 10,
-        borderRadius: 5,
+        background: 'linear-gradient(135deg, #087708 0%, #0a9a0a 100%)',
+        padding: 20,
+        marginBottom: 20,
+        borderRadius: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5
     },
     headerContent: {
         flex: 1
     },
     headerTitle: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 4
+        marginBottom: 6,
+        letterSpacing: 0.5
+    },
+    headerSubtitle: {
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontSize: 12,
+        marginBottom: 8
     },
     headerInfo: {
-        color: 'white',
-        fontSize: 9,
+        color: 'rgba(255, 255, 255, 0.8)',
+        fontSize: 10,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
     logoContainer: {
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         backgroundColor: 'white',
-        borderRadius: 5,
+        borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 10
+        marginLeft: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4
     },
     logo: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 'bold',
-        color: '#087708'
+        color: '#087708',
+        letterSpacing: 0.5
     },
+    // Modern card-based info section
     infoSection: {
         flexDirection: 'row',
-        marginBottom: 10,
-        borderRadius: 5,
-        overflow: 'hidden'
+        marginBottom: 20,
+        gap: 15
     },
-    infoBox: {
+    infoCard: {
         flex: 1,
-        padding: 8,
-        backgroundColor: '#f5f5f5',
-        margin: 2
+        padding: 16,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#e1e5e9',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8
+    },
+    infoCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    infoIcon: {
+        width: 20,
+        height: 20,
+        backgroundColor: '#087708',
+        borderRadius: 10,
+        marginRight: 8
     },
     infoTitle: {
-        fontSize: 9,
+        fontSize: 11,
         fontWeight: 'bold',
-        marginBottom: 3,
-        color: '#087708'
+        color: '#087708',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
     },
     infoContent: {
-        fontSize: 8,
-        color: '#333'
+        fontSize: 9,
+        color: '#495057',
+        lineHeight: 1.4,
+        marginBottom: 2
     },
+    // Enhanced exercise details with better visual hierarchy
     exerciseDetails: {
-        marginBottom: 15,
-        border: '1px solid #E0E0E0',
-        borderRadius: 5,
-        overflow: 'hidden'
+        marginBottom: 20,
+        borderRadius: 12,
+        overflow: 'hidden',
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12
     },
     exerciseHeader: {
         backgroundColor: '#087708',
-        padding: 6,
+        background: 'linear-gradient(90deg, #087708 0%, #0a9a0a 100%)',
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    exerciseHeaderIcon: {
+        width: 24,
+        height: 24,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 12,
+        marginRight: 10
     },
     exerciseHeaderText: {
         color: 'white',
-        fontSize: 12,
-        fontWeight: 'bold'
+        fontSize: 14,
+        fontWeight: 'bold',
+        letterSpacing: 0.3
     },
     exerciseContent: {
-        padding: 10,
-        backgroundColor: '#f9f9f9'
+        padding: 20,
+        backgroundColor: '#f8f9fa'
     },
-    exerciseRow: {
+    statsGrid: {
         flexDirection: 'row',
-        marginBottom: 5,
-        paddingBottom: 3,
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
+        flexWrap: 'wrap',
+        marginBottom: 20,
+        gap: 10
+    },
+    statCard: {
+        flex: '1 1 45%',
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#087708',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4
+    },
+    statLabel: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        color: '#6c757d',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 4
+    },
+    statValue: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#212529'
+    },
+    // Enhanced description section
+    descriptionSection: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef'
+    },
+    descriptionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingBottom: 8,
+        borderBottomWidth: 2,
+        borderBottomColor: '#087708',
         borderBottomStyle: 'solid'
     },
-    exerciseLabel: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        width: '30%',
-        color: '#555'
+    descriptionIcon: {
+        width: 16,
+        height: 16,
+        backgroundColor: '#087708',
+        borderRadius: 8,
+        marginRight: 8
     },
-    exerciseValue: {
-        fontSize: 8,
-        width: '70%'
-    },
-    instructionsTitle: {
-        fontSize: 10,
+    descriptionTitle: {
+        fontSize: 11,
         fontWeight: 'bold',
-        marginTop: 8,
-        marginBottom: 4,
         color: '#087708',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-        borderBottomStyle: 'solid',
-        paddingBottom: 2
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
     },
-    instructionsText: {
-        fontSize: 8,
-        lineHeight: 1.4
+    descriptionText: {
+        fontSize: 9,
+        lineHeight: 1.6,
+        color: '#495057',
+        textAlign: 'justify'
     },
-    footer: {
-        position: 'absolute',
-        bottom: 10,
-        left: 0,
-        right: 0,
-        textAlign: 'right',
-        paddingTop: 5,
-        marginRight: 15
-    },
-    footerText: {
-        fontSize: 7,
-        color: '#087708'
-    },
-    footerWebsite: {
-        fontSize: 7,
-        color: '#FF9800',
-        marginTop: 2
-    },
+    // Modern notes section with accent
     notesSection: {
-        marginTop: 10,
-        padding: 8,
-        backgroundColor: '#FFF9C4',
-        borderRadius: 5
+        marginTop: 20,
+        padding: 16,
+        backgroundColor: '#fff8e1',
+        borderRadius: 12,
+        borderLeftWidth: 6,
+        borderLeftColor: '#ff9800',
+        shadowColor: '#ff9800',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8
+    },
+    notesHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8
+    },
+    notesIcon: {
+        width: 16,
+        height: 16,
+        backgroundColor: '#ff9800',
+        borderRadius: 8,
+        marginRight: 8
     },
     notesTitle: {
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: 'bold',
-        marginBottom: 3,
-        color: '#FF9800'
+        color: '#ff9800',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
     },
     notesContent: {
+        fontSize: 9,
+        color: '#5d4037',
+        lineHeight: 1.5,
+        fontStyle: 'italic'
+    },
+    // Enhanced footer with better styling
+    footer: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        right: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: 15,
+        borderTopWidth: 2,
+        borderTopColor: '#e9ecef',
+        borderTopStyle: 'solid'
+    },
+    footerLeft: {
+        flex: 1
+    },
+    footerText: {
         fontSize: 8,
-        color: '#333'
+        color: '#087708',
+        fontWeight: 'bold'
+    },
+    footerWebsite: {
+        fontSize: 8,
+        color: '#ff9800',
+        fontWeight: 'bold',
+        marginTop: 2
+    },
+    footerRight: {
+        alignItems: 'flex-end'
+    },
+    footerLogo: {
+        fontSize: 10,
+        color: '#087708',
+        fontWeight: 'bold'
+    },
+    // Decorative elements
+    decorativeLine: {
+        height: 2,
+        backgroundColor: 'linear-gradient(90deg, #087708 0%, #ff9800 100%)',
+        marginVertical: 10,
+        borderRadius: 1
+    },
+    badge: {
+        backgroundColor: '#087708',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start'
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 7,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
     }
 });
 
@@ -221,14 +372,28 @@ const ExerciseDocument = ({exercise, assignmentData}) => {
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
     const dietitianName = "Belirtilmemiş";
 
+    // Helper function to get difficulty text
+    const getDifficultyText = (difficulty) => {
+        const difficultyMap = {
+            1: "Çok Kolay",
+            2: "Kolay",
+            3: "Orta",
+            4: "Zor",
+            5: "Çok Zor"
+        };
+        return difficultyMap[difficulty] || "Belirtilmemiş";
+    };
+
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
+                {/* Enhanced Header */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
-                        <Text style={pdfStyles.headerTitle}>{exercise.exercise_name} Egzersiz Programı</Text>
+                        <Text style={pdfStyles.headerTitle}>{exercise.exercise_name}</Text>
+                        <Text style={pdfStyles.headerSubtitle}>Kişisel Egzersiz Programı</Text>
                         <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
+                            <Text>Oluşturulma: {dateStr}</Text>
                         </View>
                     </View>
                     <View style={pdfStyles.logoContainer}>
@@ -236,74 +401,95 @@ const ExerciseDocument = ({exercise, assignmentData}) => {
                     </View>
                 </View>
 
+                {/* Enhanced Info Cards */}
                 <View style={pdfStyles.infoSection}>
-                    <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
-                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
-                        <Text style={pdfStyles.infoContent}>Beslenme ve Diyet Uzmanı</Text>
-                        <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
-                        <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
+                    <View style={pdfStyles.infoCard}>
+                        <View style={pdfStyles.infoCardHeader}>
+                            <View style={pdfStyles.infoIcon}></View>
+                            <Text style={pdfStyles.infoTitle}>Diyetisyen</Text>
+                        </View>
+                        <Text style={pdfStyles.infoContent}> </Text>
+                        <Text style={pdfStyles.infoContent}> </Text>
+                         <Text style={pdfStyles.infoContent}> </Text>
+                        <Text style={pdfStyles.infoContent}> </Text>
                     </View>
 
                     {assignmentData && (
-                        <View style={pdfStyles.infoBox}>
-                            <Text style={pdfStyles.infoTitle}>Program Bilgileri</Text>
-                            <Text
-                                style={pdfStyles.infoContent}>Danışan: {assignmentData.clientName || "Belirtilmemiş"}</Text>
-                            <Text
-                                style={pdfStyles.infoContent}>Başlangıç: {assignmentData.startDate ? new Date(assignmentData.startDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
-                            <Text
-                                style={pdfStyles.infoContent}>Bitiş: {assignmentData.endDate ? new Date(assignmentData.endDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                        <View style={pdfStyles.infoCard}>
+                            <View style={pdfStyles.infoCardHeader}>
+                                <View style={pdfStyles.infoIcon}></View>
+                                <Text style={pdfStyles.infoTitle}>Program Detayları</Text>
+                            </View>
+                            <Text style={pdfStyles.infoContent}>👤 {assignmentData.clientName || "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>🗓️ {assignmentData.startDate ? new Date(assignmentData.startDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>⏰ {assignmentData.endDate ? new Date(assignmentData.endDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
                         </View>
                     )}
                 </View>
 
+                {/* Enhanced Exercise Details */}
                 <View style={pdfStyles.exerciseDetails}>
                     <View style={pdfStyles.exerciseHeader}>
-                        <Text style={pdfStyles.exerciseHeaderText}>Egzersiz Detayları</Text>
+                        <View style={pdfStyles.exerciseHeaderIcon}></View>
+                        <Text style={pdfStyles.exerciseHeaderText}>Egzersiz Özellikleri</Text>
                     </View>
-                    <View style={pdfStyles.exerciseContent}>
-                        <View style={pdfStyles.exerciseRow}>
-                            <Text style={pdfStyles.exerciseLabel}>Süre:</Text>
-                            <Text style={pdfStyles.exerciseValue}>{exercise.duration || 0} dakika</Text>
-                        </View>
-                        <View style={pdfStyles.exerciseRow}>
-                            <Text style={pdfStyles.exerciseLabel}>Zorluk Seviyesi:</Text>
-                            <Text style={pdfStyles.exerciseValue}>{exercise.difficulty || 0}/5</Text>
-                        </View>
-                        <View style={pdfStyles.exerciseRow}>
-                            <Text style={pdfStyles.exerciseLabel}>Yakılan Kalori:</Text>
-                            <Text style={pdfStyles.exerciseValue}>{exercise.calories_burned || 0} kcal</Text>
-                        </View>
-                        {exercise.equipment && (
-                            <View style={pdfStyles.exerciseRow}>
-                                <Text style={pdfStyles.exerciseLabel}>Ekipman:</Text>
-                                <Text style={pdfStyles.exerciseValue}>{exercise.equipment}</Text>
-                            </View>
-                        )}
-                        {exercise.video && (
-                            <View style={pdfStyles.exerciseRow}>
-                                <Text style={pdfStyles.exerciseLabel}>Video URL:</Text>
-                                <Text style={pdfStyles.exerciseValue}>{exercise.video}</Text>
-                            </View>
-                        )}
 
-                        <Text style={pdfStyles.instructionsTitle}>Egzersiz Açıklaması</Text>
-                        <Text
-                            style={pdfStyles.instructionsText}>{exercise.exercise_description || "Bu egzersiz için detaylı açıklama bulunmamaktadır."}</Text>
+                    <View style={pdfStyles.exerciseContent}>
+                        {/* Stats Grid */}
+                        <View style={pdfStyles.statsGrid}>
+                            <View style={pdfStyles.statCard}>
+                                <Text style={pdfStyles.statLabel}>Süre</Text>
+                                <Text style={pdfStyles.statValue}>{exercise.duration || 0} dakika</Text>
+                            </View>
+                            <View style={pdfStyles.statCard}>
+                                <Text style={pdfStyles.statLabel}>Zorluk</Text>
+                                <Text style={pdfStyles.statValue}>{getDifficultyText(exercise.difficulty)}</Text>
+                            </View>
+                            <View style={pdfStyles.statCard}>
+                                <Text style={pdfStyles.statLabel}>Kalori</Text>
+                                <Text style={pdfStyles.statValue}>{exercise.calories_burned || 0} kcal</Text>
+                            </View>
+                            {exercise.equipment && (
+                                <View style={pdfStyles.statCard}>
+                                    <Text style={pdfStyles.statLabel}>Ekipman</Text>
+                                    <Text style={pdfStyles.statValue}>{exercise.equipment}</Text>
+                                </View>
+                            )}
+                        </View>
+
+                        {/* Enhanced Description */}
+                        <View style={pdfStyles.descriptionSection}>
+                            <View style={pdfStyles.descriptionHeader}>
+                                <View style={pdfStyles.descriptionIcon}></View>
+                                <Text style={pdfStyles.descriptionTitle}>Egzersiz Açıklaması</Text>
+                            </View>
+                            <Text style={pdfStyles.descriptionText}>
+                                {exercise.exercise_description || "Bu egzersiz için detaylı açıklama eklenecektir. Lütfen diyetisyeninizle iletişime geçin."}
+                            </Text>
+                        </View>
                     </View>
                 </View>
 
+                {/* Enhanced Notes Section */}
                 {assignmentData && assignmentData.note && (
                     <View style={pdfStyles.notesSection}>
-                        <Text style={pdfStyles.notesTitle}>Diyetisyen Notu</Text>
-                        <Text style={pdfStyles.notesContent}>{assignmentData.note}</Text>
+                        <View style={pdfStyles.notesHeader}>
+                            <View style={pdfStyles.notesIcon}></View>
+                            <Text style={pdfStyles.notesTitle}>Özel Notlar</Text>
+                        </View>
+                        <Text style={pdfStyles.notesContent}>"{assignmentData.note}"</Text>
                     </View>
                 )}
 
+                {/* Enhanced Footer */}
                 <View style={pdfStyles.footer}>
-                    <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
-                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
+                    <View style={pdfStyles.footerLeft}>
+                        <Text style={pdfStyles.footerText}>Sağlıklı ve aktif günler dileriz!</Text>
+                        <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
+                    </View>
+                    <View style={pdfStyles.footerRight}>
+                        <Text style={pdfStyles.footerLogo}>Diyetia</Text>
+                    </View>
                 </View>
             </Page>
         </Document>
