@@ -33,7 +33,7 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import HistoryIcon from '@mui/icons-material/History';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
-import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
+import {PDFDownloadLink} from '@react-pdf/renderer';
 
 import ExerciseDocument from './ExerciseDocument.jsx';
 
