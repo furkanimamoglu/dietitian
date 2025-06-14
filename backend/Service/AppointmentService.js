@@ -4,6 +4,8 @@ const Appointment = require(path.join(__dirname, '..', 'Model', 'Appointment'));
 const Client = require(path.join(__dirname, '..', 'Model', 'Client'));
 const {Op} = require('sequelize');
 
+const moment = require('moment-timezone');
+
 class AppointmentService {
     static async fetchDietitianAppointments(user_id) {
         try {
@@ -69,7 +71,7 @@ class AppointmentService {
                 throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
-            return await Appointment.create({
+            const appointment = await Appointment.create({
                 title,
                 start,
                 end,
@@ -77,6 +79,11 @@ class AppointmentService {
                 client_id,
             });
 
+            return {
+                ...appointment.dataValues,
+                start: moment(appointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+                end: moment(appointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+            };
         } catch (error) {
             throw new Exception(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }

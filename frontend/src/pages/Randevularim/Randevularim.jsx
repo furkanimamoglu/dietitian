@@ -48,7 +48,6 @@ export default function Randevularim() {
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
-    // Randevu çakışma kontrolü için yeni state değişkenleri
     const [appointmentConflict, setAppointmentConflict] = useState(false);
     const [conflictMessage, setConflictMessage] = useState("");
 
@@ -376,7 +375,6 @@ export default function Randevularim() {
                 client_id: updatedEventWithDates.client_id,
                 status: updatedEventWithDates.status,
             };
-
             const response = await axios.put(
                 config[config.environment].apiUrl + "/appointment/updateAppointmentAsDietitian",
                 requestData,
@@ -423,28 +421,23 @@ export default function Randevularim() {
             end: false,
             client_id: false
         });
-        // Çakışma durumunu sıfırla
         setAppointmentConflict(false);
         setConflictMessage("");
     };
 
-    // Randevu çakışmalarını kontrol eden fonksiyon
     const checkAppointmentConflicts = (start, end, currentAppointmentId = null) => {
         if (!start || !end) return false;
 
         const startTime = new Date(start);
         const endTime = new Date(end);
 
-        // Geçerli bir randevu süresi olup olmadığını kontrol et
         if (startTime >= endTime) {
             setAppointmentConflict(true);
             setConflictMessage("Başlangıç zamanı bitiş zamanından sonra olamaz.");
             return true;
         }
 
-        // Mevcut randevularla çakışma kontrolü
         const conflictingAppointment = randevular.find(appointment => {
-            // Düzenleme durumunda kendisi ile çakışma kontrolü yapılmasın
             if (currentAppointmentId && String(appointment.id) === String(currentAppointmentId)) {
                 return false;
             }
@@ -452,17 +445,13 @@ export default function Randevularim() {
             const appointmentStart = new Date(appointment.start);
             const appointmentEnd = new Date(appointment.end || appointment.start);
 
-            // Çakışma kontrolü:
-            // (StartA < EndB) && (EndA > StartB)
             return (startTime < appointmentEnd && endTime > appointmentStart);
         });
 
         if (conflictingAppointment) {
-            // Çakışan randevunun danışan bilgisini bul
             const client = clients.find(c => String(c.id) === String(conflictingAppointment.extendedProps?.client_id));
             const clientName = client ? client.name : "Bilinmeyen Danışan";
 
-            // Çakışan randevu saatini formatla
             const conflictStartTime = new Date(conflictingAppointment.start).toLocaleTimeString('tr-TR', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -481,7 +470,6 @@ export default function Randevularim() {
             return true;
         }
 
-        // Çakışma yok
         setAppointmentConflict(false);
         setConflictMessage("");
         return false;
@@ -493,7 +481,6 @@ export default function Randevularim() {
             [key]: value,
         }));
 
-        // Eğer validasyon gösteriliyorsa, alan doldurulduğunda hatayı temizle
         if (showValidation && value) {
             setValidationErrors(prev => ({
                 ...prev,
@@ -501,12 +488,10 @@ export default function Randevularim() {
             }));
         }
 
-        // Başlangıç veya bitiş tarihi değiştiyse çakışma kontrolü yap
         if ((key === "start" || key === "end") && eventData.start && eventData.end) {
             const startToCheck = key === "start" ? value : eventData.start;
             const endToCheck = key === "end" ? value : eventData.end;
 
-            // Düzenleme ekranında ise mevcut randevu ID'sini gönder
             const currentId = randevuDuzenlePopup ? eventData.id : null;
             checkAppointmentConflicts(startToCheck, endToCheck, currentId);
         }
@@ -514,11 +499,9 @@ export default function Randevularim() {
 
     const handleEventDelete = async () => {
         try {
-            // Get the appointment ID and log it to make sure it's correct
             const appointmentId = eventData.id;
             console.log("Silinecek randevu ID:", appointmentId);
 
-            // Use a properly formatted query parameter
             const response = await axios.delete(
                 `${config[config.environment].apiUrl}/appointment/deleteAppointmentAsDietitian`,
                 {
@@ -638,8 +621,7 @@ export default function Randevularim() {
                             const client = clients.find(c => String(c.id) === String(clientId));
                             const clientName = client ? client.name : "";
 
-                            // Saat formatını ayarlama (UTC zamanını kullanarak)
-                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString('tr-TR', {
+                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString(undefined, {
                                 hour: '2-digit',
                                 minute: '2-digit',
                                 hour12: false,
