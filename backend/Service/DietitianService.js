@@ -43,7 +43,7 @@ class DietitianService {
                     role: dietitianInfo.role
                 },
                 config.secretkey,
-                {expiresIn: '24h'}
+                {expiresIn: '30d'}
             );
 
             await dietitianInfo.update({token});
@@ -94,7 +94,8 @@ class DietitianService {
                     phoneNumber: dietitian.phoneNumber,
                     role: DIETITIAN
                 },
-                config.secretkey
+                config.secretkey,
+                {expiresIn: '30d'}
             );
 
             await dietitian.update({token});
@@ -270,7 +271,8 @@ class DietitianService {
                     email: email,
                     role: CLIENT
                 },
-                config.secretkey
+                config.secretkey,
+                {expiresIn: '30d'}
             );
 
             return await Client.create({
@@ -574,6 +576,56 @@ class DietitianService {
             return dietitian;
         } catch (error) {
             throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
+        }
+    }
+
+    static async changeDietitianSubscriptionToFree(dietitian_id) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401, true);
+            }
+
+            const dietitian = await Dietitian.findByPk(dietitian_id);
+
+            if (!dietitian) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            await dietitian.update({
+                subscription_start_date: null,
+                subscription_end_date: null,
+                subscription_type: 'free'
+            });
+
+            return {message: "Abonelik başarıyla ücretsiz olarak değiştirildi."};
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
+        }
+    }
+
+    static async updateClientWaterLimit(dietitian_id, client_id, waterLimit) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: dietitian_id
+                }
+            });
+
+            if (!client) {
+                throw new Exception('Client bulunamadı veya erişim yetkiniz yok.', 400, true);
+            }
+
+            client.dailyWaterIntake = waterLimit;
+            await client.save();
+
+            return client;
+        } catch (error) {
+            throw new Exception(error.message, 400);
         }
     }
 

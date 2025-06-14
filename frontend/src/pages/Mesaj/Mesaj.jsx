@@ -65,19 +65,15 @@ export default function Mesaj() {
     const intervalRef = useRef();
 
     useEffect(() => {
-        // Mesajlar yüklendiğinde veya değiştiğinde en alta kaydır
         if (messageListRef.current) {
-            // setTimeout kullanarak DOM güncellemesinin tamamlanması için süre veriyoruz
             setTimeout(() => {
                 messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
             }, 100);
         }
     }, [messages]);
 
-    // Danışan seçildiğinde ve mesajlar ilk yüklendiğinde de kaydırma yap
     useEffect(() => {
         if (selectedDanisan && messageListRef.current) {
-            // Danışan seçildiğinde ve mesajlar yüklendiğinde en alta kaydır
             setTimeout(() => {
                 messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
             }, 300);
@@ -142,9 +138,7 @@ export default function Mesaj() {
         }
     }, [lastMessageId]);
 
-    // Mesaj yenileme interval'ı - optimize edilmiş
     useEffect(() => {
-        // Önceki interval'ı temizle
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
         }
@@ -153,15 +147,12 @@ export default function Mesaj() {
             return;
         }
 
-        // İlk mesajları yükle
         checkNewMessages(selectedDanisan.id);
 
-        // 10 saniyede bir yeni mesajları kontrol et
         intervalRef.current = setInterval(() => {
             checkNewMessages(selectedDanisan.id);
         }, 10000);
 
-        // Cleanup function
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -179,7 +170,6 @@ export default function Mesaj() {
         try {
             if (!danisanList || danisanList.length === 0) return;
 
-            // Her danışan için ayrı ayrı istek yapılır
             const promises = danisanList.map(danisan =>
                 axios.get(
                     config[config.environment].apiUrl + `/message/getMyUnreadMessageCount?partner_id=${danisan.id}`,
@@ -234,7 +224,6 @@ export default function Mesaj() {
                 }));
                 setDanisanList(enhancedData);
 
-                // Danışan listesi yüklendikten sonra okunmamış mesaj sayılarını al
                 setTimeout(() => {
                     fetchUnreadMessageCounts();
                 }, 100);
@@ -300,7 +289,6 @@ export default function Mesaj() {
             isRead: false
         };
 
-        // Mesajı hemen UI'a ekle
         setMessages(prev => [...prev, newMsg]);
         setNewMessage("");
 
@@ -321,7 +309,6 @@ export default function Mesaj() {
                 }
             );
 
-            // Başarılı gönderimden sonra gerçek mesaj ID'sini güncelle
             if (response.data && response.data.id) {
                 setMessages(prev =>
                     prev.map(msg =>
@@ -331,12 +318,10 @@ export default function Mesaj() {
                     )
                 );
 
-                // LastMessageId'yi güncelle
                 setLastMessageId(response.data.id);
             }
         } catch (error) {
             console.error("Error sending message:", error);
-            // Hata durumunda mesajı kaldır veya hata durumunu göster
             setMessages(prev => prev.filter(msg => msg.id !== tempId));
         }
     };
@@ -384,9 +369,8 @@ export default function Mesaj() {
         if (!file) return;
 
         const isImage = file.type.startsWith('image/');
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024;
 
-        // Sadece resim dosyalarına izin ver
         if (!isImage) {
             alert('Sadece resim dosyaları yükleyebilirsiniz.');
             return;
@@ -404,7 +388,6 @@ export default function Mesaj() {
             const formData = new FormData();
             formData.append('image', file);
 
-            // Dosyayı yükle
             const response = await axios.post(
                 config[config.environment].apiUrl + "/upload",
                 formData,
@@ -425,21 +408,18 @@ export default function Mesaj() {
             if (response.data && response.data.imageUrl) {
                 const imageUrl = response.data.imageUrl;
 
-                // Resim URL'sini içeren mesaj metni oluştur
                 const messageText = `[RESIM:${imageUrl}]`;
 
-                // Mesajı gönder
                 const messageData = {
                     receiver_id: selectedDanisan.id,
                     message: messageText,
                     isRead: false
                 };
 
-                // UI için geçici mesaj oluştur
                 const tempId = Date.now();
                 const newMsg = {
                     id: tempId,
-                    text: null, // Metin yerine resim gösterileceği için null
+                    text: null,
                     sender: "DIETITIAN",
                     timestamp: new Date().toLocaleString('tr-TR', {
                         year: 'numeric',
@@ -456,10 +436,8 @@ export default function Mesaj() {
                     }
                 };
 
-                // Mesajı UI'a ekle
                 setMessages(prev => [...prev, newMsg]);
 
-                // API ile resim mesajını gönder
                 try {
                     const msgResponse = await axios.post(
                         config[config.environment].apiUrl + "/message/sendMessage",
@@ -471,7 +449,6 @@ export default function Mesaj() {
                         }
                     );
 
-                    // Başarılı gönderimden sonra gerçek mesaj ID'sini güncelle
                     if (msgResponse.data && msgResponse.data.id) {
                         setMessages(prev =>
                             prev.map(msg =>
@@ -481,12 +458,10 @@ export default function Mesaj() {
                             )
                         );
 
-                        // LastMessageId'yi güncelle
                         setLastMessageId(msgResponse.data.id);
                     }
                 } catch (msgError) {
                     console.error("Resim mesajı gönderirken hata:", msgError);
-                    // Hata durumunda mesajı kaldır
                     setMessages(prev => prev.filter(msg => msg.id !== tempId));
                 }
             } else {
@@ -502,7 +477,6 @@ export default function Mesaj() {
     };
 
     const renderMessage = (message) => {
-        // Dosya özelliği varsa onu göster
         if (message.file) {
             if (message.file.isImage) {
                 return (
@@ -533,7 +507,6 @@ export default function Mesaj() {
             }
         }
 
-        // Metinde [RESIM:URL] formatını kontrol et
         if (message.text && typeof message.text === 'string') {
             const imageMatch = message.text.match(/^\[RESIM:(.*?)\]$/);
             if (imageMatch) {
@@ -550,7 +523,6 @@ export default function Mesaj() {
             }
         }
 
-        // Normal mesaj metni göster
         return (
             <Typography variant="body1">
                 {message.text}
@@ -963,7 +935,7 @@ export default function Mesaj() {
                 ref={fileInputRef}
                 style={{display: 'none'}}
                 onChange={handleFileSelect}
-                accept="image/*" // Sadece resim dosyalarını kabul et
+                accept="image/*"
             />
 
             {/* Resim yükleme işlemi sırasında gösterilecek ilerleme bildirimi */}

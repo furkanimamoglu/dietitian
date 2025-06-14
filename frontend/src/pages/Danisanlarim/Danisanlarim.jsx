@@ -1787,6 +1787,14 @@ export default function Danisanlarim() {
                     onClose={closeCreateDialog}
                     maxWidth="sm"
                     fullWidth
+                    PaperProps={{
+                        sx: {
+                            maxHeight: '90vh',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflow: 'visible'
+                        }
+                    }}
                 >
                     <DialogTitle sx={{
                         backgroundColor: 'primary.main',
@@ -1810,9 +1818,9 @@ export default function Danisanlarim() {
                             <CloseIcon/>
                         </IconButton>
                     </DialogTitle>
-                    <form onSubmit={handleCreateSubmit}>
-                        <DialogContent dividers>
-                            <Stack spacing={3} sx={{mt: 1}}>
+                    <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto' }}>
+                        <DialogContent dividers sx={{ overflowY: 'auto', flex: '1 1 auto' }}>
+                            <Stack spacing={3} sx={{mt: 1, overflowY: 'auto', maxHeight: '60vh'}}>
                                 <TextField
                                     fullWidth
                                     required
@@ -1916,7 +1924,7 @@ export default function Danisanlarim() {
                                 </FormControl>
                             </Stack>
                         </DialogContent>
-                        <DialogActions sx={{p: 2, justifyContent: 'flex-end'}}>
+                        <DialogActions sx={{p: 2, justifyContent: 'flex-end', flex: '0 0 auto', position: 'sticky', bottom: 0, bgcolor: 'background.paper', borderTop: '1px solid rgba(0, 0, 0, 0.12)'}}>
                             <Button
                                 type="submit"
                                 variant="contained"

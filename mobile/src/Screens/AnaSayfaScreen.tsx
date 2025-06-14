@@ -40,7 +40,7 @@ const AnaSayfa = ({navigation}: Props) => {
     const [waterLoading, setWaterLoading] = useState<boolean>(false);
     const [showWaterModal, setShowWaterModal] = useState<boolean>(false);
     const [showWaterListModal, setShowWaterListModal] = useState<boolean>(false);
-    const [dailyWaterGoal] = useState<number>(2500); // Default daily goal in ml
+    const [dailyWaterGoal, setDailyWaterGoal] = useState<number>(2500);
     const [deletingWaterId, setDeletingWaterId] = useState<string | null>(null);
 
     const onRefresh = async () => {
@@ -122,6 +122,9 @@ const AnaSayfa = ({navigation}: Props) => {
             const data = await response.json();
             if (response.ok) {
                 setUserName(data.name || 'Bilinmiyor');
+                if (data.dailyWaterIntake && typeof data.dailyWaterIntake === 'number') {
+                    setDailyWaterGoal(data.dailyWaterIntake);
+                }
             } else {
                 console.log('Kullanıcı bilgisi alınamadı:', data.message);
             }

@@ -33,7 +33,9 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import HistoryIcon from '@mui/icons-material/History';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
-import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
+import {PDFDownloadLink} from '@react-pdf/renderer';
+
+import ExerciseDocument from './ExerciseDocument.jsx';
 
 import {
     Avatar,
@@ -55,260 +57,6 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-
-Font.register({
-    family: 'Open Sans',
-    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
-});
-
-const pdfStyles = StyleSheet.create({
-    page: {
-        flexDirection: 'column',
-        backgroundColor: '#fff',
-        padding: 10,
-        fontFamily: 'Open Sans'
-    },
-    header: {
-        backgroundColor: '#087708',
-        padding: 5,
-        marginBottom: 10,
-        borderRadius: 5,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    headerContent: {
-        flex: 1
-    },
-    headerTitle: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 4
-    },
-    headerInfo: {
-        color: 'white',
-        fontSize: 9,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    logoContainer: {
-        width: 50,
-        height: 50,
-        backgroundColor: 'white',
-        borderRadius: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 10
-    },
-    logo: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#087708'
-    },
-    infoSection: {
-        flexDirection: 'row',
-        marginBottom: 10,
-        borderRadius: 5,
-        overflow: 'hidden'
-    },
-    infoBox: {
-        flex: 1,
-        padding: 8,
-        backgroundColor: '#f5f5f5',
-        margin: 2
-    },
-    infoTitle: {
-        fontSize: 9,
-        fontWeight: 'bold',
-        marginBottom: 3,
-        color: '#087708'
-    },
-    infoContent: {
-        fontSize: 8,
-        color: '#333'
-    },
-    exerciseDetails: {
-        marginBottom: 15,
-        border: '1px solid #E0E0E0',
-        borderRadius: 5,
-        overflow: 'hidden'
-    },
-    exerciseHeader: {
-        backgroundColor: '#087708',
-        padding: 6,
-    },
-    exerciseHeaderText: {
-        color: 'white',
-        fontSize: 12,
-        fontWeight: 'bold'
-    },
-    exerciseContent: {
-        padding: 10,
-        backgroundColor: '#f9f9f9'
-    },
-    exerciseRow: {
-        flexDirection: 'row',
-        marginBottom: 5,
-        paddingBottom: 3,
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-        borderBottomStyle: 'solid'
-    },
-    exerciseLabel: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        width: '30%',
-        color: '#555'
-    },
-    exerciseValue: {
-        fontSize: 8,
-        width: '70%'
-    },
-    instructionsTitle: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        marginTop: 8,
-        marginBottom: 4,
-        color: '#087708',
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-        borderBottomStyle: 'solid',
-        paddingBottom: 2
-    },
-    instructionsText: {
-        fontSize: 8,
-        lineHeight: 1.4
-    },
-    footer: {
-        position: 'absolute',
-        bottom: 10,
-        left: 0,
-        right: 0,
-        textAlign: 'right',
-        paddingTop: 5,
-        marginRight: 15
-    },
-    footerText: {
-        fontSize: 7,
-        color: '#087708'
-    },
-    footerWebsite: {
-        fontSize: 7,
-        color: '#FF9800',
-        marginTop: 2
-    },
-    notesSection: {
-        marginTop: 10,
-        padding: 8,
-        backgroundColor: '#FFF9C4',
-        borderRadius: 5
-    },
-    notesTitle: {
-        fontSize: 9,
-        fontWeight: 'bold',
-        marginBottom: 3,
-        color: '#FF9800'
-    },
-    notesContent: {
-        fontSize: 8,
-        color: '#333'
-    }
-});
-
-const ExerciseDocument = ({exercise, assignmentData}) => {
-    const today = new Date();
-    const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Belirtilmemiş";
-
-    return (
-        <Document>
-            <Page size="A4" style={pdfStyles.page}>
-                <View style={pdfStyles.header}>
-                    <View style={pdfStyles.headerContent}>
-                        <Text style={pdfStyles.headerTitle}>{exercise.exercise_name} Egzersiz Programı</Text>
-                        <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
-                        </View>
-                    </View>
-                    <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>Diyetia</Text>
-                    </View>
-                </View>
-
-                <View style={pdfStyles.infoSection}>
-                    <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Diyetisyen Bilgisi</Text>
-                        <Text style={pdfStyles.infoContent}>{dietitianName}</Text>
-                        <Text style={pdfStyles.infoContent}>Beslenme ve Diyet Uzmanı</Text>
-                        <Text style={pdfStyles.infoContent}>Tel: +90 555 123 4567</Text>
-                        <Text style={pdfStyles.infoContent}>E-posta: info@diyetia.com</Text>
-                    </View>
-
-                    {assignmentData && (
-                        <View style={pdfStyles.infoBox}>
-                            <Text style={pdfStyles.infoTitle}>Program Bilgileri</Text>
-                            <Text
-                                style={pdfStyles.infoContent}>Danışan: {assignmentData.clientName || "Belirtilmemiş"}</Text>
-                            <Text
-                                style={pdfStyles.infoContent}>Başlangıç: {assignmentData.startDate ? new Date(assignmentData.startDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
-                            <Text
-                                style={pdfStyles.infoContent}>Bitiş: {assignmentData.endDate ? new Date(assignmentData.endDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
-                        </View>
-                    )}
-                </View>
-
-                <View style={pdfStyles.exerciseDetails}>
-                    <View style={pdfStyles.exerciseHeader}>
-                        <Text style={pdfStyles.exerciseHeaderText}>Egzersiz Detayları</Text>
-                    </View>
-                    <View style={pdfStyles.exerciseContent}>
-                        <View style={pdfStyles.exerciseRow}>
-                            <Text style={pdfStyles.exerciseLabel}>Süre:</Text>
-                            <Text style={pdfStyles.exerciseValue}>{exercise.duration || 0} dakika</Text>
-                        </View>
-                        <View style={pdfStyles.exerciseRow}>
-                            <Text style={pdfStyles.exerciseLabel}>Zorluk Seviyesi:</Text>
-                            <Text style={pdfStyles.exerciseValue}>{exercise.difficulty || 0}/5</Text>
-                        </View>
-                        <View style={pdfStyles.exerciseRow}>
-                            <Text style={pdfStyles.exerciseLabel}>Yakılan Kalori:</Text>
-                            <Text style={pdfStyles.exerciseValue}>{exercise.calories_burned || 0} kcal</Text>
-                        </View>
-                        {exercise.equipment && (
-                            <View style={pdfStyles.exerciseRow}>
-                                <Text style={pdfStyles.exerciseLabel}>Ekipman:</Text>
-                                <Text style={pdfStyles.exerciseValue}>{exercise.equipment}</Text>
-                            </View>
-                        )}
-                        {exercise.video && (
-                            <View style={pdfStyles.exerciseRow}>
-                                <Text style={pdfStyles.exerciseLabel}>Video URL:</Text>
-                                <Text style={pdfStyles.exerciseValue}>{exercise.video}</Text>
-                            </View>
-                        )}
-
-                        <Text style={pdfStyles.instructionsTitle}>Egzersiz Açıklaması</Text>
-                        <Text
-                            style={pdfStyles.instructionsText}>{exercise.exercise_description || "Bu egzersiz için detaylı açıklama bulunmamaktadır."}</Text>
-                    </View>
-                </View>
-
-                {assignmentData && assignmentData.note && (
-                    <View style={pdfStyles.notesSection}>
-                        <Text style={pdfStyles.notesTitle}>Diyetisyen Notu</Text>
-                        <Text style={pdfStyles.notesContent}>{assignmentData.note}</Text>
-                    </View>
-                )}
-
-                <View style={pdfStyles.footer}>
-                    <Text style={pdfStyles.footerText}>Sağlıklı günler dileriz!</Text>
-                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
-                </View>
-            </Page>
-        </Document>
-    );
-};
 
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     return (
@@ -338,7 +86,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
+const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, dietitianInfo}) => {
     return (
         <div className="exercise-card">
             <div className="card-image-container" onClick={() => onView(item)}>
@@ -380,7 +128,7 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
                         <PersonAddIcon/>
                     </button>
                     <PDFDownloadLink
-                        document={<ExerciseDocument exercise={item} assignmentData={null}/>}
+                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitianInfo={dietitianInfo} />}
                         fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -448,10 +196,6 @@ export default function Egzersizler() {
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
-
-    const [difficultyFilter, setDifficultyFilter] = useState(0);
-
-    const [calorieFilter, setCalorieFilter] = useState(null);
 
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
@@ -691,36 +435,7 @@ export default function Egzersizler() {
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
 
-        const difficultyMatch = difficultyFilter === 0 || item.difficulty === difficultyFilter;
-
-        let calorieMatch = true;
-        if (calorieFilter !== null) {
-            const calories = item.calories_burned || 0;
-            switch (calorieFilter) {
-                case '0-50':
-                    calorieMatch = calories >= 0 && calories <= 50;
-                    break;
-                case '50-100':
-                    calorieMatch = calories > 50 && calories <= 100;
-                    break;
-                case '100-200':
-                    calorieMatch = calories > 100 && calories <= 200;
-                    break;
-                case '200-300':
-                    calorieMatch = calories > 200 && calories <= 300;
-                    break;
-                case '300-500':
-                    calorieMatch = calories > 300 && calories <= 500;
-                    break;
-                case '500+':
-                    calorieMatch = calories > 500;
-                    break;
-                default:
-                    calorieMatch = true;
-            }
-        }
-
-        return searchMatch && categoryMatch && difficultyMatch && calorieMatch;
+        return searchMatch && categoryMatch;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -1141,6 +856,24 @@ export default function Egzersizler() {
             });
     };
 
+    const [dietitianInfo, setDietitianInfo] = useState({});
+
+    useEffect(() => {
+        axios
+            .get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                console.log("Dietitian Info:", response.data);
+                setDietitianInfo(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching clients:", error);
+            });
+    }, []);
+
     return (
         <Default>
             <div className="egzersizler-container">
@@ -1227,49 +960,6 @@ export default function Egzersizler() {
                                         <CloseIcon />
                                     </button>
                                 )}
-                            </div>
-                        </div>
-                        {/* Difficulty filter */}
-                        <div className="filter-group">
-                            <h3 className="filter-title">Zorluk Seviyesi:</h3>
-                            <div className="difficulty-options">
-                                <button
-                                    className={`difficulty-btn ${difficultyFilter === 0 ? 'active' : ''}`}
-                                    onClick={() => setDifficultyFilter(0)}
-                                >
-                                    Tümü
-                                </button>
-                                {[1, 2, 3, 4, 5].map(level => (
-                                    <button
-                                        key={level}
-                                        className={`difficulty-btn ${difficultyFilter === level ? 'active' : ''}`}
-                                        onClick={() => setDifficultyFilter(level)}
-                                    >
-                                        {level}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Calorie filter */}
-                        <div className="filter-group">
-                            <h3 className="filter-title">Kalori Aralığı:</h3>
-                            <div className="calorie-options">
-                                <button
-                                    className={`calorie-btn ${calorieFilter === null ? 'active' : ''}`}
-                                    onClick={() => setCalorieFilter(null)}
-                                >
-                                    Tümü
-                                </button>
-                                {['0-50', '50-100', '100-200', '200-300', '300-500', '500+'].map(range => (
-                                    <button
-                                        key={range}
-                                        className={`calorie-btn ${calorieFilter === range ? 'active' : ''}`}
-                                        onClick={() => setCalorieFilter(range)}
-                                    >
-                                        {range}
-                                    </button>
-                                ))}
                             </div>
                         </div>
                     </div>
