@@ -217,6 +217,7 @@ export default function Default(props) {
                     'Authorization': token || ''
                 }
             });
+
             if (response.data) {
                 setDietitianInfo(response.data);
 
@@ -248,6 +249,9 @@ export default function Default(props) {
             }
         } catch (error) {
             console.error('Diyetisyen bilgisi alınamadı.', error);
+            if (error.response.data.message === "jwt expired") {
+                navigate('/girisyap');
+            }
         }
     };
 
