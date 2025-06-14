@@ -332,9 +332,9 @@ const NutritionPlanDocument = ({program}) => {
                 {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
                     <Text style={pdfStyles.footerText}>
-                        Bu beslenme programı {dietitianName} tarafından hazırlanmıştır.
+                        Bu beslenme programı .... tarafından hazırlanmıştır.
                     </Text>
-                    <Text style={pdfStyles.footerWebsite}>www.diyetprogrami.com</Text>
+                    <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
                 </View>
             </Page>
         </Document>

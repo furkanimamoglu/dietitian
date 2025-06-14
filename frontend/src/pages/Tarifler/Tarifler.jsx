@@ -4,7 +4,7 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 import {showErrorToast} from '../../utils/toastUtil';
-import { saveRecipe, updateRecipe } from './helpers.js';
+import {saveRecipe, updateRecipe} from './helpers.js';
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -20,8 +20,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import DescriptionIcon from "@mui/icons-material/Description";
 import NoteIcon from '@mui/icons-material/Note';
 
-import {jsPDF} from "jspdf";
-import 'jspdf-autotable';
+import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
+
 import {
     Avatar,
     Box,
@@ -37,215 +37,493 @@ import {
     Typography
 } from '@mui/material';
 
-const generatePDF = (recipe) => {
-    const doc = new jsPDF({
-        orientation: 'portrait', unit: 'mm', format: 'a4'
-    });
+Font.register({
+    family: 'Open Sans',
+    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
+});
 
-    doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.ttf', 'Helvetica', 'normal');
-    doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.bold.ttf', 'Helvetica', 'bold');
-    doc.addFont('https://fonts.cdnfonts.com/s/15051/unicode.helvetica.italic.ttf', 'Helvetica', 'italic');
+const pdfStyles = StyleSheet.create({
+    page: {
+        flexDirection: 'column',
+        backgroundColor: '#fff',
+        padding: 20,
+        fontFamily: 'Open Sans'
+    },
+    header: {
+        backgroundColor: '#087708',
+        background: 'linear-gradient(135deg, #087708 0%, #0a9a0a 100%)',
+        padding: 20,
+        marginBottom: 20,
+        borderRadius: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5
+    },
+    headerContent: {
+        flex: 1
+    },
+    headerTitle: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 6,
+        letterSpacing: 0.5
+    },
+    headerInfo: {
+        color: 'rgba(255, 255, 255, 0.8)',
+        fontSize: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    logoContainer: {
+        width: 60,
+        height: 60,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4
+    },
+    logo: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#087708',
+        letterSpacing: 0.5
+    },
+    // Modern card-based info section
+    infoSection: {
+        flexDirection: 'row',
+        marginBottom: 20,
+        gap: 15
+    },
+    infoCard: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#e1e5e9',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8
+    },
+    infoCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    infoIcon: {
+        width: 20,
+        height: 20,
+        backgroundColor: '#087708',
+        borderRadius: 10,
+        marginRight: 8
+    },
+    infoTitle: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#087708',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
+    },
+    infoContent: {
+        fontSize: 9,
+        color: '#495057',
+        lineHeight: 1.4,
+        marginBottom: 2
+    },
+    // Recipe details with better visual hierarchy
+    recipeDetails: {
+        marginBottom: 20,
+        borderRadius: 12,
+        overflow: 'hidden',
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12
+    },
+    recipeHeader: {
+        backgroundColor: '#ff9800',
+        background: 'linear-gradient(90deg, #ff9800 0%, #ffb74d 100%)',
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    recipeHeaderIcon: {
+        width: 24,
+        height: 24,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 12,
+        marginRight: 10
+    },
+    recipeHeaderText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+        letterSpacing: 0.3
+    },
+    recipeContent: {
+        padding: 20,
+        backgroundColor: '#f8f9fa'
+    },
+    nutritionSection: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 20,
+        gap: 10
+    },
+    nutritionCard: {
+        flex: '1 1 45%',
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#ff9800',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4
+    },
+    nutritionLabel: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        color: '#6c757d',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 4
+    },
+    nutritionValue: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#212529'
+    },
+    ingredientsSection: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+        marginBottom: 15
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingBottom: 8,
+        borderBottomWidth: 2,
+        borderBottomColor: '#ff9800',
+        borderBottomStyle: 'solid'
+    },
+    sectionIcon: {
+        width: 16,
+        height: 16,
+        backgroundColor: '#ff9800',
+        borderRadius: 8,
+        marginRight: 8
+    },
+    sectionTitle: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#ff9800',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
+    },
+    ingredientsList: {
+        fontSize: 9,
+        lineHeight: 1.6,
+        color: '#495057'
+    },
+    ingredientItem: {
+        flexDirection: 'row',
+        marginBottom: 4
+    },
+    bulletPoint: {
+        marginRight: 5,
+        color: '#ff9800'
+    },
+    ingredientText: {
+        flex: 1
+    },
+    instructionsSection: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef'
+    },
+    instructionStep: {
+        flexDirection: 'row',
+        marginBottom: 8
+    },
+    stepNumber: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        color: '#ff9800',
+        marginRight: 8,
+        minWidth: 16,
+        textAlign: 'center',
+        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+        borderRadius: 10,
+        paddingVertical: 2,
+        paddingHorizontal: 5
+    },
+    stepText: {
+        fontSize: 9,
+        lineHeight: 1.6,
+        color: '#495057',
+        flex: 1
+    },
+    notesSection: {
+        marginTop: 20,
+        padding: 16,
+        backgroundColor: '#fff8e1',
+        borderRadius: 12,
+        borderLeftWidth: 6,
+        borderLeftColor: '#ff9800',
+        shadowColor: '#ff9800',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8
+    },
+    notesHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8
+    },
+    notesIcon: {
+        width: 16,
+        height: 16,
+        backgroundColor: '#ff9800',
+        borderRadius: 8,
+        marginRight: 8
+    },
+    notesTitle: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#ff9800',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
+    },
+    notesContent: {
+        fontSize: 9,
+        color: '#5d4037',
+        lineHeight: 1.5,
+        fontStyle: 'italic'
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        right: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: 15,
+        borderTopWidth: 2,
+        borderTopColor: '#e9ecef',
+        borderTopStyle: 'solid'
+    },
+    footerLeft: {
+        flex: 1
+    },
+    footerText: {
+        fontSize: 8,
+        color: '#087708',
+        fontWeight: 'bold'
+    },
+    footerWebsite: {
+        fontSize: 8,
+        color: '#ff9800',
+        fontWeight: 'bold',
+        marginTop: 2
+    },
+    footerRight: {
+        alignItems: 'flex-end'
+    },
+    footerLogo: {
+        fontSize: 10,
+        color: '#087708',
+        fontWeight: 'bold'
+    },
+    badge: {
+        backgroundColor: '#ff9800',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start'
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 7,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5
+    }
+});
 
-    const greenColor = [76, 175, 80];
-    const orangeColor = [255, 152, 0];
 
-    doc.setFillColor(greenColor[0], greenColor[1], greenColor[2]);
-    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 40, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('Helvetica', 'bold');
-
-    let title = recipe.title || "Tarif";
-    const titleWidth = doc.getStringUnitWidth(title) * 24 / doc.internal.scaleFactor;
-    const availableWidth = doc.internal.pageSize.getWidth() - 40;
-    if (titleWidth > availableWidth) {
-        title = title.substring(0, Math.floor(title.length * (availableWidth / titleWidth) - 3)) + '...';
+const RecipeDocument = ({recipe, assignmentData, dietitianInfo}) => {
+    if (!recipe) {
+        return null;
     }
 
-    doc.text(title, 20, 25);
+    const today = new Date();
+    const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
+    const dietitianName = "Belirtilmemiş";
 
-    doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
-    doc.rect(0, 40, doc.internal.pageSize.getWidth(), 5, 'F');
+    const ingredientsArray = recipe.malzemeler && typeof recipe.malzemeler === 'string'
+        ? recipe.malzemeler.split(',').map(item => item.trim()).filter(Boolean)
+        : [];
 
-    doc.setTextColor(0, 0, 0);
+    const instructionsArray = recipe.hazirlanis && typeof recipe.hazirlanis === 'string'
+        ? recipe.hazirlanis.split(/\r?\n/)
+            .filter(line => line && line.trim().length > 0)
+            .map(line => line.trim())
+        : [];
 
-    let yPosition = 60;
-    if (recipe.description && recipe.description.trim()) {
-        doc.setFontSize(12);
-        doc.setFont('Helvetica', 'italic');
-        const descriptionLines = doc.splitTextToSize(recipe.description, doc.internal.pageSize.getWidth() - 40);
-        doc.text(descriptionLines, 20, yPosition);
-        yPosition += descriptionLines.length * 7 + 10;
-    }
+    return (
+        <Document>
+            <Page size="A4" style={pdfStyles.page}>
+                {/* Enhanced Header */}
+                <View style={pdfStyles.header}>
+                    <View style={pdfStyles.headerContent}>
+                        <Text style={pdfStyles.headerTitle}>{recipe.title}</Text>
+                        <View style={pdfStyles.headerInfo}>
+                            <Text>Oluşturulma: {dateStr}</Text>
+                        </View>
+                    </View>
+                    <View style={pdfStyles.logoContainer}>
+                        <Text style={pdfStyles.logo}>Diyetia</Text>
+                    </View>
+                </View>
 
-    if (recipe.nutritional_info) {
-        doc.setFontSize(14);
-        doc.setFont('Helvetica', 'bold');
-        doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-        doc.text("Besin Degerleri", 20, yPosition);
+                {/* Enhanced Info Cards */}
+                <View style={pdfStyles.infoSection}>
+                    <View style={pdfStyles.infoCard}>
+                        <View style={pdfStyles.infoCardHeader}>
+                            <View style={pdfStyles.infoIcon}></View>
+                            <Text style={pdfStyles.infoTitle}>Diyetisyen</Text>
+                        </View>
+                        <Text style={pdfStyles.infoContent}>{dietitianInfo.name}</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianInfo.phoneNumber || "Belirtilmemiş"}</Text>
+                        <Text style={pdfStyles.infoContent}>{dietitianInfo.email || "Belirtilmemiş"}</Text>
+                    </View>
 
-        doc.setFontSize(10);
-        doc.setFont('Helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
+                    {assignmentData && (
+                        <View style={pdfStyles.infoCard}>
+                            <View style={pdfStyles.infoCardHeader}>
+                                <View style={pdfStyles.infoIcon}></View>
+                                <Text style={pdfStyles.infoTitle}>Tarif Detayları</Text>
+                            </View>
+                            <Text style={pdfStyles.infoContent}>👤 {assignmentData.clientName || "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>🗓️ Atanma: {assignmentData.assignmentDate ? new Date(assignmentData.assignmentDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
+                            <Text style={pdfStyles.infoContent}>🏷️ Kategori: {recipe.category_name || "Belirtilmemiş"}</Text>
+                        </View>
+                    )}
+                </View>
 
-        yPosition += 8;
-        const nutriInfo = recipe.nutritional_info;
+                {/* Recipe Description */}
+                {recipe.description && (
+                    <View style={pdfStyles.recipeDetails}>
+                        <View style={pdfStyles.recipeHeader}>
+                            <View style={pdfStyles.recipeHeaderIcon}></View>
+                            <Text style={pdfStyles.recipeHeaderText}>Tarif Hakkında</Text>
+                        </View>
+                        <View style={pdfStyles.recipeContent}>
+                            <Text style={{...pdfStyles.stepText, marginBottom: 10}}>
+                                {recipe.description}
+                            </Text>
+                </View>
+                    </View>
+                )}
 
-        if (nutriInfo.calories) {
-            doc.text(`• Kalori: ${nutriInfo.calories} kcal`, 25, yPosition);
-            yPosition += 6;
-        }
+                {/* Nutrition Information */}
+                <View style={pdfStyles.recipeDetails}>
+                    <View style={pdfStyles.recipeHeader}>
+                        <View style={pdfStyles.recipeHeaderIcon}></View>
+                        <Text style={pdfStyles.recipeHeaderText}>Besin Değerleri</Text>
+                            </View>
+                    <View style={pdfStyles.recipeContent}>
+                        <View style={pdfStyles.nutritionSection}>
+                            <View style={pdfStyles.nutritionCard}>
+                                <Text style={pdfStyles.nutritionLabel}>Kalori</Text>
+                                <Text style={pdfStyles.nutritionValue}>{recipe.kcal || 0} kcal</Text>
+                            </View>
+                            <View style={pdfStyles.nutritionCard}>
+                                <Text style={pdfStyles.nutritionLabel}>Protein</Text>
+                                <Text style={pdfStyles.nutritionValue}>{recipe.protein || 0} g</Text>
+                            </View>
+                            <View style={pdfStyles.nutritionCard}>
+                                <Text style={pdfStyles.nutritionLabel}>Karbonhidrat</Text>
+                                <Text style={pdfStyles.nutritionValue}>{recipe.karbonhidrat || 0} g</Text>
+                                </View>
+                            <View style={pdfStyles.nutritionCard}>
+                                <Text style={pdfStyles.nutritionLabel}>Yağ</Text>
+                                <Text style={pdfStyles.nutritionValue}>{recipe.yag || 0} g</Text>
+                        </View>
+                            </View>
+                    </View>
+                </View>
 
-        if (nutriInfo.protein) {
-            doc.text(`• Protein: ${nutriInfo.protein} g`, 25, yPosition);
-            yPosition += 6;
-        }
+                {/* Ingredients */}
+                <View style={pdfStyles.ingredientsSection}>
+                    <View style={pdfStyles.sectionHeader}>
+                        <View style={pdfStyles.sectionIcon}></View>
+                        <Text style={pdfStyles.sectionTitle}>Malzemeler</Text>
+                    </View>
+                    <View style={pdfStyles.ingredientsList}>
+                        {recipe.malzemeler}
+                    </View>
+                </View>
 
-        if (nutriInfo.carbs) {
-            doc.text(`• Karbonhidrat: ${nutriInfo.carbs} g`, 25, yPosition);
-            yPosition += 6;
-        }
+                {/* Instructions */}
+                <View style={pdfStyles.instructionsSection}>
+                    <View style={pdfStyles.sectionHeader}>
+                        <View style={pdfStyles.sectionIcon}></View>
+                        <Text style={pdfStyles.sectionTitle}>Hazırlanışı</Text>
+                        </View>
+                    <View>
+                        {recipe.hazirlanis}
+                    </View>
+                </View>
 
-        if (nutriInfo.fat) {
-            doc.text(`• Yag: ${nutriInfo.fat} g`, 25, yPosition);
-            yPosition += 6;
-        }
+                {/* Notes Section */}
+                {assignmentData && assignmentData.note && (
+                    <View style={pdfStyles.notesSection}>
+                        <View style={pdfStyles.notesHeader}>
+                            <View style={pdfStyles.notesIcon}></View>
+                            <Text style={pdfStyles.notesTitle}>Özel Notlar</Text>
+                        </View>
+                        <Text style={pdfStyles.notesContent}>"{assignmentData.note}"</Text>
+                    </View>
+                )}
 
-        yPosition += 5;
-    }
-
-    // Check if we need a new page
-    if (yPosition > doc.internal.pageSize.getHeight() - 50) {
-        doc.addPage();
-
-        // Add orange header on the new page
-        doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
-        doc.rect(0, 0, doc.internal.pageSize.getWidth(), 15, 'F');
-
-        yPosition = 30;
-    }
-
-    // Add ingredients
-    doc.setFontSize(14);
-    doc.setFont('Helvetica', 'bold');
-    doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-    doc.text("Malzemeler", 20, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('Helvetica', 'normal');
-    doc.setTextColor(0, 0, 0);
-
-    if (recipe.ingredients) {
-        const ingredients = recipe.ingredients.split(',');
-        ingredients.forEach(ingredient => {
-            const trimmedIngredient = ingredient.trim().replace(/ı/g, 'i').replace(/İ/g, 'I')
-                .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
-                .replace(/ü/g, 'u').replace(/Ü/g, 'U')
-                .replace(/ş/g, 's').replace(/Ş/g, 'S')
-                .replace(/ç/g, 'c').replace(/Ç/g, 'C')
-                .replace(/ö/g, 'o').replace(/Ö/g, 'O');
-
-            if (trimmedIngredient) {
-                doc.text(`• ${trimmedIngredient}`, 25, yPosition);
-                yPosition += 6;
-
-                // Check if we need a new page
-                if (yPosition > doc.internal.pageSize.getHeight() - 20) {
-                    doc.addPage();
-
-                    // Add orange header on the new page
-                    doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
-                    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 15, 'F');
-
-                    yPosition = 30;
-                }
-            }
-        });
-    }
-
-    yPosition += 10;
-
-    // Check if we need a new page for instructions
-    if (yPosition > doc.internal.pageSize.getHeight() - 60) {
-        doc.addPage();
-
-        // Add orange header on the new page
-        doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
-        doc.rect(0, 0, doc.internal.pageSize.getWidth(), 15, 'F');
-
-        yPosition = 30;
-    }
-
-    // Add instructions
-    doc.setFontSize(14);
-    doc.setFont('Helvetica', 'bold');
-    doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-    doc.text("Hazirlani", 20, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('Helvetica', 'normal');
-    doc.setTextColor(0, 0, 0);
-
-    if (recipe.instructions) {
-        // Replace Turkish characters with their ASCII equivalents
-        const sanitizedInstructions = recipe.instructions.replace(/ı/g, 'i').replace(/İ/g, 'I')
-            .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
-            .replace(/ü/g, 'u').replace(/Ü/g, 'U')
-            .replace(/ş/g, 's').replace(/Ş/g, 'S')
-            .replace(/ç/g, 'c').replace(/Ç/g, 'C')
-            .replace(/ö/g, 'o').replace(/Ö/g, 'O');
-
-        // Handle long texts with multiline
-        const splitText = doc.splitTextToSize(sanitizedInstructions, doc.internal.pageSize.getWidth() - 40);
-
-        // Check if we have too many lines for the current page
-        if (yPosition + splitText.length * 5 > doc.internal.pageSize.getHeight() - 20) {
-            // Calculate how many lines we can fit on this page
-            const linesPerPage = Math.floor((doc.internal.pageSize.getHeight() - 20 - yPosition) / 5);
-
-            // Add as many lines as we can fit
-            doc.text(splitText.slice(0, linesPerPage), 20, yPosition);
-
-            // Add a new page for the remaining lines
-            doc.addPage();
-
-            // Add orange header on the new page
-            doc.setFillColor(orangeColor[0], orangeColor[1], orangeColor[2]);
-            doc.rect(0, 0, doc.internal.pageSize.getWidth(), 15, 'F');
-
-            // Continue with the remaining lines
-            yPosition = 30;
-            doc.text(splitText.slice(linesPerPage), 20, yPosition);
-        } else {
-            // All lines fit on the current page
-            doc.text(splitText, 20, yPosition);
-        }
-    }
-
-    // Add footer
-    const footerY = doc.internal.pageSize.getHeight() - 10;
-    doc.setFontSize(8);
-    doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
-    doc.text("Diyetisyen Uygulamasi", 20, footerY);
-    doc.setTextColor(orangeColor[0], orangeColor[1], orangeColor[2]);
-    doc.text(new Date().toLocaleDateString('en-US'), doc.internal.pageSize.getWidth() - 40, footerY);
-
-    // Save the PDF
-    const safeFileName = recipe.title ? recipe.title.replace(/\s+/g, '_')
-        .replace(/ı/g, 'i').replace(/İ/g, 'I')
-        .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
-        .replace(/ü/g, 'u').replace(/Ü/g, 'U')
-        .replace(/ş/g, 's').replace(/Ş/g, 'S')
-        .replace(/ç/g, 'c').replace(/Ç/g, 'C')
-        .replace(/ö/g, 'o').replace(/Ö/g, 'O') : 'Tarif';
-
-    doc.save(`${safeFileName}.pdf`);
+                {/* Enhanced Footer */}
+                <View style={pdfStyles.footer}>
+                    <View style={pdfStyles.footerLeft}>
+                        <Text style={pdfStyles.footerText}>Afiyet olsun!</Text>
+                        <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
+                    </View>
+                    <View style={pdfStyles.footerRight}>
+                        <Text style={pdfStyles.footerLogo}>Diyetia</Text>
+                    </View>
+                </View>
+            </Page>
+        </Document>
+    );
 };
 
-// Category Item Component
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     return (<div
             className={`category-item ${isChecked ? 'checked' : ''}`}
@@ -272,8 +550,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
         </div>);
 };
 
-// Recipe Card Component
-const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
+const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign, dietitianInfo}) => {
     return (<div className="recipe-card">
             <div className="card-image-container" onClick={() => onView(item)}>
                 <img
@@ -315,13 +592,25 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
                     >
                         <PersonAddIcon />
                     </button>
-                    <button
-                        className="action-button print-btn"
-                        title="Yazdır"
-                        onClick={() => onPrint(item)}
+                    <PDFDownloadLink
+                        document={<RecipeDocument recipe={item} assignmentData={null} dietitianInfo={dietitianInfo}/>}
+                        fileName={`${item.title ? item.title.replace(/\s+/g, '_') : 'tarif'}_tarifi.pdf`}
+                        style={{textDecoration: 'none'}}
                     >
-                        <PrintIcon/>
-                    </button>
+                        {({blob, url, loading, error}) => (
+                            <button
+                                className="action-button print-btn"
+                                title="Yazdır"
+                                disabled={loading}
+                                onClick={(e) => {
+                                    if (loading) e.preventDefault();
+                                    else onPrint(item);
+                                }}
+                            >
+                                <PrintIcon/>
+                            </button>
+                        )}
+                    </PDFDownloadLink>
                     <button
                         className="action-button edit-btn"
                         title="Düzenle"
@@ -341,7 +630,6 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign}) => {
         </div>);
 };
 
-// Modal Component
 const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     if (!isOpen) return null;
 
@@ -369,17 +657,14 @@ export default function Tarifler() {
     const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // Danışan ara için state
     const [danisanSearchTerm, setDanisanSearchTerm] = useState('');
     const [filteredDanisanList, setFilteredDanisanList] = useState([]);
 
-    // Danışana atanmış tarifler için state'ler
     const [clientRecipesModal, setClientRecipesModal] = useState(false);
     const [selectedClientRecipes, setSelectedClientRecipes] = useState([]);
     const [loadingClientRecipes, setLoadingClientRecipes] = useState(false);
     const [selectedClientInfo, setSelectedClientInfo] = useState(null);
 
-    // Modal states
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -391,7 +676,6 @@ export default function Tarifler() {
     const [newCategoryTitle, setNewCategoryTitle] = useState('');
     const [assignmentNote, setAssignmentNote] = useState('');
 
-    // Edit recipe states
     const [editTitle, setEditTitle] = useState('');
     const [editDescription, setEditDescription] = useState('');
     const [editIngredients, setEditIngredients] = useState('');
@@ -403,15 +687,12 @@ export default function Tarifler() {
         calories: '', protein: '', carbs: '', fat: ''
     });
 
-    // Success popup states
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Error popup states
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    // New recipe state
     const [newRecipe, setNewRecipe] = useState({
         title: '',
         description: '',
@@ -424,7 +705,6 @@ export default function Tarifler() {
         }
     });
 
-    // Delete confirmation modal states
     const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleteCategoryConfirmModal, setDeleteCategoryConfirmModal] = useState(false);
@@ -432,10 +712,27 @@ export default function Tarifler() {
     const [deleteMultiCategoriesConfirmModal, setDeleteMultiCategoriesConfirmModal] = useState(false);
     const [affectedRecipes, setAffectedRecipes] = useState([]);
 
-    // Edit form state
+    const [dietitianInfo, setDietitianInfo] = useState({});
+
+    useEffect(() => {
+        axios
+            .get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                console.log("Dietitian Info:", response.data);
+                setDietitianInfo(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching clients:", error);
+            });
+    }, []);
+
+
     const [isSaving, setIsSaving] = useState(false);
 
-    // Auto-hide success popup after 3 seconds
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
@@ -446,7 +743,6 @@ export default function Tarifler() {
         }
     }, [showSuccessPopup]);
 
-    // Auto-hide error popup after 5 seconds
     useEffect(() => {
         if (showErrorPopup) {
             const timer = setTimeout(() => {
@@ -457,7 +753,6 @@ export default function Tarifler() {
         }
     }, [showErrorPopup]);
 
-    // Fetch clients data
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/dietitian/getAllMyClients`, {
@@ -473,7 +768,6 @@ export default function Tarifler() {
             });
     }, []);
 
-    // Fetch recipe categories
     useEffect(() => {
         axios
             .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
@@ -522,20 +816,15 @@ export default function Tarifler() {
             });
     };
 
-    // Initial fetch
     useEffect(() => {
         fetchRecipes();
     }, []);
 
-    // Filter categories based on search term
     const filteredCategories = categoryData?.filter(category => (category?.name || category?.title || "").toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // Filter recipes based on selected categories
     const filteredRecipeData = recipeData.filter(item => {
-        // Önce kategori filtresi uygulayalım
         const passesCategory = checkedCategories.length === 0 || checkedCategories.includes(item.category_id);
 
-        // Sonra arama terimine göre filtreleyelim
         const passesSearch = !recipeSearchTerm ||
             item.title.toLowerCase().includes(recipeSearchTerm.toLowerCase()) ||
             (item.description && item.description.toLowerCase().includes(recipeSearchTerm.toLowerCase())) ||
@@ -544,7 +833,6 @@ export default function Tarifler() {
         return passesCategory && passesSearch;
     });
 
-    // Category handlers
     const handleCategoryCheck = (categoryId) => {
         setCheckedCategories(prev => prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [...prev, categoryId]);
     };
@@ -552,7 +840,6 @@ export default function Tarifler() {
     const handleOpenMultiDeleteConfirm = () => {
         if (checkedCategories.length === 0) return;
 
-        // Find recipes that would be affected by deleting these categories
         const recipesToDelete = recipeData.filter(recipe => checkedCategories.includes(recipe.category_id));
 
         setAffectedRecipes(recipesToDelete);
@@ -563,7 +850,6 @@ export default function Tarifler() {
         const category = categoryData.find(cat => cat.id === categoryId);
         if (!category) return;
 
-        // Find recipes that would be affected by deleting this category
         const recipesToDelete = recipeData.filter(recipe => recipe.category_id === categoryId);
 
         setCategoryToDelete(category);
@@ -571,7 +857,6 @@ export default function Tarifler() {
         setDeleteCategoryConfirmModal(true);
     };
 
-    // Placeholder for recipe card handlers
     const handleOpenDetailModal = (item) => {
         setDetailItem(item);
         setDetailModal(true);
@@ -585,14 +870,11 @@ export default function Tarifler() {
     };
 
     const handlePrint = (item) => {
-        console.log("Generating PDF for:", item);
-        generatePDF(item);
     };
 
     const handleEdit = (item) => {
         setSelectedRecipe(item);
 
-        // Set form fields with current values
         setEditTitle(item.title || '');
         setEditDescription(item.description || '');
         setEditIngredients(item.ingredients || '');
@@ -600,7 +882,6 @@ export default function Tarifler() {
         setEditCategoryId(item.category_id || '');
         setEditImage(item.image || '');
 
-        // Set nutritional info or initialize with empty values
         const nutritionalInfo = item.nutritional_info || {};
         setEditNutritionalInfo({
             calories: nutritionalInfo.calories || '',
@@ -754,6 +1035,7 @@ export default function Tarifler() {
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewRecipe}
                                     onAssign={handleOpenAddToUserModal}
+                                    dietitianInfo={dietitianInfo}
                                 />))) : (<div className="no-recipes">
                                 <p>Bu kategoriya ait tarif bulunamadı.</p>
                             </div>)}
@@ -994,6 +1276,7 @@ export default function Tarifler() {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setNewRecipe({...newRecipe, image: file});
+                                        setImagePreview(reader.result); // Önizleme için resmin URL'ini ayarla
                                     };
                                     reader.readAsDataURL(file);
                                 }
@@ -1443,7 +1726,6 @@ export default function Tarifler() {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setEditImage(file);

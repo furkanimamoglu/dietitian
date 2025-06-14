@@ -803,6 +803,7 @@ export default function Dashboard() {
                                         type="submit"
                                         variant="contained"
                                         startIcon={<AddIcon/>}
+                                        onClick={handleAddNote}
                                     >
                                         Ekle
                                     </Button>

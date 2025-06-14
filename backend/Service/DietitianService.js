@@ -43,7 +43,7 @@ class DietitianService {
                     role: dietitianInfo.role
                 },
                 config.secretkey,
-                {expiresIn: '24h'}
+                {expiresIn: '30d'}
             );
 
             await dietitianInfo.update({token});
@@ -94,7 +94,8 @@ class DietitianService {
                     phoneNumber: dietitian.phoneNumber,
                     role: DIETITIAN
                 },
-                config.secretkey
+                config.secretkey,
+                {expiresIn: '30d'}
             );
 
             await dietitian.update({token});
@@ -270,7 +271,8 @@ class DietitianService {
                     email: email,
                     role: CLIENT
                 },
-                config.secretkey
+                config.secretkey,
+                {expiresIn: '30d'}
             );
 
             return await Client.create({

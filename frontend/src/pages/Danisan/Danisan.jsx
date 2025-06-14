@@ -1577,6 +1577,13 @@ function Danisan() {
                             </Box>
                         ) : anamnezData ? (
                             <>
+                                <Box sx={{display: 'justify-end', alignItems: 'center', gap: 1}}>
+                                    <Chip
+                                        label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
+                                        size="small"
+                                        sx={{mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff'}}
+                                    />
+                                </Box>
                                 {/* Sağlık Bilgileri Akordiyonu */}
                                 <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 1}}>
                                     <Button
@@ -1604,14 +1611,6 @@ function Danisan() {
                                             <Typography variant="h6" sx={{fontWeight: 'bold'}}>
                                                 Sağlık Bilgileri
                                             </Typography>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                <Chip
-                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
-                                                    size="small"
-                                                    color="primary"
-                                                    sx={{mr: 1}}
-                                                />
-                                            </Box>
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -1745,14 +1744,6 @@ function Danisan() {
                                             <Typography variant="h6" sx={{fontWeight: 'bold'}}>
                                                 Diyet Alışkanlıkları
                                             </Typography>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                <Chip
-                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
-                                                    size="small"
-                                                    color="warning"
-                                                    sx={{mr: 1}}
-                                                />
-                                            </Box>
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -1886,14 +1877,6 @@ function Danisan() {
                                             <Typography variant="h6" sx={{fontWeight: 'bold'}}>
                                                 Fiziksel Aktivite
                                             </Typography>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                <Chip
-                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
-                                                    size="small"
-                                                    color="info"
-                                                    sx={{mr: 1}}
-                                                />
-                                            </Box>
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails>
@@ -1991,13 +1974,6 @@ function Danisan() {
                                             <Typography variant="h6" sx={{fontWeight: 'bold'}}>
                                                 Özel Notlar
                                             </Typography>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                <Chip
-                                                    label={`Son Güncelleme: ${new Date(anamnezData.updatedAt).toLocaleDateString('tr-TR')}`}
-                                                    size="small"
-                                                    sx={{mr: 1, fontWeight: 'bold', bgcolor: '#9575cd', color: '#fff'}}
-                                                />
-                                            </Box>
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails>
