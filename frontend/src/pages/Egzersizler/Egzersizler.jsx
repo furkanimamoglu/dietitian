@@ -35,6 +35,8 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
 
+import ExerciseDocument from './ExerciseDocument.jsx';
+
 import {
     Avatar,
     Box,
@@ -55,444 +57,6 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-
-Font.register({
-    family: 'Open Sans',
-    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
-});
-
-const pdfStyles = StyleSheet.create({
-    page: {
-        flexDirection: 'column',
-        backgroundColor: '#fff',
-        padding: 20,
-        fontFamily: 'Open Sans'
-    },
-    // Gradient header effect with shadow
-    header: {
-        backgroundColor: '#087708',
-        background: 'linear-gradient(135deg, #087708 0%, #0a9a0a 100%)',
-        padding: 20,
-        marginBottom: 20,
-        borderRadius: 12,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5
-    },
-    headerContent: {
-        flex: 1
-    },
-    headerTitle: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 6,
-        letterSpacing: 0.5
-    },
-    headerSubtitle: {
-        color: 'rgba(255, 255, 255, 0.9)',
-        fontSize: 12,
-        marginBottom: 8
-    },
-    headerInfo: {
-        color: 'rgba(255, 255, 255, 0.8)',
-        fontSize: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    logoContainer: {
-        width: 60,
-        height: 60,
-        backgroundColor: 'white',
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4
-    },
-    logo: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#087708',
-        letterSpacing: 0.5
-    },
-    // Modern card-based info section
-    infoSection: {
-        flexDirection: 'row',
-        marginBottom: 20,
-        gap: 15
-    },
-    infoCard: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#e1e5e9',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8
-    },
-    infoCardHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10
-    },
-    infoIcon: {
-        width: 20,
-        height: 20,
-        backgroundColor: '#087708',
-        borderRadius: 10,
-        marginRight: 8
-    },
-    infoTitle: {
-        fontSize: 11,
-        fontWeight: 'bold',
-        color: '#087708',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    },
-    infoContent: {
-        fontSize: 9,
-        color: '#495057',
-        lineHeight: 1.4,
-        marginBottom: 2
-    },
-    // Enhanced exercise details with better visual hierarchy
-    exerciseDetails: {
-        marginBottom: 20,
-        borderRadius: 12,
-        overflow: 'hidden',
-        backgroundColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12
-    },
-    exerciseHeader: {
-        backgroundColor: '#087708',
-        background: 'linear-gradient(90deg, #087708 0%, #0a9a0a 100%)',
-        padding: 16,
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    exerciseHeaderIcon: {
-        width: 24,
-        height: 24,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 12,
-        marginRight: 10
-    },
-    exerciseHeaderText: {
-        color: 'white',
-        fontSize: 14,
-        fontWeight: 'bold',
-        letterSpacing: 0.3
-    },
-    exerciseContent: {
-        padding: 20,
-        backgroundColor: '#f8f9fa'
-    },
-    statsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: 20,
-        gap: 10
-    },
-    statCard: {
-        flex: '1 1 45%',
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 8,
-        borderLeftWidth: 4,
-        borderLeftColor: '#087708',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4
-    },
-    statLabel: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        color: '#6c757d',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-        marginBottom: 4
-    },
-    statValue: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#212529'
-    },
-    // Enhanced description section
-    descriptionSection: {
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e9ecef'
-    },
-    descriptionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-        paddingBottom: 8,
-        borderBottomWidth: 2,
-        borderBottomColor: '#087708',
-        borderBottomStyle: 'solid'
-    },
-    descriptionIcon: {
-        width: 16,
-        height: 16,
-        backgroundColor: '#087708',
-        borderRadius: 8,
-        marginRight: 8
-    },
-    descriptionTitle: {
-        fontSize: 11,
-        fontWeight: 'bold',
-        color: '#087708',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    },
-    descriptionText: {
-        fontSize: 9,
-        lineHeight: 1.6,
-        color: '#495057',
-        textAlign: 'justify'
-    },
-    // Modern notes section with accent
-    notesSection: {
-        marginTop: 20,
-        padding: 16,
-        backgroundColor: '#fff8e1',
-        borderRadius: 12,
-        borderLeftWidth: 6,
-        borderLeftColor: '#ff9800',
-        shadowColor: '#ff9800',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8
-    },
-    notesHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8
-    },
-    notesIcon: {
-        width: 16,
-        height: 16,
-        backgroundColor: '#ff9800',
-        borderRadius: 8,
-        marginRight: 8
-    },
-    notesTitle: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        color: '#ff9800',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    },
-    notesContent: {
-        fontSize: 9,
-        color: '#5d4037',
-        lineHeight: 1.5,
-        fontStyle: 'italic'
-    },
-    // Enhanced footer with better styling
-    footer: {
-        position: 'absolute',
-        bottom: 20,
-        left: 20,
-        right: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: 15,
-        borderTopWidth: 2,
-        borderTopColor: '#e9ecef',
-        borderTopStyle: 'solid'
-    },
-    footerLeft: {
-        flex: 1
-    },
-    footerText: {
-        fontSize: 8,
-        color: '#087708',
-        fontWeight: 'bold'
-    },
-    footerWebsite: {
-        fontSize: 8,
-        color: '#ff9800',
-        fontWeight: 'bold',
-        marginTop: 2
-    },
-    footerRight: {
-        alignItems: 'flex-end'
-    },
-    footerLogo: {
-        fontSize: 10,
-        color: '#087708',
-        fontWeight: 'bold'
-    },
-    decorativeLine: {
-        height: 2,
-        backgroundColor: 'linear-gradient(90deg, #087708 0%, #ff9800 100%)',
-        marginVertical: 10,
-        borderRadius: 1
-    },
-    badge: {
-        backgroundColor: '#087708',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        alignSelf: 'flex-start'
-    },
-    badgeText: {
-        color: 'white',
-        fontSize: 7,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    }
-});
-
-const ExerciseDocument = ({exercise, assignmentData}) => {
-    const today = new Date();
-    const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Belirtilmemiş";
-
-    const getDifficultyText = (difficulty) => {
-        const difficultyMap = {
-            1: "Çok Kolay",
-            2: "Kolay",
-            3: "Orta",
-            4: "Zor",
-            5: "Çok Zor"
-        };
-        return difficultyMap[difficulty] || "Belirtilmemiş";
-    };
-
-    return (
-        <Document>
-            <Page size="A4" style={pdfStyles.page}>
-                {/* Enhanced Header */}
-                <View style={pdfStyles.header}>
-                    <View style={pdfStyles.headerContent}>
-                        <Text style={pdfStyles.headerTitle}>{exercise.exercise_name}</Text>
-                        <Text style={pdfStyles.headerSubtitle}>Kişisel Egzersiz Programı</Text>
-                        <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma: {dateStr}</Text>
-                        </View>
-                    </View>
-                    <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>Diyetia</Text>
-                    </View>
-                </View>
-
-                {/* Enhanced Info Cards */}
-                <View style={pdfStyles.infoSection}>
-                    <View style={pdfStyles.infoCard}>
-                        <View style={pdfStyles.infoCardHeader}>
-                            <View style={pdfStyles.infoIcon}></View>
-                            <Text style={pdfStyles.infoTitle}>Diyetisyen</Text>
-                        </View>
-                        <Text style={pdfStyles.infoContent}> </Text>
-                        <Text style={pdfStyles.infoContent}> </Text>
-                         <Text style={pdfStyles.infoContent}> </Text>
-                        <Text style={pdfStyles.infoContent}> </Text>
-                    </View>
-
-                    {assignmentData && (
-                        <View style={pdfStyles.infoCard}>
-                            <View style={pdfStyles.infoCardHeader}>
-                                <View style={pdfStyles.infoIcon}></View>
-                                <Text style={pdfStyles.infoTitle}>Program Detayları</Text>
-                            </View>
-                            <Text style={pdfStyles.infoContent}>👤 {assignmentData.clientName || "Belirtilmemiş"}</Text>
-                            <Text style={pdfStyles.infoContent}>🗓️ {assignmentData.startDate ? new Date(assignmentData.startDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
-                            <Text style={pdfStyles.infoContent}>⏰ {assignmentData.endDate ? new Date(assignmentData.endDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
-                        </View>
-                    )}
-                </View>
-
-                {/* Enhanced Exercise Details */}
-                <View style={pdfStyles.exerciseDetails}>
-                    <View style={pdfStyles.exerciseHeader}>
-                        <View style={pdfStyles.exerciseHeaderIcon}></View>
-                        <Text style={pdfStyles.exerciseHeaderText}>Egzersiz Özellikleri</Text>
-                    </View>
-
-                    <View style={pdfStyles.exerciseContent}>
-                        {/* Stats Grid */}
-                        <View style={pdfStyles.statsGrid}>
-                            <View style={pdfStyles.statCard}>
-                                <Text style={pdfStyles.statLabel}>Süre</Text>
-                                <Text style={pdfStyles.statValue}>{exercise.duration || 0} dakika</Text>
-                            </View>
-                            <View style={pdfStyles.statCard}>
-                                <Text style={pdfStyles.statLabel}>Zorluk</Text>
-                                <Text style={pdfStyles.statValue}>{getDifficultyText(exercise.difficulty)}</Text>
-                            </View>
-                            <View style={pdfStyles.statCard}>
-                                <Text style={pdfStyles.statLabel}>Kalori</Text>
-                                <Text style={pdfStyles.statValue}>{exercise.calories_burned || 0} kcal</Text>
-                            </View>
-                            {exercise.equipment && (
-                                <View style={pdfStyles.statCard}>
-                                    <Text style={pdfStyles.statLabel}>Ekipman</Text>
-                                    <Text style={pdfStyles.statValue}>{exercise.equipment}</Text>
-                                </View>
-                            )}
-                        </View>
-
-                        {/* Enhanced Description */}
-                        <View style={pdfStyles.descriptionSection}>
-                            <View style={pdfStyles.descriptionHeader}>
-                                <View style={pdfStyles.descriptionIcon}></View>
-                                <Text style={pdfStyles.descriptionTitle}>Egzersiz Açıklaması</Text>
-                            </View>
-                            <Text style={pdfStyles.descriptionText}>
-                                {exercise.exercise_description || "Bu egzersiz için detaylı açıklama eklenecektir. Lütfen diyetisyeninizle iletişime geçin."}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Enhanced Notes Section */}
-                {assignmentData && assignmentData.note && (
-                    <View style={pdfStyles.notesSection}>
-                        <View style={pdfStyles.notesHeader}>
-                            <View style={pdfStyles.notesIcon}></View>
-                            <Text style={pdfStyles.notesTitle}>Özel Notlar</Text>
-                        </View>
-                        <Text style={pdfStyles.notesContent}>"{assignmentData.note}"</Text>
-                    </View>
-                )}
-
-                {/* Enhanced Footer */}
-                <View style={pdfStyles.footer}>
-                    <View style={pdfStyles.footerLeft}>
-                        <Text style={pdfStyles.footerText}>Sağlıklı ve aktif günler dileriz!</Text>
-                        <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
-                    </View>
-                    <View style={pdfStyles.footerRight}>
-                        <Text style={pdfStyles.footerLogo}>Diyetia</Text>
-                    </View>
-                </View>
-            </Page>
-        </Document>
-    );
-};
 
 const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     return (
@@ -522,7 +86,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
+const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, dietitianInfo}) => {
     return (
         <div className="exercise-card">
             <div className="card-image-container" onClick={() => onView(item)}>
@@ -564,7 +128,7 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =>
                         <PersonAddIcon/>
                     </button>
                     <PDFDownloadLink
-                        document={<ExerciseDocument exercise={item} assignmentData={null}/>}
+                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitianInfo={dietitianInfo} />}
                         fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -1291,6 +855,24 @@ export default function Egzersizler() {
                 setAssignmentToDelete(null);
             });
     };
+
+    const [dietitianInfo, setDietitianInfo] = useState({});
+
+    useEffect(() => {
+        axios
+            .get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            })
+            .then((response) => {
+                console.log("Dietitian Info:", response.data);
+                setDietitianInfo(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching clients:", error);
+            });
+    }, []);
 
     return (
         <Default>
