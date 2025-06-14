@@ -24,6 +24,10 @@ router.get('/getMyClient', dietitianController.getMyClient);
 router.get('/getAllMyClients', dietitianController.getAllMyClients);
 router.get('/getMyActiveClientCount', dietitianController.getMyActiveClientCount);
 
+router.post('/changeDietitianSubscriptionToFree', dietitianController.changeDietitianSubscriptionToFree);
+
+router.post('/updateClientWaterLimit', dietitianController.updateClientWaterLimit);
+
 router.get('/globalSearchbar', dietitianController.globalSearchbar);
 
 router.get('/getDietitianQR', dietitianController.createMyQR);

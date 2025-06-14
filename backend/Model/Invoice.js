@@ -50,14 +50,31 @@ const Invoice = sequelize.define('Invoice', {
                 }
             }
         },
+        paid_amount: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            defaultValue: 0,
+            validate: {
+                isDecimal: {
+                    msg: "Ödenen tutar bir ondalık sayı olmalıdır."
+                },
+                min: {
+                    args: [0],
+                    msg: "Ödenen tutar 0'dan büyük olmalıdır."
+                },
+                notNull: {
+                    msg: "Ödenen tutar gereklidir."
+                }
+            }
+        },
         status: {
-            type: DataTypes.ENUM('paid', 'unpaid', 'cancelled'),
+            type: DataTypes.ENUM('paid', 'partiallypaid', 'unpaid', 'cancelled'),
             allowNull: false,
             defaultValue: 'unpaid',
             validate: {
                 isIn: {
-                    args: [['paid', 'unpaid', 'cancelled']],
-                    msg: "Durum 'paid', 'unpaid' veya 'cancelled' olmalıdır."
+                    args: [['paid', 'partiallypaid', 'unpaid', 'cancelled']],
+                    msg: "Durum 'paid', 'partiallypaid', 'unpaid' veya 'cancelled' olmalıdır."
                 }
             }
         },

@@ -43,7 +43,7 @@ class ClientService {
                     phoneNumber: client.phoneNumber,
                 },
                 config.secretkey,
-                {expiresIn: '24h'}
+                {expiresIn: '30d'}
             );
 
             await client.update({token});
@@ -84,7 +84,8 @@ class ClientService {
                     phoneNumber: client.phoneNumber,
                     role: CLIENT
                 },
-                config.secretkey
+                config.secretkey,
+                {expiresIn: '30d'}
             );
 
             await client.update({token});
@@ -206,7 +207,7 @@ class ClientService {
             throw new Exception("Bugün için atanmış bir beslenme planı bulunamadı. Lütfen diyetisyeninizden size bir beslenme programı atamasını talep edin.", 404, true);
         }
 
-        return assignment.mealPlan;
+        return assignment;
     }
 
     static async getMyRecipes(client_id) {

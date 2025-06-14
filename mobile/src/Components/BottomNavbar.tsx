@@ -23,11 +23,16 @@ type Props = {
     navigation: NavigationProp;
 };
 
-interface DailyMealPlan {
-    Kahvaltı: string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    'Öğle Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    'Akşam Yemeği': string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
-    Aparatif: string[] | string | { main: string[], alternatives: { [key: string]: string[] } };
+// Öğün türü ara yüzünü tanımlıyorum
+interface MealType {
+    id: string;
+    name: string;
+    apiName: string;
+}
+
+// Beslenme planı veri yapısını tanımlıyorum
+interface DailyMeal {
+    [key: string]: any;
 }
 
 const BottomNav = ({navigation}: Props) => {
@@ -35,7 +40,7 @@ const BottomNav = ({navigation}: Props) => {
     const [showMealPopup, setShowMealPopup] = useState(false);
     const [showExercisePopup, setShowExercisePopup] = useState(false);
     const route = useRoute();
-    const [selectedMealType, setSelectedMealType] = useState('Kahvaltı');
+    const [selectedMealType, setSelectedMealType] = useState('');
     const [newMeal, setNewMeal] = useState('');
     const [newPortion, setNewPortion] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,6 +48,23 @@ const BottomNav = ({navigation}: Props) => {
     const [exerciseDuration, setExerciseDuration] = useState('');
     const [isExerciseSubmitting, setIsExerciseSubmitting] = useState(false);
     const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
+    // Dinamik öğün tiplerini tutacak state
+    const [mealTypes, setMealTypes] = useState<MealType[]>([]);
+    // Günlük beslenme planını tutacak state
+    const [dailyMealPlan, setDailyMealPlan] = useState<DailyMeal | null>(null);
+    // Egzersiz tiplerini tutacak değişkeni tanımlıyorum
+    const exerciseTypes = [
+        'Koşu',
+        'Yürüyüş',
+        'Bisiklet',
+        'Yüzme',
+        'Yoga',
+        'Pilates',
+        'Futbol',
+        'Basketbol',
+        'Voleybol',
+        'Tenis',
+    ];
 
     const [toastVisible, setToastVisible] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -51,7 +73,226 @@ const BottomNav = ({navigation}: Props) => {
 
     useEffect(() => {
         fetchNutritionPlanId();
+        fetchMealTypes();  // Öğün tiplerini çek
     }, []);
+
+    // Öğün tiplerini getirmek için yeni fonksiyon
+    const fetchMealTypes = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Debug: API yanıtının içeriğini kontrol et
+            const responseText = await response.text();
+            console.log('API Response:', responseText.substring(0, 100) + '...'); // Çok uzun olmaması için kısaltıyoruz
+
+            // HTML yanıtı başlıyor mu diye kontrol et (JSON sanılıp HTML dönüyorsa)
+            if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+                console.error('API HTML yanıtı döndürüyor, JSON değil');
+                // Varsayılan değerleri kullan
+                useDefaultMealTypes();
+                return;
+            }
+
+            // Metin yanıtını JSON'a çevirelim
+            const data = JSON.parse(responseText);
+
+            // Beslenme planı bilgisini al
+            if (data.id || data.nutrition_plan_id) {
+                if (data.nutrition_plan_id) {
+                    setNutritionPlanId(data.nutrition_plan_id);
+                } else if (data.NutritionPlan && data.NutritionPlan.id) {
+                    setNutritionPlanId(data.NutritionPlan.id);
+                }
+
+                // Bugünkü beslenme planını set et
+                await fetchTodayMealPlan(data);
+
+                // Bugünkü gün için öğün tiplerini al
+                const todayTurkish = getToday();
+
+                let mealPlanData: any = null;
+
+                if (data.mealPlan) {
+                    mealPlanData = data.mealPlan;
+                } else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
+                    mealPlanData = data.NutritionPlan.mealPlan;
+                }
+
+                // Eğer bugünün bir öğün planı varsa, öğün tiplerini buradan çıkart
+                if (mealPlanData && mealPlanData[todayTurkish]) {
+                    const mealTypesList: MealType[] = [];
+
+                    // Öğün tiplerini belirle
+                    Object.keys(mealPlanData[todayTurkish]).forEach((mealTypeKey, index) => {
+                        mealTypesList.push({
+                            id: `meal-type-${index}`,
+                            name: convertApiMealNameToAppMealName(mealTypeKey),
+                            apiName: mealTypeKey
+                        });
+                    });
+
+                    if (mealTypesList.length > 0) {
+                        setMealTypes(mealTypesList);
+                        setSelectedMealType(mealTypesList[0].name); // İlk öğün türünü seç
+                        return;
+                    }
+                }
+            }
+
+            // Eğer öğün planında öğün tipi bulunamadıysa, varsayılan öğün tiplerini kullan
+            useDefaultMealTypes();
+        } catch (error) {
+            console.error('Error fetching meal types:', error);
+            // Hata durumunda varsayılan öğün tiplerini kullan
+            useDefaultMealTypes();
+        }
+    };
+
+    // Varsayılan öğün tiplerini kullanan yardımcı fonksiyon
+    const useDefaultMealTypes = () => {
+        const defaultMealTypes: MealType[] = [
+            { id: 'breakfast', name: 'Kahvaltı', apiName: 'Kahvaltı' },
+            { id: 'lunch', name: 'Öğle', apiName: 'Öğle Yemeği' },
+            { id: 'dinner', name: 'Akşam', apiName: 'Akşam Yemeği' },
+            { id: 'snacks', name: 'Aperatifler', apiName: 'Aparatif' }
+        ];
+
+        setMealTypes(defaultMealTypes);
+        setSelectedMealType(defaultMealTypes[0].name);
+    };
+
+    // API öğün adlarını uygulama içindeki öğün adlarına dönüştüren fonksiyon
+    const convertApiMealNameToAppMealName = (apiMealName: string): string => {
+        switch (apiMealName) {
+            case 'Kahvaltı':
+                return 'Kahvaltı';
+            case 'Öğle Yemeği':
+                return 'Öğle';
+            case 'Akşam Yemeği':
+                return 'Akşam';
+            case 'Aparatif':
+                return 'Aperatifler';
+            default:
+                return apiMealName;
+        }
+    };
+
+    // Uygulama içindeki öğün adlarını API öğün adlarına dönüştüren fonksiyon
+    const convertAppMealNameToApiMealName = (appMealName: string): string => {
+        const selectedMealType = mealTypes.find(type => type.name === appMealName);
+        if (selectedMealType) {
+            return selectedMealType.apiName;
+        }
+
+        // Eğer bulunamazsa varsayılan dönüşüm yap
+        switch (appMealName) {
+            case 'Kahvaltı':
+                return 'Kahvaltı';
+            case 'Öğle':
+                return 'Öğle Yemeği';
+            case 'Akşam':
+                return 'Akşam Yemeği';
+            case 'Aperatifler':
+                return 'Aparatif';
+            default:
+                return appMealName;
+        }
+    };
+
+    // Bugünkü beslenme planını getir
+    const fetchTodayMealPlan = async (data?: any) => {
+        try {
+            if (!data) {
+                const token = await AsyncStorage.getItem('token');
+                if (!token) {
+                    console.error('Token Bulunamadı');
+                    return;
+                }
+
+                const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // API cevabını metin olarak al ve kontrol et
+                const responseText = await response.text();
+
+                // HTML yanıtı mı kontrol et
+                if (responseText.trim().startsWith('<')) {
+                    console.error('API HTML yanıtı döndürüyor, JSON değil');
+                    // Varsayılan değerler kullan
+                    setDailyMealPlan({
+                        'Kahvaltı': [],
+                        'Öğle Yemeği': [],
+                        'Akşam Yemeği': [],
+                        'Aparatif': []
+                    });
+                    return;
+                }
+
+                // Metin yanıtını JSON'a çevir
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('JSON parse hatası:', e);
+                    setDailyMealPlan({
+                        'Kahvaltı': [],
+                        'Öğle Yemeği': [],
+                        'Akşam Yemeği': [],
+                        'Aparatif': []
+                    });
+                    return;
+                }
+            }
+
+            const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            const today = new Date().getDay();
+            const todayTurkish = days[today];
+
+            let mealPlanData: any = null;
+
+            if (data.mealPlan) {
+                mealPlanData = data.mealPlan;
+            } else if (data.NutritionPlan && data.NutritionPlan.mealPlan) {
+                mealPlanData = data.NutritionPlan.mealPlan;
+            }
+
+            if (mealPlanData && mealPlanData[todayTurkish]) {
+                setDailyMealPlan(mealPlanData[todayTurkish]);
+            } else {
+                setDailyMealPlan({
+                    'Kahvaltı': [],
+                    'Öğle Yemeği': [],
+                    'Akşam Yemeği': [],
+                    'Aparatif': []
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching today meal plan:', error);
+            // Hata durumunda varsayılan değerleri kullan
+            setDailyMealPlan({
+                'Kahvaltı': [],
+                'Öğle Yemeği': [],
+                'Akşam Yemeği': [],
+                'Aparatif': []
+            });
+        }
+    };
 
     const showToast = (message: string, type: 'success' | 'error' = 'success') => {
         setToastMessage(message);
@@ -73,6 +314,13 @@ const BottomNav = ({navigation}: Props) => {
         }, 3000);
     };
 
+    // Bugünün Türkçe gün adını döndüren yardımcı fonksiyon
+    const getToday = (): string => {
+        const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const today = new Date().getDay();
+        return days[today];
+    };
+
     const fetchNutritionPlanId = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
@@ -89,32 +337,32 @@ const BottomNav = ({navigation}: Props) => {
                 }
             });
 
-            const data = await response.json();
+            // API cevabını metin olarak al ve kontrol et
+            const responseText = await response.text();
 
-            if (data.nutrition_plan_id) {
-                setNutritionPlanId(data.nutrition_plan_id);
-            } else if (data.NutritionPlan && data.NutritionPlan.id) {
-                setNutritionPlanId(data.NutritionPlan.id);
+            // HTML yanıtı mı kontrol et
+            if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+                console.error('API HTML yanıtı döndürüyor, JSON değil');
+                return;
+            }
+
+            // Metin yanıtını JSON'a çevir
+            try {
+                const data = JSON.parse(responseText);
+
+                if (data.nutrition_plan_id) {
+                    setNutritionPlanId(data.nutrition_plan_id);
+                } else if (data.NutritionPlan && data.NutritionPlan.id) {
+                    setNutritionPlanId(data.NutritionPlan.id);
+                }
+            } catch (e) {
+                console.error('JSON parse hatası:', e);
+                return;
             }
         } catch (error) {
             console.error('Error fetching nutrition plan ID:', error);
         }
     };
-
-    const mealTypes = ['Kahvaltı', 'Öğle', 'Akşam', 'Aperatifler'];
-
-    const exerciseTypes = [
-        'Koşu',
-        'Yürüyüş',
-        'Bisiklet',
-        'Yüzme',
-        'Yoga',
-        'Pilates',
-        'Futbol',
-        'Basketbol',
-        'Voleybol',
-        'Tenis',
-    ];
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -142,21 +390,6 @@ const BottomNav = ({navigation}: Props) => {
                 }
             }
 
-            const convertAppMealNameToApiMealName = (appMealName: string): string => {
-                switch (appMealName) {
-                    case 'Kahvaltı':
-                        return 'Kahvaltı';
-                    case 'Öğle':
-                        return 'Öğle Yemeği';
-                    case 'Akşam':
-                        return 'Akşam Yemeği';
-                    case 'Aperatifler':
-                        return 'Aparatif';
-                    default:
-                        return '';
-                }
-            };
-
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 showToast('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.', 'error');
@@ -164,7 +397,17 @@ const BottomNav = ({navigation}: Props) => {
                 return;
             }
 
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMeal`, {
+            // Seçilen öğün tipinin API adını al
+            const selectedMealTypeObj = mealTypes.find(type => type.name === selectedMealType);
+            if (!selectedMealTypeObj) {
+                showToast('Öğün tipi bulunamadı. Lütfen tekrar deneyin.', 'error');
+                setIsSubmitting(false);
+                return;
+            }
+            const apiMealType = selectedMealTypeObj.apiName;
+
+            // Güncel beslenme planını çek
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getTodayMealPlan`, {
                 method: 'GET',
                 headers: {
                     'Authorization': token,
@@ -172,7 +415,27 @@ const BottomNav = ({navigation}: Props) => {
                 }
             });
 
-            const data = await response.json();
+            // API yanıtını metin olarak al
+            const responseText = await response.text();
+
+            // HTML yanıtı mı kontrol et
+            if (responseText.trim().startsWith('<')) {
+                console.error('API HTML yanıtı döndürüyor, JSON değil');
+                showToast('Sunucudan geçersiz yanıt alındı. Lütfen tekrar deneyin.', 'error');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Metin yanıtını JSON'a çevir
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('JSON parse hatası:', e);
+                showToast('Sunucudan geçersiz yanıt alındı. Lütfen tekrar deneyin.', 'error');
+                setIsSubmitting(false);
+                return;
+            }
 
             let mealPlanData: any = null;
 
@@ -182,57 +445,85 @@ const BottomNav = ({navigation}: Props) => {
                 mealPlanData = data.NutritionPlan.mealPlan;
             }
 
+            // Eğer beslenme planı yoksa yeni oluştur
             if (!mealPlanData) {
-                mealPlanData = {
-                    [todayTurkish]: {
-                        'Kahvaltı': [],
-                        'Öğle Yemeği': [],
-                        'Akşam Yemeği': [],
-                        'Aparatif': []
-                    }
-                };
+                mealPlanData = { [todayTurkish]: {} };
+                mealTypes.forEach(type => {
+                    mealPlanData[todayTurkish][type.apiName] = [];
+                });
             }
 
+            // Bugün için planı yoksa oluştur
             if (!mealPlanData[todayTurkish]) {
-                mealPlanData[todayTurkish] = {
-                    'Kahvaltı': [],
-                    'Öğle Yemeği': [],
-                    'Akşam Yemeği': [],
-                    'Aparatif': []
-                };
+                mealPlanData[todayTurkish] = {};
+                mealTypes.forEach(type => {
+                    mealPlanData[todayTurkish][type.apiName] = [];
+                });
             }
-
-            const apiMealType = convertAppMealNameToApiMealName(selectedMealType);
 
             const todayPlan = mealPlanData[todayTurkish];
 
+            // Seçilen öğün tipi için veri yapısını kontrol et ve ekle
             if (!todayPlan[apiMealType]) {
-                todayPlan[apiMealType] = [];
-            } else if (typeof todayPlan[apiMealType] === 'object' &&
-                !Array.isArray(todayPlan[apiMealType]) &&
-                todayPlan[apiMealType] &&
-                'main' in todayPlan[apiMealType]) {
-                const mealData = todayPlan[apiMealType] as {
-                    main: string[],
-                    alternatives?: { [key: string]: string[] }
+                // Öğün tipi yoksa yeni bir nesne oluştur (Ana Menü formatında)
+                todayPlan[apiMealType] = {
+                    "Ana Menü": [{
+                        name: newMeal,
+                        portion: newPortion,
+                        eaten: false,
+                        timestamp: new Date().toISOString()
+                    }]
                 };
+            } else if (typeof todayPlan[apiMealType] === 'object' &&
+                      !Array.isArray(todayPlan[apiMealType]) &&
+                      todayPlan[apiMealType] &&
+                      todayPlan[apiMealType]["Ana Menü"]) {
+                // "Ana Menü" formatında
+                if (!todayPlan[apiMealType]["Ana Menü"]) {
+                    todayPlan[apiMealType]["Ana Menü"] = [];
+                }
 
-                if (!mealData.main.includes(newMeal)) {
-                    mealData.main.push(newMeal);
+                // Aynı yemek adı daha önce eklenmiş mi kontrol et
+                const existingMealIndex = todayPlan[apiMealType]["Ana Menü"].findIndex(
+                    (item: any) => item.name === newMeal
+                );
+
+                // Yeni yemeği ekle
+                if (existingMealIndex === -1) {
+                    todayPlan[apiMealType]["Ana Menü"].push({
+                        name: newMeal,
+                        portion: newPortion,
+                        eaten: false,
+                        timestamp: new Date().toISOString()
+                    });
                 }
             } else if (Array.isArray(todayPlan[apiMealType])) {
-                const meals = todayPlan[apiMealType] as string[];
-                if (!meals.includes(newMeal)) {
-                    meals.push(newMeal);
-                }
+                // Array formatında ise Ana Menü formatına dönüştür
+                const existingMeals = todayPlan[apiMealType] as any[];
+                todayPlan[apiMealType] = {
+                    "Ana Menü": [
+                        ...existingMeals.map(item => {
+                            if (typeof item === 'string') {
+                                return { name: item, portion: "1 porsiyon", eaten: false };
+                            }
+                            return item;
+                        }),
+                        { name: newMeal, portion: newPortion, eaten: false, timestamp: new Date().toISOString() }
+                    ]
+                };
             }
 
+            // Beslenme planını güncelle - TÜM günlerin verilerini koruyacak şekilde güncellendi
             const updateData = {
                 nutrition_plan_id: nutritionPlanId,
                 mealPlan: {
-                    [todayTurkish]: todayPlan
+                    ...mealPlanData,  // Tüm mevcut günlerin verilerini koru
+                    [todayTurkish]: todayPlan  // Bugünün güncel verilerini ekle
                 }
             };
+
+            console.log('Gönderilen beslenme planı:', JSON.stringify(updateData.mealPlan));
+            console.log('Bugünün öğünleri:', JSON.stringify(todayPlan));
 
             const updateResponse = await fetch(`${config[config.environment].apiUrl}/client/updateMealPlan`, {
                 method: 'POST',
@@ -243,18 +534,42 @@ const BottomNav = ({navigation}: Props) => {
                 body: JSON.stringify(updateData)
             });
 
-            const updateResult = await updateResponse.json();
+            // API yanıtını metin olarak al
+            const updateResponseText = await updateResponse.text();
+
+            // HTML yanıtı mı kontrol et
+            if (updateResponseText.trim().startsWith('<')) {
+                console.error('API güncelleme yanıtı HTML içeriyor, JSON değil');
+                showToast('Öğün eklenirken bir hata oluştu: Sunucu yanıtı geçersiz', 'error');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Metin yanıtını JSON'a çevir
+            let updateResult;
+            try {
+                updateResult = JSON.parse(updateResponseText);
+            } catch (e) {
+                console.error('JSON parse hatası:', e);
+                showToast('Öğün eklenirken bir hata oluştu: Sunucu yanıtı geçersiz', 'error');
+                setIsSubmitting(false);
+                return;
+            }
 
             if (!updateResponse.ok) {
                 showToast('Öğün eklenirken bir hata oluştu: ' + (updateResult.message || 'Bilinmeyen hata'), 'error');
             } else {
                 showToast('Öğün başarıyla eklendi', 'success');
+                // Güncel öğün planını yeniden yükle
+                fetchTodayMealPlan();
             }
 
             setShowMealPopup(false);
             setNewMeal('');
             setNewPortion('');
-            setSelectedMealType('Kahvaltı');
+            if (mealTypes.length > 0) {
+                setSelectedMealType(mealTypes[0].name);
+            }
         } catch (e) {
             console.error('Error adding meal:', e);
             showToast('Öğün eklenirken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
@@ -266,20 +581,82 @@ const BottomNav = ({navigation}: Props) => {
     const handleAddExercise = async () => {
         if (!selectedExerciseType || !exerciseDuration) return;
         setIsExerciseSubmitting(true);
+
         try {
-            await fetch('https://your-api-endpoint.com/exercises', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    exerciseType: selectedExerciseType,
-                    duration: exerciseDuration,
-                }),
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                showToast('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.', 'error');
+                setIsExerciseSubmitting(false);
+                return;
+            }
+
+            // Güncel egzersiz planını getir
+            const response = await fetch(`${config[config.environment].apiUrl}/client/getExercisePlan`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                }
             });
+
+            // API yanıtını kontrol et
+            if (!response.ok) {
+                console.error('Egzersiz planı alınamadı');
+                showToast('Egzersiz planı alınamadı. Lütfen tekrar deneyin.', 'error');
+                setIsExerciseSubmitting(false);
+                return;
+            }
+
+            // API yanıtını JSON olarak çözümle
+            const data = await response.json();
+
+            // Türkçe gün adını al
+            const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            const today = new Date().getDay();
+            const todayTurkish = days[today];
+
+            // Mevcut egzersiz planı
+            let exercisePlan = data.exercisePlan || {};
+
+            // Bugün için egzersiz planı yoksa oluştur
+            if (!exercisePlan[todayTurkish]) {
+                exercisePlan[todayTurkish] = [];
+            }
+
+            // Yeni egzersizi ekle
+            exercisePlan[todayTurkish].push({
+                type: selectedExerciseType,
+                duration: exerciseDuration,
+                timestamp: new Date().toISOString()
+            });
+
+            // Tüm egzersiz planını güncelle (tüm günlerin verilerini koru)
+            const updateResponse = await fetch(`${config[config.environment].apiUrl}/client/updateExercisePlan`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    exercisePlan: exercisePlan // Tüm günlerin verileri korunuyor
+                })
+            });
+
+            // API yanıtını kontrol et
+            if (!updateResponse.ok) {
+                console.error('Egzersiz eklenirken bir hata oluştu');
+                showToast('Egzersiz eklenirken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                setIsExerciseSubmitting(false);
+                return;
+            }
+
+            showToast('Egzersiz başarıyla eklendi', 'success');
             setShowExercisePopup(false);
             setSelectedExerciseType('Koşu');
             setExerciseDuration('');
         } catch (e) {
-            console.log('Hata:', 'Hızlı Egzersiz Ekle butonunda bir hata oluştu.');
+            console.error('Hata:', e);
+            showToast('Egzersiz eklenirken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
         } finally {
             setIsExerciseSubmitting(false);
         }
@@ -312,7 +689,7 @@ const BottomNav = ({navigation}: Props) => {
                     <TouchableOpacity
                         style={styles.floatingButton}
                         onPress={() => {
-                            setShowExercisePopup(true);
+                            navigation.navigate('Egzersiz');
                             setMenuOpen(false);
                         }}
                         activeOpacity={0.8}
@@ -404,14 +781,14 @@ const BottomNav = ({navigation}: Props) => {
                         <View style={{flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8}}>
                             {mealTypes.map(type => (
                                 <TouchableOpacity
-                                    key={type}
+                                    key={type.id}
                                     style={{
                                         flexDirection: 'row',
                                         alignItems: 'center',
                                         marginRight: 16,
                                         marginBottom: 4
                                     }}
-                                    onPress={() => setSelectedMealType(type)}
+                                    onPress={() => setSelectedMealType(type.name)}
                                 >
                                     <View style={{
                                         width: 20,
@@ -422,12 +799,12 @@ const BottomNav = ({navigation}: Props) => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         marginRight: 4,
-                                        backgroundColor: selectedMealType === type ? '#fc9e21' : '#fff',
+                                        backgroundColor: selectedMealType === type.name ? '#fc9e21' : '#fff',
                                     }}>
-                                        {selectedMealType === type && <View
+                                        {selectedMealType === type.name && <View
                                             style={{width: 10, height: 10, borderRadius: 5, backgroundColor: '#fff'}}/>}
                                     </View>
-                                    <Text>{type}</Text>
+                                    <Text>{type.name}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>

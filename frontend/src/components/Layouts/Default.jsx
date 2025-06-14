@@ -219,6 +219,32 @@ export default function Default(props) {
             });
             if (response.data) {
                 setDietitianInfo(response.data);
+
+                if (response.data.subscription_end_date) {
+                    const endDate = new Date(response.data.subscription_end_date);
+                    const currentDate = new Date();
+
+                    if (endDate < currentDate) {
+                        console.log('Abonelik süresi dolmuş, ücretsiz plana dönüştürülüyor...');
+                        await axios.post(`${config[config.environment].apiUrl}/dietitian/changeDietitianSubscriptionToFree`, {}, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': token || ''
+                            }
+                        });
+
+                        const updatedResponse = await axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': token || ''
+                            }
+                        });
+
+                        if (updatedResponse.data) {
+                            setDietitianInfo(updatedResponse.data);
+                        }
+                    }
+                }
             }
         } catch (error) {
             console.error('Diyetisyen bilgisi alınamadı.', error);

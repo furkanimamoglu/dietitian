@@ -25,7 +25,9 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    TextField
+    TextField,
+    InputAdornment,
+    Alert
 } from '@mui/material';
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
@@ -35,6 +37,7 @@ import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
+import Person from "@mui/icons-material/Person";
 
 
 export default function Randevularim() {
@@ -44,6 +47,9 @@ export default function Randevularim() {
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+    const [appointmentConflict, setAppointmentConflict] = useState(false);
+    const [conflictMessage, setConflictMessage] = useState("");
 
     const [validationErrors, setValidationErrors] = useState({
         title: false,
@@ -65,6 +71,25 @@ export default function Randevularim() {
     const calendarRef = useRef(null);
 
     useEffect(() => {
+        const fetchClients = async () => {
+            try {
+                const response = await axios.get(
+                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token')
+                        }
+                    }
+                );
+                setClients(response.data || []);
+
+                // Danışanlar çekildikten sonra randevuları çek
+                fetchAppointments();
+            } catch (error) {
+                console.error("Müşteriler çekilirken bir hata oluştu:", error);
+            }
+        };
+
         const fetchAppointments = async () => {
             try {
                 const response = await axios.get(
@@ -101,26 +126,7 @@ export default function Randevularim() {
             }
         };
 
-        fetchAppointments();
-    }, []);
-
-    useEffect(() => {
-        const fetchClients = async () => {
-            try {
-                const response = await axios.get(
-                    config[config.environment].apiUrl + "/dietitian/getAllMyClients",
-                    {
-                        headers: {
-                            Authorization: localStorage.getItem('token')
-                        }
-                    }
-                );
-                setClients(response.data || []);
-            } catch (error) {
-                console.error("Müşteriler çekilirken bir hata oluştu:", error);
-            }
-        };
-
+        // İlk önce danışanları çek
         fetchClients();
     }, []);
 
@@ -184,6 +190,13 @@ export default function Randevularim() {
                 client_id: false
             });
             setShowValidation(false);
+
+            // Randevu çakışma kontrolü yap
+            checkAppointmentConflicts(
+                startDate.toISOString().slice(0, 16),
+                endDate.toISOString().slice(0, 16)
+            );
+
             setRandevuEklePopup(true);
         }
     };
@@ -204,7 +217,7 @@ export default function Randevularim() {
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
-        // Validasyon durumlarını sıfırla
+
         setValidationErrors({
             title: false,
             start: false,
@@ -362,7 +375,6 @@ export default function Randevularim() {
                 client_id: updatedEventWithDates.client_id,
                 status: updatedEventWithDates.status,
             };
-
             const response = await axios.put(
                 config[config.environment].apiUrl + "/appointment/updateAppointmentAsDietitian",
                 requestData,
@@ -409,6 +421,58 @@ export default function Randevularim() {
             end: false,
             client_id: false
         });
+        setAppointmentConflict(false);
+        setConflictMessage("");
+    };
+
+    const checkAppointmentConflicts = (start, end, currentAppointmentId = null) => {
+        if (!start || !end) return false;
+
+        const startTime = new Date(start);
+        const endTime = new Date(end);
+
+        if (startTime >= endTime) {
+            setAppointmentConflict(true);
+            setConflictMessage("Başlangıç zamanı bitiş zamanından sonra olamaz.");
+            return true;
+        }
+
+        const conflictingAppointment = randevular.find(appointment => {
+            if (currentAppointmentId && String(appointment.id) === String(currentAppointmentId)) {
+                return false;
+            }
+
+            const appointmentStart = new Date(appointment.start);
+            const appointmentEnd = new Date(appointment.end || appointment.start);
+
+            return (startTime < appointmentEnd && endTime > appointmentStart);
+        });
+
+        if (conflictingAppointment) {
+            const client = clients.find(c => String(c.id) === String(conflictingAppointment.extendedProps?.client_id));
+            const clientName = client ? client.name : "Bilinmeyen Danışan";
+
+            const conflictStartTime = new Date(conflictingAppointment.start).toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const conflictEndTime = conflictingAppointment.end ?
+                new Date(conflictingAppointment.end).toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }) : conflictStartTime;
+
+            setAppointmentConflict(true);
+            setConflictMessage(`Bu saatte "${clientName}" için "${conflictingAppointment.title}" randevusu bulunuyor. (${conflictStartTime} - ${conflictEndTime})`);
+            return true;
+        }
+
+        setAppointmentConflict(false);
+        setConflictMessage("");
+        return false;
     };
 
     const handleEventChange = (key, value) => {
@@ -417,22 +481,27 @@ export default function Randevularim() {
             [key]: value,
         }));
 
-        // Eğer validasyon gösteriliyorsa, alan doldurulduğunda hatayı temizle
         if (showValidation && value) {
             setValidationErrors(prev => ({
                 ...prev,
                 [key]: false
             }));
         }
+
+        if ((key === "start" || key === "end") && eventData.start && eventData.end) {
+            const startToCheck = key === "start" ? value : eventData.start;
+            const endToCheck = key === "end" ? value : eventData.end;
+
+            const currentId = randevuDuzenlePopup ? eventData.id : null;
+            checkAppointmentConflicts(startToCheck, endToCheck, currentId);
+        }
     };
 
     const handleEventDelete = async () => {
         try {
-            // Get the appointment ID and log it to make sure it's correct
             const appointmentId = eventData.id;
             console.log("Silinecek randevu ID:", appointmentId);
 
-            // Use a properly formatted query parameter
             const response = await axios.delete(
                 `${config[config.environment].apiUrl}/appointment/deleteAppointmentAsDietitian`,
                 {
@@ -545,7 +614,78 @@ export default function Randevularim() {
                         eventResize={handleEventResizeOrDrop}
                         eventDrop={handleEventResizeOrDrop}
                         eventResizableFromStart={true}
-                        eventOverlap={false}
+                        eventOverlap={true}
+                        eventContent={(arg) => {
+                            const clientId = arg.event.extendedProps?.client_id;
+
+                            const client = clients.find(c => String(c.id) === String(clientId));
+                            const clientName = client ? client.name : "";
+
+                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString(undefined, {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false,
+                                timeZone: 'UTC'
+                            }) : '';
+
+                            return (
+                                <div className="appointment-event" style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    padding: '1px',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{
+                                        fontSize: '0.8em',
+                                        fontWeight: 'bold',
+                                        padding: '2px 4px',
+                                        borderRadius: '3px',
+                                        marginBottom: '1px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>
+                                        <Person
+                                            style={{
+                                                fontSize: '0.9em',
+                                                color: '#0020ff',
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                        <span style={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            marginLeft: '2px'
+                                        }}>
+                                            {clientName || "Danışan belirtilmemiş"}
+                                        </span>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.75em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '0 4px'
+                                    }}>
+                                        <span style={{
+                                            fontWeight: 'bold',
+                                            flexShrink: 0
+                                        }}>
+                                            {startTime}
+                                        </span>
+                                        <span style={{
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
+                                        }}>
+                                            {arg.event.title}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        }}
                     />
                 </Box>
             </Grid2>
@@ -568,15 +708,6 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        label="Randevu Başlığı"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
-                    />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
@@ -586,7 +717,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
-                            minutesStep={15}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -604,7 +735,7 @@ export default function Randevularim() {
                             }}
                             ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
-                            minutesStep={15}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -619,7 +750,8 @@ export default function Randevularim() {
                         options={clients}
                         getOptionLabel={(option) => option.name}
                         onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
-                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        value={clients.find((client) => String(client.id) === String(eventData.client_id)) || null}
+                        isOptionEqualToValue={(option, value) => String(option.id) === String(value.id)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -627,9 +759,40 @@ export default function Randevularim() {
                                 margin="normal"
                                 error={showValidation && validationErrors.client_id}
                                 helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start">
+                                                <Person color="primary" />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    )
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: 2,
+                                        }
+                                    }
+                                }}
                             />
                         )}
                         fullWidth
+                    />
+                    <TextField
+                        label="Randevu Notu"
+                        value={eventData.title}
+                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        error={showValidation && validationErrors.title}
+                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -646,6 +809,13 @@ export default function Randevularim() {
                             <MenuItem value="denied">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
+
+                    {/* Çakışma mesajı için Alert bileşeni */}
+                    {appointmentConflict && conflictMessage && (
+                        <Alert severity="error" sx={{marginTop: 2}}>
+                            {conflictMessage}
+                        </Alert>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="secondary">
@@ -678,15 +848,6 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        label="Randevu Başlığı"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
-                    />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
@@ -696,6 +857,7 @@ export default function Randevularim() {
                             }}
                             ampm={false} // 24 saat formatı için
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -713,6 +875,7 @@ export default function Randevularim() {
                             }}
                             ampm={false} // 24 saat formatı için
                             views={['year', 'month', 'day', 'hours', 'minutes']}
+                            disablePast
                             slotProps={{
                                 textField: {
                                     fullWidth: true,
@@ -727,7 +890,8 @@ export default function Randevularim() {
                         options={clients}
                         getOptionLabel={(option) => option.name}
                         onChange={(e, value) => handleEventChange("client_id", value?.id || "")}
-                        value={clients.find((client) => client.id === eventData.client_id) || null}
+                        value={clients.find((client) => String(client.id) === String(eventData.client_id)) || null}
+                        isOptionEqualToValue={(option, value) => String(option.id) === String(value.id)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -735,9 +899,40 @@ export default function Randevularim() {
                                 margin="normal"
                                 error={showValidation && validationErrors.client_id}
                                 helperText={showValidation && validationErrors.client_id ? "Bu alan zorunludur" : ""}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <>
+                                            <InputAdornment position="start">
+                                                <Person color="primary" />
+                                            </InputAdornment>
+                                            {params.InputProps.startAdornment}
+                                        </>
+                                    )
+                                }}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                        '&:hover fieldset': {
+                                            borderColor: 'primary.main',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderWidth: 2,
+                                        }
+                                    }
+                                }}
                             />
                         )}
                         fullWidth
+                    />
+                    <TextField
+                        label="Randevu Notu"
+                        value={eventData.title}
+                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        error={showValidation && validationErrors.title}
+                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -754,6 +949,13 @@ export default function Randevularim() {
                             <MenuItem value="denied">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
+
+                    {/* Çakışma mesajı için Alert bileşeni */}
+                    {appointmentConflict && conflictMessage && (
+                        <Alert severity="error" sx={{marginTop: 2}}>
+                            {conflictMessage}
+                        </Alert>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button
@@ -838,3 +1040,4 @@ export default function Randevularim() {
         </Default>
     );
 }
+

@@ -313,7 +313,12 @@ export default function Finans() {
                 packageId: inv.package_id,
                 packageName: inv.Package?.name || '',
                 amount: Number(inv.amount),
-                status: inv.status === 'paid' ? 'Ödendi' : inv.status === 'unpaid' ? 'Beklemede' : inv.status === 'cancelled' ? 'Ödenmedi' : inv.status,
+                paid_amount: Number(inv.paid_amount),
+                status:
+                    inv.status === 'paid' ? 'Ödendi' :
+                    inv.status === 'partiallypaid' ? 'Kısmi Ödeme' :
+                    inv.status === 'unpaid' ? 'Beklemede' :
+                    inv.status === 'cancelled' ? 'Ödenmedi' : inv.status,
                 issueDate: inv.issueDate ? inv.issueDate.split('T')[0] : '',
                 dueDate: inv.dueDate ? inv.dueDate.split('T')[0] : '',
                 description: inv.description || '',
@@ -327,21 +332,20 @@ export default function Finans() {
         }
     };
 
-    // Add helper function to get package duration in months
     const getPackageDurationInMonths = (packageType) => {
         switch (packageType) {
             case "Seanslık":
-                return 1; // Count full amount in the month of the session
+                return 1;
             case "Aylık":
-                return 1; // 1 month
+                return 1;
             case "3 Aylık":
-                return 3; // 3 months
+                return 3;
             case "6 Aylık":
-                return 6; // 6 months
+                return 6;
             case "1 Yıllık":
-                return 12; // 12 months
+                return 12;
             default:
-                return 1; // Default to 1 month
+                return 1;
         }
     };
 
@@ -378,9 +382,13 @@ export default function Finans() {
             field: "amount",
             headerName: "Tutar",
             editable: false,
-            valueFormatter: (params) => {
-                if (params === undefined || params === null) return '';
-                return `${params.toLocaleString()} ₺`;
+            renderCell: (params) => {
+                if (params.row.status === "Kısmi Ödeme") {
+                    return (
+                        <div>{params.row.paid_amount.toLocaleString()} ₺ ödendi</div>
+                    );
+                }
+                return `${params.value.toLocaleString()} ₺`;
             }
         },
         {
@@ -393,7 +401,8 @@ export default function Finans() {
                     label={params.value}
                     color={
                         params.value === "Ödendi" ? "success" :
-                            params.value === "Beklemede" ? "warning" : "error"
+                        params.value === "Beklemede" ? "warning" :
+                        params.value === "Kısmi Ödeme" ? "info" : "error"
                     }
                     size="small"
                 />
@@ -442,6 +451,7 @@ export default function Finans() {
                             variant="outlined"
                         >
                             <MenuItem value="Ödendi">Ödendi</MenuItem>
+                            <MenuItem value="Kısmi Ödeme">Kısmi Ödeme</MenuItem>
                             <MenuItem value="Beklemede">Beklemede</MenuItem>
                             <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
                         </Select>
@@ -473,18 +483,20 @@ export default function Finans() {
             const currentDate = new Date();
             return invoiceDate.getMonth() === currentDate.getMonth() &&
                 invoiceDate.getFullYear() === currentDate.getFullYear() &&
-                invoice.status === "Ödendi";
+                (invoice.status === "Ödendi" || invoice.status === "Kısmi Ödeme");
         })
         .reduce((total, invoice) => {
             const pkg = packages.find(p => p.id === invoice.packageId);
-            if (!pkg) return total + invoice.amount;
+            const amount = invoice.status === "Kısmi Ödeme" ? invoice.paid_amount : invoice.amount;
+
+            if (!pkg) return total + amount;
 
             if (shouldProrate(pkg.type)) {
                 const durationInMonths = getPackageDurationInMonths(pkg.type);
-                const proratedAmount = invoice.amount / durationInMonths;
+                const proratedAmount = amount / durationInMonths;
                 return total + proratedAmount;
             } else {
-                return total + invoice.amount;
+                return total + amount;
             }
         }, 0);
 
@@ -511,9 +523,7 @@ export default function Finans() {
 
     const totalRevenue = currentMonthPaid + currentMonthUnpaid;
 
-    const allTimeTotalRevenue = invoices
-        .filter(invoice => invoice.status === "Ödendi")
-        .reduce((total, invoice) => total + invoice.amount, 0);
+    const allTimeTotalRevenue = invoices;
 
     const indexOfLastInvoice = currentPage * invoicesPerPage;
     const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
@@ -547,18 +557,17 @@ export default function Finans() {
                     invoiceDate.getFullYear() === currentYear;
             })
             .reduce((total, invoice) => {
-                // Find the package to get its type
                 const pkg = packages.find(p => p.id === invoice.packageId);
-                if (!pkg) return total + invoice.amount;
+                const amount = invoice.status === "Kısmi Ödeme" ? invoice.paid_amount : invoice.amount;
 
-                // For session-based packages, count the full amount
-                // For subscription packages, prorate the amount
+                if (!pkg) return total + amount;
+
                 if (shouldProrate(pkg.type)) {
                     const durationInMonths = getPackageDurationInMonths(pkg.type);
-                    const proratedAmount = invoice.amount / durationInMonths;
+                    const proratedAmount = amount / durationInMonths;
                     return total + proratedAmount;
                 } else {
-                    return total + invoice.amount; // Full amount for sessions
+                    return total + amount;
                 }
             }, 0);
 
@@ -569,18 +578,17 @@ export default function Finans() {
                     invoiceDate.getFullYear() === lastMonthYear;
             })
             .reduce((total, invoice) => {
-                // Find the package to get its type
                 const pkg = packages.find(p => p.id === invoice.packageId);
-                if (!pkg) return total + invoice.amount;
+                const amount = invoice.status === "Kısmi Ödeme" ? invoice.paid_amount : invoice.amount;
 
-                // For session-based packages, count the full amount
-                // For subscription packages, prorate the amount
+                if (!pkg) return total + amount;
+
                 if (shouldProrate(pkg.type)) {
                     const durationInMonths = getPackageDurationInMonths(pkg.type);
-                    const proratedAmount = invoice.amount / durationInMonths;
+                    const proratedAmount = amount / durationInMonths;
                     return total + proratedAmount;
                 } else {
-                    return total + invoice.amount; // Full amount for sessions
+                    return total + amount;
                 }
             }, 0);
 
@@ -598,13 +606,16 @@ export default function Finans() {
         };
     };
 
-    // Get payment status breakdown 
     const getPaymentStatusBreakdown = () => {
-        const total = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+        const totalInvoiceAmount = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
 
         const paid = invoices
             .filter(invoice => invoice.status === "Ödendi")
             .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+        const partiallyPaid = invoices
+            .filter(invoice => invoice.status === "Kısmi Ödeme")
+            .reduce((sum, invoice) => sum + invoice.paid_amount, 0);
 
         const pending = invoices
             .filter(invoice => invoice.status === "Beklemede")
@@ -614,13 +625,15 @@ export default function Finans() {
             .filter(invoice => invoice.status === "Ödenmedi")
             .reduce((sum, invoice) => sum + invoice.amount, 0);
 
+        const totalPaid = paid + partiallyPaid;
+
         return {
-            paid,
+            paid: totalPaid,
             pending,
             unpaid,
-            paidPercent: total === 0 ? 0 : Math.round((paid / total) * 100),
-            pendingPercent: total === 0 ? 0 : Math.round((pending / total) * 100),
-            unpaidPercent: total === 0 ? 0 : Math.round((unpaid / total) * 100)
+            paidPercent: totalInvoiceAmount === 0 ? 0 : Math.round((totalPaid / totalInvoiceAmount) * 100),
+            pendingPercent: totalInvoiceAmount === 0 ? 0 : Math.round((pending / totalInvoiceAmount) * 100),
+            unpaidPercent: totalInvoiceAmount === 0 ? 0 : Math.round((unpaid / totalInvoiceAmount) * 100)
         };
     };
 
@@ -1004,7 +1017,7 @@ export default function Finans() {
 
             switch (packageType) {
                 case "Seanslık":
-                    dueDate.setDate(dueDate.getDate() + 1); // +1 day
+                    dueDate.setDate(dueDate.getDate()); // +1 day
                     break;
                 case "Aylık":
                     dueDate.setMonth(dueDate.getMonth() + 1); // +1 month
@@ -1056,7 +1069,6 @@ export default function Finans() {
                 dueDate.setDate(dueDate.getDate() + 7);
             }
 
-            // Set fresh default values
             setNewInvoice({
                 clientName: "",
                 clientId: "",
@@ -1070,16 +1082,13 @@ export default function Finans() {
             });
         }
 
-        // Open the dialog after setting the state
         setInvoiceDialogOpen(true);
     };
 
     const handleCloseInvoiceDialog = () => {
         setInvoiceDialogOpen(false);
         setCurrentInvoice(null);
-        // Reset form errors
         setFormErrors({});
-        // Reset the form data when closing
         setNewInvoice({
             clientName: "",
             clientId: "",
@@ -1120,7 +1129,24 @@ export default function Finans() {
             }
         }
 
-        // Auto-update amount and due date if package changes
+        if (field === 'status') {
+            const updatedInvoice = {...newInvoice, [field]: value};
+
+            if (value === "Ödendi") {
+                updatedInvoice.paid_amount = updatedInvoice.amount;
+            }
+            else if (value === "Beklemede" || value === "Ödenmedi") {
+                updatedInvoice.paid_amount = 0;
+            }
+
+            setNewInvoice(updatedInvoice);
+        } else {
+            setNewInvoice({
+                ...newInvoice,
+                [field]: value
+            });
+        }
+
         if (field === 'packageId') {
             const selectedPackage = packages.find(pkg => String(pkg.id) === String(value));
             if (selectedPackage) {
@@ -1204,9 +1230,9 @@ export default function Finans() {
         }
     };
 
-    // Status mapping fonksiyonu
     const mapStatusToBackend = (status) => {
         if (status === 'Ödendi') return 'paid';
+        if (status === 'Kısmi Ödeme') return 'partiallypaid';
         if (status === 'Beklemede') return 'unpaid';
         if (status === 'Ödenmedi') return 'cancelled';
         return 'unpaid';
@@ -1259,6 +1285,7 @@ export default function Finans() {
                 client_id: newInvoice.clientId,
                 amount: newInvoice.amount,
                 status: backendStatus,
+                paid_amount: newInvoice.paid_amount || 0,
                 package_id: newInvoice.packageId || null,
                 issueDate: newInvoice.issueDate,
                 dueDate: newInvoice.dueDate,
@@ -1323,6 +1350,7 @@ export default function Finans() {
                 invoice_id: id,
                 client_id: invoice.clientId,
                 amount: invoice.amount,
+                paid_amount: invoice.paid_amount || 0,
                 status: backendStatus,
                 package_id: invoice.packageId || null,
                 issueDate: invoice.issueDate,
@@ -1754,6 +1782,7 @@ export default function Finans() {
                                         >
                                             <MenuItem value="all">Tüm Durumlar</MenuItem>
                                             <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                            <MenuItem value="Kısmi Ödeme">Kısmi Ödeme</MenuItem>
                                             <MenuItem value="Beklemede">Beklemede</MenuItem>
                                             <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
                                         </Select>
@@ -1908,9 +1937,9 @@ export default function Finans() {
                                         overflowX: 'auto'
                                     }}>
                                         danisan,paket,tutar,durum,fatura_tarihi,son_odeme,aciklama<br/>
-                                        "Ahmet Yılmaz","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs ayı
+                                        "Furkan İmamoğlu","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs ayı
                                         ödemesi"<br/>
-                                        "Ayşe Demir","Seanslık","250","Beklemede","2023-05-15","2023-05-22","İlk seans"
+                                        "Furkan İmamoğlu","Seanslık","250","Beklemede","2023-05-15","2023-05-22","İlk seans"
                                     </code>
                                 </Stack>
                             </DialogContent>
@@ -2041,6 +2070,7 @@ export default function Finans() {
                                                                 onChange={(e) => handleCsvRowChange(index, 'status', e.target.value)}
                                                             >
                                                                 <MenuItem value="Ödendi">Ödendi</MenuItem>
+                                                                <MenuItem value="Kısmi Ödeme">Kısmi Ödeme</MenuItem>
                                                                 <MenuItem value="Beklemede">Beklemede</MenuItem>
                                                                 <MenuItem value="Ödenmedi">Ödenmedi</MenuItem>
                                                             </Select>
@@ -2153,7 +2183,7 @@ export default function Finans() {
                             packageId: pkg ? pkg.id : null,
                             packageName: row.paket || "",
                             amount: parseFloat(row.tutar || 0) || 0,
-                            status: row.durum === "Ödendi" || row.durum === "Beklemede" || row.durum === "Ödenmedi"
+                            status: row.durum === "Ödendi" || row.durum === "Kısmi Ödeme" || row.durum === "Beklemede" || row.durum === "Ödenmedi"
                                 ? row.durum
                                 : "Beklemede",
                             issueDate: row.fatura_tarihi || new Date().toISOString().split('T')[0],
@@ -2335,6 +2365,7 @@ export default function Finans() {
                     const invoiceData = {
                         client_id: invoice.clientId,
                         amount: invoice.amount,
+                        paid_amount: invoice.paid_amount,
                         status: backendStatus,
                         package_id: invoice.packageId || null,
                         issueDate: invoice.issueDate,
@@ -2619,22 +2650,43 @@ export default function Finans() {
                         </div>
 
                         <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="invoice-amount">Tutar (₺)</label>
-                                <div className="input-with-icon">
-                                    <i className="icon">₺</i>
-                                    <input
-                                        id="invoice-amount"
-                                        type="number"
-                                        max={9223372036854775807}
-                                        min={0}
-                                        value={newInvoice.amount || ""}
-                                        onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
-                                        className={formErrors.amount ? "error-input" : ""}
-                                    />
+                            {newInvoice.status !== "Kısmi Ödeme" && (
+                                <div className="form-group">
+                                    <label htmlFor="invoice-amount">Tutar (₺)</label>
+                                    <div className="input-with-icon">
+                                        <i className="icon">₺</i>
+                                        <input
+                                            id="invoice-amount"
+                                            type="number"
+                                            max={9223372036854775807}
+                                            min={0}
+                                            value={newInvoice.amount || ""}
+                                            onChange={(e) => handleInvoiceChange('amount', Number(e.target.value))}
+                                            className={formErrors.amount ? "error-input" : ""}
+                                        />
+                                    </div>
+                                    {formErrors.amount && <div className="error-message">{formErrors.amount}</div>}
                                 </div>
-                                {formErrors.amount && <div className="error-message">{formErrors.amount}</div>}
-                            </div>
+                            )}
+
+                            {newInvoice.status === "Kısmi Ödeme" && (
+                                <div className="form-group">
+                                    <label htmlFor="paid-amount">Ödenen Tutar (₺)</label>
+                                    <div className="input-with-icon">
+                                        <i className="icon">₺</i>
+                                        <input
+                                            id="paid-amount"
+                                            type="number"
+                                            max={newInvoice.amount || 0}
+                                            min={0}
+                                            value={newInvoice.paid_amount || ""}
+                                            onChange={(e) => handleInvoiceChange('paid_amount', Number(e.target.value))}
+                                            className={formErrors.paid_amount ? "error-input" : ""}
+                                        />
+                                    </div>
+                                    {formErrors.paid_amount && <div className="error-message">{formErrors.paid_amount}</div>}
+                                </div>
+                            )}
 
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <div className="form-group">
@@ -2700,6 +2752,7 @@ export default function Finans() {
                                     className={`status-select status-${newInvoice.status.toLowerCase()}`}
                                 >
                                     <option value="Ödendi">Ödendi</option>
+                                    <option value="Kısmi Ödeme">Kısmi Ödeme</option>
                                     <option value="Beklemede">Beklemede</option>
                                     <option value="Ödenmedi">Ödenmedi</option>
                                 </select>

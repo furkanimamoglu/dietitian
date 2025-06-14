@@ -4,6 +4,8 @@ const Appointment = require(path.join(__dirname, '..', 'Model', 'Appointment'));
 const Client = require(path.join(__dirname, '..', 'Model', 'Client'));
 const {Op} = require('sequelize');
 
+const moment = require('moment-timezone');
+
 class AppointmentService {
     static async fetchDietitianAppointments(user_id) {
         try {
@@ -69,21 +71,7 @@ class AppointmentService {
                 throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
-            const conflictingAppointments = await Appointment.findOne({
-                where: {
-                    dietitian_id,
-                    [Op.and]: [
-                        {start: {[Op.lt]: end}},
-                        {end: {[Op.gt]: start}}
-                    ]
-                }
-            });
-
-            if (conflictingAppointments) {
-                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
-            }
-
-            return await Appointment.create({
+            const appointment = await Appointment.create({
                 title,
                 start,
                 end,
@@ -91,6 +79,11 @@ class AppointmentService {
                 client_id,
             });
 
+            return {
+                ...appointment.dataValues,
+                start: moment(appointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+                end: moment(appointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+            };
         } catch (error) {
             throw new Exception(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
@@ -107,21 +100,6 @@ class AppointmentService {
             const existingAppointment = await Appointment.findByPk(appointment_id);
             if (!existingAppointment) {
                 throw new Exception("Güncellemek istediğiniz randevu bulunamadı.");
-            }
-
-            const conflictingAppointments = await Appointment.findOne({
-                where: {
-                    id: {[Op.ne]: appointment_id},
-                    dietitian_id: dietitian_id,
-                    [Op.and]: [
-                        {start: {[Op.lt]: end}},  // diğer randevu senin bitişinden önce başlamışsa
-                        {end: {[Op.gt]: start}}   // ve senin başlangıcından sonra bitiyorsa => çakışma var
-                    ]
-                }
-            });
-
-            if (conflictingAppointments) {
-                throw new Exception("Bu zaman aralığında başka bir randevu bulunmaktadır.");
             }
 
             await existingAppointment.update({
@@ -265,7 +243,7 @@ class AppointmentService {
             throw new Exception("Bu randevu zaten değerlendirilmiş.", 400, true);
         }
 
-        if (!['approved', 'denied'].includes(action)) {
+        if (action !== 'approved' && action !== 'cancelled') {
             throw new Exception("Geçersiz işlem türü.", 400, true);
         }
 

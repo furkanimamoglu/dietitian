@@ -261,7 +261,6 @@ export default function Header({navigation}: Props) {
             return `Dün ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
         }
 
-        // Diğer durumlar için tarih göster
         return date.toLocaleDateString('tr-TR');
     };
 
