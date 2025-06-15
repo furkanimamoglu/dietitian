@@ -169,7 +169,7 @@ function QuickSearchToolbar() {
                 size="small"
                 sx={{ mr: 2 }}
             >
-                İnaktif Hesapları Sil
+                Pasif Danışanları Temizle
             </Button>
         </GridToolbarContainer>
     );
@@ -187,8 +187,8 @@ export default function Danisanlarim() {
     const [qrData, setQrData] = useState("");
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
-    const [activeFilter, setActiveFilter] = useState(null); // 'all', 'active', 'inactive', 'female', 'male', 'other'
-    const [deleteInactiveDialogOpen, setDeleteInactiveDialogOpen] = useState(false); // İnaktif hesapları silme için modal
+    const [activeFilter, setActiveFilter] = useState(null);
+    const [deleteInactiveDialogOpen, setDeleteInactiveDialogOpen] = useState(false);
 
     // CSV Import states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -1995,14 +1995,14 @@ export default function Danisanlarim() {
 
                                     setSnackbar({
                                         open: true,
-                                        message: "Tüm inaktif danışanlar başarıyla silindi",
+                                        message: "Tüm pasif danışanlar başarıyla temizlendi.",
                                         severity: "success"
                                     });
                                 } catch (error) {
-                                    console.error("İnaktif danışanlar silinirken hata oluştu:", error);
+                                    console.error("Pasif danışanlar temizlenirken hata oluştu:", error);
                                     setSnackbar({
                                         open: true,
-                                        message: "İnaktif danışanlar silinirken bir hata oluştu",
+                                        message: "Pasif danışanlar temizlenirken bir hata oluştu",
                                         severity: "error"
                                     });
                                 } finally {
