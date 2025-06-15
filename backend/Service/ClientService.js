@@ -74,6 +74,7 @@ class ClientService {
                 phoneNumber: phoneNumber,
                 password: password,
                 role: CLIENT,
+                status: 'Pasif',
                 ipAddress: ipAddress
             });
 

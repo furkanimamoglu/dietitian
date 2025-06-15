@@ -282,6 +282,7 @@ class DietitianService {
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
+                status: 'Aktif',
                 role: CLIENT,
                 token: token
             })
