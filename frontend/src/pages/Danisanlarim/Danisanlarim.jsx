@@ -161,6 +161,16 @@ function QuickSearchToolbar() {
     return (
         <GridToolbarContainer sx={{justifyContent: "space-between", ml: "1rem", py: 1}}>
             <GridToolbarQuickFilter placeholder="Danışan Ara"/>
+            <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => document.dispatchEvent(new CustomEvent('deleteInactiveClients'))}
+                size="small"
+                sx={{ mr: 2 }}
+            >
+                İnaktif Hesapları Sil
+            </Button>
         </GridToolbarContainer>
     );
 }
@@ -178,6 +188,7 @@ export default function Danisanlarim() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
     const [activeFilter, setActiveFilter] = useState(null); // 'all', 'active', 'inactive', 'female', 'male', 'other'
+    const [deleteInactiveDialogOpen, setDeleteInactiveDialogOpen] = useState(false); // İnaktif hesapları silme için modal
 
     // CSV Import states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -245,7 +256,26 @@ export default function Danisanlarim() {
                 setClients(res.data);
             })
             .catch((err) => console.error("Error fetching clients:", err));
-    }, []);
+
+        // İnaktif hesapları silme olayı için dinleyici
+        const handleDeleteInactive = () => {
+            if (clients.filter(c => c.status === "Pasif").length === 0) {
+                setSnackbar({
+                    open: true,
+                    message: "Silinecek inaktif danışan bulunmamaktadır",
+                    severity: "info"
+                });
+                return;
+            }
+            setDeleteInactiveDialogOpen(true);
+        };
+
+        document.addEventListener('deleteInactiveClients', handleDeleteInactive);
+
+        return () => {
+            document.removeEventListener('deleteInactiveClients', handleDeleteInactive);
+        };
+    }, [clients]);
 
     const handleRowUpdate = useCallback(async (updatedRow, originalRow) => {
         // Değişiklikleri karşılaştır
@@ -374,7 +404,6 @@ export default function Danisanlarim() {
 
     const handleChangeStatus = async (client) => {
         try {
-            // Mevcut durumun tersini ayarla
             const newStatus = client.status === "Aktif" ? "Pasif" : "Aktif";
 
             await axios.post(
@@ -386,7 +415,6 @@ export default function Danisanlarim() {
                 {headers: {Authorization: localStorage.getItem("token")}}
             );
 
-            // Yerel veriyi güncelle
             setClients(prev => prev.map(c =>
                 c.id === client.id ? {...c, status: newStatus} : c
             ));
@@ -605,7 +633,10 @@ export default function Danisanlarim() {
             headerName: "Durum",
             width: 90,
             type: "singleSelect",
-            valueOptions: ["Aktif", "Pasif"],
+            valueOptions: [
+                { value: "Aktif", label: "Aktif" },
+                { value: "Pasif", label: "Pasif" }
+            ],
             editable: false,
             renderCell: (params) => {
                 if (params.row.status === "Aktif") {
@@ -1938,6 +1969,52 @@ export default function Danisanlarim() {
                         {snackbar.message}
                     </Alert>
                 </Snackbar>
+
+                {/* Delete Inactive Confirmation Dialog */}
+                <Dialog open={deleteInactiveDialogOpen} onClose={() => setDeleteInactiveDialogOpen(false)}>
+                    <DialogTitle>İnaktif Danışanları Sil</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Tüm inaktif danışanları silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setDeleteInactiveDialogOpen(false)} variant="outlined" color="secondary">
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    // İnaktif danışanları filtrele
+                                    const inactiveClients = clients.filter(c => c.status === "Pasif");
+
+                                    // Her bir inaktif danışanı sırayla sil
+                                    for (const client of inactiveClients) {
+                                        await handleDelete(client.id);
+                                    }
+
+                                    setSnackbar({
+                                        open: true,
+                                        message: "Tüm inaktif danışanlar başarıyla silindi",
+                                        severity: "success"
+                                    });
+                                } catch (error) {
+                                    console.error("İnaktif danışanlar silinirken hata oluştu:", error);
+                                    setSnackbar({
+                                        open: true,
+                                        message: "İnaktif danışanlar silinirken bir hata oluştu",
+                                        severity: "error"
+                                    });
+                                } finally {
+                                    setDeleteInactiveDialogOpen(false);
+                                }
+                            }}
+                            variant="contained" color="error"
+                        >
+                            Sil
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Stack>
         </Default>
     );
