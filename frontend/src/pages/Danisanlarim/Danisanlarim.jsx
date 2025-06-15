@@ -453,10 +453,6 @@ export default function Danisanlarim() {
         }
     };
 
-    const togglePdfPreview = () => {
-        setShowPdfPreview(!showPdfPreview);
-    };
-
     const closeQrDialog = () => {
         setQrDialogOpen(false);
         setShowPdfPreview(false);
@@ -474,28 +470,24 @@ export default function Danisanlarim() {
     const validateForm = () => {
         const errors = {};
 
-        // İsim validasyonu
         if (!newClient.name || newClient.name.trim() === "") {
             errors.name = "Adı Soyadı zorunludur";
         } else if (newClient.name.trim().length < 2) {
             errors.name = "Adı Soyadı en az 2 karakter olmalıdır";
         }
 
-        // Telefon validasyonu
         if (!newClient.phoneNumber || newClient.phoneNumber.trim() === "") {
             errors.phoneNumber = "Telefon numarası zorunludur";
         } else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) {
             errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
         }
 
-        // Şifre validasyonu
         if (!newClient.password || newClient.password.trim() === "") {
             errors.password = "Şifre zorunludur";
         } else if (newClient.password.length < 6) {
             errors.password = "Şifre en az 6 karakter olmalıdır";
         }
 
-        // Email validasyonu (opsiyonel ama girilmişse geçerli olmalı)
         if (newClient.email && newClient.email.trim() !== "") {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(newClient.email)) {
@@ -503,7 +495,6 @@ export default function Danisanlarim() {
             }
         }
 
-        // Cinsiyet validasyonu
         if (!newClient.gender || newClient.gender === "") {
             errors.gender = "Cinsiyet seçimi zorunludur";
         }
@@ -516,7 +507,6 @@ export default function Danisanlarim() {
         const {name, value} = e.target;
         setNewClient(prev => ({...prev, [name]: value}));
 
-        // Kullanıcı yazmaya başladığında o alanın hatasını temizle
         if (formErrors[name]) {
             setFormErrors(prev => ({...prev, [name]: ""}));
         }
@@ -540,9 +530,7 @@ export default function Danisanlarim() {
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
 
-        // Validasyonu çalıştır
         if (!validateForm()) {
-            // İlk hatalı alana odaklan
             const firstErrorField = Object.keys(formErrors)[0];
             if (firstErrorField) {
                 const element = document.querySelector(`[name="${firstErrorField}"]`);
@@ -586,7 +574,6 @@ export default function Danisanlarim() {
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
 
-            // Server tarafından gelen hataları göster
             let errorMessage = "Danışan eklenirken bir hata oluştu";
 
             if (error.response?.data?.message) {
