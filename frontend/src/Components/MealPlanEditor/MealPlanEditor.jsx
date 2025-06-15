@@ -186,12 +186,16 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         })
             .then(response => {
                 setCategories(response.data || []);
+
+                if (existingPlan?.category_id) {
+                    setCategoryId(existingPlan.category_id);
+                }
             })
             .catch(error => {
                 console.error("Kategoriler yüklenirken hata oluştu:", error);
                 showErrorToast("Kategoriler yüklenirken bir hata oluştu.");
             });
-    }, []);
+    }, [existingPlan]);
 
     const getAlternativesForCell = (day, mealType) => {
         if (mealPlan[day] && mealPlan[day][mealType]) {
@@ -629,7 +633,10 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                         >
                             <option value="">Kategori Seçin</option>
                             {categories.map(category => (
-                                <option key={category.category_id} value={category.category_id}>
+                                <option
+                                    key={category.category_id || category.id}
+                                    value={category.category_id || category.id}
+                                >
                                     {category.name}
                                 </option>
                             ))}
