@@ -806,7 +806,7 @@ export default function Randevularim() {
                         >
                             <MenuItem value="approved">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
-                            <MenuItem value="denied">Reddedildi</MenuItem>
+                            <MenuItem value="cancelled">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
 
@@ -946,7 +946,7 @@ export default function Randevularim() {
                         >
                             <MenuItem value="approved">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
-                            <MenuItem value="denied">Reddedildi</MenuItem>
+                            <MenuItem value="cancelled">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
 
