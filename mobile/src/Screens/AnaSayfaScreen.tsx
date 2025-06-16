@@ -42,6 +42,9 @@ const AnaSayfa = ({navigation}: Props) => {
     const [showWaterListModal, setShowWaterListModal] = useState<boolean>(false);
     const [dailyWaterGoal, setDailyWaterGoal] = useState<number>(2500);
     const [deletingWaterId, setDeletingWaterId] = useState<string | null>(null);
+    const [acceptedUserAgreement, setAcceptedUserAgreement] = useState<boolean>(false);
+    const [acceptedKVKK, setAcceptedKVKK] = useState<boolean>(false);
+    const [acceptedNotifications, setAcceptedNotifications] = useState<boolean>(false);
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -50,8 +53,7 @@ const AnaSayfa = ({navigation}: Props) => {
                 fetchClientInfo(),
                 fetchMeasurementInfo(),
                 fetchAppointmentInfo(),
-                fetchWaterIntake(),
-                checkKVKKStatus()
+                fetchWaterIntake()
             ]);
         } catch (error) {
             console.error('Yenileme hatası:', error);
@@ -60,41 +62,54 @@ const AnaSayfa = ({navigation}: Props) => {
         }
     };
 
-    const checkKVKKStatus = async () => {
-        try {
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyKVKKStatus`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': await AsyncStorage.getItem('token') || ''
-                }
-            });
-            const data = await response.json();
-            if (response.ok && data.kvkkApproval === false) {
-                setShowKVKKModal(true);
-            }
-        } catch (error) {
-            console.error('KVKK status kontrol hatası:', error);
-        }
-    };
-
     const approveKVKK = async () => {
+        if (!acceptedUserAgreement || !acceptedKVKK || !acceptedNotifications) {
+            setAcceptedUserAgreement(true);
+            setAcceptedKVKK(true);
+            setAcceptedNotifications(true);
+            return;
+        }
+
         try {
-            const response = await fetch(`${config[config.environment].apiUrl}/client/approveKVKK`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/updateApprovalSettings`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': await AsyncStorage.getItem('token') || ''
-                }
+                },
+                body: JSON.stringify({
+                    kvkkApproval: true,
+                    kullaniciSozlesmesiApproval: true,
+                    SMSApproval: acceptedNotifications,
+                    MailApproval: acceptedNotifications,
+                    NotificationApproval: acceptedNotifications
+                })
             });
-            const data = await response.json();
+
             if (response.ok) {
                 setShowKVKKModal(false);
             } else {
-                console.log('KVKK onayı hatası:', data.message);
+                let errorMsg = 'Onay bilgileri güncellenirken bir hata oluştu.';
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        errorMsg = data.message || errorMsg;
+                    } else {
+                        // JSON olmayan yanıt için
+                        const text = await response.text();
+                        console.log('Sunucu yanıtı (JSON değil):', text);
+                    }
+                } catch (parseError) {
+                    console.log('Yanıt çözümleme hatası:', parseError);
+                }
+
+                console.log('Onay güncelleme hatası:', errorMsg);
+                Alert.alert('Hata', errorMsg);
             }
         } catch (error) {
-            console.error('KVKK onayı hatası:', error);
+            console.error('Onay güncelleme hatası:', error);
+            Alert.alert('Hata', 'Bir bağlantı hatası oluştu. Lütfen internet bağlantınızı kontrol ediniz.');
         }
     };
 
@@ -124,6 +139,16 @@ const AnaSayfa = ({navigation}: Props) => {
                 setUserName(data.name || 'Bilinmiyor');
                 if (data.dailyWaterIntake && typeof data.dailyWaterIntake === 'number') {
                     setDailyWaterGoal(data.dailyWaterIntake);
+                }
+
+                // KVKK ve kullanıcı sözleşmesi durumunu kontrol et
+                if (!data.kvkkApproval || !data.kullaniciSozlesmesiApproval) {
+                    setShowKVKKModal(true);
+                    setAcceptedUserAgreement(!!data.kullaniciSozlesmesiApproval);
+                    setAcceptedKVKK(!!data.kvkkApproval);
+                    setAcceptedNotifications(!!(data.SMSApproval && data.MailApproval && data.NotificationApproval));
+                } else {
+                    setShowKVKKModal(false);
                 }
             } else {
                 console.log('Kullanıcı bilgisi alınamadı:', data.message);
@@ -290,7 +315,6 @@ const AnaSayfa = ({navigation}: Props) => {
         fetchMeasurementInfo();
         fetchClientInfo();
         fetchWaterIntake();
-        checkKVKKStatus();
     }, []);
 
     const todayDate = new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'});
@@ -553,62 +577,141 @@ const AnaSayfa = ({navigation}: Props) => {
                 visible={showKVKKModal}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => {
-                }}
+                onRequestClose={() => {}}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>KVKK Aydınlatma Metni</Text>
-                        <ScrollView style={styles.modalScrollView}>
-                            <Text style={styles.modalText}>
-                                Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizin işlenmesi,
-                                saklanması ve kullanılması hakkında aşağıdaki bilgileri siz değerli kullanıcılarımızla
-                                paylaşmak isteriz.
-                                {'\n\n'}
-                                Uygulamamız, sağlık verilerinizi, beslenme alışkanlıklarınızı, fiziksel aktivitelerinizi
-                                ve sizinle ilgili diğer kişisel bilgileri, size özel hizmet sunabilmek amacıyla
-                                toplamakta ve işlemektedir.
-                                {'\n\n'}
-                                Kişisel verileriniz, sadece uygulama içerisindeki hizmetlerin sunulması, iyileştirilmesi
-                                ve kişiselleştirilmesi amacıyla kullanılacak olup, açık rızanız olmadan üçüncü kişilerle
-                                paylaşılmayacaktır.
-                                {'\n\n'}
-                                Kişisel verilerinizin güvenliği için gerekli tüm teknik ve idari tedbirler alınmıştır.
-                                KVKK kapsamında sahip olduğunuz haklar:
-                                {'\n\n'}
-                                - Kişisel verilerinizin işlenip işlenmediğini öğrenme
-                                {'\n'}
-                                - Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme
-                                {'\n'}
-                                - Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp
-                                kullanılmadığını öğrenme
-                                {'\n'}
-                                - Yurtiçinde veya yurtdışında kişisel verilerinizin aktarıldığı üçüncü kişileri bilme
-                                {'\n'}
-                                - Kişisel verilerinizin eksik veya yanlış işlenmiş olması hâlinde bunların
-                                düzeltilmesini isteme
-                                {'\n'}
-                                - KVKK'nın 7. maddesinde öngörülen şartlar çerçevesinde kişisel verilerinizin
-                                silinmesini veya yok edilmesini isteme
-                                {'\n\n'}
-                                Bu aydınlatma metnini kabul etmeniz, uygulamayı kullanabilmeniz için gereklidir. Kabul
-                                etmediğiniz takdirde, uygulamayı kullanamayacağınızı belirtmek isteriz.
-                            </Text>
-                        </ScrollView>
+                        <Text style={styles.modalTitle}>Sözleşmeler</Text>
+
+                        <View style={styles.agreementBoxesContainer}>
+                            {/* Kullanıcı Sözleşmesi Kutusu */}
+                            <View style={styles.agreementBoxWrapper}>
+                                <Text style={styles.agreementBoxTitle}>Kullanıcı Sözleşmesi</Text>
+                                <View style={styles.agreementBox}>
+                                    <ScrollView style={styles.agreementScrollView}>
+                                        <Text style={styles.modalText}>
+                                            Kullanıcı Sözleşmesi
+                                            {'\n\n'}
+                                            Bu Kullanıcı Sözleşmesi ("Sözleşme"), uygulamamızı kullanımınızı düzenleyen koşulları içermektedir. Uygulamayı kullanarak bu sözleşmeyi kabul etmiş sayılırsınız.
+                                            {'\n\n'}
+                                            1. Hizmet Kullanımı
+                                            {'\n'}
+                                            Uygulamamız, beslenme ve diyet hizmetleri kapsamında danışmanlık, takip ve bilgilendirme amaçlarıyla sağlanmaktadır. Hizmetlerimizi yalnızca yasal amaçlar için ve bu sözleşmede belirtilen koşullara uygun olarak kullanmayı kabul ediyorsunuz.
+                                            {'\n\n'}
+                                            2. Hesap Güvenliği
+                                            {'\n'}
+                                            Hesabınızın güvenliğinden ve hesabınız altında gerçekleşen tüm etkinliklerden siz sorumlusunuz. Şifrenizi güvende tutmak ve herhangi bir güvenlik ihlali durumunda derhal bize bildirmek sizin sorumluluğunuzdadır.
+                                            {'\n\n'}
+                                            3. Kullanıcı İçeriği
+                                            {'\n'}
+                                            Uygulama içerisinde paylaştığınız tüm içeriklerden (veriler, bilgiler, dosyalar vb.) siz sorumlusunuz. Telif hakkı, ticari marka veya başkalarının haklarını ihlal eden içerikler paylaşmamayı kabul ediyorsunuz.
+                                            {'\n\n'}
+                                            4. Ücretlendirme ve Ödemeler
+                                            {'\n'}
+                                            Uygulama içerisindeki bazı özellikler ve hizmetler ücretli olabilir. Ücretli hizmetlerden yararlanabilmek için ilgili ücretin tam ve zamanında ödenmesi gerekmektedir.
+                                        </Text>
+                                    </ScrollView>
+                                </View>
+                            </View>
+
+                            {/* KVKK Aydınlatma Metni Kutusu */}
+                            <View style={styles.agreementBoxWrapper}>
+                                <Text style={styles.agreementBoxTitle}>KVKK Aydınlatma Metni</Text>
+                                <View style={styles.agreementBox}>
+                                    <ScrollView style={styles.agreementScrollView}>
+                                        <Text style={styles.modalText}>
+                                            Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizin işlenmesi,
+                                            saklanması ve kullanılması hakkında aşağıdaki bilgileri siz değerli kullanıcılarımızla
+                                            paylaşmak isteriz.
+                                            {'\n\n'}
+                                            Uygulamamız, sağlık verilerinizi, beslenme alışkanlıklarınızı, fiziksel aktivitelerinizi
+                                            ve sizinle ilgili diğer kişisel bilgileri, size özel hizmet sunabilmek amacıyla
+                                            toplamakta ve işlemektedir.
+                                            {'\n\n'}
+                                            Kişisel verileriniz, sadece uygulama içerisindeki hizmetlerin sunulması, iyileştirilmesi
+                                            ve kişiselleştirilmesi amacıyla kullanılacak olup, açık rızanız olmadan üçüncü kişilerle
+                                            paylaşılmayacaktır.
+                                            {'\n\n'}
+                                            Kişisel verilerinizin güvenliği için gerekli tüm teknik ve idari tedbirler alınmıştır.
+                                            KVKK kapsamında sahip olduğunuz haklar:
+                                            {'\n\n'}
+                                            - Kişisel verilerinizin işlenip işlenmediğini öğrenme
+                                            {'\n'}
+                                            - Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme
+                                            {'\n'}
+                                            - Kişisel verilerinizin işlenme amacını ve bunların amacına uygun kullanılıp
+                                            kullanılmadığını öğrenme
+                                        </Text>
+                                    </ScrollView>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.checkboxesContainer}>
+                            <View style={styles.checkboxContainer}>
+                                <TouchableOpacity
+                                    style={styles.checkboxTouchable}
+                                    onPress={() => setAcceptedUserAgreement(!acceptedUserAgreement)}
+                                >
+                                    <Icon
+                                        name={acceptedUserAgreement ? "checkbox-marked" : "checkbox-blank-outline"}
+                                        size={24}
+                                        color={acceptedUserAgreement ? "#2e7d32" : "#757575"}
+                                    />
+                                </TouchableOpacity>
+                                <Text style={styles.checkboxLabel}>
+                                    Kullanıcı Sözleşmesini okudum ve kabul ediyorum.
+                                </Text>
+                            </View>
+
+                            <View style={styles.checkboxContainer}>
+                                <TouchableOpacity
+                                    style={styles.checkboxTouchable}
+                                    onPress={() => setAcceptedKVKK(!acceptedKVKK)}
+                                >
+                                    <Icon
+                                        name={acceptedKVKK ? "checkbox-marked" : "checkbox-blank-outline"}
+                                        size={24}
+                                        color={acceptedKVKK ? "#2e7d32" : "#757575"}
+                                    />
+                                </TouchableOpacity>
+                                <Text style={styles.checkboxLabel}>
+                                    KVKK Aydınlatma Metni'ni okudum ve onaylıyorum.
+                                </Text>
+                            </View>
+
+                            <View style={styles.checkboxContainer}>
+                                <TouchableOpacity
+                                    style={styles.checkboxTouchable}
+                                    onPress={() => setAcceptedNotifications(!acceptedNotifications)}
+                                >
+                                    <Icon
+                                        name={acceptedNotifications ? "checkbox-marked" : "checkbox-blank-outline"}
+                                        size={24}
+                                        color={acceptedNotifications ? "#2e7d32" : "#757575"}
+                                    />
+                                </TouchableOpacity>
+                                <Text style={styles.checkboxLabel}>
+                                    SMS, Mail ve Bildirim yolu üzerinden bilgilendirmeleri kabul ediyorum.
+                                </Text>
+                            </View>
+                        </View>
+
                         <View style={styles.modalButtonContainer}>
                             <Button
-                                mode="contained"
-                                style={[styles.modalButton, styles.rejectButton]}
+                                mode="outlined"
+                                style={styles.modalButton}
                                 onPress={rejectKVKK}
                             >
-                                Reddet
+                                Vazgeç
                             </Button>
                             <Button
                                 mode="contained"
                                 style={[styles.modalButton, styles.acceptButton]}
                                 onPress={approveKVKK}
+                                labelStyle={styles.buttonLabel}
                             >
-                                Kabul Et
+                                {acceptedUserAgreement && acceptedKVKK && acceptedNotifications ? 'Kabul Et' : 'Onayla'}
                             </Button>
                         </View>
                     </View>
@@ -899,39 +1002,54 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 16,
         width: '100%',
-        maxHeight: '80%',
+        maxHeight: '85%',
         padding: 20,
-        elevation: 5
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#2e7d32',
         marginBottom: 16,
-        textAlign: 'center'
+        textAlign: 'center',
+        letterSpacing: 0.5
     },
     modalScrollView: {
         maxHeight: 400,
         marginBottom: 16
     },
     modalText: {
-        fontSize: 14,
-        lineHeight: 20,
-        color: '#424242'
+        fontSize: 13,
+        lineHeight: 18,
+        color: '#424242',
+        padding: 8
     },
     modalButtonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginTop: 8
     },
     modalButton: {
         flex: 1,
-        margin: 8
+        margin: 8,
+        borderRadius: 8,
+        elevation: 2
     },
     acceptButton: {
         backgroundColor: '#2e7d32'
     },
+    disabledButton: {
+        backgroundColor: '#a5d6a7',
+        opacity: 0.7
+    },
     rejectButton: {
-        backgroundColor: '#d32f2f'
+        backgroundColor: 'transparent',
+        borderColor: '#d32f2f',
+        borderWidth: 1
     },
     waterEntriesPreview: {
         marginTop: 4
@@ -1020,6 +1138,51 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         paddingHorizontal: 10,
     },
+    agreementBoxesContainer: {
+        marginBottom: 16
+    },
+    agreementBoxWrapper: {
+        marginBottom: 12
+    },
+    agreementBoxTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#424242',
+        marginBottom: 8
+    },
+    agreementBox: {
+        borderRadius: 12,
+        backgroundColor: '#f9f9f9',
+        overflow: 'hidden',
+        elevation: 1
+    },
+    agreementScrollView: {
+        maxHeight: 120
+    },
+    checkboxesContainer: {
+        marginBottom: 16
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12
+    },
+    checkboxTouchable: {
+        width: 24,
+        height: 24,
+        borderRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12
+    },
+    checkboxLabel: {
+        fontSize: 14,
+        color: '#424242'
+    },
+    buttonLabel: {
+        textAlign: 'center',
+        lineHeight: 20
+    }
 });
 
 export default AnaSayfa;

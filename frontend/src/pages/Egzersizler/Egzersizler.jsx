@@ -298,6 +298,28 @@ export default function Egzersizler() {
             });
     }, []);
 
+    const setDateRange = (weeks) => {
+        const today = new Date();
+        const start = new Date(today);
+        const end = new Date(today);
+
+        if (weeks === 'month') {
+            end.setMonth(end.getMonth() + 1);
+        } else {
+            end.setDate(end.getDate() + (7 * weeks));
+        }
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
+    };
+
     const getClientExercises = (clientId) => {
         const danisan = danisanList.find(d => d.id === clientId);
         setSelectedClientInfo(danisan);
@@ -1499,9 +1521,10 @@ export default function Egzersizler() {
                                 value={newExercise.duration}
                                 onChange={(e) => setNewExercise({
                                     ...newExercise,
-                                    duration: parseInt(e.target.value) || 0
+                                    duration: Math.min(1440, parseInt(e.target.value) || 0)
                                 })}
                                 min="0"
+                                max="1440"
                             />
                         </div>
                         <div className="input-container half-width">
@@ -1511,10 +1534,14 @@ export default function Egzersizler() {
                                 id="exerciseDifficulty"
                                 className="text-input"
                                 value={newExercise.difficulty}
-                                onChange={(e) => setNewExercise({
-                                    ...newExercise,
-                                    difficulty: parseInt(e.target.value) || 1
-                                })}
+                                onChange={(e) => {
+                                    const value = e.target.value === '' ? 1 : parseInt(e.target.value, 10);
+                                    if (isNaN(value)) return;
+                                    setNewExercise({
+                                        ...newExercise,
+                                        difficulty: Math.max(1, Math.min(5, value))
+                                    });
+                                }}
                                 min="1"
                                 max="5"
                             />
@@ -1539,11 +1566,16 @@ export default function Egzersizler() {
                                 id="exerciseCalories"
                                 className="text-input"
                                 value={newExercise.calories_burned}
-                                onChange={(e) => setNewExercise({
-                                    ...newExercise,
-                                    calories_burned: parseInt(e.target.value) || 0
-                                })}
+                                onChange={(e) => {
+                                    const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                    if (isNaN(value)) return;
+                                    setNewExercise({
+                                        ...newExercise,
+                                        calories_burned: Math.max(0, Math.min(5000, value))
+                                    });
+                                }}
                                 min="0"
+                                max="5000"
                             />
                         </div>
                     </div>
@@ -1661,11 +1693,16 @@ export default function Egzersizler() {
                                 id="editExerciseDuration"
                                 className="text-input"
                                 value={editExerciseData.duration}
-                                onChange={(e) => setEditExerciseData({
-                                    ...editExerciseData,
-                                    duration: parseInt(e.target.value) || 0
-                                })}
+                                onChange={(e) => {
+                                    const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                    if (isNaN(value)) return;
+                                    setEditExerciseData({
+                                        ...editExerciseData,
+                                        duration: Math.max(0, Math.min(1440, value))
+                                    });
+                                }}
                                 min="0"
+                                max="1440"
                             />
                         </div>
                         <div className="input-container half-width">
@@ -1675,10 +1712,14 @@ export default function Egzersizler() {
                                 id="editExerciseDifficulty"
                                 className="text-input"
                                 value={editExerciseData.difficulty}
-                                onChange={(e) => setEditExerciseData({
-                                    ...editExerciseData,
-                                    difficulty: parseInt(e.target.value) || 1
-                                })}
+                                onChange={(e) => {
+                                    const value = e.target.value === '' ? 1 : parseInt(e.target.value, 10);
+                                    if (isNaN(value)) return;
+                                    setEditExerciseData({
+                                        ...editExerciseData,
+                                        difficulty: Math.max(1, Math.min(5, value))
+                                    });
+                                }}
                                 min="1"
                                 max="5"
                             />
@@ -1703,11 +1744,16 @@ export default function Egzersizler() {
                                 id="editExerciseCalories"
                                 className="text-input"
                                 value={editExerciseData.calories_burned}
-                                onChange={(e) => setEditExerciseData({
-                                    ...editExerciseData,
-                                    calories_burned: parseInt(e.target.value) || 0
-                                })}
+                                onChange={(e) => {
+                                    const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                    if (isNaN(value)) return;
+                                    setEditExerciseData({
+                                        ...editExerciseData,
+                                        calories_burned: Math.max(0, Math.min(5000, value))
+                                    });
+                                }}
                                 min="0"
+                                max="5000"
                             />
                         </div>
                     </div>
@@ -1774,6 +1820,41 @@ export default function Egzersizler() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className="date-period-buttons">
+                        <Typography variant="h5" sx={{mb: 1, mt: 2}}>
+                            Hızlı Süre Seç:
+                        </Typography>
+                        <Stack direction="row" spacing={1} sx={{mb: 2}}>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => setDateRange(1)}
+                            >
+                                1 Hafta
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => setDateRange(2)}
+                            >
+                                2 Hafta
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => setDateRange(3)}
+                            >
+                                3 Hafta
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => setDateRange('month')}
+                            >
+                                1 Ay
+                            </Button>
+                        </Stack>
                     </div>
                     <div className="date-inputs-container">
                         <LocalizationProvider dateAdapter={AdapterDateFns}>

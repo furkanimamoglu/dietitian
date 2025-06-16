@@ -9,6 +9,10 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
+    DialogContentText,
+    DialogTitle,
+    FormControlLabel,
+    Checkbox,
     IconButton,
     Typography
 } from '@mui/material';
@@ -16,6 +20,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import RocketIcon from '@mui/icons-material/Rocket';
 import LockIcon from '@mui/icons-material/Lock';
+import SecurityIcon from '@mui/icons-material/Security';
 
 import Header from "../Header/Header.jsx";
 import Navbar from "../Navbar/Navbar.jsx";
@@ -23,19 +28,38 @@ import Footer from "../Footer/Footer.jsx";
 import axios from "axios";
 import config from "../../config.js";
 
-const SubscriptionInfoModal = ({open, onClose, onUpgrade}) => {
+// KVKK onayı için modal bileşeni
+const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
+    const [kvkkAccepted, setKvkkAccepted] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [communicationAccepted, setCommunicationAccepted] = useState(false);
+    const allAccepted = kvkkAccepted && termsAccepted && communicationAccepted;
+
+    const handleAccept = () => {
+        if (allAccepted) {
+            onApprove();
+        }
+    };
+
+    const acceptAll = () => {
+        setKvkkAccepted(true);
+        setTermsAccepted(true);
+        setCommunicationAccepted(true);
+    };
+
     return (
         <Dialog
             open={open}
             onClose={onClose}
-            maxWidth="sm"
+            maxWidth="md"
             fullWidth
             disableEscapeKeyDown
             PaperProps={{
                 sx: {
                     borderRadius: 3,
                     boxShadow: '0 24px 48px rgba(0,0,0,0.15)',
-                    overflow: 'visible'
+                    overflow: 'visible',
+                    position: 'relative'
                 }
             }}
             BackdropComponent={Backdrop}
@@ -46,152 +70,169 @@ const SubscriptionInfoModal = ({open, onClose, onUpgrade}) => {
                 }
             }}
         >
-            <DialogContent sx={{p: 0, position: 'relative'}}>
-                {/* Close Button */}
-                <IconButton
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 12,
-                        top: 12,
-                        zIndex: 1,
-                        backgroundColor: 'rgba(255,255,255,0.95)',
-                        border: '1px solid #e0e0e0',
-                        '&:hover': {
-                            backgroundColor: 'rgba(255,255,255,1)',
-                            transform: 'scale(1.1)'
-                        }
-                    }}
-                >
-                    <CloseIcon/>
-                </IconButton>
+            {/* Sağ üst çarpı butonu */}
+            <IconButton
+                aria-label="close"
+                onClick={onClose}
+                sx={{
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    zIndex: 1,
+                    color: '#757575'
+                }}
+            >
+                <CloseIcon />
+            </IconButton>
 
-                {/* Uyarı Mesajı */}
-                <Alert
-                    severity="info"
-                    sx={{
-                        m: 0,
-                        borderRadius: 0,
-                        backgroundColor: '#e3f2fd',
-                        border: 'none',
-                        borderBottom: '1px solid #f0f0f0'
-                    }}
-                    icon={<LockIcon/>}
-                >
-                    <AlertTitle sx={{fontWeight: 'bold'}}>
-                        Paket Gerekli
-                    </AlertTitle>
-                    Bu özelliği kullanabilmek için paket satın almanız gerekmektedir.
-                </Alert>
+            <DialogTitle
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    backgroundColor: '#e3f2fd',
+                    color: '#0d47a1',
+                    pr: 4
+                }}
+            >
+                <SecurityIcon />
+                KVKK ve Kullanıcı Sözleşmesi
+            </DialogTitle>
 
-                {/* Header Section */}
+            <DialogContent sx={{ mt: 2 }}>
+                <DialogContentText sx={{ mb: 2 }}>
+                    Lütfen aşağıdaki KVKK Aydınlatma Metni ve Kullanıcı Sözleşmesini okuyup onaylayın.
+                </DialogContentText>
+
+                {/* KVKK Metni */}
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    KVKK Aydınlatma Metni
+                </Typography>
+
                 <Box
                     sx={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
-                        p: 4,
-                        textAlign: 'center',
-                        position: 'relative',
-                        overflow: 'hidden'
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        p: 2,
+                        mb: 2,
+                        maxHeight: '150px',
+                        overflowY: 'auto',
+                        bgcolor: 'rgba(249, 249, 249, 0.8)'
                     }}
                 >
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: -50,
-                            right: -50,
-                            width: 100,
-                            height: 100,
-                            borderRadius: '50%',
-                            background: 'rgba(255,255,255,0.1)',
-                        }}
-                    />
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            bottom: -30,
-                            left: -30,
-                            width: 60,
-                            height: 60,
-                            borderRadius: '50%',
-                            background: 'rgba(255,255,255,0.1)',
-                        }}
-                    />
-
-                    <RocketIcon sx={{fontSize: 48, mb: 2, opacity: 0.9}}/>
-                    <Typography variant="h5" fontWeight="bold" gutterBottom>
-                        Paket Satın Alın
-                    </Typography>
-                    <Typography variant="body1" sx={{opacity: 0.9}}>
-                        Sistemi kullanabilmek için bir paket seçmeniz gerekiyor
+                    <Typography variant="body2">
+                        Kişisel Verilerin Korunması Kanunu kapsamında sizden aldığımız bilgiler, sadece hizmetimizi sunmak ve
+                        geliştirmek amacıyla kullanılmaktadır. Hizmetlerimizi kullanmak için verdiğiniz kişisel bilgiler (adınız, soyadınız, e-posta adresiniz, telefon numaranız ve diğer iletişim bilgileri) güvenli bir şekilde saklanmakta ve
+                        izniniz olmadan üçüncü kişilerle paylaşılmamaktadır.
+                        <br/><br/>
+                        Kişisel verileriniz, size daha iyi hizmet verebilmemiz, yasal yükümlülüklerimizi yerine getirmek ve sizinle iletişimde kalmak amacıyla kullanılmaktadır.
+                        <br/><br/>
+                        6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında, kişisel verilerinizin güvenliği bizim için önemlidir. Verilerinize kimlerin erişebildiği, nasıl kullanıldığı, nasıl korunduğu ve hangi haklara sahip olduğunuz konusunda sizi bilgilendirmek isteriz.
+                        <br/><br/>
+                        Kişisel verileriniz hakkında her zaman bilgi talep edebilir, verilerinizin düzeltilmesini veya silinmesini isteyebilirsiniz.
                     </Typography>
                 </Box>
 
-                {/* Content Section */}
-                <Box sx={{p: 4, textAlign: 'center'}}>
-                    <Typography
-                        variant="h6"
-                        color="text.primary"
-                        sx={{
-                            mb: 2,
-                            fontWeight: 500
-                        }}
-                    >
-                        Devam etmek için paket seçimi yapınız
-                    </Typography>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={kvkkAccepted}
+                            onChange={(e) => setKvkkAccepted(e.target.checked)}
+                            color="primary"
+                        />
+                    }
+                    label="KVKK aydınlatma metnini okudum ve kabul ediyorum"
+                    sx={{ mb: 3 }}
+                />
 
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                            mb: 3
-                        }}
-                    >
-                        Size en uygun paketi seçebilir ve hemen kullanmaya başlayabilirsiniz.
+                {/* Kullanıcı Sözleşmesi */}
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    Kullanıcı Sözleşmesi
+                </Typography>
+
+                <Box
+                    sx={{
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        p: 2,
+                        mb: 2,
+                        maxHeight: '150px',
+                        overflowY: 'auto',
+                        bgcolor: 'rgba(249, 249, 249, 0.8)'
+                    }}
+                >
+                    <Typography variant="body2">
+                        Bu Kullanıcı Sözleşmesi, dietitian platformunu kullanırken uymanız gereken kuralları ve koşulları belirtir.
+                        <br/><br/>
+                        1. Hizmet Kullanımı: Platformumuz, diyetisyenlerin müşterileri ile etkileşimde bulunmasına olanak tanır. Platformu kötüye kullanmak, yasadışı faaliyetlerde bulunmak veya başkalarına zarar vermek için kullanamazsınız.
+                        <br/><br/>
+                        2. Hesap Güvenliği: Hesabınızın güvenliğinden siz sorumlusunuz. Güçlü bir şifre kullanın ve şifrenizi başkalarıyla paylaşmayın.
+                        <br/><br/>
+                        3. İçerik Sorumluluğu: Platformda paylaştığınız tüm içeriklerden siz sorumlusunuz. Yasa dışı, zararlı, tehditkar, taciz edici, iftira niteliğinde veya başka şekilde uygunsuz içerik paylaşmayın.
+                        <br/><br/>
+                        4. Telif Hakları: Başkalarının telif haklarını ihlal eden içerik paylaşmayın.
+                        <br/><br/>
+                        5. Servis Değişiklikleri: Hizmetimizi herhangi bir zamanda değiştirme veya sonlandırma hakkını saklı tutarız.
+                        <br/><br/>
+                        6. Hesap İptali: Kullanım koşullarını ihlal ettiğinizde hesabınızı askıya alma veya sonlandırma hakkımız vardır.
+                        <br/><br/>
+                        7. Sorumluluk Sınırlaması: Platformumuzun kullanımı sırasında oluşabilecek doğrudan, dolaylı, özel, arızi veya sonuçsal zararlardan sorumlu değiliz.
                     </Typography>
+                </Box>
+
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            color="primary"
+                        />
+                    }
+                    label="Kullanıcı sözleşmesini okudum ve kabul ediyorum"
+                    sx={{ mb: 3 }}
+                />
+
+                {/* İletişim İzinleri - Kullanıcı Sözleşmesinin altında, belirgin bir şekilde */}
+                <Box sx={{ pt: 1, pb: 1, borderTop: '1px solid #f0f0f0', mt: 1 }}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={communicationAccepted}
+                                onChange={(e) => setCommunicationAccepted(e.target.checked)}
+                                color="primary"
+                            />
+                        }
+                        label="SMS, e-posta ve bildirim almayı kabul ediyorum"
+                        sx={{ mb: 2 }}
+                    />
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{p: 3, pt: 0, gap: 2, flexDirection: 'column'}}>
-                {/* Ana CTA Button */}
-                <Button
-                    onClick={onUpgrade}
-                    variant="contained"
-                    size="large"
-                    fullWidth
-                    sx={{
-                        borderRadius: 3,
-                        textTransform: 'none',
-                        py: 1.5,
-                        fontSize: '1.1rem',
-                        fontWeight: 'bold',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        boxShadow: '0 6px 20px rgba(102,126,234,0.4)',
-                        '&:hover': {
-                            background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                            boxShadow: '0 8px 25px rgba(102,126,234,0.5)',
-                            transform: 'translateY(-2px)'
-                        }
-                    }}
-                >
-                    Paket Seç
-                </Button>
-
-                {/* İkincil Button */}
+            <DialogActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
                 <Button
                     onClick={onClose}
-                    variant="text"
+                    variant="outlined"
+                    color="error"
                     sx={{
                         borderRadius: 2,
                         textTransform: 'none',
-                        color: '#666',
-                        fontSize: '0.9rem',
-                        '&:hover': {
-                            backgroundColor: '#f5f5f5'
-                        }
+                        py: 1,
                     }}
                 >
-                    Daha sonra
+                    Vazgeç
+                </Button>
+
+                <Button
+                    onClick={allAccepted ? handleAccept : acceptAll}
+                    variant="contained"
+                    sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        py: 1,
+                        background: allAccepted ? 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)' : 'linear-gradient(135deg, #3f51b5 0%, #303f9f 100%)',
+                    }}
+                >
+                    {allAccepted ? "Kabul Et" : "Onaylayın"}
                 </Button>
             </DialogActions>
         </Dialog>
@@ -204,12 +245,16 @@ export default function Default(props) {
     const [dietitianInfo, setDietitianInfo] = useState({});
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [isContentBlocked, setIsContentBlocked] = useState(false);
+    const [showKvkkModal, setShowKvkkModal] = useState(false);
+    // İçeriğin yüklenip yüklenmediğini takip etmek için yeni state
+    const [isLoading, setIsLoading] = useState(true);
 
     const isPaymentPage = location.pathname === '/odeme';
     const isSettingsPage = location.pathname === '/ayarlar';
 
     const getDietitianInfo = async () => {
         try {
+            setIsLoading(true); // Bilgi yüklenirken loading durumu
             const token = localStorage.getItem('token');
             const response = await axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
                 headers: {
@@ -217,9 +262,29 @@ export default function Default(props) {
                     'Authorization': token || ''
                 }
             });
+
             if (response.data) {
                 setDietitianInfo(response.data);
 
+                const kvkkNotApproved = response.data.hasOwnProperty('kvkkApproval') && response.data.kvkkApproval === false;
+                const sozlesmeNotApproved = response.data.hasOwnProperty('kullaniciSozlesmesiApproval') && response.data.kullaniciSozlesmesiApproval === false;
+
+                if (kvkkNotApproved || sozlesmeNotApproved) {
+                    setShowKvkkModal(true);
+                } else {
+                    setShowKvkkModal(false);
+                }
+
+                const isFree = response.data.subscription_type === "free";
+                if (isFree && !isPaymentPage && !isSettingsPage) {
+                    setIsContentBlocked(true);
+                } else {
+                    setIsContentBlocked(false);
+                }
+
+                setShowSubscriptionModal(false);
+
+                // Abonelik süresi kontrolü
                 if (response.data.subscription_end_date) {
                     const endDate = new Date(response.data.subscription_end_date);
                     const currentDate = new Date();
@@ -242,28 +307,30 @@ export default function Default(props) {
 
                         if (updatedResponse.data) {
                             setDietitianInfo(updatedResponse.data);
+
+                            const isStillFree = updatedResponse.data.subscription_type === "free";
+                            if (isStillFree && !isPaymentPage && !isSettingsPage) {
+                                setIsContentBlocked(true);
+                            } else {
+                                setIsContentBlocked(false);
+                            }
                         }
                     }
                 }
             }
+            setIsLoading(false); // Yükleme tamamlandı
         } catch (error) {
             console.error('Diyetisyen bilgisi alınamadı.', error);
+            if (error.response?.data?.message === "jwt expired") {
+                navigate('/girisyap');
+            }
+            setIsLoading(false); // Hata olsa bile yükleme durumunu sonlandır
         }
     };
 
     useEffect(() => {
         getDietitianInfo();
     }, []);
-
-    useEffect(() => {
-        if (dietitianInfo.subscription_type === "free" && !isPaymentPage && !isSettingsPage) {
-            setIsContentBlocked(true);
-            setShowSubscriptionModal(true);
-        } else {
-            setIsContentBlocked(false);
-            setShowSubscriptionModal(false);
-        }
-    }, [dietitianInfo, isPaymentPage, isSettingsPage]);
 
     const handleUpgrade = () => {
         setShowSubscriptionModal(false);
@@ -274,69 +341,125 @@ export default function Default(props) {
         setShowSubscriptionModal(false);
     };
 
+    const handleKvkkApprove = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`${config[config.environment].apiUrl}/dietitian/updateApprovalSettings`,
+                {
+                    kvkkApproval: true,
+                    kullaniciSozlesmesiApproval: true,
+                    SMSApproval: true,
+                    MailApproval: true,
+                    NotificationApproval: true
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token || ''
+                    }
+                }
+            );
+
+            setShowKvkkModal(false);
+
+            const updatedResponse = await axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token || ''
+                }
+            });
+
+            if (updatedResponse.data) {
+                setDietitianInfo(updatedResponse.data);
+
+                // Onay sonrası içerik bloklanma durumunu güncelle
+                const isFree = updatedResponse.data.subscription_type === "free";
+                if (isFree && !isPaymentPage && !isSettingsPage) {
+                    setIsContentBlocked(true);
+                } else {
+                    setIsContentBlocked(false);
+                }
+            }
+        } catch (error) {
+            console.error('KVKK onayı güncellenemedi:', error);
+        }
+    };
+
+    // Eğer yükleme devam ediyorsa, yükleme göster
+    if (isLoading) {
+        return (
+            <>
+                <Header/>
+                <Navbar/>
+                <Box
+                    sx={{
+                        p: 3,
+                        minHeight: 'calc(100vh - 64px - 56px)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}
+                >
+                    {/* Basit bir yükleniyor göstergesi */}
+                    <Typography variant="h6" color="text.secondary">
+                        Yükleniyor...
+                    </Typography>
+                </Box>
+                <Footer/>
+            </>
+        );
+    }
+
     return (
         <>
             <Header/>
             <Navbar/>
-            <Box
-                sx={{
-                    flex: 1,
-                    height: 'calc(100vh - 120px)',
-                    overflowY: 'auto',
-                    overflowX: 'auto',
-                    padding: '1rem',
-                    mt: {xs: '3rem', sm: '2rem'},
-                    pb: '60px',
-                    position: 'relative'
-                }}
-            >
-                {/* İçerik Blokaj Overlay - sadece ödeme sayfası değilse göster */}
-                {isContentBlocked && !isPaymentPage && !isSettingsPage ? (
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            backdropFilter: 'blur(3px)',
-                            zIndex: 999,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column',
-                            gap: 3
-                        }}
-                    >
-                        <LockIcon sx={{fontSize: 64, color: '#ccc'}}/>
-                        <Typography variant="h5" color="text.secondary" textAlign="center">
-                            Bu içeriği görüntülemek için<br/>
-                            paket satın almanız gerekiyor
+
+            {/* Ana içerik alanı */}
+            <Box sx={{ p: 3, bgcolor: isContentBlocked ? '#f9f9f9' : 'inherit', minHeight: 'calc(100vh - 64px - 56px)' }}>
+                {isContentBlocked ? (
+                    <Box sx={{ textAlign: 'center', py: 5 }}>
+                        <Typography variant="h6" gutterBottom>
+                            İçerik Erişimi Engellendi
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                            Bu içeriği görüntülemek için lütfen bir paket satın alın.
                         </Typography>
                         <Button
                             variant="contained"
-                            onClick={() => setShowSubscriptionModal(true)}
+                            size="large"
+                            onClick={() => navigate('/odeme')}
                             sx={{
                                 borderRadius: 3,
-                                px: 4,
                                 py: 1.5,
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                px: 3,
+                                textTransform: 'none',
+                                fontSize: '1rem',
+                                fontWeight: 'medium',
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                boxShadow: '0 6px 20px rgba(102,126,234,0.4)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                                    boxShadow: '0 8px 25px rgba(102,126,234,0.5)',
+                                    transform: 'translateY(-2px)'
+                                }
                             }}
                         >
-                            Paket Seç
+                            Paket Satın Al
                         </Button>
                     </Box>
                 ) : (
                     props.children
                 )}
             </Box>
+
             <Footer/>
 
-            <SubscriptionInfoModal
-                open={showSubscriptionModal && !isPaymentPage}
-                onClose={handleCloseModal}
-                onUpgrade={handleUpgrade}
+            {/* KVKK onayı modalı */}
+            <KvkkApprovalModal
+                open={showKvkkModal}
+                onClose={() => setShowKvkkModal(false)}
+                onApprove={handleKvkkApprove}
             />
         </>
     );

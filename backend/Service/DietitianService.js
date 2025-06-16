@@ -63,30 +63,30 @@ class DietitianService {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
-            const verificationCode = Math.floor(100000 + Math.random() * 900000);
-            const verificationCodeExpires = moment().add(10, 'minutes').toDate();
-
-            const emailSent = await mailer.sendMail(
-                email,
-                'Diyetia Doğrulama Kodu',
-                `Onay kodunuz: ${verificationCode}`,
-                getDogrulamaEmailTemplate(verificationCode)
-            );
-
-            if (!emailSent) {
-                throw new Exception('Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyiniz.', 500);
-            }
+            // const verificationCode = Math.floor(100000 + Math.random() * 900000);
+            // const verificationCodeExpires = moment().add(10, 'minutes').toDate();
+            //
+            // const emailSent = await mailer.sendMail(
+            //     email,
+            //     'Diyetia Doğrulama Kodu',
+            //     `Onay kodunuz: ${verificationCode}`,
+            //     getDogrulamaEmailTemplate(verificationCode)
+            // );
+            //
+            // if (!emailSent) {
+            //     throw new Exception('Doğrulama kodu gönderilemedi. Lütfen daha sonra tekrar deneyiniz.', 500);
+            // }
 
             const dietitian = await Dietitian.create({
                 name,
                 phoneNumber,
                 email,
                 password,
-                role: 'DIETITIAN',
-                ipAddress,
-                verificationCode,
-                verificationCodeExpires,
+                role: DIETITIAN,
+                ipAddress
             });
+            //                verificationCode,
+            //                 verificationCodeExpires,
 
             const token = jwt.sign(
                 {
@@ -282,6 +282,7 @@ class DietitianService {
                 email: email,
                 password: password,
                 phoneNumber: phoneNumber,
+                status: 'Aktif',
                 role: CLIENT,
                 token: token
             })
@@ -626,6 +627,35 @@ class DietitianService {
             return client;
         } catch (error) {
             throw new Exception(error.message, 400);
+        }
+    }
+
+    static async updateApprovalSettings(dietitian_id, approvalSettings) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findByPk(dietitian_id);
+
+            if (!dietitian) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            await dietitian.update({
+                kvkkApproval: approvalSettings.kvkkApproval,
+                kullaniciSozlesmesiApproval: approvalSettings.kullaniciSozlesmesiApproval,
+                SMSApproval: approvalSettings.SMSApproval,
+                MailApproval: approvalSettings.MailApproval,
+                NotificationApproval: approvalSettings.NotificationApproval
+            });
+
+            return {
+                showOnScreen: true,
+                message: "Onay ayarları başarıyla güncellendi."
+            };
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
         }
     }
 

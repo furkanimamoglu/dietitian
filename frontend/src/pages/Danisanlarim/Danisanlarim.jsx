@@ -161,6 +161,16 @@ function QuickSearchToolbar() {
     return (
         <GridToolbarContainer sx={{justifyContent: "space-between", ml: "1rem", py: 1}}>
             <GridToolbarQuickFilter placeholder="Danışan Ara"/>
+            <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => document.dispatchEvent(new CustomEvent('deleteInactiveClients'))}
+                size="small"
+                sx={{ mr: 2 }}
+            >
+                Pasif Danışanları Temizle
+            </Button>
         </GridToolbarContainer>
     );
 }
@@ -177,7 +187,8 @@ export default function Danisanlarim() {
     const [qrData, setQrData] = useState("");
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [pendingEdit, setPendingEdit] = useState(null);
-    const [activeFilter, setActiveFilter] = useState(null); // 'all', 'active', 'inactive', 'female', 'male', 'other'
+    const [activeFilter, setActiveFilter] = useState(null);
+    const [deleteInactiveDialogOpen, setDeleteInactiveDialogOpen] = useState(false);
 
     // CSV Import states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -245,7 +256,26 @@ export default function Danisanlarim() {
                 setClients(res.data);
             })
             .catch((err) => console.error("Error fetching clients:", err));
-    }, []);
+
+        // İnaktif hesapları silme olayı için dinleyici
+        const handleDeleteInactive = () => {
+            if (clients.filter(c => c.status === "Pasif").length === 0) {
+                setSnackbar({
+                    open: true,
+                    message: "Silinecek inaktif danışan bulunmamaktadır",
+                    severity: "info"
+                });
+                return;
+            }
+            setDeleteInactiveDialogOpen(true);
+        };
+
+        document.addEventListener('deleteInactiveClients', handleDeleteInactive);
+
+        return () => {
+            document.removeEventListener('deleteInactiveClients', handleDeleteInactive);
+        };
+    }, [clients]);
 
     const handleRowUpdate = useCallback(async (updatedRow, originalRow) => {
         // Değişiklikleri karşılaştır
@@ -374,7 +404,6 @@ export default function Danisanlarim() {
 
     const handleChangeStatus = async (client) => {
         try {
-            // Mevcut durumun tersini ayarla
             const newStatus = client.status === "Aktif" ? "Pasif" : "Aktif";
 
             await axios.post(
@@ -386,7 +415,6 @@ export default function Danisanlarim() {
                 {headers: {Authorization: localStorage.getItem("token")}}
             );
 
-            // Yerel veriyi güncelle
             setClients(prev => prev.map(c =>
                 c.id === client.id ? {...c, status: newStatus} : c
             ));
@@ -453,10 +481,6 @@ export default function Danisanlarim() {
         }
     };
 
-    const togglePdfPreview = () => {
-        setShowPdfPreview(!showPdfPreview);
-    };
-
     const closeQrDialog = () => {
         setQrDialogOpen(false);
         setShowPdfPreview(false);
@@ -474,28 +498,24 @@ export default function Danisanlarim() {
     const validateForm = () => {
         const errors = {};
 
-        // İsim validasyonu
         if (!newClient.name || newClient.name.trim() === "") {
             errors.name = "Adı Soyadı zorunludur";
         } else if (newClient.name.trim().length < 2) {
             errors.name = "Adı Soyadı en az 2 karakter olmalıdır";
         }
 
-        // Telefon validasyonu
         if (!newClient.phoneNumber || newClient.phoneNumber.trim() === "") {
             errors.phoneNumber = "Telefon numarası zorunludur";
         } else if (!/^[0-9]{10}$/.test(newClient.phoneNumber)) {
             errors.phoneNumber = "Geçerli bir telefon numarası giriniz (10 rakam)";
         }
 
-        // Şifre validasyonu
         if (!newClient.password || newClient.password.trim() === "") {
             errors.password = "Şifre zorunludur";
         } else if (newClient.password.length < 6) {
             errors.password = "Şifre en az 6 karakter olmalıdır";
         }
 
-        // Email validasyonu (opsiyonel ama girilmişse geçerli olmalı)
         if (newClient.email && newClient.email.trim() !== "") {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(newClient.email)) {
@@ -503,7 +523,6 @@ export default function Danisanlarim() {
             }
         }
 
-        // Cinsiyet validasyonu
         if (!newClient.gender || newClient.gender === "") {
             errors.gender = "Cinsiyet seçimi zorunludur";
         }
@@ -516,7 +535,6 @@ export default function Danisanlarim() {
         const {name, value} = e.target;
         setNewClient(prev => ({...prev, [name]: value}));
 
-        // Kullanıcı yazmaya başladığında o alanın hatasını temizle
         if (formErrors[name]) {
             setFormErrors(prev => ({...prev, [name]: ""}));
         }
@@ -540,9 +558,7 @@ export default function Danisanlarim() {
     const handleCreateSubmit = async (e) => {
         e.preventDefault();
 
-        // Validasyonu çalıştır
         if (!validateForm()) {
-            // İlk hatalı alana odaklan
             const firstErrorField = Object.keys(formErrors)[0];
             if (firstErrorField) {
                 const element = document.querySelector(`[name="${firstErrorField}"]`);
@@ -586,7 +602,6 @@ export default function Danisanlarim() {
         } catch (error) {
             console.error("Danışan eklenirken hata oluştu:", error);
 
-            // Server tarafından gelen hataları göster
             let errorMessage = "Danışan eklenirken bir hata oluştu";
 
             if (error.response?.data?.message) {
@@ -618,7 +633,10 @@ export default function Danisanlarim() {
             headerName: "Durum",
             width: 90,
             type: "singleSelect",
-            valueOptions: ["Aktif", "Pasif"],
+            valueOptions: [
+                { value: "Aktif", label: "Aktif" },
+                { value: "Pasif", label: "Pasif" }
+            ],
             editable: false,
             renderCell: (params) => {
                 if (params.row.status === "Aktif") {
@@ -1951,6 +1969,52 @@ export default function Danisanlarim() {
                         {snackbar.message}
                     </Alert>
                 </Snackbar>
+
+                {/* Delete Inactive Confirmation Dialog */}
+                <Dialog open={deleteInactiveDialogOpen} onClose={() => setDeleteInactiveDialogOpen(false)}>
+                    <DialogTitle>İnaktif Danışanları Sil</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            Tüm inaktif danışanları silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setDeleteInactiveDialogOpen(false)} variant="outlined" color="secondary">
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    // İnaktif danışanları filtrele
+                                    const inactiveClients = clients.filter(c => c.status === "Pasif");
+
+                                    // Her bir inaktif danışanı sırayla sil
+                                    for (const client of inactiveClients) {
+                                        await handleDelete(client.id);
+                                    }
+
+                                    setSnackbar({
+                                        open: true,
+                                        message: "Tüm pasif danışanlar başarıyla temizlendi.",
+                                        severity: "success"
+                                    });
+                                } catch (error) {
+                                    console.error("Pasif danışanlar temizlenirken hata oluştu:", error);
+                                    setSnackbar({
+                                        open: true,
+                                        message: "Pasif danışanlar temizlenirken bir hata oluştu",
+                                        severity: "error"
+                                    });
+                                } finally {
+                                    setDeleteInactiveDialogOpen(false);
+                                }
+                            }}
+                            variant="contained" color="error"
+                        >
+                            Sil
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Stack>
         </Default>
     );
