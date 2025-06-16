@@ -53,31 +53,12 @@ const AnaSayfa = ({navigation}: Props) => {
                 fetchClientInfo(),
                 fetchMeasurementInfo(),
                 fetchAppointmentInfo(),
-                fetchWaterIntake(),
-                checkKVKKStatus()
+                fetchWaterIntake()
             ]);
         } catch (error) {
             console.error('Yenileme hatası:', error);
         } finally {
             setRefreshing(false);
-        }
-    };
-
-    const checkKVKKStatus = async () => {
-        try {
-            const response = await fetch(`${config[config.environment].apiUrl}/client/getMyKVKKStatus`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': await AsyncStorage.getItem('token') || ''
-                }
-            });
-            const data = await response.json();
-            if (response.ok && data.kvkkApproval === false) {
-                setShowKVKKModal(true);
-            }
-        } catch (error) {
-            console.error('KVKK status kontrol hatası:', error);
         }
     };
 
@@ -90,21 +71,45 @@ const AnaSayfa = ({navigation}: Props) => {
         }
 
         try {
-            const response = await fetch(`${config[config.environment].apiUrl}/client/approveKVKK`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/client/updateApprovalSettings`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': await AsyncStorage.getItem('token') || ''
-                }
+                },
+                body: JSON.stringify({
+                    kvkkApproval: true,
+                    kullaniciSozlesmesiApproval: true,
+                    SMSApproval: acceptedNotifications,
+                    MailApproval: acceptedNotifications,
+                    NotificationApproval: acceptedNotifications
+                })
             });
-            const data = await response.json();
+
             if (response.ok) {
                 setShowKVKKModal(false);
             } else {
-                console.log('KVKK onayı hatası:', data.message);
+                let errorMsg = 'Onay bilgileri güncellenirken bir hata oluştu.';
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        errorMsg = data.message || errorMsg;
+                    } else {
+                        // JSON olmayan yanıt için
+                        const text = await response.text();
+                        console.log('Sunucu yanıtı (JSON değil):', text);
+                    }
+                } catch (parseError) {
+                    console.log('Yanıt çözümleme hatası:', parseError);
+                }
+
+                console.log('Onay güncelleme hatası:', errorMsg);
+                Alert.alert('Hata', errorMsg);
             }
         } catch (error) {
-            console.error('KVKK onayı hatası:', error);
+            console.error('Onay güncelleme hatası:', error);
+            Alert.alert('Hata', 'Bir bağlantı hatası oluştu. Lütfen internet bağlantınızı kontrol ediniz.');
         }
     };
 
@@ -134,6 +139,16 @@ const AnaSayfa = ({navigation}: Props) => {
                 setUserName(data.name || 'Bilinmiyor');
                 if (data.dailyWaterIntake && typeof data.dailyWaterIntake === 'number') {
                     setDailyWaterGoal(data.dailyWaterIntake);
+                }
+
+                // KVKK ve kullanıcı sözleşmesi durumunu kontrol et
+                if (!data.kvkkApproval || !data.kullaniciSozlesmesiApproval) {
+                    setShowKVKKModal(true);
+                    setAcceptedUserAgreement(!!data.kullaniciSozlesmesiApproval);
+                    setAcceptedKVKK(!!data.kvkkApproval);
+                    setAcceptedNotifications(!!(data.SMSApproval && data.MailApproval && data.NotificationApproval));
+                } else {
+                    setShowKVKKModal(false);
                 }
             } else {
                 console.log('Kullanıcı bilgisi alınamadı:', data.message);
@@ -300,7 +315,6 @@ const AnaSayfa = ({navigation}: Props) => {
         fetchMeasurementInfo();
         fetchClientInfo();
         fetchWaterIntake();
-        checkKVKKStatus();
     }, []);
 
     const todayDate = new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'});

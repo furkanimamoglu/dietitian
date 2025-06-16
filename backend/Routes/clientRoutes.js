@@ -14,8 +14,9 @@ router.get('/getClientInfo', clientController.getClientInfo);
 router.get('/getMyNotifications', clientController.getMyNotifications);
 router.get('/readMyAllNotifications', clientController.readMyAllNotifications);
 
-router.get('/getMyKVKKStatus', clientController.getMyKVKKStatus);
 router.put('/approveKVKK', clientController.approveKVKK);
+
+router.put('/updateApprovalSettings', clientController.updateApprovalSettings);
 
 router.get('/getTodayMealPlan', clientController.getTodayMealPlan);
 router.get('/getMyRecipes', clientController.getMyRecipes);

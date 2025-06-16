@@ -239,7 +239,7 @@ class ClientController {
         }
     }
 
-    static async getMyKVKKStatus(req, res) {
+    static async getMyApprovalStatus(req, res) {
         try {
             const token = req.headers.authorization;
             const client_id = Security.getUserIdFromToken(token);
@@ -252,7 +252,7 @@ class ClientController {
                 });
             }
 
-            const result = await ClientService.getMyKVKKStatus(client_id);
+            const result = await ClientService.getMyApprovalStatus(client_id);
 
             return res.status(200).json(result);
         } catch (error) {
@@ -334,6 +334,54 @@ class ClientController {
                 showOnScreen: error.showOnScreen,
                 message: error.message
             })
+        }
+    }
+
+    static async updateApprovalSettings(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {
+                kvkkApproval,
+                kullaniciSozlesmesiApproval,
+                SMSApproval,
+                MailApproval,
+                NotificationApproval
+            } = req.body;
+
+            if (!kvkkApproval || !kullaniciSozlesmesiApproval || !SMSApproval || !MailApproval || !NotificationApproval)
+            {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm onay parametreleri sağlanmalıdır.'
+                });
+            }
+
+            const approvalSettings = {
+                kvkkApproval,
+                kullaniciSozlesmesiApproval,
+                SMSApproval,
+                MailApproval,
+                NotificationApproval
+            };
+
+            const result = await ClientService.updateApprovalSettings(client_id, approvalSettings);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen || true,
+                message: err.message || "Onay ayarları güncellenirken bir hata oluştu."
+            });
         }
     }
 

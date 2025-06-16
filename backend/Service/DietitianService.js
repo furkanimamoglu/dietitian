@@ -630,6 +630,35 @@ class DietitianService {
         }
     }
 
+    static async updateApprovalSettings(dietitian_id, approvalSettings) {
+        try {
+            if (!dietitian_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const dietitian = await Dietitian.findByPk(dietitian_id);
+
+            if (!dietitian) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            await dietitian.update({
+                kvkkApproval: approvalSettings.kvkkApproval,
+                kullaniciSozlesmesiApproval: approvalSettings.kullaniciSozlesmesiApproval,
+                SMSApproval: approvalSettings.SMSApproval,
+                MailApproval: approvalSettings.MailApproval,
+                NotificationApproval: approvalSettings.NotificationApproval
+            });
+
+            return {
+                showOnScreen: true,
+                message: "Onay ayarları başarıyla güncellendi."
+            };
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
+        }
+    }
+
 }
 
 module.exports = DietitianService;
