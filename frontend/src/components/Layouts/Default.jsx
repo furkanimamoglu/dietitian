@@ -416,7 +416,7 @@ export default function Default(props) {
             <Navbar/>
 
             {/* Ana içerik alanı */}
-            <Box sx={{ p: 3, bgcolor: isContentBlocked ? '#f9f9f9' : 'inherit', minHeight: 'calc(100vh - 64px - 56px)' }}>
+            <Box sx={{ p: 3, mt: 3, bgcolor: isContentBlocked ? '#f9f9f9' : 'inherit', minHeight: 'calc(100vh - 64px - 56px)' }}>
                 {isContentBlocked ? (
                     <Box sx={{ textAlign: 'center', py: 5 }}>
                         <Typography variant="h6" gutterBottom>
