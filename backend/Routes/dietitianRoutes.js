@@ -26,6 +26,8 @@ router.get('/getMyActiveClientCount', dietitianController.getMyActiveClientCount
 
 router.post('/changeDietitianSubscriptionToFree', dietitianController.changeDietitianSubscriptionToFree);
 
+router.put('/updateApprovalSettings', dietitianController.updateApprovalSettings);
+
 router.post('/updateClientWaterLimit', dietitianController.updateClientWaterLimit);
 
 router.get('/globalSearchbar', dietitianController.globalSearchbar);
