@@ -344,7 +344,7 @@ export default function Default(props) {
     const handleKvkkApprove = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${config[config.environment].apiUrl}/dietitian/updateApprovalSettings`,
+            await axios.put(`${config[config.environment].apiUrl}/dietitian/updateApprovalSettings`,
                 {
                     kvkkApproval: true,
                     kullaniciSozlesmesiApproval: true,
