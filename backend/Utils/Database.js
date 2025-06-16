@@ -9,8 +9,7 @@ const sequelize = new Sequelize(
     {
         host: config.database_connection.host,
         logging: config.database_options.logging,
-        dialect: "postgres",
-        timezone: '+03:00'
+        dialect: "postgres"
     }
 );
 

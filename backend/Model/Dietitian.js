@@ -45,6 +45,31 @@ const Dietitian = sequelize.define('Dietitian', {
             }
         }
     },
+    subscription_type: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: "free"
+    },
+    subscription_start_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+        validate: {
+            isDate: {
+                msg: 'Abonelik başlangıç tarihi geçerli bir tarih olmalıdır.'
+            }
+        }
+    },
+    subscription_end_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+        validate: {
+            isDate: {
+                msg: 'Abonelik bitiş tarihi geçerli bir tarih olmalıdır.'
+            }
+        }
+    },
     verificationCode: {
         type: DataTypes.BIGINT,
         allowNull: true
@@ -84,31 +109,6 @@ const Dietitian = sequelize.define('Dietitian', {
     status: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
-    },
-    subscription_type: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: "free"
-    },
-    subscription_start_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: null,
-        validate: {
-            isDate: {
-                msg: 'Abonelik başlangıç tarihi geçerli bir tarih olmalıdır.'
-            }
-        }
-    },
-    subscription_end_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: null,
-        validate: {
-            isDate: {
-                msg: 'Abonelik bitiş tarihi geçerli bir tarih olmalıdır.'
-            }
-        }
     },
     gender: {
         type: DataTypes.STRING
