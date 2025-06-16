@@ -13,7 +13,7 @@ class AppointmentService {
                 throw new Exception("Yetkisiz Erişim.", 401);
             }
 
-            return await Appointment.findAll({
+            const appointments = await Appointment.findAll({
                 where: {dietitian_id: user_id},
                 include: [
                     {
@@ -22,6 +22,12 @@ class AppointmentService {
                     },
                 ],
             });
+
+            return appointments.map(appointment => ({
+                ...appointment.dataValues,
+                start: moment(appointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+                end: moment(appointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+            }));
         } catch (error) {
             throw new Exception(error.message, error.status || 500);
         }
@@ -47,12 +53,18 @@ class AppointmentService {
             throw new Exception("Bu danışan size ait değil veya bulunamadı.", 403, true);
         }
 
-        return await Appointment.findAll({
+        const appointments = await Appointment.findAll({
             where: {
                 client_id: client_id
             },
             order: [['start', 'DESC']]
         });
+
+        return appointments.map(appointment => ({
+            ...appointment.dataValues,
+            start: moment(appointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+            end: moment(appointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+        }));
     }
 
 
@@ -79,11 +91,7 @@ class AppointmentService {
                 client_id,
             });
 
-            return {
-                ...appointment.dataValues,
-                start: moment(appointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
-                end: moment(appointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
-            };
+            return appointment;
         } catch (error) {
             throw new Exception(error.message || "Randevu oluşturulurken bir hata meydana geldi.");
         }
@@ -111,7 +119,11 @@ class AppointmentService {
                 status,
             });
 
-            return existingAppointment;
+            return {
+                ...existingAppointment.dataValues,
+                start: moment(existingAppointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+                end: moment(existingAppointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+            };
         } catch (error) {
             throw new Exception(error.message || "Randevu güncellenirken bir hata meydana geldi.");
         }
@@ -132,7 +144,12 @@ class AppointmentService {
                 throw new Exception("Şu anda herhangi bir randevu bulunmamaktadır.");
             }
 
-            return appointments;
+            // Türkiye saati (GMT+3) formatında başlangıç ve bitiş zamanlarını formatla
+            return appointments.map(appointment => ({
+                ...appointment.dataValues,
+                start: moment(appointment.start).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+                end: moment(appointment.end).tz("Europe/Istanbul").format("YYYY-MM-DDTHH:mm"),
+            }));
         } catch (error) {
             throw new Exception(error.message, error.status || 500);
         }

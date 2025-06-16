@@ -74,6 +74,7 @@ class ClientService {
                 phoneNumber: phoneNumber,
                 password: password,
                 role: CLIENT,
+                status: 'Pasif',
                 ipAddress: ipAddress
             });
 
@@ -285,11 +286,11 @@ class ClientService {
         return assignment;
     }
 
-    static async getMyKVKKStatus(client_id) {
+    static async getMyApprovalStatus(client_id) {
         try {
             const client = await Client.findOne({
                 where: {id: client_id},
-                attributes: ['kvkkApproval']
+                attributes: ['kvkkApproval', 'kullaniciSozlesmesiApproval', 'SMSApproval', 'MailApproval', 'NotificationApproval']
             });
 
             if (!client) {
@@ -297,14 +298,46 @@ class ClientService {
             }
 
             return {
-                kvkkApproval: client.kvkkApproval
+                kvkkApproval: client.kvkkApproval,
+                kullaniciSozlesmesiApproval: client.kullaniciSozlesmesiApproval,
+                SMSApproval: client.SMSApproval,
+                MailApproval: client.MailApproval,
+                NotificationApproval: client.NotificationApproval
             };
         } catch (error) {
-            console.error("KVKK durumu alınırken hata:", error.message);
-            return false;
+            console.error("Onay durumları alınırken hata:", error.message);
+            throw new Exception(error.message, 400);
         }
     }
 
+    static async updateApprovalSettings(client_id, approvalSettings) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz erişim.", 401);
+            }
+
+            const client = await Client.findByPk(client_id);
+
+            if (!client) {
+                throw new Exception("Diyetisyen bulunamadı.", 404, true);
+            }
+
+            await client.update({
+                kvkkApproval: approvalSettings.kvkkApproval,
+                kullaniciSozlesmesiApproval: approvalSettings.kullaniciSozlesmesiApproval,
+                SMSApproval: approvalSettings.SMSApproval,
+                MailApproval: approvalSettings.MailApproval,
+                NotificationApproval: approvalSettings.NotificationApproval
+            });
+
+            return {
+                showOnScreen: true,
+                message: "Onay ayarları başarıyla güncellendi."
+            };
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400, error.showOnScreen || true);
+        }
+    }
 
     static async approveKVKK(client_id) {
         try {

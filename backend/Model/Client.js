@@ -119,6 +119,46 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
+        kullaniciSozlesmesiApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            validate: {
+                notNull: {
+                    msg: 'Kullanıcı onayı alanı boş bırakılamaz.'
+                }
+            }
+        },
+        SMSApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            validate: {
+                notNull: {
+                    msg: 'SMS onayı alanı boş bırakılamaz.'
+                }
+            }
+        },
+        MailApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            validate: {
+                notNull: {
+                    msg: 'Mail onayı alanı boş bırakılamaz.'
+                }
+            }
+        },
+        NotificationApproval: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+            validate: {
+                notNull: {
+                    msg: 'Bildirim onayı alanı boş bırakılamaz.'
+                }
+            }
+        },
         dailyWaterIntake: {
             type: DataTypes.INTEGER,
             allowNull: true,

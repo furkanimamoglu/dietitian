@@ -154,10 +154,13 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
 
     const busySlots = useMemo(() => {
         return appointments.map(app => {
-            const utcDate = new Date(app.start);
+            const date = new Date(app.start);
+            // Artık servis tarafından dönüştürülen tarihi doğrudan kullanabiliriz
+            // çünkü zaten Europe/Istanbul zaman diliminde formatlanmış durumda
+            const startParts = app.start.split('T');
             return {
-                date: utcDate.toISOString().split('T')[0],
-                time: utcDate.toISOString().split('T')[1].substring(0, 5)
+                date: startParts[0],
+                time: startParts[1].substring(0, 5)
             };
         });
     }, [appointments]);
@@ -185,11 +188,13 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
 
                 const [hour, minute] = selectedTime.split(':').map(Number);
 
-                const year = selectedDate.getUTCFullYear();
-                const month = selectedDate.getUTCMonth(); // 0 tabanlı
-                const day = selectedDate.getUTCDate();
+                // UTC yerine yerel zaman dilimini kullan
+                const year = selectedDate.getFullYear();
+                const month = selectedDate.getMonth(); // 0 tabanlı
+                const day = selectedDate.getDate();
 
-                const startDateTime = new Date(Date.UTC(year, month, day, hour, minute));
+                // Yerel zaman diliminde tarih oluştur
+                const startDateTime = new Date(year, month, day, hour, minute);
                 const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
                 const response = await fetch(`${config[config.environment].apiUrl}/appointment/addAppointmentAsClient`, {
@@ -257,7 +262,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
-            timeZone: 'UTC'
+            timeZone: 'Europe/Istanbul'
         });
     }, []);
 
@@ -671,3 +676,4 @@ const styles = StyleSheet.create({
 });
 
 export default RandevuScreen;
+

@@ -656,6 +656,54 @@ class DietitianController {
         }
     }
 
+    static async updateApprovalSettings(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {
+                kvkkApproval,
+                kullaniciSozlesmesiApproval,
+                SMSApproval,
+                MailApproval,
+                NotificationApproval
+            } = req.body;
+
+            if (!kvkkApproval || !kullaniciSozlesmesiApproval || !SMSApproval || !MailApproval || !NotificationApproval)
+            {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Tüm onay parametreleri sağlanmalıdır.'
+                });
+            }
+
+            const approvalSettings = {
+                kvkkApproval,
+                kullaniciSozlesmesiApproval,
+                SMSApproval,
+                MailApproval,
+                NotificationApproval
+            };
+
+            const result = await DietitianService.updateApprovalSettings(dietitian_id, approvalSettings);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(err.status || 500).json({
+                showOnScreen: err.showOnScreen || true,
+                message: err.message || "Onay ayarları güncellenirken bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = DietitianController;

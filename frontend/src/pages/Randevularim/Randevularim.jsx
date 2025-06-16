@@ -169,19 +169,22 @@ export default function Randevularim() {
         if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
-            const startDate = new Date(arg.dateStr);
+            // Doğrudan date nesnesini kullan ve timezone'u koru
+            const startDate = new Date(arg.date);
             const endDate = new Date(startDate);
-
             endDate.setMinutes(endDate.getMinutes() + 15);
+
+            console.log("Tıklanan saat (yerel):", startDate.toLocaleTimeString());
 
             setEventData((prev) => ({
                 ...prev,
                 title: "",
-                start: startDate.toISOString().slice(0, 16),
-                end: endDate.toISOString().slice(0, 16),
+                start: startDate,
+                end: endDate,
                 client_id: "",
                 status: "pending",
             }));
+
             // Validasyon durumlarını sıfırla
             setValidationErrors({
                 title: false,
@@ -192,10 +195,7 @@ export default function Randevularim() {
             setShowValidation(false);
 
             // Randevu çakışma kontrolü yap
-            checkAppointmentConflicts(
-                startDate.toISOString().slice(0, 16),
-                endDate.toISOString().slice(0, 16)
-            );
+            checkAppointmentConflicts(startDate, endDate);
 
             setRandevuEklePopup(true);
         }
@@ -209,11 +209,12 @@ export default function Randevularim() {
             extendedProps: event.extendedProps
         });
 
+        // Date nesnelerini doğrudan kullan
         setEventData({
             id: event.id,
             title: event.title,
-            start: event.start.toISOString().slice(0, 16),
-            end: event.end?.toISOString().slice(0, 16) || "",
+            start: event.start,
+            end: event.end || null,
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
@@ -476,6 +477,7 @@ export default function Randevularim() {
     };
 
     const handleEventChange = (key, value) => {
+        // Date nesnesi olarak sakla, string formatına dönüştürme
         setEventData((prev) => ({
             ...prev,
             [key]: value,
@@ -547,7 +549,7 @@ export default function Randevularim() {
                         ref={calendarRef}
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
-                        timeZone={'UTC'}
+                        timeZone={'local'}
                         themeSystem={'bootstrap5'}
                         events={randevular}
                         editable={true}
@@ -621,11 +623,10 @@ export default function Randevularim() {
                             const client = clients.find(c => String(c.id) === String(clientId));
                             const clientName = client ? client.name : "";
 
-                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString(undefined, {
+                            const startTime = arg.event.start ? new Date(arg.event.start).toLocaleTimeString('tr-TR', {
                                 hour: '2-digit',
                                 minute: '2-digit',
-                                hour12: false,
-                                timeZone: 'UTC'
+                                hour12: false
                             }) : '';
 
                             return (
@@ -806,7 +807,7 @@ export default function Randevularim() {
                         >
                             <MenuItem value="approved">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
-                            <MenuItem value="denied">Reddedildi</MenuItem>
+                            <MenuItem value="cancelled">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
 
@@ -946,7 +947,7 @@ export default function Randevularim() {
                         >
                             <MenuItem value="approved">Onaylandı</MenuItem>
                             <MenuItem value="pending">Beklemede</MenuItem>
-                            <MenuItem value="denied">Reddedildi</MenuItem>
+                            <MenuItem value="cancelled">Reddedildi</MenuItem>
                         </Select>
                     </FormControl>
 
