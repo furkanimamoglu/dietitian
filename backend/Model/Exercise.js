@@ -73,6 +73,11 @@ const Exercise = sequelize.define('Exercise', {
             allowNull: true,
             defaultValue: null
         },
+        video: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: null
+        },
         duration: {
             type: DataTypes.INTEGER,
             allowNull: true,

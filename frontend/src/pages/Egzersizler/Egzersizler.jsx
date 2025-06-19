@@ -197,7 +197,6 @@ export default function Egzersizler() {
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
 
-    // Kalori ve zorluk filtreleri için state değişkenleri
     const [calorieFilter, setCalorieFilter] = useState('all');
     const [difficultyFilter, setDifficultyFilter] = useState('all');
 
