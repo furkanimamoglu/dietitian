@@ -592,6 +592,31 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     };
 
     const containerRef = useRef(null);
+    const addDayMenuRef = useRef(null);
+    const addMealMenuRef = useRef(null);
+
+    // Dışarı tıklama olaylarını dinle
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Gün ekleme menüsü için kontrol
+            if (showAddDay && addDayMenuRef.current && !addDayMenuRef.current.contains(event.target)) {
+                setShowAddDay(false);
+            }
+
+            // Öğün ekleme menüsü için kontrol (opsiyonel)
+            if (showAddMeal && addMealMenuRef.current && !addMealMenuRef.current.contains(event.target)) {
+                setShowAddMeal(false);
+            }
+        };
+
+        // Olay dinleyicileri ekle
+        document.addEventListener('mousedown', handleClickOutside);
+
+        // Temizleme
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showAddDay, showAddMeal]);
 
     return (
         <div className="mui-meal-plan-container" ref={containerRef}>
@@ -662,6 +687,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 <div className="mui-form-row">
                     <div className="mui-form-group">
                         <label htmlFor="plan-image">Plan Görseli</label>
+                        {/* Gerçek dosya input'unu gizle */}
                         <input
                             type="file"
                             id="plan-image"
@@ -679,6 +705,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                     reader.readAsDataURL(file);
                                 }
                             }}
+                            style={{ display: 'none' }}
                         />
                         <label htmlFor="plan-image" className="file-upload-label">
                             <span className="file-upload-icon">📷</span>
@@ -751,7 +778,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                         ))}
                         <th className="mui-table-header-cell mui-add-column-cell">
                             {showAddDay ? (
-                                <div className="mui-add-day-panel">
+                                <div className="mui-add-day-panel" ref={addDayMenuRef}>
                                     <div className="mui-add-day-header">
                                         <span>Eklemek istediğiniz günü seçin</span>
                                     </div>
