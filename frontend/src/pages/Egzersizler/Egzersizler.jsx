@@ -197,6 +197,10 @@ export default function Egzersizler() {
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
 
+    // Kalori ve zorluk filtreleri için state değişkenleri
+    const [calorieFilter, setCalorieFilter] = useState('all');
+    const [difficultyFilter, setDifficultyFilter] = useState('all');
+
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -457,7 +461,20 @@ export default function Egzersizler() {
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
 
-        return searchMatch && categoryMatch;
+        // Kalori filtresini uygula
+        let calorieMatch = true;
+        if (calorieFilter !== 'all') {
+            const [min, max] = calorieFilter.split('-').map(Number);
+            calorieMatch = item.calories_burned >= min && item.calories_burned <= max;
+        }
+
+        // Zorluk filtresini uygula
+        let difficultyMatch = true;
+        if (difficultyFilter !== 'all') {
+            difficultyMatch = item.difficulty === parseInt(difficultyFilter);
+        }
+
+        return searchMatch && categoryMatch && calorieMatch && difficultyMatch;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -982,6 +999,79 @@ export default function Egzersizler() {
                                         <CloseIcon />
                                     </button>
                                 )}
+                            </div>
+                        </div>
+
+                        {/* New filters for calorie and difficulty */}
+                        <div className="filter-group">
+                            <h3 className="filter-title">Kalori Filtrele:</h3>
+                            <div className="calorie-filter-buttons">
+                                <button
+                                    className={`filter-button ${calorieFilter === 'all' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('all')}
+                                >
+                                    Tümü
+                                </button>
+                                <button
+                                    className={`filter-button ${calorieFilter === '0-200' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('0-200')}
+                                >
+                                    0-200 kcal
+                                </button>
+                                <button
+                                    className={`filter-button ${calorieFilter === '201-400' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('201-400')}
+                                >
+                                    201-400 kcal
+                                </button>
+                                <button
+                                    className={`filter-button ${calorieFilter === '401-600' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('401-600')}
+                                >
+                                    401-600 kcal
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="filter-group">
+                            <h3 className="filter-title">Zorluk Filtrele:</h3>
+                            <div className="difficulty-filter-buttons">
+                                <button
+                                    className={`filter-button ${difficultyFilter === 'all' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('all')}
+                                >
+                                    Tümü
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '1' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('1')}
+                                >
+                                    1
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '2' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('2')}
+                                >
+                                    2
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '3' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('3')}
+                                >
+                                    3
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '4' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('4')}
+                                >
+                                    4
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '5' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('5')}
+                                >
+                                    5
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -2462,7 +2552,6 @@ export default function Egzersizler() {
                                     <Typography variant="body2" color="text.secondary" align="center"
                                                 sx={{mt: 1, maxWidth: 600}}>
                                         Danışanınız henüz herhangi bir egzersizi tamamlamamış veya seçtiğiniz tarih
-                                        aralığında tamamlanmış egzersiz bulunmuyor. Farklı bir tarih aralığı seçebilir
                                         veya danışanınızın egzersizleri tamamlamasını bekleyebilirsiniz.
                                     </Typography>
                                 </Box>
