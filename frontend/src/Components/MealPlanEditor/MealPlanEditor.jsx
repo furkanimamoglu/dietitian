@@ -770,14 +770,25 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                 <div className="mui-day-header-content">
                                     <div className="mui-day-actions">
                                         <button
-                                            className="mui-day-action-btn mui-copy-btn"
+                                            className="mui-btn mui-btn-icon mui-copy-btn"
                                             onClick={() => copyDay(day)}
                                             title="Bu günü kopyala"
+                                            style={{
+                                                backgroundColor: '#2196F3',
+                                                color: 'white',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                border: 'none',
+                                                marginRight: '5px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                fontSize: '12px'
+                                            }}
                                         >
-                                            📋
+                                            <span style={{ marginRight: '3px' }}>📋</span>
                                         </button>
                                         <button
-                                            className={`mui-day-action-btn mui-paste-btn ${copiedDay ? 'active' : ''}`}
+                                            className={`mui-btn mui-btn-icon mui-paste-btn ${copiedDay ? 'active' : ''}`}
                                             onClick={() => pasteDay(day)}
                                             disabled={!copiedDay || copiedDay === day}
                                             title={
@@ -785,8 +796,20 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                 copiedDay === day ? "Aynı güne yapıştıramazsınız" :
                                                 `${copiedDay} gününü buraya yapıştır`
                                             }
+                                            style={{
+                                                backgroundColor: '#4CAF50',
+                                                color: 'white',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                border: 'none',
+                                                opacity: (!copiedDay || copiedDay === day) ? '0.5' : '1',
+                                                cursor: (!copiedDay || copiedDay === day) ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                fontSize: '12px'
+                                            }}
                                         >
-                                            📄
+                                            <span style={{ marginRight: '3px' }}>📄</span>
                                         </button>
                                     </div>
                                     <span>{day}</span>
@@ -861,7 +884,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                             </div>
 
                                             <div className="mui-meal-form-field">
-                                                <label htmlFor="meal-time-input" className="mui-time-picker-label">Öğün Saati</label>
+                                                <label htmlFor="meal-time-input" className="mui-time-picker-label">Öğun Saati</label>
                                                 <div className="mui-time-picker-container">
                                                     <span className="mui-time-picker-icon">🕒</span>
                                                     <input
@@ -1098,50 +1121,65 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             <div className="mui-add-meal-section">
                 {showAddMeal ? (
                     <div className="mui-add-meal-type-container">
-                        <div className="mui-add-meal-type-form">
-                            <button
-                                className="mui-cancel-btn"
-                                onClick={() => {
-                                    setShowAddMeal(false);
-                                    setEditedMealName('');
-                                }}
-                            >
-                                ×
-                            </button>
-                            <h4>Yeni Öğun Ekle</h4>
-                            <input
-                                type="text"
-                                className="mui-meal-input"
-                                placeholder="Öğün adını girin..."
-                                value={editedMealName}
-                                onChange={(e) => setEditedMealName(e.target.value)}
-                                autoFocus
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter' && editedMealName.trim()) {
-                                        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-                                        const newMealType = {
-                                            id: `new-${Date.now()}`,
-                                            name: editedMealName.trim(),
-                                            color: randomColor,
-                                            order: mealTypes.length,
-                                            time: editedMealTime
-                                        };
-                                        addMealType(newMealType);
+                        <div className="mui-add-meal-type-form mui-dialog">
+                            <div className="mui-dialog-header">
+                                <h4 className="mui-dialog-title">Yeni Öğün Ekle</h4>
+                                <button
+                                    className="mui-dialog-close-btn"
+                                    onClick={() => {
+                                        setShowAddMeal(false);
+                                        setEditedMealName('');
+                                    }}
+                                    aria-label="Kapat"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            <div className="mui-dialog-content">
+                                <div className="mui-meal-form-field">
+                                    <label htmlFor="new-meal-name" className="mui-input-label">Öğün Adı</label>
+                                    <div className="mui-input-container">
+                                        <input
+                                            id="new-meal-name"
+                                            type="text"
+                                            className="mui-text-input"
+                                            placeholder="Öğün adını girin..."
+                                            value={editedMealName}
+                                            onChange={(e) => setEditedMealName(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mui-meal-form-field">
+                                    <label htmlFor="new-meal-time" className="mui-input-label">Öğün Saati</label>
+                                    <div className="mui-input-container mui-time-picker-container">
+                                        <span className="mui-input-icon">🕒</span>
+                                        <input
+                                            id="new-meal-time"
+                                            type="time"
+                                            className="mui-time-input"
+                                            value={editedMealTime}
+                                            onChange={(e) => setEditedMealTime(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mui-dialog-actions">
+                                <button
+                                    className="mui-btn mui-btn-text"
+                                    onClick={() => {
+                                        setShowAddMeal(false);
                                         setEditedMealName('');
                                         setEditedMealTime('');
-                                    }
-                                }}
-                            />
-                            <input
-                                type="time"
-                                className="mui-meal-time-input"
-                                placeholder="Öğün saati"
-                                value={editedMealTime}
-                                onChange={(e) => setEditedMealTime(e.target.value)}
-                            />
-                            <div className="mui-form-actions">
+                                    }}
+                                >
+                                    İptal
+                                </button>
                                 <button
-                                    className="mui-btn mui-btn-contained"
+                                    className="mui-btn mui-btn-contained mui-btn-primary"
                                     onClick={() => {
                                         if (editedMealName.trim()) {
                                             const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
@@ -1155,11 +1193,12 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                             addMealType(newMealType);
                                             setEditedMealName('');
                                             setEditedMealTime('');
+                                            setShowAddMeal(false);
                                         }
                                     }}
                                     disabled={!editedMealName.trim()}
                                 >
-                                    Ekle
+                                    Kaydet
                                 </button>
                             </div>
                         </div>
