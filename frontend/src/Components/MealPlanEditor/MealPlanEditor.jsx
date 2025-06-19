@@ -171,7 +171,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             return normalizedPlan;
         }
 
-        // Yeni plan oluştur
         const initialPlan = {};
         defaultDays.forEach(day => {
             initialPlan[day] = {};
@@ -451,9 +450,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         }
     };
 
-    // Alternatif isim düzenleme fonksiyonları
     const startEditingAlternativeName = (day, mealType, alternative) => {
-        // Alternatif adını düzenlemek için herhangi bir kısıtlama kaldırıldı
         setEditingAlternativeName(`${day}-${mealType}-${alternative}`);
         setEditedAlternativeName(alternative);
     };
@@ -466,25 +463,20 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
         const newName = editedAlternativeName.trim();
 
-        // Aynı isimde başka bir alternatif var mı kontrol et
         if (mealPlan[day]?.[mealType]?.[newName]) {
             showErrorToast("Bu isimde bir alternatif zaten var!");
             cancelEditingAlternativeName();
             return;
         }
 
-        // İsmi değiştir
         setMealPlan(prev => {
             const updated = {...prev};
 
-            // Eski alternatifin içeriğini kopyala ve yeni isim ile ekle
             updated[day][mealType][newName] = [...updated[day][mealType][oldName]];
 
-            // Eski alternatifi sil
             const { [oldName]: removed, ...rest } = updated[day][mealType];
             updated[day][mealType] = rest;
 
-            // Yeni alternatifi ekle (alfabetik sırada olabilmesi için önce rest'i al sonra yeni değeri ekle)
             updated[day][mealType] = {
                 ...rest,
                 [newName]: updated[day][mealType][newName]
@@ -510,37 +502,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             cancelEditingAlternativeName();
         }
     };
-
-    const addNewMealType = () => {
-        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-
-        const newName = `Yeni Öğün ${mealTypes.length + 1}`;
-
-        const newMealType = {
-            id: `new-${Date.now()}`,
-            name: newName,
-            color: randomColor,
-            order: mealTypes.length
-        };
-
-        const newMealTypes = [...mealTypes, newMealType].sort((a, b) => a.order - b.order);
-        setMealTypes(newMealTypes);
-
-        setMealPlan(prev => {
-            const updated = {...prev};
-            days.forEach(day => {
-                if (!updated[day]) updated[day] = {};
-                updated[day][newName] = {
-                    [defaultMainMenu]: []
-                };
-            });
-            return updated;
-        });
-
-        setTimeout(() => {
-            startEditingMealName(newMealType);
-        }, 100);
-    }
 
     const copyDay = (dayToCopy) => {
         setCopiedDay(dayToCopy);
@@ -659,21 +620,17 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     const addDayMenuRef = useRef(null);
     const addMealMenuRef = useRef(null);
 
-    // Dışarı tıklama olaylarını dinle
     useEffect(() => {
         const handleClickOutside = (event) => {
-            // Gün ekleme menüsü için kontrol
             if (showAddDay && addDayMenuRef.current && !addDayMenuRef.current.contains(event.target)) {
                 setShowAddDay(false);
             }
 
-            // Öğün ekleme menüsü için kontrol (opsiyonel)
             if (showAddMeal && addMealMenuRef.current && !addMealMenuRef.current.contains(event.target)) {
                 setShowAddMeal(false);
             }
         };
 
-        // Olay dinleyicileri ekle
         document.addEventListener('mousedown', handleClickOutside);
 
         // Temizleme
