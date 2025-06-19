@@ -1371,6 +1371,7 @@ export default function Beslenme() {
                                 className="action-btn add-plan-btn"
                                 title="Plan Ekle"
                                 onClick={() => setAddPlanModal(true)}
+                                disabled={beslenmeData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Plan</span>
@@ -2532,3 +2533,4 @@ export default function Beslenme() {
         </Default>
     );
 }
+

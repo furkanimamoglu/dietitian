@@ -959,6 +959,7 @@ export default function Tarifler() {
                                     setImagePreview(''); // Resim önizlemeyi temizle
                                     setAddRecipeModal(true);
                                 }}
+                                disabled={recipeData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Tarif</span>
