@@ -67,7 +67,6 @@ import ErrorIcon from "@mui/icons-material/Error";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import Person from '@mui/icons-material/Person';
-import Cake from '@mui/icons-material/Cake';
 import Email from '@mui/icons-material/Email';
 import Phone from '@mui/icons-material/Phone';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
@@ -113,7 +112,7 @@ const WaterTrackingCard = ({data, clientId}) => {
     };
 
     const handleCloseEditGoalDialog = () => {
-        setIsEditGoalDialogOpen(false);
+        setIsEditGoalDialog(false);
     };
 
     const handleUpdateDailyGoal = async () => {
@@ -926,16 +925,6 @@ function Danisan() {
 
     const handleCreateMeasurement = async (e) => {
         e.preventDefault();
-
-        const yag = parseFloat(measurementForm.yag) || 0;
-        const kas = parseFloat(measurementForm.kas) || 0;
-        const su = parseFloat(measurementForm.su) || 0;
-        const toplam = yag + kas + su;
-        if (yag > 100 || kas > 100 || su > 100 || toplam !== 100) {
-            setErrorMessage("Yağ, kas ve su oranları 100'den düşük ve toplamı %100'e eşit olmalıdır.");
-            setShowErrorPopup(true);
-            return;
-        }
         setCreateMeasurementLoading(true);
 
         try {
@@ -4047,10 +4036,16 @@ function Danisan() {
             </Box>
 
             {/* Ölçüm Ekleme Dialog */}
-            <Dialog open={isMeasurementDialogOpen} onClose={handleCloseMeasurementDialog} fullWidth maxWidth="md">
+            <Dialog
+                open={isMeasurementDialogOpen}
+                onClose={handleCloseMeasurementDialog}
+                fullWidth
+                maxWidth="md"
+                scroll="paper"
+            >
                 <DialogTitle>Yeni Ölçüm Ekle</DialogTitle>
                 <Box component="form" onSubmit={handleCreateMeasurement}>
-                    <DialogContent dividers>
+                    <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '70vh' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
@@ -4060,7 +4055,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.boy}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4074,7 +4068,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.kilo}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                                     }}
@@ -4230,7 +4223,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.boy}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4244,7 +4236,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.kilo}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                                     }}
@@ -4535,7 +4526,7 @@ function Danisan() {
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
-                                    label="Sevilmeyen Yiyecekler"
+                                    label="Sevmediği Yiyecekler"
                                     value={anamnezForm.diyet_aliskanliklari?.sevilmeyen_yiyecekler || ''}
                                     onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'sevilmeyen_yiyecekler', e.target.value)}
                                     margin="normal"
@@ -4601,7 +4592,7 @@ function Danisan() {
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
-                                    label="Meslek ve Aktivite Durumu"
+                                    label="Mesleği ve Aktivite Durumu"
                                     value={anamnezForm.fiziksel_aktivite?.meslek_ve_aktivite_durumu || ''}
                                     onChange={(e) => handleNestedAnamnezFormChange('fiziksel_aktivite', 'meslek_ve_aktivite_durumu', e.target.value)}
                                     margin="normal"
