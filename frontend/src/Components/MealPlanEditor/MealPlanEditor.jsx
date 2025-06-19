@@ -29,7 +29,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     ];
 
     // Her hücre içindeki ana menü
-    const defaultMainMenu = 'Ana Menü';
+    const defaultMainMenu = 'Alternatif';
 
     // Orijinal günlerin sırası için indeks haritası
     const dayOrderMap = Object.fromEntries(defaultDays.map((day, index) => [day, index]));
@@ -400,7 +400,25 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     const startAddingAlternative = (day, mealType) => {
         setEditingCellAlternative(`${day}-${mealType}`);
-        setNewAlternativeName('');
+
+        // Mevcut alternatif menü sayısını hesapla ve yeni alternatif için numara belirle
+        const currentAlternatives = Object.keys(mealPlan[day]?.[mealType] || {});
+        const alternativeNumbers = currentAlternatives
+            .filter(alt => alt.startsWith('Alternatif '))
+            .map(alt => {
+                const num = parseInt(alt.replace('Alternatif ', ''), 10);
+                return isNaN(num) ? 0 : num;
+            });
+
+        // En yüksek numarayı bul ve bir sonraki numarayı kullan
+        const maxNumber = alternativeNumbers.length > 0 ? Math.max(...alternativeNumbers) : 0;
+        const nextNumber = maxNumber + 1;
+
+        // "Alternatif" varsa 1'den, yoksa 2'den başlat
+        const startNumber = 2;
+        const newNumber = Math.max(nextNumber, startNumber);
+
+        setNewAlternativeName(`Alternatif ${newNumber}`);
     };
 
     const cancelEditing = () => {
@@ -1062,4 +1080,3 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 };
 
 export default MealPlanEditor;
-

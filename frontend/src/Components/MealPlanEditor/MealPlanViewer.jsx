@@ -15,7 +15,7 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
     const [selectedDay, setSelectedDay] = useState(DAYS_OF_WEEK[0]);
 
     // Her hücre içindeki ana menü
-    const defaultMainMenu = 'Ana Menü';
+    const defaultMainMenu = 'Alternatif';
 
     // Bir öğünün alternatiflerini döndüren yardımcı fonksiyon
     const getAlternativesForCell = (day, mealType) => {
