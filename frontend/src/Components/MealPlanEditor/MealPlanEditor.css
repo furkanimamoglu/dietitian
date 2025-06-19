@@ -1107,67 +1107,111 @@ select.mui-form-control option {
     border-color: #bbb !important;
 }
 
-/* Gün Kopyalama/Yapıştırma Butonları */
-.mui-day-actions {
-    display: flex;
-    gap: 2px;
-    margin-bottom: 6px;
+/* Saat Seçimi Stili */
+.mui-meal-time-input {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+    color: #333;
+    transition: all 0.2s ease;
+    margin-top: 5px;
+    width: 100%;
+    display: block;
+    cursor: pointer;
+    position: relative;
 }
 
-.mui-day-action-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    font-size: 12px;
+.mui-meal-time-input:focus {
+    outline: none;
+    border-color: #ff9e25;
+    box-shadow: 0 0 0 2px rgba(255, 158, 37, 0.2);
+    background-color: white;
+}
+
+.mui-time-picker-wrapper {
+    position: relative;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.mui-time-picker-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.mui-time-picker-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    opacity: 0.7;
-    transition: all 0.2s;
-    padding: 0;
+    gap: 5px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 10px;
+    transition: all 0.2s ease;
 }
 
-.mui-day-action-btn:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
+.mui-time-picker-container:focus-within {
+    border-color: #ff9e25;
+    box-shadow: 0 0 0 2px rgba(255, 158, 37, 0.2);
+    background-color: white;
 }
 
-.mui-copy-btn {
-    background-color: rgba(76, 175, 80, 0.5);
+.mui-time-picker-icon {
+    color: #666;
+    font-size: 1.2em;
+    margin-right: 5px;
 }
 
-.mui-copy-btn:hover {
-    background-color: rgba(76, 175, 80, 0.8);
+.mui-edit-meal-name-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.mui-paste-btn {
-    background-color: rgba(33, 150, 243, 0.5);
+.mui-meal-type-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
-.mui-paste-btn:hover {
-    background-color: rgba(33, 150, 243, 0.8);
+.mui-meal-time {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: normal;
+    margin-left: 5px;
 }
 
-.mui-paste-btn.active {
-    background-color: rgba(33, 150, 243, 0.8);
-    animation: pulse 1.5s infinite;
+/* Yeni öğün ekleme formu için düzenlemeler */
+.mui-add-meal-type-form {
+    padding: 15px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 6px rgba(33, 150, 243, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
-    }
+/* Öğün adı ve saati için yan yana görünüm */
+.mui-meal-form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mui-meal-form-field {
+    flex: 1;
+    min-width: 150px;
 }
 
 /* Print Styles */
