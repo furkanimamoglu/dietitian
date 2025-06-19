@@ -587,6 +587,27 @@ select.mui-form-control option {
     letter-spacing: 0.5px;
 }
 
+.mui-alternative-title {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #333;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.mui-alternative-title.editable {
+    cursor: pointer;
+    border: 1px dashed transparent;
+    transition: all 0.2s ease;
+    padding: 2px 8px;
+}
+
+.mui-alternative-title.editable:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px dashed #aaa;
+    color: #000;
+}
+
 .mui-alternative-count {
     font-size: 0.7rem;
     color: #999;
@@ -617,7 +638,7 @@ select.mui-form-control option {
     transform: scale(1.2);
 }
 
-/* Alternative Select */
+/* Alternatif Select */
 .mui-alternative-select {
     width: 100%;
     padding: 8px 12px;
@@ -1370,4 +1391,36 @@ select.mui-form-control option {
 .file-upload-icon {
     margin-right: 8px;
     font-size: 20px;
+}
+
+/* Alternatif isim düzenleme formu */
+.mui-edit-alternative-name-form {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+    flex: 1;
+}
+
+.mui-alternative-input {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    min-width: 120px;
+    color: #333;
+    margin-right: 8px;
+}
+
+.mui-alternative-input:focus {
+    outline: none;
+    border-color: #ff9e25;
+    box-shadow: 0 0 0 2px rgba(255, 158, 37, 0.2);
+}
+
+/* Alternatif isim düzenleme form butonları */
+.mui-btn-small {
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    min-width: 24px;
+    height: 24px;
 }

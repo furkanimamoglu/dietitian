@@ -106,6 +106,10 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     const [editingCellAlternative, setEditingCellAlternative] = useState(null); // format: "day-mealType"
     const [newAlternativeName, setNewAlternativeName] = useState('');
 
+    // Alternatif isim düzenleme için state
+    const [editingAlternativeName, setEditingAlternativeName] = useState(null); // format: "day-mealType-alternativeName"
+    const [editedAlternativeName, setEditedAlternativeName] = useState('');
+
     const [mealPlan, setMealPlan] = useState(() => {
         if (existingPlan?.mealPlan && typeof existingPlan.mealPlan === 'object' && !Array.isArray(existingPlan.mealPlan) && Object.keys(existingPlan.mealPlan).length > 0) {
             console.log('Existing plan detected, processing...', existingPlan.mealPlan);
@@ -444,6 +448,66 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             addCellAlternative(day, mealType);
         } else if (e.key === 'Escape') {
             cancelAddingAlternative();
+        }
+    };
+
+    // Alternatif isim düzenleme fonksiyonları
+    const startEditingAlternativeName = (day, mealType, alternative) => {
+        // Alternatif adını düzenlemek için herhangi bir kısıtlama kaldırıldı
+        setEditingAlternativeName(`${day}-${mealType}-${alternative}`);
+        setEditedAlternativeName(alternative);
+    };
+
+    const saveAlternativeName = (day, mealType, oldName) => {
+        if (!editedAlternativeName.trim() || editedAlternativeName === oldName) {
+            cancelEditingAlternativeName();
+            return;
+        }
+
+        const newName = editedAlternativeName.trim();
+
+        // Aynı isimde başka bir alternatif var mı kontrol et
+        if (mealPlan[day]?.[mealType]?.[newName]) {
+            showErrorToast("Bu isimde bir alternatif zaten var!");
+            cancelEditingAlternativeName();
+            return;
+        }
+
+        // İsmi değiştir
+        setMealPlan(prev => {
+            const updated = {...prev};
+
+            // Eski alternatifin içeriğini kopyala ve yeni isim ile ekle
+            updated[day][mealType][newName] = [...updated[day][mealType][oldName]];
+
+            // Eski alternatifi sil
+            const { [oldName]: removed, ...rest } = updated[day][mealType];
+            updated[day][mealType] = rest;
+
+            // Yeni alternatifi ekle (alfabetik sırada olabilmesi için önce rest'i al sonra yeni değeri ekle)
+            updated[day][mealType] = {
+                ...rest,
+                [newName]: updated[day][mealType][newName]
+            };
+
+            return updated;
+        });
+
+        cancelEditingAlternativeName();
+        showSuccessToast(`Alternatif ismi başarıyla değiştirildi: ${oldName} -> ${newName}`);
+    };
+
+    const cancelEditingAlternativeName = () => {
+        setEditingAlternativeName(null);
+        setEditedAlternativeName('');
+    };
+
+    const handleAlternativeNameKeyPress = (e, day, mealType, oldName) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveAlternativeName(day, mealType, oldName);
+        } else if (e.key === 'Escape') {
+            cancelEditingAlternativeName();
         }
     };
 
@@ -874,18 +938,54 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                             {getAlternativesForCell(day, mealType.name).map(alternative => (
                                                 <div key={alternative} className="mui-alternative-section">
                                                     <div className="mui-alternative-header">
-                                                        <span className="mui-alternative-title">{alternative}</span>
-                                                        <span className="mui-alternative-count">
-                                                            ({mealPlan[day]?.[mealType.name]?.[alternative]?.length || 0})
-                                                        </span>
-                                                        {alternative !== defaultMainMenu && (
-                                                            <button
-                                                                className="mui-alternative-delete"
-                                                                onClick={() => removeCellAlternative(day, mealType.name, alternative)}
-                                                                title="Bu alternatifi kaldır"
-                                                            >
-                                                                ×
-                                                            </button>
+                                                        {editingAlternativeName === `${day}-${mealType.name}-${alternative}` ? (
+                                                            <div className="mui-edit-alternative-name-form">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editedAlternativeName}
+                                                                    onChange={(e) => setEditedAlternativeName(e.target.value)}
+                                                                    className="mui-alternative-input"
+                                                                    autoFocus
+                                                                    onKeyDown={(e) => handleAlternativeNameKeyPress(e, day, mealType.name, alternative)}
+                                                                />
+                                                                <div className="mui-form-actions">
+                                                                    <button
+                                                                        className="mui-btn mui-btn-contained mui-btn-small"
+                                                                        onClick={() => saveAlternativeName(day, mealType.name, alternative)}
+                                                                        style={{ backgroundColor: mealType.color }}
+                                                                    >
+                                                                        ✓
+                                                                    </button>
+                                                                    <button
+                                                                        className="mui-btn mui-btn-outlined mui-btn-small"
+                                                                        onClick={cancelEditingAlternativeName}
+                                                                    >
+                                                                        ✗
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <span
+                                                                    className="mui-alternative-title editable"
+                                                                    onClick={() => startEditingAlternativeName(day, mealType.name, alternative)}
+                                                                    title="Alternatif adını düzenlemek için tıklayın"
+                                                                >
+                                                                    {alternative}
+                                                                </span>
+                                                                <span className="mui-alternative-count">
+                                                                    ({mealPlan[day]?.[mealType.name]?.[alternative]?.length || 0})
+                                                                </span>
+                                                                {alternative !== defaultMainMenu && (
+                                                                    <button
+                                                                        className="mui-alternative-delete"
+                                                                        onClick={() => removeCellAlternative(day, mealType.name, alternative)}
+                                                                        title="Bu alternatifi kaldır"
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                )}
+                                                            </>
                                                         )}
                                                     </div>
 
