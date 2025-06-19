@@ -401,7 +401,6 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     const startAddingAlternative = (day, mealType) => {
         setEditingCellAlternative(`${day}-${mealType}`);
 
-        // Mevcut alternatif menü sayısını hesapla ve yeni alternatif için numara belirle
         const currentAlternatives = Object.keys(mealPlan[day]?.[mealType] || {});
         const alternativeNumbers = currentAlternatives
             .filter(alt => alt.startsWith('Alternatif '))
@@ -410,11 +409,9 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 return isNaN(num) ? 0 : num;
             });
 
-        // En yüksek numarayı bul ve bir sonraki numarayı kullan
         const maxNumber = alternativeNumbers.length > 0 ? Math.max(...alternativeNumbers) : 0;
         const nextNumber = maxNumber + 1;
 
-        // "Alternatif" varsa 1'den, yoksa 2'den başlat
         const startNumber = 2;
         const newNumber = Math.max(nextNumber, startNumber);
 
