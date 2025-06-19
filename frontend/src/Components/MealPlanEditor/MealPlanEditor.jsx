@@ -785,7 +785,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                 fontSize: '12px'
                                             }}
                                         >
-                                            <span style={{ marginRight: '3px' }}>📋</span>
+                                            <span>📋</span>
                                         </button>
                                         <button
                                             className={`mui-btn mui-btn-icon mui-paste-btn ${copiedDay ? 'active' : ''}`}
@@ -806,10 +806,11 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                 cursor: (!copiedDay || copiedDay === day) ? 'not-allowed' : 'pointer',
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                fontSize: '12px'
+                                                fontSize: '12px',
+                                                animation: (copiedDay && copiedDay !== day) ? 'pulse 1.5s infinite' : 'none'
                                             }}
                                         >
-                                            <span style={{ marginRight: '3px' }}>📄</span>
+                                            <span>📄</span>
                                         </button>
                                     </div>
                                     <span>{day}</span>
