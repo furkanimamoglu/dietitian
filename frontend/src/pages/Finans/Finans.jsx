@@ -2696,6 +2696,7 @@ export default function Finans() {
                                         onChange={(newValue) => {
                                             handleInvoiceChange('issueDate', newValue ? newValue.toISOString().split('T')[0] : '');
                                         }}
+                                        format="dd/MM/yyyy"
                                         minDate={minDate}
                                         maxDate={maxDate}
                                         slotProps={{
@@ -2715,6 +2716,7 @@ export default function Finans() {
                                         onChange={(newValue) => {
                                             handleInvoiceChange('dueDate', newValue ? newValue.toISOString().split('T')[0] : '');
                                         }}
+                                        format="dd/MM/yyyy"
                                         minDate={minDate}
                                         maxDate={maxDate}
                                         slotProps={{
