@@ -31,17 +31,14 @@ const LoginScreen = ({navigation}: Props) => {
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // Sözleşme modal'ları için state'ler
     const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
     const [showUserAgreementModal, setShowUserAgreementModal] = useState<boolean>(false);
 
-    // Animasyon değerleri
     const errorOpacity = useState(new Animated.Value(0))[0];
     const formTranslateY = useRef(new Animated.Value(30)).current;
     const formOpacity = useRef(new Animated.Value(0)).current;
     const logoScale = useRef(new Animated.Value(0.8)).current;
 
-    // Sayfa açılışında animasyonu başlat
     useEffect(() => {
         Animated.parallel([
             Animated.timing(formOpacity, {
