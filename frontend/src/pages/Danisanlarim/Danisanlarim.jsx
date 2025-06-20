@@ -534,6 +534,61 @@ export default function Danisanlarim() {
         }
     };
 
+    const [bulkNotificationDialogOpen, setBulkNotificationDialogOpen] = useState(false);
+    const [bulkNotificationData, setBulkNotificationData] = useState({
+        body: ""
+    });
+
+    const openBulkNotificationDialog = () => {
+        setBulkNotificationDialogOpen(true);
+    };
+
+    const closeBulkNotificationDialog = () => {
+        setBulkNotificationDialogOpen(false);
+        setBulkNotificationData({
+            body: ""
+        });
+    };
+
+    const handleSendBulkNotification = async () => {
+        try {
+            if (filteredClients.length === 0) {
+                setSnackbar({
+                    open: true,
+                    message: "Bildirim gönderilecek danışan bulunamadı",
+                    severity: "warning"
+                });
+                return;
+            }
+
+            await axios.post(
+                `${config[config.environment].apiUrl}/notification/sendNotificationToAllMyClients`,
+                {
+                    notificationData: {
+                        title: "Diyetisyeninizden Haber Var!",
+                        body: bulkNotificationData.body,
+                        data: {}
+                    }
+                },
+                { headers: { Authorization: localStorage.getItem("token") } }
+            );
+
+            setSnackbar({
+                open: true,
+                message: `${filteredClients.length} danışana bildirim başarıyla gönderildi`,
+                severity: "success"
+            });
+            closeBulkNotificationDialog();
+        } catch (error) {
+            console.error("Toplu bildirim gönderme hatası:", error);
+            setSnackbar({
+                open: true,
+                message: "Bildirimler gönderilirken bir hata oluştu",
+                severity: "error"
+            });
+        }
+    };
+
     const closeQrDialog = () => {
         setQrDialogOpen(false);
         setShowPdfPreview(false);
@@ -1349,6 +1404,21 @@ export default function Danisanlarim() {
 
                         <Button
                             variant="contained"
+                            startIcon={<NotificationsIcon/>}
+                            onClick={openBulkNotificationDialog}
+                            sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
+                                borderRadius: 10,
+                                textTransform: "none",
+                                boxShadow: 3
+                            }}
+                        >
+                            Toplu Bildirim Gönder
+                        </Button>
+
+                        <Button
+                            variant="contained"
                             startIcon={<DownloadIcon/>}
                             onClick={() => setImportDialogOpen(true)}
                             sx={{
@@ -2131,6 +2201,73 @@ export default function Danisanlarim() {
                             disabled={!notificationData.body}
                         >
                             Gönder
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                {/* Toplu Bildirim Dialog */}
+                <Dialog
+                    open={bulkNotificationDialogOpen}
+                    onClose={closeBulkNotificationDialog}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'orange',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <NotificationsIcon />
+                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
+                                Tüm Danışanlara Bildirim Gönder
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            edge="end"
+                            onClick={closeBulkNotificationDialog}
+                            aria-label="close"
+                            sx={{color: 'red'}}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <Stack spacing={3} sx={{mt: 1}}>
+                            <Typography variant="body2" color="text.secondary">
+                                {filteredClients.length} danışana bildirim gönderilecektir.
+                                {activeFilter && ` (Filtre: ${activeFilter === 'all' ? 'Tümü' :
+                                    activeFilter === 'active' ? 'Aktif' :
+                                        activeFilter === 'inactive' ? 'Pasif' :
+                                            activeFilter === 'female' ? 'Kadın' :
+                                                activeFilter === 'male' ? 'Erkek' : 'Diğer'})`}
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                required
+                                label="Bildirim İçeriği"
+                                value={bulkNotificationData.body}
+                                onChange={(e) => setBulkNotificationData(prev => ({...prev, body: e.target.value}))}
+                                margin="normal"
+                                autoComplete="off"
+                                inputProps={{maxLength: 500}}
+                                placeholder="Değerli danışanlarım, bugün ofisimiz 18:00'de kapanacaktır..."
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={closeBulkNotificationDialog} variant="outlined" color="secondary">
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={handleSendBulkNotification}
+                            variant="contained"
+                            color="primary"
+                            disabled={!bulkNotificationData.body}
+                            startIcon={<NotificationsIcon />}
+                        >
+                            {filteredClients.length} Danışana Gönder
                         </Button>
                     </DialogActions>
                 </Dialog>

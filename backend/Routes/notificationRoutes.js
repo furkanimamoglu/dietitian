@@ -6,5 +6,6 @@ const router = express.Router();
 const notificationController = require(path.join(__dirname, '..', 'Controller', 'notificationController'));
 
 router.post('/sendNotificationToClient', notificationController.sendNotificationToClient);
+router.post('/sendNotificationToAllMyClients', notificationController.sendNotificationToAllMyClients);
 
 module.exports = router;

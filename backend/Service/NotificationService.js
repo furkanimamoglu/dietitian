@@ -49,6 +49,43 @@ class NotificationService {
         return response;
     }
 
+    static async sendNotificationToAllMyClients(dietitian_id, notificationData) {
+        const clients = await Client.findAll({
+            where: {
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (clients.length === 0) {
+            throw new Exception("Bu diyetisyene ait client bulunamadı");
+        }
+
+        const tokens = clients.map(client => client.fcmToken).filter(token => token);
+
+        if (tokens.length === 0) {
+            throw new Exception("Hiçbir client için bildirim token'ı bulunamadı");
+        }
+
+        const message = {
+            notification: {
+                title: notificationData.title,
+                body: notificationData.body
+            },
+            data: notificationData.data
+        };
+
+        const results = await Promise.all(
+            tokens.map(token => {
+                const msg = {
+                    ...message,
+                    token: token
+                };
+                return admin.messaging().send(msg);
+            })
+        );
+        return results;
+    }
+
 }
 
 module.exports = NotificationService;
