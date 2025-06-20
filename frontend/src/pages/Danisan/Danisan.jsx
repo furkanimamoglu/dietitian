@@ -112,7 +112,7 @@ const WaterTrackingCard = ({data, clientId}) => {
     };
 
     const handleCloseEditGoalDialog = () => {
-        setIsEditGoalDialog(false);
+        setIsEditGoalDialogOpen(false);
     };
 
     const handleUpdateDailyGoal = async () => {
@@ -538,18 +538,39 @@ const WaterTrackingCard = ({data, clientId}) => {
                         <TextField
                             fullWidth
                             label="Günlük Su Hedefi (ml)"
-                            type="number"
                             value={newDailyGoal}
-                            onChange={(e) => setNewDailyGoal(parseInt(e.target.value, 10) || 0)}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                setNewDailyGoal(parseInt(value, 10) || 0);
+                            }}
+                            InputProps={{
+                                inputMode: 'numeric',
+                                endAdornment: <InputAdornment position="end">ml</InputAdornment>,
+                                // Sayı girişini daha kullanışlı hale getiren özellikler
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <LocalDrinkIcon color="primary" />
+                                    </InputAdornment>
+                                ),
+                            }}
                             inputProps={{
                                 min: 100,
-                                step: 100
+                                step: 100,
+                                pattern: '[0-9]*'
                             }}
-                            helperText="Minimum 100 ml olmalıdır"
+                            error={newDailyGoal < 100}
+                            helperText={newDailyGoal < 100 ? "Minimum 100 ml olmalıdır" : ""}
                         />
-                        <Typography variant="caption" color="text.secondary" sx={{mt: 1, display: 'block'}}>
-                            {newDailyGoal / 1000} litre
+                        <Box sx={{mt: 2, display: 'flex', alignItems: 'center'}}>
+                            <Typography variant="body2" color="text.secondary" sx={{mr: 1}}>
+                                ≈ <strong>{(newDailyGoal / 1000).toFixed(1)}</strong> litre
                         </Typography>
+                            <LinearProgress
+                                variant="determinate"
+                                value={Math.min(newDailyGoal / 50, 100)}
+                                sx={{flexGrow: 1, height: 8, borderRadius: 4}}
+                            />
+                        </Box>
                     </Box>
                 </DialogContent>
                 <DialogActions>
