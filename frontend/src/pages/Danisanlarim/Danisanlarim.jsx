@@ -51,6 +51,7 @@ import VpnKey from "@mui/icons-material/VpnKey";
 import UploadIcon from "@mui/icons-material/Upload";
 import DownloadIcon from "@mui/icons-material/Download";
 import GroupAdd from "@mui/icons-material/GroupAdd";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 import {blue, green, pink, purple, red} from "@mui/material/colors";
 import Default from "../../Components/Layouts/Default.jsx";
@@ -189,6 +190,25 @@ export default function Danisanlarim() {
     const [pendingEdit, setPendingEdit] = useState(null);
     const [activeFilter, setActiveFilter] = useState(null);
     const [deleteInactiveDialogOpen, setDeleteInactiveDialogOpen] = useState(false);
+
+    const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+    const [notificationData, setNotificationData] = useState({
+        body: ""
+    });
+    const [selectedClientForNotification, setSelectedClientForNotification] = useState(null);
+
+    const closeNotificationDialog = () => {
+        setNotificationDialogOpen(false);
+        setSelectedClientForNotification(null);
+        setNotificationData({
+            body: ""
+        });
+    };
+
+    const openNotificationDialog = (client) => {
+        setSelectedClientForNotification(client);
+        setNotificationDialogOpen(true);
+    };
 
     // CSV Import states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -481,6 +501,39 @@ export default function Danisanlarim() {
         }
     };
 
+    const handleSendNotification = async () => {
+        try {
+            if (!selectedClientForNotification) return;
+
+            await axios.post(
+                `${config[config.environment].apiUrl}/notification/sendNotificationToClient`,
+                {
+                    client_id: selectedClientForNotification.id,
+                    notificationData: {
+                        title: "Diyetisyeninden Haber Var!",
+                        body: notificationData.body,
+                        data: {}
+                }
+                },
+                { headers: { Authorization: localStorage.getItem("token") } }
+            );
+
+            setSnackbar({
+                open: true,
+                message: "Bildirim başarıyla gönderildi",
+                severity: "success"
+            });
+            closeNotificationDialog();
+        } catch (error) {
+            console.error("Bildirim gönderme hatası:", error);
+            setSnackbar({
+                open: true,
+                message: "Bildirim gönderilirken bir hata oluştu",
+                severity: "error"
+            });
+        }
+    };
+
     const closeQrDialog = () => {
         setQrDialogOpen(false);
         setShowPdfPreview(false);
@@ -704,7 +757,7 @@ export default function Danisanlarim() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 240, // Genişliği arttırdım
+            width: 340, // Genişliği arttırdım
             sortable: false,
             editable: false,
             renderCell: (params) => (
@@ -716,6 +769,15 @@ export default function Danisanlarim() {
                         title="Detayları Görüntüle"
                     >
                         <Visibility fontSize="small"/>
+                    </Button>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => openNotificationDialog(params.row)}
+                        title="Bildirim Gönder"
+                    >
+                        <NotificationsIcon fontSize="small"/>
                     </Button>
                     <Button
                         size="small"
@@ -2012,6 +2074,63 @@ export default function Danisanlarim() {
                             variant="contained" color="error"
                         >
                             Sil
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                {/* Notification Dialog */}
+                <Dialog
+                    open={notificationDialogOpen}
+                    onClose={closeNotificationDialog}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'orange',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <NotificationsIcon />
+                            <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
+                                Bildirim Gönder - {selectedClientForNotification?.name}
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            edge="end"
+                            onClick={closeNotificationDialog}
+                            aria-label="close"
+                            sx={{color: 'red'}}
+                        >
+                            <CloseIcon/>
+                        </IconButton>
+                    </DialogTitle>
+                    <DialogContent dividers>
+                        <Stack spacing={3} sx={{mt: 1}}>
+                            <TextField
+                                fullWidth
+                                required
+                                label="Bildirim İçeriği"
+                                value={notificationData.body}
+                                onChange={(e) => setNotificationData(prev => ({...prev, body: e.target.value}))}
+                                margin="normal"
+                                autoComplete="off"
+                                inputProps={{maxLength: 500}}
+                            />
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={closeNotificationDialog} variant="outlined" color="secondary">
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={handleSendNotification}
+                            variant="contained"
+                            color="primary"
+                            disabled={!notificationData.body}
+                        >
+                            Gönder
                         </Button>
                     </DialogActions>
                 </Dialog>

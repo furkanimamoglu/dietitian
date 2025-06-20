@@ -28,6 +28,8 @@ const exerciseRoutes = require(path.join(__dirname, "Routes", "exerciseRoutes"))
 const anamnesRoutes = require(path.join(__dirname, "Routes", "anamnesRoutes"));
 const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
 const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
+const notificationRoutes = require(path.join(__dirname, "Routes", "notificationRoutes"));
+
 const {diskStorage} = require("multer");
 const multer = require("multer");
 
@@ -96,9 +98,8 @@ app.use('/api/invoice', invoiceRoutes);
 app.use('/api/measurement', measurementRoutes);
 app.use('/api/package', packageRoutes);
 app.use('/api/nutrition', nutritionRoutes);
+app.use('/api/notification', notificationRoutes);
 
-
-// Working Directory
 try {
     process.chdir('../');
     console.log('INFO - Çalışma Dizini: ' + process.cwd());
