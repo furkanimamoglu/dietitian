@@ -18,7 +18,6 @@ import {
     MenuItem,
     Paper,
     Select,
-    Snackbar,
     Stack,
     Table,
     TableBody,
@@ -29,6 +28,8 @@ import {
     TextField,
     Typography
 } from "@mui/material";
+
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 import {DataGrid, GridToolbarContainer, GridToolbarQuickFilter} from "@mui/x-data-grid";
 
@@ -165,10 +166,10 @@ function QuickSearchToolbar() {
             <Button
                 variant="outlined"
                 color="error"
-                startIcon={<DeleteIcon />}
+                startIcon={<DeleteIcon/>}
                 onClick={() => document.dispatchEvent(new CustomEvent('deleteInactiveClients'))}
                 size="small"
-                sx={{ mr: 2 }}
+                sx={{mr: 2}}
             >
                 Pasif Danışanları Temizle
             </Button>
@@ -253,11 +254,6 @@ export default function Danisanlarim() {
     });
     const [formErrors, setFormErrors] = useState({});
     const [showPassword, setShowPassword] = useState(true);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: "",
-        severity: "success"
-    });
 
     const totalCount = clients.length;
     const activeCount = clients.filter(c => c.status === "Aktif").length;
@@ -277,14 +273,9 @@ export default function Danisanlarim() {
             })
             .catch((err) => console.error("Error fetching clients:", err));
 
-        // İnaktif hesapları silme olayı için dinleyici
         const handleDeleteInactive = () => {
             if (clients.filter(c => c.status === "Pasif").length === 0) {
-                setSnackbar({
-                    open: true,
-                    message: "Silinecek inaktif danışan bulunmamaktadır",
-                    severity: "info"
-                });
+                showErrorToast("Silinecek inaktif danışan bulunmamaktadır");
                 return;
             }
             setDeleteInactiveDialogOpen(true);
@@ -439,19 +430,10 @@ export default function Danisanlarim() {
                 c.id === client.id ? {...c, status: newStatus} : c
             ));
 
-            setSnackbar({
-                open: true,
-                message: `${client.name} durumu ${newStatus === "Aktif" ? "aktif" : "pasif"} olarak değiştirildi`,
-                severity: "success"
-            });
-
+            showSuccessToast(`${client.name} durumu ${newStatus === "Aktif" ? "aktif" : "pasif"} olarak değiştirildi`);
         } catch (error) {
             console.error("Durum değiştirme hatası:", error);
-            setSnackbar({
-                open: true,
-                message: "Danışan durumu değiştirilemedi",
-                severity: "error"
-            });
+            showErrorToast("Danışan durumu değiştirilemedi");
         }
     };
 
@@ -513,24 +495,16 @@ export default function Danisanlarim() {
                         title: "Diyetisyeninden Haber Var!",
                         body: notificationData.body,
                         data: {}
-                }
+                    }
                 },
-                { headers: { Authorization: localStorage.getItem("token") } }
+                {headers: {Authorization: localStorage.getItem("token")}}
             );
 
-            setSnackbar({
-                open: true,
-                message: "Bildirim başarıyla gönderildi",
-                severity: "success"
-            });
+            showSuccessToast("Bildirim başarıyla gönderildi");
             closeNotificationDialog();
         } catch (error) {
             console.error("Bildirim gönderme hatası:", error);
-            setSnackbar({
-                open: true,
-                message: "Bildirim gönderilirken bir hata oluştu",
-                severity: "error"
-            });
+            showErrorToast("Bildirim gönderilirken bir hata oluştu");
         }
     };
 
@@ -553,11 +527,7 @@ export default function Danisanlarim() {
     const handleSendBulkNotification = async () => {
         try {
             if (filteredClients.length === 0) {
-                setSnackbar({
-                    open: true,
-                    message: "Bildirim gönderilecek danışan bulunamadı",
-                    severity: "warning"
-                });
+                showSuccessToast("Bildirim gönderilecek danışan bulunamadı.");
                 return;
             }
 
@@ -570,22 +540,14 @@ export default function Danisanlarim() {
                         data: {}
                     }
                 },
-                { headers: { Authorization: localStorage.getItem("token") } }
+                {headers: {Authorization: localStorage.getItem("token")}}
             );
 
-            setSnackbar({
-                open: true,
-                message: `${filteredClients.length} danışana bildirim başarıyla gönderildi`,
-                severity: "success"
-            });
+            showSuccessToast(`${filteredClients.length} danışana bildirim başarıyla gönderildi`);
             closeBulkNotificationDialog();
         } catch (error) {
             console.error("Toplu bildirim gönderme hatası:", error);
-            setSnackbar({
-                open: true,
-                message: "Bildirimler gönderilirken bir hata oluştu",
-                severity: "error"
-            });
+            showErrorToast("Bildirimler gönderilirken bir hata oluştu");
         }
     };
 
@@ -690,13 +652,8 @@ export default function Danisanlarim() {
 
             setClients(prev => [...prev, response.data]);
 
-            setSnackbar({
-                open: true,
-                message: "Danışan başarıyla eklendi",
-                severity: "success"
-            });
+            showSuccessToast("Danışan başarıyla eklendi");
 
-            // Formu temizle
             setNewClient({
                 phoneNumber: "",
                 password: "",
@@ -720,16 +677,8 @@ export default function Danisanlarim() {
                 errorMessage = "Bu telefon numarası zaten kayıtlı.";
             }
 
-            setSnackbar({
-                open: true,
-                message: errorMessage,
-                severity: "error"
-            });
+            showErrorToast(errorMessage);
         }
-    };
-
-    const handleSnackbarClose = () => {
-        setSnackbar(prev => ({...prev, open: false}));
     };
 
     const columns = [
@@ -742,8 +691,8 @@ export default function Danisanlarim() {
             width: 90,
             type: "singleSelect",
             valueOptions: [
-                { value: "Aktif", label: "Aktif" },
-                { value: "Pasif", label: "Pasif" }
+                {value: "Aktif", label: "Aktif"},
+                {value: "Pasif", label: "Pasif"}
             ],
             editable: false,
             renderCell: (params) => {
@@ -894,19 +843,11 @@ export default function Danisanlarim() {
                     setImportDialogOpen(false);
                     setImportPreviewOpen(true);
                 } else {
-                    setSnackbar({
-                        open: true,
-                        message: "CSV dosyası boş veya geçersiz format içeriyor",
-                        severity: "error"
-                    });
+                    showErrorToast("CSV dosyası boş veya geçersiz format içeriyor");
                 }
             },
             error: function (error) {
-                setSnackbar({
-                    open: true,
-                    message: `CSV okuma hatası: ${error.message}`,
-                    severity: "error"
-                });
+                showErrorToast(`CSV okuma hatası: ${error.message}`);
             }
         });
     };
@@ -1022,11 +963,7 @@ export default function Danisanlarim() {
 
     const handleImportSubmit = async () => {
         if (Object.keys(csvErrors).length > 0) {
-            setSnackbar({
-                open: true,
-                message: "Lütfen tüm hataları düzeltin",
-                severity: "error"
-            });
+            showErrorToast("Lütfen tüm hataları düzeltin");
             return;
         }
 
@@ -1056,23 +993,13 @@ export default function Danisanlarim() {
                     failCount++;
                 }
             }
-
-            setSnackbar({
-                open: true,
-                message: `${successCount} danışan başarıyla eklendi. ${failCount > 0 ? `${failCount} danışan eklenemedi.` : ''}`,
-                severity: failCount > 0 ? "warning" : "success"
-            });
-
+            showSuccessToast(`${successCount} danışan başarıyla eklendi. ${failCount > 0 ? `${failCount} danışan eklenemedi.` : ''}`);
             setImportPreviewOpen(false);
             setCsvData([]);
 
         } catch (error) {
             console.error("Toplu danışan eklenirken hata oluştu:", error);
-            setSnackbar({
-                open: true,
-                message: "Danışanlar eklenirken bir hata oluştu",
-                severity: "error"
-            });
+            showErrorToast("Danışanlar eklenirken bir hata oluştu.");
         }
     };
 
@@ -1953,9 +1880,9 @@ export default function Danisanlarim() {
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <GroupAdd sx={{ color: 'orange' }} />
-                            <Typography variant="h6" sx={{ color: '#2E7D32', fontWeight: 'bold' }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <GroupAdd sx={{color: 'orange'}}/>
+                            <Typography variant="h6" sx={{color: '#2E7D32', fontWeight: 'bold'}}>
                                 Yeni Danışan Ekle
                             </Typography>
                         </Box>
@@ -1968,8 +1895,9 @@ export default function Danisanlarim() {
                             <CloseIcon/>
                         </IconButton>
                     </DialogTitle>
-                    <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto' }}>
-                        <DialogContent dividers sx={{ overflowY: 'auto', flex: '1 1 auto' }}>
+                    <form onSubmit={handleCreateSubmit}
+                          style={{display: 'flex', flexDirection: 'column', flex: '1 1 auto'}}>
+                        <DialogContent dividers sx={{overflowY: 'auto', flex: '1 1 auto'}}>
                             <Stack spacing={3} sx={{mt: 1, overflowY: 'auto', maxHeight: '60vh'}}>
                                 <TextField
                                     fullWidth
@@ -2074,7 +2002,15 @@ export default function Danisanlarim() {
                                 </FormControl>
                             </Stack>
                         </DialogContent>
-                        <DialogActions sx={{p: 2, justifyContent: 'flex-end', flex: '0 0 auto', position: 'sticky', bottom: 0, bgcolor: 'background.paper', borderTop: '1px solid rgba(0, 0, 0, 0.12)'}}>
+                        <DialogActions sx={{
+                            p: 2,
+                            justifyContent: 'flex-end',
+                            flex: '0 0 auto',
+                            position: 'sticky',
+                            bottom: 0,
+                            bgcolor: 'background.paper',
+                            borderTop: '1px solid rgba(0, 0, 0, 0.12)'
+                        }}>
                             <Button
                                 type="submit"
                                 variant="contained"
@@ -2085,22 +2021,6 @@ export default function Danisanlarim() {
                         </DialogActions>
                     </form>
                 </Dialog>
-
-                {/* Success/Error Notification */}
-                <Snackbar
-                    open={snackbar.open}
-                    autoHideDuration={6000}
-                    onClose={handleSnackbarClose}
-                    anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                >
-                    <Alert
-                        onClose={handleSnackbarClose}
-                        severity={snackbar.severity}
-                        sx={{width: '100%'}}
-                    >
-                        {snackbar.message}
-                    </Alert>
-                </Snackbar>
 
                 {/* Delete Inactive Confirmation Dialog */}
                 <Dialog open={deleteInactiveDialogOpen} onClose={() => setDeleteInactiveDialogOpen(false)}>
@@ -2117,26 +2037,16 @@ export default function Danisanlarim() {
                         <Button
                             onClick={async () => {
                                 try {
-                                    // İnaktif danışanları filtrele
                                     const inactiveClients = clients.filter(c => c.status === "Pasif");
 
-                                    // Her bir inaktif danışanı sırayla sil
                                     for (const client of inactiveClients) {
                                         await handleDelete(client.id);
                                     }
 
-                                    setSnackbar({
-                                        open: true,
-                                        message: "Tüm pasif danışanlar başarıyla temizlendi.",
-                                        severity: "success"
-                                    });
+                                    showSuccessToast("Tüm pasif danışanlar başarıyla temizlendi.");
                                 } catch (error) {
                                     console.error("Pasif danışanlar temizlenirken hata oluştu:", error);
-                                    setSnackbar({
-                                        open: true,
-                                        message: "Pasif danışanlar temizlenirken bir hata oluştu",
-                                        severity: "error"
-                                    });
+                                    showErrorToast("Pasif danışanlar temizlenirken bir hata oluştu");
                                 } finally {
                                     setDeleteInactiveDialogOpen(false);
                                 }
@@ -2162,7 +2072,7 @@ export default function Danisanlarim() {
                         alignItems: 'center'
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <NotificationsIcon />
+                            <NotificationsIcon/>
                             <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 Bildirim Gönder - {selectedClientForNotification?.name}
                             </Typography>
@@ -2219,7 +2129,7 @@ export default function Danisanlarim() {
                         alignItems: 'center'
                     }}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <NotificationsIcon />
+                            <NotificationsIcon/>
                             <Typography variant="h6" sx={{color: 'green', fontWeight: 'bold'}}>
                                 Tüm Danışanlara Bildirim Gönder
                             </Typography>
@@ -2265,7 +2175,7 @@ export default function Danisanlarim() {
                             variant="contained"
                             color="primary"
                             disabled={!bulkNotificationData.body}
-                            startIcon={<NotificationsIcon />}
+                            startIcon={<NotificationsIcon/>}
                         >
                             {filteredClients.length} Danışana Gönder
                         </Button>
