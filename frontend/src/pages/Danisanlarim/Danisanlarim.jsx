@@ -1341,7 +1341,22 @@ export default function Danisanlarim() {
                                 boxShadow: 3
                             }}
                         >
-                            Toplu Bildirim Gönder
+                            Tüm Danışanlarıma Bildirim Gönder
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            startIcon={<QrCodeIcon/>}
+                            onClick={fetchQR}
+                            sx={{
+                                color: 'white',
+                                backgroundColor: '#2d4149',
+                                borderRadius: 10,
+                                textTransform: "none",
+                                boxShadow: 3
+                            }}
+                        >
+                            QR'ımı Göster
                         </Button>
 
                         <Button
@@ -1372,21 +1387,6 @@ export default function Danisanlarim() {
                             }}
                         >
                             Dışa Aktar
-                        </Button>
-
-                        <Button
-                            variant="contained"
-                            startIcon={<QrCodeIcon/>}
-                            onClick={fetchQR}
-                            sx={{
-                                color: 'white',
-                                backgroundColor: '#2d4149',
-                                borderRadius: 10,
-                                textTransform: "none",
-                                boxShadow: 3
-                            }}
-                        >
-                            QR'ımı Göster
                         </Button>
                     </Stack>
                 </Box>
