@@ -14,7 +14,10 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    ImageBackground,
+    Alert,
 } from 'react-native';
+
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
@@ -28,6 +31,7 @@ const Mesaj = ({navigation}) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalImageUri, setModalImageUri] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     const flatListRef = useRef(null);
     const intervalRef = useRef(null);
@@ -135,6 +139,70 @@ const Mesaj = ({navigation}) => {
         }
     };
 
+    const uploadImage = async (imageUri) => {
+        try {
+            setUploadingImage(true);
+
+            const formData = new FormData();
+            formData.append('image', {
+                uri: imageUri,
+                type: 'image/jpeg',
+                name: 'image.jpg',
+            });
+
+            const response = await fetch('http://localhost:3000/api/upload', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.imageUrl) {
+                return data.imageUrl;
+            } else {
+                throw new Error('Resim yüklenemedi');
+            }
+        } catch (error) {
+            console.error('Resim yükleme hatası:', error);
+            Alert.alert('Hata', 'Resim yüklenirken bir hata oluştu');
+            return null;
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const sendImageMessage = async (imageUrl) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token bulunamadı');
+                return;
+            }
+
+            const response = await fetch(`${config[config.environment].apiUrl}/message/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    receiver_id: clientInfo.dietitian_id,
+                    message: `[RESIM:${imageUrl}]`
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API Hatası: ${response.status}`, errorText);
+            }
+        } catch (err) {
+            console.error('Resim mesajı gönderme hatası:', err);
+        }
+    };
+
     const sendMessage = useCallback(async () => {
         if (input.trim() === '') return;
 
@@ -189,7 +257,7 @@ const Mesaj = ({navigation}) => {
                 maxWidth: 1000,
                 maxHeight: 1000,
             },
-            (response) => {
+            async (response) => {
                 setLoading(false);
                 if (response.didCancel) {
                     console.log('Kullanıcı kamerayı iptal etti');
@@ -198,18 +266,31 @@ const Mesaj = ({navigation}) => {
                 } else {
                     const imageUri = response.assets?.[0]?.uri;
                     if (imageUri) {
-                        const newMessage = {
+                        // Önce UI'da göster
+                        const tempMessage = {
                             id: Date.now().toString(),
-                            from: 'user',
-                            image: imageUri,
-                            timestamp: getCurrentTime()
+                            sender: 'CLIENT',
+                            message: `[RESIM:${imageUri}]`,
+                            createdAt: getCurrentTime(),
+                            isUploading: true
                         };
-                        setMessages(prev => [...prev, newMessage]);
+                        setMessages(prev => [...prev, tempMessage]);
+
+                        // Resmi yükle ve gerçek URL'i gönder
+                        const uploadedImageUrl = await uploadImage(imageUri);
+                        if (uploadedImageUrl) {
+                            // Temp mesajı kaldır ve gerçek mesajı ekle
+                            setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
+                            await sendImageMessage(uploadedImageUrl);
+                        } else {
+                            // Hata durumunda temp mesajı kaldır
+                            setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
+                        }
                     }
                 }
             }
         );
-    }, []);
+    }, [clientInfo.dietitian_id]);
 
     const openGallery = useCallback(() => {
         setLoading(true);
@@ -220,7 +301,7 @@ const Mesaj = ({navigation}) => {
                 maxWidth: 1000,
                 maxHeight: 1000,
             },
-            (response) => {
+            async (response) => {
                 setLoading(false);
                 if (response.didCancel) {
                     console.log('Kullanıcı galeriyi iptal etti');
@@ -229,18 +310,31 @@ const Mesaj = ({navigation}) => {
                 } else {
                     const imageUri = response.assets?.[0]?.uri;
                     if (imageUri) {
-                        const newMessage = {
+                        // Önce UI'da göster
+                        const tempMessage = {
                             id: Date.now().toString(),
-                            from: 'user',
-                            image: imageUri,
-                            timestamp: getCurrentTime()
+                            sender: 'CLIENT',
+                            message: `[RESIM:${imageUri}]`,
+                            createdAt: getCurrentTime(),
+                            isUploading: true
                         };
-                        setMessages(prev => [...prev, newMessage]);
+                        setMessages(prev => [...prev, tempMessage]);
+
+                        // Resmi yükle ve gerçek URL'i gönder
+                        const uploadedImageUrl = await uploadImage(imageUri);
+                        if (uploadedImageUrl) {
+                            // Temp mesajı kaldır ve gerçek mesajı gönder
+                            setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
+                            await sendImageMessage(uploadedImageUrl);
+                        } else {
+                            // Hata durumunda temp mesajı kaldır
+                            setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
+                        }
                     }
                 }
             }
         );
-    }, []);
+    }, [clientInfo.dietitian_id]);
 
     const handleImagePress = useCallback((uri) => {
         setModalImageUri(uri);
@@ -266,7 +360,11 @@ const Mesaj = ({navigation}) => {
         return (
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
-                    {!isImage && !isResimFormat && item.message && <Text style={styles.messageText}>{item.message}</Text>}
+                    {!isImage && !isResimFormat && item.message && (
+                        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.diyetisyenMessageText]}>
+                            {item.message}
+                        </Text>
+                    )}
 
                     {isImage && (
                         <TouchableOpacity onPress={() => handleImagePress(item.message)} activeOpacity={0.8}>
@@ -275,6 +373,11 @@ const Mesaj = ({navigation}) => {
                                 style={styles.sentImage}
                                 resizeMode="cover"
                             />
+                            {item.isUploading && (
+                                <View style={styles.imageUploadOverlay}>
+                                    <ActivityIndicator color="#fff" size="small"/>
+                                </View>
+                            )}
                         </TouchableOpacity>
                     )}
 
@@ -285,6 +388,11 @@ const Mesaj = ({navigation}) => {
                                 style={styles.sentImage}
                                 resizeMode="cover"
                             />
+                            {item.isUploading && (
+                                <View style={styles.imageUploadOverlay}>
+                                    <ActivityIndicator color="#fff" size="small"/>
+                                </View>
+                            )}
                         </TouchableOpacity>
                     )}
 
@@ -295,6 +403,11 @@ const Mesaj = ({navigation}) => {
                                 style={styles.sentImage}
                                 resizeMode="cover"
                             />
+                            {item.isUploading && (
+                                <View style={styles.imageUploadOverlay}>
+                                    <ActivityIndicator color="#fff" size="small"/>
+                                </View>
+                            )}
                         </TouchableOpacity>
                     )}
 
@@ -308,30 +421,43 @@ const Mesaj = ({navigation}) => {
 
     const ListHeaderComponent = useMemo(() => (
         <View style={styles.dateHeader}>
-            <Text style={styles.dateHeaderText}>Bugün</Text>
+            <View style={styles.dateHeaderContainer}>
+                <Text style={styles.dateHeaderText}>Bugün</Text>
+            </View>
         </View>
     ), []);
 
     return (
         <View style={styles.container}>
-            <StatusBar backgroundColor="#f57c00" barStyle="light-content"/>
+            <StatusBar backgroundColor="#2E7D32" barStyle="light-content"/>
             <Header navigation={navigation}/>
 
-            <FlatList
-                ref={flatListRef}
-                data={messages}
-                keyExtractor={item => item.id}
-                renderItem={renderMessageItem}
-                contentContainerStyle={styles.messagesContainer}
-                ListHeaderComponent={ListHeaderComponent}
-                showsVerticalScrollIndicator={false}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Icon name="chat-outline" size={60} color="#ccc"/>
-                        <Text style={styles.emptyText}>Henüz mesaj yok</Text>
-                    </View>
-                }
-            />
+            <ImageBackground
+                source={{
+                    uri: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxwYXR0ZXJuIGlkPSJzdWJ0bGUtcGF0dGVybiIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPgogICAgICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZhZmFmYSIvPgogICAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIxLjUiIGZpbGw9IiNmMGYwZjAiIG9wYWNpdHk9IjAuMyIvPgogICAgICA8Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSIjZThlOGU4IiBvcGFjaXR5PSIwLjIiLz4KICAgICAgPGNpcmNsZSBjeD0iODAiIGN5PSI4MCIgcj0iMSIgZmlsbD0iI2U4ZThlOCIgb3BhY2l0eT0iMC4yIi8+CiAgICA8L3BhdHRlcm4+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSJ1cmwoI3N1YnRsZS1wYXR0ZXJuKSIvPgo8L3N2Zz4='
+                }}
+                style={styles.backgroundImage}
+                resizeMode="repeat"
+            >
+                <FlatList
+                    ref={flatListRef}
+                    data={messages}
+                    keyExtractor={item => item.id}
+                    renderItem={renderMessageItem}
+                    contentContainerStyle={styles.messagesContainer}
+                    ListHeaderComponent={ListHeaderComponent}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <View style={styles.emptyIconContainer}>
+                                <Icon name="chat-outline" size={60} color="#bbb"/>
+                            </View>
+                            <Text style={styles.emptyText}>Henüz mesaj yok</Text>
+                            <Text style={styles.emptySubText}>Diyetisyeninizle sohbete başlayın</Text>
+                        </View>
+                    }
+                />
+            </ImageBackground>
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -343,29 +469,37 @@ const Mesaj = ({navigation}) => {
                             value={input}
                             onChangeText={setInput}
                             placeholder="Mesajınızı yazın..."
+                            placeholderTextColor="#888"
                             style={styles.input}
                             multiline
                         />
-                        <View style={styles.inputActions}>
-                            <TouchableOpacity style={styles.iconButton} onPress={openCamera} disabled={loading}>
-                                <Icon name="camera" size={24} color={loading ? "#ccc" : "#555"}/>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={styles.iconButton} onPress={openGallery} disabled={loading}>
-                                <Icon name="image" size={24} color={loading ? "#ccc" : "#555"}/>
-                            </TouchableOpacity>
-                        </View>
+                        {/*<View style={styles.inputActions}>*/}
+                        {/*    <TouchableOpacity*/}
+                        {/*        style={[styles.iconButton, (loading || uploadingImage) && styles.iconButtonDisabled]}*/}
+                        {/*        onPress={openGallery}*/}
+                        {/*        disabled={loading || uploadingImage}*/}
+                        {/*    >*/}
+                        {/*        <Icon name="image" size={22} color={(loading || uploadingImage) ? "#ccc" : "#4CAF50"}/>*/}
+                        {/*    </TouchableOpacity>*/}
+                        {/*    <TouchableOpacity*/}
+                        {/*        style={[styles.iconButton, (loading || uploadingImage) && styles.iconButtonDisabled]}*/}
+                        {/*        onPress={openCamera}*/}
+                        {/*        disabled={loading || uploadingImage}*/}
+                        {/*    >*/}
+                        {/*        <Icon name="camera" size={22} color={(loading || uploadingImage) ? "#ccc" : "#4CAF50"}/>*/}
+                        {/*    </TouchableOpacity>*/}
+                        {/*</View>*/}
                     </View>
 
                     <TouchableOpacity
                         onPress={sendMessage}
                         style={[styles.sendButton, input.trim() === '' && styles.sendButtonDisabled]}
-                        disabled={input.trim() === '' || loading}
+                        disabled={input.trim() === '' || loading || uploadingImage}
                     >
-                        {loading ? (
+                        {(loading || uploadingImage) ? (
                             <ActivityIndicator color="#fff" size="small"/>
                         ) : (
-                            <Icon name="send" size={22} color="#fff"/>
+                            <Icon name="send" size={20} color="#fff"/>
                         )}
                     </TouchableOpacity>
                 </View>
@@ -379,7 +513,7 @@ const Mesaj = ({navigation}) => {
                             style={styles.closeButton}
                             onPress={() => setModalVisible(false)}
                         >
-                            <Icon name="close" size={24} color="#fff"/>
+                            <Icon name="close" size={28} color="#fff"/>
                         </TouchableOpacity>
                     </View>
                     <Image source={{uri: modalImageUri}} style={styles.fullImage} resizeMode="contain"/>
@@ -392,16 +526,20 @@ const Mesaj = ({navigation}) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f7'
+        backgroundColor: '#fafafa'
+    },
+    backgroundImage: {
+        flex: 1,
     },
     messagesContainer: {
         padding: 16,
         paddingBottom: 20,
+        flexGrow: 1,
     },
     messageRow: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        marginVertical: 4,
+        marginVertical: 3,
     },
     userRow: {
         justifyContent: 'flex-end',
@@ -410,31 +548,54 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     messageBubble: {
-        maxWidth: '70%',
-        padding: 10,
-        borderRadius: 16,
-        minWidth: 80,
+        maxWidth: '75%',
+        padding: 12,
+        borderRadius: 20,
+        minWidth: 60,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     userBubble: {
-        backgroundColor: '#e1f5fe',
-        borderBottomRightRadius: 4,
+        backgroundColor: '#4CAF50',
+        borderBottomRightRadius: 5,
         marginRight: 8,
     },
     diyetisyenBubble: {
-        backgroundColor: '#fff3e0',
-        borderBottomLeftRadius: 4,
+        backgroundColor: '#ffffff',
+        borderBottomLeftRadius: 5,
         marginLeft: 8,
+        borderWidth: 1,
+        borderColor: '#f0f0f0',
     },
     messageText: {
         fontSize: 15,
         lineHeight: 20,
-        color: '#333',
+    },
+    userMessageText: {
+        color: '#ffffff',
+    },
+    diyetisyenMessageText: {
+        color: '#333333',
     },
     sentImage: {
         width: 200,
         height: 200,
-        borderRadius: 12,
-        marginVertical: 4,
+        borderRadius: 15,
+        marginVertical: 2,
+    },
+    imageUploadOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     timestamp: {
         fontSize: 11,
@@ -442,109 +603,140 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
     },
     userTimestamp: {
-        color: '#78909c',
+        color: 'rgba(255,255,255,0.8)',
     },
     diyetisyenTimestamp: {
-        color: '#bf8c5c',
+        color: '#888888',
     },
     fullImage: {
         width: '90%',
         height: '80%',
-        borderRadius: 8,
+        borderRadius: 10,
     },
     inputWrapper: {
         flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
+        alignItems: 'flex-end',
+        padding: 12,
         backgroundColor: '#ffffff',
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
+        borderTopColor: '#e8e8e8',
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: -2},
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 5,
     },
     inputContainer: {
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: '#f1f1f1',
-        borderRadius: 20,
-        paddingHorizontal: 10,
-        alignItems: 'center',
+        backgroundColor: '#f8f8f8',
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        alignItems: 'flex-end',
+        minHeight: 45,
+        borderWidth: 1,
+        borderColor: '#e8e8e8',
     },
     input: {
         flex: 1,
-        paddingVertical: 8,
+        paddingVertical: 12,
         paddingHorizontal: 5,
         maxHeight: 100,
         fontSize: 15,
+        color: '#333',
     },
     inputActions: {
         flexDirection: 'row',
+        alignItems: 'flex-end',
+        paddingBottom: 8,
     },
     sendButton: {
-        backgroundColor: '#fc9e21',
+        backgroundColor: '#4CAF50',
         borderRadius: 25,
-        width: 45,
-        height: 45,
+        width: 48,
+        height: 48,
         justifyContent: 'center',
         alignItems: 'center',
         marginLeft: 8,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 1},
-        shadowOpacity: 0.2,
-        shadowRadius: 1.5,
-        elevation: 2,
+        shadowColor: '#4CAF50',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 4,
     },
     sendButtonDisabled: {
-        backgroundColor: '#f5ac71',
+        backgroundColor: '#a8d5aa',
+        shadowOpacity: 0.1,
     },
     iconButton: {
-        padding: 6,
+        padding: 8,
+        marginHorizontal: 2,
+        borderRadius: 20,
     },
-    avatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        marginBottom: 5,
+    iconButtonDisabled: {
+        opacity: 0.5,
     },
     modalBackground: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.9)',
+        backgroundColor: 'rgba(0,0,0,0.95)',
         justifyContent: 'center',
         alignItems: 'center'
     },
     modalHeader: {
         position: 'absolute',
-        top: 40,
+        top: 50,
         right: 20,
         zIndex: 1,
     },
     closeButton: {
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        borderRadius: 20,
-        padding: 8,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderRadius: 25,
+        padding: 10,
     },
     dateHeader: {
         alignItems: 'center',
         marginBottom: 20,
         marginTop: 10,
     },
+    dateHeaderContainer: {
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
     dateHeaderText: {
-        backgroundColor: 'rgba(0,0,0,0.1)',
         color: '#666',
         fontSize: 12,
-        fontWeight: '500',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 10,
+        fontWeight: '600',
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 50,
+        marginTop: 100,
+    },
+    emptyIconContainer: {
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        borderRadius: 40,
+        padding: 20,
+        marginBottom: 20,
     },
     emptyText: {
+        color: '#666',
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    emptySubText: {
         color: '#999',
-        fontSize: 16,
-        marginTop: 10,
+        fontSize: 14,
+        textAlign: 'center',
     },
 });
 
