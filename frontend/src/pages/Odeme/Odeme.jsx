@@ -37,7 +37,6 @@ import AccountBalance from "@mui/icons-material/AccountBalance";
 import Compare from "@mui/icons-material/Compare";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
-import School from "@mui/icons-material/School";
 import Diamond from "@mui/icons-material/Diamond";
 import Cancel from "@mui/icons-material/Cancel";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -99,21 +98,6 @@ export default function Odeme() {
                 {name: "Çevrimiçi randevu", included: true},
                 {name: "Özelleştirilmiş diyet planları", included: true},
                 {name: "SMS gönderme", included: false}
-            ]
-        },
-        {
-            name: "Öğrenci",
-            type: "student",
-            price: 500,
-            originalPrice: 1000,
-            discount: "50%",
-            features: [
-                {name: "Sınırsız danışan", included: true},
-                {name: "Gelişmiş raporlar", included: true},
-                {name: "7/24 destek", included: true},
-                {name: "Çevrimiçi randevu", included: true},
-                {name: "Özelleştirilmiş diyet planları", included: true},
-                {name: "Gelişmiş grafikler ve analiz", included: true}
             ]
         },
         {
