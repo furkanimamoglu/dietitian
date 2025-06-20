@@ -69,7 +69,7 @@ class AppointmentService {
 
 
     static async addAppointment(data) {
-        const {title, start, end, client_id} = data;
+        const {note, start, end, client_id} = data;
 
         const client = await Client.findByPk(client_id);
         if (!client) {
@@ -79,12 +79,12 @@ class AppointmentService {
         const dietitian_id = client.dietitian_id;
 
         try {
-            if (!title || !start || !end || !dietitian_id || !client_id) {
+            if (!start || !end || !dietitian_id || !client_id) {
                 throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
             const appointment = await Appointment.create({
-                title,
+                note,
                 start,
                 end,
                 dietitian_id,
@@ -98,10 +98,10 @@ class AppointmentService {
     }
 
     static async updateAppointment(appointment_id, data) {
-        const {title, start, end, dietitian_id, client_id, status} = data;
+        const {note, start, end, dietitian_id, client_id, status} = data;
 
         try {
-            if (!appointment_id || !title || !start || !end || !dietitian_id || !client_id || !status) {
+            if (!appointment_id || !start || !end || !dietitian_id || !client_id || !status) {
                 throw new Exception("Tüm alanları doldurmanız gerekmektedir.");
             }
 
@@ -111,7 +111,7 @@ class AppointmentService {
             }
 
             await existingAppointment.update({
-                title,
+                note,
                 start,
                 end,
                 dietitian_id,

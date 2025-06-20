@@ -52,7 +52,6 @@ export default function Randevularim() {
     const [conflictMessage, setConflictMessage] = useState("");
 
     const [validationErrors, setValidationErrors] = useState({
-        title: false,
         start: false,
         end: false,
         client_id: false
@@ -61,7 +60,7 @@ export default function Randevularim() {
 
     const [eventData, setEventData] = useState({
         id: null,
-        title: "",
+        note: "",
         start: "",
         end: "",
         client_id: "",
@@ -105,7 +104,8 @@ export default function Randevularim() {
 
                 const formattedAppointments = appointments.map((appointment) => ({
                     id: appointment.id,
-                    title: appointment.title,
+                    title: appointment.note, // Takvimde görüntülenmesi için title olarak note'u ekliyorum
+                    note: appointment.note,   // Aynı zamanda note değerini de saklıyorum
                     start: appointment.start,
                     end: appointment.end,
                     extendedProps: {
@@ -130,10 +130,8 @@ export default function Randevularim() {
         fetchClients();
     }, []);
 
-    // Validasyon fonksiyonu
     const validateEventData = () => {
         const errors = {
-            title: !eventData.title.trim(),
             start: !eventData.start,
             end: !eventData.end,
             client_id: !eventData.client_id
@@ -146,7 +144,7 @@ export default function Randevularim() {
     const handleRandevuEkleButton = () => {
         setEventData({
             id: null,
-            title: "",
+            note: "",
             start: "",
             end: "",
             client_id: "",
@@ -154,7 +152,6 @@ export default function Randevularim() {
         });
         // Validasyon durumlarını sıfırla
         setValidationErrors({
-            title: false,
             start: false,
             end: false,
             client_id: false
@@ -178,7 +175,7 @@ export default function Randevularim() {
 
             setEventData((prev) => ({
                 ...prev,
-                title: "",
+                note: "",
                 start: startDate,
                 end: endDate,
                 client_id: "",
@@ -187,7 +184,6 @@ export default function Randevularim() {
 
             // Validasyon durumlarını sıfırla
             setValidationErrors({
-                title: false,
                 start: false,
                 end: false,
                 client_id: false
@@ -212,7 +208,7 @@ export default function Randevularim() {
         // Date nesnelerini doğrudan kullan
         setEventData({
             id: event.id,
-            title: event.title,
+            note: event.title || event.extendedProps?.note || "", // Önce title, sonra extendedProps.note ve son olarak boş string kullan
             start: event.start,
             end: event.end || null,
             client_id: event.extendedProps?.client_id || "",
@@ -220,7 +216,6 @@ export default function Randevularim() {
         });
 
         setValidationErrors({
-            title: false,
             start: false,
             end: false,
             client_id: false
@@ -235,7 +230,7 @@ export default function Randevularim() {
 
             const updatedEvent = {
                 id: event.id,
-                title: event.title,
+                note: event.note,
                 start: event.start.toISOString(),
                 end: event.end ? event.end.toISOString() : null,
                 client_id: event.extendedProps?.client_id || "",
@@ -244,7 +239,7 @@ export default function Randevularim() {
 
             const requestData = {
                 appointment_id: updatedEvent.id,
-                title: updatedEvent.title,
+                note: updatedEvent.note,
                 start: updatedEvent.start,
                 end: updatedEvent.end,
                 client_id: updatedEvent.client_id,
@@ -295,7 +290,7 @@ export default function Randevularim() {
 
         try {
             const requestData = {
-                title: eventData.title,
+                note: eventData.note,
                 start: eventData.start,
                 end: eventData.end,
                 client_id: eventData.client_id,
@@ -329,7 +324,7 @@ export default function Randevularim() {
 
             const newEvent = {
                 id: appointmentData.id,
-                title: appointmentData.title || eventData.title,
+                note: appointmentData.note || eventData.note,
                 start: appointmentData.start || eventData.start,
                 end: appointmentData.end || eventData.end,
                 extendedProps: {
@@ -361,7 +356,7 @@ export default function Randevularim() {
         try {
             const updatedEventWithDates = {
                 id: eventData.id,
-                title: eventData.title,
+                note: eventData.note,
                 start: eventData.start,
                 end: eventData.end,
                 client_id: eventData.client_id,
@@ -370,7 +365,7 @@ export default function Randevularim() {
 
             const requestData = {
                 appointment_id: updatedEventWithDates.id,
-                title: updatedEventWithDates.title,
+                note: updatedEventWithDates.note,
                 start: updatedEventWithDates.start,
                 end: updatedEventWithDates.end,
                 client_id: updatedEventWithDates.client_id,
@@ -392,7 +387,7 @@ export default function Randevularim() {
                     String(randevu.id) === String(updatedEventWithDates.id)
                         ? {
                             ...randevu,
-                            title: updatedEventWithDates.title,
+                            note: updatedEventWithDates.note,
                             start: updatedEventWithDates.start,
                             end: updatedEventWithDates.end,
                             extendedProps: {
@@ -417,7 +412,6 @@ export default function Randevularim() {
         setRandevuEklePopup(false);
         setShowValidation(false);
         setValidationErrors({
-            title: false,
             start: false,
             end: false,
             client_id: false
@@ -467,7 +461,7 @@ export default function Randevularim() {
                 }) : conflictStartTime;
 
             setAppointmentConflict(true);
-            setConflictMessage(`Bu saatte "${clientName}" için "${conflictingAppointment.title}" randevusu bulunuyor. (${conflictStartTime} - ${conflictEndTime})`);
+            setConflictMessage(`Bu saatte "${clientName}" için "${conflictingAppointment.note}" randevusu bulunuyor. (${conflictStartTime} - ${conflictEndTime})`);
             return true;
         }
 
@@ -681,7 +675,7 @@ export default function Randevularim() {
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis'
                                         }}>
-                                            {arg.event.title}
+                                            {arg.event.note}
                                         </span>
                                     </div>
                                 </div>
@@ -788,12 +782,10 @@ export default function Randevularim() {
                     />
                     <TextField
                         label="Randevu Notu"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        value={eventData.note}
+                        onChange={(e) => handleEventChange("note", e.target.value)}
                         fullWidth
                         margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -928,12 +920,10 @@ export default function Randevularim() {
                     />
                     <TextField
                         label="Randevu Notu"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        value={eventData.note}
+                        onChange={(e) => handleEventChange("note", e.target.value)}
                         fullWidth
                         margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -1008,7 +998,7 @@ export default function Randevularim() {
                 <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                         <Box sx={{fontWeight: 'medium', fontSize: '16px'}}>
-                            "{eventData.title}" randevusunu silmek istediğinize emin misiniz?
+                            "{eventData.note}" randevusunu silmek istediğinize emin misiniz?
                         </Box>
                         <Box sx={{color: 'text.secondary', fontSize: '14px'}}>
                             Bu işlem geri alınamaz. Randevu kalıcı olarak silinecektir.
