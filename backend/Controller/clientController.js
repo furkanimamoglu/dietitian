@@ -385,6 +385,39 @@ class ClientController {
         }
     }
 
+    static async updateFCMToken(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {fcmToken} = req.body;
+
+            if (!fcmToken) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'FCM token sağlanmalıdır.'
+                });
+            }
+
+            const result = await ClientService.updateFCMToken(client_id, fcmToken);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = ClientController;

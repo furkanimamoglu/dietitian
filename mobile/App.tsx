@@ -19,6 +19,7 @@ import OnboardingScreen from './src/Screens/OnboardingScreen';
 import KayitolScreen from './src/Screens/KayitolScreen';
 import SifremiUnuttumScreen from './src/Screens/SifremiUnuttumScreen';
 import {customLightTheme} from './src/Theme/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import messaging from '@react-native-firebase/messaging';
 
@@ -172,7 +173,7 @@ const App = () => {
             const fcmToken = await messaging().getToken();
             if (fcmToken) {
                 console.log('FCM Token:', fcmToken);
-                // You can store this token in your backend/database
+                await AsyncStorage.setItem('fcmToken', fcmToken);
             } else {
                 console.log('Failed to get FCM token');
             }
