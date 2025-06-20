@@ -60,30 +60,29 @@ class NotificationService {
             throw new Exception("Bu diyetisyene ait client bulunamadı");
         }
 
-        const tokens = clients.map(client => client.fcmToken).filter(token => token);
+        const tokens = clients
+            .map(client => client.fcmToken)
+            .filter(token => !!token);
 
         if (tokens.length === 0) {
             throw new Exception("Hiçbir client için bildirim token'ı bulunamadı");
         }
 
-        const message = {
+        const multicastMessage = {
             notification: {
                 title: notificationData.title,
                 body: notificationData.body
             },
-            data: notificationData.data
+            data: notificationData.data,
+            tokens: tokens
         };
+        // INFO: 500 danışana kadar destekler, sistemde birisinin bundan daha fazla danışan varsa, foreache dön.
+        const response = await admin.messaging().sendEachForMulticast(multicastMessage);
 
-        const results = await Promise.all(
-            tokens.map(token => {
-                const msg = {
-                    ...message,
-                    token: token
-                };
-                return admin.messaging().send(msg);
-            })
-        );
-        return results;
+        const successCount = response.responses.filter(r => r.success).length;
+        const failureCount = response.responses.length - successCount;
+
+        return response;
     }
 
 }
