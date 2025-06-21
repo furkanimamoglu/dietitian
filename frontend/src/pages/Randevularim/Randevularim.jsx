@@ -1316,7 +1316,7 @@ export default function Randevularim() {
                         borderBottom: '1px solid #e9ecef',
                         padding: '16px 24px',
                         fontWeight: 'bold',
-                        color: '#007bff',
+                        color: '#fd9200',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1
