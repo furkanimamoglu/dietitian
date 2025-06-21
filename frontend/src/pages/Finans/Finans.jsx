@@ -198,6 +198,7 @@ export default function Finans() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [invoicesPerPage] = useState(6);
+    const [reminderDisabledIds, setReminderDisabledIds] = useState({});
 
     const [deleteConfirmation, setDeleteConfirmation] = useState({
         isOpen: false,
@@ -299,6 +300,9 @@ export default function Finans() {
 
     const sendPaymentReminder = async (invoice) => {
         try {
+            // Butonu devre dışı bırak
+            setReminderDisabledIds(prev => ({...prev, [invoice.id]: true}));
+
             const apiUrl = `${config[config.environment].apiUrl}/notification/sendPaymentReminderNotification`;
 
             let formattedDate = "";
@@ -320,8 +324,25 @@ export default function Finans() {
             });
 
             showSuccessToast(`${invoice.clientName} adlı danışana ödeme hatırlatma bildirimi başarıyla gönderildi.`);
+
+            // 5 saniye sonra butonu tekrar etkinleştir
+            setTimeout(() => {
+                setReminderDisabledIds(prev => {
+                    const newState = {...prev};
+                    delete newState[invoice.id];
+                    return newState;
+                });
+            }, 5000);
+
             return true;
         } catch (error) {
+            // Hata durumunda butonu hemen etkinleştir
+            setReminderDisabledIds(prev => {
+                const newState = {...prev};
+                delete newState[invoice.id];
+                return newState;
+            });
+
             console.error("Ödeme hatırlatma bildirimi gönderilirken hata oluştu:", error);
             showErrorToast("Ödeme hatırlatma bildirimi gönderilirken bir hata oluştu.");
             return false;
@@ -501,6 +522,7 @@ export default function Finans() {
                         variant="contained"
                         color="info"
                         onClick={() => sendPaymentReminder(params.row)}
+                        disabled={reminderDisabledIds[params.row.id]}
                     >
                         <NotificationsActiveIcon fontSize="small"/>
                     </Button>
