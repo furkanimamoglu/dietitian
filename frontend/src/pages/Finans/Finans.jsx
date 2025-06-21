@@ -1846,7 +1846,13 @@ export default function Finans() {
                                         color="primary"
                                         startIcon={<AddIcon/>}
                                         onClick={() => handleOpenInvoiceDialog()}
-                                        sx={{mt: {xs: 2, md: 0}}}
+                                        sx={{
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
+                                            textTransform: "none",
+                                            boxShadow: 3
+                                        }}
                                     >
                                         Yeni Fatura
                                     </Button>
@@ -1876,7 +1882,13 @@ export default function Finans() {
                                             setIsLoading(false);
                                         }}
                                         disabled={isLoading}
-                                        sx={{mt: {xs: 2, md: 0}}}
+                                        sx={{
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
+                                            textTransform: "none",
+                                            boxShadow: 3
+                                        }}
                                     >
                                         Tüm Ödemeleri Hatırlat
                                     </Button>
@@ -1886,8 +1898,9 @@ export default function Finans() {
                                         startIcon={<DownloadIcon/>}
                                         onClick={() => setImportDialogOpen(true)}
                                         sx={{
-                                            mt: {xs: 2, md: 0},
-                                            borderRadius: 2,
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
                                             textTransform: "none",
                                             boxShadow: 3
                                         }}
@@ -1900,8 +1913,9 @@ export default function Finans() {
                                         startIcon={<UploadIcon/>}
                                         onClick={handleExportCSV}
                                         sx={{
-                                            mt: {xs: 2, md: 0},
-                                            borderRadius: 2,
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
                                             textTransform: "none",
                                             boxShadow: 3
                                         }}
