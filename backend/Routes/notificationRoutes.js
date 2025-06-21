@@ -15,4 +15,6 @@ router.post('/sendExerciseAssignedNotification', notificationController.sendExer
 
 router.post('/sendPaymentReminderNotification', notificationController.sendPaymentReminderNotification);
 
+router.post('/sendRecipeAssignedNotification', notificationController.sendRecipeAssignedNotification);
+
 module.exports = router;
