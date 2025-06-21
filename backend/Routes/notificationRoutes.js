@@ -11,6 +11,8 @@ router.post('/sendNotificationToAllMyClients', notificationController.sendNotifi
 router.post('/sendAppointmentReminder', notificationController.sendAppointmentReminder);
 router.post('/sendAppointmentChangeNotification', notificationController.sendAppointmentChangeNotification);
 
+router.post('/sendAppointmentNotification', notificationController.sendAppointmentNotification);
+
 router.post('/sendNutritionPlanAssignedNotification', notificationController.sendNutritionPlanAssignedNotification);
 router.post('/sendExerciseAssignedNotification', notificationController.sendExerciseAssignedNotification);
 

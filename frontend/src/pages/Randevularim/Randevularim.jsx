@@ -323,6 +323,45 @@ export default function Randevularim() {
             };
 
             setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
+
+            try {
+                const startDate = new Date(appointmentData.start || eventData.start);
+                const date = startDate.toLocaleDateString('tr-TR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+
+                const time = startDate.toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                const notificationData = {
+                    client_id: appointmentData.client_id || eventData.client_id,
+                    appointmentDetails: {
+                        date: date,
+                        time: time
+                    }
+                };
+
+                const notificationResponse = await axios.post(
+                    config[config.environment].apiUrl + "/notification/sendAppointmentNotification",
+                    notificationData,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                        },
+                    }
+                );
+
+                console.log("Randevu bildirimi gönderildi:", notificationResponse.data);
+            } catch (notificationError) {
+                console.error("Randevu bildirimi gönderilirken bir hata oluştu:", notificationError);
+                // Bildirim hatası ana işlemi etkilemesin
+            }
+
             setRandevuEklePopup(false);
             setShowValidation(false);
 
