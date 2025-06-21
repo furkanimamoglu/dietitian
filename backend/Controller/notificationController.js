@@ -419,7 +419,7 @@ class notificationController {
         try {
             const notificationData = {
                 title: "❌ Randevu İptali! ❌",
-                body: `Diyetisyeniniz ${appointmentDetails.date} tarihinde saat ${appointmentDetails.time} bulunan randevunuzu saatinde iptal etti!`,
+                body: `Diyetisyeniniz ${appointmentDetails.date} tarihinde, ${appointmentDetails.time} saatinde bulunan randevunuzu saatinde iptal etti!`,
                 data: appointmentDetails
             };
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
