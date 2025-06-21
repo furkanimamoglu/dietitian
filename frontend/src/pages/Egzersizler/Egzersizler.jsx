@@ -933,7 +933,7 @@ export default function Egzersizler() {
                                 className="action-btn add-plan-btn"
                                 title="Egzersiz Ekle"
                                 onClick={() => setAddExerciseModal(true)}
-                                disabled={egzersizData.length === 0}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Egzersiz</span>

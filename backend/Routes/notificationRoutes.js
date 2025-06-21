@@ -8,4 +8,8 @@ const notificationController = require(path.join(__dirname, '..', 'Controller', 
 router.post('/sendNotificationToClient', notificationController.sendNotificationToClient);
 router.post('/sendNotificationToAllMyClients', notificationController.sendNotificationToAllMyClients);
 
+router.post('/sendAppointmentReminder', notificationController.sendAppointmentReminder);
+
+router.post('/sendNutritionPlanAssignedNotification', notificationController.sendNutritionPlanAssignedNotification);
+
 module.exports = router;

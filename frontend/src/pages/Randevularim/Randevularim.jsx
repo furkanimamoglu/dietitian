@@ -38,6 +38,7 @@ import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
 import Person from "@mui/icons-material/Person";
+import Notifications from "@mui/icons-material/Notifications";
 
 
 export default function Randevularim() {
@@ -66,6 +67,8 @@ export default function Randevularim() {
         client_id: "",
         status: "pending",
     });
+
+    const [reminderButtonDisabled, setReminderButtonDisabled] = useState(false);
 
     const calendarRef = useRef(null);
 
@@ -404,6 +407,59 @@ export default function Randevularim() {
             setShowValidation(false);
         } catch (error) {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
+        }
+    };
+
+    const sendReminderNotification = async () => {
+        try {
+            if (!eventData.start || !eventData.client_id) {
+                showErrorToast('Randevu tarihi ve danışan bilgisi gereklidir.');
+                return;
+            }
+
+            const startDate = new Date(eventData.start);
+
+            // Tarih formatını DD.MM.YYYY olarak ayarla
+            const date = startDate.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            // Saat formatını HH:MM olarak ayarla
+            const time = startDate.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const requestData = {
+                client_id: eventData.client_id,
+                appointmentDetails: {
+                    date: date,
+                    time: time
+                }
+            };
+
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/notification/sendAppointmentReminder",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            showSuccessToast(response.data?.message || 'Randevu hatırlatma bildirimi gönderildi!');
+
+            setReminderButtonDisabled(true);
+            setTimeout(() => {
+                setReminderButtonDisabled(false);
+            }, 5000);
+        } catch (error) {
+            console.error("Hatırlatma bildirimi gönderilirken bir hata oluştu:", error);
+            showErrorToast('Bildirim gönderilemedi: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -955,6 +1011,14 @@ export default function Randevularim() {
                         startIcon={<Delete/>}
                     >
                         Sil
+                    </Button>
+                    <Button
+                        onClick={sendReminderNotification}
+                        color="info"
+                        disabled={reminderButtonDisabled}
+                        startIcon={<Notifications />}
+                    >
+                        Randevu Hatırlat
                     </Button>
                     <Button
                         onClick={handleEventSave}

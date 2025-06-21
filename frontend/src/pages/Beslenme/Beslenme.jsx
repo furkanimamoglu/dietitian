@@ -1206,6 +1206,17 @@ export default function Beslenme() {
                 const programName = selectedProgram.title;
                 const userName = selectedUser.name;
 
+                try {
+                    axios.post(
+                        `${config[config.environment].apiUrl}/notification/sendNutritionPlanAssignedNotification`,
+                        { client_id: response.data.client_id },
+                        { headers: { Authorization: localStorage.getItem("token") } }
+                    );
+                    console.log(`Bildirim gönderildi: client_id=${response.data.client_id}`);
+                } catch (notificationError) {
+                    console.error("Bildirim gönderilirken hata oluştu:", notificationError);
+                }
+
                 setAddToUserModal(false);
                 setSelectedProgram(null);
                 setSelectedUser(null);
@@ -1371,7 +1382,7 @@ export default function Beslenme() {
                                 className="action-btn add-plan-btn"
                                 title="Plan Ekle"
                                 onClick={() => setAddPlanModal(true)}
-                                disabled={beslenmeData.length === 0}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Plan</span>

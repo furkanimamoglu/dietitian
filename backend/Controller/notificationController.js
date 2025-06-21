@@ -91,6 +91,87 @@ class notificationController {
         }
     }
 
+    static async sendAppointmentReminder(req, res) {
+        const token = req.headers.authorization;
+        const dietitian_id = Security.getUserIdFromToken(token);
+        const permission = Security.checkUserPermission(token, DIETITIAN);
+
+        if (!token || !dietitian_id || !permission) {
+            return res.status(401).json({
+                showOnScreen: true,
+                message: "Yetkisiz erişim."
+            });
+        }
+
+        const {client_id, appointmentDetails} = req.body;
+
+        if (!client_id) {
+            return res.status(400).json({
+                showOnScreen: true,
+                message: "Client ID is required."
+            });
+        }
+
+        if (!appointmentDetails || !appointmentDetails.date || !appointmentDetails.time) {
+            return res.status(400).json({
+                showOnScreen: true,
+                message: "Randevu detayları gereklidir."
+            });
+        }
+
+        try {
+            const notificationData = {
+                title: "✨ Randevu Zamanı! ✨",
+                body: `Hey! ${appointmentDetails.date} tarihinde ${appointmentDetails.time} saatinde diyetisyeninizle görüşmeniz var!`,
+                data: appointmentDetails
+            };
+            const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            });
+        }
+    }
+
+    static async sendNutritionPlanAssignedNotification(req, res) {
+        const token = req.headers.authorization;
+        const dietitian_id = Security.getUserIdFromToken(token);
+        const permission = Security.checkUserPermission(token, DIETITIAN);
+
+        if (!token || !dietitian_id || !permission) {
+            return res.status(401).json({
+                showOnScreen: true,
+                message: "Yetkisiz erişim."
+            });
+        }
+
+        const {client_id} = req.body;
+
+        if (!client_id) {
+            return res.status(400).json({
+                showOnScreen: true,
+                message: "Client ID is required."
+            });
+        }
+
+        try {
+            const notificationData = {
+                title: "📋 Yeni Beslenme Planı! 📋",
+                body: `Diyetisyeniniz size özel olarak hazırladığı yeni beslenme programınızı ekledi! Hemen göz atın!`,
+                data: {}
+            };
+            const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            });
+        }
+    }
+
 }
 
 module.exports = notificationController;
