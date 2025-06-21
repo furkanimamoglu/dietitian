@@ -840,6 +840,14 @@ export default function Egzersizler() {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
+                axios.post(`${config[config.environment].apiUrl}/notification/sendExerciseAssignedNotification`,
+                    { client_id: selectedUser.id },
+                    { headers: {Authorization: localStorage.getItem("token")} }
+                )
+                .catch(notificationError => {
+                    console.error("Bildirim gönderilirken hata oluştu:", notificationError);
+                });
+
                 setAddToUserModal(false);
                 setSelectedExercise(null);
                 setSelectedUser(null);
