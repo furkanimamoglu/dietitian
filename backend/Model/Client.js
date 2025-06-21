@@ -55,6 +55,9 @@ const Client = sequelize.define('Client', {
         token: {
             type: DataTypes.STRING
         },
+        fcmToken: {
+            type: DataTypes.STRING
+        },
         role: {
             type: DataTypes.STRING,
             allowNull: false,

@@ -115,6 +115,27 @@ const LoginScreen = ({navigation}: Props) => {
 
             const bearerToken = `Bearer ${token}`;
             await AsyncStorage.setItem('token', bearerToken);
+            const fcmToken = await AsyncStorage.getItem('fcmToken');
+
+            if (fcmToken) {
+                try {
+                    await axios.put(
+                        `${config[config.environment].apiUrl}/client/updateFCMToken`,
+                        {
+                            fcmToken: fcmToken
+                        },
+                        {
+                            headers: {
+                                Authorization: bearerToken,
+                                'Content-Type': 'application/json',
+                            },
+                            validateStatus: () => true,
+                        }
+                    );
+                } catch (error) {
+                    console.log('FCM token güncellenirken hata:', error);
+                }
+            }
 
             const clientResponse = await axios.get(
                 `${config[config.environment].apiUrl}/client/getClientInfo`,

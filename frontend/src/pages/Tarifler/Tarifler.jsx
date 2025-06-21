@@ -959,7 +959,7 @@ export default function Tarifler() {
                                     setImagePreview(''); // Resim önizlemeyi temizle
                                     setAddRecipeModal(true);
                                 }}
-                                disabled={recipeData.length === 0}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Tarif</span>
@@ -2256,6 +2256,17 @@ export default function Tarifler() {
                                 })
                                 .then(response => {
                                     const selectedClientName = danisanList.find(client => client.id == selectedUser)?.name;
+
+                                    axios.post(`${config[config.environment].apiUrl}/notification/sendRecipeAssignedNotification`,
+                                        { client_id: selectedUser },
+                                        {
+                                            headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Error sending notification:", error);
+                                        });
 
                                     setSuccessMessage(`"${selectedRecipe.title}" tarifi "${selectedClientName}" danışanına başarıyla atandı.`);
                                     setShowSuccessPopup(true);

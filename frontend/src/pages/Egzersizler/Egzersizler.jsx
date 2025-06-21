@@ -840,6 +840,14 @@ export default function Egzersizler() {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
+                axios.post(`${config[config.environment].apiUrl}/notification/sendExerciseAssignedNotification`,
+                    { client_id: selectedUser.id },
+                    { headers: {Authorization: localStorage.getItem("token")} }
+                )
+                .catch(notificationError => {
+                    console.error("Bildirim gönderilirken hata oluştu:", notificationError);
+                });
+
                 setAddToUserModal(false);
                 setSelectedExercise(null);
                 setSelectedUser(null);
@@ -933,7 +941,7 @@ export default function Egzersizler() {
                                 className="action-btn add-plan-btn"
                                 title="Egzersiz Ekle"
                                 onClick={() => setAddExerciseModal(true)}
-                                disabled={egzersizData.length === 0}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Egzersiz</span>

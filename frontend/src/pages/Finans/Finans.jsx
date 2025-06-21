@@ -55,6 +55,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
@@ -197,6 +198,7 @@ export default function Finans() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [invoicesPerPage] = useState(6);
+    const [reminderDisabledIds, setReminderDisabledIds] = useState({});
 
     const [deleteConfirmation, setDeleteConfirmation] = useState({
         isOpen: false,
@@ -294,6 +296,57 @@ export default function Finans() {
             console.error('Error fetching clients:', error);
             showErrorToast('Danışanlar yüklenirken bir hata oluştu.');
         }
+    };
+
+    const sendPaymentReminder = async (invoice) => {
+        try {
+            // Butonu devre dışı bırak
+            setReminderDisabledIds(prev => ({...prev, [invoice.id]: true}));
+
+            const apiUrl = `${config[config.environment].apiUrl}/notification/sendPaymentReminderNotification`;
+
+            let formattedDate = "";
+            if (invoice.dueDate) {
+                const dateObj = new Date(invoice.dueDate);
+                formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}.${(dateObj.getMonth() + 1).toString().padStart(2, '0')}.${dateObj.getFullYear()}`;
+            }
+
+            const reminderData = {
+                client_id: invoice.clientId,
+                due_date: formattedDate,
+                amount: invoice.amount
+            };
+
+            await axios.post(apiUrl, reminderData, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            });
+
+            showSuccessToast(`${invoice.clientName} adlı danışana ödeme hatırlatma bildirimi başarıyla gönderildi.`);
+
+            // 5 saniye sonra butonu tekrar etkinleştir
+            setTimeout(() => {
+                setReminderDisabledIds(prev => {
+                    const newState = {...prev};
+                    delete newState[invoice.id];
+                    return newState;
+                });
+            }, 5000);
+
+            return true;
+        } catch (error) {
+            // Hata durumunda butonu hemen etkinleştir
+            setReminderDisabledIds(prev => {
+                const newState = {...prev};
+                delete newState[invoice.id];
+                return newState;
+            });
+
+            console.error("Ödeme hatırlatma bildirimi gönderilirken hata oluştu:", error);
+            showErrorToast("Ödeme hatırlatma bildirimi gönderilirken bir hata oluştu.");
+            return false;
+    }
     };
 
     // Fetch invoices from backend
@@ -437,7 +490,7 @@ export default function Finans() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 275,
+            width: 375,
             sortable: false,
             filterable: false,
             editable: false,
@@ -463,6 +516,15 @@ export default function Finans() {
                         onClick={() => handleOpenInvoiceDialog(params.row)}
                     >
                         <EditIcon fontSize="small"/>
+                    </Button>
+                    <Button
+                        size="medium"
+                        variant="contained"
+                        color="info"
+                        onClick={() => sendPaymentReminder(params.row)}
+                        disabled={reminderDisabledIds[params.row.id]}
+                    >
+                        <NotificationsActiveIcon fontSize="small"/>
                     </Button>
                     <Button
                         size="small"
@@ -1239,10 +1301,8 @@ export default function Finans() {
     };
 
     const handleSaveInvoice = async () => {
-        // Reset previous errors
         const errors = {};
 
-        // Validate all required fields
         if (!newInvoice.clientId) {
             errors.clientId = "Lütfen bir danışan seçin";
         }
@@ -1259,13 +1319,11 @@ export default function Finans() {
             errors.dueDate = "Lütfen son ödeme tarihi seçin";
         }
 
-        // If we have validation errors, show them and stop
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
             return;
         }
 
-        // If validation passes, continue with saving
         setIsLoading(true);
         try {
             const getApiUrl = (endpoint) => {
@@ -1279,7 +1337,6 @@ export default function Finans() {
                 },
             };
 
-            // Status mapping fonksiyonu kullan
             const backendStatus = mapStatusToBackend(newInvoice.status);
             const invoiceData = {
                 client_id: newInvoice.clientId,
@@ -1293,14 +1350,12 @@ export default function Finans() {
             };
 
             if (currentInvoice) {
-                // Update
                 const response = await axios.put(getApiUrl('/invoice/updateInvoice'), {
                     invoice_id: currentInvoice.id,
                     ...invoiceData
                 }, authHeaders);
                 showSuccessToast("Fatura güncellendi.");
             } else {
-                // Create
                 await axios.post(getApiUrl('/invoice/addInvoice'), invoiceData, authHeaders);
                 showSuccessToast("Yeni fatura oluşturuldu.");
             }
@@ -1319,7 +1374,6 @@ export default function Finans() {
         const invoiceToDelete = invoices.find(invoice => invoice.id === id);
         if (!invoiceToDelete) return;
 
-        // Open confirmation dialog
         setDeleteConfirmation({
             isOpen: true,
             itemId: id,
@@ -1341,9 +1395,7 @@ export default function Finans() {
                     Authorization: localStorage.getItem("token"),
                 },
             };
-            // Status mapping fonksiyonu kullan
             const backendStatus = mapStatusToBackend(newStatus);
-            // Faturayı bul
             const invoice = invoices.find(i => i.id === id);
             if (!invoice) throw new Error('Fatura bulunamadı');
             await axios.put(getApiUrl('/invoice/updateInvoice'), {
@@ -1372,10 +1424,9 @@ export default function Finans() {
         }
     };
 
-    // Render the appropriate tab content
     const renderTabContent = () => {
         switch (tabValue) {
-            case 0: // Financial Overview
+            case 0:
                 const comparison = getMonthlyComparison();
                 const statusBreakdown = getPaymentStatusBreakdown();
 
@@ -1795,9 +1846,51 @@ export default function Finans() {
                                         color="primary"
                                         startIcon={<AddIcon/>}
                                         onClick={() => handleOpenInvoiceDialog()}
-                                        sx={{mt: {xs: 2, md: 0}}}
+                                        sx={{
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
+                                            textTransform: "none",
+                                            boxShadow: 3
+                                        }}
                                     >
                                         Yeni Fatura
+                                    </Button>
+
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<NotificationsActiveIcon/>}
+                                        onClick={async () => {
+                                            const unpaidInvoices = invoices.filter(invoice =>
+                                                invoice.status === "Beklemede" || invoice.status === "Ödenmedi" || invoice.status === "Kısmi Ödeme"
+                                            );
+
+                                            if (unpaidInvoices.length === 0) {
+                                                showErrorToast("Hatırlatma gönderilecek bekleyen fatura bulunmuyor.");
+                                                return;
+                                            }
+
+                                            setIsLoading(true);
+                                            let successCount = 0;
+
+                                            for (const invoice of unpaidInvoices) {
+                                                const success = await sendPaymentReminder(invoice);
+                                                if (success) successCount++;
+                                            }
+
+                                            setIsLoading(false);
+                                        }}
+                                        disabled={isLoading}
+                                        sx={{
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
+                                            textTransform: "none",
+                                            boxShadow: 3
+                                        }}
+                                    >
+                                        Tüm Ödemeleri Hatırlat
                                     </Button>
 
                                     <Button
@@ -1805,8 +1898,9 @@ export default function Finans() {
                                         startIcon={<DownloadIcon/>}
                                         onClick={() => setImportDialogOpen(true)}
                                         sx={{
-                                            mt: {xs: 2, md: 0},
-                                            borderRadius: 2,
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
                                             textTransform: "none",
                                             boxShadow: 3
                                         }}
@@ -1819,8 +1913,9 @@ export default function Finans() {
                                         startIcon={<UploadIcon/>}
                                         onClick={handleExportCSV}
                                         sx={{
-                                            mt: {xs: 2, md: 0},
-                                            borderRadius: 2,
+                                            color: 'white',
+                                            backgroundColor: '#2d4149',
+                                            borderRadius: 10,
                                             textTransform: "none",
                                             boxShadow: 3
                                         }}
@@ -1847,7 +1942,6 @@ export default function Finans() {
                                     "& .MuiDataGrid-footerContainer": {
                                         bgcolor: "background.default",
                                     },
-                                    // Hücre seçiminde oluşan çerçeveyi kaldırma
                                     "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
                                         outline: "none",
                                     },
@@ -2154,12 +2248,10 @@ export default function Finans() {
         }
     };
 
-    // Handle snackbar close
     const handleSnackbarClose = () => {
         setSnackbar(prev => ({...prev, open: false}));
     };
 
-    // CSV Import/Export handlers
     const handleCsvFileUpload = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -2168,12 +2260,9 @@ export default function Finans() {
             header: true,
             skipEmptyLines: true,
             complete: function (results) {
-                // Check if we have valid data
                 if (results.data && results.data.length > 0) {
                     const parsedData = results.data.map((row, index) => {
-                        // Find client by name
                         const client = clients.find(c => c.name && c.name.toLowerCase() === (row.danisan || "").toLowerCase());
-                        // Find package by name
                         const pkg = packages.find(p => p.name && p.name.toLowerCase() === (row.paket || "").toLowerCase());
 
                         return {
