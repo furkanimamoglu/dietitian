@@ -809,15 +809,42 @@ export default function Randevularim() {
 
             console.log("Randevu silme başarılı:", response.data);
 
-            // Randevu listesinden sil
             setRandevular((prevRandevular) =>
                 prevRandevular.filter((randevu) => String(randevu.id) !== String(appointmentId))
             );
 
-            // Toast bildirim göster
             showSuccessToast('Randevu başarıyla silindi!');
 
-            // Dialogları kapat
+            try {
+                const randevuTarihi = new Date(eventData.start);
+                const formattedDate = randevuTarihi.toISOString().split('T')[0]; // YYYY-MM-DD formatı
+                const formattedTime = randevuTarihi.toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                await axios.post(
+                    `${config[config.environment].apiUrl}/notification/sendAppointmentCancellationNotification`,
+                    {
+                        client_id: eventData.clientId || eventData.client_id,
+                        appointmentDetails: {
+                            date: formattedDate,
+                            time: formattedTime
+                        }
+                    },
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                console.log("Randevu iptal bildirimi başarıyla gönderildi");
+            } catch (notificationError) {
+                console.error("Randevu iptal bildirimi gönderilirken hata:", notificationError);
+            }
+
             setConfirmDialogOpen(false);
             handleDialogClose();
 

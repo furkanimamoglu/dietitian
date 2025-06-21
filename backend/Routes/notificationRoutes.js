@@ -10,6 +10,7 @@ router.post('/sendNotificationToAllMyClients', notificationController.sendNotifi
 
 router.post('/sendAppointmentReminder', notificationController.sendAppointmentReminder);
 router.post('/sendAppointmentChangeNotification', notificationController.sendAppointmentChangeNotification);
+router.post('/sendAppointmentCancellationNotification', notificationController.sendAppointmentCancellationNotification);
 
 router.post('/sendAppointmentNotification', notificationController.sendAppointmentNotification);
 
