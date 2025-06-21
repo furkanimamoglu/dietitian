@@ -1853,6 +1853,36 @@ export default function Finans() {
 
                                     <Button
                                         variant="contained"
+                                        color="primary"
+                                        startIcon={<NotificationsActiveIcon/>}
+                                        onClick={async () => {
+                                            const unpaidInvoices = invoices.filter(invoice =>
+                                                invoice.status === "Beklemede" || invoice.status === "Ödenmedi" || invoice.status === "Kısmi Ödeme"
+                                            );
+
+                                            if (unpaidInvoices.length === 0) {
+                                                showErrorToast("Hatırlatma gönderilecek bekleyen fatura bulunmuyor.");
+                                                return;
+                                            }
+
+                                            setIsLoading(true);
+                                            let successCount = 0;
+
+                                            for (const invoice of unpaidInvoices) {
+                                                const success = await sendPaymentReminder(invoice);
+                                                if (success) successCount++;
+                                            }
+
+                                            setIsLoading(false);
+                                        }}
+                                        disabled={isLoading}
+                                        sx={{mt: {xs: 2, md: 0}}}
+                                    >
+                                        Tüm Ödemeleri Hatırlat
+                                    </Button>
+
+                                    <Button
+                                        variant="contained"
                                         startIcon={<DownloadIcon/>}
                                         onClick={() => setImportDialogOpen(true)}
                                         sx={{
