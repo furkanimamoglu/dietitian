@@ -1329,8 +1329,20 @@ export default function Randevularim() {
                 </DialogTitle>
                 <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                        <Box sx={{fontWeight: 'medium', fontSize: '16px'}}>
-                            "{eventData.note}" randevusunu silmek istediğinize emin misiniz?
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, fontWeight: 'medium', fontSize: '16px'}}>
+                            <Box>
+                                <strong>Tarih/Saat:</strong> {eventData.start ?
+                                    `${new Date(eventData.start).toLocaleDateString('tr-TR', {day: '2-digit', month: '2-digit', year: 'numeric'})} - 
+                                    ${new Date(eventData.start).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} / 
+                                    ${new Date(eventData.end).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}`
+                                    : ''}
+                            </Box>
+                            <Box>
+                                <strong>Danışan:</strong> {clients.find(client => String(client.id) === String(eventData.client_id))?.name || 'Belirtilmemiş'}
+                            </Box>
+                            <Box sx={{mt: 1}}>
+                                Bu randevuyu silmek istediğinize emin misiniz?
+                            </Box>
                         </Box>
                         <Box sx={{color: 'text.secondary', fontSize: '14px'}}>
                             Bu işlem geri alınamaz. Randevu kalıcı olarak silinecektir.
