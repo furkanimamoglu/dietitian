@@ -13,4 +13,6 @@ router.post('/sendAppointmentReminder', notificationController.sendAppointmentRe
 router.post('/sendNutritionPlanAssignedNotification', notificationController.sendNutritionPlanAssignedNotification);
 router.post('/sendExerciseAssignedNotification', notificationController.sendExerciseAssignedNotification);
 
+router.post('/sendPaymentReminderNotification', notificationController.sendPaymentReminderNotification);
+
 module.exports = router;
