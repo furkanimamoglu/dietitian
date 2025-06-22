@@ -15,10 +15,9 @@ const OdemeScreen = ({navigation}) => {
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
-    const [page, setPage] = useState(1);
-    const [hasMoreData, setHasMoreData] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const ITEMS_PER_PAGE = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const ITEMS_PER_PAGE = 6; // Bir sayfada gösterilecek fatura sayısı
     const apiUrl = config.environment === 'dev' ? config.dev.apiUrl : config.prod.apiUrl;
 
     const fetchInvoices = async () => {
@@ -43,13 +42,11 @@ const OdemeScreen = ({navigation}) => {
             const data = await response.json();
 
             if (response.ok) {
-                // Tarihe göre tersten sıralama (en yeniden eskiye)
                 const sortedInvoices = data.sort((a, b) =>
                     new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()
                 );
                 setAllInvoices(sortedInvoices);
                 applyFilters(sortedInvoices, filterStatus, searchQuery);
-                setPage(1);
             } else {
                 setError(data.message || 'Faturalar yüklenirken bir hata oluştu.');
             }
@@ -79,30 +76,26 @@ const OdemeScreen = ({navigation}) => {
 
         setFilteredInvoices(result);
 
-        loadInvoicesByPage(result, 1);
-    }, []);
+        const totalPagesCount = Math.ceil(result.length / ITEMS_PER_PAGE);
+        setTotalPages(totalPagesCount > 0 ? totalPagesCount : 1);
 
-    const loadInvoicesByPage = useCallback((data, pageNumber) => {
-        const startIndex = 0;
-        const endIndex = pageNumber * ITEMS_PER_PAGE;
-
-        const paginatedData = data.slice(startIndex, endIndex);
-        setDisplayedInvoices(paginatedData);
-        setHasMoreData(endIndex < data.length);
+        setCurrentPage(1);
+        loadPage(1, result);
     }, [ITEMS_PER_PAGE]);
 
-    const loadMoreInvoices = useCallback(() => {
-        if (!hasMoreData || loadingMore) return;
+    const loadPage = useCallback((pageNumber, data = null) => {
+        const invoicesData = data || filteredInvoices;
+        const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
 
-        setLoadingMore(true);
-        const nextPage = page + 1;
+        setDisplayedInvoices(invoicesData.slice(startIndex, endIndex));
+    }, [filteredInvoices, ITEMS_PER_PAGE]);
 
-        setTimeout(() => {
-            loadInvoicesByPage(filteredInvoices, nextPage);
-            setPage(nextPage);
-            setLoadingMore(false);
-        }, 500);
-    }, [filteredInvoices, hasMoreData, loadingMore, page, loadInvoicesByPage]);
+    const changePage = useCallback((pageNumber) => {
+        if (pageNumber < 1 || pageNumber > totalPages) return;
+        setCurrentPage(pageNumber);
+        loadPage(pageNumber);
+    }, [totalPages, loadPage]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -119,6 +112,10 @@ const OdemeScreen = ({navigation}) => {
         fetchInvoices();
     }, []);
 
+    useEffect(() => {
+        loadPage(currentPage);
+    }, [currentPage, loadPage]);
+
     const formatDate = (dateString) => {
         if (!dateString) return 'Belirtilmemiş';
         const date = new Date(dateString);
@@ -127,6 +124,105 @@ const OdemeScreen = ({navigation}) => {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    const renderPagination = () => {
+        if (totalPages <= 1) return null;
+
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+
+        let startPage = 1;
+        let endPage = totalPages;
+
+        if (totalPages > maxVisiblePages) {
+            const halfVisible = Math.floor(maxVisiblePages / 2);
+
+            if (currentPage <= halfVisible + 1) {
+                endPage = maxVisiblePages;
+            } else if (currentPage >= totalPages - halfVisible) {
+                startPage = totalPages - maxVisiblePages + 1;
+            } else {
+                startPage = currentPage - halfVisible;
+                endPage = currentPage + halfVisible;
+            }
+        }
+
+        pageNumbers.push(
+            <TouchableOpacity
+                key="prev"
+                style={[styles.pageButton, currentPage === 1 && styles.disabledPageButton]}
+                onPress={() => changePage(currentPage - 1)}
+                disabled={currentPage === 1}
+            >
+                <Icon name="chevron-left" size={20} color={currentPage === 1 ? "#999" : "#333"} />
+            </TouchableOpacity>
+        );
+
+        if (startPage > 1) {
+            pageNumbers.push(
+                <TouchableOpacity
+                    key="1"
+                    style={[styles.pageButton, 1 === currentPage && styles.activePageButton]}
+                    onPress={() => changePage(1)}
+                >
+                    <Text style={[styles.pageButtonText, 1 === currentPage && styles.activePageText]}>1</Text>
+                </TouchableOpacity>
+            );
+
+            if (startPage > 2) {
+                pageNumbers.push(
+                    <Text key="ellipsis1" style={styles.ellipsis}>...</Text>
+                );
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(
+                <TouchableOpacity
+                    key={i}
+                    style={[styles.pageButton, i === currentPage && styles.activePageButton]}
+                    onPress={() => changePage(i)}
+                >
+                    <Text style={[styles.pageButtonText, i === currentPage && styles.activePageText]}>{i}</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                pageNumbers.push(
+                    <Text key="ellipsis2" style={styles.ellipsis}>...</Text>
+                );
+            }
+
+            pageNumbers.push(
+                <TouchableOpacity
+                    key={totalPages}
+                    style={[styles.pageButton, totalPages === currentPage && styles.activePageButton]}
+                    onPress={() => changePage(totalPages)}
+                >
+                    <Text style={[styles.pageButtonText, totalPages === currentPage && styles.activePageText]}>{totalPages}</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        pageNumbers.push(
+            <TouchableOpacity
+                key="next"
+                style={[styles.pageButton, currentPage === totalPages && styles.disabledPageButton]}
+                onPress={() => changePage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+            >
+                <Icon name="chevron-right" size={20} color={currentPage === totalPages ? "#999" : "#333"} />
+            </TouchableOpacity>
+        );
+
+        return (
+            <View style={styles.paginationContainer}>
+                {pageNumbers}
+            </View>
+        );
     };
 
     const renderPaymentStatus = (status) => {
@@ -244,17 +340,6 @@ const OdemeScreen = ({navigation}) => {
         </View>
     );
 
-    const renderFooter = () => {
-        if (!loadingMore) return null;
-
-        return (
-            <View style={styles.footerLoading}>
-                <ActivityIndicator size="small" color="#fc9e21" />
-                <Text style={styles.footerText}>Daha fazla fatura yükleniyor...</Text>
-            </View>
-        );
-    };
-
     const renderContent = () => {
         if (loading && !refreshing) {
             return (
@@ -302,18 +387,18 @@ const OdemeScreen = ({navigation}) => {
         }
 
         return (
-            <FlatList
-                data={displayedInvoices}
-                renderItem={renderInvoiceItem}
-                keyExtractor={(item, index) => `invoice-${item.id || index}`}
-                contentContainerStyle={styles.listContainer}
-                onEndReached={loadMoreInvoices}
-                onEndReachedThreshold={0.3}
-                ListFooterComponent={renderFooter}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#fc9e21']} />
-                }
-            />
+            <View style={{flex: 1}}>
+                <FlatList
+                    data={displayedInvoices}
+                    renderItem={renderInvoiceItem}
+                    keyExtractor={(item, index) => `invoice-${item.id || index}`}
+                    contentContainerStyle={styles.listContainer}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#fc9e21']} />
+                    }
+                />
+                {renderPagination()}
+            </View>
         );
     };
 
@@ -339,7 +424,7 @@ const OdemeScreen = ({navigation}) => {
 
                 <View style={styles.resultsContainer}>
                     <Text style={styles.resultsText}>
-                        {filteredInvoices.length} fatura bulundu
+                        {filteredInvoices.length} fatura bulundu {totalPages > 1 ? `(${currentPage}/${totalPages} sayfa)` : ''}
                     </Text>
                 </View>
 
@@ -592,6 +677,47 @@ const styles = StyleSheet.create({
         marginTop: 8,
         fontSize: 14,
         color: '#666'
+    },
+    paginationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+        marginTop: 8
+    },
+    pageButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#f1f1f1',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 4,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    activePageButton: {
+        backgroundColor: '#fc9e21',
+        borderColor: '#fc9e21',
+    },
+    disabledPageButton: {
+        opacity: 0.5,
+    },
+    pageButtonText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333'
+    },
+    activePageText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    ellipsis: {
+        fontSize: 16,
+        color: '#666',
+        marginHorizontal: 4
     }
 });
 
