@@ -383,26 +383,52 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                     <Card key={mealType} style={styles.mealCard} mode="elevated">
                         <Card.Title
                             title={mealType}
+                            subtitle={
+                                <View style={styles.subtitleContainer}>
+                                    {mealCategories.info?.time && (
+                                        <View style={styles.timeContainer}>
+                                            <Avatar.Icon
+                                                size={16}
+                                                icon="clock-outline"
+                                                color="#4caf50"
+                                                style={styles.clockIcon}
+                                            />
+                                            <Text style={styles.timeText}>{mealCategories.info.time}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            }
                             titleStyle={styles.mealTitleText}
                             left={(props) => (
                                 <Avatar.Icon
-                                    size={40}
+                                    size={48}
                                     icon={mealIcons[mealType] || 'food'}
                                     color="#4caf50"
-                                    style={{backgroundColor: '#e8f5e9'}}
+                                    style={styles.mealIcon}
                                 />
                             )}
-                            right={(props) => mealCategories.info?.time ? (
-                                <View style={styles.timeContainer}>
+                            right={(props) => (
+                                <View style={styles.headerButtonsContainer}>
                                     <IconButton
-                                        icon="clock-outline"
-                                        size={16}
-                                        color="#4caf50"
-                                        style={{margin: 0, padding: 0}}
+                                        icon="camera"
+                                        size={22}
+                                        iconColor="#4caf50"
+                                        style={styles.headerButton}
+                                        onPress={() => {
+                                            // Kamera işlevi
+                                        }}
                                     />
-                                    <Text style={styles.timeText}>{mealCategories.info.time}</Text>
+                                    <IconButton
+                                        icon="image"
+                                        size={22}
+                                        iconColor="#4caf50"
+                                        style={styles.headerButton}
+                                        onPress={() => {
+                                            // Galeri işlevi
+                                        }}
+                                    />
                                 </View>
-                            ) : null}
+                            )}
                         />
                         <Divider/>
 
@@ -694,13 +720,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         backgroundColor: '#4caf50'
     },
-    headerCard: {
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 12,
-        elevation: 2,
-        backgroundColor: '#fff'
-    },
+
     sectionTitle: {
         fontSize: 22,
         fontWeight: 'bold',
@@ -713,9 +733,6 @@ const styles = StyleSheet.create({
         color: '#666',
         marginBottom: 12,
         textAlign: 'center'
-    },
-    progressContainer: {
-        marginTop: 8
     },
     progressTextRow: {
         flexDirection: 'row',
@@ -737,33 +754,9 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         marginLeft: 12
     },
-    progressBar: {
-        height: 10,
-        borderRadius: 10
-    },
-    mealCard: {
-        marginBottom: 16,
-        borderRadius: 12,
-        overflow: 'hidden',
-        elevation: 2
-    },
     cardTitle: {
         fontSize: 18,
         fontWeight: '600'
-    },
-    cardContent: {
-        paddingVertical: 8
-    },
-    mealItemContainer: {
-        marginBottom: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-        paddingBottom: 8
-    },
-    mealItem: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingVertical: 8
     },
     mealInfo: {
         flex: 1,
@@ -903,21 +896,6 @@ const styles = StyleSheet.create({
         color: '#4caf50',
         fontWeight: '500'
     },
-    categoryHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: '#f9f9f9',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0'
-    },
-    categoryTitle: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#333'
-    },
     smallAddButton: {
         marginLeft: 8,
         backgroundColor: '#e8f5e9'
@@ -946,48 +924,161 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         paddingHorizontal: 10,
     },
-    addMealButtonContainer: {
-        padding: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        backgroundColor: '#fff'
-    },
-    addMealButton: {
-        width: '100%',
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: '#4caf50'
-    },
-    mealTitleText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#2e7d32',
-        marginBottom: 4,
-        textAlign: 'left'
-    },
     mealTimeText: {
         fontSize: 14,
-        color: '#666',
-        marginTop: 4
+        color: '#666'
     },
     deleteButton: {
         margin: 0,
         padding: 0,
         marginLeft: 5
     },
+    mealCard: {
+        marginBottom: 18,
+        borderRadius: 16,
+        overflow: 'hidden',
+        elevation: 4,
+        backgroundColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+    },
+    mealIcon: {
+        backgroundColor: '#e8f5e9',
+        marginRight: 8,
+        elevation: 2,
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+    },
+    mealTitleText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#2e7d32',
+        letterSpacing: 0.5,
+        marginBottom: 4,
+    },
+    subtitleContainer: {
+        marginTop: 4,
+    },
     timeContainer: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        backgroundColor: '#f1f8e9',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
+        marginTop: 2,
+    },
+    clockIcon: {
+        backgroundColor: 'transparent',
+        marginRight: 4,
     },
     timeText: {
         fontSize: 14,
-        color: '#666',
-        marginLeft: 4
-    }
+        color: '#2e7d32',
+        fontWeight: '600',
+        letterSpacing: 0.3,
+    },
+    headerButtonsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 8,
+    },
+    headerButton: {
+        marginLeft: 4,
+        backgroundColor: '#e8f5e9',
+        elevation: 1,
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.15,
+        shadowRadius: 2,
+    },
+    cardContent: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#fafafa',
+    },
+    mealItemContainer: {
+        marginBottom: 12,
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        padding: 12,
+        elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+    },
+    mealItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 4,
+    },
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#f8f9fa',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    categoryTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#495057',
+        letterSpacing: 0.3,
+    },
+    addMealButtonContainer: {
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+        backgroundColor: '#ffffff',
+    },
+    addMealButton: {
+        width: '100%',
+        borderRadius: 12,
+        paddingVertical: 14,
+        paddingHorizontal: 20,
+        backgroundColor: '#4caf50',
+        elevation: 2,
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    // Header card iyileştirmesi
+    headerCard: {
+        padding: 20,
+        marginBottom: 20,
+        borderRadius: 16,
+        elevation: 4,
+        backgroundColor: '#ffffff',
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#4caf50',
+    },
+    progressContainer: {
+        marginTop: 12,
+        backgroundColor: '#f8f9fa',
+        padding: 16,
+        borderRadius: 12,
+    },
+    progressBar: {
+        height: 12,
+        borderRadius: 12,
+        backgroundColor: '#e9ecef',
+    },
 });
 
 export default Beslenme;
-
