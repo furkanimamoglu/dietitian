@@ -112,7 +112,7 @@ const WaterTrackingCard = ({data, clientId}) => {
     };
 
     const handleCloseEditGoalDialog = () => {
-        setIsEditGoalDialogOpen(false);
+        setIsEditGoalDialog(false);
     };
 
     const handleUpdateDailyGoal = async () => {
@@ -1429,6 +1429,18 @@ function Danisan() {
         }
     }, [activeTab, id, historyStartDate, historyEndDate]);
 
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageModalOpen, setImageModalOpen] = useState(false);
+
+    const handleImageClick = (imageUrl) => {
+        setSelectedImage(imageUrl);
+        setImageModalOpen(true);
+    };
+
+    const handleCloseImageModal = () => {
+        setImageModalOpen(false);
+    };
+
     if (isLoading) {
         return (
             <Default>
@@ -1450,131 +1462,115 @@ function Danisan() {
         setActiveTab(newValue);
     };
 
+    // Beslenme planı öğünlerini render eden fonksiyon
     const renderMealItems = (mealItems) => {
-        if (!mealItems) return "Öğün girilmemiş.";
+        if (!mealItems) return null;
 
-        if (typeof mealItems === 'object' && !Array.isArray(mealItems)) {
+        // Yeni JSON yapısı için özel işleme
+        // Eğer mealItems'ın info, Alternatif vb. özellikleri varsa yeni formatta
+        if (mealItems.info || Object.keys(mealItems).some(key => key.includes('Alternatif'))) {
+            const info = mealItems.info || {};
+            const alternativeKeys = Object.keys(mealItems).filter(key => key !== 'info');
+
             return (
-                <>
-                    {Object.entries(mealItems).map(([menuName, items], menuIndex) => (
-                        <Box key={menuIndex} sx={{ mb: menuIndex < Object.keys(mealItems).length - 1 ? 2 : 0 }}>
-                                <Typography
-                                    variant="subtitle2"
-                                    fontWeight="medium"
-                                    sx={{
-                                        mb: 1,
-                                        textAlign: 'center',
-                                        width: '100%',
-                                        py: 1,
-                                        borderBottom: '1px solid',
-                                        borderColor: 'divider',
-                                        color: 'white',
-                                        bgcolor: 'rgba(45,65,73,0.76)',
-                                        borderRadius: 1
-                                    }}>
-                                    {menuName}
-                                </Typography>
+                <Box>
+                    {/* Zaman ve Görsel Bilgisi */}
+                    {info.time && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <AccessTimeIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">
+                                {info.time}
+                            </Typography>
+                        </Box>
+                    )}
 
-                            {Array.isArray(items) && items.length > 0 ? (
-                                items.map((item, itemIndex) => (
+                    {/* Görsel varsa göster */}
+                    {info.image && info.image !== "" && (
+                        <Box sx={{ mb: 1 }}>
+                            <Box
+                                component="img"
+                                src={info.image}
+                                alt="Yemek görseli"
+                                sx={{
+                                    width: '100%',
+                                    height: 60,
+                                    objectFit: 'cover',
+                                    borderRadius: 1,
+                                    mb: 0.5,
+                                    cursor: 'pointer' // İmleci tıklanabilir şekilde göster
+                                }}
+                                onClick={() => handleImageClick(info.image)} // Tıklama işleyicisini ekledim
+                            />
+                        </Box>
+                    )}
+
+                    {/* Alternatifler */}
+                    {alternativeKeys.map((altKey, altIndex) => {
+                        const items = mealItems[altKey];
+                        if (!Array.isArray(items) || items.length === 0) return null;
+
+                        return (
+                            <Box key={`alt-${altIndex}`} sx={{ mb: altIndex < alternativeKeys.length - 1 ? 1 : 0 }}>
+                                {alternativeKeys.length > 1 && (
+                                    <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', color: 'text.secondary' }}>
+                                        {altKey}:
+                                    </Typography>
+                                )}
+
+                                {items.map((item, itemIndex) => (
                                     <Typography
-                                        key={itemIndex}
+                                        key={`item-${itemIndex}`}
                                         variant="body2"
-                                        component="div"
                                         sx={{
+                                            textDecoration: item.eaten ? 'line-through' : 'none',
+                                            color: item.eaten ? 'text.secondary' : 'text.primary',
                                             display: 'flex',
-                                            alignItems: 'center',
-                                            mb: itemIndex < items.length - 1 ? 0.5 : 0,
-                                            ...(item.eaten ? { textDecoration: 'line-through', color: 'text.secondary' } : {})
+                                            alignItems: 'center'
                                         }}
                                     >
-                                        {item.eaten ?
-                                            <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} /> :
-                                            <RadioButtonUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }} />
-                                        }
-                                        {item.name}
-                                        {item.portion && (
-                                            <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                                                ({item.portion})
-                                            </Typography>
+                                        {item.eaten ? (
+                                            <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5, color: 'success.main' }} />
+                                        ) : (
+                                            <RadioButtonUncheckedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
                                         )}
+                                        {item.name}
+                                        {item.portion && ` (${item.portion})`}
                                     </Typography>
-                                ))
-                            ) : (
-                                <Typography variant="body2" color="text.secondary">
-                                    Bu menüde öğün girilmemiş.
-                                </Typography>
-                            )}
-                        </Box>
-                    ))}
-                </>
+                                ))}
+                            </Box>
+                        );
+                    })}
+                </Box>
             );
-        }
+    }
 
-        if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
-            return (
-                <>
-                    {mealItems.map((item, index) => (
-                        <Typography
-                            key={index}
-                            variant="body2"
-                            component="div"
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                mb: index < mealItems.length - 1 ? 0.5 : 0,
-                                ...(item.yenildi ? {textDecoration: 'line-through', color: 'text.secondary'} : {})
-                            }}
-                        >
-                            {item.yenildi ?
-                                <CheckCircleIcon sx={{fontSize: 16, color: 'success.main', mr: 0.5}}/> :
-                                <RadioButtonUncheckedIcon sx={{fontSize: 16, color: 'text.secondary', mr: 0.5}}/>
-                            }
-                            {item.isim}
-                        </Typography>
-                    ))}
-                </>
-            );
-        }
+    // Eski format için uyumluluk
+    if (Array.isArray(mealItems)) {
+        return mealItems.map((item, index) => (
+            <Typography
+                key={index}
+                variant="body2"
+                sx={{
+                    textDecoration: item.yenildi ? 'line-through' : 'none',
+                    color: item.yenildi ? 'text.secondary' : 'text.primary',
+                    mb: index < mealItems.length - 1 ? 0.5 : 0,
+                    display: 'flex',
+                    alignItems: 'center'
+                }}
+            >
+                {item.yenildi ? (
+                    <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5, color: 'success.main' }} />
+                ) : (
+                    <RadioButtonUncheckedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
+                )}
+                {item.isim || item.name}
+                {(item.porsiyon || item.portion) && ` (${item.porsiyon || item.portion})`}
+            </Typography>
+        ));
+    }
 
-        if (typeof mealItems === 'string') {
-            return mealItems;
-        }
-
-        if (Array.isArray(mealItems)) {
-            return mealItems.join(", ");
-        }
-
-        if (mealItems.main && Array.isArray(mealItems.main)) {
-            const mainItems = mealItems.main.join(", ");
-
-            if (mealItems.alternatives && Object.keys(mealItems.alternatives).length > 0) {
-                let alternativesText = [];
-
-                for (const [mainItem, alternatives] of Object.entries(mealItems.alternatives)) {
-                    if (alternatives && alternatives.length > 0) {
-                        alternativesText.push(`${mainItem} yerine: ${alternatives.join(", ")}`);
-                    }
-                }
-
-                if (alternativesText.length > 0) {
-                    return (
-                        <>
-                            <Typography variant="body2" component="div">{mainItems}</Typography>
-                            <Typography variant="body2" component="div" color="text.secondary"
-                                        sx={{fontSize: '0.85rem', fontStyle: 'italic', mt: 0.5}}>
-                                {alternativesText.join("; ")}
-                            </Typography>
-                        </>
-                    );
-                }
-            }
-
-            return mainItems;
-        }
-
-        return "Öğün formatı tanınmıyor.";
-    };
+    return <Typography variant="body2">Öğün girilmemiş.</Typography>;
+};
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -3009,7 +3005,9 @@ function Danisan() {
                                 </LocalizationProvider>
                             </DialogContent>
                             <DialogActions>
-                                <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>İptal</Button>
+                                <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>
+                                    İptal
+                                </Button>
                                 <Button onClick={handleAddAppointment}>Ekle</Button>
                             </DialogActions>
                         </Dialog>
@@ -4391,7 +4389,7 @@ function Danisan() {
                             color="primary"
                             disabled={updateMeasurementLoading}
                         >
-                            {updateMeasurementLoading ? <CircularProgress size={24}/> : "Güncelle"}
+                            {updateMeasurementLoading ? <CircularProgress size={24} /> : "Güncelle"}
                         </Button>
                     </DialogActions>
                 </Box>
@@ -4644,6 +4642,34 @@ function Danisan() {
                         color="primary"
                     >
                         Kaydet
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Resim büyütme modalı */}
+            <Dialog
+                open={imageModalOpen}
+                onClose={handleCloseImageModal}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogContent sx={{ p: 1, textAlign: 'center' }}>
+                    {selectedImage && (
+                        <Box
+                            component="img"
+                            src={selectedImage}
+                            alt="Yemek görseli"
+                            sx={{
+                                maxWidth: '100%',
+                                maxHeight: '80vh',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseImageModal} color="primary">
+                        Kapat
                     </Button>
                 </DialogActions>
             </Dialog>
