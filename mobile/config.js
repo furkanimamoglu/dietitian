@@ -3,7 +3,7 @@ const config = {
 
     dev: {
         app_scheme: "diyetia",
-        apiUrl: 'http://192.168.1.135:3000/api'
+        apiUrl: 'http://172.20.10.2:3000/api'
     },
 
     prod: {

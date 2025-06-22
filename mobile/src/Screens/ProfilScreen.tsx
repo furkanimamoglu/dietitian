@@ -76,11 +76,40 @@ const Profil = ({navigation}) => {
                         <Button onPress={() => console.log('Ayarlar')} mode="outlined"
                                 style={styles.button}>Ayarlar</Button>
                         */}
-                        <Button onPress={() => navigation.navigate('Odeme')} mode="outlined" style={styles.button}>
+                        <Button
+                            onPress={() => navigation.navigate('Odeme')}
+                            mode="contained"
+                            icon="credit-card"
+                            style={[styles.button, styles.primaryButton]}
+                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
+                        >
                             Ödemelerim
                         </Button>
-                        <Button onPress={handleLogout} mode="outlined" textColor="#d32f2f" style={styles.button}
-                                icon="logout">Çıkış Yap
+
+                        <Button
+                            onPress={() => console.log('Hesap Siliniyor')}
+                            mode="outlined"
+                            icon="account-remove"
+                            textColor="#d32f2f"
+                            style={[styles.button, styles.dangerButton]}
+                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Hesabımı Sil
+                        </Button>
+
+                        <Button
+                            onPress={handleLogout}
+                            mode="contained"
+                            textColor="#fff"
+                            buttonColor="#d32f2f"
+                            style={[styles.button, styles.logoutButton]}
+                            icon="logout"
+                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Çıkış Yap
                         </Button>
                     </Card.Content>
                 </Card>
@@ -131,9 +160,33 @@ const styles = StyleSheet.create({
         paddingBottom: 12
     },
     button: {
-        marginVertical: 6,
-        borderRadius: 24
-    }
+        marginVertical: 8,
+        borderRadius: 12,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    primaryButton: {
+        backgroundColor: '#ff9e25',
+    },
+    dangerButton: {
+        borderColor: '#d32f2f',
+        borderWidth: 2,
+    },
+    logoutButton: {
+        backgroundColor: '#d32f2f',
+    },
+    buttonContent: {
+        height: 48,
+        flexDirection: 'row-reverse',
+    },
+    buttonLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        letterSpacing: 0.5,
+    },
 });
 
 export default Profil;

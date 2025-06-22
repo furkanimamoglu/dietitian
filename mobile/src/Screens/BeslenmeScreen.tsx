@@ -27,8 +27,14 @@ interface MealItem {
     portion: string | null;
 }
 
+interface MealInfo {
+    image: string;
+    time: string;
+}
+
 interface MealCategory {
     [category: string]: MealItem[];
+    info?: MealInfo;
 }
 
 interface DailyMeal {
@@ -181,8 +187,12 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (!mealPlan[currentDay]) return 0;
 
         return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
-            return total + Object.values(mealType).reduce((mealTotal, category) => {
-                return mealTotal + category.length;
+            return total + Object.entries(mealType).reduce((mealTotal, [category, items]) => {
+                // "info" nesnesi olduğunda atla, çünkü bu bir dizi değil
+                if (category === 'info') return mealTotal;
+
+                // Dizi ise öğeleri say
+                return mealTotal + items.length;
             }, 0);
         }, 0);
     };
@@ -191,8 +201,12 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (!mealPlan[currentDay]) return 0;
 
         return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
-            return total + Object.values(mealType).reduce((mealTotal, category) => {
-                return mealTotal + category.filter(item => item.eaten).length;
+            return total + Object.entries(mealType).reduce((mealTotal, [category, items]) => {
+                // "info" nesnesi olduğunda atla, çünkü bu bir dizi değil
+                if (category === 'info') return mealTotal;
+
+                // Dizi ise yenmiş öğeleri say
+                return mealTotal + items.filter(item => item.eaten).length;
             }, 0);
         }, 0);
     };
@@ -378,14 +392,29 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                     style={{backgroundColor: '#e8f5e9'}}
                                 />
                             )}
+                            right={(props) => mealCategories.info?.time ? (
+                                <View style={styles.timeContainer}>
+                                    <IconButton
+                                        icon="clock-outline"
+                                        size={16}
+                                        color="#4caf50"
+                                        style={{margin: 0, padding: 0}}
+                                    />
+                                    <Text style={styles.timeText}>{mealCategories.info.time}</Text>
+                                </View>
+                            ) : null}
                         />
                         <Divider/>
 
                         {/* Öğün kategorileri */}
-                        {Object.entries(mealCategories).map(([category, meals]) => (
+                        {Object.entries(mealCategories).map(([category, meals]) => {
+                            // "info" nesnesi ise bu kategoriyi atla
+                            if (category === 'info') return null;
+
+                            return (
                             <View key={`${mealType}-${category}`}>
                                 {/* Eğer birden fazla kategori varsa kategori başlığını göster */}
-                                {Object.keys(mealCategories).length > 1 && (
+                                {Object.keys(mealCategories).filter(cat => cat !== 'info').length > 1 && (
                                     <View style={styles.categoryHeader}>
                                         <Text style={styles.categoryTitle}>{category}</Text>
                                         <IconButton
@@ -402,11 +431,11 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 )}
 
                                 <Card.Content style={styles.cardContent}>
-                                    {meals.length === 0 ? (
+                                    {Array.isArray(meals) && meals.length === 0 ? (
                                         <Text style={styles.emptyMealText}>
                                             Bu öğün için henüz yemek eklenmemiş
                                         </Text>
-                                    ) : (
+                                    ) : Array.isArray(meals) ? (
                                         meals.map((meal, index) => (
                                             <View key={index} style={styles.mealItemContainer}>
                                                 <View style={styles.mealItem}>
@@ -441,10 +470,15 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                                 </View>
                                             </View>
                                         ))
+                                    ) : (
+                                        <Text style={styles.emptyMealText}>
+                                            Bu öğün için henüz yemek eklenmemiş
+                                        </Text>
                                     )}
                                 </Card.Content>
                             </View>
-                        ))}
+                            );
+                        })}
 
                         {/* Yeni Öğün Ekle butonu */}
                         <View style={styles.addMealButtonContainer}>
@@ -934,11 +968,25 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         textAlign: 'left'
     },
+    mealTimeText: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 4
+    },
     deleteButton: {
         margin: 0,
         padding: 0,
         marginLeft: 5
     },
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    timeText: {
+        fontSize: 14,
+        color: '#666',
+        marginLeft: 4
+    }
 });
 
 export default Beslenme;

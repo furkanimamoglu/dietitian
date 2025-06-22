@@ -371,7 +371,6 @@ class DietitianController {
 
     static async getAllMyClients(req, res) {
         try {
-            //TODO: Client olarak bearer tokenimle çektiğimde, verilerim geliyor? Bağlı olduğu diyetisyenin clientlerini çekemiyor olması gerekiyor.
             const token = req.headers.authorization;
             const dietitian_id = Security.getUserIdFromToken(token);
             const permission = Security.checkUserPermission(token, DIETITIAN);

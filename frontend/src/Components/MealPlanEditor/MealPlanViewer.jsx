@@ -5,7 +5,7 @@ import './MealPlanEditor.css';
  * MealPlanViewer - Salt okunur beslenme planı görüntüleyici bileşeni
  * MealPlanEditor'ün görsel özelliklerini korur ancak düzenleme işlevselliği yoktur
  */
-const MealPlanViewer = ({ mealPlan, title, description }) => {
+const MealPlanViewer = ({ mealPlan, title, description, mealTypes }) => {
     // Sabitleri tanımla
     const DAYS_OF_WEEK = [
         "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"
@@ -27,7 +27,8 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
         if (typeof mealPlan[day][mealType] === 'object' && !Array.isArray(mealPlan[day][mealType])) {
             // Ana Menü formatı - her alternatif için ayrı liste
             if (!mealPlan[day][mealType].main) {
-                return Object.keys(mealPlan[day][mealType]);
+                // "info" dışındaki tüm anahtarları alternatif olarak döndür
+                return Object.keys(mealPlan[day][mealType]).filter(key => key !== 'info');
             }
         }
 
@@ -106,6 +107,24 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
         return [];
     };
 
+    // Öğün saatini almak için yardımcı fonksiyon
+    const getMealTime = (day, mealType) => {
+        if (!mealPlan || !mealPlan[day] || !mealPlan[day][mealType]) {
+            // Saat bilgisi mealPlan'da yoksa, meal type'dan almaya çalışalım
+            const mealTypeObj = mealTypes ? mealTypes.find(m => m.name === mealType) : null;
+            return mealTypeObj?.time || '';
+        }
+
+        // MealPlanEditor formatı (info objesi içinde time)
+        if (mealPlan[day][mealType].info && mealPlan[day][mealType].info.time) {
+            return mealPlan[day][mealType].info.time;
+        }
+
+        // Saat bilgisi mealPlan'da yoksa, meal type'dan almaya çalışalım
+        const mealTypeObj = mealTypes ? mealTypes.find(m => m.name === mealType) : null;
+        return mealTypeObj?.time || '';
+    };
+
     return (
         <div className="mui-meal-plan-container">
             {/* Başlık ve Açıklama */}
@@ -163,6 +182,9 @@ const MealPlanViewer = ({ mealPlan, title, description }) => {
                                         ></div>
                                         <div className="mui-meal-type-name">
                                             {mealType}
+                                            {getMealTime(selectedDay, mealType) && (
+                                                <span className="mui-meal-time"> ({getMealTime(selectedDay, mealType)})</span>
+                                            )}
                                         </div>
                                     </div>
                                 </td>
