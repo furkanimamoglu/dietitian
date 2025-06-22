@@ -53,7 +53,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [mealPlan, setMealPlan] = useState<WeeklyMealPlan>({});
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedMealType, setSelectedMealType] = useState<string>('');
-    const [selectedMealCategory, setSelectedMealCategory] = useState<string>('Ana Menü');
+    const [selectedMealCategory, setSelectedMealCategory] = useState<string>('Alternatif');
     const [newMeal, setNewMeal] = useState('');
     const [newPortion, setNewPortion] = useState('');
     const [loading, setLoading] = useState(true);
@@ -453,7 +453,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 icon="plus"
                                 onPress={() => {
                                     setSelectedMealType(Object.keys(mealCategories)[0]);
-                                    setSelectedMealCategory('Ana Menü');
+                                    setSelectedMealCategory('Alternatif');
                                     setModalVisible(true);
                                 }}
                                 style={styles.addMealButton}
