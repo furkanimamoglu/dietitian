@@ -69,15 +69,19 @@ const Profil = ({navigation}) => {
                         {/*
                         <Button onPress={() => console.log('Profili Düzenle')} mode="outlined" style={styles.button}>Profili
                             Düzenle</Button>
-                        <Button onPress={() => console.log('Ödemelerim')} mode="outlined" style={styles.button}>
-                            Ödemelerim</Button>
+
                         <Button onPress={() => console.log('Şifreyi Değiştir')} mode="outlined" style={styles.button}>Şifreyi
-                            Değiştir</Button>
+                            Değiştir
+                        </Button>
                         <Button onPress={() => console.log('Ayarlar')} mode="outlined"
                                 style={styles.button}>Ayarlar</Button>
-                    */}
+                        */}
+                        <Button onPress={() => navigation.navigate('Odeme')} mode="outlined" style={styles.button}>
+                            Ödemelerim
+                        </Button>
                         <Button onPress={handleLogout} mode="outlined" textColor="#d32f2f" style={styles.button}
-                                icon="logout">Çıkış Yap</Button>
+                                icon="logout">Çıkış Yap
+                        </Button>
                     </Card.Content>
                 </Card>
             </ScrollView>

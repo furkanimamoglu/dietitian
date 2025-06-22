@@ -10,6 +10,7 @@ import AnaSayfaScreen from './src/Screens/AnaSayfaScreen';
 import LoginScreen from './src/Screens/LoginScreen';
 import BeslenmeScreen from './src/Screens/BeslenmeScreen';
 import ProfilScreen from './src/Screens/ProfilScreen';
+import OdemeScreen from './src/Screens/OdemeScreen';
 import EgzersizScreen from './src/Screens/EgzersizScreen';
 import TarifScreen from './src/Screens/TarifScreen';
 import MesajScreen from './src/Screens/MesajScreen';
@@ -36,6 +37,7 @@ export type RootStackParamList = {
     Mesaj: undefined;
     Kayitol: { dietitian_id: string };
     SifremiUnuttum: undefined;
+    Odeme: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -58,7 +60,8 @@ const linking = {
             Rapor: 'rapor',
             AnaSayfa: 'anasayfa',
             Mesaj: 'mesaj',
-            SifremiUnuttum: 'sifremiunuttum'
+            SifremiUnuttum: 'sifremiunuttum',
+            Odeme: 'odeme'
         }
     }
 };
@@ -249,6 +252,11 @@ const App = () => {
                         <Stack.Screen
                             name="SifremiUnuttum"
                             component={SifremiUnuttumScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Odeme"
+                            component={OdemeScreen}
                             options={{headerShown: false}}
                         />
                     </Stack.Navigator>
