@@ -28,7 +28,7 @@ const Tarif = ({navigation}) => {
                 navigation.replace('Login');
                 return;
             }
-            setError(null); // Hata mesajını temizle
+            setError(null);
 
             const response = await fetch(`${config[config.environment].apiUrl}/client/getMyRecipes`, {
                 method: 'GET',
@@ -39,7 +39,6 @@ const Tarif = ({navigation}) => {
             });
 
             if (response.status === 404) {
-                // 404 durumunda özel mesaj göster, hata olarak değerlendirme
                 setMyRecipes([]);
                 setError('✨ Henüz sizin için özel tarifler eklenmemiş. Diyetisyeniniz yakında lezzetli tarifler paylaşacak! ✨');
                 setLoading(false);
@@ -90,16 +89,10 @@ const Tarif = ({navigation}) => {
                 id: recipe.id,
                 name: recipe.name,
                 category: recipe.category?.name || 'Kişisel Tarif',
-                calories: recipe.kcal || 0,
                 prepTime: '- dk',
                 description: recipe.description || 'Açıklama bulunmuyor',
                 ingredients: ingredients,
                 steps: steps,
-                nutritionInfo: {
-                    protein: recipe.protein || 0,
-                    carbs: recipe.karbonhidrat || 0,
-                    fat: recipe.yag || 0
-                },
                 image: recipe.image || null,
                 note: item.note
             };
@@ -220,10 +213,6 @@ const Tarif = ({navigation}) => {
                                             <Text style={styles.recipeName}>{recipe.name}</Text>
                                             <View style={styles.recipeDetails}>
                                                 <View style={styles.recipeDetail}>
-                                                    <Icon name="fire" size={16} color="#fc9e21" />
-                                                    <Text style={styles.recipeDetailText}>{recipe.calories} kcal</Text>
-                                                </View>
-                                                <View style={styles.recipeDetail}>
                                                     <Icon name="clock-outline" size={16} color="#fc9e21" />
                                                     <Text style={styles.recipeDetailText}>{recipe.prepTime}</Text>
                                                 </View>
@@ -279,28 +268,8 @@ const Tarif = ({navigation}) => {
 
                             <View style={styles.recipeDetailInfo}>
                                 <View style={styles.recipeDetail}>
-                                    <Icon name="fire" size={18} color="#fc9e21" />
-                                    <Text style={styles.recipeDetailInfoText}>{activeRecipe.calories} kcal</Text>
-                                </View>
-                                <View style={styles.recipeDetail}>
                                     <Icon name="clock-outline" size={18} color="#fc9e21" />
                                     <Text style={styles.recipeDetailInfoText}>{activeRecipe.prepTime}</Text>
-                                </View>
-                            </View>
-
-                            {/* Besin değerleri */}
-                            <View style={styles.nutritionContainer}>
-                                <View style={styles.nutritionItem}>
-                                    <Text style={styles.nutritionLabel}>Protein</Text>
-                                    <Text style={styles.nutritionValue}>{activeRecipe.nutritionInfo?.protein || 0}g</Text>
-                                </View>
-                                <View style={styles.nutritionItem}>
-                                    <Text style={styles.nutritionLabel}>Karbonhidrat</Text>
-                                    <Text style={styles.nutritionValue}>{activeRecipe.nutritionInfo?.carbs || 0}g</Text>
-                                </View>
-                                <View style={styles.nutritionItem}>
-                                    <Text style={styles.nutritionLabel}>Yağ</Text>
-                                    <Text style={styles.nutritionValue}>{activeRecipe.nutritionInfo?.fat || 0}g</Text>
                                 </View>
                             </View>
                         </View>
