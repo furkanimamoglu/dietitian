@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View} from 'react-native';
+import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View, Platform, PermissionsAndroid} from 'react-native';
 import {
     Avatar,
     Button,
@@ -19,6 +19,7 @@ import {
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
+import {launchCamera, launchImageLibrary, ImagePickerResponse, Asset} from 'react-native-image-picker';
 import config from '../../config.js';
 
 interface MealItem {
@@ -69,6 +70,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [mealToDelete, setMealToDelete] = useState<{mealType: string, category: string, index: number} | null>(null);
+    const [imageResponse, setImageResponse] = useState<Asset | null>(null);
 
     useEffect(() => {
         fetchTodayMeal();
@@ -415,7 +417,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                         iconColor="#4caf50"
                                         style={styles.headerButton}
                                         onPress={() => {
-                                            // Kamera işlevi
+                                            setSelectedMealType(mealType);
+                                            openCamera();
                                         }}
                                     />
                                     <IconButton
@@ -424,12 +427,37 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                         iconColor="#4caf50"
                                         style={styles.headerButton}
                                         onPress={() => {
-                                            // Galeri işlevi
+                                            setSelectedMealType(mealType);
+                                            openGallery();
                                         }}
                                     />
                                 </View>
                             )}
                         />
+
+                        {/* Yemek resmi alanı */}
+                        {mealCategories.info?.image ? (
+                            <Card.Cover
+                                source={{ uri: mealCategories.info.image }}
+                                style={styles.mealImage}
+                            />
+                        ) : (
+                            <View style={styles.emptyImageContainer}>
+                                <Avatar.Icon
+                                    size={60}
+                                    icon="image-plus"
+                                    color="#4caf50"
+                                    style={styles.emptyImageIcon}
+                                />
+                                <Text style={styles.emptyImageText}>
+                                    Öğününün resmini yükle!
+                                </Text>
+                                <Text style={styles.emptyImageSubText}>
+                                    Yediğin yemeğin fotoğrafını çek veya galeriden seç
+                                </Text>
+                            </View>
+                        )}
+
                         <Divider/>
 
                         {/* Öğün kategorileri */}
@@ -553,6 +581,190 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             />
 
         );
+    };
+
+    // Kamera izinlerini kontrol et ve gerekirse iste
+    const requestCameraPermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: "Kamera İzni",
+                        message: "Fotoğraf çekebilmek için kamera izni gerekiyor.",
+                        buttonPositive: "Tamam",
+                        buttonNegative: "İptal",
+                    }
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        }
+        return true; // iOS otomatik olarak izin isteyeceği için true dönüyoruz
+    };
+
+    // Depolama izinlerini kontrol et ve gerekirse iste (Android için)
+    const requestStoragePermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                // Android 13 (API 33) ve üzeri sürümlerde farklı bir izin gerekiyor
+                const permission = parseInt(Platform.Version.toString(), 10) >= 33
+                    ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+                    : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+                const granted = await PermissionsAndroid.request(
+                    permission,
+                    {
+                        title: "Galeri Erişim İzni",
+                        message: "Galeri erişim izni olmadan fotoğraflarınıza erişilemez.",
+                        buttonPositive: "Tamam",
+                        buttonNegative: "İptal",
+                    }
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        }
+        return true; // iOS otomatik olarak izin isteyeceği için true dönüyoruz
+    };
+
+    // Kamerayı başlat
+    const openCamera = async () => {
+        const hasPermission = await requestCameraPermission();
+
+        if (!hasPermission) {
+            Alert.alert('İzin Reddedildi', 'Kamera izni olmadan fotoğraf çekemezsiniz.');
+            return;
+        }
+
+        const options = {
+            mediaType: 'photo',
+            includeBase64: false,
+            maxHeight: 1200,
+            maxWidth: 1200,
+            quality: 0.8,
+            saveToPhotos: true,
+        };
+
+        launchCamera(options, (response: ImagePickerResponse) => {
+            if (response.didCancel) {
+                console.log('Kullanıcı kamerayı iptal etti');
+            } else if (response.errorCode) {
+                console.log('ImagePicker Hatası: ', response.errorMessage);
+                Alert.alert('Hata', response.errorMessage || 'Kamera açılırken bir hata oluştu');
+            } else if (response.assets && response.assets.length > 0) {
+                console.log('Çekilen fotoğraf: ', response.assets[0]);
+                setImageResponse(response.assets[0]);
+                handleImageSelected(response.assets[0]);
+            }
+        });
+    };
+
+    // Galeriyi aç
+    const openGallery = async () => {
+        const hasPermission = await requestStoragePermission();
+
+        if (!hasPermission) {
+            Alert.alert('İzin Reddedildi', 'Galeri erişim izni olmadan fotoğraf seçemezsiniz.');
+            return;
+        }
+
+        const options = {
+            mediaType: 'photo',
+            includeBase64: false,
+            maxHeight: 1200,
+            maxWidth: 1200,
+            quality: 0.8,
+        };
+
+        launchImageLibrary(options, (response: ImagePickerResponse) => {
+            if (response.didCancel) {
+                console.log('Kullanıcı galeriyi iptal etti');
+            } else if (response.errorCode) {
+                console.log('ImagePicker Hatası: ', response.errorMessage);
+                Alert.alert('Hata', response.errorMessage || 'Galeri açılırken bir hata oluştu');
+            } else if (response.assets && response.assets.length > 0) {
+                console.log('Seçilen fotoğraf: ', response.assets[0]);
+                setImageResponse(response.assets[0]);
+                handleImageSelected(response.assets[0]);
+            }
+        });
+    };
+
+    // Fotoğraf seçildiğinde yapılacak işlemler
+    const handleImageSelected = async (asset: Asset) => {
+        try {
+            if (!asset.uri) {
+                Alert.alert("Hata", "Fotoğraf yüklenemedi, geçerli bir resim seçiniz.");
+                return;
+            }
+
+            // Hangi öğün için resim yüklendiğinin kontrolü
+            if (!selectedMealType || !mealPlan[currentDay] || !mealPlan[currentDay][selectedMealType]) {
+                Alert.alert("Hata", "Lütfen önce bir öğün seçiniz.");
+                return;
+            }
+
+            // Yüklenme durumu için loading göster
+            setLoading(true);
+
+            // FormData oluştur
+            const formData = new FormData();
+            formData.append('image', {
+                uri: asset.uri,
+                type: asset.type || 'image/jpeg',
+                name: asset.fileName || 'photo.jpg',
+            } as any);
+
+            // Token al
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                setLoading(false);
+                return;
+            }
+
+            // Resmi yükle
+            const response = await fetch(`${config[config.environment].apiUrl}/upload`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.imageUrl) {
+                throw new Error(data.message || 'Resim yüklenemedi.');
+            }
+
+            // MealPlan nesnesini güncelle
+            const updatedMealPlan = {...mealPlan};
+
+            if (!updatedMealPlan[currentDay][selectedMealType].info) {
+                updatedMealPlan[currentDay][selectedMealType].info = {
+                    time: updatedMealPlan[currentDay][selectedMealType].info?.time || '',
+                    image: data.imageUrl
+                };
+            } else {
+                updatedMealPlan[currentDay][selectedMealType].info.image = data.imageUrl;
+            }
+
+            setMealPlan(updatedMealPlan);
+
+            await updateMealPlanOnServerFromNewFormat(updatedMealPlan);
+        } catch (error) {
+            console.error('Resim yükleme hatası:', error);
+            Alert.alert("Hata", error instanceof Error ? error.message : "Resim yüklenirken bir hata oluştu.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -1079,6 +1291,37 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: '#e9ecef',
     },
+    mealImage: {
+        height: 150,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+    },
+    emptyImageContainer: {
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 150,
+        backgroundColor: '#f9f9f9',
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+    },
+    emptyImageIcon: {
+        backgroundColor: '#e8f5e9',
+        marginBottom: 8,
+    },
+    emptyImageText: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#4caf50',
+        marginBottom: 4,
+        textAlign: 'center'
+    },
+    emptyImageSubText: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 20
+    }
 });
 
 export default Beslenme;
