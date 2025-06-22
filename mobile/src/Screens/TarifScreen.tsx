@@ -211,12 +211,14 @@ const Tarif = ({navigation}) => {
                                                 <Text style={styles.recipeBadgeText}>{recipe.category}</Text>
                                             </View>
                                             <Text style={styles.recipeName}>{recipe.name}</Text>
-                                            <View style={styles.recipeDetails}>
-                                                <View style={styles.recipeDetail}>
-                                                    <Icon name="clock-outline" size={16} color="#fc9e21" />
-                                                    <Text style={styles.recipeDetailText}>{recipe.prepTime}</Text>
-                                                </View>
-                                            </View>
+
+                                            {recipe.description && (
+                                                <Text style={styles.recipeDescription} numberOfLines={2}>
+                                                    {recipe.description.length > 80
+                                                        ? recipe.description.substring(0, 80) + '...'
+                                                        : recipe.description}
+                                                </Text>
+                                            )}
 
                                             {recipe.note && (
                                                 <View style={styles.noteContainer}>
@@ -415,6 +417,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 8,
         color: '#333',
+    },
+    recipeDescription: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
     },
     recipeDetails: {
         flexDirection: 'row',
