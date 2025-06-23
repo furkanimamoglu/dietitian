@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, View, Linking} from 'react-native';
-import {Button, Card, Text} from 'react-native-paper';
+import {Button, Card, Text, Modal, Portal, TextInput} from 'react-native-paper';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,6 +12,9 @@ const Profil = ({navigation}) => {
         phone: '',
         email: '',
     });
+
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [confirmName, setConfirmName] = useState('');
 
     useEffect(() => {
         const fetchClientInfo = async () => {
@@ -51,7 +54,19 @@ const Profil = ({navigation}) => {
     };
 
     const handleDeleteAccount = () => {
-        Linking.openURL('mailto:diyetia.app@gmail.com?subject=Hesap%20Silme%20Talebi&body=Merhaba,%0A%0AHesabımı%20silmenizi%20talep%20ediyorum.%0A%0AAdı%20Soyadı:%20' + user.name + '%0AE-posta:%20' + user.email);
+        Linking.openURL('mailto:diyetia.app@gmail.com?subject=Hesap%20Silme%20Talebi&body=Merhaba,%0A%0AHesabımı%20silmenizi%20talep%20ediyorum.%0A%0AAdı%20Soyadı:%20' + user.name +
+        '%0AE-posta:%20' + user.email +
+        '%0ATelefon:%20+90' + user.phone +
+        '%0A%0ALütfen hesabımı silme işlemleri için, telefon numaram üzerinden benimle iletişime geçin.');
+    };
+
+    const handleConfirmDelete = () => {
+        if (confirmName === user.name) {
+            handleDeleteAccount();
+            setDeleteModalVisible(false);
+        } else {
+            alert('Lütfen hesabınızı silmek için adınızı doğru bir şekilde girin.');
+        }
     };
 
     return (
@@ -92,7 +107,7 @@ const Profil = ({navigation}) => {
                         </Button>
 
                         <Button
-                            onPress={handleDeleteAccount}
+                            onPress={() => setDeleteModalVisible(true)}
                             mode="outlined"
                             icon="account-remove"
                             textColor="#d32f2f"
@@ -117,6 +132,44 @@ const Profil = ({navigation}) => {
                         </Button>
                     </Card.Content>
                 </Card>
+
+                <Portal>
+                    <Modal
+                        visible={deleteModalVisible}
+                        onDismiss={() => setDeleteModalVisible(false)}
+                        contentContainerStyle={styles.modalContainer}
+                    >
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Hesabı Sil</Text>
+                            <Text style={styles.modalText}>
+                                Hesabınızı silmek üzeresiniz. Bu işlem geri alınamaz.
+                            </Text>
+
+                            <TextInput
+                                label="Adınızı Onaylayın"
+                                value={confirmName}
+                                onChangeText={setConfirmName}
+                                style={styles.textInput}
+                            />
+
+                            <Button
+                                onPress={handleConfirmDelete}
+                                mode="contained"
+                                style={styles.deleteButton}
+                            >
+                                Hesabı Sil
+                            </Button>
+
+                            <Button
+                                onPress={() => setDeleteModalVisible(false)}
+                                mode="outlined"
+                                style={styles.cancelButton}
+                            >
+                                İptal
+                            </Button>
+                        </View>
+                    </Modal>
+                </Portal>
             </ScrollView>
 
             <BottomNavbar navigation={navigation}/>
@@ -190,6 +243,42 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         letterSpacing: 0.5,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        padding: 24,
+        borderRadius: 12,
+        margin: 16,
+    },
+    modalContent: {
+        maxWidth: 400,
+        width: '100%',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    modalText: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    textInput: {
+        marginBottom: 16,
+        backgroundColor: '#f1f1f1',
+        borderRadius: 8,
+    },
+    deleteButton: {
+        backgroundColor: '#d32f2f',
+        borderRadius: 8,
+    },
+    cancelButton: {
+        borderRadius: 8,
+        borderColor: '#007bff',
+        borderWidth: 2,
     },
 });
 
