@@ -8,11 +8,9 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
-    Image,
     Platform,
     Easing,
 } from 'react-native';
-import {Appbar} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,7 +19,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import config from '../../config';
 
 const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
 
 type Props = {
     navigation: NativeStackNavigationProp<RootStackParamList>;
@@ -43,12 +40,10 @@ export default function Header({navigation}: Props) {
     const [drawerAnim] = useState(new Animated.Value(screenWidth));
     const [userName, setUserName] = useState<string>('Yükleniyor...');
 
-    // Yeni animasyonlar
     const bellShakeAnim = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
-    // Bildirim geldiğinde zil animasyonu
     useEffect(() => {
         if (unreadNotificationsCount > 0) {
             Animated.loop(
