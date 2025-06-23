@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {BackHandler, SafeAreaView} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {BackHandler, SafeAreaView, ActivityIndicator, View} from 'react-native';
 import {DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {PaperProvider} from 'react-native-paper';
@@ -69,8 +69,32 @@ const linking = {
 const App = () => {
     const paperTheme = customLightTheme;
     const navTheme = DefaultTheme;
+    const [isLoading, setIsLoading] = useState(true);
+    const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Onboarding');
 
     const navigationRef = useNavigationContainerRef();
+
+    useEffect(() => {
+        const checkUserSession = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (token) {
+                    console.log('Kullanıcı oturumu aktif, token bulundu');
+                    setInitialRoute('AnaSayfa');
+                } else {
+                    console.log('Token bulunamadı, giriş gerekiyor');
+                    setInitialRoute('Onboarding');
+                }
+            } catch (error) {
+                console.error('Token kontrolü sırasında hata:', error);
+                setInitialRoute('Onboarding');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkUserSession();
+    }, []);
 
     // Notifee için bildirim kanalı oluşturma
     useEffect(() => {
@@ -185,6 +209,14 @@ const App = () => {
         }
     };
 
+    if (isLoading) {
+        return (
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
     return (
         <PaperProvider theme={paperTheme}>
             <SafeAreaView style={{flex: 1}}>
@@ -193,7 +225,7 @@ const App = () => {
                     theme={navTheme}
                     linking={linking}
                 >
-                    <Stack.Navigator initialRouteName="Onboarding">
+                    <Stack.Navigator initialRouteName={initialRoute}>
                         <Stack.Screen
                             name="Onboarding"
                             component={OnboardingScreen}
