@@ -1098,7 +1098,7 @@ export default function Beslenme() {
 
             try {
                 const uploadRes = await axios.post(
-                    `${config[config.environment].apiUrl}/upload`,
+                    `${config[config.environment].apiUrl}/upload?type=nutrition`,
                     formData,
                     {
                         headers: {

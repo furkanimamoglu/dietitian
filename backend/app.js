@@ -5,16 +5,18 @@ const cors = require('cors');
 const path = require("path");
 const fs = require('fs');
 
+// Config
 const config = require(path.join(__dirname, 'config.json'));
+// Database
 const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
-
-
+// Exception
+const Exception = require(path.join(__dirname, 'Exception', 'Exception'));
 // Models
 require(path.join(__dirname, 'Model', 'MainModel'));
-
+// Utils
 const Security = require(path.join(__dirname, 'Utils','Security'));
+// Enum
 const {DIETITIAN, CLIENT} = require(path.join(__dirname, "Enum", "Role"));
-
 
 // Express App
 const app = express();
@@ -33,7 +35,6 @@ const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
 const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
 const notificationRoutes = require(path.join(__dirname, "Routes", "notificationRoutes"));
 
-const {diskStorage} = require("multer");
 const multer = require("multer");
 
 app.use(bodyParser.json());
@@ -61,7 +62,7 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         try {
             const token = req.headers.authorization?.split(' ')[1];
-            if (!token) return cb(new Error('Token eksik.'));
+            if (!token) return cb(new Exception('Token eksik.'));
 
             const userId = Security.getUserIdFromToken(token);
             const role = Security.getPermissionFromToken(token);
@@ -69,7 +70,7 @@ const storage = multer.diskStorage({
             const type = sanitize(req.query.type);
 
             if (!ALLOWED_TYPES.includes(type)) {
-                return cb(new Error('Geçersiz yükleme türü.'));
+                return cb(new Exception('Geçersiz yükleme türü.'));
             }
 
             let folderPath;
@@ -96,7 +97,7 @@ const storage = multer.diskStorage({
             fs.mkdirSync(folderPath, { recursive: true });
             cb(null, folderPath);
         } catch (err) {
-            cb(new Error('Yükleme klasörü oluşturulamadı.'));
+            cb(new Exception('Yükleme klasörü oluşturulamadı.'));
         }
     },
 

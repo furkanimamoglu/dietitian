@@ -725,7 +725,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
 
             // Resmi yükle
-            const response = await fetch(`${config[config.environment].apiUrl}/upload`, {
+            const response = await fetch(`${config[config.environment].apiUrl}/upload?type=nutrition`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

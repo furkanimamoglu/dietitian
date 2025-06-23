@@ -649,7 +649,7 @@ export default function Egzersizler() {
             const formData = new FormData();
             formData.append('image', newExercise.image);
 
-            axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+            axios.post(`${config[config.environment].apiUrl}/upload?type=exercise`, formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     'Content-Type': 'multipart/form-data'
@@ -716,7 +716,7 @@ export default function Egzersizler() {
             const formData = new FormData();
             formData.append('image', editExerciseData.image);
 
-            axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+            axios.post(`${config[config.environment].apiUrl}/upload?type=exercise`, formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     'Content-Type': 'multipart/form-data'

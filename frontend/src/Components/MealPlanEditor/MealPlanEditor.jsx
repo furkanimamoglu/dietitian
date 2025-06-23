@@ -601,7 +601,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 formData.append('image', planImage);
 
                 try {
-                    const uploadResponse = await axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                    const uploadResponse = await axios.post(`${config[config.environment].apiUrl}/upload?type=nutrition`, formData, {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             'Content-Type': 'multipart/form-data'

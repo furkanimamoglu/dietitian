@@ -1455,7 +1455,7 @@ export default function Tarifler() {
                                 formData.append('image', newRecipe.image);
 
                                 // Resmi yükle
-                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                                axios.post(`${config[config.environment].apiUrl}/upload?type=recipe`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
                                         'Content-Type': 'multipart/form-data'
@@ -1901,7 +1901,7 @@ export default function Tarifler() {
                                 formData.append('image', editImage);
 
                                 // Resmi yükle
-                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                                axios.post(`${config[config.environment].apiUrl}/upload?type=recipe`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
                                         'Content-Type': 'multipart/form-data'

@@ -150,7 +150,7 @@ const Mesaj = ({navigation}) => {
                 name: 'image.jpg',
             });
 
-            const response = await fetch('http://localhost:3000/api/upload', {
+            const response = await fetch('http://localhost:3000/api/upload?type=message', {
                 method: 'POST',
                 body: formData,
                 headers: {
