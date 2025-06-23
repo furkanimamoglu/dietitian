@@ -491,11 +491,12 @@ class DietitianService {
                 {type: "page", name: "Randevularım", url: "/randevularim"},
                 {type: "page", name: "Ayarlar", url: "/ayarlar"},
                 {type: "page", name: "Beslenme", url: "/beslenme"},
-                {type: "page", name: "Egzersiz", url: "/egzersiz"},
                 {type: "page", name: "Finans", url: "/finans"},
                 {type: "page", name: "Tarif", url: "/tarif"},
                 {type: "page", name: "Egzersiz", url: "/egzersiz"},
-                {type: "page", name: "Mesaj", url: "/mesaj"}
+                {type: "page", name: "Mesaj", url: "/mesaj"},
+                //{type: "page", name: "Ayarlar", url: "/ayar"},
+                {type: "page", name: "Ödeme", url: "/odeme"}
             ];
 
             const dietitian = await Dietitian.findOne({

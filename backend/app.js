@@ -12,6 +12,9 @@ const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
 // Models
 require(path.join(__dirname, 'Model', 'MainModel'));
 
+const Security = require(path.join(__dirname, 'Utils','Security'));
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, "Enum", "Role"));
+
 
 // Express App
 const app = express();
@@ -48,13 +51,55 @@ app.use((req, res, next) => {
 });
 
 
-// Static Files
-app.use('/uploads', express.static('uploads'));
+const ALLOWED_TYPES = ['profilephoto', 'meal', 'exercise', 'nutritionplan', 'recipe', 'message'];
 
-const storage = diskStorage({
+function sanitize(str) {
+    return String(str || '').replace(/[^a-z0-9_-]/gi, '_');
+}
+
+const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'uploads'));
+        try {
+            const token = req.headers.authorization?.split(' ')[1];
+            if (!token) return cb(new Error('Token eksik.'));
+
+            const userId = Security.getUserIdFromToken(token);
+            const role = Security.getPermissionFromToken(token);
+            const clientId = sanitize(req.query.client_id);
+            const type = sanitize(req.query.type);
+
+            if (!ALLOWED_TYPES.includes(type)) {
+                return cb(new Error('Geçersiz yükleme türü.'));
+            }
+
+            let folderPath;
+
+            if (role === DIETITIAN) {
+                folderPath = path.join(
+                    __dirname,
+                    'uploads',
+                    'Dietitian',
+                    sanitize(userId),
+                    clientId,
+                    type
+                );
+            } else {
+                folderPath = path.join(
+                    __dirname,
+                    'uploads',
+                    'Client',
+                    sanitize(userId),
+                    type
+                );
+            }
+
+            fs.mkdirSync(folderPath, { recursive: true });
+            cb(null, folderPath);
+        } catch (err) {
+            cb(new Error('Yükleme klasörü oluşturulamadı.'));
+        }
     },
+
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + path.extname(file.originalname));
@@ -63,7 +108,6 @@ const storage = diskStorage({
 
 const upload = multer({ storage });
 
-// Dosya Yükleme Uç Noktası (Güvenli)
 app.post('/api/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ showOnScreen: true, message: 'Yüklenecek dosya eklenmedi.' });
@@ -82,7 +126,8 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
         return res.status(400).json({ showOnScreen: true, message: 'Dosya boyutu 5MB\'ı geçemez.' });
     }
 
-    const imageUrl = `${config.image_url}${req.file.filename}`;
+    const relativePath = path.relative(path.join(__dirname, 'uploads'), req.file.path).replace(/\\/g, '/');
+    const imageUrl = `${config.image_url}${relativePath}`;
     res.json({ imageUrl });
 });
 

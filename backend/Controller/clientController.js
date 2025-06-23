@@ -418,6 +418,39 @@ class ClientController {
         }
     }
 
+    static async updateProfilePhoto(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {profilePhoto} = req.body;
+
+            if (!profilePhoto) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Fotoğraf sağlanmalıdır.'
+                });
+            }
+
+            const result = await ClientService.updateProfilePhoto(client_id, profilePhoto);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
 }
 
 module.exports = ClientController;

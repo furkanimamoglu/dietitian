@@ -116,6 +116,15 @@ const Client = sequelize.define('Client', {
             type: DataTypes.STRING,
             allowNull: true,
         },
+        dietitianNotes: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        profilePhoto: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'placeholder_client.jpg'
+        },
         kvkkApproval: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

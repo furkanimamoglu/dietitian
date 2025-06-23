@@ -29,4 +29,6 @@ router.put('/updateMyExercise', clientController.updateMyExercise);
 
 router.put('/updateFCMToken', clientController.updateFCMToken);
 
+router.put('/updateProfilePhoto', clientController.updateProfilePhoto);
+
 module.exports = router;

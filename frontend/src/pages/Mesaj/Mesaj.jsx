@@ -885,32 +885,6 @@ export default function Mesaj() {
                                             />
                                         </ListItemButton>
 
-                                        <Divider sx={{my: 1}}/>
-
-                                        <ListItemButton>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{bgcolor: theme.palette.success.light}}>
-                                                    <HeightIcon/>
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText
-                                                primary="Boy"
-                                                secondary={selectedDanisan.height ? `${selectedDanisan.height} cm` : "Belirtilmemiş"}
-                                            />
-                                        </ListItemButton>
-
-                                        <ListItemButton>
-                                            <ListItemAvatar>
-                                                <Avatar sx={{bgcolor: theme.palette.success.light}}>
-                                                    <FitnessCenterIcon/>
-                                                </Avatar>
-                                            </ListItemAvatar>
-                                            <ListItemText
-                                                primary="Kilo"
-                                                secondary={selectedDanisan.weight ? `${selectedDanisan.weight} kg` : "Belirtilmemiş"}
-                                            />
-                                        </ListItemButton>
-
                                         {selectedDanisan.bmi && (
                                             <ListItemButton>
                                                 <ListItemAvatar>

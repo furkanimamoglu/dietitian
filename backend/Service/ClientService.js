@@ -456,6 +456,30 @@ class ClientService {
         }
     }
 
+    static async updateProfilePhoto(client_id, profilePhoto) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 400, true);
+            }
+
+            const client = await Client.findByPk(client_id);
+
+            if (!client) {
+                throw new Exception("Kullanıcı bulunamadı.", 404, true);
+            }
+
+            client.profilePhoto = profilePhoto;
+            await client.save();
+
+            return {
+                showOnScreen: true,
+                message: "Profil fotoğrafı başarıyla güncellendi."
+            };
+        } catch (error) {
+            throw new Exception(error.message, error.status || 400);
+        }
+    }
+
 }
 
 module.exports = ClientService;
