@@ -641,6 +641,18 @@ function Danisan() {
     const [measurements, setMeasurements] = useState([]);
     const [measurementsLoading, setMeasurementsLoading] = useState(false);
 
+    const [isDeleteMeasurementDialogOpen, setIsDeleteMeasurementDialogOpen] = useState(false);
+    const [measurementToDelete, setMeasurementToDelete] = useState(null);
+
+    const handleCloseDeleteMeasurementDialog = () => {
+        setIsDeleteMeasurementDialogOpen(false);
+    };
+
+    const handleOpenDeleteMeasurementDialog = (measurement) => {
+        setMeasurementToDelete(measurement);
+        setIsDeleteMeasurementDialogOpen(true);
+    };
+
     const [bloodTestFiles, setBloodTestFiles] = useState([]);
 
     const handleViewBloodTestFile = (file) => {
@@ -912,7 +924,7 @@ function Danisan() {
     const deleteMeasurement = async (measurement) => {
         try {
             await axios.delete(
-                config[config.environment].apiUrl + "/measurement/deleteMeasurement",
+                `${config[config.environment].apiUrl}/measurement/deleteMeasurement`,
                 {
                     headers: {
                         Authorization: localStorage.getItem('token'),
@@ -923,9 +935,11 @@ function Danisan() {
                 }
             );
 
+            handleCloseDeleteMeasurementDialog();
+
             setMeasurementsLoading(true);
             const response = await axios.get(
-                config[config.environment].apiUrl + "/measurement/getClientMeasurement",
+                `${config[config.environment].apiUrl}/measurement/getClientMeasurement`,
                 {
                     headers: {
                         Authorization: localStorage.getItem('token'),
@@ -2214,7 +2228,7 @@ function Danisan() {
                                                                     <IconButton
                                                                         color="secondary"
                                                                         sx={{color: 'red'}}
-                                                                        onClick={() => deleteMeasurement(measurement)}
+                                                                        onClick={() => handleOpenDeleteMeasurementDialog(measurement)}
                                                                     >
                                                                         <DeleteIcon/>
                                                                     </IconButton>
@@ -4447,6 +4461,30 @@ function Danisan() {
                         color="error"
                         autoFocus
                     >
+                        Sil
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Ölçüm Silme Onayı Dialog */}
+            <Dialog
+                open={isDeleteMeasurementDialogOpen}
+                onClose={handleCloseDeleteMeasurementDialog}
+                aria-labelledby="delete-measurement-dialog-title"
+                aria-describedby="delete-measurement-dialog-description"
+            >
+                <DialogTitle id="delete-measurement-dialog-title">
+                    Ölçüm Silme Onayı
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {measurementToDelete &&
+                            `${new Date(measurementToDelete.createdAt).toLocaleDateString('tr-TR')} tarihli ölçümü silmek istediğinizden emin misiniz?`}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteMeasurementDialog}>İptal</Button>
+                    <Button onClick={() => deleteMeasurement(measurementToDelete)} color="error">
                         Sil
                     </Button>
                 </DialogActions>
