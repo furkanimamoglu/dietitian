@@ -540,7 +540,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 mode="contained"
                                 icon="plus"
                                 onPress={() => {
-                                    setSelectedMealType(Object.keys(mealCategories)[0]);
+                                    setSelectedMealType(mealType);
                                     setSelectedMealCategory('Alternatif');
                                     setModalVisible(true);
                                 }}
@@ -796,7 +796,9 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                     <RadioButton.Group onValueChange={value => setSelectedMealCategory(value)}
                                                     value={selectedMealCategory}>
                                         <View style={styles.radioButtonsContainer}>
-                                            {Object.keys(mealPlan[currentDay][selectedMealType]).map(category => (
+                                            {Object.keys(mealPlan[currentDay][selectedMealType])
+                                                .filter(category => category !== 'info')
+                                                .map(category => (
                                                 <View key={category} style={styles.radioOption}>
                                                     <RadioButton.Android value={category} color="#4caf50"/>
                                                     <Text>{category}</Text>
