@@ -99,6 +99,10 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
+        age: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         gender: {
             type: DataTypes.STRING,
             validate: {
