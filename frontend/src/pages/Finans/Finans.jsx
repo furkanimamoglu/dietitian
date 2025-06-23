@@ -60,6 +60,8 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import { tr } from 'date-fns/locale';
+
 import {DataGrid} from '@mui/x-data-grid';
 import Papa from 'papaparse';
 import {trTR} from "@mui/x-data-grid/locales";
@@ -2777,7 +2779,7 @@ export default function Finans() {
                                 </div>
                             )}
 
-                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                 <div className="form-group">
                                     <label htmlFor="invoice-amount">Fatura Tarihi</label>
                                     <DatePicker

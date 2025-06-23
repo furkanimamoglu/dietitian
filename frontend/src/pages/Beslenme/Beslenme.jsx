@@ -63,6 +63,7 @@ import {
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
 
 Font.register({
     family: 'Open Sans',
@@ -1835,7 +1836,7 @@ export default function Beslenme() {
                             ))}
                         </select>
                     </div>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                         <div className="date-inputs-container">
                             <div className="input-container half-width">
                                 <DatePicker

@@ -7,6 +7,7 @@ import config from "../../config.js";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -1955,7 +1956,7 @@ export default function Egzersizler() {
                         </Stack>
                     </div>
                     <div className="date-inputs-container">
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                             <div className="input-container half-width">
                                 <DatePicker
                                     label="Başlangıç Tarihi"
@@ -2335,7 +2336,7 @@ export default function Egzersizler() {
                                     Tarih Aralığı Filtreleme
                                 </Typography>
                                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end'}}>
-                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                         <Box sx={{flex: '1 1 200px'}}>
                                             <DatePicker
                                                 label="Başlangıç Tarihi"

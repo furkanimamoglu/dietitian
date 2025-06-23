@@ -53,6 +53,7 @@ import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -2995,7 +2996,7 @@ function Danisan() {
                                     onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})}
                                     fullWidth margin="normal"
                                 />
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                     <DateTimePicker
                                         label="Başlangıç"
                                         ampm={false}
@@ -3010,7 +3011,7 @@ function Danisan() {
                                         renderInput={(params) => <TextField {...params} fullWidth margin="normal"/>}
                                     />
                                 </LocalizationProvider>
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                     <DateTimePicker
                                         label="Bitiş"
                                         ampm={false}
@@ -3313,7 +3314,7 @@ function Danisan() {
                                         Tarih Aralığı Filtreleme
                                     </Typography>
                                     <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end'}}>
-                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                             <Box sx={{flex: '1 1 200px'}}>
                                                 <DatePicker
                                                     label="Başlangıç Tarihi"
@@ -3584,7 +3585,7 @@ function Danisan() {
                                             />
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
-                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                                 <DatePicker
                                                     label="Başlangıç Tarihi"
                                                     name="start_date"
@@ -3606,7 +3607,7 @@ function Danisan() {
                                             </LocalizationProvider>
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
-                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                                 <DatePicker
                                                     label="Bitiş Tarihi"
                                                     name="end_date"

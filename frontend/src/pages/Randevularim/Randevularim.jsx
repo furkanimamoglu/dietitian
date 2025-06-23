@@ -33,6 +33,7 @@ import {
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import { tr } from 'date-fns/locale';
 
 import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
@@ -1027,7 +1028,7 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
                             value={eventData.start ? new Date(eventData.start) : null}
@@ -1165,7 +1166,7 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
                             value={eventData.start ? new Date(eventData.start) : null}
