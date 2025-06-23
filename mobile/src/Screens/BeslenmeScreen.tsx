@@ -583,7 +583,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         );
     };
 
-    // Kamera izinlerini kontrol et ve gerekirse iste
     const requestCameraPermission = async (): Promise<boolean> => {
         if (Platform.OS === 'android') {
             try {
@@ -602,14 +601,12 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return false;
             }
         }
-        return true; // iOS otomatik olarak izin isteyeceği için true dönüyoruz
+        return true;
     };
 
-    // Depolama izinlerini kontrol et ve gerekirse iste (Android için)
     const requestStoragePermission = async (): Promise<boolean> => {
         if (Platform.OS === 'android') {
             try {
-                // Android 13 (API 33) ve üzeri sürümlerde farklı bir izin gerekiyor
                 const permission = parseInt(Platform.Version.toString(), 10) >= 33
                     ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
                     : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
@@ -629,10 +626,9 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return false;
             }
         }
-        return true; // iOS otomatik olarak izin isteyeceği için true dönüyoruz
+        return true;
     };
 
-    // Kamerayı başlat
     const openCamera = async () => {
         const hasPermission = await requestCameraPermission();
 
@@ -744,7 +740,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 throw new Error(data.message || 'Resim yüklenemedi.');
             }
 
-            // MealPlan nesnesini güncelle
             const updatedMealPlan = {...mealPlan};
 
             if (!updatedMealPlan[currentDay][selectedMealType].info) {
@@ -1170,7 +1165,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#2e7d32',
         letterSpacing: 0.5,
-        marginBottom: 4,
     },
     subtitleContainer: {
         marginTop: 4,
@@ -1183,7 +1177,6 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 12,
         alignSelf: 'flex-start',
-        marginTop: 2,
     },
     clockIcon: {
         backgroundColor: 'transparent',

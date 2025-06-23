@@ -1475,16 +1475,6 @@ function Danisan() {
 
             return (
                 <Box>
-                    {/* Zaman ve Görsel Bilgisi */}
-                    {info.time && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            <AccessTimeIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
-                            <Typography variant="caption" color="text.secondary">
-                                {info.time}
-                            </Typography>
-                        </Box>
-                    )}
-
                     {/* Görsel varsa göster */}
                     {info.image && info.image !== "" && (
                         <Box sx={{ mb: 1 }}>
@@ -2490,7 +2480,14 @@ function Danisan() {
                                                         'Aparatif': 'Ara Öğün'
                                                     };
 
-                                                    return meals.map((meal, mealIndex) => (
+                                                    return meals.map((meal, mealIndex) => {
+                                                        // Mealtype'a ait zaman bilgisini bulmak için
+                                                        // İlk günün verisinden aldığımız saat bilgisini tüm satır için kullanacağız
+                                                        const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
+                                                        const mealInfo = nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay]?.[meal]?.info || {};
+                                                        const mealTime = mealInfo.time;
+
+                                                        return (
                                                         <React.Fragment key={`meal-row-${mealIndex}`}>
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
@@ -2503,12 +2500,21 @@ function Danisan() {
                                                     borderRadius: 1,
                                                     height: '100%',
                                                     display: 'flex',
+                                                    flexDirection: 'column',
                                                     alignItems: 'center',
                                                     justifyContent: 'center'
                                                 }}>
                                                                         <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
                                                                             {mealDisplayNames[meal] || meal}
                                                                         </Typography>
+                                                                        {mealTime && (
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                                                                                <AccessTimeIcon sx={{ fontSize: 14, mr: 0.5, color: 'inherit', opacity: 0.9 }} />
+                                                                                <Typography variant="caption" sx={{ fontWeight: 'medium', color: 'inherit' }}>
+                                                                                    {mealTime}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        )}
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={10}>
@@ -2526,7 +2532,8 @@ function Danisan() {
                                                 </Grid>
                                                             {mealIndex < meals.length - 1 && <Divider sx={{my: 1}} />}
                                                         </React.Fragment>
-                                                    ));
+                                                        );
+                                                    });
                                                   })()
                                                 }
                                             </>
