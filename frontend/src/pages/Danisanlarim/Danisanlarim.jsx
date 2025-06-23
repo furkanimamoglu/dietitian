@@ -682,6 +682,7 @@ export default function Danisanlarim() {
         {field: "name", headerName: "İsim", flex: 1, editable: false},
         {field: "email", headerName: "Email", flex: 1.2, editable: false},
         {field: "phoneNumber", headerName: "Telefon", flex: 1, editable: false},
+        {field: "age", headerName: "Yaş", width: 50, editable: false, type: "number"},
         {
             field: "status",
             headerName: "Durum",
@@ -692,13 +693,15 @@ export default function Danisanlarim() {
                 {value: "Pasif", label: "Pasif"}
             ],
             editable: false,
-            renderCell: (params) => {
-                if (params.row.status === "Aktif") {
-                    return <CheckCircle sx={{color: green[500]}}/>;
-                } else {
-                    return <Cancel sx={{color: red[500]}}/>;
-                }
-            }
+            renderCell: (params) => (
+                <Box display="flex" justifyContent="center" alignItems="center" width="100%" height="100%">
+                    {params.row.status === "Aktif" ? (
+                        <CheckCircle sx={{color: green[500]}}/>
+                    ) : (
+                        <Cancel sx={{color: red[500]}}/>
+                    )}
+                </Box>
+            )
         },
         {
             field: "gender",
@@ -707,14 +710,17 @@ export default function Danisanlarim() {
             type: "singleSelect",
             valueOptions: ["Erkek", "Kadın", "Diğer"],
             editable: false,
-            renderCell: (params) =>
-                params.value === "Erkek" ? (
-                    <MaleIcon sx={{color: blue[500]}}/>
-                ) : params.value === "Kadın" ? (
-                    <FemaleIcon sx={{color: pink[500]}}/>
-                ) : (
-                    <PersonIcon sx={{color: purple[500]}}/>
-                ),
+            renderCell: (params) => (
+                <Box display="flex" justifyContent="center" alignItems="center" width="100%" height="100%">
+                    {params.value === "Erkek" ? (
+                        <MaleIcon sx={{color: blue[500]}}/>
+                    ) : params.value === "Kadın" ? (
+                        <FemaleIcon sx={{color: pink[500]}}/>
+                    ) : (
+                        <PersonIcon sx={{color: purple[500]}}/>
+                    )}
+                </Box>
+            ),
         },
         {
             field: "kvkkApproval",
@@ -722,12 +728,15 @@ export default function Danisanlarim() {
             width: 90,
             type: "boolean",
             editable: false,
-            renderCell: (params) =>
-                params.value ? (
-                    <CheckCircle sx={{color: green[500]}}/>
-                ) : (
-                    <Cancel sx={{color: red[500]}}/>
-                ),
+            renderCell: (params) => (
+                <Box display="flex" justifyContent="center" alignItems="center" width="100%" height="100%">
+                    {params.value ? (
+                        <CheckCircle sx={{color: green[500]}}/>
+                    ) : (
+                        <Cancel sx={{color: red[500]}}/>
+                    )}
+                </Box>
+            ),
         },
         {
             field: "createdAt",
@@ -758,7 +767,7 @@ export default function Danisanlarim() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 340,
+            width: 300,
             sortable: false,
             editable: false,
             renderCell: (params) => (
