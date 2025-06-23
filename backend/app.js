@@ -51,8 +51,9 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/uploads', express.static('uploads'));
 
-const ALLOWED_TYPES = ['profilephoto', 'meal', 'exercise', 'nutritionplan', 'recipe', 'message'];
+const ALLOWED_TYPES = ['profilephoto', 'meal', 'exercise', 'nutrition', 'recipe', 'message'];
 
 function sanitize(str) {
     return String(str || '').replace(/[^a-z0-9_-]/gi, '_');

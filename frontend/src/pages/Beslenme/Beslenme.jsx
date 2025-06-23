@@ -1362,6 +1362,18 @@ export default function Beslenme() {
         setEndDate(formatDate(end));
     };
 
+    const renderDanisanAvatar = (danisan) => {
+        const defaultAvatar = '/path/to/default/avatar.png'; // Varsayılan avatar yolu
+        const profilePhoto = danisan.profilePhoto;
+
+        return (
+            <Avatar
+                src={profilePhoto ? profilePhoto : defaultAvatar}
+                alt={danisan.name}
+            />
+        );
+    };
+
     return (
         <Default>
             <div className="beslenme-container">
@@ -1578,16 +1590,7 @@ export default function Beslenme() {
                                                 }}
                                             >
                                                 <ListItemAvatar>
-                                                    <Avatar
-                                                        sx={{
-                                                            bgcolor: danisan.image ? 'transparent' : '#ffa955',
-                                                            width: 40,
-                                                            height: 40
-                                                        }}
-                                                        src={danisan.image || ''}
-                                                    >
-                                                        {!danisan.image && danisan.name.charAt(0)}
-                                                    </Avatar>
+                                                    {renderDanisanAvatar(danisan)}
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     primary={danisan.name}

@@ -679,6 +679,23 @@ export default function Danisanlarim() {
     };
 
     const columns = [
+        {
+            field: "profilePhoto",
+            headerName: "Profil",
+            width: 80,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                <Box display="flex" justifyContent="center" alignItems="center" width="100%" height="100%">
+                    <img
+                        src={params.value || "/placeholder_client.jpg"}
+                        alt="Profil"
+                        style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: "2px solid #eee" }}
+                        onError={e => { e.target.onerror = null; e.target.src = "/placeholder_client.jpg"; }}
+                    />
+                </Box>
+            ),
+        },
         {field: "name", headerName: "İsim", flex: 1, editable: false},
         {field: "email", headerName: "Email", flex: 1.2, editable: false},
         {field: "phoneNumber", headerName: "Telefon", flex: 1, editable: false},

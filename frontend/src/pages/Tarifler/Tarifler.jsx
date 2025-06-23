@@ -1126,13 +1126,13 @@ export default function Tarifler() {
                                                 <ListItemAvatar>
                                                     <Avatar
                                                         sx={{
-                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            bgcolor: danisan.profilePhoto ? 'transparent' : '#087708',
                                                             width: 40,
                                                             height: 40
                                                         }}
-                                                        src={danisan.image || ''}
+                                                        src={danisan.profilePhoto || ''}
                                                     >
-                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                        {!danisan.profilePhoto && danisan.name.charAt(0)}
                                                     </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText

@@ -422,7 +422,7 @@ export default function Mesaj() {
             formData.append('image', file);
 
             const response = await axios.post(
-                config[config.environment].apiUrl + "/upload",
+                config[config.environment].apiUrl + "/upload?type=message&client_id=" + selectedDanisan.id,
                 formData,
                 {
                     headers: {
@@ -603,9 +603,10 @@ export default function Mesaj() {
                                             >
                                                 <ListItemAvatar>
                                                     <Avatar
-                                                        sx={{bgcolor: getAvatarColor(danisan.name || '')}}
+                                                        src={danisan.profilePhoto || undefined}
+                                                        sx={{bgcolor: danisan.profilePhoto ? undefined : getAvatarColor(danisan.name || '')}}
                                                     >
-                                                        {getInitials(danisan.name || '')}
+                                                        {!danisan.profilePhoto && getInitials(danisan.name || '')}
                                                     </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText
