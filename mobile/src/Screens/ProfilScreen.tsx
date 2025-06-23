@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View, Linking} from 'react-native';
 import {Button, Card, Text} from 'react-native-paper';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
@@ -50,6 +50,10 @@ const Profil = ({navigation}) => {
         }
     };
 
+    const handleDeleteAccount = () => {
+        Linking.openURL('mailto:diyetia.app@gmail.com?subject=Hesap%20Silme%20Talebi&body=Merhaba,%0A%0AHesabımı%20silmenizi%20talep%20ediyorum.%0A%0AAdı%20Soyadı:%20' + user.name + '%0AE-posta:%20' + user.email);
+    };
+
     return (
         <View style={styles.container}>
             <Header navigation={navigation}/>
@@ -88,7 +92,7 @@ const Profil = ({navigation}) => {
                         </Button>
 
                         <Button
-                            onPress={() => console.log('Hesap Siliniyor')}
+                            onPress={handleDeleteAccount}
                             mode="outlined"
                             icon="account-remove"
                             textColor="#d32f2f"
