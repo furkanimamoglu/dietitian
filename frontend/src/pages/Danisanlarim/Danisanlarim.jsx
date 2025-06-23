@@ -211,7 +211,6 @@ export default function Danisanlarim() {
         setNotificationDialogOpen(true);
     };
 
-    // CSV Import states
     const [importDialogOpen, setImportDialogOpen] = useState(false);
     const [csvData, setCsvData] = useState([]);
     const [csvErrors, setCsvErrors] = useState({});
@@ -240,7 +239,6 @@ export default function Danisanlarim() {
         }
     }, [clients, activeFilter]);
 
-    // Kart seçimini ele alma fonksiyonu
     const handleCardSelect = (filter) => {
         setActiveFilter(activeFilter === filter ? null : filter);
     };
@@ -286,10 +284,9 @@ export default function Danisanlarim() {
         return () => {
             document.removeEventListener('deleteInactiveClients', handleDeleteInactive);
         };
-    }, [clients]);
+    }, []);
 
     const handleRowUpdate = useCallback(async (updatedRow, originalRow) => {
-        // Değişiklikleri karşılaştır
         const changes = Object.keys(updatedRow).reduce((acc, key) => {
             if (updatedRow[key] !== originalRow[key]) {
                 acc[key] = {
@@ -761,7 +758,7 @@ export default function Danisanlarim() {
         {
             field: "actions",
             headerName: "İşlemler",
-            width: 340, // Genişliği arttırdım
+            width: 340,
             sortable: false,
             editable: false,
             renderCell: (params) => (
@@ -817,10 +814,8 @@ export default function Danisanlarim() {
             header: true,
             skipEmptyLines: true,
             complete: function (results) {
-                // Check if we have valid data
                 if (results.data && results.data.length > 0) {
                     const parsedData = results.data.map((row, index) => {
-                        // Clean up phone number - remove non-digits
                         let phoneNumber = row.telefon || "";
                         phoneNumber = phoneNumber.replace(/\D/g, '');
                         if (phoneNumber.startsWith('0')) {
@@ -858,24 +853,20 @@ export default function Danisanlarim() {
         data.forEach((row, index) => {
             const rowErrors = {};
 
-            // İsim validasyonu
             if (!row.name || row.name.trim() === "") {
                 rowErrors.name = "İsim zorunludur";
             }
 
-            // Telefon validasyonu
             if (!row.phoneNumber || row.phoneNumber.trim() === "") {
                 rowErrors.phoneNumber = "Telefon numarası zorunludur";
             } else if (!/^[0-9]{10}$/.test(row.phoneNumber.replace(/\D/g, ''))) {
                 rowErrors.phoneNumber = "Geçerli bir telefon numarası giriniz";
             }
 
-            // Cinsiyet validasyonu
             if (!row.gender || !["Erkek", "Kadın", "Diğer"].includes(row.gender)) {
                 rowErrors.gender = "Geçerli bir cinsiyet seçiniz (Erkek, Kadın, Diğer)";
             }
 
-            // Email validasyonu (opsiyonel)
             if (row.email && row.email.trim() !== "") {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(row.email)) {
@@ -897,7 +888,6 @@ export default function Danisanlarim() {
         updatedData[index][field] = value;
         setCsvData(updatedData);
 
-        // Validate the updated row
         const rowErrors = {};
         const row = updatedData[index];
 
@@ -943,11 +933,9 @@ export default function Danisanlarim() {
         const updatedData = csvData.filter((_, i) => i !== index);
         setCsvData(updatedData);
 
-        // Update errors
         const newErrors = {...csvErrors};
         delete newErrors[index];
 
-        // Reindex errors if necessary
         const reindexedErrors = {};
         Object.keys(newErrors).forEach(key => {
             const numKey = parseInt(key);
@@ -971,7 +959,6 @@ export default function Danisanlarim() {
             let successCount = 0;
             let failCount = 0;
 
-            // Process each client one by one
             for (const client of csvData) {
                 try {
                     const response = await axios.post(
@@ -1012,9 +999,7 @@ export default function Danisanlarim() {
         return password;
     };
 
-    // Export clients to CSV
     const handleExportCSV = () => {
-        // Filter clients based on active filter
         const dataToExport = filteredClients.map(client => ({
             isim: client.name,
             telefon: client.phoneNumber,
@@ -1023,15 +1008,12 @@ export default function Danisanlarim() {
             durum: client.status ? "Aktif" : "Pasif",
         }));
 
-        // Convert to CSV
         const csv = Papa.unparse(dataToExport);
 
-        // Create download link
         const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
 
-        // Set file name with current date
         const date = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
         const fileName = `danisanlar_${date}.csv`;
 
@@ -1042,9 +1024,6 @@ export default function Danisanlarim() {
         document.body.removeChild(link);
     };
 
-    // ---------------------------
-    // Render
-    // ---------------------------
     return (
         <Default>
             <Stack spacing={2} sx={{mt: "15px"}}>
