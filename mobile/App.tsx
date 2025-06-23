@@ -79,8 +79,45 @@ const App = () => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 if (token) {
-                    console.log('Kullanıcı oturumu aktif, token bulundu');
-                    setInitialRoute('AnaSayfa');
+                    console.log('Token bulundu, hesap durumu kontrol ediliyor...');
+
+                    try {
+                        const response = await fetch(
+                            `${config[config.environment].apiUrl}/client/getClientInfo`,
+                            {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': token
+                                }
+                            }
+                        );
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            const userStatus = data.status;
+
+                            if (userStatus === 'Aktif') {
+                                console.log('Hesap aktif, ana sayfaya yönlendiriliyor');
+                                setInitialRoute('AnaSayfa');
+                            } else if (userStatus === 'Pasif') {
+                                console.log('Hesap pasif durumda, giriş sayfasına yönlendiriliyor');
+                                await AsyncStorage.setItem('loginMessage', 'Hesabınız askıya alınmıştır. Lütfen yöneticinizle iletişime geçin.');
+                                setInitialRoute('Login');
+                            } else {
+                                console.log('Hesap durumu belirlenemedi, giriş sayfasına yönlendiriliyor');
+                                await AsyncStorage.setItem('loginMessage', 'Hesabınızın durumu belirlenemedi. Lütfen tekrar giriş yapın.');
+                                setInitialRoute('Login');
+                            }
+                        } else {
+                            console.log('Kullanıcı bilgisi alınamadı:', data.message);
+                            setInitialRoute('Login');
+                        }
+                    } catch (error) {
+                        console.error('Hesap durumu kontrolünde hata:', error);
+                        setInitialRoute('Login');
+                    }
                 } else {
                     console.log('Token bulunamadı, giriş gerekiyor');
                     setInitialRoute('Onboarding');

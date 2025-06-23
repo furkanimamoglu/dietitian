@@ -170,6 +170,22 @@ const LoginScreen = ({navigation}: Props) => {
         }
     };
 
+    useEffect(() => {
+        const checkLoginMessage = async () => {
+            try {
+                const message = await AsyncStorage.getItem('loginMessage');
+                if (message) {
+                    setErrorMessage(message);
+                    await AsyncStorage.removeItem('loginMessage');
+                }
+            } catch (error) {
+                console.error('Hata mesajı kontrolünde hata:', error);
+            }
+        };
+
+        checkLoginMessage();
+    }, []);
+
     const ErrorMessage = () => {
         if (!errorMessage) return null;
 
