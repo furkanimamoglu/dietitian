@@ -1390,7 +1390,6 @@ export default function Danisanlarim() {
                             "& .MuiDataGrid-footerContainer": {
                                 bgcolor: "background.default",
                             },
-                            // Hücre seçiminde oluşan çerçeveyi kaldırma
                             "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
                                 outline: "none",
                             },
