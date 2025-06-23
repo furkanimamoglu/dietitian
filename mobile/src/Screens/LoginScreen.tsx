@@ -308,7 +308,7 @@ const LoginScreen = ({navigation}: Props) => {
                                     <View style={styles.divider}/>
                                 </View>
 
-                                <Button
+                                {/* <Button
                                     mode="outlined"
                                     onPress={() => navigation.navigate('Kayitol', {})}
                                     style={styles.registerButton}
@@ -317,7 +317,11 @@ const LoginScreen = ({navigation}: Props) => {
                                     labelStyle={styles.buttonLabel}
                                 >
                                     Yeni Hesap Oluştur
-                                </Button>
+                                </Button> */}
+
+                                <Text style={styles.infoText}>
+                                    Diyetisyeninizden size hesap oluşturmasını isteyebilirsiniz.
+                                </Text>
                             </Card.Content>
                         </Card>
                     </Animated.View>
@@ -652,6 +656,26 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         paddingVertical: 10,
         elevation: 3,
+    },
+    infoText: {
+        color: '#555',
+        fontSize: 14,
+        textAlign: 'center',
+        marginTop: 8,
+        marginBottom: 16,
+        paddingHorizontal: 10,
+    },
+    infoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFBEE',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 8,
+        elevation: 2,
+    },
+    infoIcon: {
+        marginRight: 10,
     },
 });
 
