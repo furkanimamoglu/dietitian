@@ -39,6 +39,10 @@ import WcIcon from '@mui/icons-material/Wc';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import StraightenIcon from '@mui/icons-material/Straighten';
+import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import ScaleIcon from '@mui/icons-material/Scale';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import axios from "axios";
@@ -57,6 +61,7 @@ export default function Mesaj() {
     const [lastMessageId, setLastMessageId] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [measurements, setMeasurements] = useState(null); // Ölçüm verileri için state eklendi
     const theme = useTheme();
 
     const messageListRef = useRef();
@@ -261,6 +266,10 @@ export default function Mesaj() {
         setSelectedDanisan(danisan);
         setMessages([]);
         setLastMessageId(null);
+        setMeasurements(null); // Yeni danışan seçildiğinde ölçümleri sıfırla
+
+        // Danışan seçildiğinde ölçüm verilerini getir
+        fetchClientMeasurements(danisan.id);
 
         markMessagesAsRead(danisan.id);
 
@@ -269,6 +278,30 @@ export default function Mesaj() {
                 messageInputRef.current.focus();
             }
         }, 100);
+    };
+
+    // Danışanın ölçüm verilerini getiren fonksiyon
+    const fetchClientMeasurements = async (clientId) => {
+        try {
+            const response = await axios.get(
+                config[config.environment].apiUrl + `/measurement/getClientMeasurement?client_id=${clientId}`,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem("token"),
+                    }
+                }
+            );
+
+            if (response.data && response.data.length > 0) {
+                // En son ölçüm verisini al
+                setMeasurements(response.data[0]);
+            } else {
+                setMeasurements(null);
+            }
+        } catch (error) {
+            console.error("Danışan ölçümlerini getirirken hata:", error);
+            setMeasurements(null);
+        }
     };
 
     const handleSendMessage = async () => {
@@ -890,6 +923,216 @@ export default function Mesaj() {
                                                     secondary={selectedDanisan.bmi}
                                                 />
                                             </ListItemButton>
+                                        )}
+
+                                        {/* Ölçüm verileri bölümü */}
+                                        {measurements && (
+                                            <>
+                                                <Divider sx={{my: 2}} />
+                                                <Typography variant="subtitle1" sx={{px: 2, fontWeight: 'bold', color: theme.palette.primary.main}}>
+                                                    Son Ölçüm Bilgileri
+                                                </Typography>
+                                                <Box sx={{px: 2, mt: 1}}>
+                                                    <Grid container spacing={1}>
+                                                        <Grid item xs={6}>
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 1,
+                                                                    bgcolor: theme.palette.primary.light,
+                                                                    color: 'white',
+                                                                    borderRadius: 1,
+                                                                    textAlign: 'center',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                <HeightIcon />
+                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Boy</Typography>
+                                                                <Typography variant="body2">{measurements.boy} cm</Typography>
+                                                            </Paper>
+                                                        </Grid>
+                                                        <Grid item xs={6}>
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 1,
+                                                                    bgcolor: theme.palette.success.light,
+                                                                    color: 'white',
+                                                                    borderRadius: 1,
+                                                                    textAlign: 'center',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                <MonitorWeightIcon />
+                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kilo</Typography>
+                                                                <Typography variant="body2">{measurements.kilo} kg</Typography>
+                                                            </Paper>
+                                                        </Grid>
+
+                                                        {/* Diğer ölçüm değerleri - 4 kutu ile ayrı satırda gösterilecek */}
+                                                        <Grid item xs={12}>
+                                                            <Typography variant="caption" sx={{mt: 1, display: 'block', color: theme.palette.text.secondary}}>
+                                                                Diğer Ölçümler
+                                                            </Typography>
+                                                        </Grid>
+
+                                                        <Grid item xs={3}>
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 1,
+                                                                    bgcolor: theme.palette.info.light,
+                                                                    color: 'white',
+                                                                    borderRadius: 1,
+                                                                    textAlign: 'center',
+                                                                    height: '100%',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                <StraightenIcon fontSize="small" />
+                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Bel</Typography>
+                                                                <Typography variant="body2">{measurements.bel} cm</Typography>
+                                                            </Paper>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 1,
+                                                                    bgcolor: theme.palette.warning.light,
+                                                                    color: 'white',
+                                                                    borderRadius: 1,
+                                                                    textAlign: 'center',
+                                                                    height: '100%',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                <StraightenIcon fontSize="small" />
+                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kalça</Typography>
+                                                                <Typography variant="body2">{measurements.kalca} cm</Typography>
+                                                            </Paper>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 1,
+                                                                    bgcolor: theme.palette.error.light,
+                                                                    color: 'white',
+                                                                    borderRadius: 1,
+                                                                    textAlign: 'center',
+                                                                    height: '100%',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                <StraightenIcon fontSize="small" />
+                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Göğüs</Typography>
+                                                                <Typography variant="body2">{measurements.gogus} cm</Typography>
+                                                            </Paper>
+                                                        </Grid>
+                                                        <Grid item xs={3}>
+                                                            <Paper
+                                                                elevation={0}
+                                                                sx={{
+                                                                    p: 1,
+                                                                    bgcolor: theme.palette.secondary.light,
+                                                                    color: 'white',
+                                                                    borderRadius: 1,
+                                                                    textAlign: 'center',
+                                                                    height: '100%',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center'
+                                                                }}
+                                                            >
+                                                                <StraightenIcon fontSize="small" />
+                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kol</Typography>
+                                                                <Typography variant="body2">{measurements.kol} cm</Typography>
+                                                            </Paper>
+                                                        </Grid>
+
+                                                        <Grid item xs={12}>
+                                                            <Box sx={{mt: 1}}>
+                                                                <Grid container spacing={1}>
+                                                                    <Grid item xs={4}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 1,
+                                                                                bgcolor: 'rgba(244, 167, 89, 0.8)',
+                                                                                color: 'white',
+                                                                                borderRadius: 1,
+                                                                                textAlign: 'center',
+                                                                                display: 'flex',
+                                                                                flexDirection: 'column',
+                                                                                alignItems: 'center'
+                                                                            }}
+                                                                        >
+                                                                            <ScaleIcon fontSize="small" />
+                                                                            <Typography variant="caption" sx={{fontWeight: 'bold'}}>Yağ</Typography>
+                                                                            <Typography variant="body2">%{measurements.yag}</Typography>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 1,
+                                                                                bgcolor: 'rgba(90, 173, 246, 0.8)',
+                                                                                color: 'white',
+                                                                                borderRadius: 1,
+                                                                                textAlign: 'center',
+                                                                                display: 'flex',
+                                                                                flexDirection: 'column',
+                                                                                alignItems: 'center'
+                                                                            }}
+                                                                        >
+                                                                            <FitnessCenterIcon fontSize="small" />
+                                                                            <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kas</Typography>
+                                                                            <Typography variant="body2">%{measurements.kas}</Typography>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                    <Grid item xs={4}>
+                                                                        <Paper
+                                                                            elevation={0}
+                                                                            sx={{
+                                                                                p: 1,
+                                                                                bgcolor: 'rgba(79, 195, 247, 0.8)',
+                                                                                color: 'white',
+                                                                                borderRadius: 1,
+                                                                                textAlign: 'center',
+                                                                                display: 'flex',
+                                                                                flexDirection: 'column',
+                                                                                alignItems: 'center'
+                                                                            }}
+                                                                        >
+                                                                            <WaterDropIcon fontSize="small" />
+                                                                            <Typography variant="caption" sx={{fontWeight: 'bold'}}>Su</Typography>
+                                                                            <Typography variant="body2">%{measurements.su}</Typography>
+                                                                        </Paper>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Box>
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    <Box sx={{mt: 1, textAlign: 'center'}}>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            Son ölçüm tarihi: {new Date(measurements.createdAt).toLocaleDateString('tr-TR')}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </>
                                         )}
                                     </List>
                                 </>

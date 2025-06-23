@@ -77,6 +77,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import Cake from '@mui/icons-material/Cake';
 
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
@@ -3970,6 +3971,24 @@ function Danisan() {
                                             primary={<Typography variant="body2"
                                                                  color="text.secondary">Cinsiyet</Typography>}
                                             secondary={<Typography variant="body1">{danisan.gender || '-'}</Typography>}
+                                        />
+                                    </ListItem>
+
+                                    <ListItem sx={{
+                                        py: 1,
+                                        px: 0,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
+                                                <Cake fontSize="small"/>
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={<Typography variant="body2"
+                                                                 color="text.secondary">Yaş</Typography>}
+                                            secondary={<Typography variant="body1">{danisan.age || '-'}</Typography>}
                                         />
                                     </ListItem>
 
