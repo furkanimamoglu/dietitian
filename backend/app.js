@@ -3,8 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require("path");
-const fs = require('fs');
 const AWS = require('aws-sdk');
+const rateLimit = require('express-rate-limit');
 
 // Config
 const config = require(path.join(__dirname, 'config.json'));
@@ -122,6 +122,17 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
         res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
     }
 });
+
+// Rate Limiter
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000,
+//     max: 200,
+//     message: { showOnScreen: true, message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.' },
+//     standardHeaders: true,
+//     legacyHeaders: false,
+// });
+//
+// app.use(limiter);
 
 // Routers
 app.use('/api/dietitian', dietitianRoutes);
