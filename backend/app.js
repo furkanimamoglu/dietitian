@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require("path");
 const fs = require('fs');
+const AWS = require('aws-sdk');
 
 // Config
 const config = require(path.join(__dirname, 'config.json'));
@@ -35,7 +36,8 @@ const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
 const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
 const notificationRoutes = require(path.join(__dirname, "Routes", "notificationRoutes"));
 
-const multer = require("multer");
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 
 app.use(bodyParser.json());
 
@@ -59,58 +61,11 @@ function sanitize(str) {
     return String(str || '').replace(/[^a-z0-9_-]/gi, '_');
 }
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        try {
-            const token = req.headers.authorization?.split(' ')[1];
-            if (!token) return cb(new Exception('Token eksik.'));
-
-            const userId = Security.getUserIdFromToken(token);
-            const role = Security.getPermissionFromToken(token);
-            const clientId = sanitize(req.query.client_id);
-            const type = sanitize(req.query.type);
-
-            if (!ALLOWED_TYPES.includes(type)) {
-                return cb(new Exception('Geçersiz yükleme türü.'));
-            }
-
-            let folderPath;
-
-            if (role === DIETITIAN) {
-                folderPath = path.join(
-                    __dirname,
-                    'uploads',
-                    'Dietitian',
-                    sanitize(userId),
-                    clientId,
-                    type
-                );
-            } else {
-                folderPath = path.join(
-                    __dirname,
-                    'uploads',
-                    'Client',
-                    sanitize(userId),
-                    type
-                );
-            }
-
-            fs.mkdirSync(folderPath, { recursive: true });
-            cb(null, folderPath);
-        } catch (err) {
-            cb(new Exception('Yükleme klasörü oluşturulamadı.'));
-        }
-    },
-
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
+const upload = multer({
+    storage: multer.memoryStorage()
 });
 
-const upload = multer({ storage });
-
-app.post('/api/upload', upload.single('image'), (req, res) => {
+app.post('/api/upload', upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ showOnScreen: true, message: 'Yüklenecek dosya eklenmedi.' });
     }
@@ -118,19 +73,54 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     const allowedExtensions = ['.jpg', '.jpeg', '.png'];
     const fileExt = path.extname(req.file.originalname).toLowerCase();
     if (!allowedExtensions.includes(fileExt)) {
-        fs.unlink(req.file.path, () => {});
         return res.status(400).json({ showOnScreen: true, message: 'Sadece resim dosyaları yüklenebilir.' });
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (req.file.size > maxSize) {
-        fs.unlink(req.file.path, () => {});
         return res.status(400).json({ showOnScreen: true, message: 'Dosya boyutu 5MB\'ı geçemez.' });
     }
 
-    const relativePath = path.relative(path.join(__dirname, 'uploads'), req.file.path).replace(/\\/g, '/');
-    const imageUrl = `${config.image_url}${relativePath}`;
-    res.json({ imageUrl });
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) throw new Exception('Token eksik.');
+
+        const userId = Security.getUserIdFromToken(token);
+        const role = Security.getPermissionFromToken(token);
+        const clientId = sanitize(req.query.client_id);
+        const type = sanitize(req.query.type);
+
+        if (!ALLOWED_TYPES.includes(type)) {
+            throw new Exception('Geçersiz yükleme türü.');
+        }
+
+        const folderPath = `${role === DIETITIAN ? 'Dietitian' : 'Client'}/${sanitize(userId)}/${clientId}/${type}`;
+        const uniqueSuffix = `${new Date().toISOString().split('T')[0]}`;
+        const sanitizedFileName = sanitize(req.file.originalname).toLowerCase().replace(/\s+/g, '-');
+        const fileName = `${folderPath}/${uniqueSuffix}.${sanitizedFileName}`;
+
+        const s3 = new AWS.S3({
+            accessKeyId: config.s3.accessKeyId,
+            secretAccessKey: config.s3.secretAccessKey,
+            region: config.s3.region
+        });
+
+        const params = {
+            Bucket: config.s3.bucketName,
+            Key: fileName,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+            ACL: 'public-read'
+        };
+
+        const awsresponse = await s3.upload(params).promise();
+
+        const imageUrl = awsresponse.Location;
+        res.json({ imageUrl });
+    } catch (err) {
+        console.error('Dosya yükleme hatası:', err);
+        res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
+    }
 });
 
 // Routers

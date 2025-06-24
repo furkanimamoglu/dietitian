@@ -19,5 +19,11 @@
     "emailAppPassword": "lgit zzvy qhuo zwxw"
   },
   "ddl": "update",
-  "secretkey": "furkantopsecret"
+  "secretkey": "furkantopsecret",
+  "s3": {
+    "accessKeyId": "AKIAW3MD7OZZXZOYIYXO",
+    "secretAccessKey": "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",
+    "region": "eu-central-1",
+    "bucketName": "diyetia"
+  }
 }
