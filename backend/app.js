@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require("path");
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const rateLimit = require('express-rate-limit');
 
 // Config
@@ -99,9 +99,11 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
         const sanitizedFileName = sanitize(req.file.originalname).toLowerCase().replace(/\s+/g, '-');
         const fileName = `${folderPath}/${uniqueSuffix}.${sanitizedFileName}`;
 
-        const s3 = new AWS.S3({
-            accessKeyId: config.s3.accessKeyId,
-            secretAccessKey: config.s3.secretAccessKey,
+        const s3Client = new S3Client({
+            credentials: {
+                accessKeyId: config.s3.accessKeyId,
+                secretAccessKey: config.s3.secretAccessKey
+            },
             region: config.s3.region
         });
 
@@ -113,10 +115,15 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
             ACL: 'public-read'
         };
 
-        const awsresponse = await s3.upload(params).promise();
-
-        const imageUrl = awsresponse.Location;
-        res.json({ imageUrl });
+        try {
+            const command = new PutObjectCommand(params);
+            await s3Client.send(command);
+            const imageUrl = `https://${config.s3.bucketName}.s3.${config.s3.region}.amazonaws.com/${fileName}`;
+            res.json({ imageUrl });
+        } catch (err) {
+            console.error('Dosya yükleme hatası:', err);
+            res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
+        }
     } catch (err) {
         console.error('Dosya yükleme hatası:', err);
         res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
