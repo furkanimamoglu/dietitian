@@ -172,11 +172,10 @@ export default function Header({navigation}: Props) {
         checkToken();
         fetchNotifications();
 
-        // Periyodik yenileme için interval
         const interval = setInterval(() => {
             fetchUnreadMessages();
             fetchNotifications();
-        }, 30000); // Her 30 saniyede bir güncelle
+        }, 30000);
 
         return () => clearInterval(interval);
     }, []);
@@ -244,12 +243,10 @@ export default function Header({navigation}: Props) {
         const date = new Date(dateString);
         const now = new Date();
 
-        // Bugün ise saat göster
         if (date.toDateString() === now.toDateString()) {
             return `Bugün ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
         }
 
-        // Dün ise "Dün" yaz
         const yesterday = new Date(now);
         yesterday.setDate(now.getDate() - 1);
         if (date.toDateString() === yesterday.toDateString()) {
