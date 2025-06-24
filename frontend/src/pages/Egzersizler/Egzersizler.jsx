@@ -461,14 +461,12 @@ export default function Egzersizler() {
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
 
-        // Kalori filtresini uygula
         let calorieMatch = true;
         if (calorieFilter !== 'all') {
             const [min, max] = calorieFilter.split('-').map(Number);
             calorieMatch = item.calories_burned >= min && item.calories_burned <= max;
         }
 
-        // Zorluk filtresini uygula
         let difficultyMatch = true;
         if (difficultyFilter !== 'all') {
             difficultyMatch = item.difficulty === parseInt(difficultyFilter);

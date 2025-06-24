@@ -156,17 +156,11 @@ const ConfirmationDialog = ({isOpen, onClose, onConfirm, title, message, itemNam
 export default function Finans() {
     const [tabValue, setTabValue] = useState(0);
 
-    // Packages state
     const [packages, setPackages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-
-    // Add clients state
     const [clients, setClients] = useState([]);
-
-    // Sample data for invoices
     const [invoices, setInvoices] = useState([]);
 
-    // Package management state
     const [packageDialogOpen, setPackageDialogOpen] = useState(false);
     const [currentPackage, setCurrentPackage] = useState(null);
     const [newPackage, setNewPackage] = useState({
@@ -209,7 +203,6 @@ export default function Finans() {
         itemName: ''
     });
 
-    // Package management state
     const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
     const [currentInvoice, setCurrentInvoice] = useState(null);
     const [formErrors, setFormErrors] = useState({});
@@ -227,7 +220,6 @@ export default function Finans() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
-    // Fetch packages on component mount
     useEffect(() => {
         fetchPackages();
         fetchClients();
@@ -238,11 +230,9 @@ export default function Finans() {
         }));
     }, []);
 
-    // API Functions
     const fetchPackages = async () => {
         setIsLoading(true);
         try {
-            // Ensure config is available and properly structured
             const apiUrl = config && config[config.environment] && config[config.environment].apiUrl
                 ? `${config[config.environment].apiUrl}/package/getMyPackages`
                 : '/package/getMyPackages';
@@ -254,7 +244,6 @@ export default function Finans() {
             });
             const packagesData = response.data;
 
-            // Fetch services for each package
             const packagesWithServices = await Promise.all(
                 packagesData.map(async (pkg) => {
                     const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl
@@ -280,10 +269,8 @@ export default function Finans() {
         }
     };
 
-    // Add function to fetch clients
     const fetchClients = async () => {
         try {
-            // Ensure config is available and properly structured
             const apiUrl = config && config[config.environment] && config[config.environment].apiUrl
                 ? `${config[config.environment].apiUrl}/dietitian/getAllMyClients`
                 : '/dietitian/getAllMyClients';
@@ -302,7 +289,6 @@ export default function Finans() {
 
     const sendPaymentReminder = async (invoice) => {
         try {
-            // Butonu devre dışı bırak
             setReminderDisabledIds(prev => ({...prev, [invoice.id]: true}));
 
             const apiUrl = `${config[config.environment].apiUrl}/notification/sendPaymentReminderNotification`;
@@ -327,7 +313,6 @@ export default function Finans() {
 
             showSuccessToast(`${invoice.clientName} adlı danışana ödeme hatırlatma bildirimi başarıyla gönderildi.`);
 
-            // 5 saniye sonra butonu tekrar etkinleştir
             setTimeout(() => {
                 setReminderDisabledIds(prev => {
                     const newState = {...prev};
@@ -338,7 +323,6 @@ export default function Finans() {
 
             return true;
         } catch (error) {
-            // Hata durumunda butonu hemen etkinleştir
             setReminderDisabledIds(prev => {
                 const newState = {...prev};
                 delete newState[invoice.id];
@@ -351,7 +335,6 @@ export default function Finans() {
     }
     };
 
-    // Fetch invoices from backend
     const fetchInvoices = async () => {
         setIsLoading(true);
         try {
@@ -408,7 +391,6 @@ export default function Finans() {
         return packageType !== "Seanslık";
     };
 
-    // Filter invoices based on search term and status filter
     const filteredInvoices = useMemo(() => {
         return invoices.filter(invoice => {
             const matchesSearch =
@@ -419,7 +401,6 @@ export default function Finans() {
         });
     }, [invoices, searchTerm, statusFilter]);
 
-    // DataGrid columns for invoices
     const invoiceColumns = [
         {
             field: "clientName",
@@ -701,16 +682,13 @@ export default function Finans() {
         };
     };
 
-    // Package management handlers
     const handleOpenPackageDialog = async (pkg = null) => {
-        // Reset any form errors
         setPackageFormErrors({});
 
         if (pkg) {
             setCurrentPackage(pkg);
 
             try {
-                // Ensure config is available and properly structured
                 const servicesUrl = config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}/package/getPackageItemsFromPackage?package_id=${pkg.id}`
                     : `/package/getPackageItemsFromPackage?package_id=${pkg.id}`;
@@ -721,12 +699,8 @@ export default function Finans() {
                     },
                 });
 
-                // Get service items and names
                 const serviceItems = servicesResponse.data;
                 const serviceNames = serviceItems.map(item => item.name);
-
-                // Don't add an empty service if there are no services
-                // Let the user add services if they want to
 
                 setNewPackage({
                     ...pkg,
@@ -745,7 +719,7 @@ export default function Finans() {
                 type: "Seanslık",
                 price: "",
                 description: "",
-                services: [], // Start with no services
+                services: [],
                 serviceItems: []
             });
         }
@@ -755,15 +729,13 @@ export default function Finans() {
     const handleClosePackageDialog = () => {
         setPackageDialogOpen(false);
         setCurrentPackage(null);
-        // Reset form errors
         setPackageFormErrors({});
-        // Reset the form data when closing
         setNewPackage({
             name: "",
             type: "Seanslık",
             price: "",
             description: "",
-            services: [], // No default services
+            services: [],
             serviceItems: []
         });
     };
@@ -774,7 +746,6 @@ export default function Finans() {
             [field]: value
         });
 
-        // Clear error for this field if it exists
         if (packageFormErrors[field]) {
             setPackageFormErrors(prev => {
                 const newErrors = {...prev};
@@ -810,10 +781,8 @@ export default function Finans() {
     };
 
     const handleSavePackage = async () => {
-        // Reset previous errors
         const errors = {};
 
-        // Validate all required fields
         if (!newPackage.name || newPackage.name.trim() === "") {
             errors.name = "Lütfen paket adını girin";
         }
@@ -826,9 +795,6 @@ export default function Finans() {
             errors.price = "Lütfen geçerli bir fiyat girin";
         }
 
-        // Note: Paket İçeriği is now optional, so we removed that validation
-
-        // If we have validation errors, show them and stop
         if (Object.keys(errors).length > 0) {
             setPackageFormErrors(errors);
             return;
@@ -838,7 +804,6 @@ export default function Finans() {
         try {
             let savedPackage;
 
-            // Get base API URL with safe access
             const getApiUrl = (endpoint) => {
                 return config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}${endpoint}`
@@ -852,13 +817,12 @@ export default function Finans() {
             };
 
             if (currentPackage) {
-                // Update existing package
                 const packageData = {
                     package_id: currentPackage.id,
                     name: newPackage.name,
                     description: newPackage.description,
                     type: newPackage.type,
-                    price: parseInt(newPackage.price, 10) // Ensure price is sent as a number
+                    price: parseInt(newPackage.price, 10)
                 };
 
                 const response = await axios.put(
@@ -868,19 +832,16 @@ export default function Finans() {
                 );
                 savedPackage = response.data;
 
-                // Get existing services for the package
                 const existingServicesResponse = await axios.get(
                     getApiUrl(`/package/getPackageItemsFromPackage?package_id=${currentPackage.id}`),
                     authHeaders
                 );
                 const existingServices = existingServicesResponse.data;
 
-                // Track which services to delete
                 const servicesToRemove = existingServices.filter(
                     existing => !newPackage.services.includes(existing.name)
                 );
 
-                // Delete services that are no longer in the updated list
                 for (const serviceToRemove of servicesToRemove) {
                     await axios.delete(
                         getApiUrl(`/package/deletePackageItem?item_id=${serviceToRemove.id}`),
@@ -888,14 +849,12 @@ export default function Finans() {
                     );
                 }
 
-                // Update or add services
                 for (const serviceName of newPackage.services) {
-                    if (!serviceName.trim()) continue; // Skip empty services
+                    if (!serviceName.trim()) continue;
 
                     const existingService = existingServices.find(s => s.name === serviceName);
 
                     if (existingService) {
-                        // Service exists but needs to be updated (only if name changed)
                         if (existingService.name !== serviceName) {
                             await axios.put(
                                 getApiUrl('/package/updatePackageItem'),
@@ -907,7 +866,6 @@ export default function Finans() {
                             );
                         }
                     } else {
-                        // Service is new, add it
                         await axios.post(
                             getApiUrl('/package/addPackageItem'),
                             {
@@ -926,7 +884,6 @@ export default function Finans() {
                     } paketi güncellendi.`
                 );
             } else {
-                // Create new package
                 const packageData = {
                     name: newPackage.name,
                     description: newPackage.description,
@@ -941,7 +898,6 @@ export default function Finans() {
                 );
                 savedPackage = response.data;
 
-                // Add services for the new package
                 for (const serviceName of newPackage.services) {
                     if (serviceName.trim()) {
                         await axios.post(
@@ -963,7 +919,6 @@ export default function Finans() {
                 );
             }
 
-            // Refresh packages after saving
             await fetchPackages();
         } catch (error) {
             console.error('Error saving package:', error);
@@ -975,18 +930,15 @@ export default function Finans() {
     };
 
     const handleDeletePackage = (id) => {
-        // Check if package is used in any invoices
         const isUsed = invoices.some(invoice => invoice.packageId === id);
         if (isUsed) {
             showErrorToast("Bu paket faturalarda kullanıldığı için silinemez.");
             return;
         }
 
-        // Get the package name for the confirmation message
         const packageToDelete = packages.find(pkg => pkg.id === id);
         if (!packageToDelete) return;
 
-        // Open confirmation dialog
         setDeleteConfirmation({
             isOpen: true,
             itemId: id,
@@ -995,13 +947,11 @@ export default function Finans() {
         });
     };
 
-    // Add the actual delete function that will be called after confirmation
     const confirmDelete = async () => {
         const {itemId, itemType, itemName} = deleteConfirmation;
         setIsLoading(true);
 
         try {
-            // Get base API URL with safe access
             const getApiUrl = (endpoint) => {
                 return config && config[config.environment] && config[config.environment].apiUrl
                     ? `${config[config.environment].apiUrl}${endpoint}`
@@ -1026,7 +976,7 @@ export default function Finans() {
                         : itemName
                     } paketi silindi.`
                 );
-                await fetchPackages(); // Refresh packages list
+                await fetchPackages();
             } else if (itemType === 'invoice') {
                 await axios.delete(getApiUrl(`/invoice/deleteInvoice?invoice_id=${itemId}`), authHeaders);
                 showSuccessToast(`Fatura silindi.`);
@@ -1040,25 +990,22 @@ export default function Finans() {
         }
     };
 
-    // Add helper function to validate date strings
     const isValidDateString = (dateStr) => {
         if (!dateStr) return false;
         const date = new Date(dateStr);
         return !isNaN(date.getTime());
     };
 
-    // Add helper function to safely parse dates
     const safelyParseDate = (dateStr) => {
         try {
             if (!isValidDateString(dateStr)) return new Date();
             return new Date(dateStr);
         } catch (error) {
             console.error('Error parsing date:', error);
-            return new Date(); // Return current date as fallback
+            return new Date();
         }
     };
 
-    // Add helper function to safely format dates to ISO string
     const safelyFormatDate = (date) => {
         try {
             if (!date || isNaN(date.getTime())) {
@@ -1071,57 +1018,49 @@ export default function Finans() {
         }
     };
 
-    // Update calculate due date function with better error handling
     const calculateDueDateFromPackageType = (issueDate, packageType) => {
         try {
-            // Ensure we have a valid date object
             const dueDate = isValidDateString(issueDate)
                 ? new Date(issueDate)
                 : new Date();
 
             switch (packageType) {
                 case "Seanslık":
-                    dueDate.setDate(dueDate.getDate()); // +1 day
+                    dueDate.setDate(dueDate.getDate());
                     break;
                 case "Aylık":
-                    dueDate.setMonth(dueDate.getMonth() + 1); // +1 month
+                    dueDate.setMonth(dueDate.getMonth() + 1);
                     break;
                 case "3 Aylık":
-                    dueDate.setMonth(dueDate.getMonth() + 3); // +3 months
+                    dueDate.setMonth(dueDate.getMonth() + 3);
                     break;
                 case "6 Aylık":
-                    dueDate.setMonth(dueDate.getMonth() + 6); // +6 months
+                    dueDate.setMonth(dueDate.getMonth() + 6);
                     break;
                 case "1 Yıllık":
-                    dueDate.setFullYear(dueDate.getFullYear() + 1); // +1 year
+                    dueDate.setFullYear(dueDate.getFullYear() + 1);
                     break;
                 default:
-                    dueDate.setDate(dueDate.getDate() + 7); // Default: +7 days
+                    dueDate.setDate(dueDate.getDate() + 7);
             }
 
             return dueDate;
         } catch (error) {
             console.error('Error calculating due date:', error);
-            // Return a safe default: current date + 7 days
             const defaultDate = new Date();
             defaultDate.setDate(defaultDate.getDate() + 7);
             return defaultDate;
         }
     };
 
-    // Invoice management handlers
     const handleOpenInvoiceDialog = (invoice = null) => {
-        // Always reset form first to clear any previous data
         setCurrentInvoice(null);
-        // Reset any form errors
         setFormErrors({});
 
         if (invoice) {
-            // If editing an existing invoice
             setCurrentInvoice(invoice);
             setNewInvoice({...invoice});
         } else {
-            // If creating a new invoice, set default values
             const firstPackage = packages.length > 0 ? packages[0] : null;
             const today = new Date();
             let dueDate;
@@ -1172,7 +1111,6 @@ export default function Finans() {
             [field]: value
         });
 
-        // Clear error for this field if it exists
         if (formErrors[field]) {
             setFormErrors(prev => {
                 const newErrors = {...prev};
@@ -1181,7 +1119,6 @@ export default function Finans() {
             });
         }
 
-        // Auto-update client name if client id changes
         if (field === 'clientId') {
             const selectedClient = clients.find(client => client.id === Number(value));
             if (selectedClient) {
@@ -1252,14 +1189,12 @@ export default function Finans() {
             }
         }
 
-        // Update due date when issue date changes based on selected package
         if (field === 'issueDate') {
             try {
                 const issueDate = safelyParseDate(value);
                 const selectedPackage = packages.find(pkg => pkg.id === newInvoice.packageId);
 
                 if (selectedPackage) {
-                    // Only auto-calculate due date if a package is selected
                     const dueDate = calculateDueDateFromPackageType(issueDate, selectedPackage.type);
                     setNewInvoice(prev => ({
                         ...prev,
@@ -1267,7 +1202,6 @@ export default function Finans() {
                         dueDate: safelyFormatDate(dueDate)
                     }));
 
-                    // Clear due date error if it exists since we're setting a valid due date
                     if (formErrors.dueDate) {
                         setFormErrors(prev => {
                             const newErrors = {...prev};
@@ -1276,8 +1210,6 @@ export default function Finans() {
                         });
                     }
                 } else {
-                    // If no package is selected, don't change the due date
-                    // Let user set it manually
                     setNewInvoice(prev => ({
                         ...prev,
                         issueDate: value
@@ -1285,7 +1217,6 @@ export default function Finans() {
                 }
             } catch (error) {
                 console.error('Error updating due date after issue date change:', error);
-                // Just update the issue date without changing the due date
                 setNewInvoice(prev => ({
                     ...prev,
                     issueDate: value
@@ -2303,19 +2234,16 @@ export default function Finans() {
         data.forEach((row, index) => {
             const rowErrors = {};
 
-            // Client validation
             if (!row.clientName || row.clientName.trim() === "") {
                 rowErrors.clientName = "Danışan adı zorunludur";
             } else if (!row.clientId) {
                 rowErrors.clientName = "Danışan sistemde bulunamadı";
             }
 
-            // Amount validation
             if (isNaN(row.amount) || row.amount <= 0) {
                 rowErrors.amount = "Geçerli bir tutar giriniz";
             }
 
-            // Date validation
             if (!row.issueDate || !isValidDateString(row.issueDate)) {
                 rowErrors.issueDate = "Geçerli bir fatura tarihi giriniz";
             }
@@ -2337,13 +2265,11 @@ export default function Finans() {
         const updatedData = [...csvData];
         updatedData[index][field] = value;
 
-        // If changing client, update clientId
         if (field === 'clientName') {
             const client = clients.find(c => c.name === value);
             updatedData[index].clientId = client ? client.id : null;
         }
 
-        // If changing package, update packageId and amount
         if (field === 'packageName') {
             const pkg = packages.find(p => p.name === value);
             updatedData[index].packageId = pkg ? pkg.id : null;
@@ -2354,7 +2280,6 @@ export default function Finans() {
 
         setCsvData(updatedData);
 
-        // Validate the updated row
         const rowErrors = {};
         const row = updatedData[index];
 
@@ -2403,11 +2328,9 @@ export default function Finans() {
         const updatedData = csvData.filter((_, i) => i !== index);
         setCsvData(updatedData);
 
-        // Update errors
         const newErrors = {...csvErrors};
         delete newErrors[index];
 
-        // Reindex errors if necessary
         const reindexedErrors = {};
         Object.keys(newErrors).forEach(key => {
             const numKey = parseInt(key);
@@ -2435,7 +2358,6 @@ export default function Finans() {
             let successCount = 0;
             let failCount = 0;
 
-            // Process each invoice one by one
             for (const invoice of csvData) {
                 try {
                     const getApiUrl = (endpoint) => {
@@ -2450,7 +2372,6 @@ export default function Finans() {
                         },
                     };
 
-                    // Map status to backend format
                     const backendStatus = mapStatusToBackend(invoice.status);
 
                     const invoiceData = {
@@ -2489,7 +2410,6 @@ export default function Finans() {
     };
 
     const handleExportCSV = () => {
-        // Filter invoices based on active filter
         const filteredInvoices = invoices.filter(invoice => {
             const matchesSearch =
                 (invoice?.clientName?.toLowerCase() || '').includes((searchTerm || '').toLowerCase()) ||
@@ -2498,7 +2418,6 @@ export default function Finans() {
             return matchesSearch && matchesStatus;
         });
 
-        // Prepare data for export
         const dataToExport = filteredInvoices.map(invoice => ({
             danisan: invoice.clientName || "",
             paket: invoice.packageName || "",
@@ -2509,15 +2428,12 @@ export default function Finans() {
             aciklama: invoice.description || ""
         }));
 
-        // Convert to CSV
         const csv = Papa.unparse(dataToExport);
 
-        // Create download link
         const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
 
-        // Set file name with current date
         const date = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
         const fileName = `faturalar_${date}.csv`;
 

@@ -19,7 +19,7 @@ export const showSuccessToast = (message, options = {}) => {
  */
 export const showErrorToast = (message, options = {}) => {
     toast.error(message, {
-        duration: 4000, // Slightly longer duration for errors
+        duration: 4000,
         ...options
     });
 };

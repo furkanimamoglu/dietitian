@@ -548,7 +548,6 @@ const WaterTrackingCard = ({data, clientId}) => {
                             InputProps={{
                                 inputMode: 'numeric',
                                 endAdornment: <InputAdornment position="end">ml</InputAdornment>,
-                                // Sayı girişini daha kullanışlı hale getiren özellikler
                                 startAdornment: (
                                     <InputAdornment position="start">
                                         <LocalDrinkIcon color="primary" />
@@ -1478,12 +1477,9 @@ function Danisan() {
         setActiveTab(newValue);
     };
 
-    // Beslenme planı öğünlerini render eden fonksiyon
     const renderMealItems = (mealItems) => {
         if (!mealItems) return null;
 
-        // Yeni JSON yapısı için özel işleme
-        // Eğer mealItems'ın info, Alternatif vb. özellikleri varsa yeni formatta
         if (mealItems.info || Object.keys(mealItems).some(key => key.includes('Alternatif'))) {
             const info = mealItems.info || {};
             const alternativeKeys = Object.keys(mealItems).filter(key => key !== 'info');
@@ -1503,9 +1499,9 @@ function Danisan() {
                                     objectFit: 'cover',
                                     borderRadius: 1,
                                     mb: 0.5,
-                                    cursor: 'pointer' // İmleci tıklanabilir şekilde göster
+                                    cursor: 'pointer'
                                 }}
-                                onClick={() => handleImageClick(info.image)} // Tıklama işleyicisini ekledim
+                                onClick={() => handleImageClick(info.image)}
                             />
                         </Box>
                     )}
@@ -1550,7 +1546,6 @@ function Danisan() {
             );
     }
 
-    // Eski format için uyumluluk
     if (Array.isArray(mealItems)) {
         return mealItems.map((item, index) => (
             <Typography
@@ -2484,7 +2479,6 @@ function Danisan() {
                                                         'Öğle Yemeği': 'warning.light',
                                                         'Akşam Yemeği': 'error.light',
                                                         'Aparatif': 'info.light',
-                                                        // Diğer öğünler için varsayılan renk
                                                         'default': 'secondary.light'
                                                     };
 
@@ -2496,8 +2490,6 @@ function Danisan() {
                                                     };
 
                                                     return meals.map((meal, mealIndex) => {
-                                                        // Mealtype'a ait zaman bilgisini bulmak için
-                                                        // İlk günün verisinden aldığımız saat bilgisini tüm satır için kullanacağız
                                                         const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
                                                         const mealInfo = nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay]?.[meal]?.info || {};
                                                         const mealTime = mealInfo.time;

@@ -45,7 +45,7 @@ const pdfStyles = StyleSheet.create({
     logo: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#ff9800',  // Yeşil yerine turuncu renk
+        color: '#ff9800',
     },
     infoSection: {
         flexDirection: 'row',
@@ -66,7 +66,7 @@ const pdfStyles = StyleSheet.create({
     infoIcon: {
         width: 12,
         height: 12,
-        backgroundColor: '#ff9800',  // Yeşil yerine turuncu renk
+        backgroundColor: '#ff9800',
         borderRadius: 6,
         marginRight: 5,
     },
@@ -86,7 +86,7 @@ const pdfStyles = StyleSheet.create({
     exerciseHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#ff9800',  // Yeşil yerine turuncu renk
+        backgroundColor: '#ff9800',
         padding: 8,
         borderRadius: 5,
         marginBottom: 10,
@@ -114,7 +114,7 @@ const pdfStyles = StyleSheet.create({
         width: 120,
         fontSize: 10,
         fontWeight: 'bold',
-        color: '#ff9800',  // Yeşil yerine turuncu renk
+        color: '#ff9800',
     },
     exerciseValue: {
         flex: 1,
@@ -124,7 +124,7 @@ const pdfStyles = StyleSheet.create({
     instructionsHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#ff9800',  // Yeşil yerine turuncu renk
+        backgroundColor: '#ff9800',
         padding: 8,
         borderRadius: 5,
         marginBottom: 10,
@@ -153,7 +153,7 @@ const pdfStyles = StyleSheet.create({
         right: 30,
         textAlign: 'center',
         borderTopWidth: 1,
-        borderTopColor: '#ff9800',  // Yeşil yerine turuncu renk
+        borderTopColor: '#ff9800',
         paddingTop: 10,
     },
     footerText: {
@@ -161,7 +161,7 @@ const pdfStyles = StyleSheet.create({
         fontSize: 8,
     },
     footerHighlight: {
-        color: '#ff9800',  // Yeşil yerine turuncu renk
+        color: '#ff9800',
         fontSize: 8,
         fontWeight: 'bold',
     }

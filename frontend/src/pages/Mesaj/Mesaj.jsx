@@ -6,7 +6,6 @@ import {
     Avatar,
     Badge,
     Box,
-    Button,
     Chip,
     CircularProgress,
     Divider,
@@ -61,7 +60,7 @@ export default function Mesaj() {
     const [lastMessageId, setLastMessageId] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [measurements, setMeasurements] = useState(null); // Ölçüm verileri için state eklendi
+    const [measurements, setMeasurements] = useState(null);
     const theme = useTheme();
 
     const messageListRef = useRef();
@@ -266,9 +265,8 @@ export default function Mesaj() {
         setSelectedDanisan(danisan);
         setMessages([]);
         setLastMessageId(null);
-        setMeasurements(null); // Yeni danışan seçildiğinde ölçümleri sıfırla
+        setMeasurements(null);
 
-        // Danışan seçildiğinde ölçüm verilerini getir
         fetchClientMeasurements(danisan.id);
 
         markMessagesAsRead(danisan.id);
@@ -280,7 +278,6 @@ export default function Mesaj() {
         }, 100);
     };
 
-    // Danışanın ölçüm verilerini getiren fonksiyon
     const fetchClientMeasurements = async (clientId) => {
         try {
             const response = await axios.get(
@@ -293,7 +290,6 @@ export default function Mesaj() {
             );
 
             if (response.data && response.data.length > 0) {
-                // En son ölçüm verisini al
                 setMeasurements(response.data[0]);
             } else {
                 setMeasurements(null);

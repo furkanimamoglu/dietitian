@@ -90,7 +90,6 @@ export default function Randevularim() {
                 );
                 setClients(response.data || []);
 
-                // Danışanlar çekildikten sonra randevuları çek
                 fetchAppointments();
             } catch (error) {
                 console.error("Müşteriler çekilirken bir hata oluştu:", error);
@@ -112,8 +111,8 @@ export default function Randevularim() {
 
                 const formattedAppointments = appointments.map((appointment) => ({
                     id: appointment.id,
-                    title: appointment.note, // Takvimde görüntülenmesi için title olarak note'u ekliyorum
-                    note: appointment.note,   // Aynı zamanda note değerini de saklıyorum
+                    title: appointment.note,
+                    note: appointment.note,
                     start: appointment.start,
                     end: appointment.end,
                     extendedProps: {
@@ -134,7 +133,6 @@ export default function Randevularim() {
             }
         };
 
-        // İlk önce danışanları çek
         fetchClients();
     }, []);
 
@@ -158,7 +156,6 @@ export default function Randevularim() {
             client_id: "",
             status: "pending",
         });
-        // Validasyon durumlarını sıfırla
         setValidationErrors({
             start: false,
             end: false,
@@ -174,7 +171,6 @@ export default function Randevularim() {
         if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
-            // Doğrudan date nesnesini kullan ve timezone'u koru
             const startDate = new Date(arg.date);
             const endDate = new Date(startDate);
             endDate.setMinutes(endDate.getMinutes() + 15);
@@ -190,7 +186,6 @@ export default function Randevularim() {
                 status: "pending",
             }));
 
-            // Validasyon durumlarını sıfırla
             setValidationErrors({
                 start: false,
                 end: false,
@@ -198,7 +193,6 @@ export default function Randevularim() {
             });
             setShowValidation(false);
 
-            // Randevu çakışma kontrolü yap
             checkAppointmentConflicts(startDate, endDate);
 
             setRandevuEklePopup(true);
@@ -213,7 +207,6 @@ export default function Randevularim() {
             extendedProps: event.extendedProps
         });
 
-        // Orijinal randevu verisini sakla
         setOriginalAppointmentData({
             id: event.id,
             note: event.title,
@@ -227,7 +220,7 @@ export default function Randevularim() {
             id: event.id,
             note: event.title || "",
             start: event.start,
-            end: event.end || event.start, // Eğer bitiş yoksa başlangıcı kullan
+            end: event.end || event.start,
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
@@ -244,8 +237,6 @@ export default function Randevularim() {
     const handleEventResizeOrDrop = async (arg) => {
         try {
             const event = arg.event;
-
-            // Değiştirilmiş randevu bilgilerini sakla
             setDragDropEventData({
                 id: event.id,
                 note: event.title,
@@ -255,13 +246,11 @@ export default function Randevularim() {
                 status: event.extendedProps?.status || "pending",
             });
 
-            // Orijinal randevu bilgilerini de sakla (modal için)
             const randevu = randevular.find(r => String(r.id) === String(event.id));
             setOriginalAppointmentData(randevu);
 
             setDragDropArgument(arg);
 
-            // Değişiklik onay modalını göster
             setConfirmChangeDialogOpen(true);
         } catch (error) {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
@@ -360,7 +349,6 @@ export default function Randevularim() {
                 console.log("Randevu bildirimi gönderildi:", notificationResponse.data);
             } catch (notificationError) {
                 console.error("Randevu bildirimi gönderilirken bir hata oluştu:", notificationError);
-                // Bildirim hatası ana işlemi etkilemesin
             }
 
             setRandevuEklePopup(false);
@@ -381,7 +369,6 @@ export default function Randevularim() {
             return;
         }
 
-        // Randevu değişikliği için orijinal randevu verisini sakla
         setOriginalAppointmentData({
             id: eventData.id,
             note: eventData.note,
@@ -391,13 +378,11 @@ export default function Randevularim() {
             status: eventData.status
         });
 
-        // Değişiklik onay modalını göster
         setConfirmChangeDialogOpen(true);
     };
 
     const confirmAppointmentChange = async () => {
         try {
-            // Eğer sürükle-bırak işlemi varsa
             if (dragDropEventData) {
                 await confirmDragDropChange();
                 return;
@@ -449,7 +434,6 @@ export default function Randevularim() {
                 );
             });
 
-            // Randevu değişikliği bildirimi gönder
             await sendAppointmentChangeNotification();
 
             setConfirmChangeDialogOpen(false);
@@ -460,7 +444,6 @@ export default function Randevularim() {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
             showErrorToast('Randevu güncellenirken bir hata oluştu: ' + (error.response?.data?.message || error.message));
         } finally {
-            // İşlem tamamlandığında sürükle-bırak verilerini temizle
             setDragDropEventData(null);
             setDragDropArgument(null);
         }
@@ -506,7 +489,6 @@ export default function Randevularim() {
                 );
             });
 
-            // Sürükle-bırak işlemi için de bildirim gönder
             await sendDragDropChangeNotification();
 
             setConfirmChangeDialogOpen(false);
@@ -515,7 +497,7 @@ export default function Randevularim() {
             console.error("Sürükle-bırak işleminde hata oluştu:", error);
             showErrorToast('Randevu güncellenirken bir hata oluştu');
             if (dragDropArgument) {
-                dragDropArgument.revert(); // İşlem başarısız olursa geri al
+                dragDropArgument.revert();
             }
         }
     };
@@ -529,14 +511,12 @@ export default function Randevularim() {
 
             const startDate = new Date(eventData.start);
 
-            // Tarih formatını DD.MM.YYYY olarak ayarla
             const date = startDate.toLocaleDateString('tr-TR', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
             });
 
-            // Saat formatını HH:MM olarak ayarla
             const time = startDate.toLocaleTimeString('tr-TR', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -582,14 +562,12 @@ export default function Randevularim() {
 
             const startDate = new Date(eventData.start);
 
-            // Tarih formatını DD.MM.YYYY olarak ayarla
             const date = startDate.toLocaleDateString('tr-TR', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
             });
 
-            // Saat formatını HH:MM olarak ayarla
             const time = startDate.toLocaleTimeString('tr-TR', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -632,14 +610,12 @@ export default function Randevularim() {
 
             const startDate = new Date(dragDropEventData.start);
 
-            // Tarih formatını DD.MM.YYYY olarak ayarla
             const date = startDate.toLocaleDateString('tr-TR', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
             });
 
-            // Saat formatını HH:MM olarak ayarla
             const time = startDate.toLocaleTimeString('tr-TR', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -674,8 +650,6 @@ export default function Randevularim() {
     };
 
     const handleChangeDialogClose = () => {
-        // Eğer sürükle-bırak ile yapılan bir değişiklik varsa ve vazgeçilirse,
-        // eventi eski yerine döndür
         if (dragDropArgument) {
             dragDropArgument.revert();
         }
@@ -686,25 +660,20 @@ export default function Randevularim() {
     };
 
     const handleDialogClose = () => {
-        // Eğer düzenleme modalında yapılan bir değişiklik varsa ve vazgeçilirse,
-        // ve orijinal appointment verisi varsa, takvimi yeniden yükle
         if (randevuDuzenlePopup && originalAppointmentData && calendarRef.current) {
             const calendar = calendarRef.current.getApi();
             const existingEvent = calendar.getEventById(originalAppointmentData.id);
 
             if (existingEvent) {
-                // Eventin pozisyonunu orijinal verilere göre güncelle
                 existingEvent.setProp('title', originalAppointmentData.note);
                 existingEvent.setStart(originalAppointmentData.start);
                 existingEvent.setEnd(originalAppointmentData.end);
 
-                // Client ve status gibi extendedProps'ları güncelle
                 existingEvent.setExtendedProp('client_id', originalAppointmentData.client_id);
                 existingEvent.setExtendedProp('status', originalAppointmentData.status);
             }
         }
 
-        // Modal durumlarını sıfırla
         setRandevuDuzenlePopup(false);
         setRandevuEklePopup(false);
         setShowValidation(false);
@@ -769,7 +738,6 @@ export default function Randevularim() {
     };
 
     const handleEventChange = (key, value) => {
-        // Date nesnesi olarak sakla, string formatına dönüştürme
         setEventData((prev) => ({
             ...prev,
             [key]: value,
@@ -818,7 +786,7 @@ export default function Randevularim() {
 
             try {
                 const randevuTarihi = new Date(eventData.start);
-                const formattedDate = randevuTarihi.toISOString().split('T')[0]; // YYYY-MM-DD formatı
+                const formattedDate = randevuTarihi.toISOString().split('T')[0];
                 const formattedTime = randevuTarihi.toLocaleTimeString('tr-TR', {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -1173,7 +1141,7 @@ export default function Randevularim() {
                             onChange={(newValue) => {
                                 handleEventChange("start", newValue ? newValue.toISOString() : '')
                             }}
-                            ampm={false} // 24 saat formatı için
+                            ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
                             disablePast
                             slotProps={{
@@ -1191,7 +1159,7 @@ export default function Randevularim() {
                             onChange={(newValue) => {
                                 handleEventChange("end", newValue ? newValue.toISOString() : '')
                             }}
-                            ampm={false} // 24 saat formatı için
+                            ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
                             disablePast
                             slotProps={{

@@ -99,7 +99,6 @@ const pdfStyles = StyleSheet.create({
         color: '#087708',
         letterSpacing: 0.5
     },
-    // Modern card-based info section
     infoSection: {
         flexDirection: 'row',
         marginBottom: 20,
@@ -142,7 +141,6 @@ const pdfStyles = StyleSheet.create({
         lineHeight: 1.4,
         marginBottom: 2
     },
-    // Recipe details with better visual hierarchy
     recipeDetails: {
         marginBottom: 20,
         borderRadius: 12,
@@ -784,7 +782,6 @@ export default function Tarifler() {
             });
     }, []);
 
-    // Fetch recipes
     const fetchRecipes = () => {
         setLoading(true);
         axios
@@ -902,7 +899,6 @@ export default function Tarifler() {
         setDeleteConfirmModal(true);
     };
 
-    // Danışanların filtrelenmesi için useEffect
     useEffect(() => {
         if (danisanList.length > 0) {
             setFilteredDanisanList(
@@ -913,13 +909,11 @@ export default function Tarifler() {
         }
     }, [danisanList, danisanSearchTerm]);
 
-    // Danışana atanan tarifleri getiren fonksiyon
     const getClientRecipes = (clientId) => {
         const danisan = danisanList.find(d => d.id === clientId);
         setSelectedClientInfo(danisan);
         setLoadingClientRecipes(true);
 
-        // Danışana atanmış tarifleri al
         axios.get(`${config[config.environment].apiUrl}/recipe/getAssignedRecipesByClient?client_id=${clientId}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
@@ -956,7 +950,7 @@ export default function Tarifler() {
                                 className="action-btn add-plan-btn"
                                 title="Tarif Ekle"
                                 onClick={() => {
-                                    setImagePreview(''); // Resim önizlemeyi temizle
+                                    setImagePreview('');
                                     setAddRecipeModal(true);
                                 }}
                                 disabled={categoryData.length === 0}
@@ -1273,11 +1267,10 @@ export default function Tarifler() {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setNewRecipe({...newRecipe, image: file});
-                                        setImagePreview(reader.result); // Önizleme için resmin URL'ini ayarla
+                                        setImagePreview(reader.result);
                                     };
                                     reader.readAsDataURL(file);
                                 }
@@ -1421,7 +1414,6 @@ export default function Tarifler() {
                     <button
                         className="modal-btn confirm-btn"
                         onClick={() => {
-                            // Validate form
                             if (!newRecipe.title.trim()) {
                                 setErrorMessage("Lütfen tarif adını giriniz.");
                                 setShowErrorPopup(true);
@@ -1446,15 +1438,12 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Resim yükleme işlemini başlat
                             if (newRecipe.image && newRecipe.image instanceof File) {
-                                setIsSaving(true); // Yükleme durumunu göster
+                                setIsSaving(true);
 
-                                // Form data oluştur
                                 const formData = new FormData();
                                 formData.append('image', newRecipe.image);
 
-                                // Resmi yükle
                                 axios.post(`${config[config.environment].apiUrl}/upload?type=recipe`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
@@ -1462,10 +1451,7 @@ export default function Tarifler() {
                                     },
                                 })
                                 .then(response => {
-                                    // Yükleme başarılı, resim URL'sini al
                                     const imageUrl = response.data.imageUrl;
-
-                                    // Tarif verilerini hazırla ve resim URL'sini ekle
                                     const requestData = {
                                         category_id: parseInt(newRecipe.category_id),
                                         name: newRecipe.title,
@@ -1479,7 +1465,6 @@ export default function Tarifler() {
                                         image: imageUrl
                                     };
 
-                                    // Tarif kaydetme isteğini gönder
                                     saveRecipe(requestData, {
                                         setSuccessMessage,
                                         setShowSuccessPopup,
@@ -1499,7 +1484,6 @@ export default function Tarifler() {
                                     setIsSaving(false);
                                 });
                             } else {
-                                // Resim yok, doğrudan tarifi kaydet
                                 const requestData = {
                                     category_id: parseInt(newRecipe.category_id),
                                     name: newRecipe.title,
@@ -1563,26 +1547,22 @@ export default function Tarifler() {
                     <button
                         className="modal-btn confirm-btn"
                         onClick={() => {
-                            // Validate input
                             if (!newCategoryTitle.trim()) {
                                 setErrorMessage("Lütfen kategori adını giriniz.");
                                 setShowErrorPopup(true);
                                 return;
                             }
 
-                            // Prepare request data
                             const categoryData = {
                                 recipe_category_name: newCategoryTitle.trim()
                             };
 
-                            // Send request to API
                             axios.post(`${config[config.environment].apiUrl}/recipe/addRecipeCategory`, categoryData, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                 },
                             })
                                 .then(response => {
-                                    // Refresh categories
                                     axios
                                         .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
                                             headers: {
@@ -1593,11 +1573,9 @@ export default function Tarifler() {
                                             setCategoryData(response.data);
                                         });
 
-                                    // Show success message
                                     setSuccessMessage(`"${newCategoryTitle}" kategorisi başarıyla eklendi.`);
                                     setShowSuccessPopup(true);
 
-                                    // Reset form and close modal
                                     setNewCategoryTitle("");
                                     setAddCategoryModal(false);
                                 })
@@ -1651,7 +1629,6 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Send DELETE request to API
                             axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
@@ -1659,19 +1636,15 @@ export default function Tarifler() {
                             })
                                 .then(response => {
                                     if (response.data.success) {
-                                        // Remove deleted recipe from state
                                         setRecipeData(prevData => prevData.filter(recipe => recipe.id !== itemToDelete.id));
 
-                                        // Show success message
                                         setSuccessMessage(`"${itemToDelete.title}" tarifi başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Show error if API returns success false
                                         setErrorMessage("Tarif silinirken bir hata oluştu.");
                                         setShowErrorPopup(true);
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteConfirmModal(false);
                                     setItemToDelete(null);
                                 })
@@ -1866,7 +1839,6 @@ export default function Tarifler() {
                     <button
                         className="modal-btn confirm-btn"
                         onClick={() => {
-                            // Validate required fields
                             if (!editTitle.trim()) {
                                 setErrorMessage("Lütfen tarif adını giriniz.");
                                 setShowErrorPopup(true);
@@ -1891,16 +1863,12 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Set saving state
                             setIsSaving(true);
 
-                            // Resim varsa ve yeni bir dosya ise, önce resmi yükle
                             if (editImage && editImage instanceof File) {
-                                // Form data oluştur
                                 const formData = new FormData();
                                 formData.append('image', editImage);
 
-                                // Resmi yükle
                                 axios.post(`${config[config.environment].apiUrl}/upload?type=recipe`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
@@ -1908,10 +1876,8 @@ export default function Tarifler() {
                                     },
                                 })
                                 .then(response => {
-                                    // Yükleme başarılı, resim URL'sini al
                                     const imageUrl = response.data.imageUrl;
 
-                                    // Tarif verilerini güncelle
                                     const recipeData = {
                                         recipe_id: selectedRecipe.id,
                                         category_id: parseInt(editCategoryId),
@@ -1926,7 +1892,6 @@ export default function Tarifler() {
                                         yag: editNutritionalInfo.fat || 0
                                     };
 
-                                    // Tarifi güncelle
                                     updateRecipe(recipeData, {
                                         setRecipeData,
                                         setSuccessMessage,
@@ -1944,7 +1909,6 @@ export default function Tarifler() {
                                     setIsSaving(false);
                                 });
                             } else {
-                                // Resim değişmedi veya yok, doğrudan tarifi güncelle
                                 const recipeData = {
                                     recipe_id: selectedRecipe.id,
                                     category_id: parseInt(editCategoryId),
@@ -2028,7 +1992,6 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Send DELETE request to API
                             axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
@@ -2036,25 +1999,19 @@ export default function Tarifler() {
                             })
                                 .then(response => {
                                     if (response.data.success) {
-                                        // Remove deleted category from state
                                         setCategoryData(prevData => prevData.filter(category => category.id !== categoryToDelete.id));
 
-                                        // Remove category from checked categories if it's there
                                         setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
 
-                                        // Remove all recipes that belonged to this category from display
                                         fetchRecipes();
 
-                                        // Show success message
                                         setSuccessMessage(`"${categoryToDelete.name}" kategorisi başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Show error if API returns success false
                                         setErrorMessage("Kategori silinirken bir hata oluştu.");
                                         setShowErrorPopup(true);
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteCategoryConfirmModal(false);
                                     setCategoryToDelete(null);
                                     setAffectedRecipes([]);
@@ -2119,38 +2076,26 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Create an array of promises for each category deletion
                             const deletePromises = checkedCategories.map(categoryId => axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                 },
                             }));
 
-                            // Execute all deletion requests
                             Promise.all(deletePromises)
                                 .then(responses => {
-                                    // Check if all deletions were successful
                                     const allSuccessful = responses.every(response => response.data.success);
 
                                     if (allSuccessful) {
-                                        // Remove deleted categories from state
                                         setCategoryData(prevData => prevData.filter(category => !checkedCategories.includes(category.id)));
-
-                                        // Clear checked categories
                                         setCheckedCategories([]);
-
-                                        // Refresh recipes
                                         fetchRecipes();
-
-                                        // Show success message
                                         setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Some deletions failed
                                         setErrorMessage("Bazı kategoriler silinemedi.");
                                         setShowErrorPopup(true);
 
-                                        // Refresh categories to get updated list
                                         axios
                                             .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
                                                 headers: {
@@ -2163,7 +2108,6 @@ export default function Tarifler() {
                                             });
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteMultiCategoriesConfirmModal(false);
                                     setAffectedRecipes([]);
                                 })
@@ -2172,7 +2116,6 @@ export default function Tarifler() {
                                     setErrorMessage("Kategoriler silinirken bir hata oluştu.");
                                     setShowErrorPopup(true);
 
-                                    // Close modal but don't clear checkedCategories
                                     setDeleteMultiCategoriesConfirmModal(false);
                                     setAffectedRecipes([]);
                                 });

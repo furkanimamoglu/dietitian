@@ -1363,7 +1363,7 @@ export default function Beslenme() {
     };
 
     const renderDanisanAvatar = (danisan) => {
-        const defaultAvatar = '/path/to/default/avatar.png'; // Varsayılan avatar yolu
+        const defaultAvatar = '/path/to/default/avatar.png';
         const profilePhoto = danisan.profilePhoto;
 
         return (
