@@ -48,7 +48,6 @@ const Egzersiz = ({navigation}) => {
             const data = await response.json();
             if (response.ok) {
                 setExerciseInfo(data);
-                // Başarılı yükleme animasyonu
                 Animated.timing(fadeAnim, {
                     toValue: 1,
                     duration: 500,
