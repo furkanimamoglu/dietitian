@@ -188,14 +188,6 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     );
 };
 
-const renderVideo = (videoUrl) => {
-    return (
-        <div className="video-container">
-            <ReactPlayer url={videoUrl} controls={true} width="100%" height="100%" />
-        </div>
-    );
-};
-
 export default function Egzersizler() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
