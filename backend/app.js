@@ -130,16 +130,15 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     }
 });
 
-// Rate Limiter
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000,
-//     max: 200,
-//     message: { showOnScreen: true, message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.' },
-//     standardHeaders: true,
-//     legacyHeaders: false,
-// });
-//
-// app.use(limiter);
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 500,
+    message: { showOnScreen: true, message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.use(limiter);
 
 // Routers
 app.use('/api/dietitian', dietitianRoutes);

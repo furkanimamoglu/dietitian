@@ -37,6 +37,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import {PDFDownloadLink} from '@react-pdf/renderer';
 
 import ExerciseDocument from './ExerciseDocument.jsx';
+import ReactPlayer from 'react-player';
 
 import {
     Avatar,
@@ -187,6 +188,14 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
     );
 };
 
+const renderVideo = (videoUrl) => {
+    return (
+        <div className="video-container">
+            <ReactPlayer url={videoUrl} controls={true} width="100%" height="100%" />
+        </div>
+    );
+};
+
 export default function Egzersizler() {
     const [categoryData, setCategoryData] = useState([]);
     const [checkedCategories, setCheckedCategories] = useState([]);
@@ -231,6 +240,7 @@ export default function Egzersizler() {
         exercise_name: '',
         exercise_description: '',
         category_id: '',
+        video: '',
         image: '',
         duration: 30,
         difficulty: 3,
@@ -243,6 +253,7 @@ export default function Egzersizler() {
         exercise_name: '',
         exercise_description: '',
         category_id: '',
+        video: '',
         image: '',
         duration: 30,
         difficulty: 3,
@@ -571,7 +582,8 @@ export default function Egzersizler() {
             difficulty: item.difficulty || 3,
             equipment: item.equipment || '',
             calories_burned: item.calories_burned || 0,
-            image: item.image || null
+            image: item.image || null,
+            video: item.video || ''
         });
 
         setImagePreview(item.image || '');
@@ -670,7 +682,7 @@ export default function Egzersizler() {
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${addResponse.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', video: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
                     setImagePreview('');
                 })
                 .catch(error => {
@@ -691,7 +703,7 @@ export default function Egzersizler() {
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', video: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
                     setImagePreview('');
                 })
                 .catch(error => {
@@ -750,7 +762,8 @@ export default function Egzersizler() {
                         difficulty: 3,
                         equipment: '',
                         calories_burned: 0,
-                        image: null
+                        image: null,
+                        video: null
                     });
                     setImagePreview('');
 
@@ -1569,6 +1582,24 @@ export default function Egzersizler() {
                         </select>
                     </div>
                     <div className="input-container">
+                        <label htmlFor="exerciseVideoUrl">Video URL</label>
+                        <TextField
+                            id="exerciseVideoUrl"
+                            variant="outlined"
+                            size="small"
+                            className="text-input"
+                            value={newExercise.video || ''}
+                            onChange={(e) => setNewExercise({ ...newExercise, video: e.target.value })}
+                            placeholder="Egzersiz video URL'si giriniz"
+                            fullWidth
+                        />
+                    </div>
+                    {newExercise.video && (
+                        <div style={{ marginTop: 16 }}>
+                            <ReactPlayer url={newExercise.video} controls width="100%" height="240px" />
+                        </div>
+                    )}
+                    <div className="input-container">
                         <label htmlFor="exerciseImage">Egzersiz Resmi</label>
                         <input
                             type="file"
@@ -1742,6 +1773,24 @@ export default function Egzersizler() {
                             ))}
                         </select>
                     </div>
+                    <div className="input-container">
+                        <label htmlFor="editExerciseVideo">Video URL</label>
+                        <TextField
+                            id="editExerciseVideo"
+                            variant="outlined"
+                            size="small"
+                            className="text-input"
+                            value={editExerciseData.video || ''}
+                            onChange={(e) => setEditExerciseData({ ...editExerciseData, video: e.target.value })}
+                            placeholder="Egzersiz video URL'si giriniz"
+                            fullWidth
+                        />
+                    </div>
+                    {editExerciseData.video && (
+                        <div style={{ marginTop: 16 }}>
+                            <ReactPlayer url={editExerciseData.video} controls width="100%" height="240px" />
+                        </div>
+                    )}
                     <div className="input-container">
                         <label htmlFor="editExerciseImage">Egzersiz Resmi</label>
                         <input
