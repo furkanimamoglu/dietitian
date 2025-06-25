@@ -25,7 +25,7 @@ const {width} = Dimensions.get('window');
 const Egzersiz = ({navigation}) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [exerciseInfo, setExerciseInfo] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedEgzersiz, setSelectedEgzersiz] = useState(null);
     const [customDuration, setCustomDuration] = useState('');
@@ -33,7 +33,9 @@ const Egzersiz = ({navigation}) => {
     const [fadeAnim] = useState(new Animated.Value(0));
 
     const fetchExerciseInfo = async () => {
-        setLoading(true);
+        if (!refreshing) {
+            setLoading(true);
+        }
         setError(null);
         try {
             const response = await fetch(`${config[config.environment].apiUrl}/client/getMyDailyExercises`, {
@@ -46,6 +48,7 @@ const Egzersiz = ({navigation}) => {
             const data = await response.json();
             if (response.ok) {
                 setExerciseInfo(data);
+                // Başarılı yükleme animasyonu
                 Animated.timing(fadeAnim, {
                     toValue: 1,
                     duration: 500,
@@ -248,18 +251,27 @@ const Egzersiz = ({navigation}) => {
                 </View>
 
                 {/* Exercise Image */}
-                {item.Exercise?.image && (
+                {item.Exercise?.image ? (
                     <View style={styles.imageContainer}>
                         <Image
                             source={{uri: item.Exercise.image}}
                             style={styles.exerciseImage}
                             resizeMode="cover"
                         />
-                        <View style={styles.imageOverlay}>
-                            <TouchableOpacity style={styles.playButton}>
-                                <Icon name="play" size={24} color="#fff"/>
-                            </TouchableOpacity>
-                        </View>
+                        {item.Exercise?.video && (
+                            <View style={styles.imageOverlay}>
+                                <TouchableOpacity style={styles.playButton}>
+                                    <Icon name="play" size={24} color="#fff"/>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                ) : (
+                    <View style={styles.noImageContainer}>
+                        <Icon name="image-off-outline" size={48} color="#D1D5DB"/>
+                        <Text style={styles.noImageText}>
+                            Henüz görsel eklenmemiş 📸
+                        </Text>
                     </View>
                 )}
 
@@ -424,6 +436,7 @@ const Egzersiz = ({navigation}) => {
                 }
                 showsVerticalScrollIndicator={false}
             >
+
                 {error ? (
                     <View style={styles.errorContainer}>
                         <Icon name="alert-circle-outline" size={48} color="#EF4444"/>
@@ -612,9 +625,31 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: 'rgba(255,255,255,0.9)',
+        backgroundColor: 'rgb(253,146,0)',
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    noImageContainer: {
+        height: 160,
+        backgroundColor: '#F8FAFC',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6'
+    },
+    noImageText: {
+        fontSize: 16,
+        color: '#6B7280',
+        fontWeight: '600',
+        marginTop: 8,
+        textAlign: 'center'
+    },
+    noImageSubtext: {
+        fontSize: 14,
+        color: '#9CA3AF',
+        marginTop: 4,
+        textAlign: 'center',
+        fontStyle: 'italic'
     },
 
     // Card Content Styles
