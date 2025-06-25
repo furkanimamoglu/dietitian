@@ -1292,6 +1292,13 @@ export default function Egzersizler() {
                             className="recipe-detail-image"
                         />
                     )}
+
+                    {detailItem?.video && (
+                        <div className="video-link">
+                            <ReactPlayer url={detailItem.video} controls width="100%" height="240px" />
+                        </div>
+                    )}
+
                     <p className="detail-description">{detailItem?.exercise_description}</p>
 
                     <div className="exercise-detail-info">
@@ -1316,14 +1323,6 @@ export default function Egzersizler() {
                             </div>
                         )}
                     </div>
-
-                    {detailItem?.video && (
-                        <div className="video-link">
-                            <a href={detailItem.video} target="_blank" rel="noopener noreferrer">
-                                Egzersiz Videosunu İzle
-                            </a>
-                        </div>
-                    )}
                 </div>
                 <div className="modal-footer">
                     <button
