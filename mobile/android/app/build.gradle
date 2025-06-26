@@ -82,8 +82,13 @@ android {
         applicationId "com.diyetia"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+<<<<<<< prod_to_main
         versionCode 5
         versionName "1.0.6"
+=======
+        versionCode 4
+        versionName "1.0.5"
+>>>>>>> main
     }
 
     signingConfigs {
