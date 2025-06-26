@@ -74,143 +74,221 @@ const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
         backgroundColor: '#fff',
-        padding: 10,
+        padding: 15,
         fontFamily: 'Open Sans'
     },
     header: {
-        backgroundColor: '#4CAF50',
-        padding: 5,
-        marginBottom: 10,
-        borderRadius: 5,
+        backgroundColor: '#2E7D32',
+        padding: 12,
+        marginBottom: 15,
+        borderRadius: 8,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4
     },
     headerContent: {
         flex: 1
     },
     headerTitle: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 6
+    },
+    headerSubtitle: {
+        color: '#E8F5E8',
+        fontSize: 10,
         marginBottom: 4
     },
     headerInfo: {
-        color: 'white',
+        color: '#E8F5E8',
         fontSize: 9,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
     logoContainer: {
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         backgroundColor: 'white',
-        borderRadius: 5,
+        borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 10
+        marginLeft: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2
     },
     logo: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 'bold',
-        color: '#4CAF50'
+        color: '#2E7D32'
     },
     infoSection: {
         flexDirection: 'row',
-        marginBottom: 10,
-        borderRadius: 5,
-        overflow: 'hidden'
+        marginBottom: 15,
+        gap: 8
     },
     infoBox: {
         flex: 1,
-        padding: 8,
-        backgroundColor: '#f5f5f5',
-        margin: 2
+        padding: 12,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 6,
+        borderLeft: '3px solid #4CAF50'
     },
     infoTitle: {
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: 'bold',
-        marginBottom: 3,
-        color: '#4CAF50'
+        marginBottom: 4,
+        color: '#2E7D32'
     },
     infoContent: {
-        fontSize: 8,
-        color: '#333'
+        fontSize: 9,
+        color: '#424242',
+        lineHeight: 1.3
     },
     daysContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        gap: 8
     },
     dayCard: {
-        width: '32%',
-        marginBottom: 8,
-        border: '1px solid #E0E0E0',
-        borderRadius: 3,
-        overflow: 'hidden'
+        width: '48%',
+        marginBottom: 12,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        border: '1px solid #E0E0E0'
     },
     dayHeader: {
-        backgroundColor: '#FF9800',
-        padding: 4,
+        backgroundColor: '#FF6B35',
+        padding: 8,
+        alignItems: 'center'
     },
     dayHeaderText: {
         color: 'white',
-        fontSize: 9,
-        fontWeight: 'bold'
+        fontSize: 11,
+        fontWeight: 'bold',
+        letterSpacing: 0.5
     },
     dayContent: {
-        padding: 5
+        padding: 10
     },
     mealSection: {
-        marginBottom: 5
+        marginBottom: 8
     },
     mealTitle: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        marginBottom: 4,
+        color: '#2E7D32',
+        backgroundColor: '#E8F5E8',
+        padding: 3,
+        borderRadius: 3,
+        textAlign: 'center'
+    },
+    alternativeGroup: {
+        marginBottom: 6,
+        paddingLeft: 4
+    },
+    alternativeTitle: {
         fontSize: 8,
         fontWeight: 'bold',
-        marginBottom: 2,
-        borderBottom: '1px solid #EEEEEE',
-        paddingBottom: 1
+        color: '#FF6B35',
+        marginBottom: 2
     },
     mealItem: {
-        fontSize: 7,
-        marginBottom: 1,
-        paddingLeft: 5
+        fontSize: 8,
+        marginBottom: 2,
+        paddingLeft: 8,
+        flexDirection: 'row',
+        alignItems: 'flex-start'
     },
     mealItemBullet: {
+        fontSize: 8,
+        marginRight: 4,
+        color: '#4CAF50',
+        fontWeight: 'bold'
+    },
+    mealItemContent: {
+        flex: 1
+    },
+    mealItemName: {
+        fontSize: 8,
+        color: '#424242'
+    },
+    mealItemPortion: {
         fontSize: 7,
-        marginRight: 3
-    },
-    alternativeItem: {
-        fontSize: 6,
-        marginLeft: 10,
-        color: '#FF7043',
-        marginBottom: 1
-    },
-    alternativePrefix: {
-        fontSize: 6,
-        color: '#757575'
+        color: '#757575',
+        marginTop: 1
     },
     noMealText: {
-        fontSize: 7,
+        fontSize: 8,
         color: '#9E9E9E',
-        paddingLeft: 5
+        paddingLeft: 8,
+        textAlign: 'center',
+        marginTop: 5
+    },
+    emptyDay: {
+        width: '100%',
+        backgroundColor: '#F5F5F5',
+        borderRadius: 8,
+        padding: 20,
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    emptyDayText: {
+        fontSize: 10,
+        color: '#757575',
+        textAlign: 'center'
     },
     footer: {
         position: 'absolute',
-        bottom: 10,
+        bottom: 15,
         left: 0,
         right: 0,
-        textAlign: 'right',
-        paddingTop: 5,
-        marginRight: 15
+        alignItems: 'center',
+        paddingHorizontal: 15
     },
     footerText: {
-        fontSize: 7,
-        color: '#4CAF50'
+        fontSize: 8,
+        color: '#2E7D32',
+        textAlign: 'center',
+        marginBottom: 3
     },
     footerWebsite: {
+        fontSize: 8,
+        color: '#FF6B35',
+        fontWeight: 'bold'
+    },
+    statsSection: {
+        flexDirection: 'row',
+        marginBottom: 10,
+        backgroundColor: '#F0F4FF',
+        padding: 8,
+        borderRadius: 6,
+        justifyContent: 'space-around'
+    },
+    statItem: {
+        alignItems: 'center'
+    },
+    statNumber: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#2E7D32'
+    },
+    statLabel: {
         fontSize: 7,
-        color: '#FF9800',
+        color: '#757575',
         marginTop: 2
     }
 });
@@ -222,6 +300,52 @@ const NutritionPlanDocument = ({program}) => {
     const mealPlanData = program?.mealPlan || {};
     const hasMealPlan = Object.keys(mealPlanData).length > 0;
 
+    const calculateStats = () => {
+        let totalDays = 0;
+        let totalMeals = 0;
+        let totalItems = 0;
+
+        Object.keys(mealPlanData).forEach(day => {
+            const dayData = mealPlanData[day] || {};
+            let dayHasMeals = false;
+
+            Object.keys(dayData).forEach(meal => {
+                const mealData = dayData[meal] || {};
+                Object.keys(mealData).forEach(altGroup => {
+                    const items = mealData[altGroup] || [];
+                    if (Array.isArray(items) && items.length > 0) {
+                        dayHasMeals = true;
+                        totalMeals++;
+                        totalItems += items.length;
+                    }
+                });
+            });
+
+            if (dayHasMeals) totalDays++;
+        });
+
+        return { totalDays, totalMeals, totalItems };
+    };
+
+    const stats = calculateStats();
+
+    // Yemek öğesi render fonksiyonu
+    const renderMealItem = (item, index) => {
+        if (!item || !item.name) return null;
+
+        return (
+            <View style={pdfStyles.mealItem} key={`item-${index}`}>
+                <Text style={pdfStyles.mealItemBullet}>•</Text>
+                <View style={pdfStyles.mealItemContent}>
+                    <Text style={pdfStyles.mealItemName}>{item.name}</Text>
+                    {item.portion && (
+                        <Text style={pdfStyles.mealItemPortion}>Porsiyon: {item.portion}</Text>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
@@ -229,13 +353,14 @@ const NutritionPlanDocument = ({program}) => {
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
                         <Text style={pdfStyles.headerTitle}>{program?.title || 'Beslenme Programı'}</Text>
+                        <Text style={pdfStyles.headerSubtitle}>Kişiselleştirilmiş Beslenme Planı</Text>
                         <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
+                            <Text>Oluşturulma: {dateStr}</Text>
                             <Text>Diyetisyen: {dietitianName}</Text>
                         </View>
                     </View>
                     <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>DIYET</Text>
+                        <Text style={pdfStyles.logo}>DİYET</Text>
                     </View>
                 </View>
 
@@ -255,77 +380,91 @@ const NutritionPlanDocument = ({program}) => {
                     </View>
                 </View>
 
+                {/* İstatistikler */}
+                {hasMealPlan && (
+                    <View style={pdfStyles.statsSection}>
+                        <View style={pdfStyles.statItem}>
+                            <Text style={pdfStyles.statNumber}>{stats.totalDays}</Text>
+                            <Text style={pdfStyles.statLabel}>Aktif Gün</Text>
+                        </View>
+                        <View style={pdfStyles.statItem}>
+                            <Text style={pdfStyles.statNumber}>{stats.totalMeals}</Text>
+                            <Text style={pdfStyles.statLabel}>Öğün</Text>
+                        </View>
+                        <View style={pdfStyles.statItem}>
+                            <Text style={pdfStyles.statNumber}>{stats.totalItems}</Text>
+                            <Text style={pdfStyles.statLabel}>Besin Öğesi</Text>
+                        </View>
+                    </View>
+                )}
+
                 {/* Günler ve Yemekler */}
                 <View style={pdfStyles.daysContainer}>
                     {hasMealPlan ? (
-                        Object.keys(mealPlanData).map((day, index) => {
+                        Object.keys(mealPlanData).map((day, dayIndex) => {
                             const dayData = mealPlanData[day] || {};
-                            const hasMeals = Object.keys(dayData).length > 0;
+                            const dayHasMeals = Object.keys(dayData).some(meal => {
+                                const mealData = dayData[meal] || {};
+                                return Object.keys(mealData).some(altGroup => {
+                                    const items = mealData[altGroup] || [];
+                                    return Array.isArray(items) && items.length > 0;
+                                });
+                            });
 
                             return (
-                        <View style={pdfStyles.dayCard} key={`day-${index}`}>
-                            <View style={pdfStyles.dayHeader}>
-                                <Text style={pdfStyles.dayHeaderText}>{day}</Text>
-                            </View>
-                            <View style={pdfStyles.dayContent}>
-                                        {hasMeals ? (
+                                <View style={pdfStyles.dayCard} key={`day-${dayIndex}`}>
+                                    <View style={pdfStyles.dayHeader}>
+                                        <Text style={pdfStyles.dayHeaderText}>{day}</Text>
+                                    </View>
+                                    <View style={pdfStyles.dayContent}>
+                                        {dayHasMeals ? (
                                             Object.keys(dayData).map((meal, mealIndex) => {
-                                                const mealData = dayData[meal];
-                                    let items = [];
-                                    let alternatives = {};
+                                                const mealData = dayData[meal] || {};
+                                                const mealHasItems = Object.keys(mealData).some(altGroup => {
+                                                    const items = mealData[altGroup] || [];
+                                                    return Array.isArray(items) && items.length > 0;
+                                                });
 
-                                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData)) {
-                                        if (mealData.main) {
-                                                    items = Array.isArray(mealData.main) ? mealData.main : [];
-                                        alternatives = mealData.alternatives || {};
-                                        } else {
-                                            const { alternatives: alts, ...rest } = mealData;
-                                            items = Object.values(rest).filter(item => item && typeof item === 'string');
-                                            alternatives = alts || {};
-                                        }
-                                    } else if (Array.isArray(mealData)) {
-                                        items = mealData;
-                                    } else if (typeof mealData === 'string') {
-                                                    items = mealData.split(',')
-                                                        .map(item => item.trim())
-                                                        .filter(item => item !== '');
-                                    } else if (mealData) {
-                                        items = [String(mealData)];
-                                    }
+                                                if (!mealHasItems) return null;
 
-                                    return (
-                                        <View style={pdfStyles.mealSection} key={`meal-${mealIndex}`}>
-                                            <Text style={pdfStyles.mealTitle}>{meal}</Text>
-                                            {items && items.length > 0 ? (
-                                                items.map((item, itemIndex) => (
-                                                    <View key={`item-${itemIndex}`}>
-                                                        <Text style={pdfStyles.mealItem}>
-                                                            <Text style={pdfStyles.mealItemBullet}>•</Text> {item}
-                                                        </Text>
-                                                        {alternatives && alternatives[item] && (
-                                                            <Text style={pdfStyles.alternativeItem}>
-                                                                <Text style={pdfStyles.alternativePrefix}>Alternatif: </Text>
-                                                                {alternatives[item]}
-                                                            </Text>
-                                                        )}
+                                                return (
+                                                    <View style={pdfStyles.mealSection} key={`meal-${mealIndex}`}>
+                                                        <Text style={pdfStyles.mealTitle}>{meal}</Text>
+                                                        {Object.keys(mealData).map((alternativeGroup, altIndex) => {
+                                                            const items = mealData[alternativeGroup] || [];
+
+                                                            if (!Array.isArray(items) || items.length === 0) {
+                                                                return null;
+                                                            }
+
+                                                            return (
+                                                                <View style={pdfStyles.alternativeGroup} key={`alt-${altIndex}`}>
+                                                                    {Object.keys(mealData).length > 1 && (
+                                                                        <Text style={pdfStyles.alternativeTitle}>
+                                                                            {alternativeGroup}
+                                                                        </Text>
+                                                                    )}
+                                                                    {items.map((item, itemIndex) =>
+                                                                        renderMealItem(item, itemIndex)
+                                                                    )}
+                                                                </View>
+                                                            );
+                                                        })}
                                                     </View>
-                                                ))
-                                            ) : (
-                                                <Text style={pdfStyles.noMealText}>Öğün belirtilmemiş</Text>
-                                            )}
-                                        </View>
-                                    );
+                                                );
                                             })
                                         ) : (
                                             <Text style={pdfStyles.noMealText}>Bu gün için öğün planı bulunmuyor</Text>
                                         )}
-                            </View>
-                        </View>
+                                    </View>
+                                </View>
                             );
                         })
                     ) : (
-                        <View style={[pdfStyles.dayCard, { width: '100%', alignItems: 'center', padding: 20 }]}>
-                            <Text style={pdfStyles.noMealText}>Bu beslenme programında günlük öğün planı bulunmuyor</Text>
+                        <View style={pdfStyles.emptyDay}>
+                            <Text style={pdfStyles.emptyDayText}>
+                                Bu beslenme programında günlük öğün planı bulunmuyor
+                            </Text>
                         </View>
                     )}
                 </View>
@@ -333,7 +472,7 @@ const NutritionPlanDocument = ({program}) => {
                 {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
                     <Text style={pdfStyles.footerText}>
-                        Bu beslenme programı .... tarafından hazırlanmıştır.
+                        Bu beslenme programı uzman diyetisyen tarafından hazırlanmıştır.
                     </Text>
                     <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
                 </View>
