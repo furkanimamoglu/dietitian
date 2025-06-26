@@ -5,7 +5,7 @@ export default function LandingPage() {
     return (
         <div className="landing-page-container">
             <iframe
-                src="/landingpage/index.html?version=1.0.3"
+                src="/landingpage/index.html?version=1.1"
                 title="Landing Page Content"
                 style={{
                     width: '100%',
