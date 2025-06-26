@@ -138,7 +138,7 @@ class RecipeService {
         return {success: true, message: "Tarif Kategorisi başarıyla silindi."};
     }
 
-    static async assignRecipeToClient(dietitian_id, client_id, recipe_id, note) {
+    static async assignRecipeToClient(dietitian_id, recipe_id, client_id, note) {
         if (!dietitian_id || !client_id || !recipe_id) {
             throw new Exception("Eksik veri.", 400, true);
         }
