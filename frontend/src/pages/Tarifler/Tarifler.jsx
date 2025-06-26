@@ -2023,7 +2023,7 @@ export default function Tarifler() {
                             <option value="">Danışan Seçin</option>
                             {danisanList.map(client => (
                                 <option key={client.id} value={client.id}>
-                                    {client.name} {client.surname}
+                                    {client.name}
                                 </option>
                             ))}
                         </select>
