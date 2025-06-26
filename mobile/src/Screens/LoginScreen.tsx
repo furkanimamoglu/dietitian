@@ -9,7 +9,8 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
-    Image
+    Image,
+    Modal
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Button, Card, Surface, Text, TextInput, useTheme} from 'react-native-paper';
@@ -30,13 +31,14 @@ const LoginScreen = ({navigation}: Props) => {
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // Animasyon değerleri
+    const [showKVKKModal, setShowKVKKModal] = useState<boolean>(false);
+    const [showUserAgreementModal, setShowUserAgreementModal] = useState<boolean>(false);
+
     const errorOpacity = useState(new Animated.Value(0))[0];
     const formTranslateY = useRef(new Animated.Value(30)).current;
     const formOpacity = useRef(new Animated.Value(0)).current;
     const logoScale = useRef(new Animated.Value(0.8)).current;
 
-    // Sayfa açılışında animasyonu başlat
     useEffect(() => {
         Animated.parallel([
             Animated.timing(formOpacity, {
@@ -113,6 +115,27 @@ const LoginScreen = ({navigation}: Props) => {
 
             const bearerToken = `Bearer ${token}`;
             await AsyncStorage.setItem('token', bearerToken);
+            const fcmToken = await AsyncStorage.getItem('fcmToken');
+
+            if (fcmToken) {
+                try {
+                    await axios.put(
+                        `${config[config.environment].apiUrl}/client/updateFCMToken`,
+                        {
+                            fcmToken: fcmToken
+                        },
+                        {
+                            headers: {
+                                Authorization: bearerToken,
+                                'Content-Type': 'application/json',
+                            },
+                            validateStatus: () => true,
+                        }
+                    );
+                } catch (error) {
+                    console.log('FCM token güncellenirken hata:', error);
+                }
+            }
 
             const clientResponse = await axios.get(
                 `${config[config.environment].apiUrl}/client/getClientInfo`,
@@ -146,6 +169,22 @@ const LoginScreen = ({navigation}: Props) => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const checkLoginMessage = async () => {
+            try {
+                const message = await AsyncStorage.getItem('loginMessage');
+                if (message) {
+                    setErrorMessage(message);
+                    await AsyncStorage.removeItem('loginMessage');
+                }
+            } catch (error) {
+                console.error('Hata mesajı kontrolünde hata:', error);
+            }
+        };
+
+        checkLoginMessage();
+    }, []);
 
     const ErrorMessage = () => {
         if (!errorMessage) return null;
@@ -269,7 +308,7 @@ const LoginScreen = ({navigation}: Props) => {
                                     <View style={styles.divider}/>
                                 </View>
 
-                                <Button
+                                {/* <Button
                                     mode="outlined"
                                     onPress={() => navigation.navigate('Kayitol', {})}
                                     style={styles.registerButton}
@@ -278,16 +317,105 @@ const LoginScreen = ({navigation}: Props) => {
                                     labelStyle={styles.buttonLabel}
                                 >
                                     Yeni Hesap Oluştur
-                                </Button>
+                                </Button> */}
+
+                                <Text style={styles.infoText}>
+                                    Diyetisyeninizden size hesap oluşturmasını isteyebilirsiniz.
+                                </Text>
                             </Card.Content>
                         </Card>
                     </Animated.View>
 
                     <View style={styles.footer}>
+                        <View style={styles.legalLinksContainer}>
+                            <TouchableOpacity onPress={() => setShowKVKKModal(true)}>
+                                <Text style={styles.legalText}>Gizlilik Politikası</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.legalSeparator}>•</Text>
+                            <TouchableOpacity onPress={() => setShowUserAgreementModal(true)}>
+                                <Text style={styles.legalText}>Kullanıcı Sözleşmesi</Text>
+                            </TouchableOpacity>
+                        </View>
                         <Text style={styles.footerText}>© 2025 Diyetia.com</Text>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* KVKK Aydınlatma Metni Modal'ı */}
+            <Modal
+                visible={showKVKKModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowKVKKModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Gizlilik Politikası</Text>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <Text style={styles.modalText}>
+                                6698 sayılı Kişisel Verilerin Korunması Kanunu (“Kanun”) uyarınca, kişisel verilerinizin korunması
+                                ve işlenmesi hususunda bilgilendirilmektesiniz. Diyetia olarak, kişisel verilerinizi koruma
+                                ve gizliliğinizi sağlama konusuna büyük önem vermekteyiz.
+                            </Text>
+                            <Text style={styles.modalText}>
+                                Kişisel verileriniz, sunduğumuz hizmetlerin daha iyi bir şekilde ifası, sizlere daha iyi
+                                hizmet verebilmek amacıyla işlenmektedir. Kişisel verilerinizin işlenme amacı ve kapsamı
+                                hakkında detaylı bilgiye sahip olmak için lütfen Aydınlatma Metni'mizi inceleyiniz.
+                            </Text>
+                        </ScrollView>
+                        <Button
+                            mode="contained"
+                            onPress={() => setShowKVKKModal(false)}
+                            style={styles.modalButton}
+                            buttonColor="#FF6B00"
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Kapat
+                        </Button>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Kullanıcı Sözleşmesi Modal'ı */}
+            <Modal
+                visible={showUserAgreementModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowUserAgreementModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Kullanıcı Sözleşmesi</Text>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <Text style={styles.modalText}>
+                                İşbu kullanıcı sözleşmesi (“Sözleşme”), Diyetia uygulaması (“Uygulama”) ile
+                                kullanıcı arasında akdedilmiştir. Uygulama’yı kullanarak işbu Sözleşme’yi kabul
+                                ettiğinizi beyan etmektesiniz.
+                            </Text>
+                            <Text style={styles.modalText}>
+                                Uygulama, kullanıcıların sağlıklı yaşam ve diyet süreçlerini yönetmelerine yardımcı
+                                olmak amacıyla hazırlanmış bir mobil uygulamadır. Uygulama’nın sunduğu hizmetlerden
+                                yararlanabilmek için öncelikle üye olmanız gerekmektedir.
+                            </Text>
+                            <Text style={styles.modalText}>
+                                Üyelik işlemleri sırasında verdiğiniz kişisel verileriniz, yalnızca üyelik işlemlerinin
+                                gerçekleştirilmesi ve Uygulama’nın sunduğu hizmetlerin ifası amacıyla kullanılacaktır.
+                                Kişisel verilerinizin korunması ve işlenmesi hakkında detaylı bilgi için lütfen
+                                Aydınlatma Metni'mizi inceleyiniz.
+                            </Text>
+                        </ScrollView>
+                        <Button
+                            mode="contained"
+                            onPress={() => setShowUserAgreementModal(false)}
+                            style={styles.modalButton}
+                            buttonColor="#FF6B00"
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Kapat
+                        </Button>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -480,6 +608,76 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '500'
     },
+    legalLinksContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    legalText: {
+        color: '#FF6B00',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    legalSeparator: {
+        color: '#777',
+        fontSize: 14,
+        fontWeight: '500',
+        paddingHorizontal: 8,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        padding: 20,
+    },
+    modalContent: {
+        width: '100%',
+        maxWidth: 400,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 24,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: 16,
+        textAlign: 'center',
+        color: '#333',
+    },
+    modalText: {
+        fontSize: 14,
+        lineHeight: 22,
+        color: '#555',
+        marginBottom: 16,
+    },
+    modalButton: {
+        borderRadius: 12,
+        paddingVertical: 10,
+        elevation: 3,
+    },
+    infoText: {
+        color: '#555',
+        fontSize: 14,
+        textAlign: 'center',
+        marginTop: 8,
+        marginBottom: 16,
+        paddingHorizontal: 10,
+    },
+    infoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFBEE',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 8,
+        elevation: 2,
+    },
+    infoIcon: {
+        marginRight: 10,
+    },
 });
 
 export default LoginScreen;
+

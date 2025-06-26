@@ -20,7 +20,7 @@ class PackageService {
             throw new Exception("Yetkisiz Erişim.", 401, true);
         }
 
-        if (!packageData || !packageData.name || !packageData.description || !packageData.type || !packageData.price) {
+        if (!packageData || !packageData.name || !packageData.type || !packageData.price) {
             throw new Exception("Eksik Paket bilgisi gönderildi.", 400, true);
         }
 

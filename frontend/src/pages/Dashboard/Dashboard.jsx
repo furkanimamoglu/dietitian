@@ -59,19 +59,19 @@ export default function Dashboard() {
 
     const weeklyStats = [
         {
-            icon: <CheckCircleIcon sx={{color: '#27ae60', fontSize: 32}}/>, // Onaylı randevu
+            icon: <CheckCircleIcon sx={{color: '#27ae60', fontSize: 32}}/>,
             label: 'Onaylanan Randevu',
             value: "-",
             color: '#27ae60',
         },
         {
-            icon: <PeopleIcon sx={{color: '#1976d2', fontSize: 32}}/>, // Yeni danışan
+            icon: <PeopleIcon sx={{color: '#1976d2', fontSize: 32}}/>,
             label: 'Yeni Danışan',
             value: "-",
             color: '#1976d2',
         },
         {
-            icon: <EventIcon sx={{color: '#ff9800', fontSize: 32}}/>, // Tamamlanan görüşme
+            icon: <EventIcon sx={{color: '#ff9800', fontSize: 32}}/>,
             label: 'Tamamlanan Görüşme',
             value: "-",
             color: '#ff9800',
@@ -194,7 +194,6 @@ export default function Dashboard() {
                     }
                 );
 
-                // Filter out past appointments
                 const now = new Date();
                 const futureAppointments = (response.data || []).filter(appointment => {
                     const appointmentEndTime = new Date(appointment.end);
@@ -232,13 +231,12 @@ export default function Dashboard() {
         timerRef.current = setInterval(() => {
             setCurrentTime(new Date());
 
-            // Also check if any appointments have ended and should be removed from the list
             const now = new Date();
             setApprovedAppointments(prev => prev.filter(appointment => {
                 const appointmentEndTime = new Date(appointment.end);
                 return appointmentEndTime > now;
             }));
-        }, 30000); // Update every 30 seconds instead of every minute
+        }, 30000);
 
         return () => {
             if (timerRef.current) {
@@ -340,10 +338,8 @@ export default function Dashboard() {
                 }
             );
 
-            // Remove the note from local state
             setNotes(notes.filter(note => note.id !== noteId));
 
-            // Show success message
             setSuccessMessage('Not başarıyla silindi.');
             setShowSuccessPopup(true);
         } catch (error) {
@@ -394,10 +390,9 @@ export default function Dashboard() {
     };
 
     const calculateTimeRemaining = (appointmentTime) => {
-        const now = new Date(); // Use local time
-        const appointmentDate = new Date(appointmentTime); // Appointment time is already in Turkey time
+        const now = new Date();
+        const appointmentDate = new Date(appointmentTime);
         appointmentDate.setHours(appointmentDate.getHours() - 3);
-        // If appointment is in the past
         if (appointmentDate < now) {
             return "Başladı";
         }
@@ -416,11 +411,11 @@ export default function Dashboard() {
 
 
     const getCountdownColor = (appointmentTime) => {
-        const now = new Date(); // Use local time
-        const appointmentDate = new Date(appointmentTime); // Appointment time is already in Turkey time
+        const now = new Date();
+        const appointmentDate = new Date(appointmentTime);
 
         if (appointmentDate < now) {
-            return "error"; // Appointment already started
+            return "error";
         }
 
         const diffMs = appointmentDate - now;

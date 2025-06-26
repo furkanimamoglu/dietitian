@@ -2,7 +2,7 @@ const path = require("path");
 
 const InvoiceService = require(path.join(__dirname, "..", "Service", "InvoiceService"));
 const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class invoiceController {
 
@@ -41,6 +41,28 @@ class invoiceController {
             const {client_id} = req.query;
 
             const result = await InvoiceService.getClientInvoices(dietitian_id, client_id);
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen,
+                message: error.message
+            })
+        }
+    }
+
+    static async getClientInvoicesAsClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const client_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, CLIENT);
+
+            if (!token || !client_id || !permission) {
+                return res.status(401).json({
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const result = await InvoiceService.getClientInvoicesAsClient(client_id);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({

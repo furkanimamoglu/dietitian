@@ -20,7 +20,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import DescriptionIcon from "@mui/icons-material/Description";
 import NoteIcon from '@mui/icons-material/Note';
 
-import {Document, Font, Page, PDFDownloadLink, StyleSheet, Text, View} from '@react-pdf/renderer';
+import {Document, Font, Page, PDFDownloadLink, StyleSheet, Image, Text, View} from '@react-pdf/renderer';
 
 import {
     Avatar,
@@ -51,169 +51,95 @@ const pdfStyles = StyleSheet.create({
     },
     header: {
         backgroundColor: '#087708',
-        background: 'linear-gradient(135deg, #087708 0%, #0a9a0a 100%)',
         padding: 20,
         marginBottom: 20,
-        borderRadius: 12,
+        borderRadius: 8,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5
+        alignItems: 'center'
     },
     headerContent: {
         flex: 1
     },
     headerTitle: {
         color: 'white',
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 6,
-        letterSpacing: 0.5
+        marginBottom: 8
+    },
+    headerSubtitle: {
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontSize: 12,
+        marginBottom: 10
     },
     headerInfo: {
         color: 'rgba(255, 255, 255, 0.8)',
-        fontSize: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        fontSize: 10
     },
     logoContainer: {
         width: 60,
         height: 60,
         backgroundColor: 'white',
-        borderRadius: 12,
+        borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4
+        marginLeft: 15
     },
     logo: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#087708',
-        letterSpacing: 0.5
+        color: '#087708'
     },
-    // Modern card-based info section
-    infoSection: {
-        flexDirection: 'row',
+    imageSection: {
         marginBottom: 20,
-        gap: 15
-    },
-    infoCard: {
-        flex: 1,
-        padding: 16,
         backgroundColor: '#fff',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#e1e5e9',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8
+        borderRadius: 8,
+        overflow: 'hidden',
+        border: '1px solid #e9ecef'
     },
-    infoCardHeader: {
-        flexDirection: 'row',
+    imageContainer: {
+        height: 200,
+        backgroundColor: '#f8f9fa',
         alignItems: 'center',
-        marginBottom: 10
+        justifyContent: 'center'
     },
-    infoIcon: {
-        width: 20,
-        height: 20,
-        backgroundColor: '#087708',
-        borderRadius: 10,
-        marginRight: 8
+    imagePlaceholder: {
+        fontSize: 12,
+        color: '#6c757d',
+        textAlign: 'center'
     },
-    infoTitle: {
-        fontSize: 11,
-        fontWeight: 'bold',
-        color: '#087708',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    },
-    infoContent: {
-        fontSize: 9,
-        color: '#495057',
-        lineHeight: 1.4,
-        marginBottom: 2
-    },
-    // Recipe details with better visual hierarchy
     recipeDetails: {
         marginBottom: 20,
-        borderRadius: 12,
+        borderRadius: 8,
         overflow: 'hidden',
         backgroundColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12
+        border: '1px solid #e9ecef'
     },
     recipeHeader: {
         backgroundColor: '#ff9800',
-        background: 'linear-gradient(90deg, #ff9800 0%, #ffb74d 100%)',
         padding: 16,
         flexDirection: 'row',
         alignItems: 'center'
     },
-    recipeHeaderIcon: {
-        width: 24,
-        height: 24,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 12,
-        marginRight: 10
-    },
     recipeHeaderText: {
         color: 'white',
         fontSize: 14,
-        fontWeight: 'bold',
-        letterSpacing: 0.3
+        fontWeight: 'bold'
     },
     recipeContent: {
         padding: 20,
-        backgroundColor: '#f8f9fa'
+        backgroundColor: '#fafafa'
     },
-    nutritionSection: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: 20,
-        gap: 10
+    descriptionText: {
+        fontSize: 11,
+        lineHeight: 1.6,
+        color: '#495057'
     },
-    nutritionCard: {
-        flex: '1 1 45%',
-        backgroundColor: '#fff',
-        padding: 12,
-        borderRadius: 8,
-        borderLeftWidth: 4,
-        borderLeftColor: '#ff9800',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4
-    },
-    nutritionLabel: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        color: '#6c757d',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-        marginBottom: 4
-    },
-    nutritionValue: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#212529'
-    },
-    ingredientsSection: {
+    sectionContainer: {
         backgroundColor: '#fff',
         padding: 16,
         borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e9ecef',
+        border: '1px solid #e9ecef',
         marginBottom: 15
     },
     sectionHeader: {
@@ -221,105 +147,69 @@ const pdfStyles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 12,
         paddingBottom: 8,
-        borderBottomWidth: 2,
-        borderBottomColor: '#ff9800',
-        borderBottomStyle: 'solid'
-    },
-    sectionIcon: {
-        width: 16,
-        height: 16,
-        backgroundColor: '#ff9800',
-        borderRadius: 8,
-        marginRight: 8
+        borderBottom: '2px solid #ff9800'
     },
     sectionTitle: {
-        fontSize: 11,
+        fontSize: 13,
         fontWeight: 'bold',
         color: '#ff9800',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
+        textTransform: 'uppercase'
     },
     ingredientsList: {
-        fontSize: 9,
-        lineHeight: 1.6,
-        color: '#495057'
+        marginTop: 8
     },
     ingredientItem: {
         flexDirection: 'row',
-        marginBottom: 4
+        marginBottom: 8,
+        alignItems: 'flex-start'
     },
     bulletPoint: {
-        marginRight: 5,
-        color: '#ff9800'
+        fontSize: 12,
+        color: '#ff9800',
+        marginRight: 10,
+        fontWeight: 'bold',
+        minWidth: 15
     },
     ingredientText: {
-        flex: 1
+        flex: 1,
+        fontSize: 11,
+        color: '#495057',
+        lineHeight: 1.4
     },
-    instructionsSection: {
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e9ecef'
+    instructionsContainer: {
+        marginTop: 8
     },
     instructionStep: {
         flexDirection: 'row',
-        marginBottom: 8
+        marginBottom: 12,
+        alignItems: 'flex-start'
     },
     stepNumber: {
-        fontSize: 9,
+        fontSize: 11,
         fontWeight: 'bold',
         color: '#ff9800',
-        marginRight: 8,
-        minWidth: 16,
+        marginRight: 10,
+        minWidth: 20,
         textAlign: 'center',
         backgroundColor: 'rgba(255, 152, 0, 0.1)',
-        borderRadius: 10,
-        paddingVertical: 2,
-        paddingHorizontal: 5
+        borderRadius: 12,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        border: '1px solid rgba(255, 152, 0, 0.1)'
     },
     stepText: {
-        fontSize: 9,
+        fontSize: 11,
         lineHeight: 1.6,
         color: '#495057',
         flex: 1
     },
-    notesSection: {
-        marginTop: 20,
-        padding: 16,
-        backgroundColor: '#fff8e1',
-        borderRadius: 12,
-        borderLeftWidth: 6,
-        borderLeftColor: '#ff9800',
-        shadowColor: '#ff9800',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8
-    },
-    notesHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8
-    },
-    notesIcon: {
-        width: 16,
-        height: 16,
-        backgroundColor: '#ff9800',
-        borderRadius: 8,
-        marginRight: 8
-    },
-    notesTitle: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        color: '#ff9800',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
-    },
-    notesContent: {
-        fontSize: 9,
-        color: '#5d4037',
-        lineHeight: 1.5,
-        fontStyle: 'italic'
+    emptyState: {
+        textAlign: 'center',
+        color: '#9e9e9e',
+        fontSize: 11,
+        padding: 20,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 4
     },
     footer: {
         position: 'absolute',
@@ -330,20 +220,18 @@ const pdfStyles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingTop: 15,
-        borderTopWidth: 2,
-        borderTopColor: '#e9ecef',
-        borderTopStyle: 'solid'
+        borderTop: '2px solid #e9ecef'
     },
     footerLeft: {
         flex: 1
     },
     footerText: {
-        fontSize: 8,
+        fontSize: 10,
         color: '#087708',
         fontWeight: 'bold'
     },
     footerWebsite: {
-        fontSize: 8,
+        fontSize: 10,
         color: '#ff9800',
         fontWeight: 'bold',
         marginTop: 2
@@ -352,171 +240,159 @@ const pdfStyles = StyleSheet.create({
         alignItems: 'flex-end'
     },
     footerLogo: {
-        fontSize: 10,
+        fontSize: 12,
         color: '#087708',
         fontWeight: 'bold'
     },
-    badge: {
-        backgroundColor: '#ff9800',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        alignSelf: 'flex-start'
-    },
-    badgeText: {
-        color: 'white',
-        fontSize: 7,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5
+    footerDate: {
+        fontSize: 8,
+        color: '#6c757d',
+        marginTop: 2
     }
 });
 
-
-const RecipeDocument = ({recipe, assignmentData, dietitianInfo}) => {
+const RecipeDocument = ({ dietitian,recipe }) => {
     if (!recipe) {
         return null;
     }
 
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "Belirtilmemiş";
+    const timeStr = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}`;
 
-    const ingredientsArray = recipe.malzemeler && typeof recipe.malzemeler === 'string'
-        ? recipe.malzemeler.split(',').map(item => item.trim()).filter(Boolean)
-        : [];
+    const parseIngredients = (ingredients) => {
+        if (!ingredients) return [];
 
-    const instructionsArray = recipe.hazirlanis && typeof recipe.hazirlanis === 'string'
-        ? recipe.hazirlanis.split(/\r?\n/)
-            .filter(line => line && line.trim().length > 0)
-            .map(line => line.trim())
-        : [];
+        if (typeof ingredients === 'string') {
+            return ingredients.split(/[,\n]/)
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+        }
+
+        if (Array.isArray(ingredients)) {
+            return ingredients.filter(item => item && item.trim().length > 0);
+        }
+
+        return [];
+    };
+
+    const parseInstructions = (instructions) => {
+        if (!instructions) return [];
+
+        if (typeof instructions === 'string') {
+            return instructions.split(/\r?\n/)
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+        }
+
+        if (Array.isArray(instructions)) {
+            return instructions.filter(item => item && item.trim().length > 0);
+        }
+
+        return [];
+    };
+
+    const ingredientsList = parseIngredients(recipe.malzemeler || recipe.ingredients);
+    const instructionsList = parseInstructions(recipe.hazirlanis || recipe.instructions);
 
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
-                {/* Enhanced Header */}
+                {/* Header */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
-                        <Text style={pdfStyles.headerTitle}>{recipe.title}</Text>
-                        <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma: {dateStr}</Text>
-                        </View>
+                        <Text style={pdfStyles.headerTitle}>
+                            {recipe.name || 'İsimsiz Tarif'}
+                        </Text>
+                        <Text style={pdfStyles.headerInfo}>
+                            Diyetisyen: {dietitian.name}
+                        </Text>
+                        <Text style={pdfStyles.headerInfo}>
+                            Oluşturulma: {dateStr} - {timeStr}
+                        </Text>
                     </View>
                     <View style={pdfStyles.logoContainer}>
                         <Text style={pdfStyles.logo}>Diyetia</Text>
                     </View>
                 </View>
 
-                {/* Enhanced Info Cards */}
-                <View style={pdfStyles.infoSection}>
-                    <View style={pdfStyles.infoCard}>
-                        <View style={pdfStyles.infoCardHeader}>
-                            <View style={pdfStyles.infoIcon}></View>
-                            <Text style={pdfStyles.infoTitle}>Diyetisyen</Text>
+                {/* Resim varsa göster */}
+                {recipe.image && (
+                    <View style={pdfStyles.imageSection}>
+                        <View style={pdfStyles.imageContainer}>
+                            <Image
+                                src={recipe.image}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </View>
-                        <Text style={pdfStyles.infoContent}>{dietitianInfo.name}</Text>
-                        <Text style={pdfStyles.infoContent}>{dietitianInfo.phoneNumber || "Belirtilmemiş"}</Text>
-                        <Text style={pdfStyles.infoContent}>{dietitianInfo.email || "Belirtilmemiş"}</Text>
                     </View>
+                )}
 
-                    {assignmentData && (
-                        <View style={pdfStyles.infoCard}>
-                            <View style={pdfStyles.infoCardHeader}>
-                                <View style={pdfStyles.infoIcon}></View>
-                                <Text style={pdfStyles.infoTitle}>Tarif Detayları</Text>
-                            </View>
-                            <Text style={pdfStyles.infoContent}>👤 {assignmentData.clientName || "Belirtilmemiş"}</Text>
-                            <Text style={pdfStyles.infoContent}>🗓️ Atanma: {assignmentData.assignmentDate ? new Date(assignmentData.assignmentDate).toLocaleDateString('tr-TR') : "Belirtilmemiş"}</Text>
-                            <Text style={pdfStyles.infoContent}>🏷️ Kategori: {recipe.category_name || "Belirtilmemiş"}</Text>
-                        </View>
-                    )}
-                </View>
-
-                {/* Recipe Description */}
-                {recipe.description && (
+                {/* Tarif açıklaması */}
+                {(recipe.description || recipe.desc) && (
                     <View style={pdfStyles.recipeDetails}>
                         <View style={pdfStyles.recipeHeader}>
-                            <View style={pdfStyles.recipeHeaderIcon}></View>
                             <Text style={pdfStyles.recipeHeaderText}>Tarif Hakkında</Text>
                         </View>
                         <View style={pdfStyles.recipeContent}>
-                            <Text style={{...pdfStyles.stepText, marginBottom: 10}}>
-                                {recipe.description}
+                            <Text style={pdfStyles.descriptionText}>
+                                {recipe.description || recipe.desc}
                             </Text>
-                </View>
+                        </View>
                     </View>
                 )}
 
-                {/* Nutrition Information */}
-                <View style={pdfStyles.recipeDetails}>
-                    <View style={pdfStyles.recipeHeader}>
-                        <View style={pdfStyles.recipeHeaderIcon}></View>
-                        <Text style={pdfStyles.recipeHeaderText}>Besin Değerleri</Text>
-                            </View>
-                    <View style={pdfStyles.recipeContent}>
-                        <View style={pdfStyles.nutritionSection}>
-                            <View style={pdfStyles.nutritionCard}>
-                                <Text style={pdfStyles.nutritionLabel}>Kalori</Text>
-                                <Text style={pdfStyles.nutritionValue}>{recipe.kcal || 0} kcal</Text>
-                            </View>
-                            <View style={pdfStyles.nutritionCard}>
-                                <Text style={pdfStyles.nutritionLabel}>Protein</Text>
-                                <Text style={pdfStyles.nutritionValue}>{recipe.protein || 0} g</Text>
-                            </View>
-                            <View style={pdfStyles.nutritionCard}>
-                                <Text style={pdfStyles.nutritionLabel}>Karbonhidrat</Text>
-                                <Text style={pdfStyles.nutritionValue}>{recipe.karbonhidrat || 0} g</Text>
+                {/* Malzemeler */}
+                <View style={pdfStyles.sectionContainer}>
+                    <View style={pdfStyles.sectionHeader}>
+                        <Text style={pdfStyles.sectionTitle}>MALZEMELER</Text>
+                    </View>
+                    {ingredientsList.length > 0 ? (
+                        <View style={pdfStyles.ingredientsList}>
+                            {ingredientsList.map((ingredient, index) => (
+                                <View style={pdfStyles.ingredientItem} key={index}>
+                                    <Text style={pdfStyles.bulletPoint}>•</Text>
+                                    <Text style={pdfStyles.ingredientText}>{ingredient}</Text>
                                 </View>
-                            <View style={pdfStyles.nutritionCard}>
-                                <Text style={pdfStyles.nutritionLabel}>Yağ</Text>
-                                <Text style={pdfStyles.nutritionValue}>{recipe.yag || 0} g</Text>
+                            ))}
                         </View>
-                            </View>
-                    </View>
+                    ) : (
+                        <Text style={pdfStyles.emptyState}>
+                            Malzeme listesi bulunamadı
+                        </Text>
+                    )}
                 </View>
 
-                {/* Ingredients */}
-                <View style={pdfStyles.ingredientsSection}>
+                {/* Hazırlanış */}
+                <View style={pdfStyles.sectionContainer}>
                     <View style={pdfStyles.sectionHeader}>
-                        <View style={pdfStyles.sectionIcon}></View>
-                        <Text style={pdfStyles.sectionTitle}>Malzemeler</Text>
-                    </View>
-                    <View style={pdfStyles.ingredientsList}>
-                        {recipe.malzemeler}
-                    </View>
-                </View>
-
-                {/* Instructions */}
-                <View style={pdfStyles.instructionsSection}>
-                    <View style={pdfStyles.sectionHeader}>
-                        <View style={pdfStyles.sectionIcon}></View>
                         <Text style={pdfStyles.sectionTitle}>Hazırlanışı</Text>
-                        </View>
-                    <View>
-                        {recipe.hazirlanis}
                     </View>
+                    {instructionsList.length > 0 ? (
+                        <View style={pdfStyles.instructionsContainer}>
+                            {instructionsList.map((instruction, index) => (
+                                <View style={pdfStyles.instructionStep} key={index}>
+                                    <Text style={pdfStyles.stepNumber}>{index + 1}</Text>
+                                    <Text style={pdfStyles.stepText}>{instruction}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={pdfStyles.emptyState}>
+                            Hazırlama talimatı bulunamadı
+                        </Text>
+                    )}
                 </View>
 
-                {/* Notes Section */}
-                {assignmentData && assignmentData.note && (
-                    <View style={pdfStyles.notesSection}>
-                        <View style={pdfStyles.notesHeader}>
-                            <View style={pdfStyles.notesIcon}></View>
-                            <Text style={pdfStyles.notesTitle}>Özel Notlar</Text>
-                        </View>
-                        <Text style={pdfStyles.notesContent}>"{assignmentData.note}"</Text>
-                    </View>
-                )}
-
-                {/* Enhanced Footer */}
+                {/* Footer */}
                 <View style={pdfStyles.footer}>
                     <View style={pdfStyles.footerLeft}>
-                        <Text style={pdfStyles.footerText}>Afiyet olsun!</Text>
+                        <Text style={pdfStyles.footerText}>Afiyet olsun! </Text>
                         <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
                     </View>
                     <View style={pdfStyles.footerRight}>
                         <Text style={pdfStyles.footerLogo}>Diyetia</Text>
+                        <Text style={pdfStyles.footerDate}>{dateStr} - {timeStr}</Text>
                     </View>
                 </View>
             </Page>
@@ -593,7 +469,7 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign, dietitia
                         <PersonAddIcon />
                     </button>
                     <PDFDownloadLink
-                        document={<RecipeDocument recipe={item} assignmentData={null} dietitianInfo={dietitianInfo}/>}
+                        document={<RecipeDocument dietitian={dietitianInfo} recipe={item} assignmentData={null}/>}
                         fileName={`${item.title ? item.title.replace(/\s+/g, '_') : 'tarif'}_tarifi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -784,7 +660,6 @@ export default function Tarifler() {
             });
     }, []);
 
-    // Fetch recipes
     const fetchRecipes = () => {
         setLoading(true);
         axios
@@ -902,7 +777,6 @@ export default function Tarifler() {
         setDeleteConfirmModal(true);
     };
 
-    // Danışanların filtrelenmesi için useEffect
     useEffect(() => {
         if (danisanList.length > 0) {
             setFilteredDanisanList(
@@ -913,13 +787,11 @@ export default function Tarifler() {
         }
     }, [danisanList, danisanSearchTerm]);
 
-    // Danışana atanan tarifleri getiren fonksiyon
     const getClientRecipes = (clientId) => {
         const danisan = danisanList.find(d => d.id === clientId);
         setSelectedClientInfo(danisan);
         setLoadingClientRecipes(true);
 
-        // Danışana atanmış tarifleri al
         axios.get(`${config[config.environment].apiUrl}/recipe/getAssignedRecipesByClient?client_id=${clientId}`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
@@ -956,9 +828,10 @@ export default function Tarifler() {
                                 className="action-btn add-plan-btn"
                                 title="Tarif Ekle"
                                 onClick={() => {
-                                    setImagePreview(''); // Resim önizlemeyi temizle
+                                    setImagePreview('');
                                     setAddRecipeModal(true);
                                 }}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Tarif</span>
@@ -1037,7 +910,7 @@ export default function Tarifler() {
                                     onAssign={handleOpenAddToUserModal}
                                     dietitianInfo={dietitianInfo}
                                 />))) : (<div className="no-recipes">
-                                <p>Bu kategoriya ait tarif bulunamadı.</p>
+                                <p>Bu kategoriye ait tarif bulunamadı.</p>
                             </div>)}
                     </div>
                 </div>
@@ -1125,13 +998,13 @@ export default function Tarifler() {
                                                 <ListItemAvatar>
                                                     <Avatar
                                                         sx={{
-                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            bgcolor: danisan.profilePhoto ? 'transparent' : '#087708',
                                                             width: 40,
                                                             height: 40
                                                         }}
-                                                        src={danisan.image || ''}
+                                                        src={danisan.profilePhoto || ''}
                                                     >
-                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                        {!danisan.profilePhoto && danisan.name.charAt(0)}
                                                     </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText
@@ -1272,11 +1145,10 @@ export default function Tarifler() {
                             onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
                                         setNewRecipe({...newRecipe, image: file});
-                                        setImagePreview(reader.result); // Önizleme için resmin URL'ini ayarla
+                                        setImagePreview(reader.result);
                                     };
                                     reader.readAsDataURL(file);
                                 }
@@ -1420,7 +1292,6 @@ export default function Tarifler() {
                     <button
                         className="modal-btn confirm-btn"
                         onClick={() => {
-                            // Validate form
                             if (!newRecipe.title.trim()) {
                                 setErrorMessage("Lütfen tarif adını giriniz.");
                                 setShowErrorPopup(true);
@@ -1445,26 +1316,20 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Resim yükleme işlemini başlat
                             if (newRecipe.image && newRecipe.image instanceof File) {
-                                setIsSaving(true); // Yükleme durumunu göster
+                                setIsSaving(true);
 
-                                // Form data oluştur
                                 const formData = new FormData();
                                 formData.append('image', newRecipe.image);
 
-                                // Resmi yükle
-                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                                axios.post(`${config[config.environment].apiUrl}/upload?type=recipe`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
                                         'Content-Type': 'multipart/form-data'
                                     },
                                 })
                                 .then(response => {
-                                    // Yükleme başarılı, resim URL'sini al
                                     const imageUrl = response.data.imageUrl;
-
-                                    // Tarif verilerini hazırla ve resim URL'sini ekle
                                     const requestData = {
                                         category_id: parseInt(newRecipe.category_id),
                                         name: newRecipe.title,
@@ -1478,7 +1343,6 @@ export default function Tarifler() {
                                         image: imageUrl
                                     };
 
-                                    // Tarif kaydetme isteğini gönder
                                     saveRecipe(requestData, {
                                         setSuccessMessage,
                                         setShowSuccessPopup,
@@ -1498,7 +1362,6 @@ export default function Tarifler() {
                                     setIsSaving(false);
                                 });
                             } else {
-                                // Resim yok, doğrudan tarifi kaydet
                                 const requestData = {
                                     category_id: parseInt(newRecipe.category_id),
                                     name: newRecipe.title,
@@ -1562,26 +1425,22 @@ export default function Tarifler() {
                     <button
                         className="modal-btn confirm-btn"
                         onClick={() => {
-                            // Validate input
                             if (!newCategoryTitle.trim()) {
                                 setErrorMessage("Lütfen kategori adını giriniz.");
                                 setShowErrorPopup(true);
                                 return;
                             }
 
-                            // Prepare request data
                             const categoryData = {
                                 recipe_category_name: newCategoryTitle.trim()
                             };
 
-                            // Send request to API
                             axios.post(`${config[config.environment].apiUrl}/recipe/addRecipeCategory`, categoryData, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                 },
                             })
                                 .then(response => {
-                                    // Refresh categories
                                     axios
                                         .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
                                             headers: {
@@ -1592,11 +1451,9 @@ export default function Tarifler() {
                                             setCategoryData(response.data);
                                         });
 
-                                    // Show success message
                                     setSuccessMessage(`"${newCategoryTitle}" kategorisi başarıyla eklendi.`);
                                     setShowSuccessPopup(true);
 
-                                    // Reset form and close modal
                                     setNewCategoryTitle("");
                                     setAddCategoryModal(false);
                                 })
@@ -1650,7 +1507,6 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Send DELETE request to API
                             axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipe?recipe_id=${itemToDelete.id}`, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
@@ -1658,19 +1514,15 @@ export default function Tarifler() {
                             })
                                 .then(response => {
                                     if (response.data.success) {
-                                        // Remove deleted recipe from state
                                         setRecipeData(prevData => prevData.filter(recipe => recipe.id !== itemToDelete.id));
 
-                                        // Show success message
                                         setSuccessMessage(`"${itemToDelete.title}" tarifi başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Show error if API returns success false
                                         setErrorMessage("Tarif silinirken bir hata oluştu.");
                                         setShowErrorPopup(true);
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteConfirmModal(false);
                                     setItemToDelete(null);
                                 })
@@ -1865,7 +1717,6 @@ export default function Tarifler() {
                     <button
                         className="modal-btn confirm-btn"
                         onClick={() => {
-                            // Validate required fields
                             if (!editTitle.trim()) {
                                 setErrorMessage("Lütfen tarif adını giriniz.");
                                 setShowErrorPopup(true);
@@ -1890,27 +1741,21 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Set saving state
                             setIsSaving(true);
 
-                            // Resim varsa ve yeni bir dosya ise, önce resmi yükle
                             if (editImage && editImage instanceof File) {
-                                // Form data oluştur
                                 const formData = new FormData();
                                 formData.append('image', editImage);
 
-                                // Resmi yükle
-                                axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+                                axios.post(`${config[config.environment].apiUrl}/upload?type=recipe`, formData, {
                                     headers: {
                                         Authorization: localStorage.getItem("token"),
                                         'Content-Type': 'multipart/form-data'
                                     },
                                 })
                                 .then(response => {
-                                    // Yükleme başarılı, resim URL'sini al
                                     const imageUrl = response.data.imageUrl;
 
-                                    // Tarif verilerini güncelle
                                     const recipeData = {
                                         recipe_id: selectedRecipe.id,
                                         category_id: parseInt(editCategoryId),
@@ -1925,7 +1770,6 @@ export default function Tarifler() {
                                         yag: editNutritionalInfo.fat || 0
                                     };
 
-                                    // Tarifi güncelle
                                     updateRecipe(recipeData, {
                                         setRecipeData,
                                         setSuccessMessage,
@@ -1943,7 +1787,6 @@ export default function Tarifler() {
                                     setIsSaving(false);
                                 });
                             } else {
-                                // Resim değişmedi veya yok, doğrudan tarifi güncelle
                                 const recipeData = {
                                     recipe_id: selectedRecipe.id,
                                     category_id: parseInt(editCategoryId),
@@ -2027,7 +1870,6 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Send DELETE request to API
                             axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryToDelete.id}`, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
@@ -2035,25 +1877,19 @@ export default function Tarifler() {
                             })
                                 .then(response => {
                                     if (response.data.success) {
-                                        // Remove deleted category from state
                                         setCategoryData(prevData => prevData.filter(category => category.id !== categoryToDelete.id));
 
-                                        // Remove category from checked categories if it's there
                                         setCheckedCategories(prev => prev.filter(id => id !== categoryToDelete.id));
 
-                                        // Remove all recipes that belonged to this category from display
                                         fetchRecipes();
 
-                                        // Show success message
                                         setSuccessMessage(`"${categoryToDelete.name}" kategorisi başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Show error if API returns success false
                                         setErrorMessage("Kategori silinirken bir hata oluştu.");
                                         setShowErrorPopup(true);
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteCategoryConfirmModal(false);
                                     setCategoryToDelete(null);
                                     setAffectedRecipes([]);
@@ -2118,38 +1954,26 @@ export default function Tarifler() {
                                 return;
                             }
 
-                            // Create an array of promises for each category deletion
                             const deletePromises = checkedCategories.map(categoryId => axios.delete(`${config[config.environment].apiUrl}/recipe/deleteRecipeCategory?recipe_category_id=${categoryId}`, {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                 },
                             }));
 
-                            // Execute all deletion requests
                             Promise.all(deletePromises)
                                 .then(responses => {
-                                    // Check if all deletions were successful
                                     const allSuccessful = responses.every(response => response.data.success);
 
                                     if (allSuccessful) {
-                                        // Remove deleted categories from state
                                         setCategoryData(prevData => prevData.filter(category => !checkedCategories.includes(category.id)));
-
-                                        // Clear checked categories
                                         setCheckedCategories([]);
-
-                                        // Refresh recipes
                                         fetchRecipes();
-
-                                        // Show success message
                                         setSuccessMessage(`${checkedCategories.length} kategori başarıyla silindi.`);
                                         setShowSuccessPopup(true);
                                     } else {
-                                        // Some deletions failed
                                         setErrorMessage("Bazı kategoriler silinemedi.");
                                         setShowErrorPopup(true);
 
-                                        // Refresh categories to get updated list
                                         axios
                                             .get(`${config[config.environment].apiUrl}/recipe/getMyRecipeCategories`, {
                                                 headers: {
@@ -2162,7 +1986,6 @@ export default function Tarifler() {
                                             });
                                     }
 
-                                    // Close modal and reset state
                                     setDeleteMultiCategoriesConfirmModal(false);
                                     setAffectedRecipes([]);
                                 })
@@ -2171,7 +1994,6 @@ export default function Tarifler() {
                                     setErrorMessage("Kategoriler silinirken bir hata oluştu.");
                                     setShowErrorPopup(true);
 
-                                    // Close modal but don't clear checkedCategories
                                     setDeleteMultiCategoriesConfirmModal(false);
                                     setAffectedRecipes([]);
                                 });
@@ -2201,7 +2023,7 @@ export default function Tarifler() {
                             <option value="">Danışan Seçin</option>
                             {danisanList.map(client => (
                                 <option key={client.id} value={client.id}>
-                                    {client.name} {client.surname}
+                                    {client.name}
                                 </option>
                             ))}
                         </select>
@@ -2255,6 +2077,17 @@ export default function Tarifler() {
                                 })
                                 .then(response => {
                                     const selectedClientName = danisanList.find(client => client.id == selectedUser)?.name;
+
+                                    axios.post(`${config[config.environment].apiUrl}/notification/sendRecipeAssignedNotification`,
+                                        { client_id: selectedUser },
+                                        {
+                                            headers: {
+                                                Authorization: localStorage.getItem("token"),
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Error sending notification:", error);
+                                        });
 
                                     setSuccessMessage(`"${selectedRecipe.title}" tarifi "${selectedClientName}" danışanına başarıyla atandı.`);
                                     setShowSuccessPopup(true);

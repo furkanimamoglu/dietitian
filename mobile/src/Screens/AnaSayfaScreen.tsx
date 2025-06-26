@@ -616,11 +616,11 @@ const AnaSayfa = ({navigation}: Props) => {
 
                             {/* KVKK Aydınlatma Metni Kutusu */}
                             <View style={styles.agreementBoxWrapper}>
-                                <Text style={styles.agreementBoxTitle}>KVKK Aydınlatma Metni</Text>
+                                <Text style={styles.agreementBoxTitle}>Gizlilik Politikası</Text>
                                 <View style={styles.agreementBox}>
                                     <ScrollView style={styles.agreementScrollView}>
                                         <Text style={styles.modalText}>
-                                            Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizin işlenmesi,
+                                            Gizlilik Politikası kapsamında, kişisel verilerinizin işlenmesi,
                                             saklanması ve kullanılması hakkında aşağıdaki bilgileri siz değerli kullanıcılarımızla
                                             paylaşmak isteriz.
                                             {'\n\n'}
@@ -633,7 +633,7 @@ const AnaSayfa = ({navigation}: Props) => {
                                             paylaşılmayacaktır.
                                             {'\n\n'}
                                             Kişisel verilerinizin güvenliği için gerekli tüm teknik ve idari tedbirler alınmıştır.
-                                            KVKK kapsamında sahip olduğunuz haklar:
+                                            Sahip olduğunuz haklar:
                                             {'\n\n'}
                                             - Kişisel verilerinizin işlenip işlenmediğini öğrenme
                                             {'\n'}
@@ -676,7 +676,7 @@ const AnaSayfa = ({navigation}: Props) => {
                                     />
                                 </TouchableOpacity>
                                 <Text style={styles.checkboxLabel}>
-                                    KVKK Aydınlatma Metni'ni okudum ve onaylıyorum.
+                                    Gizlilik Politikası'nı okudum ve onaylıyorum.
                                 </Text>
                             </View>
 

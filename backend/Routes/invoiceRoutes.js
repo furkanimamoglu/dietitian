@@ -7,6 +7,7 @@ const invoiceController = require(path.join(__dirname, '..', 'Controller', 'invo
 
 router.get('/getMyInvoices', invoiceController.getMyInvoices);
 router.get('/getClientInvoices', invoiceController.getClientInvoices);
+router.get('/getClientInvoicesAsClient', invoiceController.getClientInvoicesAsClient);
 router.delete('/deleteInvoice', invoiceController.deleteInvoice);
 router.put('/updateInvoice', invoiceController.updateInvoice);
 router.post('/addInvoice', invoiceController.addInvoice);

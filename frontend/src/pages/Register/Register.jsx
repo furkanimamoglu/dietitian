@@ -45,7 +45,6 @@ function Register() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // SMS Verification states
     const [showVerificationDialog, setShowVerificationDialog] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [verificationLoading, setVerificationLoading] = useState(false);
@@ -75,7 +74,6 @@ function Register() {
         e.preventDefault();
         setLoading(true);
 
-        // Validate phone number format
         if (!/^\d{10}$/.test(phone)) {
             setMessage('Telefon numarası 10 haneli olmalıdır (5XXXXXXXXX)');
             setLoading(false);

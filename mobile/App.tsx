@@ -1,14 +1,17 @@
-import React, {useEffect} from 'react';
-import {BackHandler, SafeAreaView, useColorScheme} from 'react-native';
-import {DarkTheme, DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {BackHandler, ActivityIndicator, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {PaperProvider} from 'react-native-paper';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
 import config from './config';
 import AnaSayfaScreen from './src/Screens/AnaSayfaScreen';
 import LoginScreen from './src/Screens/LoginScreen';
 import BeslenmeScreen from './src/Screens/BeslenmeScreen';
 import ProfilScreen from './src/Screens/ProfilScreen';
+import OdemeScreen from './src/Screens/OdemeScreen';
 import EgzersizScreen from './src/Screens/EgzersizScreen';
 import TarifScreen from './src/Screens/TarifScreen';
 import MesajScreen from './src/Screens/MesajScreen';
@@ -17,7 +20,10 @@ import RaporScreen from './src/Screens/RaporScreen';
 import OnboardingScreen from './src/Screens/OnboardingScreen';
 import KayitolScreen from './src/Screens/KayitolScreen';
 import SifremiUnuttumScreen from './src/Screens/SifremiUnuttumScreen';
-import {customDarkTheme, customLightTheme} from './src/Theme/theme';
+import {customLightTheme} from './src/Theme/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import messaging from '@react-native-firebase/messaging';
 
 export type RootStackParamList = {
     Onboarding: undefined;
@@ -32,6 +38,7 @@ export type RootStackParamList = {
     Mesaj: undefined;
     Kayitol: { dietitian_id: string };
     SifremiUnuttum: undefined;
+    Odeme: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -54,17 +61,123 @@ const linking = {
             Rapor: 'rapor',
             AnaSayfa: 'anasayfa',
             Mesaj: 'mesaj',
-            SifremiUnuttum: 'sifremiunuttum'
+            SifremiUnuttum: 'sifremiunuttum',
+            Odeme: 'odeme'
         }
     }
 };
 
 const App = () => {
-    const colorScheme = useColorScheme();
     const paperTheme = customLightTheme;
     const navTheme = DefaultTheme;
+    const [isLoading, setIsLoading] = useState(true);
+    const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Onboarding');
 
     const navigationRef = useNavigationContainerRef();
+
+    useEffect(() => {
+        const checkUserSession = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (token) {
+                    console.log('Token bulundu, hesap durumu kontrol ediliyor...');
+
+                    try {
+                        const response = await fetch(
+                            `${config[config.environment].apiUrl}/client/getClientInfo`,
+                            {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': token
+                                }
+                            }
+                        );
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            const userStatus = data.status;
+
+                            if (userStatus === 'Aktif') {
+                                console.log('Hesap aktif, ana sayfaya yönlendiriliyor');
+                                setInitialRoute('AnaSayfa');
+                            } else if (userStatus === 'Pasif') {
+                                console.log('Hesap pasif durumda, giriş sayfasına yönlendiriliyor');
+                                await AsyncStorage.setItem('loginMessage', 'Hesabınız askıya alınmıştır. Lütfen yöneticinizle iletişime geçin.');
+                                setInitialRoute('Login');
+                            } else {
+                                console.log('Hesap durumu belirlenemedi, giriş sayfasına yönlendiriliyor');
+                                await AsyncStorage.setItem('loginMessage', 'Hesabınızın durumu belirlenemedi. Lütfen tekrar giriş yapın.');
+                                setInitialRoute('Login');
+                            }
+                        } else {
+                            console.log('Kullanıcı bilgisi alınamadı:', data.message);
+                            setInitialRoute('Login');
+                        }
+                    } catch (error) {
+                        console.error('Hesap durumu kontrolünde hata:', error);
+                        setInitialRoute('Login');
+                    }
+                } else {
+                    console.log('Token bulunamadı, giriş gerekiyor');
+                    setInitialRoute('Onboarding');
+                }
+            } catch (error) {
+                console.error('Token kontrolü sırasında hata:', error);
+                setInitialRoute('Onboarding');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkUserSession();
+    }, []);
+
+    // Notifee için bildirim kanalı oluşturma
+    useEffect(() => {
+        createNotificationChannel();
+
+        // Notifee olaylarını dinleme
+        return notifee.onForegroundEvent(({ type, detail }) => {
+            switch (type) {
+                case EventType.DISMISSED:
+                    console.log('Kullanıcı bildirimi kapadı');
+                    break;
+                case EventType.PRESS:
+                    console.log('Kullanıcı bildirime tıkladı', detail.notification);
+                    break;
+            }
+        });
+    }, []);
+
+    // Bildirim kanalı oluşturma fonksiyonu
+    async function createNotificationChannel() {
+        await notifee.createChannel({
+            id: 'default',
+            name: 'Varsayılan Kanal',
+            lights: true,
+            vibration: true,
+            importance: AndroidImportance.HIGH,
+        });
+    }
+
+    // Bildirim gösterme fonksiyonu
+    async function showNotification(title, body, data = {}) {
+        await notifee.displayNotification({
+            title,
+            body,
+            data,
+            android: {
+                channelId: 'default',
+                smallIcon: 'ic_launcher',
+                importance: AndroidImportance.HIGH,
+                pressAction: {
+                    id: 'default',
+                },
+            },
+        });
+    }
 
     useEffect(() => {
         const backAction = () => {
@@ -81,6 +194,66 @@ const App = () => {
         return () => backHandler.remove();
     }, [navigationRef]);
 
+    useEffect(() => {
+        requestUserPermission();
+
+        // Uygulama açıkken gelen bildirimler (ön plan bildirimleri)
+        const unsubscribe = messaging().onMessage(async remoteMessage => {
+            const title = remoteMessage.notification?.title || 'Yeni Bildirim';
+            const body = remoteMessage.notification?.body || '';
+
+            // Alert yerine Notifee kullanarak bildirim gösterme
+            await showNotification(title, body, remoteMessage.data || {});
+        });
+
+        // Handle background state tap
+        messaging().onNotificationOpenedApp(remoteMessage => {
+            console.log('Notification opened from background state:', remoteMessage.notification);
+        });
+
+        // Handle quit state tap
+        messaging().getInitialNotification().then(remoteMessage => {
+            if (remoteMessage) {
+                console.log('Notification caused app to open from quit state:', remoteMessage.notification);
+            }
+        });
+
+        return unsubscribe;
+    }, []);
+
+    const requestUserPermission = async () => {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+            console.log('Notification permission status:', authStatus);
+            getFcmToken();
+        }
+    };
+
+    const getFcmToken = async () => {
+        try {
+            const fcmToken = await messaging().getToken();
+            if (fcmToken) {
+                await AsyncStorage.setItem('fcmToken', fcmToken);
+            } else {
+                console.log('Failed to get FCM token');
+            }
+        } catch (error) {
+            console.error('Error fetching FCM token:', error);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
     return (
         <PaperProvider theme={paperTheme}>
             <SafeAreaView style={{flex: 1}}>
@@ -89,7 +262,7 @@ const App = () => {
                     theme={navTheme}
                     linking={linking}
                 >
-                    <Stack.Navigator initialRouteName="Onboarding">
+                    <Stack.Navigator initialRouteName={initialRoute}>
                         <Stack.Screen
                             name="Onboarding"
                             component={OnboardingScreen}
@@ -148,6 +321,11 @@ const App = () => {
                         <Stack.Screen
                             name="SifremiUnuttum"
                             component={SifremiUnuttumScreen}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="Odeme"
+                            component={OdemeScreen}
                             options={{headerShown: false}}
                         />
                     </Stack.Navigator>

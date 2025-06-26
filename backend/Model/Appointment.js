@@ -10,17 +10,9 @@ const Appointment = sequelize.define('Appointment', {
         allowNull: false,
         primaryKey: true
     },
-    title: {
+    note: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notNull: {
-                msg: 'Randevu başlığı boş bırakılamaz.'
-            },
-            notEmpty: {
-                msg: 'Randevu başlığı boş olamaz.'
-            }
-        }
+        allowNull: true
     },
     status: {
         type: DataTypes.STRING,

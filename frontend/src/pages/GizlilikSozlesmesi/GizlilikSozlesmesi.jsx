@@ -4,7 +4,6 @@ import {
     Box,
     Container,
     Typography,
-    Paper,
     Card,
     CardContent,
     useTheme,
@@ -58,7 +57,7 @@ function GizlilikSozlesmesi() {
                             animation: 'fadeIn 1s ease-in-out'
                         }}
                     >
-                        Gizlilik Sözleşmesi
+                        Gizlilik Politikası
                     </Typography>
                     <Typography
                         variant={isMobile ? "h5" : "h4"}
@@ -101,14 +100,14 @@ function GizlilikSozlesmesi() {
                                     mb: 4
                                 }}
                             >
-                                Gizlilik Sözleşmesi
+                                Gizlilik Politikası
                             </Typography>
 
                             <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#ff7355', mt: 4 }}>
                                 1. Kişisel Verilerin Korunması
                             </Typography>
                             <Typography variant="body1" paragraph>
-                                Diyetia.com olarak kişisel verilerinizin gizliliği konusunda hassasiyet gösteriyoruz. Bu gizlilik sözleşmesi, platformumuzu kullanırken sağladığınız kişisel verilerin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.
+                                Diyetia.com olarak kişisel verilerinizin gizliliği konusunda hassasiyet gösteriyoruz. Bu Gizlilik Politikası, platformumuzu kullanırken sağladığınız kişisel verilerin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.
                             </Typography>
                             <Typography variant="body1" paragraph>
                                 Platformumuz üzerinden toplanan tüm kişisel veriler, 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında işlenmekte ve saklanmaktadır.
@@ -269,7 +268,7 @@ function GizlilikSozlesmesi() {
                                 8. İletişim
                             </Typography>
                             <Typography variant="body1" paragraph>
-                                Bu gizlilik sözleşmesi ile ilgili sorularınız veya talepleriniz için bizimle aşağıdaki kanallardan iletişime geçebilirsiniz:
+                                Bu Gizlilik Politikası ile ilgili sorularınız veya talepleriniz için bizimle aşağıdaki kanallardan iletişime geçebilirsiniz:
                             </Typography>
                             <Typography variant="body1" paragraph>
                                 E-posta: info@diyetia.com
@@ -282,7 +281,7 @@ function GizlilikSozlesmesi() {
                                 9. Değişiklikler
                             </Typography>
                             <Typography variant="body1" paragraph>
-                                Bu gizlilik sözleşmesi zaman zaman güncellenebilir. Yapılan önemli değişiklikler hakkında sizi bilgilendireceğiz. Yine de, düzenli olarak bu sayfayı ziyaret ederek güncel bilgilere erişmenizi öneririz.
+                                Bu Gizlilik Politikası zaman zaman güncellenebilir. Yapılan önemli değişiklikler hakkında sizi bilgilendireceğiz. Yine de, düzenli olarak bu sayfayı ziyaret ederek güncel bilgilere erişmenizi öneririz.
                             </Typography>
 
                             <Typography variant="body2" sx={{ mt: 6, textAlign: 'center', fontStyle: 'italic', color: '#666' }}>

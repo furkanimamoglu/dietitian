@@ -53,9 +53,9 @@ class measurementController {
 
             const {client_id, boy, kilo, bel, digerbel, kalca, gogus, kol, bacak, yag, kas, su} = req.body;
 
-            if (!client_id || !boy || !kilo || !yag || !kas || !su) {
+            if (!client_id) {
                 return res.status(400).json({
-                    message: "Tüm alanlar zorunludur."
+                    message: "Danışan id çekilemedi."
                 });
             }
 

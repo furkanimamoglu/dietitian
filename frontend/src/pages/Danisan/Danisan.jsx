@@ -53,6 +53,7 @@ import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -67,7 +68,6 @@ import ErrorIcon from "@mui/icons-material/Error";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import Person from '@mui/icons-material/Person';
-import Cake from '@mui/icons-material/Cake';
 import Email from '@mui/icons-material/Email';
 import Phone from '@mui/icons-material/Phone';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
@@ -78,6 +78,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import Cake from '@mui/icons-material/Cake';
 
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
@@ -113,7 +114,7 @@ const WaterTrackingCard = ({data, clientId}) => {
     };
 
     const handleCloseEditGoalDialog = () => {
-        setIsEditGoalDialogOpen(false);
+        setIsEditGoalDialog(false);
     };
 
     const handleUpdateDailyGoal = async () => {
@@ -539,18 +540,38 @@ const WaterTrackingCard = ({data, clientId}) => {
                         <TextField
                             fullWidth
                             label="Günlük Su Hedefi (ml)"
-                            type="number"
                             value={newDailyGoal}
-                            onChange={(e) => setNewDailyGoal(parseInt(e.target.value, 10) || 0)}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                setNewDailyGoal(parseInt(value, 10) || 0);
+                            }}
+                            InputProps={{
+                                inputMode: 'numeric',
+                                endAdornment: <InputAdornment position="end">ml</InputAdornment>,
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <LocalDrinkIcon color="primary" />
+                                    </InputAdornment>
+                                ),
+                            }}
                             inputProps={{
                                 min: 100,
-                                step: 100
+                                step: 100,
+                                pattern: '[0-9]*'
                             }}
-                            helperText="Minimum 100 ml olmalıdır"
+                            error={newDailyGoal < 100}
+                            helperText={newDailyGoal < 100 ? "Minimum 100 ml olmalıdır" : ""}
                         />
-                        <Typography variant="caption" color="text.secondary" sx={{mt: 1, display: 'block'}}>
-                            {newDailyGoal / 1000} litre
+                        <Box sx={{mt: 2, display: 'flex', alignItems: 'center'}}>
+                            <Typography variant="body2" color="text.secondary" sx={{mr: 1}}>
+                                ≈ <strong>{(newDailyGoal / 1000).toFixed(1)}</strong> litre
                         </Typography>
+                            <LinearProgress
+                                variant="determinate"
+                                value={Math.min(newDailyGoal / 50, 100)}
+                                sx={{flexGrow: 1, height: 8, borderRadius: 4}}
+                            />
+                        </Box>
                     </Box>
                 </DialogContent>
                 <DialogActions>
@@ -619,6 +640,18 @@ function Danisan() {
 
     const [measurements, setMeasurements] = useState([]);
     const [measurementsLoading, setMeasurementsLoading] = useState(false);
+
+    const [isDeleteMeasurementDialogOpen, setIsDeleteMeasurementDialogOpen] = useState(false);
+    const [measurementToDelete, setMeasurementToDelete] = useState(null);
+
+    const handleCloseDeleteMeasurementDialog = () => {
+        setIsDeleteMeasurementDialogOpen(false);
+    };
+
+    const handleOpenDeleteMeasurementDialog = (measurement) => {
+        setMeasurementToDelete(measurement);
+        setIsDeleteMeasurementDialogOpen(true);
+    };
 
     const [bloodTestFiles, setBloodTestFiles] = useState([]);
 
@@ -891,7 +924,7 @@ function Danisan() {
     const deleteMeasurement = async (measurement) => {
         try {
             await axios.delete(
-                config[config.environment].apiUrl + "/measurement/deleteMeasurement",
+                `${config[config.environment].apiUrl}/measurement/deleteMeasurement`,
                 {
                     headers: {
                         Authorization: localStorage.getItem('token'),
@@ -902,9 +935,11 @@ function Danisan() {
                 }
             );
 
+            handleCloseDeleteMeasurementDialog();
+
             setMeasurementsLoading(true);
             const response = await axios.get(
-                config[config.environment].apiUrl + "/measurement/getClientMeasurement",
+                `${config[config.environment].apiUrl}/measurement/getClientMeasurement`,
                 {
                     headers: {
                         Authorization: localStorage.getItem('token'),
@@ -926,16 +961,6 @@ function Danisan() {
 
     const handleCreateMeasurement = async (e) => {
         e.preventDefault();
-
-        const yag = parseFloat(measurementForm.yag) || 0;
-        const kas = parseFloat(measurementForm.kas) || 0;
-        const su = parseFloat(measurementForm.su) || 0;
-        const toplam = yag + kas + su;
-        if (yag > 100 || kas > 100 || su > 100 || toplam !== 100) {
-            setErrorMessage("Yağ, kas ve su oranları 100'den düşük ve toplamı %100'e eşit olmalıdır.");
-            setShowErrorPopup(true);
-            return;
-        }
         setCreateMeasurementLoading(true);
 
         try {
@@ -994,6 +1019,35 @@ function Danisan() {
     });
     const [selectedMeasurementId, setSelectedMeasurementId] = useState(null);
     const [updateMeasurementLoading, setUpdateMeasurementLoading] = useState(false);
+
+    const [clientNote, setClientNote] = useState("");
+
+    useEffect(() => {
+        if (danisan && typeof danisan.dietitianNotes === "string") {
+            setClientNote(danisan.dietitianNotes);
+        }
+    }, [danisan]);
+
+    const handleSaveClientNote = async (danisanId, note) => {
+        try {
+            await axios.put(
+                `${config[config.environment].apiUrl}/dietitian/updateClientNote`,
+                { note },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: danisanId
+                    }
+                }
+            );
+            showSuccessToast("Not başarıyla kaydedildi.");
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || "Not kaydedilirken bir hata oluştu.");
+            setShowErrorPopup(true);
+        }
+    }
 
     const handleEditMeasurementFormChange = (e) => {
         const {name, value} = e.target;
@@ -1419,6 +1473,18 @@ function Danisan() {
         }
     }, [activeTab, id, historyStartDate, historyEndDate]);
 
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageModalOpen, setImageModalOpen] = useState(false);
+
+    const handleImageClick = (imageUrl) => {
+        setSelectedImage(imageUrl);
+        setImageModalOpen(true);
+    };
+
+    const handleCloseImageModal = () => {
+        setImageModalOpen(false);
+    };
+
     if (isLoading) {
         return (
             <Default>
@@ -1441,130 +1507,100 @@ function Danisan() {
     };
 
     const renderMealItems = (mealItems) => {
-        if (!mealItems) return "Öğün girilmemiş.";
+        if (!mealItems) return null;
 
-        if (typeof mealItems === 'object' && !Array.isArray(mealItems)) {
+        if (mealItems.info || Object.keys(mealItems).some(key => key.includes('Alternatif'))) {
+            const info = mealItems.info || {};
+            const alternativeKeys = Object.keys(mealItems).filter(key => key !== 'info');
+
             return (
-                <>
-                    {Object.entries(mealItems).map(([menuName, items], menuIndex) => (
-                        <Box key={menuIndex} sx={{ mb: menuIndex < Object.keys(mealItems).length - 1 ? 2 : 0 }}>
-                                <Typography
-                                    variant="subtitle2"
-                                    fontWeight="medium"
-                                    sx={{
-                                        mb: 1,
-                                        textAlign: 'center',
-                                        width: '100%',
-                                        py: 1,
-                                        borderBottom: '1px solid',
-                                        borderColor: 'divider',
-                                        color: 'white',
-                                        bgcolor: 'rgba(45,65,73,0.76)',
-                                        borderRadius: 1
-                                    }}>
-                                    {menuName}
-                                </Typography>
+                <Box>
+                    {/* Görsel varsa göster */}
+                    {info.image && info.image !== "" && (
+                        <Box sx={{ mb: 1 }}>
+                            <Box
+                                component="img"
+                                src={info.image}
+                                alt="Yemek görseli"
+                                sx={{
+                                    width: '100%',
+                                    height: 60,
+                                    objectFit: 'cover',
+                                    borderRadius: 1,
+                                    mb: 0.5,
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => handleImageClick(info.image)}
+                            />
+                        </Box>
+                    )}
 
-                            {Array.isArray(items) && items.length > 0 ? (
-                                items.map((item, itemIndex) => (
+                    {/* Alternatifler */}
+                    {alternativeKeys.map((altKey, altIndex) => {
+                        const items = mealItems[altKey];
+                        if (!Array.isArray(items) || items.length === 0) return null;
+
+                        return (
+                            <Box key={`alt-${altIndex}`} sx={{ mb: altIndex < alternativeKeys.length - 1 ? 1 : 0 }}>
+                                {alternativeKeys.length > 1 && (
+                                    <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', color: 'text.secondary' }}>
+                                        {altKey}:
+                                    </Typography>
+                                )}
+
+                                {items.map((item, itemIndex) => (
                                     <Typography
-                                        key={itemIndex}
+                                        key={`item-${itemIndex}`}
                                         variant="body2"
-                                        component="div"
                                         sx={{
+                                            textDecoration: item.eaten ? 'line-through' : 'none',
+                                            color: item.eaten ? 'text.secondary' : 'text.primary',
                                             display: 'flex',
-                                            alignItems: 'center',
-                                            mb: itemIndex < items.length - 1 ? 0.5 : 0,
-                                            ...(item.eaten ? { textDecoration: 'line-through', color: 'text.secondary' } : {})
+                                            alignItems: 'center'
                                         }}
                                     >
-                                        {item.eaten ?
-                                            <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} /> :
-                                            <RadioButtonUncheckedIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.5 }} />
-                                        }
-                                        {item.name}
-                                        {item.portion && (
-                                            <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                                                ({item.portion})
-                                            </Typography>
+                                        {item.eaten ? (
+                                            <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5, color: 'success.main' }} />
+                                        ) : (
+                                            <RadioButtonUncheckedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
                                         )}
+                                        {item.name}
+                                        {item.portion && ` (${item.portion})`}
                                     </Typography>
-                                ))
-                            ) : (
-                                <Typography variant="body2" color="text.secondary">
-                                    Bu menüde öğün girilmemiş.
-                                </Typography>
-                            )}
-                        </Box>
-                    ))}
-                </>
+                                ))}
+                            </Box>
+                        );
+                    })}
+                </Box>
             );
-        }
+    }
 
-        if (Array.isArray(mealItems) && mealItems.length > 0 && mealItems[0].hasOwnProperty('isim')) {
-            return (
-                <>
-                    {mealItems.map((item, index) => (
-                        <Typography
-                            key={index}
-                            variant="body2"
-                            component="div"
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                mb: index < mealItems.length - 1 ? 0.5 : 0,
-                                ...(item.yenildi ? {textDecoration: 'line-through', color: 'text.secondary'} : {})
-                            }}
-                        >
-                            {item.yenildi ?
-                                <CheckCircleIcon sx={{fontSize: 16, color: 'success.main', mr: 0.5}}/> :
-                                <RadioButtonUncheckedIcon sx={{fontSize: 16, color: 'text.secondary', mr: 0.5}}/>
-                            }
-                            {item.isim}
-                        </Typography>
-                    ))}
-                </>
-            );
-        }
+    if (Array.isArray(mealItems)) {
+        return mealItems.map((item, index) => (
+            <Typography
+                key={index}
+                variant="body2"
+                sx={{
+                    textDecoration: item.yenildi ? 'line-through' : 'none',
+                    color: item.yenildi ? 'text.secondary' : 'text.primary',
+                    mb: index < mealItems.length - 1 ? 0.5 : 0,
+                    display: 'flex',
+                    alignItems: 'center'
+                }}
+            >
+                {item.yenildi ? (
+                    <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5, color: 'success.main' }} />
+                ) : (
+                    <RadioButtonUncheckedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
+                )}
+                {item.isim || item.name}
+                {(item.porsiyon || item.portion) && ` (${item.porsiyon || item.portion})`}
+            </Typography>
+        ));
+    }
 
-        if (typeof mealItems === 'string') {
-            return mealItems;
-        }
-
-        if (Array.isArray(mealItems)) {
-            return mealItems.join(", ");
-        }
-
-        if (mealItems.main && Array.isArray(mealItems.main)) {
-            const mainItems = mealItems.main.join(", ");
-
-            if (mealItems.alternatives && Object.keys(mealItems.alternatives).length > 0) {
-                let alternativesText = [];
-
-                for (const [mainItem, alternatives] of Object.entries(mealItems.alternatives)) {
-                    if (alternatives && alternatives.length > 0) {
-                        alternativesText.push(`${mainItem} yerine: ${alternatives.join(", ")}`);
-                    }
-                }
-
-                if (alternativesText.length > 0) {
-                    return (
-                        <>
-                            <Typography variant="body2" component="div">{mainItems}</Typography>
-                            <Typography variant="body2" component="div" color="text.secondary"
-                                        sx={{fontSize: '0.85rem', fontStyle: 'italic', mt: 0.5}}>
-                                {alternativesText.join("; ")}
-                            </Typography>
-                        </>
-                    );
-                }
-            }
-
-            return mainItems;
-        }
-
-        return "Öğün formatı tanınmıyor.";
-    };
+    return <Typography variant="body2">Öğün girilmemiş.</Typography>;
+};
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -2217,7 +2253,7 @@ function Danisan() {
                                                                     <IconButton
                                                                         color="secondary"
                                                                         sx={{color: 'red'}}
-                                                                        onClick={() => deleteMeasurement(measurement)}
+                                                                        onClick={() => handleOpenDeleteMeasurementDialog(measurement)}
                                                                     >
                                                                         <DeleteIcon/>
                                                                     </IconButton>
@@ -2472,7 +2508,6 @@ function Danisan() {
                                                         'Öğle Yemeği': 'warning.light',
                                                         'Akşam Yemeği': 'error.light',
                                                         'Aparatif': 'info.light',
-                                                        // Diğer öğünler için varsayılan renk
                                                         'default': 'secondary.light'
                                                     };
 
@@ -2483,7 +2518,12 @@ function Danisan() {
                                                         'Aparatif': 'Ara Öğün'
                                                     };
 
-                                                    return meals.map((meal, mealIndex) => (
+                                                    return meals.map((meal, mealIndex) => {
+                                                        const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
+                                                        const mealInfo = nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay]?.[meal]?.info || {};
+                                                        const mealTime = mealInfo.time;
+
+                                                        return (
                                                         <React.Fragment key={`meal-row-${mealIndex}`}>
                                         <Grid container spacing={1}>
                                             <Grid item xs={2}>
@@ -2496,12 +2536,21 @@ function Danisan() {
                                                     borderRadius: 1,
                                                     height: '100%',
                                                     display: 'flex',
+                                                    flexDirection: 'column',
                                                     alignItems: 'center',
                                                     justifyContent: 'center'
                                                 }}>
                                                                         <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
                                                                             {mealDisplayNames[meal] || meal}
                                                                         </Typography>
+                                                                        {mealTime && (
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                                                                                <AccessTimeIcon sx={{ fontSize: 14, mr: 0.5, color: 'inherit', opacity: 0.9 }} />
+                                                                                <Typography variant="caption" sx={{ fontWeight: 'medium', color: 'inherit' }}>
+                                                                                    {mealTime}
+                                                                                </Typography>
+                                                                            </Box>
+                                                                        )}
                                                 </Box>
                                             </Grid>
                                             <Grid item xs={10}>
@@ -2519,7 +2568,8 @@ function Danisan() {
                                                 </Grid>
                                                             {mealIndex < meals.length - 1 && <Divider sx={{my: 1}} />}
                                                         </React.Fragment>
-                                                    ));
+                                                        );
+                                                    });
                                                   })()
                                                 }
                                             </>
@@ -2967,7 +3017,7 @@ function Danisan() {
                                     onChange={(e) => setAppointmentForm({...appointmentForm, title: e.target.value})}
                                     fullWidth margin="normal"
                                 />
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                     <DateTimePicker
                                         label="Başlangıç"
                                         ampm={false}
@@ -2982,7 +3032,7 @@ function Danisan() {
                                         renderInput={(params) => <TextField {...params} fullWidth margin="normal"/>}
                                     />
                                 </LocalizationProvider>
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                     <DateTimePicker
                                         label="Bitiş"
                                         ampm={false}
@@ -2999,7 +3049,9 @@ function Danisan() {
                                 </LocalizationProvider>
                             </DialogContent>
                             <DialogActions>
-                                <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>İptal</Button>
+                                <Button onClick={() => setIsAddAppointmentDialogOpen(false)}>
+                                    İptal
+                                </Button>
                                 <Button onClick={handleAddAppointment}>Ekle</Button>
                             </DialogActions>
                         </Dialog>
@@ -3283,7 +3335,7 @@ function Danisan() {
                                         Tarih Aralığı Filtreleme
                                     </Typography>
                                     <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end'}}>
-                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                             <Box sx={{flex: '1 1 200px'}}>
                                                 <DatePicker
                                                     label="Başlangıç Tarihi"
@@ -3554,7 +3606,7 @@ function Danisan() {
                                             />
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
-                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                                 <DatePicker
                                                     label="Başlangıç Tarihi"
                                                     name="start_date"
@@ -3576,7 +3628,7 @@ function Danisan() {
                                             </LocalizationProvider>
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
-                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                                 <DatePicker
                                                     label="Bitiş Tarihi"
                                                     name="end_date"
@@ -3973,6 +4025,24 @@ function Danisan() {
                                     }}>
                                         <ListItemAvatar>
                                             <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
+                                                <Cake fontSize="small"/>
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={<Typography variant="body2"
+                                                                 color="text.secondary">Yaş</Typography>}
+                                            secondary={<Typography variant="body1">{danisan.age || '-'}</Typography>}
+                                        />
+                                    </ListItem>
+
+                                    <ListItem sx={{
+                                        py: 1,
+                                        px: 0,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider'
+                                    }}>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{bgcolor: 'primary.light', width: 32, height: 32}}>
                                                 <Email fontSize="small"/>
                                             </Avatar>
                                         </ListItemAvatar>
@@ -4003,6 +4073,50 @@ function Danisan() {
                                         />
                                     </ListItem>
                                 </List>
+                                {/* Not Alanı */}
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        mt: 3,
+                                        p: 2,
+                                        bgcolor: '#fffde7',
+                                        border: '1.5px solid #ffe082',
+                                        borderRadius: 2,
+                                        minHeight: 80,
+                                        boxShadow: '0 2px 8px rgba(255, 224, 130, 0.15)',
+                                        fontFamily: 'Caveat, "Comic Sans MS", cursive',
+                                        fontSize: 18,
+                                        color: '#795548',
+                                        backgroundImage: 'repeating-linear-gradient(180deg, transparent, transparent 23px, #ffe082 24px)',
+                                        outline: 'none',
+                                        resize: 'vertical'
+                                    }}
+                                >
+                                    <TextField
+                                        multiline
+                                        minRows={3}
+                                        maxRows={8}
+                                        fullWidth
+                                        variant="standard"
+                                        value={clientNote}
+                                        onChange={e => setClientNote(e.target.value)}
+                                        placeholder="Danışan için notlarınızı buraya yazabilirsiniz..."
+                                        InputProps={{
+                                            disableUnderline: true,
+                                            sx: {fontFamily: 'Caveat, "Comic Sans MS", cursive', fontSize: 18, bgcolor: 'transparent'}
+                                        }}
+                                    />
+                                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 1}}>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => handleSaveClientNote(danisan.id, clientNote)}
+                                        >
+                                            Kaydet
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </Box>
                         </Card>
                     </Grid>
@@ -4047,10 +4161,16 @@ function Danisan() {
             </Box>
 
             {/* Ölçüm Ekleme Dialog */}
-            <Dialog open={isMeasurementDialogOpen} onClose={handleCloseMeasurementDialog} fullWidth maxWidth="md">
+            <Dialog
+                open={isMeasurementDialogOpen}
+                onClose={handleCloseMeasurementDialog}
+                fullWidth
+                maxWidth="md"
+                scroll="paper"
+            >
                 <DialogTitle>Yeni Ölçüm Ekle</DialogTitle>
                 <Box component="form" onSubmit={handleCreateMeasurement}>
-                    <DialogContent dividers>
+                    <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '70vh' }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
@@ -4060,7 +4180,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.boy}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4074,7 +4193,6 @@ function Danisan() {
                                     fullWidth
                                     value={measurementForm.kilo}
                                     onChange={handleMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                                     }}
@@ -4230,7 +4348,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.boy}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">cm</InputAdornment>,
                                     }}
@@ -4244,7 +4361,6 @@ function Danisan() {
                                     fullWidth
                                     value={editMeasurementForm.kilo}
                                     onChange={handleEditMeasurementFormChange}
-                                    required
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">kg</InputAdornment>,
                                     }}
@@ -4379,7 +4495,7 @@ function Danisan() {
                             color="primary"
                             disabled={updateMeasurementLoading}
                         >
-                            {updateMeasurementLoading ? <CircularProgress size={24}/> : "Güncelle"}
+                            {updateMeasurementLoading ? <CircularProgress size={24} /> : "Güncelle"}
                         </Button>
                     </DialogActions>
                 </Box>
@@ -4411,6 +4527,30 @@ function Danisan() {
                         color="error"
                         autoFocus
                     >
+                        Sil
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Ölçüm Silme Onayı Dialog */}
+            <Dialog
+                open={isDeleteMeasurementDialogOpen}
+                onClose={handleCloseDeleteMeasurementDialog}
+                aria-labelledby="delete-measurement-dialog-title"
+                aria-describedby="delete-measurement-dialog-description"
+            >
+                <DialogTitle id="delete-measurement-dialog-title">
+                    Ölçüm Silme Onayı
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {measurementToDelete &&
+                            `${new Date(measurementToDelete.createdAt).toLocaleDateString('tr-TR')} tarihli ölçümü silmek istediğinizden emin misiniz?`}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteMeasurementDialog}>İptal</Button>
+                    <Button onClick={() => deleteMeasurement(measurementToDelete)} color="error">
                         Sil
                     </Button>
                 </DialogActions>
@@ -4535,7 +4675,7 @@ function Danisan() {
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
-                                    label="Sevilmeyen Yiyecekler"
+                                    label="Sevmediği Yiyecekler"
                                     value={anamnezForm.diyet_aliskanliklari?.sevilmeyen_yiyecekler || ''}
                                     onChange={(e) => handleNestedAnamnezFormChange('diyet_aliskanliklari', 'sevilmeyen_yiyecekler', e.target.value)}
                                     margin="normal"
@@ -4601,7 +4741,7 @@ function Danisan() {
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     fullWidth
-                                    label="Meslek ve Aktivite Durumu"
+                                    label="Mesleği ve Aktivite Durumu"
                                     value={anamnezForm.fiziksel_aktivite?.meslek_ve_aktivite_durumu || ''}
                                     onChange={(e) => handleNestedAnamnezFormChange('fiziksel_aktivite', 'meslek_ve_aktivite_durumu', e.target.value)}
                                     margin="normal"
@@ -4632,6 +4772,34 @@ function Danisan() {
                         color="primary"
                     >
                         Kaydet
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Resim büyütme modalı */}
+            <Dialog
+                open={imageModalOpen}
+                onClose={handleCloseImageModal}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogContent sx={{ p: 1, textAlign: 'center' }}>
+                    {selectedImage && (
+                        <Box
+                            component="img"
+                            src={selectedImage}
+                            alt="Yemek görseli"
+                            sx={{
+                                maxWidth: '100%',
+                                maxHeight: '80vh',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseImageModal} color="primary">
+                        Kapat
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -67,16 +67,16 @@ class AppointmentController {
                 });
             }
 
-            const {title, start, end, client_id} = req.body;
+            const {note, start, end, client_id} = req.body;
 
-            if (!title || !start || !end || !client_id) {
+            if (!start || !end || !client_id) {
                 return res.status(400).json({
                     message: "Tüm alanları doldurmanız gerekmektedir."
                 });
             }
 
             const newAppointment = await AppointmentService.addAppointment({
-                title,
+                note,
                 start,
                 end,
                 dietitian_id,
@@ -105,16 +105,16 @@ class AppointmentController {
                 });
             }
 
-            const {appointment_id, title, start, end, client_id, status} = req.body;
+            const {appointment_id, note, start, end, client_id, status} = req.body;
 
-            if (!appointment_id || !title || !start || !end || !client_id || !status) {
+            if (!appointment_id || !start || !end || !client_id || !status) {
                 return res.status(400).json({
                     message: "Tüm alanları doldurmanız gerekmektedir."
                 });
             }
 
             const updatedAppointment = await AppointmentService.updateAppointment(appointment_id, {
-                title,
+                note,
                 start,
                 end,
                 dietitian_id,
@@ -239,16 +239,16 @@ class AppointmentController {
                 });
             }
 
-            const {title, start, end} = req.body;
+            const {note, start, end} = req.body;
 
-            if (!title || !start || !end) {
+            if (!start || !end) {
                 return res.status(400).json({
                     message: "Tüm alanları doldurmanız gerekmektedir."
                 });
             }
 
             const newAppointment = await AppointmentService.addAppointment({
-                title,
+                note,
                 start,
                 end,
                 client_id,

@@ -39,7 +39,7 @@ export default function Routing() {
                 <Route path="/kayitol/*" element={<Register/>}/>
                 <Route path="/sifremiunuttum/*" element={<ForgotPassword/>}/>
                 <Route path="/odeme/*" element={<Odeme/>}/>
-                <Route path="/gizliliksozlesmesi/*" element={<GizlilikSozlesmesi/>}/>
+                <Route path="/privacy/*" element={<GizlilikSozlesmesi/>}/>
                 <Route path="/hesabimisil/*" element={<HesabimiSil/>}/>
 
                 {/* Error Routes */}

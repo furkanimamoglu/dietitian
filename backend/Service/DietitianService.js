@@ -491,11 +491,12 @@ class DietitianService {
                 {type: "page", name: "Randevularım", url: "/randevularim"},
                 {type: "page", name: "Ayarlar", url: "/ayarlar"},
                 {type: "page", name: "Beslenme", url: "/beslenme"},
-                {type: "page", name: "Egzersiz", url: "/egzersiz"},
                 {type: "page", name: "Finans", url: "/finans"},
                 {type: "page", name: "Tarif", url: "/tarif"},
                 {type: "page", name: "Egzersiz", url: "/egzersiz"},
-                {type: "page", name: "Mesaj", url: "/mesaj"}
+                {type: "page", name: "Mesaj", url: "/mesaj"},
+                //{type: "page", name: "Ayarlar", url: "/ayar"},
+                {type: "page", name: "Ödeme", url: "/odeme"}
             ];
 
             const dietitian = await Dietitian.findOne({
@@ -551,6 +552,28 @@ class DietitianService {
             });
         } catch (error) {
             throw new Exception("Not eklenirken bir hata oluştu.", 500, true);
+        }
+    }
+
+    static async updateClientNote(dietitian_id, client_id, note) {
+        try {
+            const client = await Client.findOne({
+                where: {
+                    id: client_id,
+                    dietitian_id: dietitian_id
+                }
+            });
+
+            if (!client) {
+                throw new Exception("Danışan bulunamadı veya erişim yetkiniz yok.", 404, true);
+            }
+
+            client.dietitianNotes = note;
+            await client.save();
+
+            return {dietitianNotes: client.dietitianNotes};
+        } catch (error) {
+            throw new Exception("Not güncellenirken bir hata oluştu.", 500, true);
         }
     }
 

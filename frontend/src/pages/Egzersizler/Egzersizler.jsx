@@ -7,6 +7,7 @@ import config from "../../config.js";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
 
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -36,6 +37,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import {PDFDownloadLink} from '@react-pdf/renderer';
 
 import ExerciseDocument from './ExerciseDocument.jsx';
+import ReactPlayer from 'react-player';
 
 import {
     Avatar,
@@ -128,7 +130,7 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, die
                         <PersonAddIcon/>
                     </button>
                     <PDFDownloadLink
-                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitianInfo={dietitianInfo} />}
+                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitian={dietitianInfo} />}
                         fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -197,6 +199,9 @@ export default function Egzersizler() {
     const [isSaving, setIsSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState('');
 
+    const [calorieFilter, setCalorieFilter] = useState('all');
+    const [difficultyFilter, setDifficultyFilter] = useState('all');
+
     const [addToUserModal, setAddToUserModal] = useState(false);
     const [detailModal, setDetailModal] = useState(false);
     const [addCategoryModal, setAddCategoryModal] = useState(false);
@@ -227,6 +232,7 @@ export default function Egzersizler() {
         exercise_name: '',
         exercise_description: '',
         category_id: '',
+        video: '',
         image: '',
         duration: 30,
         difficulty: 3,
@@ -239,6 +245,7 @@ export default function Egzersizler() {
         exercise_name: '',
         exercise_description: '',
         category_id: '',
+        video: '',
         image: '',
         duration: 30,
         difficulty: 3,
@@ -457,7 +464,18 @@ export default function Egzersizler() {
                 return itemCategoryId === id || itemCategoryId === String(id);
             });
 
-        return searchMatch && categoryMatch;
+        let calorieMatch = true;
+        if (calorieFilter !== 'all') {
+            const [min, max] = calorieFilter.split('-').map(Number);
+            calorieMatch = item.calories_burned >= min && item.calories_burned <= max;
+        }
+
+        let difficultyMatch = true;
+        if (difficultyFilter !== 'all') {
+            difficultyMatch = item.difficulty === parseInt(difficultyFilter);
+        }
+
+        return searchMatch && categoryMatch && calorieMatch && difficultyMatch;
     });
 
     const handleCategoryCheck = (categoryId) => {
@@ -556,7 +574,8 @@ export default function Egzersizler() {
             difficulty: item.difficulty || 3,
             equipment: item.equipment || '',
             calories_burned: item.calories_burned || 0,
-            image: item.image || null
+            image: item.image || null,
+            video: item.video || ''
         });
 
         setImagePreview(item.image || '');
@@ -632,7 +651,7 @@ export default function Egzersizler() {
             const formData = new FormData();
             formData.append('image', newExercise.image);
 
-            axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+            axios.post(`${config[config.environment].apiUrl}/upload?type=exercise`, formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     'Content-Type': 'multipart/form-data'
@@ -655,7 +674,7 @@ export default function Egzersizler() {
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${addResponse.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', video: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
                     setImagePreview('');
                 })
                 .catch(error => {
@@ -676,7 +695,7 @@ export default function Egzersizler() {
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', video: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
                     setImagePreview('');
                 })
                 .catch(error => {
@@ -699,7 +718,7 @@ export default function Egzersizler() {
             const formData = new FormData();
             formData.append('image', editExerciseData.image);
 
-            axios.post(`${config[config.environment].apiUrl}/upload`, formData, {
+            axios.post(`${config[config.environment].apiUrl}/upload?type=exercise`, formData, {
                 headers: {
                     Authorization: localStorage.getItem("token"),
                     'Content-Type': 'multipart/form-data'
@@ -735,7 +754,8 @@ export default function Egzersizler() {
                         difficulty: 3,
                         equipment: '',
                         calories_burned: 0,
-                        image: null
+                        image: null,
+                        video: null
                     });
                     setImagePreview('');
 
@@ -824,6 +844,14 @@ export default function Egzersizler() {
             headers: {Authorization: localStorage.getItem("token")}
         })
             .then(response => {
+                axios.post(`${config[config.environment].apiUrl}/notification/sendExerciseAssignedNotification`,
+                    { client_id: selectedUser.id },
+                    { headers: {Authorization: localStorage.getItem("token")} }
+                )
+                .catch(notificationError => {
+                    console.error("Bildirim gönderilirken hata oluştu:", notificationError);
+                });
+
                 setAddToUserModal(false);
                 setSelectedExercise(null);
                 setSelectedUser(null);
@@ -917,6 +945,7 @@ export default function Egzersizler() {
                                 className="action-btn add-plan-btn"
                                 title="Egzersiz Ekle"
                                 onClick={() => setAddExerciseModal(true)}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Egzersiz</span>
@@ -984,6 +1013,79 @@ export default function Egzersizler() {
                                 )}
                             </div>
                         </div>
+
+                        {/* New filters for calorie and difficulty */}
+                        <div className="filter-group">
+                            <h3 className="filter-title">Kalori Filtrele:</h3>
+                            <div className="calorie-filter-buttons">
+                                <button
+                                    className={`filter-button ${calorieFilter === 'all' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('all')}
+                                >
+                                    Tümü
+                                </button>
+                                <button
+                                    className={`filter-button ${calorieFilter === '0-200' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('0-200')}
+                                >
+                                    0-200 kcal
+                                </button>
+                                <button
+                                    className={`filter-button ${calorieFilter === '201-400' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('201-400')}
+                                >
+                                    201-400 kcal
+                                </button>
+                                <button
+                                    className={`filter-button ${calorieFilter === '401-600' ? 'active' : ''}`}
+                                    onClick={() => setCalorieFilter('401-600')}
+                                >
+                                    401-600 kcal
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="filter-group">
+                            <h3 className="filter-title">Zorluk Filtrele:</h3>
+                            <div className="difficulty-filter-buttons">
+                                <button
+                                    className={`filter-button ${difficultyFilter === 'all' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('all')}
+                                >
+                                    Tümü
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '1' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('1')}
+                                >
+                                    1
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '2' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('2')}
+                                >
+                                    2
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '3' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('3')}
+                                >
+                                    3
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '4' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('4')}
+                                >
+                                    4
+                                </button>
+                                <button
+                                    className={`filter-button ${difficultyFilter === '5' ? 'active' : ''}`}
+                                    onClick={() => setDifficultyFilter('5')}
+                                >
+                                    5
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="exercise-cards-grid">
@@ -1002,6 +1104,7 @@ export default function Egzersizler() {
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleOpenDetailModal}
+                                    dietitianInfo={dietitianInfo}
                                 />
                             ))
                         ) : (
@@ -1095,13 +1198,13 @@ export default function Egzersizler() {
                                                 <ListItemAvatar>
                                                     <Avatar
                                                         sx={{
-                                                            bgcolor: danisan.image ? 'transparent' : '#087708',
+                                                            bgcolor: danisan.profilePhoto ? 'transparent' : '#087708',
                                                             width: 40,
                                                             height: 40
                                                         }}
-                                                        src={danisan.image || ''}
+                                                        src={danisan.profilePhoto || ''}
                                                     >
-                                                        {!danisan.image && danisan.name.charAt(0)}
+                                                        {!danisan.profilePhoto && danisan.name.charAt(0)}
                                                     </Avatar>
                                                 </ListItemAvatar>
                                                 <ListItemText
@@ -1182,6 +1285,13 @@ export default function Egzersizler() {
                             className="recipe-detail-image"
                         />
                     )}
+
+                    {detailItem?.video && (
+                        <div className="video-link">
+                            <ReactPlayer url={detailItem.video} controls width="100%" height="240px" />
+                        </div>
+                    )}
+
                     <p className="detail-description">{detailItem?.exercise_description}</p>
 
                     <div className="exercise-detail-info">
@@ -1206,14 +1316,6 @@ export default function Egzersizler() {
                             </div>
                         )}
                     </div>
-
-                    {detailItem?.video && (
-                        <div className="video-link">
-                            <a href={detailItem.video} target="_blank" rel="noopener noreferrer">
-                                Egzersiz Videosunu İzle
-                            </a>
-                        </div>
-                    )}
                 </div>
                 <div className="modal-footer">
                     <button
@@ -1472,6 +1574,24 @@ export default function Egzersizler() {
                         </select>
                     </div>
                     <div className="input-container">
+                        <label htmlFor="exerciseVideoUrl">Video URL</label>
+                        <TextField
+                            id="exerciseVideoUrl"
+                            variant="outlined"
+                            size="small"
+                            className="text-input"
+                            value={newExercise.video || ''}
+                            onChange={(e) => setNewExercise({ ...newExercise, video: e.target.value })}
+                            placeholder="Egzersiz video URL'si giriniz"
+                            fullWidth
+                        />
+                    </div>
+                    {newExercise.video && (
+                        <div style={{ marginTop: 16 }}>
+                            <ReactPlayer url={newExercise.video} controls width="100%" height="240px" />
+                        </div>
+                    )}
+                    <div className="input-container">
                         <label htmlFor="exerciseImage">Egzersiz Resmi</label>
                         <input
                             type="file"
@@ -1645,6 +1765,24 @@ export default function Egzersizler() {
                             ))}
                         </select>
                     </div>
+                    <div className="input-container">
+                        <label htmlFor="editExerciseVideo">Video URL</label>
+                        <TextField
+                            id="editExerciseVideo"
+                            variant="outlined"
+                            size="small"
+                            className="text-input"
+                            value={editExerciseData.video || ''}
+                            onChange={(e) => setEditExerciseData({ ...editExerciseData, video: e.target.value })}
+                            placeholder="Egzersiz video URL'si giriniz"
+                            fullWidth
+                        />
+                    </div>
+                    {editExerciseData.video && (
+                        <div style={{ marginTop: 16 }}>
+                            <ReactPlayer url={editExerciseData.video} controls width="100%" height="240px" />
+                        </div>
+                    )}
                     <div className="input-container">
                         <label htmlFor="editExerciseImage">Egzersiz Resmi</label>
                         <input
@@ -1857,7 +1995,7 @@ export default function Egzersizler() {
                         </Stack>
                     </div>
                     <div className="date-inputs-container">
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                             <div className="input-container half-width">
                                 <DatePicker
                                     label="Başlangıç Tarihi"
@@ -2030,6 +2168,7 @@ export default function Egzersizler() {
                                                                         endDate: item.end_date,
                                                                         note: item.note
                                                                     }}
+                                                                    dietitian={dietitianInfo}
                                                                 />
                                                             }
                                                             fileName={`${item.Exercise?.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
@@ -2237,7 +2376,7 @@ export default function Egzersizler() {
                                     Tarih Aralığı Filtreleme
                                 </Typography>
                                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'flex-end'}}>
-                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                                         <Box sx={{flex: '1 1 200px'}}>
                                             <DatePicker
                                                 label="Başlangıç Tarihi"
@@ -2462,7 +2601,6 @@ export default function Egzersizler() {
                                     <Typography variant="body2" color="text.secondary" align="center"
                                                 sx={{mt: 1, maxWidth: 600}}>
                                         Danışanınız henüz herhangi bir egzersizi tamamlamamış veya seçtiğiniz tarih
-                                        aralığında tamamlanmış egzersiz bulunmuyor. Farklı bir tarih aralığı seçebilir
                                         veya danışanınızın egzersizleri tamamlamasını bekleyebilirsiniz.
                                     </Typography>
                                 </Box>

@@ -33,11 +33,13 @@ import {
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import { tr } from 'date-fns/locale';
 
 import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
 import Person from "@mui/icons-material/Person";
+import Notifications from "@mui/icons-material/Notifications";
 
 
 export default function Randevularim() {
@@ -47,12 +49,15 @@ export default function Randevularim() {
     const [randevuEklePopup, setRandevuEklePopup] = useState(false);
     const [randevuDuzenlePopup, setRandevuDuzenlePopup] = useState(false);
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+    const [confirmChangeDialogOpen, setConfirmChangeDialogOpen] = useState(false);
+    const [originalAppointmentData, setOriginalAppointmentData] = useState(null);
+    const [dragDropEventData, setDragDropEventData] = useState(null);
+    const [dragDropArgument, setDragDropArgument] = useState(null);
 
     const [appointmentConflict, setAppointmentConflict] = useState(false);
     const [conflictMessage, setConflictMessage] = useState("");
 
     const [validationErrors, setValidationErrors] = useState({
-        title: false,
         start: false,
         end: false,
         client_id: false
@@ -61,12 +66,14 @@ export default function Randevularim() {
 
     const [eventData, setEventData] = useState({
         id: null,
-        title: "",
+        note: "",
         start: "",
         end: "",
         client_id: "",
         status: "pending",
     });
+
+    const [reminderButtonDisabled, setReminderButtonDisabled] = useState(false);
 
     const calendarRef = useRef(null);
 
@@ -83,7 +90,6 @@ export default function Randevularim() {
                 );
                 setClients(response.data || []);
 
-                // Danışanlar çekildikten sonra randevuları çek
                 fetchAppointments();
             } catch (error) {
                 console.error("Müşteriler çekilirken bir hata oluştu:", error);
@@ -105,7 +111,8 @@ export default function Randevularim() {
 
                 const formattedAppointments = appointments.map((appointment) => ({
                     id: appointment.id,
-                    title: appointment.title,
+                    title: appointment.note,
+                    note: appointment.note,
                     start: appointment.start,
                     end: appointment.end,
                     extendedProps: {
@@ -126,14 +133,11 @@ export default function Randevularim() {
             }
         };
 
-        // İlk önce danışanları çek
         fetchClients();
     }, []);
 
-    // Validasyon fonksiyonu
     const validateEventData = () => {
         const errors = {
-            title: !eventData.title.trim(),
             start: !eventData.start,
             end: !eventData.end,
             client_id: !eventData.client_id
@@ -146,15 +150,13 @@ export default function Randevularim() {
     const handleRandevuEkleButton = () => {
         setEventData({
             id: null,
-            title: "",
+            note: "",
             start: "",
             end: "",
             client_id: "",
             status: "pending",
         });
-        // Validasyon durumlarını sıfırla
         setValidationErrors({
-            title: false,
             start: false,
             end: false,
             client_id: false
@@ -169,7 +171,6 @@ export default function Randevularim() {
         if (currentView === "dayGridMonth" || currentView === "dayGridYear") {
             arg.view.calendar.changeView("timeGridDay", arg.date);
         } else {
-            // Doğrudan date nesnesini kullan ve timezone'u koru
             const startDate = new Date(arg.date);
             const endDate = new Date(startDate);
             endDate.setMinutes(endDate.getMinutes() + 15);
@@ -178,23 +179,20 @@ export default function Randevularim() {
 
             setEventData((prev) => ({
                 ...prev,
-                title: "",
+                note: "",
                 start: startDate,
                 end: endDate,
                 client_id: "",
                 status: "pending",
             }));
 
-            // Validasyon durumlarını sıfırla
             setValidationErrors({
-                title: false,
                 start: false,
                 end: false,
                 client_id: false
             });
             setShowValidation(false);
 
-            // Randevu çakışma kontrolü yap
             checkAppointmentConflicts(startDate, endDate);
 
             setRandevuEklePopup(true);
@@ -209,18 +207,25 @@ export default function Randevularim() {
             extendedProps: event.extendedProps
         });
 
-        // Date nesnelerini doğrudan kullan
+        setOriginalAppointmentData({
+            id: event.id,
+            note: event.title,
+            start: event.start,
+            end: event.end,
+            client_id: event.extendedProps?.client_id,
+            status: event.extendedProps?.status || "pending"
+        });
+
         setEventData({
             id: event.id,
-            title: event.title,
+            note: event.title || "",
             start: event.start,
-            end: event.end || null,
+            end: event.end || event.start,
             client_id: event.extendedProps?.client_id || "",
             status: event.extendedProps?.status || "pending",
         });
 
         setValidationErrors({
-            title: false,
             start: false,
             end: false,
             client_id: false
@@ -232,53 +237,21 @@ export default function Randevularim() {
     const handleEventResizeOrDrop = async (arg) => {
         try {
             const event = arg.event;
-
-            const updatedEvent = {
+            setDragDropEventData({
                 id: event.id,
-                title: event.title,
+                note: event.title,
                 start: event.start.toISOString(),
                 end: event.end ? event.end.toISOString() : null,
                 client_id: event.extendedProps?.client_id || "",
                 status: event.extendedProps?.status || "pending",
-            };
-
-            const requestData = {
-                appointment_id: updatedEvent.id,
-                title: updatedEvent.title,
-                start: updatedEvent.start,
-                end: updatedEvent.end,
-                client_id: updatedEvent.client_id,
-                status: updatedEvent.status,
-            };
-
-            const response = await axios.put(
-                config[config.environment].apiUrl + "/appointment/updateAppointmentAsDietitian",
-                requestData,
-                {
-                    headers: {
-                        Authorization: localStorage.getItem('token'),
-                    },
-                }
-            );
-
-            const updatedStatus = response.data?.appointment?.status || updatedEvent.status;
-
-            setRandevular((prevRandevular) => {
-                return prevRandevular.map((randevu) =>
-                    String(randevu.id) === String(updatedEvent.id)
-                        ? {
-                            ...randevu,
-                            start: updatedEvent.start,
-                            end: updatedEvent.end,
-                            extendedProps: {
-                                client_id: updatedEvent.client_id,
-                                status: updatedStatus,
-                            },
-                            color: updatedStatus === "approved" ? "#4CAF50" : "#FF9800"
-                        }
-                        : randevu
-                );
             });
+
+            const randevu = randevular.find(r => String(r.id) === String(event.id));
+            setOriginalAppointmentData(randevu);
+
+            setDragDropArgument(arg);
+
+            setConfirmChangeDialogOpen(true);
         } catch (error) {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
             arg.revert();
@@ -295,7 +268,7 @@ export default function Randevularim() {
 
         try {
             const requestData = {
-                title: eventData.title,
+                note: eventData.note,
                 start: eventData.start,
                 end: eventData.end,
                 client_id: eventData.client_id,
@@ -329,7 +302,7 @@ export default function Randevularim() {
 
             const newEvent = {
                 id: appointmentData.id,
-                title: appointmentData.title || eventData.title,
+                note: appointmentData.note || eventData.note,
                 start: appointmentData.start || eventData.start,
                 end: appointmentData.end || eventData.end,
                 extendedProps: {
@@ -340,6 +313,44 @@ export default function Randevularim() {
             };
 
             setRandevular((prevRandevular) => [...prevRandevular, newEvent]);
+
+            try {
+                const startDate = new Date(appointmentData.start || eventData.start);
+                const date = startDate.toLocaleDateString('tr-TR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+
+                const time = startDate.toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                const notificationData = {
+                    client_id: appointmentData.client_id || eventData.client_id,
+                    appointmentDetails: {
+                        date: date,
+                        time: time
+                    }
+                };
+
+                const notificationResponse = await axios.post(
+                    config[config.environment].apiUrl + "/notification/sendAppointmentNotification",
+                    notificationData,
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                        },
+                    }
+                );
+
+                console.log("Randevu bildirimi gönderildi:", notificationResponse.data);
+            } catch (notificationError) {
+                console.error("Randevu bildirimi gönderilirken bir hata oluştu:", notificationError);
+            }
+
             setRandevuEklePopup(false);
             setShowValidation(false);
 
@@ -358,10 +369,28 @@ export default function Randevularim() {
             return;
         }
 
+        setOriginalAppointmentData({
+            id: eventData.id,
+            note: eventData.note,
+            start: eventData.start,
+            end: eventData.end,
+            client_id: eventData.client_id,
+            status: eventData.status
+        });
+
+        setConfirmChangeDialogOpen(true);
+    };
+
+    const confirmAppointmentChange = async () => {
         try {
+            if (dragDropEventData) {
+                await confirmDragDropChange();
+                return;
+            }
+
             const updatedEventWithDates = {
                 id: eventData.id,
-                title: eventData.title,
+                note: eventData.note,
                 start: eventData.start,
                 end: eventData.end,
                 client_id: eventData.client_id,
@@ -370,7 +399,7 @@ export default function Randevularim() {
 
             const requestData = {
                 appointment_id: updatedEventWithDates.id,
-                title: updatedEventWithDates.title,
+                note: updatedEventWithDates.note,
                 start: updatedEventWithDates.start,
                 end: updatedEventWithDates.end,
                 client_id: updatedEventWithDates.client_id,
@@ -392,7 +421,7 @@ export default function Randevularim() {
                     String(randevu.id) === String(updatedEventWithDates.id)
                         ? {
                             ...randevu,
-                            title: updatedEventWithDates.title,
+                            note: updatedEventWithDates.note,
                             start: updatedEventWithDates.start,
                             end: updatedEventWithDates.end,
                             extendedProps: {
@@ -405,25 +434,257 @@ export default function Randevularim() {
                 );
             });
 
+            await sendAppointmentChangeNotification();
+
+            setConfirmChangeDialogOpen(false);
             handleDialogClose();
             setShowValidation(false);
+            showSuccessToast('Randevu başarıyla güncellendi!');
         } catch (error) {
             console.error("Randevu güncellenirken bir hata oluştu:", error);
+            showErrorToast('Randevu güncellenirken bir hata oluştu: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setDragDropEventData(null);
+            setDragDropArgument(null);
         }
     };
 
+    const confirmDragDropChange = async () => {
+        try {
+            const requestData = {
+                appointment_id: dragDropEventData.id,
+                note: dragDropEventData.note,
+                start: dragDropEventData.start,
+                end: dragDropEventData.end,
+                client_id: dragDropEventData.client_id,
+                status: dragDropEventData.status,
+            };
+
+            const response = await axios.put(
+                config[config.environment].apiUrl + "/appointment/updateAppointmentAsDietitian",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            const updatedStatus = response.data?.appointment?.status || dragDropEventData.status;
+
+            setRandevular((prevRandevular) => {
+                return prevRandevular.map((randevu) =>
+                    String(randevu.id) === String(dragDropEventData.id)
+                        ? {
+                            ...randevu,
+                            start: dragDropEventData.start,
+                            end: dragDropEventData.end,
+                            extendedProps: {
+                                client_id: dragDropEventData.client_id,
+                                status: updatedStatus,
+                            },
+                            color: updatedStatus === "approved" ? "#4CAF50" : "#FF9800"
+                        }
+                        : randevu
+                );
+            });
+
+            await sendDragDropChangeNotification();
+
+            setConfirmChangeDialogOpen(false);
+            showSuccessToast('Randevu başarıyla güncellendi!');
+        } catch (error) {
+            console.error("Sürükle-bırak işleminde hata oluştu:", error);
+            showErrorToast('Randevu güncellenirken bir hata oluştu');
+            if (dragDropArgument) {
+                dragDropArgument.revert();
+            }
+        }
+    };
+
+    const sendReminderNotification = async () => {
+        try {
+            if (!eventData.start || !eventData.client_id) {
+                showErrorToast('Randevu tarihi ve danışan bilgisi gereklidir.');
+                return;
+            }
+
+            const startDate = new Date(eventData.start);
+
+            const date = startDate.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const time = startDate.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const requestData = {
+                client_id: eventData.client_id,
+                appointmentDetails: {
+                    date: date,
+                    time: time
+                }
+            };
+
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/notification/sendAppointmentReminder",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            showSuccessToast(response.data?.message || 'Randevu hatırlatma bildirimi gönderildi!');
+
+            setReminderButtonDisabled(true);
+            setTimeout(() => {
+                setReminderButtonDisabled(false);
+            }, 5000);
+        } catch (error) {
+            console.error("Hatırlatma bildirimi gönderilirken bir hata oluştu:", error);
+            showErrorToast('Bildirim gönderilemedi: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const sendAppointmentChangeNotification = async () => {
+        try {
+            if (!eventData.start || !eventData.client_id) {
+                showErrorToast('Randevu tarihi ve danışan bilgisi gereklidir.');
+                return;
+            }
+
+            const startDate = new Date(eventData.start);
+
+            const date = startDate.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const time = startDate.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const requestData = {
+                client_id: eventData.client_id,
+                appointmentDetails: {
+                    date: date,
+                    time: time
+                }
+            };
+
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/notification/sendAppointmentChangeNotification",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            console.log("Randevu değişikliği bildirimi başarılı:", response.data);
+            return true;
+        } catch (error) {
+            console.error("Değişiklik bildirimi gönderilirken bir hata oluştu:", error);
+            showErrorToast('Değişiklik bildirimi gönderilemedi: ' + (error.response?.data?.message || error.message));
+            return false;
+        }
+    };
+
+    const sendDragDropChangeNotification = async () => {
+        try {
+            if (!dragDropEventData || !dragDropEventData.start || !dragDropEventData.client_id) {
+                showErrorToast('Randevu tarihi ve danışan bilgisi gereklidir.');
+                return false;
+            }
+
+            const startDate = new Date(dragDropEventData.start);
+
+            const date = startDate.toLocaleDateString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const time = startDate.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+
+            const requestData = {
+                client_id: dragDropEventData.client_id,
+                appointmentDetails: {
+                    date: date,
+                    time: time
+                }
+            };
+
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/notification/sendAppointmentChangeNotification",
+                requestData,
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                }
+            );
+
+            console.log("Randevu değişikliği bildirimi başarılı:", response.data);
+            return true;
+        } catch (error) {
+            console.error("Değişiklik bildirimi gönderilirken bir hata oluştu:", error);
+            showErrorToast('Değişiklik bildirimi gönderilemedi: ' + (error.response?.data?.message || error.message));
+            return false;
+        }
+    };
+
+    const handleChangeDialogClose = () => {
+        if (dragDropArgument) {
+            dragDropArgument.revert();
+        }
+
+        setConfirmChangeDialogOpen(false);
+        setDragDropEventData(null);
+        setDragDropArgument(null);
+    };
+
     const handleDialogClose = () => {
+        if (randevuDuzenlePopup && originalAppointmentData && calendarRef.current) {
+            const calendar = calendarRef.current.getApi();
+            const existingEvent = calendar.getEventById(originalAppointmentData.id);
+
+            if (existingEvent) {
+                existingEvent.setProp('title', originalAppointmentData.note);
+                existingEvent.setStart(originalAppointmentData.start);
+                existingEvent.setEnd(originalAppointmentData.end);
+
+                existingEvent.setExtendedProp('client_id', originalAppointmentData.client_id);
+                existingEvent.setExtendedProp('status', originalAppointmentData.status);
+            }
+        }
+
         setRandevuDuzenlePopup(false);
         setRandevuEklePopup(false);
         setShowValidation(false);
         setValidationErrors({
-            title: false,
             start: false,
             end: false,
             client_id: false
         });
         setAppointmentConflict(false);
         setConflictMessage("");
+        setOriginalAppointmentData(null);
     };
 
     const checkAppointmentConflicts = (start, end, currentAppointmentId = null) => {
@@ -467,7 +728,7 @@ export default function Randevularim() {
                 }) : conflictStartTime;
 
             setAppointmentConflict(true);
-            setConflictMessage(`Bu saatte "${clientName}" için "${conflictingAppointment.title}" randevusu bulunuyor. (${conflictStartTime} - ${conflictEndTime})`);
+            setConflictMessage(`Bu saatte "${clientName}" için "${conflictingAppointment.note}" randevusu bulunuyor. (${conflictStartTime} - ${conflictEndTime})`);
             return true;
         }
 
@@ -477,7 +738,6 @@ export default function Randevularim() {
     };
 
     const handleEventChange = (key, value) => {
-        // Date nesnesi olarak sakla, string formatına dönüştürme
         setEventData((prev) => ({
             ...prev,
             [key]: value,
@@ -518,15 +778,42 @@ export default function Randevularim() {
 
             console.log("Randevu silme başarılı:", response.data);
 
-            // Randevu listesinden sil
             setRandevular((prevRandevular) =>
                 prevRandevular.filter((randevu) => String(randevu.id) !== String(appointmentId))
             );
 
-            // Toast bildirim göster
             showSuccessToast('Randevu başarıyla silindi!');
 
-            // Dialogları kapat
+            try {
+                const randevuTarihi = new Date(eventData.start);
+                const formattedDate = randevuTarihi.toISOString().split('T')[0];
+                const formattedTime = randevuTarihi.toLocaleTimeString('tr-TR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                await axios.post(
+                    `${config[config.environment].apiUrl}/notification/sendAppointmentCancellationNotification`,
+                    {
+                        client_id: eventData.clientId || eventData.client_id,
+                        appointmentDetails: {
+                            date: formattedDate,
+                            time: formattedTime
+                        }
+                    },
+                    {
+                        headers: {
+                            Authorization: localStorage.getItem('token'),
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                console.log("Randevu iptal bildirimi başarıyla gönderildi");
+            } catch (notificationError) {
+                console.error("Randevu iptal bildirimi gönderilirken hata:", notificationError);
+            }
+
             setConfirmDialogOpen(false);
             handleDialogClose();
 
@@ -681,7 +968,7 @@ export default function Randevularim() {
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis'
                                         }}>
-                                            {arg.event.title}
+                                            {arg.event.note}
                                         </span>
                                     </div>
                                 </div>
@@ -709,7 +996,7 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
                             value={eventData.start ? new Date(eventData.start) : null}
@@ -788,12 +1075,10 @@ export default function Randevularim() {
                     />
                     <TextField
                         label="Randevu Notu"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        value={eventData.note}
+                        onChange={(e) => handleEventChange("note", e.target.value)}
                         fullWidth
                         margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -849,14 +1134,14 @@ export default function Randevularim() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                         <DateTimePicker
                             label="Başlangıç Tarihi"
                             value={eventData.start ? new Date(eventData.start) : null}
                             onChange={(newValue) => {
                                 handleEventChange("start", newValue ? newValue.toISOString() : '')
                             }}
-                            ampm={false} // 24 saat formatı için
+                            ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
                             disablePast
                             slotProps={{
@@ -874,7 +1159,7 @@ export default function Randevularim() {
                             onChange={(newValue) => {
                                 handleEventChange("end", newValue ? newValue.toISOString() : '')
                             }}
-                            ampm={false} // 24 saat formatı için
+                            ampm={false}
                             views={['year', 'month', 'day', 'hours', 'minutes']}
                             disablePast
                             slotProps={{
@@ -928,12 +1213,10 @@ export default function Randevularim() {
                     />
                     <TextField
                         label="Randevu Notu"
-                        value={eventData.title}
-                        onChange={(e) => handleEventChange("title", e.target.value)}
+                        value={eventData.note}
+                        onChange={(e) => handleEventChange("note", e.target.value)}
                         fullWidth
                         margin="normal"
-                        error={showValidation && validationErrors.title}
-                        helperText={showValidation && validationErrors.title ? "Bu alan zorunludur" : ""}
                     />
                     {/* Status Selectbox (MUI) */}
                     <FormControl fullWidth margin="normal">
@@ -965,6 +1248,14 @@ export default function Randevularim() {
                         startIcon={<Delete/>}
                     >
                         Sil
+                    </Button>
+                    <Button
+                        onClick={sendReminderNotification}
+                        color="info"
+                        disabled={reminderButtonDisabled}
+                        startIcon={<Notifications />}
+                    >
+                        Randevu Hatırlat
                     </Button>
                     <Button
                         onClick={handleEventSave}
@@ -1007,8 +1298,20 @@ export default function Randevularim() {
                 </DialogTitle>
                 <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                        <Box sx={{fontWeight: 'medium', fontSize: '16px'}}>
-                            "{eventData.title}" randevusunu silmek istediğinize emin misiniz?
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, fontWeight: 'medium', fontSize: '16px'}}>
+                            <Box>
+                                <strong>Tarih/Saat:</strong> {eventData.start ?
+                                    `${new Date(eventData.start).toLocaleDateString('tr-TR', {day: '2-digit', month: '2-digit', year: 'numeric'})} - 
+                                    ${new Date(eventData.start).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} / 
+                                    ${new Date(eventData.end).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}`
+                                    : ''}
+                            </Box>
+                            <Box>
+                                <strong>Danışan:</strong> {clients.find(client => String(client.id) === String(eventData.client_id))?.name || 'Belirtilmemiş'}
+                            </Box>
+                            <Box sx={{mt: 1}}>
+                                Bu randevuyu silmek istediğinize emin misiniz?
+                            </Box>
                         </Box>
                         <Box sx={{color: 'text.secondary', fontSize: '14px'}}>
                             Bu işlem geri alınamaz. Randevu kalıcı olarak silinecektir.
@@ -1035,6 +1338,112 @@ export default function Randevularim() {
                         }}
                     >
                         Sil
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Değişiklik Onay Diyaloğu */}
+            <Dialog
+                open={confirmChangeDialogOpen}
+                onClose={() => setConfirmChangeDialogOpen(false)}
+                aria-labelledby="change-confirm-dialog-title"
+                aria-describedby="change-confirm-dialog-description"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                        padding: '10px'
+                    }
+                }}
+            >
+                <DialogTitle
+                    id="change-confirm-dialog-title"
+                    sx={{
+                        backgroundColor: '#f8f9fa',
+                        borderBottom: '1px solid #e9ecef',
+                        padding: '16px 24px',
+                        fontWeight: 'bold',
+                        color: '#fd9200',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                    }}
+                >
+                    <Notifications color="primary"/>
+                    Randevu Değişikliği Onayı
+                </DialogTitle>
+                <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                        <Box sx={{ fontWeight: 'medium', fontSize: '16px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            {originalAppointmentData?.start && originalAppointmentData?.end ? (
+                                <>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+                                        <span style={{ fontWeight: 'bold', color: '#f44336', marginRight: '8px' }}>Eski:</span>
+                                        {new Date(originalAppointmentData.start).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                        {' '} - {' '}
+                                        <span style={{ fontWeight: 'bold' }}>
+                                            {new Date(originalAppointmentData.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                            {' '} - {' '}
+                                            {new Date(originalAppointmentData.end).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.main' }}>
+                                        <span style={{ fontWeight: 'bold', color: '#4caf50', marginRight: '8px' }}>Yeni:</span>
+                                        {dragDropEventData ?
+                                            <>
+                                                {new Date(dragDropEventData.start).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                {' '} - {' '}
+                                                <span style={{ fontWeight: 'bold' }}>
+                                                    {new Date(dragDropEventData.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                    {' '} - {' '}
+                                                    {dragDropEventData.end ?
+                                                        new Date(dragDropEventData.end).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) :
+                                                        ''
+                                                    }
+                                                </span>
+                                            </> :
+                                            <>
+                                                {new Date(eventData.start).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                {' '} - {' '}
+                                                <span style={{ fontWeight: 'bold' }}>
+                                                    {new Date(eventData.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                    {' '} - {' '}
+                                                    {new Date(eventData.end).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </>
+                                        }
+                                    </Box>
+                                    <Box sx={{ mt: 1 }}>Bu değişikliği onaylıyor musunuz?</Box>
+                                </>
+                            ) : (
+                                'Tarih bilgisi bulunamadı'
+                            )}
+                        </Box>
+                        <Box sx={{color: 'text.secondary', fontSize: '14px'}}>
+                            Değişiklikleri onaylamak için "Onayla" butonuna tıklayın. İptal etmek için "Vazgeç" butonuna tıklayın.
+                        </Box>
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{padding: '16px 24px', borderTop: '1px solid #e9ecef'}}>
+                    <Button
+                        onClick={handleChangeDialogClose}
+                        color="inherit"
+                        sx={{fontWeight: 'medium'}}
+                    >
+                        Vazgeç
+                    </Button>
+                    <Button
+                        onClick={confirmAppointmentChange}
+                        color="primary"
+                        variant="contained"
+                        autoFocus
+                        sx={{
+                            fontWeight: 'medium',
+                            boxShadow: 'none',
+                            '&:hover': {boxShadow: 'none'}
+                        }}
+                    >
+                        Onayla
                     </Button>
                 </DialogActions>
             </Dialog>
