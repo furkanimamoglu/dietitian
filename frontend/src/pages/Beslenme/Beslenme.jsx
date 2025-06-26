@@ -126,7 +126,7 @@ const pdfStyles = StyleSheet.create({
     logo: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#2E7D32'
+        color: '#fd9200'
     },
     infoSection: {
         flexDirection: 'row',
@@ -293,10 +293,11 @@ const pdfStyles = StyleSheet.create({
     }
 });
 
-const NutritionPlanDocument = ({program}) => {
+const NutritionPlanDocument = ({ dietitian, program }) => {
+    console.log("Rendering NutritionPlanDocument with program:", program);
+    console.log("Rendering NutritionPlanDocument with dietitian:", dietitian);
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "İsim girilmedi";
     const mealPlanData = program?.mealPlan || {};
     const hasMealPlan = Object.keys(mealPlanData).length > 0;
 
@@ -329,7 +330,6 @@ const NutritionPlanDocument = ({program}) => {
 
     const stats = calculateStats();
 
-    // Yemek öğesi render fonksiyonu
     const renderMealItem = (item, index) => {
         if (!item || !item.name) return null;
 
@@ -348,19 +348,18 @@ const NutritionPlanDocument = ({program}) => {
 
     return (
         <Document>
-            <Page size="A4" style={pdfStyles.page}>
+            <Page size="A4" style={pdfStyles.page} wrap>
                 {/* Başlık ve Logo */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
                         <Text style={pdfStyles.headerTitle}>{program?.title || 'Beslenme Programı'}</Text>
-                        <Text style={pdfStyles.headerSubtitle}>Kişiselleştirilmiş Beslenme Planı</Text>
                         <View style={pdfStyles.headerInfo}>
                             <Text>Oluşturulma: {dateStr}</Text>
-                            <Text>Diyetisyen: {dietitianName}</Text>
+                            <Text>Diyetisyen: {dietitian.name}</Text>
                         </View>
                     </View>
                     <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>DİYET</Text>
+                        <Text style={pdfStyles.logo}>Diyetia</Text>
                     </View>
                 </View>
 
@@ -399,9 +398,10 @@ const NutritionPlanDocument = ({program}) => {
                 )}
 
                 {/* Günler ve Yemekler */}
-                <View style={pdfStyles.daysContainer}>
                     {hasMealPlan ? (
-                        Object.keys(mealPlanData).map((day, dayIndex) => {
+                        (() => {
+                            const days = Object.keys(mealPlanData);
+                        const dayCards = days.map((day, dayIndex) => {
                             const dayData = mealPlanData[day] || {};
                             const dayHasMeals = Object.keys(dayData).some(meal => {
                                 const mealData = dayData[meal] || {};
@@ -412,7 +412,12 @@ const NutritionPlanDocument = ({program}) => {
                             });
 
                             return (
-                                <View style={pdfStyles.dayCard} key={`day-${dayIndex}`}>
+                                <View
+                                    style={{ ...pdfStyles.dayCard, width: '32%', minHeight: 120 }}
+                                    key={`day-${dayIndex}`}
+                                    wrap={false}
+                                    break={dayIndex % 3 === 0 && dayIndex !== 0}
+                                >
                                     <View style={pdfStyles.dayHeader}>
                                         <Text style={pdfStyles.dayHeaderText}>{day}</Text>
                                     </View>
@@ -459,7 +464,19 @@ const NutritionPlanDocument = ({program}) => {
                                     </View>
                                 </View>
                             );
-                        })
+                        });
+
+                        // 3'lü satırlara böl ve her satırı bir View ile sar
+                        const rows = [];
+                        for (let i = 0; i < dayCards.length; i += 3) {
+                            rows.push(
+                                <View style={{ flexDirection: 'row', gap: 8, width: '100%' }} key={`row-${i}`} wrap={false}>
+                                    {dayCards.slice(i, i + 3)}
+                                    </View>
+                                );
+                            }
+                            return rows;
+                        })()
                     ) : (
                         <View style={pdfStyles.emptyDay}>
                             <Text style={pdfStyles.emptyDayText}>
@@ -467,7 +484,6 @@ const NutritionPlanDocument = ({program}) => {
                             </Text>
                         </View>
                     )}
-                </View>
 
                 {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
@@ -517,7 +533,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
+const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, dietitian}) => {
     return (
         <div className="nutrition-card">
             <div className="card-image-container" onClick={() => onView(item)}>
@@ -540,7 +556,7 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                         <PersonAddIcon/>
                     </button>
                     <ConditionalPDFLink
-                        document={<NutritionPlanDocument program={item}/>}
+                        document={<NutritionPlanDocument dietitian={dietitian} program={item}/>}
                         fileName={`${item.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                         buttonClass="action-button print-btn"
                         buttonTitle="Yazdır"
@@ -1046,6 +1062,19 @@ export default function Beslenme() {
     const [imagePreview, setImagePreview] = useState('');
     const [planImage, setPlanImage] = useState(null);
     const [editImage, setEditImage] = useState(null);
+    const [dietitianInfo, setDietitianInfo] = useState({});
+
+    useEffect( () => {
+        axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+            headers: {Authorization: localStorage.getItem("token")}
+        })
+            .then(response => {
+                setDietitianInfo(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching dietitian info:", error);
+            });
+    }, []);
 
     useEffect(() => {
         axios
@@ -1622,6 +1651,7 @@ export default function Beslenme() {
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewProgram}
+                                    dietitian={dietitianInfo}
                                 />
                             ))
                         ) : (
@@ -1918,7 +1948,7 @@ export default function Beslenme() {
                             <Typography variant="h5" sx={{mb: 1, mt: 2}}>
                                 Hızlı Süre Seç:
                             </Typography>
-                            <Stack direction="row" spacing={1} sx={{mb: 2}}>
+                            <Stack direction="row" spacing={1} alignItems="center" mt={1}>
                                 <Button
                                     variant="outlined"
                                     size="small"
@@ -2616,7 +2646,7 @@ export default function Beslenme() {
                                                             if (programDetails) {
                                                                 return (
                                                                     <ConditionalPDFLink
-                                                                        document={<NutritionPlanDocument program={programDetails}/>}
+                                                                        document={<NutritionPlanDocument dietitian={dietitianInfo} program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                                                                         buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
                                                                         buttonTitle="PDF İndir"
