@@ -1020,6 +1020,35 @@ function Danisan() {
     const [selectedMeasurementId, setSelectedMeasurementId] = useState(null);
     const [updateMeasurementLoading, setUpdateMeasurementLoading] = useState(false);
 
+    const [clientNote, setClientNote] = useState("");
+
+    useEffect(() => {
+        if (danisan && typeof danisan.dietitianNotes === "string") {
+            setClientNote(danisan.dietitianNotes);
+        }
+    }, [danisan]);
+
+    const handleSaveClientNote = async (danisanId, note) => {
+        try {
+            await axios.put(
+                `${config[config.environment].apiUrl}/dietitian/updateClientNote`,
+                { note },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    },
+                    params: {
+                        client_id: danisanId
+                    }
+                }
+            );
+            showSuccessToast("Not başarıyla kaydedildi.");
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || "Not kaydedilirken bir hata oluştu.");
+            setShowErrorPopup(true);
+        }
+    }
+
     const handleEditMeasurementFormChange = (e) => {
         const {name, value} = e.target;
         setEditMeasurementForm(prev => ({...prev, [name]: value}));
@@ -4044,6 +4073,50 @@ function Danisan() {
                                         />
                                     </ListItem>
                                 </List>
+                                {/* Not Alanı */}
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        mt: 3,
+                                        p: 2,
+                                        bgcolor: '#fffde7',
+                                        border: '1.5px solid #ffe082',
+                                        borderRadius: 2,
+                                        minHeight: 80,
+                                        boxShadow: '0 2px 8px rgba(255, 224, 130, 0.15)',
+                                        fontFamily: 'Caveat, "Comic Sans MS", cursive',
+                                        fontSize: 18,
+                                        color: '#795548',
+                                        backgroundImage: 'repeating-linear-gradient(180deg, transparent, transparent 23px, #ffe082 24px)',
+                                        outline: 'none',
+                                        resize: 'vertical'
+                                    }}
+                                >
+                                    <TextField
+                                        multiline
+                                        minRows={3}
+                                        maxRows={8}
+                                        fullWidth
+                                        variant="standard"
+                                        value={clientNote}
+                                        onChange={e => setClientNote(e.target.value)}
+                                        placeholder="Danışan için notlarınızı buraya yazabilirsiniz..."
+                                        InputProps={{
+                                            disableUnderline: true,
+                                            sx: {fontFamily: 'Caveat, "Comic Sans MS", cursive', fontSize: 18, bgcolor: 'transparent'}
+                                        }}
+                                    />
+                                    <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 1}}>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => handleSaveClientNote(danisan.id, clientNote)}
+                                        >
+                                            Kaydet
+                                        </Button>
+                                    </Box>
+                                </Box>
                             </Box>
                         </Card>
                     </Grid>

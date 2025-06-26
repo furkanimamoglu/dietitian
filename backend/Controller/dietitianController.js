@@ -583,6 +583,40 @@ class DietitianController {
         }
     }
 
+    static async updateClientNote(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {client_id} = req.query;
+            const {note} = req.body;
+
+            if (!client_id || !note) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: 'Danışan ID ve içeriği gereklidir.'
+                });
+            }
+
+            const result = await DietitianService.updateClientNote(dietitian_id, client_id, note);
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen || true,
+                message: error.message || "Bir hata oluştu.",
+            });
+        }
+    }
+
     static async getDietitianSubscriptionDetails(req, res) {
         try {
             const {dietitian_id} = req.query;
