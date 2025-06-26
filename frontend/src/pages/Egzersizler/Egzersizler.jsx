@@ -130,7 +130,7 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, die
                         <PersonAddIcon/>
                     </button>
                     <PDFDownloadLink
-                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitianInfo={dietitianInfo} />}
+                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitian={dietitianInfo} />}
                         fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -1104,6 +1104,7 @@ export default function Egzersizler() {
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleOpenDetailModal}
+                                    dietitianInfo={dietitianInfo}
                                 />
                             ))
                         ) : (
@@ -2167,6 +2168,7 @@ export default function Egzersizler() {
                                                                         endDate: item.end_date,
                                                                         note: item.note
                                                                     }}
+                                                                    dietitian={dietitianInfo}
                                                                 />
                                                             }
                                                             fileName={`${item.Exercise?.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
