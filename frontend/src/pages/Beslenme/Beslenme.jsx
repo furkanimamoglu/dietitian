@@ -63,6 +63,7 @@ import {
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
 
 Font.register({
     family: 'Open Sans',
@@ -73,168 +74,292 @@ const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
         backgroundColor: '#fff',
-        padding: 10,
+        padding: 15,
         fontFamily: 'Open Sans'
     },
     header: {
-        backgroundColor: '#4CAF50',
-        padding: 5,
-        marginBottom: 10,
-        borderRadius: 5,
+        backgroundColor: '#2E7D32',
+        padding: 12,
+        marginBottom: 15,
+        borderRadius: 8,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4
     },
     headerContent: {
         flex: 1
     },
     headerTitle: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 6
+    },
+    headerSubtitle: {
+        color: '#E8F5E8',
+        fontSize: 10,
         marginBottom: 4
     },
     headerInfo: {
-        color: 'white',
+        color: '#E8F5E8',
         fontSize: 9,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
     logoContainer: {
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         backgroundColor: 'white',
-        borderRadius: 5,
+        borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 10
+        marginLeft: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2
     },
     logo: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 'bold',
-        color: '#4CAF50'
+        color: '#fd9200'
     },
     infoSection: {
         flexDirection: 'row',
-        marginBottom: 10,
-        borderRadius: 5,
-        overflow: 'hidden'
+        marginBottom: 15,
+        gap: 8
     },
     infoBox: {
         flex: 1,
-        padding: 8,
-        backgroundColor: '#f5f5f5',
-        margin: 2
+        padding: 12,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 6,
+        borderLeft: '3px solid #4CAF50'
     },
     infoTitle: {
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: 'bold',
-        marginBottom: 3,
-        color: '#4CAF50'
+        marginBottom: 4,
+        color: '#2E7D32'
     },
     infoContent: {
-        fontSize: 8,
-        color: '#333'
+        fontSize: 9,
+        color: '#424242',
+        lineHeight: 1.3
     },
     daysContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        gap: 8
     },
     dayCard: {
-        width: '32%',
-        marginBottom: 8,
-        border: '1px solid #E0E0E0',
-        borderRadius: 3,
-        overflow: 'hidden'
+        width: '48%',
+        marginBottom: 12,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        border: '1px solid #E0E0E0'
     },
     dayHeader: {
-        backgroundColor: '#FF9800',
-        padding: 4,
+        backgroundColor: '#FF6B35',
+        padding: 8,
+        alignItems: 'center'
     },
     dayHeaderText: {
         color: 'white',
-        fontSize: 9,
-        fontWeight: 'bold'
+        fontSize: 11,
+        fontWeight: 'bold',
+        letterSpacing: 0.5
     },
     dayContent: {
-        padding: 5
+        padding: 10
     },
     mealSection: {
-        marginBottom: 5
+        marginBottom: 8
     },
     mealTitle: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        marginBottom: 4,
+        color: '#2E7D32',
+        backgroundColor: '#E8F5E8',
+        padding: 3,
+        borderRadius: 3,
+        textAlign: 'center'
+    },
+    alternativeGroup: {
+        marginBottom: 6,
+        paddingLeft: 4
+    },
+    alternativeTitle: {
         fontSize: 8,
         fontWeight: 'bold',
-        marginBottom: 2,
-        borderBottom: '1px solid #EEEEEE',
-        paddingBottom: 1
+        color: '#FF6B35',
+        marginBottom: 2
     },
     mealItem: {
-        fontSize: 7,
-        marginBottom: 1,
-        paddingLeft: 5
+        fontSize: 8,
+        marginBottom: 2,
+        paddingLeft: 8,
+        flexDirection: 'row',
+        alignItems: 'flex-start'
     },
     mealItemBullet: {
+        fontSize: 8,
+        marginRight: 4,
+        color: '#4CAF50',
+        fontWeight: 'bold'
+    },
+    mealItemContent: {
+        flex: 1
+    },
+    mealItemName: {
+        fontSize: 8,
+        color: '#424242'
+    },
+    mealItemPortion: {
         fontSize: 7,
-        marginRight: 3
-    },
-    alternativeItem: {
-        fontSize: 6,
-        marginLeft: 10,
-        color: '#FF7043',
-        marginBottom: 1
-    },
-    alternativePrefix: {
-        fontSize: 6,
-        color: '#757575'
+        color: '#757575',
+        marginTop: 1
     },
     noMealText: {
-        fontSize: 7,
+        fontSize: 8,
         color: '#9E9E9E',
-        paddingLeft: 5
+        paddingLeft: 8,
+        textAlign: 'center',
+        marginTop: 5
+    },
+    emptyDay: {
+        width: '100%',
+        backgroundColor: '#F5F5F5',
+        borderRadius: 8,
+        padding: 20,
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    emptyDayText: {
+        fontSize: 10,
+        color: '#757575',
+        textAlign: 'center'
     },
     footer: {
         position: 'absolute',
-        bottom: 10,
+        bottom: 15,
         left: 0,
         right: 0,
-        textAlign: 'right',
-        paddingTop: 5,
-        marginRight: 15
+        alignItems: 'center',
+        paddingHorizontal: 15
     },
     footerText: {
-        fontSize: 7,
-        color: '#4CAF50'
+        fontSize: 8,
+        color: '#2E7D32',
+        textAlign: 'center',
+        marginBottom: 3
     },
     footerWebsite: {
+        fontSize: 8,
+        color: '#FF6B35',
+        fontWeight: 'bold'
+    },
+    statsSection: {
+        flexDirection: 'row',
+        marginBottom: 10,
+        backgroundColor: '#F0F4FF',
+        padding: 8,
+        borderRadius: 6,
+        justifyContent: 'space-around'
+    },
+    statItem: {
+        alignItems: 'center'
+    },
+    statNumber: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#2E7D32'
+    },
+    statLabel: {
         fontSize: 7,
-        color: '#FF9800',
+        color: '#757575',
         marginTop: 2
     }
 });
 
-const NutritionPlanDocument = ({program}) => {
+const NutritionPlanDocument = ({ dietitian, program }) => {
+    console.log("Rendering NutritionPlanDocument with program:", program);
+    console.log("Rendering NutritionPlanDocument with dietitian:", dietitian);
     const today = new Date();
     const dateStr = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
-    const dietitianName = "İsim girilmedi";
     const mealPlanData = program?.mealPlan || {};
     const hasMealPlan = Object.keys(mealPlanData).length > 0;
 
+    const calculateStats = () => {
+        let totalDays = 0;
+        let totalMeals = 0;
+        let totalItems = 0;
+
+        Object.keys(mealPlanData).forEach(day => {
+            const dayData = mealPlanData[day] || {};
+            let dayHasMeals = false;
+
+            Object.keys(dayData).forEach(meal => {
+                const mealData = dayData[meal] || {};
+                Object.keys(mealData).forEach(altGroup => {
+                    const items = mealData[altGroup] || [];
+                    if (Array.isArray(items) && items.length > 0) {
+                        dayHasMeals = true;
+                        totalMeals++;
+                        totalItems += items.length;
+                    }
+                });
+            });
+
+            if (dayHasMeals) totalDays++;
+        });
+
+        return { totalDays, totalMeals, totalItems };
+    };
+
+    const stats = calculateStats();
+
+    const renderMealItem = (item, index) => {
+        if (!item || !item.name) return null;
+
+        return (
+            <View style={pdfStyles.mealItem} key={`item-${index}`}>
+                <Text style={pdfStyles.mealItemBullet}>•</Text>
+                <View style={pdfStyles.mealItemContent}>
+                    <Text style={pdfStyles.mealItemName}>{item.name}</Text>
+                    {item.portion && (
+                        <Text style={pdfStyles.mealItemPortion}>Porsiyon: {item.portion}</Text>
+                    )}
+                </View>
+            </View>
+        );
+    };
+
     return (
         <Document>
-            <Page size="A4" style={pdfStyles.page}>
+            <Page size="A4" style={pdfStyles.page} wrap>
                 {/* Başlık ve Logo */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
                         <Text style={pdfStyles.headerTitle}>{program?.title || 'Beslenme Programı'}</Text>
                         <View style={pdfStyles.headerInfo}>
-                            <Text>Oluşturulma Tarihi: {dateStr}</Text>
-                            <Text>Diyetisyen: {dietitianName}</Text>
+                            <Text>Oluşturulma: {dateStr}</Text>
+                            <Text>Diyetisyen: {dietitian.name}</Text>
                         </View>
                     </View>
                     <View style={pdfStyles.logoContainer}>
-                        <Text style={pdfStyles.logo}>DIYET</Text>
+                        <Text style={pdfStyles.logo}>Diyetia</Text>
                     </View>
                 </View>
 
@@ -254,85 +379,116 @@ const NutritionPlanDocument = ({program}) => {
                     </View>
                 </View>
 
+                {/* İstatistikler */}
+                {hasMealPlan && (
+                    <View style={pdfStyles.statsSection}>
+                        <View style={pdfStyles.statItem}>
+                            <Text style={pdfStyles.statNumber}>{stats.totalDays}</Text>
+                            <Text style={pdfStyles.statLabel}>Aktif Gün</Text>
+                        </View>
+                        <View style={pdfStyles.statItem}>
+                            <Text style={pdfStyles.statNumber}>{stats.totalMeals}</Text>
+                            <Text style={pdfStyles.statLabel}>Öğün</Text>
+                        </View>
+                        <View style={pdfStyles.statItem}>
+                            <Text style={pdfStyles.statNumber}>{stats.totalItems}</Text>
+                            <Text style={pdfStyles.statLabel}>Besin Öğesi</Text>
+                        </View>
+                    </View>
+                )}
+
                 {/* Günler ve Yemekler */}
-                <View style={pdfStyles.daysContainer}>
                     {hasMealPlan ? (
-                        Object.keys(mealPlanData).map((day, index) => {
+                        (() => {
+                            const days = Object.keys(mealPlanData);
+                        const dayCards = days.map((day, dayIndex) => {
                             const dayData = mealPlanData[day] || {};
-                            const hasMeals = Object.keys(dayData).length > 0;
+                            const dayHasMeals = Object.keys(dayData).some(meal => {
+                                const mealData = dayData[meal] || {};
+                                return Object.keys(mealData).some(altGroup => {
+                                    const items = mealData[altGroup] || [];
+                                    return Array.isArray(items) && items.length > 0;
+                                });
+                            });
 
                             return (
-                        <View style={pdfStyles.dayCard} key={`day-${index}`}>
-                            <View style={pdfStyles.dayHeader}>
-                                <Text style={pdfStyles.dayHeaderText}>{day}</Text>
-                            </View>
-                            <View style={pdfStyles.dayContent}>
-                                        {hasMeals ? (
+                                <View
+                                    style={{ ...pdfStyles.dayCard, width: '32%', minHeight: 120 }}
+                                    key={`day-${dayIndex}`}
+                                    wrap={false}
+                                    break={dayIndex % 3 === 0 && dayIndex !== 0}
+                                >
+                                    <View style={pdfStyles.dayHeader}>
+                                        <Text style={pdfStyles.dayHeaderText}>{day}</Text>
+                                    </View>
+                                    <View style={pdfStyles.dayContent}>
+                                        {dayHasMeals ? (
                                             Object.keys(dayData).map((meal, mealIndex) => {
-                                                const mealData = dayData[meal];
-                                    let items = [];
-                                    let alternatives = {};
+                                                const mealData = dayData[meal] || {};
+                                                const mealHasItems = Object.keys(mealData).some(altGroup => {
+                                                    const items = mealData[altGroup] || [];
+                                                    return Array.isArray(items) && items.length > 0;
+                                                });
 
-                                    if (mealData && typeof mealData === 'object' && !Array.isArray(mealData)) {
-                                        if (mealData.main) {
-                                                    items = Array.isArray(mealData.main) ? mealData.main : [];
-                                        alternatives = mealData.alternatives || {};
-                                        } else {
-                                            const { alternatives: alts, ...rest } = mealData;
-                                            items = Object.values(rest).filter(item => item && typeof item === 'string');
-                                            alternatives = alts || {};
-                                        }
-                                    } else if (Array.isArray(mealData)) {
-                                        items = mealData;
-                                    } else if (typeof mealData === 'string') {
-                                                    items = mealData.split(',')
-                                                        .map(item => item.trim())
-                                                        .filter(item => item !== '');
-                                    } else if (mealData) {
-                                        items = [String(mealData)];
-                                    }
+                                                if (!mealHasItems) return null;
 
-                                    return (
-                                        <View style={pdfStyles.mealSection} key={`meal-${mealIndex}`}>
-                                            <Text style={pdfStyles.mealTitle}>{meal}</Text>
-                                            {items && items.length > 0 ? (
-                                                items.map((item, itemIndex) => (
-                                                    <View key={`item-${itemIndex}`}>
-                                                        <Text style={pdfStyles.mealItem}>
-                                                            <Text style={pdfStyles.mealItemBullet}>•</Text> {item}
-                                                        </Text>
-                                                        {alternatives && alternatives[item] && (
-                                                            <Text style={pdfStyles.alternativeItem}>
-                                                                <Text style={pdfStyles.alternativePrefix}>Alternatif: </Text>
-                                                                {alternatives[item]}
-                                                            </Text>
-                                                        )}
+                                                return (
+                                                    <View style={pdfStyles.mealSection} key={`meal-${mealIndex}`}>
+                                                        <Text style={pdfStyles.mealTitle}>{meal}</Text>
+                                                        {Object.keys(mealData).map((alternativeGroup, altIndex) => {
+                                                            const items = mealData[alternativeGroup] || [];
+
+                                                            if (!Array.isArray(items) || items.length === 0) {
+                                                                return null;
+                                                            }
+
+                                                            return (
+                                                                <View style={pdfStyles.alternativeGroup} key={`alt-${altIndex}`}>
+                                                                    {Object.keys(mealData).length > 1 && (
+                                                                        <Text style={pdfStyles.alternativeTitle}>
+                                                                            {alternativeGroup}
+                                                                        </Text>
+                                                                    )}
+                                                                    {items.map((item, itemIndex) =>
+                                                                        renderMealItem(item, itemIndex)
+                                                                    )}
+                                                                </View>
+                                                            );
+                                                        })}
                                                     </View>
-                                                ))
-                                            ) : (
-                                                <Text style={pdfStyles.noMealText}>Öğün belirtilmemiş</Text>
-                                            )}
-                                        </View>
-                                    );
+                                                );
                                             })
                                         ) : (
                                             <Text style={pdfStyles.noMealText}>Bu gün için öğün planı bulunmuyor</Text>
                                         )}
-                            </View>
-                        </View>
+                                    </View>
+                                </View>
                             );
-                        })
+                        });
+
+                        // 3'lü satırlara böl ve her satırı bir View ile sar
+                        const rows = [];
+                        for (let i = 0; i < dayCards.length; i += 3) {
+                            rows.push(
+                                <View style={{ flexDirection: 'row', gap: 8, width: '100%' }} key={`row-${i}`} wrap={false}>
+                                    {dayCards.slice(i, i + 3)}
+                                    </View>
+                                );
+                            }
+                            return rows;
+                        })()
                     ) : (
-                        <View style={[pdfStyles.dayCard, { width: '100%', alignItems: 'center', padding: 20 }]}>
-                            <Text style={pdfStyles.noMealText}>Bu beslenme programında günlük öğün planı bulunmuyor</Text>
+                        <View style={pdfStyles.emptyDay}>
+                            <Text style={pdfStyles.emptyDayText}>
+                                Bu beslenme programında günlük öğün planı bulunmuyor
+                            </Text>
                         </View>
                     )}
-                </View>
 
                 {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
                     <Text style={pdfStyles.footerText}>
-                        Bu beslenme programı .... tarafından hazırlanmıştır.
+                        Bu beslenme programı uzman diyetisyen tarafından hazırlanmıştır.
                     </Text>
                     <Text style={pdfStyles.footerWebsite}>www.diyetia.com</Text>
                 </View>
@@ -377,7 +533,7 @@ const CategoryItem = ({category, isChecked, onCheck, onDelete}) => {
     );
 };
 
-const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) => {
+const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, dietitian}) => {
     return (
         <div className="nutrition-card">
             <div className="card-image-container" onClick={() => onView(item)}>
@@ -400,7 +556,7 @@ const NutritionCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView}) =
                         <PersonAddIcon/>
                     </button>
                     <ConditionalPDFLink
-                        document={<NutritionPlanDocument program={item}/>}
+                        document={<NutritionPlanDocument dietitian={dietitian} program={item}/>}
                         fileName={`${item.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                         buttonClass="action-button print-btn"
                         buttonTitle="Yazdır"
@@ -454,362 +610,6 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
                 <div className="modal-content">
                     {children}
                 </div>
-            </div>
-        </div>
-    );
-};
-
-const MealPlanTable = ({mealPlan, onMealChange, selectedDay, onDayChange}) => {
-    const getMealItemsArray = (mealData) => {
-        if (!mealData) return [];
-
-        if (Array.isArray(mealData)) {
-            return [...mealData];
-        }
-
-        if (mealData.main && Array.isArray(mealData.main)) {
-            return [...mealData.main];
-        }
-
-        if (typeof mealData === 'string') {
-            return mealData.split(',').map(item => item.trim()).filter(item => item !== '');
-        }
-
-        return [];
-    };
-
-    const addMainItem = (day, meal, newItem) => {
-        if (!newItem.trim()) return;
-
-        const currentData = mealPlan[day][meal];
-        let updatedData;
-
-        if (Array.isArray(currentData)) {
-            updatedData = [...currentData, newItem.trim()];
-        } else if (currentData && currentData.main) {
-            updatedData = {
-                ...currentData,
-                main: [...currentData.main, newItem.trim()]
-            };
-        } else if (typeof currentData === 'string') {
-            const items = currentData ?
-                currentData.split(',').map(item => item.trim()).filter(item => item !== '') :
-                [];
-            updatedData = [...items, newItem.trim()];
-        } else {
-            updatedData = {
-                main: [newItem.trim()],
-                alternatives: {}
-            };
-        }
-
-        onMealChange(day, meal, updatedData);
-    };
-
-    const removeMainItem = (day, meal, indexToRemove) => {
-        const currentData = mealPlan[day][meal];
-        let updatedData;
-        let removedItemName = '';
-
-        if (Array.isArray(currentData)) {
-            removedItemName = currentData[indexToRemove];
-            updatedData = currentData.filter((_, index) => index !== indexToRemove);
-        } else if (currentData && currentData.main) {
-            removedItemName = currentData.main[indexToRemove];
-            const newMain = currentData.main.filter((_, index) => index !== indexToRemove);
-
-            const newAlternatives = {...currentData.alternatives};
-            if (newAlternatives[removedItemName]) {
-                delete newAlternatives[removedItemName];
-            }
-
-            updatedData = {
-                main: newMain,
-                alternatives: newAlternatives
-            };
-        } else if (typeof currentData === 'string') {
-            const items = currentData.split(',').map(item => item.trim()).filter(item => item !== '');
-            removedItemName = items[indexToRemove];
-            updatedData = items.filter((_, index) => index !== indexToRemove);
-        }
-
-        if (selectedMainItem === removedItemName && showAlternatives[meal]) {
-            setShowAlternatives(prev => ({
-                ...prev,
-                [meal]: false
-            }));
-            setSelectedMainItem('');
-        }
-
-        onMealChange(day, meal, updatedData);
-    };
-
-    const addAlternative = (day, meal, mainItem, alternativeItem) => {
-        if (!alternativeItem.trim() || !mainItem) return;
-
-        const currentData = mealPlan[day][meal];
-        let updatedData;
-
-        if (Array.isArray(currentData)) {
-            updatedData = {
-                main: [...currentData],
-                alternatives: {
-                    [mainItem]: [alternativeItem.trim()]
-                }
-            };
-        } else if (currentData && currentData.main) {
-            const newAlternatives = {...currentData.alternatives};
-
-            if (newAlternatives[mainItem]) {
-                newAlternatives[mainItem] = [...newAlternatives[mainItem], alternativeItem.trim()];
-            } else {
-                newAlternatives[mainItem] = [alternativeItem.trim()];
-            }
-
-            updatedData = {
-                main: [...currentData.main],
-                alternatives: newAlternatives
-            };
-        } else if (typeof currentData === 'string') {
-            const items = currentData ?
-                currentData.split(',').map(item => item.trim()).filter(item => item !== '') :
-                [];
-
-            updatedData = {
-                main: items,
-                alternatives: {
-                    [mainItem]: [alternativeItem.trim()]
-                }
-            };
-        }
-
-        onMealChange(day, meal, updatedData);
-    };
-
-    const removeAlternative = (day, meal, mainItem, alternativeIndex) => {
-        const currentData = mealPlan[day][meal];
-
-        if (!currentData || !currentData.alternatives || !currentData.alternatives[mainItem]) {
-            return;
-        }
-
-        const newAlternatives = {...currentData.alternatives};
-        newAlternatives[mainItem] = newAlternatives[mainItem].filter((_, index) => index !== alternativeIndex);
-
-        if (newAlternatives[mainItem].length === 0) {
-            delete newAlternatives[mainItem];
-        }
-
-        const updatedData = {
-            main: [...currentData.main],
-            alternatives: newAlternatives
-        };
-
-        onMealChange(day, meal, updatedData);
-    };
-
-    const [selectedMainItem, setSelectedMainItem] = useState('');
-    const [alternativeInput, setAlternativeInput] = useState('');
-    const [showAlternatives, setShowAlternatives] = useState({});
-    const [recipes, setRecipes] = useState([]);
-    const [newMealInputs, setNewMealInputs] = useState({});
-
-    useEffect(() => {
-        axios.get(`${config[config.environment].apiUrl}/recipe/getMyRecipes`, {
-            headers: {Authorization: localStorage.getItem("token")}
-        })
-            .then(response => {
-                setRecipes(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching recipes:", error);
-            });
-    }, []);
-
-    const toggleAlternatives = (meal) => {
-        setShowAlternatives(prev => ({
-            ...prev,
-            [meal]: !prev[meal]
-        }));
-    };
-
-    const handleMealInputChange = (meal, newValue) => {
-        setNewMealInputs(prev => ({
-            ...prev,
-            [meal]: newValue
-        }));
-    };
-
-    const handleAddMealItem = (meal, value) => {
-        if (!value) return;
-
-        addMainItem(selectedDay, meal, value);
-        setNewMealInputs(prev => ({
-            ...prev,
-            [meal]: ''
-        }));
-    };
-
-    return (
-        <div className="meal-plan-container">
-            <div className="day-tabs">
-                {DAYS_OF_WEEK.map((day) => (
-                    <button
-                        key={day}
-                        className={`day-tab ${selectedDay === day ? 'active' : ''}`}
-                        onClick={() => onDayChange(day)}
-                    >
-                        {day}
-                    </button>
-                ))}
-            </div>
-
-            <div className="meal-plan-content">
-                {MEALS.map((meal) => {
-                    const mealData = mealPlan[selectedDay][meal];
-                    const mainItems = getMealItemsArray(mealData);
-
-                    return (
-                        <div key={meal} className="meal-row">
-                            <div className="meal-label">
-                                <RestaurantIcon className="meal-icon"/>
-                                <span>{meal}</span>
-                            </div>
-                            <div className="meal-input-container">
-                                <div className="simple-meal-editor">
-                                    <div className="meal-items-container">
-                                        {mainItems.map((item, index) => (
-                                            <div key={index} className="meal-item">
-                                                <span>{item}</span>
-                                                <button
-                                                    className="meal-item-options"
-                                                    onClick={() => {
-                                                        setSelectedMainItem(item);
-                                                        toggleAlternatives(meal);
-                                                    }}
-                                                    title="Alternatif Ekle"
-                                                >
-                                                    •••
-                                                </button>
-                                                <button
-                                                    className="remove-meal-item"
-                                                    onClick={() => removeMainItem(selectedDay, meal, index)}
-                                                >
-                                                    <CloseIcon fontSize="small"/>
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Main meal input with Autocomplete */}
-                                    <div className="add-meal-item-container">
-                                        <Autocomplete
-                                            freeSolo
-                                            options={recipes.map(recipe => recipe.name)}
-                                            value={newMealInputs[meal] || ''}
-                                            onChange={(event, newValue) => {
-                                                if (newValue) {
-                                                    handleAddMealItem(meal, newValue);
-                                                }
-                                            }}
-                                            onInputChange={(event, newInputValue) => {
-                                                handleMealInputChange(meal, newInputValue);
-                                            }}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder={`${meal} için yiyecek ekleyin...`}
-                                                    variant="outlined"
-                                                    size="small"
-                                                    fullWidth
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && newMealInputs[meal]?.trim()) {
-                                                            handleAddMealItem(meal, newMealInputs[meal].trim());
-                                                            e.preventDefault();
-                                                        }
-                                                    }}
-                                                />
-                                            )}
-                                            className="recipe-autocomplete"
-                                        />
-                                        <button
-                                            className="add-meal-button"
-                                            onClick={() => {
-                                                if (newMealInputs[meal]?.trim()) {
-                                                    handleAddMealItem(meal, newMealInputs[meal].trim());
-                                                }
-                                            }}
-                                        >
-                                            <AddIcon/>
-                                        </button>
-                                    </div>
-
-                                    {/* Alternatives section */}
-                                    {showAlternatives[meal] && selectedMainItem && (
-                                        <div className="alternatives-section">
-                                            <div className="alternatives-header">
-                                                <h4>"{selectedMainItem}" için Alternatifler</h4>
-                                                <button
-                                                    className="close-alternatives-btn"
-                                                    onClick={() => {
-                                                        setShowAlternatives(prev => ({...prev, [meal]: false}));
-                                                        setSelectedMainItem('');
-                                                    }}
-                                                >
-                                                    <CloseIcon fontSize="small"/>
-                                                </button>
-                                            </div>
-
-                                            <div className="alternatives-items">
-                                                {mealData &&
-                                                    mealData.alternatives &&
-                                                    mealData.alternatives[selectedMainItem] &&
-                                                    mealData.alternatives[selectedMainItem].map((alt, index) => (
-                                                        <div key={index} className="alternative-item">
-                                                            <span>{alt}</span>
-                                                            <button
-                                                                className="remove-alternative-item"
-                                                                onClick={() => removeAlternative(selectedDay, meal, selectedMainItem, index)}
-                                                            >
-                                                                <CloseIcon fontSize="small"/>
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                            </div>
-
-                                            <div className="add-alternative-container">
-                                                <input
-                                                    type="text"
-                                                    className="add-alternative-input"
-                                                    placeholder="Alternatif ekleyin..."
-                                                    value={alternativeInput}
-                                                    onChange={(e) => setAlternativeInput(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && alternativeInput.trim()) {
-                                                            addAlternative(selectedDay, meal, selectedMainItem, alternativeInput);
-                                                            setAlternativeInput('');
-                                                        }
-                                                    }}
-                                                />
-                                                <button
-                                                    className="add-alternative-button"
-                                                    onClick={() => {
-                                                        if (alternativeInput.trim()) {
-                                                            addAlternative(selectedDay, meal, selectedMainItem, alternativeInput);
-                                                            setAlternativeInput('');
-                                                        }
-                                                    }}
-                                                >
-                                                    <AddIcon/>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
             </div>
         </div>
     );
@@ -906,6 +706,19 @@ export default function Beslenme() {
     const [imagePreview, setImagePreview] = useState('');
     const [planImage, setPlanImage] = useState(null);
     const [editImage, setEditImage] = useState(null);
+    const [dietitianInfo, setDietitianInfo] = useState({});
+
+    useEffect( () => {
+        axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
+            headers: {Authorization: localStorage.getItem("token")}
+        })
+            .then(response => {
+                setDietitianInfo(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching dietitian info:", error);
+            });
+    }, []);
 
     useEffect(() => {
         axios
@@ -1097,7 +910,7 @@ export default function Beslenme() {
 
             try {
                 const uploadRes = await axios.post(
-                    `${config[config.environment].apiUrl}/upload`,
+                    `${config[config.environment].apiUrl}/upload?type=nutrition`,
                     formData,
                     {
                         headers: {
@@ -1205,6 +1018,17 @@ export default function Beslenme() {
 
                 const programName = selectedProgram.title;
                 const userName = selectedUser.name;
+
+                try {
+                    axios.post(
+                        `${config[config.environment].apiUrl}/notification/sendNutritionPlanAssignedNotification`,
+                        { client_id: response.data.client_id },
+                        { headers: { Authorization: localStorage.getItem("token") } }
+                    );
+                    console.log(`Bildirim gönderildi: client_id=${response.data.client_id}`);
+                } catch (notificationError) {
+                    console.error("Bildirim gönderilirken hata oluştu:", notificationError);
+                }
 
                 setAddToUserModal(false);
                 setSelectedProgram(null);
@@ -1350,6 +1174,18 @@ export default function Beslenme() {
         setEndDate(formatDate(end));
     };
 
+    const renderDanisanAvatar = (danisan) => {
+        const defaultAvatar = '/path/to/default/avatar.png';
+        const profilePhoto = danisan.profilePhoto;
+
+        return (
+            <Avatar
+                src={profilePhoto ? profilePhoto : defaultAvatar}
+                alt={danisan.name}
+            />
+        );
+    };
+
     return (
         <Default>
             <div className="beslenme-container">
@@ -1371,6 +1207,7 @@ export default function Beslenme() {
                                 className="action-btn add-plan-btn"
                                 title="Plan Ekle"
                                 onClick={() => setAddPlanModal(true)}
+                                disabled={categoryData.length === 0}
                             >
                                 <AddIcon/>
                                 <span className="btn-text">Plan</span>
@@ -1458,6 +1295,7 @@ export default function Beslenme() {
                                     onEdit={handleEdit}
                                     onDelete={handleOpenDeleteConfirm}
                                     onView={handleViewProgram}
+                                    dietitian={dietitianInfo}
                                 />
                             ))
                         ) : (
@@ -1565,16 +1403,7 @@ export default function Beslenme() {
                                                 }}
                                             >
                                                 <ListItemAvatar>
-                                                    <Avatar
-                                                        sx={{
-                                                            bgcolor: danisan.image ? 'transparent' : '#ffa955',
-                                                            width: 40,
-                                                            height: 40
-                                                        }}
-                                                        src={danisan.image || ''}
-                                                    >
-                                                        {!danisan.image && danisan.name.charAt(0)}
-                                                    </Avatar>
+                                                    {renderDanisanAvatar(danisan)}
                                                 </ListItemAvatar>
                                                 <ListItemText
                                                     primary={danisan.name}
@@ -1763,7 +1592,7 @@ export default function Beslenme() {
                             <Typography variant="h5" sx={{mb: 1, mt: 2}}>
                                 Hızlı Süre Seç:
                             </Typography>
-                            <Stack direction="row" spacing={1} sx={{mb: 2}}>
+                            <Stack direction="row" spacing={1} alignItems="center" mt={1}>
                                 <Button
                                     variant="outlined"
                                     size="small"
@@ -1823,7 +1652,7 @@ export default function Beslenme() {
                             ))}
                         </select>
                     </div>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
                         <div className="date-inputs-container">
                             <div className="input-container half-width">
                                 <DatePicker
@@ -2461,7 +2290,7 @@ export default function Beslenme() {
                                                             if (programDetails) {
                                                                 return (
                                                                     <ConditionalPDFLink
-                                                                        document={<NutritionPlanDocument program={programDetails}/>}
+                                                                        document={<NutritionPlanDocument dietitian={dietitianInfo} program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                                                                         buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
                                                                         buttonTitle="PDF İndir"
@@ -2532,3 +2361,4 @@ export default function Beslenme() {
         </Default>
     );
 }
+

@@ -3,7 +3,6 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
     StatusBar,
     StyleSheet,
     TouchableOpacity,
@@ -36,6 +35,7 @@ const KayitolScreen: React.FC = () => {
     const [name, setName] = useState('');
     const [dietitianCode, setDietitianCode] = useState(dietitianId);
     const [gender, setGender] = useState('');
+    const [age, setAge] = useState('');
     const [mail, setMail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
@@ -50,20 +50,34 @@ const KayitolScreen: React.FC = () => {
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const [dietitianCodeError, setDietitianCodeError] = useState('');
     const [genderError, setGenderError] = useState('');
+    const [ageError, setAgeError] = useState('');
 
     const [dietitianName, setDietitianName] = useState('');
     const [loading, setLoading] = useState(false);
     const [fetchingDietitian, setFetchingDietitian] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // Animasyon değişkenleri
     const errorOpacity = useState(new Animated.Value(0))[0];
     const formTranslateY = useRef(new Animated.Value(30)).current;
     const formOpacity = useRef(new Animated.Value(0)).current;
     const headerScale = useRef(new Animated.Value(0.8)).current;
     const scrollY = useRef(new Animated.Value(0)).current;
 
-    // Sayfa açılışında animasyonları başlat
+    useEffect(() => {
+        const checkUserToken = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (token) {
+                    navigation.replace('AnaSayfa');
+                }
+            } catch (error) {
+                console.error('Token kontrolü sırasında hata:', error);
+            }
+        };
+
+        checkUserToken();
+    }, [navigation]);
+
     useEffect(() => {
         Animated.parallel([
             Animated.timing(formOpacity, {
@@ -84,7 +98,6 @@ const KayitolScreen: React.FC = () => {
         ]).start();
     }, []);
 
-    // Hata mesajları için animasyon
     useEffect(() => {
         if (errorMessage) {
             Animated.sequence([
@@ -151,6 +164,7 @@ const KayitolScreen: React.FC = () => {
         setConfirmPasswordError('');
         setDietitianCodeError('');
         setGenderError('');
+        setAgeError('');
 
         if (!name.trim()) {
             setNameError('Lütfen isminizi girin');
@@ -187,6 +201,14 @@ const KayitolScreen: React.FC = () => {
             isValid = false;
         }
 
+        if (!age) {
+            setAgeError('Lütfen yaşınızı girin');
+            isValid = false;
+        } else if (isNaN(Number(age)) || Number(age) <= 0) {
+            setAgeError('Geçerli bir yaş girin');
+            isValid = false;
+        }
+
         return isValid;
     };
 
@@ -209,6 +231,7 @@ const KayitolScreen: React.FC = () => {
                         name: name,
                         gender: gender,
                         dietitian_id: parseInt(dietitianCode),
+                        age: parseInt(age),
                     })
                 }
             );
@@ -360,6 +383,20 @@ const KayitolScreen: React.FC = () => {
                                     </View>
                                 </RadioButton.Group>
                                 {genderError ? <Text style={styles.errorText}>{genderError}</Text> : null}
+
+                                <TextInput
+                                    label="Yaş"
+                                    mode="outlined"
+                                    value={age}
+                                    onChangeText={setAge}
+                                    keyboardType="number-pad"
+                                    style={styles.input}
+                                    outlineColor={ageError ? "#FF0000" : "#DDD"}
+                                    activeOutlineColor={ageError ? "#FF0000" : "#FF6B00"}
+                                    left={<TextInput.Icon icon="cake-variant" color="#AAA"/>}
+                                    theme={{ roundness: 12 }}
+                                />
+                                {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
 
                                 <Text style={styles.formTitle}>Güvenlik Bilgileri</Text>
 

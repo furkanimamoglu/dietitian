@@ -24,43 +24,11 @@ const Measurement = sequelize.define('Measurement', {
     },
     boy: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Boy değeri bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [50],
-                msg: "Boy değeri en az 50 cm olmalıdır."
-            },
-            max: {
-                args: [300],
-                msg: "Boy değeri en fazla 300 cm olmalıdır."
-            },
-            notNull: {
-                msg: "Boy değeri gereklidir."
-            }
-        }
+        allowNull: true
     },
     kilo: {
         type: DataTypes.BIGINT,
-        allowNull: false,
-        validate: {
-            isInt: {
-                msg: "Kilo değeri bir tam sayı olmalıdır."
-            },
-            min: {
-                args: [10],
-                msg: "Kilo değeri en az 10 kg olmalıdır."
-            },
-            max: {
-                args: [500],
-                msg: "Kilo değeri en fazla 500 kg olmalıdır."
-            },
-            notNull: {
-                msg: "Kilo değeri gereklidir."
-            }
-        }
+        allowNull: true
     },
     bel: {
         type: DataTypes.BIGINT,

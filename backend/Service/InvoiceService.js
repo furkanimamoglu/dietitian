@@ -52,6 +52,17 @@ class InvoiceService {
         return invoices;
     }
 
+    static async getClientInvoicesAsClient(client_id) {
+        if (!client_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        return await Invoice.findAll({
+            where: {client_id},
+            order: [['dueDate', 'DESC']]
+        });
+    }
+
     static async addInvoice(dietitian_id, invoiceData) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);

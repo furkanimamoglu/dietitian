@@ -62,7 +62,7 @@ const getIconByType = (type) => {
 };
 
 const settings = [
-    {label: 'Ayarlar', value: 'ayarlar'},
+    /* {label: 'Ayarlar', value: 'ayarlar'}, */
     {label: 'Ödeme', value: 'odeme'},
     {label: 'Çıkış Yap', value: 'cikisyap'},
 ];
@@ -419,7 +419,7 @@ export default function Header() {
                                         <Divider/>
                                         <MenuItem onClick={handleCloseUserMenu}>
                                             <Typography variant="body2" color="text.secondary">
-                                                Sürüm: 0.0.1
+                                                Sürüm: 1.0.6
                                             </Typography>
                                         </MenuItem>
                                     </Box>

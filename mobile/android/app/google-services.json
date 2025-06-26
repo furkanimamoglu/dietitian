@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "671702182232",
+    "project_id": "diyetiacom",
+    "storage_bucket": "diyetiacom.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671702182232:android:b83a525c63ef85e45f5d2d",
+        "android_client_info": {
+          "package_name": "com.diyetia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwnJ0-roYDT6OFdoGSu17qkJYYSajaT7c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

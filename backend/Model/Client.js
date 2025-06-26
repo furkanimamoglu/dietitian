@@ -55,6 +55,9 @@ const Client = sequelize.define('Client', {
         token: {
             type: DataTypes.STRING
         },
+        fcmToken: {
+            type: DataTypes.STRING
+        },
         role: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -96,6 +99,10 @@ const Client = sequelize.define('Client', {
                 }
             }
         },
+        age: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
         gender: {
             type: DataTypes.STRING,
             validate: {
@@ -108,6 +115,15 @@ const Client = sequelize.define('Client', {
         ipAddress: {
             type: DataTypes.STRING,
             allowNull: true,
+        },
+        dietitianNotes: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        profilePhoto: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: 'placeholder_client.jpg'
         },
         kvkkApproval: {
             type: DataTypes.BOOLEAN,

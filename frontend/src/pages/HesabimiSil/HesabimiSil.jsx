@@ -4,7 +4,6 @@ import {
     Box,
     Container,
     Typography,
-    Paper,
     Card,
     CardContent,
     TextField,
@@ -69,7 +68,6 @@ export default function HesabimiSil() {
 
         setLoading(true);
 
-        // EmailJS ile mail gönderme işlemi
         const templateParams = {
             from_name: formData.fullName,
             from_email: formData.email,
@@ -80,7 +78,6 @@ export default function HesabimiSil() {
         };
 
         try {
-            // EmailJS servis ID, template ID ve kullanıcı ID'si ile değiştirilmelidir
             await emailjs.send(
                 'YOUR_SERVICE_ID',
                 'YOUR_TEMPLATE_ID',
@@ -94,7 +91,6 @@ export default function HesabimiSil() {
                 message: 'Hesap silme talebiniz başarıyla alınmıştır. En kısa sürede işleme alınacaktır.'
             });
 
-            // Formu sıfırla
             setFormData({
                 fullName: '',
                 email: '',
@@ -113,7 +109,6 @@ export default function HesabimiSil() {
         } finally {
             setLoading(false);
 
-            // 5 saniye sonra uyarıyı kaldır
             setTimeout(() => {
                 setSubmitStatus({
                     success: false,

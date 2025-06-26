@@ -3,15 +3,21 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require("path");
-const fs = require('fs');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const rateLimit = require('express-rate-limit');
 
+// Config
 const config = require(path.join(__dirname, 'config.json'));
+// Database
 const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
-
-
+// Exception
+const Exception = require(path.join(__dirname, 'Exception', 'Exception'));
 // Models
 require(path.join(__dirname, 'Model', 'MainModel'));
-
+// Utils
+const Security = require(path.join(__dirname, 'Utils','Security'));
+// Enum
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, "Enum", "Role"));
 
 // Express App
 const app = express();
@@ -28,8 +34,10 @@ const exerciseRoutes = require(path.join(__dirname, "Routes", "exerciseRoutes"))
 const anamnesRoutes = require(path.join(__dirname, "Routes", "anamnesRoutes"));
 const packageRoutes = require(path.join(__dirname, "Routes", "packageRoutes"));
 const nutritionRoutes = require(path.join(__dirname, "Routes", "nutritionRoutes"));
-const {diskStorage} = require("multer");
-const multer = require("multer");
+const notificationRoutes = require(path.join(__dirname, "Routes", "notificationRoutes"));
+
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 
 app.use(bodyParser.json());
 
@@ -45,24 +53,19 @@ app.use((req, res, next) => {
     next();
 });
 
-
-// Static Files
 app.use('/uploads', express.static('uploads'));
 
-const storage = diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'uploads'));
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
+const ALLOWED_TYPES = ['profilephoto', 'meal', 'exercise', 'nutrition', 'recipe', 'message'];
+
+function sanitize(str) {
+    return String(str || '').replace(/[^a-z0-9_-]/gi, '_');
+}
+
+const upload = multer({
+    storage: multer.memoryStorage()
 });
 
-const upload = multer({ storage });
-
-// Dosya Yükleme Uç Noktası (Güvenli)
-app.post('/api/upload', upload.single('image'), (req, res) => {
+app.post('/api/upload', upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ showOnScreen: true, message: 'Yüklenecek dosya eklenmedi.' });
     }
@@ -70,19 +73,72 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     const allowedExtensions = ['.jpg', '.jpeg', '.png'];
     const fileExt = path.extname(req.file.originalname).toLowerCase();
     if (!allowedExtensions.includes(fileExt)) {
-        fs.unlink(req.file.path, () => {});
         return res.status(400).json({ showOnScreen: true, message: 'Sadece resim dosyaları yüklenebilir.' });
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (req.file.size > maxSize) {
-        fs.unlink(req.file.path, () => {});
         return res.status(400).json({ showOnScreen: true, message: 'Dosya boyutu 5MB\'ı geçemez.' });
     }
 
-    const imageUrl = `${config.image_url}${req.file.filename}`;
-    res.json({ imageUrl });
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) throw new Exception('Token eksik.');
+
+        const userId = Security.getUserIdFromToken(token);
+        const role = Security.getPermissionFromToken(token);
+        const clientId = sanitize(req.query.client_id);
+        const type = sanitize(req.query.type);
+
+        if (!ALLOWED_TYPES.includes(type)) {
+            throw new Exception('Geçersiz yükleme türü.');
+        }
+
+        const folderPath = `${role === DIETITIAN ? 'Dietitian' : 'Client'}/${sanitize(userId)}/${clientId}/${type}`;
+        const uniqueSuffix = `${new Date().toISOString().split('T')[0]}`;
+        const sanitizedFileName = sanitize(req.file.originalname).toLowerCase().replace(/\s+/g, '-');
+        const fileName = `${folderPath}/${uniqueSuffix}.${sanitizedFileName}`;
+
+        const s3Client = new S3Client({
+            credentials: {
+                accessKeyId: config.s3.accessKeyId,
+                secretAccessKey: config.s3.secretAccessKey
+            },
+            region: config.s3.region
+        });
+
+        const params = {
+            Bucket: config.s3.bucketName,
+            Key: fileName,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+            ACL: 'public-read'
+        };
+
+        try {
+            const command = new PutObjectCommand(params);
+            await s3Client.send(command);
+            const imageUrl = `https://${config.s3.bucketName}.s3.${config.s3.region}.amazonaws.com/${fileName}`;
+            res.json({ imageUrl });
+        } catch (err) {
+            console.error('Dosya yükleme hatası:', err);
+            res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
+        }
+    } catch (err) {
+        console.error('Dosya yükleme hatası:', err);
+        res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
+    }
 });
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 500,
+    message: { showOnScreen: true, message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.use(limiter);
 
 // Routers
 app.use('/api/dietitian', dietitianRoutes);
@@ -96,9 +152,8 @@ app.use('/api/invoice', invoiceRoutes);
 app.use('/api/measurement', measurementRoutes);
 app.use('/api/package', packageRoutes);
 app.use('/api/nutrition', nutritionRoutes);
+app.use('/api/notification', notificationRoutes);
 
-
-// Working Directory
 try {
     process.chdir('../');
     console.log('INFO - Çalışma Dizini: ' + process.cwd());

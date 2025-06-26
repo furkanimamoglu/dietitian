@@ -1,15 +1,8 @@
 import React from 'react';
 
-// MUI
 import {Box, CssBaseline} from "@mui/material";
-
-// Router
 import {BrowserRouter as Router} from 'react-router-dom'
-
-// Routes
 import Routing from './routes/Routing'
-
-// Toast notifications
 import {Toaster} from 'react-hot-toast';
 
 export default function App() {

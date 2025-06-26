@@ -39,4 +39,6 @@ router.get('/getMyNotes', dietitianController.getMyNotes);
 router.post('/addNote', dietitianController.addNote);
 router.delete('/deleteNote', dietitianController.deleteNote);
 
+router.put('/updateClientNote', dietitianController.updateClientNote);
+
 module.exports = router;

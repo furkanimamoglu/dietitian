@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View} from 'react-native';
+import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View, Platform, PermissionsAndroid} from 'react-native';
 import {
     Avatar,
     Button,
@@ -19,6 +19,7 @@ import {
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
+import {launchCamera, launchImageLibrary, ImagePickerResponse, Asset} from 'react-native-image-picker';
 import config from '../../config.js';
 
 interface MealItem {
@@ -27,8 +28,14 @@ interface MealItem {
     portion: string | null;
 }
 
+interface MealInfo {
+    image: string;
+    time: string;
+}
+
 interface MealCategory {
     [category: string]: MealItem[];
+    info?: MealInfo;
 }
 
 interface DailyMeal {
@@ -53,7 +60,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [mealPlan, setMealPlan] = useState<WeeklyMealPlan>({});
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedMealType, setSelectedMealType] = useState<string>('');
-    const [selectedMealCategory, setSelectedMealCategory] = useState<string>('Ana Menü');
+    const [selectedMealCategory, setSelectedMealCategory] = useState<string>('Alternatif');
     const [newMeal, setNewMeal] = useState('');
     const [newPortion, setNewPortion] = useState('');
     const [loading, setLoading] = useState(true);
@@ -63,6 +70,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [mealToDelete, setMealToDelete] = useState<{mealType: string, category: string, index: number} | null>(null);
+    const [imageResponse, setImageResponse] = useState<Asset | null>(null);
 
     useEffect(() => {
         fetchTodayMeal();
@@ -181,8 +189,12 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (!mealPlan[currentDay]) return 0;
 
         return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
-            return total + Object.values(mealType).reduce((mealTotal, category) => {
-                return mealTotal + category.length;
+            return total + Object.entries(mealType).reduce((mealTotal, [category, items]) => {
+                // "info" nesnesi olduğunda atla, çünkü bu bir dizi değil
+                if (category === 'info') return mealTotal;
+
+                // Dizi ise öğeleri say
+                return mealTotal + items.length;
             }, 0);
         }, 0);
     };
@@ -191,8 +203,12 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (!mealPlan[currentDay]) return 0;
 
         return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
-            return total + Object.values(mealType).reduce((mealTotal, category) => {
-                return mealTotal + category.filter(item => item.eaten).length;
+            return total + Object.entries(mealType).reduce((mealTotal, [category, items]) => {
+                // "info" nesnesi olduğunda atla, çünkü bu bir dizi değil
+                if (category === 'info') return mealTotal;
+
+                // Dizi ise yenmiş öğeleri say
+                return mealTotal + items.filter(item => item.eaten).length;
             }, 0);
         }, 0);
     };
@@ -369,23 +385,90 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                     <Card key={mealType} style={styles.mealCard} mode="elevated">
                         <Card.Title
                             title={mealType}
+                            subtitle={
+                                <View style={styles.subtitleContainer}>
+                                    {mealCategories.info?.time && (
+                                        <View style={styles.timeContainer}>
+                                            <Avatar.Icon
+                                                size={16}
+                                                icon="clock-outline"
+                                                color="#4caf50"
+                                                style={styles.clockIcon}
+                                            />
+                                            <Text style={styles.timeText}>{mealCategories.info.time}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            }
                             titleStyle={styles.mealTitleText}
                             left={(props) => (
                                 <Avatar.Icon
-                                    size={40}
+                                    size={48}
                                     icon={mealIcons[mealType] || 'food'}
                                     color="#4caf50"
-                                    style={{backgroundColor: '#e8f5e9'}}
+                                    style={styles.mealIcon}
                                 />
                             )}
+                            right={(props) => (
+                                <View style={styles.headerButtonsContainer}>
+                                    <IconButton
+                                        icon="camera"
+                                        size={22}
+                                        iconColor="#4caf50"
+                                        style={styles.headerButton}
+                                        onPress={() => {
+                                            setSelectedMealType(mealType);
+                                            openCamera();
+                                        }}
+                                    />
+                                    <IconButton
+                                        icon="image"
+                                        size={22}
+                                        iconColor="#4caf50"
+                                        style={styles.headerButton}
+                                        onPress={() => {
+                                            setSelectedMealType(mealType);
+                                            openGallery();
+                                        }}
+                                    />
+                                </View>
+                            )}
                         />
+
+                        {/* Yemek resmi alanı */}
+                        {mealCategories.info?.image ? (
+                            <Card.Cover
+                                source={{ uri: mealCategories.info.image }}
+                                style={styles.mealImage}
+                            />
+                        ) : (
+                            <View style={styles.emptyImageContainer}>
+                                <Avatar.Icon
+                                    size={60}
+                                    icon="image-plus"
+                                    color="#4caf50"
+                                    style={styles.emptyImageIcon}
+                                />
+                                <Text style={styles.emptyImageText}>
+                                    Öğününün resmini yükle!
+                                </Text>
+                                <Text style={styles.emptyImageSubText}>
+                                    Yediğin yemeğin fotoğrafını çek veya galeriden seç
+                                </Text>
+                            </View>
+                        )}
+
                         <Divider/>
 
                         {/* Öğün kategorileri */}
-                        {Object.entries(mealCategories).map(([category, meals]) => (
+                        {Object.entries(mealCategories).map(([category, meals]) => {
+                            // "info" nesnesi ise bu kategoriyi atla
+                            if (category === 'info') return null;
+
+                            return (
                             <View key={`${mealType}-${category}`}>
                                 {/* Eğer birden fazla kategori varsa kategori başlığını göster */}
-                                {Object.keys(mealCategories).length > 1 && (
+                                {Object.keys(mealCategories).filter(cat => cat !== 'info').length > 1 && (
                                     <View style={styles.categoryHeader}>
                                         <Text style={styles.categoryTitle}>{category}</Text>
                                         <IconButton
@@ -402,11 +485,11 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 )}
 
                                 <Card.Content style={styles.cardContent}>
-                                    {meals.length === 0 ? (
+                                    {Array.isArray(meals) && meals.length === 0 ? (
                                         <Text style={styles.emptyMealText}>
                                             Bu öğün için henüz yemek eklenmemiş
                                         </Text>
-                                    ) : (
+                                    ) : Array.isArray(meals) ? (
                                         meals.map((meal, index) => (
                                             <View key={index} style={styles.mealItemContainer}>
                                                 <View style={styles.mealItem}>
@@ -441,10 +524,15 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                                 </View>
                                             </View>
                                         ))
+                                    ) : (
+                                        <Text style={styles.emptyMealText}>
+                                            Bu öğün için henüz yemek eklenmemiş
+                                        </Text>
                                     )}
                                 </Card.Content>
                             </View>
-                        ))}
+                            );
+                        })}
 
                         {/* Yeni Öğün Ekle butonu */}
                         <View style={styles.addMealButtonContainer}>
@@ -452,8 +540,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 mode="contained"
                                 icon="plus"
                                 onPress={() => {
-                                    setSelectedMealType(Object.keys(mealCategories)[0]);
-                                    setSelectedMealCategory('Ana Menü');
+                                    setSelectedMealType(mealType);
+                                    setSelectedMealCategory('Alternatif');
                                     setModalVisible(true);
                                 }}
                                 style={styles.addMealButton}
@@ -495,6 +583,185 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         );
     };
 
+    const requestCameraPermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: "Kamera İzni",
+                        message: "Fotoğraf çekebilmek için kamera izni gerekiyor.",
+                        buttonPositive: "Tamam",
+                        buttonNegative: "İptal",
+                    }
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const requestStoragePermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                const permission = parseInt(Platform.Version.toString(), 10) >= 33
+                    ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+                    : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+                const granted = await PermissionsAndroid.request(
+                    permission,
+                    {
+                        title: "Galeri Erişim İzni",
+                        message: "Galeri erişim izni olmadan fotoğraflarınıza erişilemez.",
+                        buttonPositive: "Tamam",
+                        buttonNegative: "İptal",
+                    }
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const openCamera = async () => {
+        const hasPermission = await requestCameraPermission();
+
+        if (!hasPermission) {
+            Alert.alert('İzin Reddedildi', 'Kamera izni olmadan fotoğraf çekemezsiniz.');
+            return;
+        }
+
+        const options = {
+            mediaType: 'photo',
+            includeBase64: false,
+            maxHeight: 1200,
+            maxWidth: 1200,
+            quality: 0.8,
+            saveToPhotos: true,
+        };
+
+        launchCamera(options, (response: ImagePickerResponse) => {
+            if (response.didCancel) {
+                console.log('Kullanıcı kamerayı iptal etti');
+            } else if (response.errorCode) {
+                console.log('ImagePicker Hatası: ', response.errorMessage);
+                Alert.alert('Hata', response.errorMessage || 'Kamera açılırken bir hata oluştu');
+            } else if (response.assets && response.assets.length > 0) {
+                console.log('Çekilen fotoğraf: ', response.assets[0]);
+                setImageResponse(response.assets[0]);
+                handleImageSelected(response.assets[0]);
+            }
+        });
+    };
+
+    // Galeriyi aç
+    const openGallery = async () => {
+        const hasPermission = await requestStoragePermission();
+
+        if (!hasPermission) {
+            Alert.alert('İzin Reddedildi', 'Galeri erişim izni olmadan fotoğraf seçemezsiniz.');
+            return;
+        }
+
+        const options = {
+            mediaType: 'photo',
+            includeBase64: false,
+            maxHeight: 1200,
+            maxWidth: 1200,
+            quality: 0.8,
+        };
+
+        launchImageLibrary(options, (response: ImagePickerResponse) => {
+            if (response.didCancel) {
+                console.log('Kullanıcı galeriyi iptal etti');
+            } else if (response.errorCode) {
+                console.log('ImagePicker Hatası: ', response.errorMessage);
+                Alert.alert('Hata', response.errorMessage || 'Galeri açılırken bir hata oluştu');
+            } else if (response.assets && response.assets.length > 0) {
+                console.log('Seçilen fotoğraf: ', response.assets[0]);
+                setImageResponse(response.assets[0]);
+                handleImageSelected(response.assets[0]);
+            }
+        });
+    };
+
+    // Fotoğraf seçildiğinde yapılacak işlemler
+    const handleImageSelected = async (asset: Asset) => {
+        try {
+            if (!asset.uri) {
+                Alert.alert("Hata", "Fotoğraf yüklenemedi, geçerli bir resim seçiniz.");
+                return;
+            }
+
+            // Hangi öğün için resim yüklendiğinin kontrolü
+            if (!selectedMealType || !mealPlan[currentDay] || !mealPlan[currentDay][selectedMealType]) {
+                Alert.alert("Hata", "Lütfen önce bir öğün seçiniz.");
+                return;
+            }
+
+            // Yüklenme durumu için loading göster
+            setLoading(true);
+
+            // FormData oluştur
+            const formData = new FormData();
+            formData.append('image', {
+                uri: asset.uri,
+                type: asset.type || 'image/jpeg',
+                name: asset.fileName || 'photo.jpg',
+            } as any);
+
+            // Token al
+            const token = await AsyncStorage.getItem('token');
+            if (!token) {
+                console.error('Token Bulunamadı');
+                setLoading(false);
+                return;
+            }
+
+            // Resmi yükle
+            const response = await fetch(`${config[config.environment].apiUrl}/upload?type=nutrition`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.imageUrl) {
+                throw new Error(data.message || 'Resim yüklenemedi.');
+            }
+
+            const updatedMealPlan = {...mealPlan};
+
+            if (!updatedMealPlan[currentDay][selectedMealType].info) {
+                updatedMealPlan[currentDay][selectedMealType].info = {
+                    time: updatedMealPlan[currentDay][selectedMealType].info?.time || '',
+                    image: data.imageUrl
+                };
+            } else {
+                updatedMealPlan[currentDay][selectedMealType].info.image = data.imageUrl;
+            }
+
+            setMealPlan(updatedMealPlan);
+
+            await updateMealPlanOnServerFromNewFormat(updatedMealPlan);
+        } catch (error) {
+            console.error('Resim yükleme hatası:', error);
+            Alert.alert("Hata", error instanceof Error ? error.message : "Resim yüklenirken bir hata oluştu.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Provider>
             <View style={styles.container}>
@@ -529,7 +796,9 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                     <RadioButton.Group onValueChange={value => setSelectedMealCategory(value)}
                                                     value={selectedMealCategory}>
                                         <View style={styles.radioButtonsContainer}>
-                                            {Object.keys(mealPlan[currentDay][selectedMealType]).map(category => (
+                                            {Object.keys(mealPlan[currentDay][selectedMealType])
+                                                .filter(category => category !== 'info')
+                                                .map(category => (
                                                 <View key={category} style={styles.radioOption}>
                                                     <RadioButton.Android value={category} color="#4caf50"/>
                                                     <Text>{category}</Text>
@@ -660,13 +929,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         backgroundColor: '#4caf50'
     },
-    headerCard: {
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 12,
-        elevation: 2,
-        backgroundColor: '#fff'
-    },
+
     sectionTitle: {
         fontSize: 22,
         fontWeight: 'bold',
@@ -679,9 +942,6 @@ const styles = StyleSheet.create({
         color: '#666',
         marginBottom: 12,
         textAlign: 'center'
-    },
-    progressContainer: {
-        marginTop: 8
     },
     progressTextRow: {
         flexDirection: 'row',
@@ -703,33 +963,9 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         marginLeft: 12
     },
-    progressBar: {
-        height: 10,
-        borderRadius: 10
-    },
-    mealCard: {
-        marginBottom: 16,
-        borderRadius: 12,
-        overflow: 'hidden',
-        elevation: 2
-    },
     cardTitle: {
         fontSize: 18,
         fontWeight: '600'
-    },
-    cardContent: {
-        paddingVertical: 8
-    },
-    mealItemContainer: {
-        marginBottom: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-        paddingBottom: 8
-    },
-    mealItem: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        paddingVertical: 8
     },
     mealInfo: {
         flex: 1,
@@ -869,21 +1105,6 @@ const styles = StyleSheet.create({
         color: '#4caf50',
         fontWeight: '500'
     },
-    categoryHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: '#f9f9f9',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0'
-    },
-    categoryTitle: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#333'
-    },
     smallAddButton: {
         marginLeft: 8,
         backgroundColor: '#e8f5e9'
@@ -912,34 +1133,190 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         paddingHorizontal: 10,
     },
-    addMealButtonContainer: {
-        padding: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        backgroundColor: '#fff'
-    },
-    addMealButton: {
-        width: '100%',
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: '#4caf50'
-    },
-    mealTitleText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#2e7d32',
-        marginBottom: 4,
-        textAlign: 'left'
+    mealTimeText: {
+        fontSize: 14,
+        color: '#666'
     },
     deleteButton: {
         margin: 0,
         padding: 0,
         marginLeft: 5
     },
+    mealCard: {
+        marginBottom: 18,
+        borderRadius: 16,
+        overflow: 'hidden',
+        elevation: 4,
+        backgroundColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+    },
+    mealIcon: {
+        backgroundColor: '#e8f5e9',
+        marginRight: 8,
+        elevation: 2,
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+    },
+    mealTitleText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#2e7d32',
+        letterSpacing: 0.5,
+    },
+    subtitleContainer: {
+        marginTop: 4,
+    },
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f1f8e9',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
+    },
+    clockIcon: {
+        backgroundColor: 'transparent',
+        marginRight: 4,
+    },
+    timeText: {
+        fontSize: 14,
+        color: '#2e7d32',
+        fontWeight: '600',
+        letterSpacing: 0.3,
+    },
+    headerButtonsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 8,
+    },
+    headerButton: {
+        marginLeft: 4,
+        backgroundColor: '#e8f5e9',
+        elevation: 1,
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.15,
+        shadowRadius: 2,
+    },
+    cardContent: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#fafafa',
+    },
+    mealItemContainer: {
+        marginBottom: 12,
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        padding: 12,
+        elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+    },
+    mealItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 4,
+    },
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#f8f9fa',
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    categoryTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#495057',
+        letterSpacing: 0.3,
+    },
+    addMealButtonContainer: {
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 1,
+        borderTopColor: '#e9ecef',
+        backgroundColor: '#ffffff',
+    },
+    addMealButton: {
+        width: '100%',
+        borderRadius: 12,
+        paddingVertical: 14,
+        paddingHorizontal: 20,
+        backgroundColor: '#4caf50',
+        elevation: 2,
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    // Header card iyileştirmesi
+    headerCard: {
+        padding: 20,
+        marginBottom: 20,
+        borderRadius: 16,
+        elevation: 4,
+        backgroundColor: '#ffffff',
+        shadowColor: '#4caf50',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#4caf50',
+    },
+    progressContainer: {
+        marginTop: 12,
+        backgroundColor: '#f8f9fa',
+        padding: 16,
+        borderRadius: 12,
+    },
+    progressBar: {
+        height: 12,
+        borderRadius: 12,
+        backgroundColor: '#e9ecef',
+    },
+    mealImage: {
+        height: 150,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+    },
+    emptyImageContainer: {
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 150,
+        backgroundColor: '#f9f9f9',
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+    },
+    emptyImageIcon: {
+        backgroundColor: '#e8f5e9',
+        marginBottom: 8,
+    },
+    emptyImageText: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#4caf50',
+        marginBottom: 4,
+        textAlign: 'center'
+    },
+    emptyImageSubText: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 20
+    }
 });
 
 export default Beslenme;
-
