@@ -3,20 +3,20 @@ import "./LandingPage.css";
 
 const faqs = [
     {
-        question: "Labore ad cillum duis occaecat veniam commodo pariatur quis cupidatat ea velit eu in deserunt.",
-        answer: "Amet non pariatur sunt est eiusmod est deserunt nisi excepteur ipsum culpa dolore tempor fugiat.",
+        question: "Diyetia nedir ve nasıl çalışır?",
+        answer: "Diyetia, diyetisyenler için özel olarak geliştirilmiş bir asistan yazılımıdır.",
     },
     {
-        question: "Laborum Lorem aute adipisicing cillum sit et sit consectetur veniam nisi exercitation irure.",
-        answer: "Elit commodo sint exercitation exercitation minim adipisicing exercitation aliquip aliqua.",
+        question: "Diyetia ücretsiz mi?",
+        answer: "Hayır, Diyetia ücretsiz değildir. Abonelik fiyatı aylık 1000 TL'dir.",
     },
     {
-        question: "Culpa proident eu excepteur amet minim laborum consectetur reprehenderit labore.",
-        answer: "Magna et aute minim cupidatat enim nulla pariatur.",
+        question: "Diyetia'yı nasıl satın alabilirim?",
+        answer: "Satın almak için WhatsApp iletişim hattımızdan bize ulaşabilirsiniz.",
     },
     {
-        question: "Nulla pariatur reprehenderit pariatur aute mollit fugiat dolore sint dolore eu tempor aliquip.",
-        answer: "Pariatur nisi officia ad consequat quis.",
+        question: "Verilerim güvende mi?",
+        answer: "Tüm kişisel verileriniz ve sağlık bilgileriniz gizlilikle korunur ve üçüncü kişilerle paylaşılmaz.",
     },
 ];
 
@@ -398,9 +398,14 @@ const LandingPage = () => {
                             <a href="#features" className="text-gray-600 hover:text-orange-500 transition-colors">Özellikler</a>
                             <a href="#pricing" className="text-gray-600 hover:text-orange-500 transition-colors">Fiyatlar</a>
                             <a href="#download" className="text-gray-600 hover:text-orange-500 transition-colors">İndir</a>
-                            <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105">
+                            <a
+                                href="https://wa.me/905075280653"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                            >
                                 Başla
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -424,11 +429,13 @@ const LandingPage = () => {
 
                             <div className="flex flex-col sm:flex-row gap-4 ">
                                 <a
-                                    href="#download"
+                                    href="https://play.google.com/store/apps/details?id=com.diyetia"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="glow-box bg-white hover:bg-gray text-gray px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2  pulse-box"
                                 >
                                     <Download className="w-5 h-5 " />
-                                    <span>Hemen İndir</span>
+                                    <span>Google Play'den İndir</span>
                                 </a>
                                 <button className="flex items-center justify-center space-x-2 t text-gray-900 transition-colors bg-orange-300 px-8 py-4 rounded-full text-lg font-semibold transform hover:scale-105">
                                     <Play className="w-5 h-5" />
@@ -491,64 +498,130 @@ const LandingPage = () => {
                             <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
                                 <Calendar className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Lorem Ipsum Dolor</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Randevu Yönetimi</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+                                Danışanlarınızla kolayca randevu oluşturun, yönetin ve takvim entegrasyonu ile takip edin.
                             </p>
                         </div>
 
                         {/* Card 2 */}
                         <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-right">
                             <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 glow-box">
-                                <Zap className="w-8 h-8 text-white" />
+                                <Users className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Consectetur Adipiscing</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Danışan Yönetimi</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt.
+                                Tüm danışanlarınızı tek panelden yönetin, geçmişlerini ve gelişimlerini görüntüleyin.
                             </p>
                         </div>
 
                         {/* Card 3 */}
                         <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-left">
                             <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
-                                <Shield className="w-8 h-8 text-white" />
+                                <Monitor className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Sed Do Eiusmod</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Beslenme Plan Yönetimi</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                                Kişiye özel beslenme planları oluşturun, düzenleyin ve danışanlarınıza kolayca iletin.
                             </p>
                         </div>
 
                         {/* Card 4 */}
                         <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-right">
                             <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
-                                <Star className="w-8 h-8 text-white" />
+                                <CheckCircle className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ut Labore Et Dolore</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Beslenme Plan Takibi</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Magna aliqua ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate.
+                                Danışanlarınızın planlara uyumunu ve günlük ilerlemelerini anlık olarak takip edin.
                             </p>
                         </div>
 
                         {/* Card 5 */}
                         <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-left">
                             <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 glow-box">
-                                <Heart className="w-8 h-8 text-white" />
+                                <Zap className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Quis Nostrud</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Danışan Su Takibi</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                                Danışanlarınızın günlük su tüketimini izleyin ve hedeflerine ulaşmalarını sağlayın.
                             </p>
                         </div>
 
                         {/* Card 6 */}
                         <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-right">
                             <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
+                                <Zap className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Egzersiz Taslak Yönetimi</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Egzersiz programlarını kolayca oluşturun, kaydedin ve danışanlarınıza atayın.
+                            </p>
+                        </div>
+
+                        {/* Card 7 */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-left">
+                            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
+                                <Clock className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Egzersiz Takibi</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Danışanlarınızın egzersizlerini ve ilerlemelerini günlük olarak takip edin.
+                            </p>
+                        </div>
+
+                        {/* Card 8 */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-right">
+                            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 glow-box">
+                                <Star className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Tarif Yönetimi ve Tarif Paylaşımı</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Sağlıklı tarifler oluşturun, danışanlarınızla paylaşın ve favori tariflerinizi yönetin.
+                            </p>
+                        </div>
+
+                        {/* Card 9 */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-left">
+                            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
+                                <Download className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Finans, Fatura ve Paketler</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Gelirlerinizi, fatura işlemlerinizi ve danışan paketlerinizi kolayca yönetin.
+                            </p>
+                        </div>
+
+                        {/* Card 10 */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-right">
+                            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 pulse-box">
+                                <Mail className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Bildirim ve SMSlerle Hatırlatmalar</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Otomatik bildirim ve SMS ile danışanlarınıza randevu ve plan hatırlatmaları gönderin.
+                            </p>
+                        </div>
+
+                        {/* Card 11 */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-left">
+                            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 glow-box">
                                 <Smartphone className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Excepteur Sint</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Mobil Uygulama</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                Tüm özelliklere mobil uygulama üzerinden de erişin, her an her yerde yönetin.
+                            </p>
+                        </div>
+
+                        {/* Card 12 */}
+                        <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 transform hover:scale-105 slide-in-left">
+                            <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 glow-box">
+                                <Mail className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Anlık Mesajlaşma</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Danışanlarınızla uygulama üzerinden anlık olarak güvenli şekilde mesajlaşın.
                             </p>
                         </div>
                     </div>
@@ -870,12 +943,17 @@ const LandingPage = () => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="bg-white text-orange-500 hover:bg-gray-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 pulse-box">
-                            App Store'dan İndir
-                        </button>
-                        <button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-orange-500 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300">
+                        {/*<button className="bg-white text-orange-500 hover:bg-gray-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 pulse-box">*/}
+                        {/*    App Store'dan İndir*/}
+                        {/*</button>*/}
+                        <a
+                            href="https://play.google.com/store/apps/details?id=com.diyetia"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-orange-500 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300"
+                        >
                             Google Play'den İndir
-                        </button>
+                        </a>
                     </div>
                 </div>
             </section>
@@ -933,3 +1011,4 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
+
