@@ -2670,8 +2670,6 @@ function Danisan() {
                                                                 sx={{bgcolor: 'primary.main'}}><RestaurantIcon/></Avatar>}
                                                             title={<Typography variant="subtitle1"
                                                                                sx={{fontWeight: 'bold'}}>{plan.note || 'Beslenme Planı'}</Typography>}
-                                                            subheader={<Typography variant="body2" color="text.secondary">Plan
-                                                                ID: {plan.id}</Typography>}
                                                             action={<Chip label={isActivePlan(plan) ? "Aktif Plan" : "Pasif Plan"} color={isActivePlan(plan) ? "success" : "default"} size="small"/>}
                                                             sx={{
                                                                 bgcolor: '#2d4149',
