@@ -383,10 +383,9 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                 )}
 
                 {/* Günler ve Yemekler */}
-                    {hasMealPlan ? (
-                        (() => {
-                            const days = Object.keys(mealPlanData);
-                        const dayCards = days.map((day, dayIndex) => {
+                {hasMealPlan ? (
+                    <View style={pdfStyles.daysContainer}>
+                        {Object.keys(mealPlanData).map((day, dayIndex) => {
                             const dayData = mealPlanData[day] || {};
                             const dayHasMeals = Object.keys(dayData).some(meal => {
                                 const mealData = dayData[meal] || {};
@@ -397,12 +396,7 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                             });
 
                             return (
-                                <View
-                                    style={{ ...pdfStyles.dayCard, width: '32%', minHeight: 120 }}
-                                    key={`day-${dayIndex}`}
-                                    wrap={false}
-                                    break={dayIndex % 3 === 0 && dayIndex !== 0}
-                                >
+                                <View style={pdfStyles.dayCard} key={`day-${dayIndex}`}>
                                     <View style={pdfStyles.dayHeader}>
                                         <Text style={pdfStyles.dayHeaderText}>{day}</Text>
                                     </View>
@@ -449,26 +443,15 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                                     </View>
                                 </View>
                             );
-                        });
-
-                        // 3'lü satırlara böl ve her satırı bir View ile sar
-                        const rows = [];
-                        for (let i = 0; i < dayCards.length; i += 3) {
-                            rows.push(
-                                <View style={{ flexDirection: 'row', gap: 8, width: '100%' }} key={`row-${i}`} wrap={false}>
-                                    {dayCards.slice(i, i + 3)}
-                                    </View>
-                                );
-                            }
-                            return rows;
-                        })()
-                    ) : (
-                        <View style={pdfStyles.emptyDay}>
-                            <Text style={pdfStyles.emptyDayText}>
-                                Bu beslenme programında günlük öğün planı bulunmuyor
-                            </Text>
-                        </View>
-                    )}
+                        })}
+                    </View>
+                ) : (
+                    <View style={pdfStyles.emptyDay}>
+                        <Text style={pdfStyles.emptyDayText}>
+                            Bu beslenme programında günlük öğün planı bulunmuyor
+                        </Text>
+                    </View>
+                )}
 
                 {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
