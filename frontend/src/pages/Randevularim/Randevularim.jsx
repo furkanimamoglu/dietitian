@@ -70,7 +70,7 @@ export default function Randevularim() {
         start: "",
         end: "",
         client_id: "",
-        status: "pending",
+        status: "approved",
     });
 
     const [reminderButtonDisabled, setReminderButtonDisabled] = useState(false);
@@ -154,7 +154,7 @@ export default function Randevularim() {
             start: "",
             end: "",
             client_id: "",
-            status: "pending",
+            status: "approved",
         });
         setValidationErrors({
             start: false,
@@ -183,7 +183,7 @@ export default function Randevularim() {
                 start: startDate,
                 end: endDate,
                 client_id: "",
-                status: "pending",
+                status: "approved",
             }));
 
             setValidationErrors({
