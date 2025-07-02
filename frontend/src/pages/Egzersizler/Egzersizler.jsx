@@ -99,9 +99,28 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, die
                         className="card-image"
                     />
                 ) : item.video ? (
-                    <div className="video-placeholder">
-                        <FitnessCenterIcon className="exercise-icon"/>
-                        <span>Video Mevcut</span>
+                    <div className="video-container">
+                        <ReactPlayer
+                            url={item.video}
+                            width="100%"
+                            height="100%"
+                            controls={true}
+                            className="card-video"
+                            config={{
+                                youtube: {
+                                    playerVars: {
+                                        modestbranding: 1,
+                                        rel: 0,
+                                        showinfo: 0,
+                                        iv_load_policy: 3,
+                                        fs: 1,
+                                        cc_load_policy: 0,
+                                        cc_lang_pref: 'tr',
+                                        hl: 'tr'
+                                    }
+                                }
+                            }}
+                        />
                     </div>
                 ) : (
                     <div className="video-placeholder">
