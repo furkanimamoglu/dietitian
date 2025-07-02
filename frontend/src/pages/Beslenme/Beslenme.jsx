@@ -73,148 +73,137 @@ const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
         backgroundColor: '#fff',
-        padding: 15,
+        padding: 8,
         fontFamily: 'Open Sans'
     },
     header: {
         backgroundColor: '#2E7D32',
-        padding: 12,
-        marginBottom: 15,
-        borderRadius: 8,
+        padding: 6,
+        marginBottom: 8,
+        borderRadius: 4,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4
+        alignItems: 'center'
     },
     headerContent: {
         flex: 1
     },
     headerTitle: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 12,
         fontWeight: 'bold',
-        marginBottom: 6
+        marginBottom: 2
     },
     headerSubtitle: {
         color: '#E8F5E8',
-        fontSize: 10,
-        marginBottom: 4
+        fontSize: 6,
+        marginBottom: 1
     },
     headerInfo: {
         color: '#E8F5E8',
-        fontSize: 9,
+        fontSize: 6,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
     logoContainer: {
-        width: 60,
-        height: 60,
+        width: 40,
+        height: 40,
         backgroundColor: 'white',
-        borderRadius: 8,
+        borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2
+        marginLeft: 8
     },
     logo: {
-        fontSize: 14,
+        fontSize: 10,
         fontWeight: 'bold',
         color: '#fd9200'
     },
     infoSection: {
         flexDirection: 'row',
-        marginBottom: 15,
-        gap: 8
+        marginBottom: 6,
+        gap: 4
     },
     infoBox: {
         flex: 1,
-        padding: 12,
+        padding: 6,
         backgroundColor: '#F8F9FA',
-        borderRadius: 6,
-        borderLeft: '3px solid #4CAF50'
+        borderRadius: 3,
+        borderLeft: '1px solid #4CAF50'
     },
     infoTitle: {
-        fontSize: 10,
+        fontSize: 6,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: 1,
         color: '#2E7D32'
     },
     infoContent: {
-        fontSize: 9,
+        fontSize: 5,
         color: '#424242',
-        lineHeight: 1.3
+        lineHeight: 1.1
     },
     daysContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        gap: 8
+        gap: 2,
+        marginBottom: 6
     },
     dayCard: {
-        width: '48%',
-        marginBottom: 12,
+        width: '13.5%',
         backgroundColor: 'white',
-        borderRadius: 8,
+        borderRadius: 3,
         overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        border: '1px solid #E0E0E0'
+        border: '0.3px solid #E0E0E0',
+        marginBottom: 2
     },
     dayHeader: {
         backgroundColor: '#FF6B35',
-        padding: 8,
+        padding: 2,
         alignItems: 'center'
     },
     dayHeaderText: {
         color: 'white',
-        fontSize: 11,
+        fontSize: 6,
         fontWeight: 'bold',
-        letterSpacing: 0.5
+        letterSpacing: 0.2
     },
     dayContent: {
-        padding: 10
+        padding: 3
     },
     mealSection: {
-        marginBottom: 8
+        marginBottom: 2
     },
     mealTitle: {
-        fontSize: 9,
+        fontSize: 5,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: 1,
         color: '#2E7D32',
         backgroundColor: '#E8F5E8',
-        padding: 3,
-        borderRadius: 3,
+        padding: 1,
+        borderRadius: 1,
         textAlign: 'center'
     },
     alternativeGroup: {
-        marginBottom: 6,
-        paddingLeft: 4
+        marginBottom: 1,
+        paddingLeft: 1
     },
     alternativeTitle: {
-        fontSize: 8,
+        fontSize: 4,
         fontWeight: 'bold',
         color: '#FF6B35',
-        marginBottom: 2
+        marginBottom: 0.5
     },
     mealItem: {
-        fontSize: 8,
-        marginBottom: 2,
-        paddingLeft: 8,
+        fontSize: 4,
+        marginBottom: 0.5,
+        paddingLeft: 2,
         flexDirection: 'row',
         alignItems: 'flex-start'
     },
     mealItemBullet: {
-        fontSize: 8,
-        marginRight: 4,
+        fontSize: 4,
+        marginRight: 1,
         color: '#4CAF50',
         fontWeight: 'bold'
     },
@@ -222,73 +211,74 @@ const pdfStyles = StyleSheet.create({
         flex: 1
     },
     mealItemName: {
-        fontSize: 8,
-        color: '#424242'
+        fontSize: 4,
+        color: '#424242',
+        lineHeight: 1.1
     },
     mealItemPortion: {
-        fontSize: 7,
+        fontSize: 3,
         color: '#757575',
-        marginTop: 1
+        marginTop: 0.2
     },
     noMealText: {
-        fontSize: 8,
+        fontSize: 4,
         color: '#9E9E9E',
-        paddingLeft: 8,
+        paddingLeft: 2,
         textAlign: 'center',
-        marginTop: 5
+        marginTop: 1
     },
     emptyDay: {
         width: '100%',
         backgroundColor: '#F5F5F5',
-        borderRadius: 8,
-        padding: 20,
+        borderRadius: 3,
+        padding: 8,
         alignItems: 'center',
-        marginBottom: 10
+        marginBottom: 4
     },
     emptyDayText: {
-        fontSize: 10,
+        fontSize: 6,
         color: '#757575',
         textAlign: 'center'
     },
     footer: {
         position: 'absolute',
-        bottom: 15,
+        bottom: 8,
         left: 0,
         right: 0,
         alignItems: 'center',
-        paddingHorizontal: 15
+        paddingHorizontal: 8
     },
     footerText: {
-        fontSize: 8,
+        fontSize: 5,
         color: '#2E7D32',
         textAlign: 'center',
-        marginBottom: 3
+        marginBottom: 1
     },
     footerWebsite: {
-        fontSize: 8,
+        fontSize: 5,
         color: '#FF6B35',
         fontWeight: 'bold'
     },
     statsSection: {
         flexDirection: 'row',
-        marginBottom: 10,
+        marginBottom: 6,
         backgroundColor: '#F0F4FF',
-        padding: 8,
-        borderRadius: 6,
+        padding: 4,
+        borderRadius: 3,
         justifyContent: 'space-around'
     },
     statItem: {
         alignItems: 'center'
     },
     statNumber: {
-        fontSize: 12,
+        fontSize: 8,
         fontWeight: 'bold',
         color: '#2E7D32'
     },
     statLabel: {
-        fontSize: 7,
+        fontSize: 5,
         color: '#757575',
-        marginTop: 2
+        marginTop: 0.5
     }
 });
 
@@ -347,7 +337,7 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
 
     return (
         <Document>
-            <Page size="A4" style={pdfStyles.page} wrap>
+            <Page size={[842, 595]} orientation="landscape" style={pdfStyles.page} wrap>
                 {/* Başlık ve Logo */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
