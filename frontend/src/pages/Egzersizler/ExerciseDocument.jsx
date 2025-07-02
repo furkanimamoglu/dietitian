@@ -313,13 +313,6 @@ const ExerciseDocument = ({exercise, assignmentData, dietitian}) => {
                     </View>
                     <View style={pdfStyles.exerciseDetailsContent}>
                         <View style={pdfStyles.exerciseDetailRow}>
-                            <Text style={pdfStyles.exerciseDetailLabel}>Kategori:</Text>
-                            <Text style={pdfStyles.exerciseDetailValue}>
-                                {exercise?.category?.name || "Belirtilmemiş"}
-                            </Text>
-                        </View>
-
-                        <View style={pdfStyles.exerciseDetailRow}>
                             <Text style={pdfStyles.exerciseDetailLabel}>Zorluk Seviyesi:</Text>
                             <View style={[pdfStyles.difficultyBadge, {
                                 backgroundColor: `${getDifficultyColor(exercise?.difficulty)}20`,

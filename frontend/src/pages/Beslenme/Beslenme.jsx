@@ -32,7 +32,6 @@ import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalP
 import {Document, Font, Page, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 import {
-    Autocomplete,
     Avatar,
     Box,
     Button,
@@ -368,10 +367,6 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                     <View style={pdfStyles.infoBox}>
                         <Text style={pdfStyles.infoTitle}>Program Adı</Text>
                         <Text style={pdfStyles.infoContent}>{program?.title || 'İsimsiz Program'}</Text>
-                    </View>
-                    <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Kategori</Text>
-                        <Text style={pdfStyles.infoContent}>{program?.category_name || 'Genel'}</Text>
                     </View>
                     <View style={pdfStyles.infoBox}>
                         <Text style={pdfStyles.infoTitle}>Açıklama</Text>
