@@ -4,6 +4,7 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 import {useNavigate, useParams} from "react-router-dom";
+import NutritionPlanAssignModal from "./NutritionPlanAssignModal.jsx";
 
 import {
     Accordion,
@@ -81,6 +82,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import Cake from '@mui/icons-material/Cake';
 
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 
 const initialWaterTrackingData = {
     dailyGoal: 2500,
@@ -612,6 +614,18 @@ function Danisan() {
 
     const [appointments, setAppointments] = useState([]);
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+
+    // Beslenme planı atama modal state'leri
+    const [isAssignNutritionPlanDialogOpen, setIsAssignNutritionPlanDialogOpen] = useState(false);
+    const [availableNutritionPlans, setAvailableNutritionPlans] = useState([]);
+    const [availableNutritionPlansLoading, setAvailableNutritionPlansLoading] = useState(false);
+    const [nutritionAssignForm, setNutritionAssignForm] = useState({
+        nutrition_plan_id: '',
+        start_date: '',
+        end_date: '',
+        note: ''
+    });
+    const [nutritionAssignLoading, setNutritionAssignLoading] = useState(false);
 
     const [anamnezData, setAnamnezData] = useState(null);
     const [anamnezLoading, setAnamnezLoading] = useState(false);
@@ -2143,7 +2157,7 @@ function Danisan() {
                         ) : (
                             <Box sx={{textAlign: 'center', mt: 4}}>
                                 <Typography variant="h6" color="text.secondary">
-                                    Bu danışan için anamnez verisi bulunamadı.
+                                    Bu danışan için anamnez verisi bulunmadı.
                                 </Typography>
                                 <Button
                                     variant="contained"
@@ -2601,6 +2615,17 @@ function Danisan() {
                             <CardHeader
                                 title="Atanmış Planlar"
                                 titleTypographyProps={{variant: 'h5', fontWeight: 'bold'}}
+                                action={
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        startIcon={<AddIcon/>}
+                                        onClick={handleOpenAssignNutritionPlanDialog}
+                                        sx={{bgcolor: theme.palette.primary.main, color: 'white'}}
+                                    >
+                                        Plan Ata
+                                    </Button>
+                                }
                                 sx={{
                                     bgcolor: '#2d4149',
                                     color: 'white',
@@ -2608,107 +2633,93 @@ function Danisan() {
                                     borderColor: 'divider'
                                 }}
                             />
-                            <List>
+                            <CardContent>
                                 {nutritionPlanLoading ? (
                                     <Box sx={{display: 'flex', justifyContent: 'center', my: 4}}>
                                         <CircularProgress/>
                                     </Box>
                                 ) : nutritionPlan && nutritionPlan.length > 0 ? (
-                                    nutritionPlan.map((plan, index) => {
-                                        let totalMeals = 0;
-                                        let eatenMeals = 0;
+                                    <Grid container spacing={2}>
+                                        {nutritionPlan.map((plan, index) => {
+                                            let totalMeals = 0;
+                                            let eatenMeals = 0;
 
-                                        if (plan.mealPlan) {
-                                            Object.keys(plan.mealPlan).forEach(day => {
-                                                if (plan.mealPlan[day]) {
-                                                    Object.keys(plan.mealPlan[day]).forEach(mealType => {
-                                                        const meals = plan.mealPlan[day][mealType];
-                                                        if (Array.isArray(meals) && meals.length > 0) {
-                                                            if (meals[0].hasOwnProperty('isim')) {
-                                                                totalMeals += meals.length;
-                                                                eatenMeals += meals.filter(meal => meal.yenildi).length;
-                                                            } else {
-                                                                totalMeals += meals.length;
+                                            if (plan.mealPlan) {
+                                                Object.keys(plan.mealPlan).forEach(day => {
+                                                    if (plan.mealPlan[day]) {
+                                                        Object.keys(plan.mealPlan[day]).forEach(mealType => {
+                                                            const meals = plan.mealPlan[day][mealType];
+                                                            if (Array.isArray(meals) && meals.length > 0) {
+                                                                if (meals[0].hasOwnProperty('isim')) {
+                                                                    totalMeals += meals.length;
+                                                                    eatenMeals += meals.filter(meal => meal.yenildi).length;
+                                                                } else {
+                                                                    totalMeals += meals.length;
+                                                                }
                                                             }
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }
+                                                        });
+                                                    }
+                                                });
+                                            }
 
-                                        return (
-                                            <React.Fragment key={plan.id || index}>
-                                                <ListItem
-                                                    onClick={() => setSelectedPlanIndex(index)}
-                                                    sx={{
-                                                        cursor: 'pointer',
-                                                        bgcolor: selectedPlanIndex === index ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-                                                        '&:hover': {
-                                                            bgcolor: 'rgba(0, 0, 0, 0.08)'
-                                                        }
-                                                    }}
-                                                >
-                                                    <ListItemAvatar>
-                                                        <Avatar sx={{bgcolor: 'primary.main'}}>
-                                                            <EventIcon/>
-                                                        </Avatar>
-                                                    </ListItemAvatar>
-                                                    <ListItemText
-                                                        primary={
-                                                            <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
-                                                                {plan.note || "Beslenme Planı"}
-                                                                {isActivePlan(plan) && (
-                                                                    <Chip
-                                                                        label="Aktif Plan"
-                                                                        size="small"
-                                                                        color="success"
-                                                                        sx={{ml: 1}}
-                                                                    />
-                                                                )}
+                                            return (
+                                                <Grid item xs={12} md={6} key={plan.id}>
+                                                    <Card elevation={3}>
+                                                        <CardHeader
+                                                            avatar={<Avatar
+                                                                sx={{bgcolor: 'primary.main'}}><RestaurantIcon/></Avatar>}
+                                                            title={<Typography variant="subtitle1"
+                                                                               sx={{fontWeight: 'bold'}}>{plan.note || 'Beslenme Planı'}</Typography>}
+                                                            subheader={<Typography variant="body2" color="text.secondary">Plan
+                                                                ID: {plan.id}</Typography>}
+                                                            action={<Chip label={isActivePlan(plan) ? "Aktif Plan" : "Pasif Plan"} color={isActivePlan(plan) ? "success" : "default"} size="small"/>}
+                                                            sx={{
+                                                                bgcolor: '#2d4149',
+                                                                color: 'white',
+                                                                borderBottom: '1px solid',
+                                                                borderColor: 'divider'
+                                                            }}
+                                                        />
+                                                        <CardContent>
+                                                            <Typography variant="body2" sx={{mb: 1}}>
+                                                                <strong>Başlangıç Tarihi:</strong> {plan.startDate ? new Date(plan.startDate).toLocaleDateString('tr-TR') : '-'}
                                                             </Typography>
-                                                        }
-                                                        secondary={
-                                                            <>
-                                                                <Typography variant="body2" component="span">
-                                                                    {plan.start_date && plan.end_date
-                                                                        ? `${new Date(plan.start_date).toLocaleDateString('tr-TR')} - ${new Date(plan.end_date).toLocaleDateString('tr-TR')}`
-                                                                        : "Tarih belirtilmemiş"}
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary"
-                                                                            display="block">
-                                                                    Not: {plan.note || "Not eklenmemiş"}
-                                                                </Typography>
-                                                                {totalMeals > 0 && (
-                                                                    <Typography variant="body2" color="text.secondary"
-                                                                                display="flex" alignItems="center"
-                                                                                sx={{mt: 0.5}}>
-                                                                        <CheckCircleIcon sx={{
-                                                                            fontSize: 16,
-                                                                            color: 'success.main',
-                                                                            mr: 0.5
-                                                                        }}/>
-                                                                        {eatenMeals} / {totalMeals} öğün tüketildi
-                                                                    </Typography>
-                                                                )}
-                                                            </>
-                                                        }
-                                                    />
-                                                </ListItem>
-                                                {index < nutritionPlan.length - 1 && (
-                                                    <Divider variant="inset" component="li"/>
-                                                )}
-                                            </React.Fragment>
-                                        );
-                                    })
+                                                            <Typography variant="body2" sx={{mb: 1}}>
+                                                                <strong>Bitiş Tarihi:</strong> {plan.endDate ? new Date(plan.endDate).toLocaleDateString('tr-TR') : '-'}
+                                                            </Typography>
+                                                            <Typography variant="body2" sx={{mb: 1}}>
+                                                                <strong>Oluşturulma Tarihi:</strong> {plan.createdAt ? new Date(plan.createdAt).toLocaleDateString('tr-TR') : '-'}
+                                                            </Typography>
+                                                            <Box sx={{mt: 2, display: 'flex', justifyContent: 'space-between'}}>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    onClick={() => setSelectedPlanIndex(index)}
+                                                                    disabled={selectedPlanIndex === index}
+                                                                >
+                                                                    {selectedPlanIndex === index ? 'Seçili Plan' : 'Planı Görüntüle'}
+                                                                </Button>
+                                                            </Box>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Grid>
+                                            );
+                                        })}
+                                    </Grid>
                                 ) : (
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Atanmış beslenme planı bulunamadı"
-                                            secondary="Danışana henüz bir beslenme planı atanmamış"
-                                        />
-                                    </ListItem>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        py: 4
+                                    }}>
+                                        <FitnessCenterIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
+                                        <Typography color="text.secondary" align="center">
+                                            Bu danışana atanmış beslenme planı bulunmamaktadır.
+                                        </Typography>
+                                    </Box>
                                 )}
-                            </List>
+                            </CardContent>
                         </Card>
 
                         {/* Water Tracking Card */}
@@ -3862,6 +3873,44 @@ function Danisan() {
         setAssignForm({exercise_id: '', start_date: '', end_date: '', note: ''});
     };
 
+    const handleOpenAssignNutritionPlanDialog = () => {
+        setIsAssignNutritionPlanDialogOpen(true);
+    };
+
+    const handleCloseAssignNutritionPlanDialog = () => {
+        setIsAssignNutritionPlanDialogOpen(false);
+    };
+
+    const handleNutritionPlanAssignSuccess = async () => {
+        // Beslenme planlarını yeniden yükle
+        setNutritionPlanLoading(true);
+        try {
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/nutrition/getNutritionAssignmentPlanByClient",
+                {
+                    client_id: id,
+                    range: "all"
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+
+            setNutritionPlan(response.data);
+
+            if (response.data && response.data.length > 0) {
+                const currentPlanIndex = findCurrentPlan(response.data);
+                setSelectedPlanIndex(currentPlanIndex);
+            }
+        } catch (err) {
+            console.error("Beslenme planı yüklenirken hata:", err.message);
+        } finally {
+            setNutritionPlanLoading(false);
+        }
+    };
+
     const handleAddAppointment = async () => {
         try {
             const response = await axios.post(
@@ -4803,6 +4852,14 @@ function Danisan() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Beslenme Planı Atama Modal */}
+            <NutritionPlanAssignModal
+                open={isAssignNutritionPlanDialogOpen}
+                onClose={handleCloseAssignNutritionPlanDialog}
+                clientId={id}
+                onSuccess={handleNutritionPlanAssignSuccess}
+            />
         </Default>
     );
 }
