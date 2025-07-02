@@ -11,7 +11,9 @@ import {
     Dimensions,
     ScrollView,
     Animated,
-    RefreshControl
+    RefreshControl,
+    Linking,
+    Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Header from '../Components/Header';
@@ -25,7 +27,7 @@ const Egzersiz = ({navigation}) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [exerciseInfo, setExerciseInfo] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [selectedEgzersiz, setSelectedEgzersiz] = useState(null);
     const [customDuration, setCustomDuration] = useState('');
     const [refreshing, setRefreshing] = useState(false);
@@ -124,7 +126,7 @@ const Egzersiz = ({navigation}) => {
     }, [statusMap]);
 
     const formatDate = useCallback((dateString) => {
-        const options = {
+        const options: Intl.DateTimeFormatOptions = {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -186,7 +188,7 @@ const Egzersiz = ({navigation}) => {
         for (let i = 1; i <= 5; i++) {
             stars.push(
                 <Icon
-                    key={i}
+                    key={`star-${i}`}
                     name={i <= difficulty ? "star" : "star-outline"}
                     size={14}
                     color={i <= difficulty ? "#F59E0B" : "#D1D5DB"}
@@ -196,7 +198,72 @@ const Egzersiz = ({navigation}) => {
         return stars;
     }, []);
 
-    const renderExerciseCard = useCallback(({item, index}) => {
+    const openVideoUrl = useCallback(async (videoUrl) => {
+        try {
+            if (!videoUrl) {
+                return;
+            }
+
+            // URL'yi temizle ve normalize et
+            let cleanUrl = videoUrl.trim();
+
+            // YouTube URL'lerini özel olarak işle
+            if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
+                // YouTube videoları için mobil uyumlu URL oluştur
+                let videoId = '';
+
+                if (cleanUrl.includes('youtu.be/')) {
+                    videoId = cleanUrl.split('youtu.be/')[1].split('?')[0];
+                } else if (cleanUrl.includes('youtube.com/watch?v=')) {
+                    videoId = cleanUrl.split('v=')[1].split('&')[0];
+                } else if (cleanUrl.includes('youtube.com/embed/')) {
+                    videoId = cleanUrl.split('embed/')[1].split('?')[0];
+                }
+
+                if (videoId) {
+                    // Önce YouTube uygulamasını dene
+                    const youtubeAppUrl = `vnd.youtube://${videoId}`;
+                    const canOpenYouTubeApp = await Linking.canOpenURL(youtubeAppUrl);
+
+                    if (canOpenYouTubeApp) {
+                        await Linking.openURL(youtubeAppUrl);
+                        return;
+                    } else {
+                        // YouTube uygulaması yoksa mobil web URL'si kullan
+                        cleanUrl = `https://m.youtube.com/watch?v=${videoId}`;
+                    }
+                }
+            }
+
+            // Vimeo URL'lerini özel olarak işle
+            if (cleanUrl.includes('vimeo.com')) {
+                const videoId = cleanUrl.split('vimeo.com/')[1].split('?')[0];
+                if (videoId) {
+                    const vimeoAppUrl = `vimeo://${videoId}`;
+                    const canOpenVimeoApp = await Linking.canOpenURL(vimeoAppUrl);
+
+                    if (canOpenVimeoApp) {
+                        await Linking.openURL(vimeoAppUrl);
+                        return;
+                    }
+                }
+            }
+
+            // HTTP/HTTPS protokolü yoksa ekle
+            if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+                cleanUrl = 'https://' + cleanUrl;
+            }
+
+            // Direkt tarayıcıda aç
+            await Linking.openURL(cleanUrl);
+
+        } catch (error) {
+            console.error('Video açılırken hata:', error);
+            // Sessizce hata yakalanır, kullanıcıya popup gösterilmez
+        }
+    }, []);
+
+    const renderExerciseCard = useCallback(({item}) => {
         const statusInfo = getStatusInfo(item.status);
         const categoryIcon = getCategoryIcon(item.Exercise?.category_id);
         const daysDuration = getDaysDifference(item.start_date, item.end_date);
@@ -258,11 +325,20 @@ const Egzersiz = ({navigation}) => {
                         />
                         {item.Exercise?.video && (
                             <View style={styles.imageOverlay}>
-                                <TouchableOpacity style={styles.playButton}>
+                                <TouchableOpacity
+                                    style={styles.playButton}
+                                    onPress={() => openVideoUrl(item.Exercise.video)}
+                                    activeOpacity={0.8}
+                                >
                                     <Icon name="play" size={24} color="#fff"/>
                                 </TouchableOpacity>
                             </View>
                         )}
+                    </View>
+                ) : item.Exercise?.video ? (
+                    <View style={styles.videoOnlyContainer}>
+                        <Icon name="video-outline" size={48} color="#6B7280"/>
+                        <Text style={styles.videoOnlyText}>Egzersiz Videosu</Text>
                     </View>
                 ) : (
                     <View style={styles.noImageContainer}>
@@ -342,7 +418,7 @@ const Egzersiz = ({navigation}) => {
                 </View>
             </Animated.View>
         );
-    }, [getCategoryIcon, getStatusInfo, formatDate, getDaysDifference, getDifficultyStars, fadeAnim]);
+    }, [getCategoryIcon, getStatusInfo, formatDate, getDaysDifference, getDifficultyStars, fadeAnim, openVideoUrl]);
 
     // Enhanced Modal
     const renderCompleteExerciseModal = () => (
@@ -455,7 +531,7 @@ const Egzersiz = ({navigation}) => {
                     <View style={styles.exerciseList}>
                         {exerciseInfo.map((item, index) => (
                             <View key={item.id}>
-                                {renderExerciseCard({item, index})}
+                                {renderExerciseCard({item})}
                             </View>
                         ))}
                     </View>
@@ -649,6 +725,38 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontStyle: 'italic'
     },
+    videoOnlyContainer: {
+        height: 180,
+        backgroundColor: '#F8FAFC',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
+        position: 'relative'
+    },
+    videoOnlyText: {
+        fontSize: 16,
+        color: '#374151',
+        fontWeight: '600',
+        marginTop: 8,
+        textAlign: 'center'
+    },
+    videoOnlyButton: {
+        position: 'absolute',
+        bottom: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#3B82F6',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 12
+    },
+    videoOnlyButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14,
+        marginLeft: 8
+    },
 
     // Card Content Styles
     cardContent: {
@@ -724,6 +832,23 @@ const styles = StyleSheet.create({
     equipmentText: {
         fontSize: 13,
         color: '#6B7280',
+        marginLeft: 6
+    },
+    videoLinkButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#EFF6FF',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#DBEAFE'
+    },
+    videoLinkText: {
+        fontSize: 14,
+        color: '#3B82F6',
+        fontWeight: '600',
         marginLeft: 6
     },
 
