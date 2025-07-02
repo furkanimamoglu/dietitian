@@ -306,8 +306,6 @@ const NutritionPlanAssignModal = ({
                                 value={nutritionAssignForm.note}
                                 onChange={handleFormChange}
                                 fullWidth
-                                multiline
-                                rows={3}
                                 size="small"
                                 placeholder="Danışana özel notlar..."
                             />
