@@ -1063,6 +1063,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                                 type="text"
                                                                 value={newMealAmount}
                                                                 onChange={(e) => setNewMealAmount(e.target.value)}
+                                                                onKeyDown={(e) => handleKeyPress(e, day, mealType.name, alternative)}
                                                                 placeholder="Miktar / Porsiyon"
                                                                 className="mui-meal-amount-input"
                                                             />
