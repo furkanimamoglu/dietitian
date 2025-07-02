@@ -253,7 +253,6 @@ const KayitolScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#FF6B00" barStyle="light-content"/>
-
             {/* Gradient Arka Plan */}
             <LinearGradient
                 colors={['#FF8E53', '#FF6B00']}
@@ -261,12 +260,10 @@ const KayitolScreen: React.FC = () => {
                 end={{x: 1, y: 1}}
                 style={styles.gradient}
             />
-
             {/* Arka Plan Desen Efekti */}
             <View style={styles.patternOverlay} />
-
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={styles.keyboardAvoidingView}
             >
                 <Animated.ScrollView

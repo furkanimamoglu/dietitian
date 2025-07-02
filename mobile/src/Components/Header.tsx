@@ -258,7 +258,11 @@ export default function Header({navigation}: Props) {
 
     return (
         <>
-            <StatusBar backgroundColor="#ff8c00" barStyle="light-content"/>
+            {Platform.OS === 'android' ? (
+                <StatusBar backgroundColor="#ff8c00" barStyle="light-content"/>
+            ) : (
+                <StatusBar barStyle="light-content"/>
+            )}
             <Animated.View style={{
                 opacity: fadeAnim,
                 transform: [{ scale: scaleAnim }]
@@ -424,14 +428,20 @@ export default function Header({navigation}: Props) {
 
 const styles = StyleSheet.create({
     appbarContainer: {
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 8,
+            },
+        }),
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-        overflow: 'hidden',
+        overflow: Platform.OS === 'ios' ? 'hidden' : 'visible',
     },
     appbarInner: {
         flexDirection: 'row',

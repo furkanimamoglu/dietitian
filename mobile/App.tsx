@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {BackHandler, ActivityIndicator, View} from 'react-native';
+import {BackHandler, ActivityIndicator, View, Platform} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -136,8 +136,9 @@ const App = () => {
 
     // Notifee için bildirim kanalı oluşturma
     useEffect(() => {
-        createNotificationChannel();
-
+        if (Platform.OS === 'android') {
+            createNotificationChannel();
+        }
         // Notifee olaylarını dinleme
         return notifee.onForegroundEvent(({ type, detail }) => {
             switch (type) {
@@ -153,13 +154,15 @@ const App = () => {
 
     // Bildirim kanalı oluşturma fonksiyonu
     async function createNotificationChannel() {
-        await notifee.createChannel({
-            id: 'default',
-            name: 'Varsayılan Kanal',
-            lights: true,
-            vibration: true,
-            importance: AndroidImportance.HIGH,
-        });
+        if (Platform.OS === 'android') {
+            await notifee.createChannel({
+                id: 'default',
+                name: 'Varsayılan Kanal',
+                lights: true,
+                vibration: true,
+                importance: AndroidImportance.HIGH,
+            });
+        }
     }
 
     // Bildirim gösterme fonksiyonu
@@ -168,30 +171,29 @@ const App = () => {
             title,
             body,
             data,
-            android: {
+            android: Platform.OS === 'android' ? {
                 channelId: 'default',
                 smallIcon: 'ic_launcher',
                 importance: AndroidImportance.HIGH,
                 pressAction: {
                     id: 'default',
                 },
-            },
+            } : undefined,
         });
     }
 
     useEffect(() => {
-        const backAction = () => {
-            if (navigationRef.isReady() && navigationRef.canGoBack()) {
-                navigationRef.goBack();
-                return true;
-            }
-            return false;
-        };
-
-        const backHandler =
-            BackHandler.addEventListener('hardwareBackPress', backAction);
-
-        return () => backHandler.remove();
+        if (Platform.OS === 'android') {
+            const backAction = () => {
+                if (navigationRef.isReady() && navigationRef.canGoBack()) {
+                    navigationRef.goBack();
+                    return true;
+                }
+                return false;
+            };
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+            return () => backHandler.remove();
+        }
     }, [navigationRef]);
 
     useEffect(() => {

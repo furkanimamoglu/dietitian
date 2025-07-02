@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, Platform } from 'react-native';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -250,11 +250,18 @@ const Tarif = ({navigation}) => {
                         </TouchableOpacity>
 
                         {activeRecipe.image ? (
-                            <Image
-                                source={{ uri: activeRecipe.image }}
-                                style={styles.recipeDetailImage}
-                                defaultSource={PLACEHOLDER_IMAGE}
-                            />
+                            Platform.OS === 'ios' ? (
+                                <Image
+                                    source={{ uri: activeRecipe.image }}
+                                    style={styles.recipeDetailImage}
+                                    defaultSource={PLACEHOLDER_IMAGE}
+                                />
+                            ) : (
+                                <Image
+                                    source={activeRecipe.image ? { uri: activeRecipe.image } : PLACEHOLDER_IMAGE}
+                                    style={styles.recipeDetailImage}
+                                />
+                            )
                         ) : (
                             <Image
                                 source={PLACEHOLDER_IMAGE}

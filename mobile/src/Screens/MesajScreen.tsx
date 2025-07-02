@@ -120,22 +120,24 @@ const Mesaj = ({navigation}) => {
     }, [messages]);
 
     const requestCameraPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-                {
-                    title: 'Kamera Erişim İzni',
-                    message: 'Uygulamanın kameraya erişmesi gerekiyor',
-                    buttonNeutral: 'Daha Sonra Sor',
-                    buttonNegative: 'İptal',
-                    buttonPositive: 'Tamam'
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: 'Kamera Erişim İzni',
+                        message: 'Uygulamanın kameraya erişmesi gerekiyor',
+                        buttonNeutral: 'Daha Sonra Sor',
+                        buttonNegative: 'İptal',
+                        buttonPositive: 'Tamam'
+                    }
+                );
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                    console.log('Kamera izni reddedildi');
                 }
-            );
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('Kamera izni reddedildi');
+            } catch (err) {
+                console.warn(err);
             }
-        } catch (err) {
-            console.warn(err);
         }
     };
 
@@ -461,7 +463,7 @@ const Mesaj = ({navigation}) => {
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={90}
+                style={{flex: 1}}
             >
                 <View style={styles.inputWrapper}>
                     <View style={styles.inputContainer}>
@@ -741,3 +743,4 @@ const styles = StyleSheet.create({
 });
 
 export default Mesaj;
+

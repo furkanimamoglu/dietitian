@@ -202,21 +202,15 @@ const LoginScreen = ({navigation}: Props) => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#FF6B00" barStyle="light-content"/>
-
-            {/* Gradient Arka Plan */}
             <LinearGradient
                 colors={['#FF8E53', '#FF6B00']}
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
                 style={styles.gradient}
             />
-
-            {/* Arka Plan Desen Efekti */}
-            <View style={styles.patternOverlay} />
-
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.keyboardAvoidingView}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{flex: 1}}
             >
                 <ScrollView
                     contentContainerStyle={styles.scrollView}
