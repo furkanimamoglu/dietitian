@@ -1325,10 +1325,13 @@ export default function Tarifler() {
                             className="text-input textarea"
                             value={newRecipe.ingredients}
                             onChange={(e) => setNewRecipe({...newRecipe, ingredients: e.target.value})}
-                            placeholder="Malzemeleri virgülle ayırarak giriniz"
+                            placeholder="Örn: domates, soğan, zeytinyağı, tuz, karabiber"
                             rows={4}
                             required
                         />
+                        <small style={{color: '#666', fontSize: '12px', marginTop: '4px', display: 'block'}}>
+                            💡 Malzemeleri virgül (,) ile ayırarak giriniz
+                        </small>
                     </div>
                     <div className="input-container">
                         <label htmlFor="recipeInstructions">Hazırlanışı *</label>
@@ -1750,10 +1753,13 @@ export default function Tarifler() {
                             className="text-input textarea"
                             value={editIngredients}
                             onChange={(e) => setEditIngredients(e.target.value)}
-                            placeholder="Malzemeleri virgülle ayırarak giriniz"
+                            placeholder="Örn: domates, soğan, zeytinyağı, tuz, karabiber"
                             rows={4}
                             required
                         />
+                        <small style={{color: '#666', fontSize: '12px', marginTop: '4px', display: 'block'}}>
+                            💡 Malzemeleri virgül (,) ile ayırarak giriniz
+                        </small>
                     </div>
                     <div className="input-container">
                         <label htmlFor="editInstructions">Hazırlanışı *</label>
