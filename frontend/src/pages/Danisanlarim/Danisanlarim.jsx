@@ -1406,6 +1406,7 @@ export default function Danisanlarim() {
                         disableSelectionOnClick
                         processRowUpdate={handleRowUpdate}
                         onProcessRowUpdateError={(error) => console.error(error)}
+                        onRowDoubleClick={(params) => navigate(`/danisan/${params.row.id}`)}
                         slots={{toolbar: QuickSearchToolbar}}
                         getRowId={(row) => row.id}
                         sx={{
