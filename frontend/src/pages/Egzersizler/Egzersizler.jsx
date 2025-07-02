@@ -1657,13 +1657,29 @@ export default function Egzersizler() {
                                 type="number"
                                 id="exerciseDuration"
                                 className="text-input"
-                                value={newExercise.duration}
-                                onChange={(e) => setNewExercise({
-                                    ...newExercise,
-                                    duration: Math.min(1440, parseInt(e.target.value) || 0)
-                                })}
+                                value={newExercise.duration === 0 ? '' : newExercise.duration}
+                                onChange={(e) => {
+                                    const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                    if (!isNaN(value)) {
+                                        setNewExercise({
+                                            ...newExercise,
+                                            duration: Math.min(1440, Math.max(0, value))
+                                        });
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    if (e.target.value === '0') {
+                                        e.target.value = '';
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        setNewExercise({...newExercise, duration: 0});
+                                    }
+                                }}
                                 min="0"
                                 max="1440"
+                                placeholder="Dakika"
                             />
                         </div>
                         <div className="input-container half-width">
@@ -1672,17 +1688,29 @@ export default function Egzersizler() {
                                 type="number"
                                 id="exerciseDifficulty"
                                 className="text-input"
-                                value={newExercise.difficulty}
+                                value={newExercise.difficulty === 1 ? '' : newExercise.difficulty}
                                 onChange={(e) => {
                                     const value = e.target.value === '' ? 1 : parseInt(e.target.value, 10);
-                                    if (isNaN(value)) return;
-                                    setNewExercise({
-                                        ...newExercise,
-                                        difficulty: Math.max(1, Math.min(5, value))
-                                    });
+                                    if (!isNaN(value)) {
+                                        setNewExercise({
+                                            ...newExercise,
+                                            difficulty: Math.max(1, Math.min(5, value))
+                                        });
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    if (e.target.value === '1') {
+                                        e.target.value = '';
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        setNewExercise({...newExercise, difficulty: 1});
+                                    }
                                 }}
                                 min="1"
                                 max="5"
+                                placeholder="1-5"
                             />
                         </div>
                     </div>
@@ -1704,17 +1732,29 @@ export default function Egzersizler() {
                                 type="number"
                                 id="exerciseCalories"
                                 className="text-input"
-                                value={newExercise.calories_burned}
+                                value={newExercise.calories_burned === 0 ? '' : newExercise.calories_burned}
                                 onChange={(e) => {
                                     const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                                    if (isNaN(value)) return;
-                                    setNewExercise({
-                                        ...newExercise,
-                                        calories_burned: Math.max(0, Math.min(5000, value))
-                                    });
+                                    if (!isNaN(value)) {
+                                        setNewExercise({
+                                            ...newExercise,
+                                            calories_burned: Math.max(0, Math.min(5000, value))
+                                        });
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    if (e.target.value === '0') {
+                                        e.target.value = '';
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        setNewExercise({...newExercise, calories_burned: 0});
+                                    }
                                 }}
                                 min="0"
                                 max="5000"
+                                placeholder="Kalori"
                             />
                         </div>
                     </div>
@@ -1849,17 +1889,29 @@ export default function Egzersizler() {
                                 type="number"
                                 id="editExerciseDuration"
                                 className="text-input"
-                                value={editExerciseData.duration}
+                                value={editExerciseData.duration === 0 ? '' : editExerciseData.duration}
                                 onChange={(e) => {
                                     const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                                    if (isNaN(value)) return;
-                                    setEditExerciseData({
-                                        ...editExerciseData,
-                                        duration: Math.max(0, Math.min(1440, value))
-                                    });
+                                    if (!isNaN(value)) {
+                                        setEditExerciseData({
+                                            ...editExerciseData,
+                                            duration: Math.max(0, Math.min(1440, value))
+                                        });
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    if (e.target.value === '0') {
+                                        e.target.value = '';
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        setEditExerciseData({...editExerciseData, duration: 0});
+                                    }
                                 }}
                                 min="0"
                                 max="1440"
+                                placeholder="Dakika"
                             />
                         </div>
                         <div className="input-container half-width">
@@ -1868,17 +1920,29 @@ export default function Egzersizler() {
                                 type="number"
                                 id="editExerciseDifficulty"
                                 className="text-input"
-                                value={editExerciseData.difficulty}
+                                value={editExerciseData.difficulty === 1 ? '' : editExerciseData.difficulty}
                                 onChange={(e) => {
                                     const value = e.target.value === '' ? 1 : parseInt(e.target.value, 10);
-                                    if (isNaN(value)) return;
-                                    setEditExerciseData({
-                                        ...editExerciseData,
-                                        difficulty: Math.max(1, Math.min(5, value))
-                                    });
+                                    if (!isNaN(value)) {
+                                        setEditExerciseData({
+                                            ...editExerciseData,
+                                            difficulty: Math.max(1, Math.min(5, value))
+                                        });
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    if (e.target.value === '1') {
+                                        e.target.value = '';
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        setEditExerciseData({...editExerciseData, difficulty: 1});
+                                    }
                                 }}
                                 min="1"
                                 max="5"
+                                placeholder="1-5"
                             />
                         </div>
                     </div>
@@ -1900,17 +1964,29 @@ export default function Egzersizler() {
                                 type="number"
                                 id="editExerciseCalories"
                                 className="text-input"
-                                value={editExerciseData.calories_burned}
+                                value={editExerciseData.calories_burned === 0 ? '' : editExerciseData.calories_burned}
                                 onChange={(e) => {
                                     const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                                    if (isNaN(value)) return;
-                                    setEditExerciseData({
-                                        ...editExerciseData,
-                                        calories_burned: Math.max(0, Math.min(5000, value))
-                                    });
+                                    if (!isNaN(value)) {
+                                        setEditExerciseData({
+                                            ...editExerciseData,
+                                            calories_burned: Math.max(0, Math.min(5000, value))
+                                        });
+                                    }
+                                }}
+                                onFocus={(e) => {
+                                    if (e.target.value === '0') {
+                                        e.target.value = '';
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    if (e.target.value === '') {
+                                        setEditExerciseData({...editExerciseData, calories_burned: 0});
+                                    }
                                 }}
                                 min="0"
                                 max="5000"
+                                placeholder="Kalori"
                             />
                         </div>
                     </div>

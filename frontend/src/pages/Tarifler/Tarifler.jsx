@@ -1185,12 +1185,31 @@ export default function Tarifler() {
                                     type="number"
                                     id="recipeCalories"
                                     className="text-input"
-                                    value={newRecipe.nutritional_info.calories}
-                                    onChange={(e) => setNewRecipe({
-                                        ...newRecipe, nutritional_info: {
-                                            ...newRecipe.nutritional_info, calories: e.target.value
+                                    value={newRecipe.nutritional_info.calories === 0 ? '' : newRecipe.nutritional_info.calories}
+                                    onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                        if (!isNaN(value)) {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, calories: value
+                                                }
+                                            });
                                         }
-                                    })}
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === '') {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, calories: 0
+                                                }
+                                            });
+                                        }
+                                    }}
                                     placeholder="Örn: 250"
                                 />
                             </div>
@@ -1200,12 +1219,31 @@ export default function Tarifler() {
                                     type="number"
                                     id="recipeProtein"
                                     className="text-input"
-                                    value={newRecipe.nutritional_info.protein}
-                                    onChange={(e) => setNewRecipe({
-                                        ...newRecipe, nutritional_info: {
-                                            ...newRecipe.nutritional_info, protein: e.target.value
+                                    value={newRecipe.nutritional_info.protein === 0 ? '' : newRecipe.nutritional_info.protein}
+                                    onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                        if (!isNaN(value)) {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, protein: value
+                                                }
+                                            });
                                         }
-                                    })}
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === '') {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, protein: 0
+                                                }
+                                            });
+                                        }
+                                    }}
                                     placeholder="Örn: 15"
                                 />
                             </div>
@@ -1215,12 +1253,31 @@ export default function Tarifler() {
                                     type="number"
                                     id="recipeCarbs"
                                     className="text-input"
-                                    value={newRecipe.nutritional_info.carbs}
-                                    onChange={(e) => setNewRecipe({
-                                        ...newRecipe, nutritional_info: {
-                                            ...newRecipe.nutritional_info, carbs: e.target.value
+                                    value={newRecipe.nutritional_info.carbs === 0 ? '' : newRecipe.nutritional_info.carbs}
+                                    onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                        if (!isNaN(value)) {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, carbs: value
+                                                }
+                                            });
                                         }
-                                    })}
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === '') {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, carbs: 0
+                                                }
+                                            });
+                                        }
+                                    }}
                                     placeholder="Örn: 30"
                                 />
                             </div>
@@ -1230,12 +1287,31 @@ export default function Tarifler() {
                                     type="number"
                                     id="recipeFat"
                                     className="text-input"
-                                    value={newRecipe.nutritional_info.fat}
-                                    onChange={(e) => setNewRecipe({
-                                        ...newRecipe, nutritional_info: {
-                                            ...newRecipe.nutritional_info, fat: e.target.value
+                                    value={newRecipe.nutritional_info.fat === 0 ? '' : newRecipe.nutritional_info.fat}
+                                    onChange={(e) => {
+                                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                        if (!isNaN(value)) {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, fat: value
+                                                }
+                                            });
                                         }
-                                    })}
+                                    }}
+                                    onFocus={(e) => {
+                                        if (e.target.value === '0') {
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    onBlur={(e) => {
+                                        if (e.target.value === '') {
+                                            setNewRecipe({
+                                                ...newRecipe, nutritional_info: {
+                                                    ...newRecipe.nutritional_info, fat: 0
+                                                }
+                                            });
+                                        }
+                                    }}
                                     placeholder="Örn: 10"
                                 />
                             </div>
