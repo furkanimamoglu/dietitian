@@ -195,7 +195,7 @@ class NutritionService {
     }
 
     static async addNutritionPlan(dietitian_id, {title, description, image, category_id, mealPlan}) {
-        if (!dietitian_id || !title || !description || !category_id) {
+        if (!dietitian_id || !title || !category_id) {
             throw new Exception("Başlık, açıklama ve kategori zorunludur.", 400, true);
         }
 

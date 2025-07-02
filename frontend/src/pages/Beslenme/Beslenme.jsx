@@ -1420,13 +1420,13 @@ export default function Beslenme() {
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="planDescription">Açıklama</label>
+                        <label htmlFor="planDescription">Açıklama (Opsiyonel)</label>
                         <textarea
                             id="planDescription"
                             className="text-input textarea"
                             value={newPlan.description}
                             onChange={(e) => setNewPlan({...newPlan, description: e.target.value})}
-                            placeholder="Plan açıklaması giriniz"
+                            placeholder="Plan açıklaması giriniz (Opsiyonel)"
                             rows={3}
                         />
                     </div>
