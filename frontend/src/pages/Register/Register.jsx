@@ -102,9 +102,10 @@ function Register() {
             .then(data => {
                 const token = data.token;
                 localStorage.setItem('token', 'Bearer ' + token);
-                setMessage('Kayıt işlemi başarılı. Mail doğrulama kodu gönderildi.');
+                setMessage('Kayıt işlemi başarılı.');
                 setLoading(false);
-                setShowVerificationDialog(true);
+                //setShowVerificationDialog(true);
+                navigate('/anasayfa');
             })
             .catch(error => {
                 console.error('Exception:', error);
