@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
+import { useNavigate } from 'react-router-dom';
 
 import {
     Avatar,
@@ -52,6 +53,8 @@ export default function Dashboard() {
 
     const [currentTime, setCurrentTime] = useState(new Date());
     const timerRef = useRef(null);
+
+    const navigate = useNavigate();
 
     const filteredNotes = notes.filter(note =>
         note.noteContent.toLowerCase().includes(searchNoteText.toLowerCase())
@@ -438,6 +441,10 @@ export default function Dashboard() {
         setPendingLimit(prev => prev + 5);
     };
 
+    const handleCardClick = (path) => {
+        navigate(path);
+    };
+
     return (
         <Default>
             <Box sx={{flexGrow: 1, p: 3, bgcolor: '#f8f9fa', minHeight: '70vh'}}>
@@ -456,12 +463,20 @@ export default function Dashboard() {
                                     position: 'relative',
                                     overflow: 'hidden',
                                     transition: 'all 0.3s ease',
+                                    cursor: 'pointer',
                                     '&:hover': {
                                         transform: 'translateY(-4px)',
                                         boxShadow: '0 12px 20px -10px rgba(0,0,0,0.1)',
                                         '& .stat-icon': {
                                             transform: 'scale(1.1) rotate(10deg)',
                                         }
+                                    }
+                                }}
+                                onClick={() => {
+                                    if (card.label === 'Aktif Danışan') {
+                                        handleCardClick('/danisanlarim');
+                                    } else if (card.label === 'Bugünkü Randevu' || card.label === 'Kalan Randevu' || card.label === 'Bekleyen Talep') {
+                                        handleCardClick('/randevularim');
                                     }
                                 }}
                             >
