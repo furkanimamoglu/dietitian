@@ -280,6 +280,55 @@ export default function Dashboard() {
             setSuccessMessage(`${clientName} için randevu talebi başarıyla ${actionText}.`);
             setShowSuccessPopup(true);
 
+            // Bildirim gönderme işlemi
+            try {
+                if (appointment) {
+                    const startDate = new Date(appointment.start);
+                    const date = startDate.toLocaleDateString('tr-TR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+
+                    const time = startDate.toLocaleTimeString('tr-TR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    });
+
+                    let notificationEndpoint = '';
+                    if (action === 'approved') {
+                        notificationEndpoint = '/notification/sendAppointmentNotification';
+                    } else if (action === 'cancelled') {
+                        notificationEndpoint = '/notification/sendAppointmentCancellationNotification';
+                    }
+
+                    if (notificationEndpoint) {
+                        const notificationData = {
+                            client_id: appointment.client_id,
+                            appointmentDetails: {
+                                date: date,
+                                time: time
+                            }
+                        };
+
+                        const notificationResponse = await axios.post(
+                            config[config.environment].apiUrl + notificationEndpoint,
+                            notificationData,
+                            {
+                                headers: {
+                                    Authorization: localStorage.getItem('token'),
+                                },
+                            }
+                        );
+
+                        console.log(`Randevu ${action} bildirimi gönderildi:`, notificationResponse.data);
+                    }
+                }
+            } catch (notificationError) {
+                console.error("Randevu bildirimi gönderilirken bir hata oluştu:", notificationError);
+            }
+
             if (action === 'approved' && appointment) {
                 setApprovedAppointments(prev => [...prev, appointment]);
             }
