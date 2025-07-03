@@ -2110,7 +2110,7 @@ export default function Beslenme() {
                                                                             title: 'Plan Atamasını Kaldır',
                                                                             message: `Plan atamasını ${selectedClientInfo?.name} danışanından kaldırmak istediğinizden emin misiniz?`,
                                                                             onConfirm: () => {
-                                                                                axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionAssignment?assignment_id=${program.assignment_id}`, {
+                                                                                axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionAssignment?assignment_id=${program.id}`, {
                                                                                     headers: {Authorization: localStorage.getItem("token")}
                                                                                 })
                                                                                 .then(response => {
