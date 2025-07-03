@@ -506,10 +506,10 @@ const RecipeCard = ({item, onPrint, onEdit, onDelete, onView, onAssign, dietitia
         </div>);
 };
 
-const Modal = ({isOpen, title, onClose, children, fullWidth = false}) => {
+const Modal = ({isOpen, title, onClose, children, fullWidth = false, isDetailModal = false}) => {
     if (!isOpen) return null;
 
-    return (<div className="modal-overlay">
+    return (<div className={`modal-overlay ${isDetailModal ? 'detail-modal' : ''}`}>
             <div className={`modal-container ${fullWidth ? 'full-width' : ''}`}>
                 <div className="modal-header">
                     <h2>{title}</h2>
@@ -808,6 +808,25 @@ export default function Tarifler() {
             });
     }
 
+    const deleteAssignedRecipe = async (assignedRecipeId) => {
+        try {
+            await axios.delete(`${config[config.environment].apiUrl}/recipe/deleteAssignedRecipe?assigned_recipe_id=${assignedRecipeId}`, {
+                headers: {Authorization: localStorage.getItem("token")}
+            });
+
+            // Başarılı silme sonrası listeyi güncelle
+            setSelectedClientRecipes(prev => prev.filter(recipe => recipe.id !== assignedRecipeId));
+            setSuccessMessage("Tarif başarıyla kaldırıldı.");
+            setShowSuccessPopup(true);
+            setTimeout(() => setShowSuccessPopup(false), 3000);
+        } catch (error) {
+            console.error("Error deleting assigned recipe:", error);
+            setErrorMessage("Tarif kaldırılırken bir hata oluştu.");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+        }
+    };
+
     return (<Default>
             <div className="tarifler-container">
                 {/* Left Panel - Categories */}
@@ -910,7 +929,7 @@ export default function Tarifler() {
                                     onAssign={handleOpenAddToUserModal}
                                     dietitianInfo={dietitianInfo}
                                 />))) : (<div className="no-recipes">
-                                <p>Bu kategoriye ait tarif bulunamadı.</p>
+                                <p>Bu kategoriya ait tarif bulunamadı.</p>
                             </div>)}
                     </div>
                 </div>
@@ -1040,6 +1059,7 @@ export default function Tarifler() {
                 isOpen={detailModal}
                 title={detailItem?.title}
                 onClose={() => setDetailModal(false)}
+                isDetailModal={true}
             >
                 <div className="recipe-detail-modal">
                     {detailItem?.image && (<img
@@ -2200,8 +2220,9 @@ export default function Tarifler() {
                 isOpen={clientRecipesModal}
                 title={`${selectedClientInfo?.name || 'Danışan'} - Atanmış Tarifler`}
                 onClose={() => setClientRecipesModal(false)}
+                fullWidth={true}
             >
-                <div className="modal-body">
+                <div className="modal-body" style={{ padding: '0', maxHeight: '70vh', overflow: 'auto' }}>
                     {loadingClientRecipes ? (
                         <Box sx={{
                             display: 'flex',
@@ -2216,84 +2237,384 @@ export default function Tarifler() {
                     ) : selectedClientRecipes.length > 0 ? (
                         <Box sx={{
                             bgcolor: 'background.paper',
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                            borderRadius: 0,
+                            overflow: 'hidden'
                         }}>
-                            <List sx={{width: '100%'}}>
+                            <List sx={{width: '100%', padding: 2}}>
                                 {selectedClientRecipes.map((item) => (
                                     <React.Fragment key={item.id}>
                                         <ListItem
                                             alignItems="flex-start"
                                             sx={{
-                                                py: 2,
-                                                transition: 'background-color 0.2s',
+                                                py: 2.5,
+                                                px: 2.5,
+                                                transition: 'all 0.2s ease-in-out',
                                                 '&:hover': {
-                                                    backgroundColor: '#f5f5f5'
-                                                }
+                                                    backgroundColor: '#f8f9fa',
+                                                    transform: 'translateY(-1px)',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                                                },
+                                                borderRadius: '16px',
+                                                mb: 1.5,
+                                                border: '1px solid #e9ecef',
+                                                position: 'relative',
+                                                background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)'
                                             }}
                                         >
-                                            <ListItemAvatar>
+                                            <ListItemAvatar sx={{ mr: 2 }}>
                                                 <Avatar sx={{
-                                                    bgcolor: '#ff9e25',
-                                                    width: 48,
-                                                    height: 48,
-                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                    bgcolor: 'linear-gradient(135deg, #ff9e25 0%, #ff8c00 100%)',
+                                                    width: 64,
+                                                    height: 64,
+                                                    boxShadow: '0 4px 20px rgba(255, 158, 37, 0.4)',
+                                                    fontSize: '1.5rem',
+                                                    fontWeight: 'bold',
+                                                    background: 'linear-gradient(135deg, #ff9e25 0%, #ff8c00 100%)'
                                                 }}>
-                                                    {item.Recipe?.name?.charAt(0) || "T"}
+                                                    {item.Recipe?.name?.charAt(0)?.toUpperCase() || "T"}
                                                 </Avatar>
                                             </ListItemAvatar>
                                             <ListItemText
+                                                sx={{ flex: 1, pr: 1 }}
                                                 primary={
-                                                    <Typography
-                                                        variant="h6"
-                                                        fontWeight="500"
-                                                        sx={{
-                                                            color: '#ff9800',
-                                                            fontSize: '1.1rem',
-                                                            mb: 0.5
-                                                        }}
-                                                    >
-                                                        {item.Recipe?.name || "Tarif"}
-                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
+                                                        <Box sx={{ flex: 1, pr: 2 }}>
+                                                            <Typography
+                                                                variant="h6"
+                                                                fontWeight="700"
+                                                                sx={{
+                                                                    color: '#1a1a1a',
+                                                                    fontSize: '1.3rem',
+                                                                    lineHeight: 1.2,
+                                                                    mb: 0.5
+                                                                }}
+                                                            >
+                                                                {item.Recipe?.name || "İsimsiz Tarif"}
+                                                            </Typography>
+
+                                                            {/* Kategori Badge */}
+                                                            <Box sx={{ mb: 1 }}>
+                                                                <Typography
+                                                                    variant="caption"
+                                                                    sx={{
+                                                                        backgroundColor: '#e3f2fd',
+                                                                        color: '#1976d2',
+                                                                        px: 1.5,
+                                                                        py: 0.5,
+                                                                        borderRadius: '12px',
+                                                                        fontSize: '0.75rem',
+                                                                        fontWeight: '600',
+                                                                        textTransform: 'uppercase',
+                                                                        letterSpacing: '0.5px'
+                                                                    }}
+                                                                >
+                                                                    📝 Tarif
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+
+                                                        <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+                                                            <button
+                                                                title="Tarifi Görüntüle"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    // Tarif detaylarını göster
+                                                                    const recipeForDetail = {
+                                                                        id: item.Recipe?.id,
+                                                                        title: item.Recipe?.name,
+                                                                        description: item.Recipe?.description,
+                                                                        ingredients: item.Recipe?.malzemeler,
+                                                                        instructions: item.Recipe?.hazirlanis,
+                                                                        image: item.Recipe?.image,
+                                                                        nutritional_info: {
+                                                                            calories: item.Recipe?.kcal,
+                                                                            protein: item.Recipe?.protein,
+                                                                            carbs: item.Recipe?.karbonhidrat,
+                                                                            fat: item.Recipe?.yag
+                                                                        }
+                                                                    };
+                                                                    handleOpenDetailModal(recipeForDetail);
+                                                                }}
+                                                                style={{
+                                                                    backgroundColor: '#2196f3',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    borderRadius: '10px',
+                                                                    padding: '8px 14px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '13px',
+                                                                    fontWeight: '600',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    transition: 'all 0.2s',
+                                                                    boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)'
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.target.style.backgroundColor = '#1976d2';
+                                                                    e.target.style.transform = 'translateY(-1px)';
+                                                                    e.target.style.boxShadow = '0 4px 12px rgba(33, 150, 243, 0.4)';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.target.style.backgroundColor = '#2196f3';
+                                                                    e.target.style.transform = 'translateY(0)';
+                                                                    e.target.style.boxShadow = '0 2px 8px rgba(33, 150, 243, 0.3)';
+                                                                }}
+                                                            >
+                                                                <DescriptionIcon fontSize="small" />
+                                                                Detay
+                                                            </button>
+                                                            <button
+                                                                title="Tarifi Kaldır"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    deleteAssignedRecipe(item.id);
+                                                                }}
+                                                                style={{
+                                                                    backgroundColor: '#f44336',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    borderRadius: '10px',
+                                                                    padding: '8px 14px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '13px',
+                                                                    fontWeight: '600',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    transition: 'all 0.2s',
+                                                                    boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)'
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.target.style.backgroundColor = '#d32f2f';
+                                                                    e.target.style.transform = 'translateY(-1px)';
+                                                                    e.target.style.boxShadow = '0 4px 12px rgba(244, 67, 54, 0.4)';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.target.style.backgroundColor = '#f44336';
+                                                                    e.target.style.transform = 'translateY(0)';
+                                                                    e.target.style.boxShadow = '0 2px 8px rgba(244, 67, 54, 0.3)';
+                                                                }}
+                                                            >
+                                                                <DeleteIcon fontSize="small" />
+                                                                Kaldır
+                                                            </button>
+                                                        </Box>
+                                                    </Box>
                                                 }
                                                 secondary={
                                                     <React.Fragment>
                                                         <Typography
-                                                            component="span"
+                                                            component="div"
                                                             variant="body2"
-                                                            color="text.primary"
-                                                            sx={{display: 'block', mb: 1}}
+                                                            sx={{
+                                                                display: 'block',
+                                                                mb: 2,
+                                                                fontSize: '0.95rem',
+                                                                lineHeight: 1.6,
+                                                                color: '#555',
+                                                                fontStyle: 'italic'
+                                                            }}
                                                         >
                                                             {item.Recipe?.description || "Bu tarif için açıklama bulunmamaktadır."}
                                                         </Typography>
+
+                                                        {/* Besin değerleri */}
+                                                        {(item.Recipe?.kcal || item.Recipe?.protein || item.Recipe?.karbonhidrat || item.Recipe?.yag) && (
+                                                            <Box sx={{
+                                                                display: 'flex',
+                                                                flexWrap: 'wrap',
+                                                                gap: 1.2,
+                                                                mb: 2.5,
+                                                                p: 2,
+                                                                backgroundColor: '#f8f9fa',
+                                                                borderRadius: '12px',
+                                                                border: '1px solid #e9ecef'
+                                                            }}>
+                                                                <Typography variant="caption" sx={{
+                                                                    width: '100%',
+                                                                    fontWeight: 'bold',
+                                                                    color: '#666',
+                                                                    mb: 1,
+                                                                    textTransform: 'uppercase',
+                                                                    letterSpacing: '0.5px'
+                                                                }}>
+                                                                    🥗 Besin Değerleri
+                                                                </Typography>
+                                                                {item.Recipe?.kcal && (
+                                                                    <Box sx={{
+                                                                        backgroundColor: '#ffecb3',
+                                                                        color: '#f57c00',
+                                                                        px: 2,
+                                                                        py: 0.8,
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '0.85rem',
+                                                                        fontWeight: '700',
+                                                                        boxShadow: '0 2px 6px rgba(245, 124, 0, 0.2)',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 0.5
+                                                                    }}>
+                                                                        🔥 {item.Recipe.kcal} kcal
+                                                                    </Box>
+                                                                )}
+                                                                {item.Recipe?.protein && (
+                                                                    <Box sx={{
+                                                                        backgroundColor: '#f3e5f5',
+                                                                        color: '#7b1fa2',
+                                                                        px: 2,
+                                                                        py: 0.8,
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '0.85rem',
+                                                                        fontWeight: '700',
+                                                                        boxShadow: '0 2px 6px rgba(123, 31, 162, 0.2)',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 0.5
+                                                                    }}>
+                                                                        💪 {item.Recipe.protein}g protein
+                                                                    </Box>
+                                                                )}
+                                                                {item.Recipe?.karbonhidrat && (
+                                                                    <Box sx={{
+                                                                        backgroundColor: '#e3f2fd',
+                                                                        color: '#1976d2',
+                                                                        px: 2,
+                                                                        py: 0.8,
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '0.85rem',
+                                                                        fontWeight: '700',
+                                                                        boxShadow: '0 2px 6px rgba(25, 118, 210, 0.2)',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 0.5
+                                                                    }}>
+                                                                        🌾 {item.Recipe.karbonhidrat}g karb
+                                                                    </Box>
+                                                                )}
+                                                                {item.Recipe?.yag && (
+                                                                    <Box sx={{
+                                                                        backgroundColor: '#e8f5e8',
+                                                                        color: '#388e3c',
+                                                                        px: 2,
+                                                                        py: 0.8,
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '0.85rem',
+                                                                        fontWeight: '700',
+                                                                        boxShadow: '0 2px 6px rgba(56, 142, 60, 0.2)',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: 0.5
+                                                                    }}>
+                                                                        🥑 {item.Recipe.yag}g yağ
+                                                                    </Box>
+                                                                )}
+                                                            </Box>
+                                                        )}
+
+                                                        {/* Malzemeler Önizlemesi */}
+                                                        {item.Recipe?.malzemeler && (
+                                                            <Box sx={{
+                                                                mb: 2,
+                                                                p: 2,
+                                                                backgroundColor: '#fff8e1',
+                                                                borderRadius: '12px',
+                                                                border: '1px solid #ffecb3'
+                                                            }}>
+                                                                <Typography variant="caption" sx={{
+                                                                    fontWeight: 'bold',
+                                                                    color: '#f57c00',
+                                                                    textTransform: 'uppercase',
+                                                                    letterSpacing: '0.5px',
+                                                                    display: 'block',
+                                                                    mb: 1
+                                                                }}>
+                                                                    🛒 Malzemeler
+                                                                </Typography>
+                                                                <Typography variant="body2" sx={{
+                                                                    color: '#5d4037',
+                                                                    fontSize: '0.9rem',
+                                                                    lineHeight: 1.4
+                                                                }}>
+                                                                    {item.Recipe.malzemeler.length > 100
+                                                                        ? `${item.Recipe.malzemeler.substring(0, 100)}...`
+                                                                        : item.Recipe.malzemeler
+                                                                    }
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+
+                                                        {/* Atama tarihi */}
+                                                        {item.created_at && (
+                                                            <Typography
+                                                                variant="caption"
+                                                                sx={{
+                                                                    display: 'block',
+                                                                    color: '#6c757d',
+                                                                    fontSize: '0.8rem',
+                                                                    mb: 1.5,
+                                                                    p: 1.5,
+                                                                    backgroundColor: '#f8f9fa',
+                                                                    borderRadius: '8px',
+                                                                    border: '1px solid #e9ecef'
+                                                                }}
+                                                            >
+                                                                📅 <strong>Atanma Tarihi:</strong> {new Date(item.created_at).toLocaleDateString('tr-TR', {
+                                                                    year: 'numeric',
+                                                                    month: 'long',
+                                                                    day: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}
+                                                            </Typography>
+                                                        )}
 
                                                         {item.note && (
                                                             <Box sx={{
                                                                 display: 'flex',
                                                                 alignItems: 'flex-start',
                                                                 bgcolor: '#fffde7',
-                                                                borderRadius: '8px',
-                                                                p: 1.5,
+                                                                borderRadius: '12px',
+                                                                p: 2.5,
                                                                 mt: 1,
-                                                                borderLeft: '3px solid #fbc02d'
+                                                                border: '2px solid #fff176',
+                                                                boxShadow: '0 3px 10px rgba(255, 235, 59, 0.3)'
                                                             }}>
-                                                                <NoteIcon fontSize="small" sx={{
-                                                                    mr: 1,
+                                                                <NoteIcon fontSize="medium" sx={{
+                                                                    mr: 2,
                                                                     color: '#f57f17',
-                                                                    fontSize: '18px',
-                                                                    mt: 0.3
+                                                                    fontSize: '24px',
+                                                                    mt: 0.2
                                                                 }}/>
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {item.note}
-                                                                </Typography>
+                                                                <Box>
+                                                                    <Typography variant="caption" sx={{
+                                                                        fontWeight: 'bold',
+                                                                        color: '#f57f17',
+                                                                        textTransform: 'uppercase',
+                                                                        letterSpacing: '0.5px',
+                                                                        display: 'block',
+                                                                        mb: 0.5
+                                                                    }}>
+                                                                        📝 Diyetisyen Notu
+                                                                    </Typography>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        sx={{
+                                                                            color: '#5d4037',
+                                                                            fontSize: '0.95rem',
+                                                                            lineHeight: 1.5,
+                                                                            fontWeight: '500'
+                                                                        }}
+                                                                    >
+                                                                        {item.note}
+                                                                    </Typography>
+                                                                </Box>
                                                             </Box>
                                                         )}
                                                     </React.Fragment>
                                                 }
                                             />
                                         </ListItem>
-                                        <Divider variant="inset" component="li"/>
                                     </React.Fragment>
                                 ))}
                             </List>
@@ -2304,29 +2625,46 @@ export default function Tarifler() {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            py: 6,
-                            px: 3,
+                            py: 8,
+                            px: 4,
                             bgcolor: '#f8f9fa',
-                            borderRadius: 2,
-                            border: '1px dashed #bdbdbd'
+                            borderRadius: 0,
+                            minHeight: '300px'
                         }}>
-                            <DescriptionIcon sx={{fontSize: 60, color: '#bdbdbd', mb: 2}}/>
-                            <Typography variant="h6" color="text.secondary" align="center" gutterBottom>
+                            <DescriptionIcon sx={{fontSize: 80, color: '#bdbdbd', mb: 3}}/>
+                            <Typography variant="h5" color="text.secondary" align="center" gutterBottom sx={{ fontWeight: 600 }}>
                                 Bu danışana atanmış tarif bulunmamaktadır
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" align="center"
-                                        sx={{mt: 1, maxWidth: 500}}>
-                                Tariflere göz atarak danışanınıza uygun tarifler atayabilirsiniz.
+                            <Typography variant="body1" color="text.secondary" align="center"
+                                        sx={{mt: 2, maxWidth: 600, lineHeight: 1.6}}>
+                                Sol panelden tariflere göz atarak danışanınıza uygun tarifler atayabilirsiniz.
+                                Atanan tarifler burada görüntülenecektir.
                             </Typography>
                         </Box>
                     )}
                 </div>
-                <div className="modal-footer">
+                <div className="modal-footer" style={{ borderTop: '2px solid #e9ecef', backgroundColor: '#f8f9fa' }}>
                     <button
                         className="modal-btn close-btn"
                         onClick={() => setClientRecipesModal(false)}
+                        style={{
+                            backgroundColor: '#6c757d',
+                            color: 'white',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#545b62';
+                            e.target.style.transform = 'translateY(-1px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#6c757d';
+                            e.target.style.transform = 'translateY(0)';
+                        }}
                     >
-                        Kapat
+                        ✕ Kapat
                     </button>
                 </div>
             </Modal>

@@ -312,16 +312,48 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 20px;
+}
+
+/* Higher z-index for detail modal (when opened from another modal) */
+.modal-overlay.detail-modal {
+    z-index: 1100;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    max-width: 90vw;
+    max-height: 90vh;
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+.modal-container.full-width {
+    max-width: 95vw;
+    width: 1200px;
+}
+
+/* Client Recipes Modal Specific */
+.modal-container.client-recipes-modal {
+    max-width: 95vw;
+    width: 1000px;
+    max-height: 85vh;
 }
 
 @keyframes modalFadeIn {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-20px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -1145,3 +1177,4 @@ select:required:invalid {
     font-weight: 700;
     color: #087708;
 }
+

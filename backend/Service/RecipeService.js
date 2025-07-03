@@ -182,6 +182,27 @@ class RecipeService {
         });
     }
 
+    static async deleteAssignedRecipe(dietitian_id, recipe_assignment_id) {
+        if (!dietitian_id) {
+            throw new Exception("Yetkisiz Erişim.", 401, true);
+        }
+
+        const assignment = await RecipeAssignment.findOne({
+            where: {
+                id: recipe_assignment_id,
+                dietitian_id: dietitian_id
+            }
+        });
+
+        if (!assignment) {
+            throw new Exception("Atama bulunamadı veya yetkisiz erişim.", 404, true);
+        }
+
+        await assignment.destroy();
+
+        return {success: true, message: "Tarif ataması başarıyla silindi."};
+    }
+
 }
 
 module.exports = RecipeService;
