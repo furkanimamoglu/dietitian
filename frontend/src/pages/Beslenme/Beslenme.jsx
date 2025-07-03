@@ -25,6 +25,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 import MealPlanViewer from "../../Components/MealPlanEditor/MealPlanViewer.jsx";
 import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalPDFLink.jsx";
@@ -42,7 +43,9 @@ import {
     Chip,
     CircularProgress,
     Dialog,
+    DialogActions,
     DialogContent,
+    DialogContentText,
     DialogTitle,
     Divider,
     Grid,
@@ -621,6 +624,14 @@ export default function Beslenme() {
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+
+    // Confirm dialog için state'ler
+    const [confirmDialog, setConfirmDialog] = useState({
+        open: false,
+        title: '',
+        message: '',
+        onConfirm: null
+    });
 
     useEffect(() => {
         if (showSuccessPopup) {
@@ -2073,7 +2084,8 @@ export default function Beslenme() {
                                                     elevation={2}
                                                     sx={{
                                                         borderRadius: '10px',
-                                                        overflow: 'visible'
+                                                        overflow: 'visible',
+                                                        position: 'relative'
                                                     }}
                                                 >
                                                     <CardHeader
@@ -2083,12 +2095,58 @@ export default function Beslenme() {
                                                             </Typography>
                                                         }
                                                         action={
-                                                            <Chip
-                                                                label={status.status}
-                                                                color={status.chipColor}
-                                                                size="small"
-                                                                sx={{fontWeight: 'medium'}}
-                                                            />
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Chip
+                                                                    label={status.status}
+                                                                    color={status.chipColor}
+                                                                    size="small"
+                                                                    sx={{fontWeight: 'medium'}}
+                                                                />
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => {
+                                                                        setConfirmDialog({
+                                                                            open: true,
+                                                                            title: 'Plan Atamasını Kaldır',
+                                                                            message: `Plan atamasını ${selectedClientInfo?.name} danışanından kaldırmak istediğinizden emin misiniz?`,
+                                                                            onConfirm: () => {
+                                                                                axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionAssignment?assignment_id=${program.assignment_id}`, {
+                                                                                    headers: {Authorization: localStorage.getItem("token")}
+                                                                                })
+                                                                                .then(response => {
+                                                                                    setSuccessMessage("Plan başarıyla kaldırıldı.");
+                                                                                    setShowSuccessPopup(true);
+                                                                                    // Planları yeniden yükle
+                                                                                    axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${selectedClientInfo.id}`, {
+                                                                                        headers: {Authorization: localStorage.getItem("token")}
+                                                                                    })
+                                                                                    .then(response => {
+                                                                                        setSelectedClientPrograms(response.data || []);
+                                                                                    })
+                                                                                    .catch(error => {
+                                                                                        console.error("Error refreshing client programs:", error);
+                                                                                    });
+                                                                                })
+                                                                                .catch(error => {
+                                                                                    console.error("Error removing assignment:", error);
+                                                                                    setErrorMessage("Plan kaldırılırken bir hata oluştu.");
+                                                                                    setShowErrorPopup(true);
+                                                                                });
+                                                                                setConfirmDialog({ open: false, title: '', message: '', onConfirm: null });
+                                                                            }
+                                                                        });
+                                                                    }}
+                                                                    sx={{
+                                                                        color: '#d32f2f',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'rgba(211, 47, 47, 0.08)'
+                                                                        }
+                                                                    }}
+                                                                    title="Atanmış Planı Kaldır"
+                                                                >
+                                                                    <RemoveCircleIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
                                                         }
                                                     />
                                                     <CardContent sx={{pt: 0}}>
@@ -2326,6 +2384,37 @@ export default function Beslenme() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Confirm Dialog */}
+            {confirmDialog.open && (
+                <Dialog
+                    open={confirmDialog.open}
+                    onClose={() => setConfirmDialog({ open: false, title: '', message: '', onConfirm: null })}
+                    aria-labelledby="confirm-dialog-title"
+                    aria-describedby="confirm-dialog-description"
+                >
+                    <DialogTitle id="confirm-dialog-title">{confirmDialog.title}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="confirm-dialog-description">
+                            {confirmDialog.message}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setConfirmDialog({ open: false, title: '', message: '', onConfirm: null })} color="primary">
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (confirmDialog.onConfirm) confirmDialog.onConfirm();
+                            }}
+                            color="error"
+                            autoFocus
+                        >
+                            Kaldır
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
         </Default>
     );
 }

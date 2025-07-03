@@ -14,6 +14,7 @@ router.delete('/deleteNutritionPlan', nutritionController.deleteNutritionPlan);
 router.post('/addNutritionPlan', nutritionController.addNutritionPlan);
 router.put('/updateNutritionPlan', nutritionController.updateNutritionPlan);
 router.post('/getNutritionAssignmentPlanByClient', nutritionController.getNutritionAssignmentPlanByClient);
+router.delete('/deleteNutritionAssignment', nutritionController.deleteNutritionAssignment);
 
 router.get('/getClientNutritionPlans', nutritionController.getClientNutritionPlans);
 

@@ -293,6 +293,32 @@ class NutritionService {
         });
     }
 
+    static async deleteNutritionAssignment(dietitian_id, assignment_id) {
+        if (!dietitian_id || !assignment_id) {
+            throw new Exception("Eksik parametreler.", 400, true);
+        }
+
+        const assignment = await NutritionAssignment.findOne({
+            where: {
+                id: assignment_id
+            },
+            include: [{
+                model: Client,
+                where: {
+                    dietitian_id: dietitian_id
+            }
+            }]
+        });
+
+        if (!assignment) {
+            throw new Exception("Bu atama size ait değil veya bulunamadı.", 403, true);
+        }
+
+        await assignment.destroy();
+
+        return {success: true, message: "Beslenme ataması başarıyla silindi."};
+    }
+
     static async getClientWater(client_id, start_date = null, end_date = null) {
 
         return await Water.findAll({
