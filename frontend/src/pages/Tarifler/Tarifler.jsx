@@ -510,7 +510,7 @@ const Modal = ({isOpen, title, onClose, children, fullWidth = false, isDetailMod
     if (!isOpen) return null;
 
     return (<div className={`modal-overlay ${isDetailModal ? 'detail-modal' : ''}`}>
-            <div className={`modal-container ${fullWidth ? 'full-width' : ''}`}>
+            <div className={`modal-container ${fullWidth ? 'half-width' : ''}`}>
                 <div className="modal-header">
                     <h2>{title}</h2>
                     <button className="modal-close-btn" onClick={onClose}>
