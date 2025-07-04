@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {BackHandler, ActivityIndicator, View, Platform} from 'react-native';
+import {BackHandler, ActivityIndicator, View, Platform, Linking, Alert, StyleSheet} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {DefaultTheme, NavigationContainer, useNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {PaperProvider} from 'react-native-paper';
+import {PaperProvider, Modal, Portal, Card, Title, Paragraph, Button} from 'react-native-paper';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
 import config from './config';
@@ -72,12 +72,16 @@ const App = () => {
     const navTheme = DefaultTheme;
     const [isLoading, setIsLoading] = useState(true);
     const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Onboarding');
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
 
     const navigationRef = useNavigationContainerRef();
 
     useEffect(() => {
         const checkUserSession = async () => {
             try {
+                // Önce version kontrolü yap
+                await checkAppVersion();
+
                 const token = await AsyncStorage.getItem('token');
                 if (token) {
                     console.log('Token bulundu, hesap durumu kontrol ediliyor...');
@@ -134,6 +138,31 @@ const App = () => {
         checkUserSession();
     }, []);
 
+    // Version kontrolü fonksiyonu
+    const checkAppVersion = async () => {
+        try {
+            const response = await fetch(`${config[config.environment].apiUrl}/version`);
+            const data = await response.json();
+
+            if (response.ok) {
+                const serverVersion = data.version;
+                const currentVersion = config.version;
+
+                console.log('Current version:', currentVersion);
+                console.log('Server version:', serverVersion);
+
+                if (serverVersion !== currentVersion) {
+                    console.log('Version mismatch detected, showing update modal');
+                    setShowUpdateModal(true);
+                }
+            } else {
+                console.log('Version check failed:', data.message);
+            }
+        } catch (error) {
+            console.error('Version kontrolünde hata:', error);
+        }
+    };
+
     // Notifee için bildirim kanalı oluşturma
     useEffect(() => {
         if (Platform.OS === 'android') {
@@ -185,6 +214,11 @@ const App = () => {
     useEffect(() => {
         if (Platform.OS === 'android') {
             const backAction = () => {
+                // Güncelleme modalı açıkken geri tuşunu devre dışı bırak
+                if (showUpdateModal) {
+                    return true;
+                }
+
                 if (navigationRef.isReady() && navigationRef.canGoBack()) {
                     navigationRef.goBack();
                     return true;
@@ -194,7 +228,7 @@ const App = () => {
             const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
             return () => backHandler.remove();
         }
-    }, [navigationRef]);
+    }, [navigationRef, showUpdateModal]);
 
     useEffect(() => {
         requestUserPermission();
@@ -248,9 +282,37 @@ const App = () => {
         }
     };
 
+    const handleUpdateApp = () => {
+        // Gerçek uygulama package id'sini kullanın
+        const storeUrl = Platform.OS === 'android'
+            ? 'https://play.google.com/store/apps/details?id=com.diyetia'
+            : 'itms-apps://itunes.apple.com/app/id1234567890';
+
+        Linking.canOpenURL(storeUrl)
+            .then(supported => {
+                if (supported) {
+                    return Linking.openURL(storeUrl);
+                } else {
+                    // Fallback URL'ler
+                    const fallbackUrl = Platform.OS === 'android'
+                        ? 'https://play.google.com/store/apps/details?id=com.diyetia'
+                        : 'https://apps.apple.com/app/id1234567890';
+                    return Linking.openURL(fallbackUrl);
+                }
+            })
+            .catch(err => {
+                console.error('Store açılırken hata oluştu:', err);
+                Alert.alert(
+                    'Hata',
+                    'Uygulama mağazası açılamadı. Lütfen manuel olarak güncelleyin.',
+                    [{ text: 'Tamam' }]
+                );
+            });
+    };
+
     if (isLoading) {
         return (
-            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#0000ff" />
             </View>
         );
@@ -332,9 +394,102 @@ const App = () => {
                         />
                     </Stack.Navigator>
                 </NavigationContainer>
+
+                <Portal>
+                    <Modal
+                        visible={showUpdateModal}
+                        dismissable={false}
+                        contentContainerStyle={styles.modalContainer}
+                    >
+                        <Card style={{ elevation: 0 }}>
+                            <Card.Content style={styles.modalContent}>
+                                <Title style={styles.modalTitle}>
+                                    🚀 Güncelleme Mevcut
+                                </Title>
+                                <Paragraph style={styles.modalDescription}>
+                                    Uygulamanın yeni bir sürümü mevcut! En son özellikler ve iyileştirmeler için lütfen uygulamanızı güncelleyiniz.
+                                </Paragraph>
+                                <Paragraph style={styles.modalSubtext}>
+                                    Bu güncelleme zorunludur ve devam etmek için gereklidir.
+                                </Paragraph>
+                            </Card.Content>
+                            <Card.Actions style={styles.modalActions}>
+                                <Button
+                                    mode="contained"
+                                    onPress={handleUpdateApp}
+                                    style={styles.updateButton}
+                                    labelStyle={styles.updateButtonLabel}
+                                >
+                                    Şimdi Güncelle
+                                </Button>
+                            </Card.Actions>
+                        </Card>
+                    </Modal>
+                </Portal>
             </SafeAreaView>
         </PaperProvider>
     );
 };
+
+const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        padding: 30,
+        margin: 20,
+        borderRadius: 15,
+        elevation: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    modalContent: {
+        alignItems: 'center',
+        paddingVertical: 20
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold' as 'bold',
+        color: '#2E7D32',
+        marginBottom: 15,
+        textAlign: 'center' as 'center'
+    },
+    modalDescription: {
+        fontSize: 16,
+        textAlign: 'center' as 'center',
+        lineHeight: 24,
+        color: '#424242',
+        marginBottom: 20
+    },
+    modalSubtext: {
+        fontSize: 14,
+        textAlign: 'center' as 'center',
+        color: '#757575',
+        fontStyle: 'italic' as 'italic'
+    },
+    modalActions: {
+        justifyContent: 'center' as 'center',
+        paddingTop: 10
+    },
+    updateButton: {
+        backgroundColor: '#2E7D32',
+        paddingHorizontal: 30,
+        paddingVertical: 8,
+        borderRadius: 25
+    },
+    updateButtonLabel: {
+        fontSize: 16,
+        fontWeight: 'bold' as 'bold',
+        color: 'white'
+    }
+});
 
 export default App;

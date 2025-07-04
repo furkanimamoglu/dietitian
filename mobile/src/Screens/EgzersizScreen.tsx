@@ -204,12 +204,9 @@ const Egzersiz = ({navigation}) => {
                 return;
             }
 
-            // URL'yi temizle ve normalize et
             let cleanUrl = videoUrl.trim();
 
-            // YouTube URL'lerini özel olarak işle
             if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
-                // YouTube videoları için mobil uyumlu URL oluştur
                 let videoId = '';
 
                 if (cleanUrl.includes('youtu.be/')) {
@@ -221,7 +218,6 @@ const Egzersiz = ({navigation}) => {
                 }
 
                 if (videoId) {
-                    // Önce YouTube uygulamasını dene
                     const youtubeAppUrl = `vnd.youtube://${videoId}`;
                     const canOpenYouTubeApp = await Linking.canOpenURL(youtubeAppUrl);
 
@@ -229,13 +225,11 @@ const Egzersiz = ({navigation}) => {
                         await Linking.openURL(youtubeAppUrl);
                         return;
                     } else {
-                        // YouTube uygulaması yoksa mobil web URL'si kullan
                         cleanUrl = `https://m.youtube.com/watch?v=${videoId}`;
                     }
                 }
             }
 
-            // Vimeo URL'lerini özel olarak işle
             if (cleanUrl.includes('vimeo.com')) {
                 const videoId = cleanUrl.split('vimeo.com/')[1].split('?')[0];
                 if (videoId) {
@@ -249,17 +243,14 @@ const Egzersiz = ({navigation}) => {
                 }
             }
 
-            // HTTP/HTTPS protokolü yoksa ekle
             if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
                 cleanUrl = 'https://' + cleanUrl;
             }
 
-            // Direkt tarayıcıda aç
             await Linking.openURL(cleanUrl);
 
         } catch (error) {
             console.error('Video açılırken hata:', error);
-            // Sessizce hata yakalanır, kullanıcıya popup gösterilmez
         }
     }, []);
 
@@ -420,7 +411,6 @@ const Egzersiz = ({navigation}) => {
         );
     }, [getCategoryIcon, getStatusInfo, formatDate, getDaysDifference, getDifficultyStars, fadeAnim, openVideoUrl]);
 
-    // Enhanced Modal
     const renderCompleteExerciseModal = () => (
         <Modal
             animationType="slide"
@@ -564,7 +554,6 @@ const styles = StyleSheet.create({
         padding: 16
     },
 
-    // Stats Card Styles
     statsCard: {
         backgroundColor: '#fff',
         borderRadius: 16,
@@ -618,7 +607,6 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
 
-    // Exercise Card Styles
     exerciseList: {
         paddingBottom: 20
     },
@@ -675,8 +663,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-
-    // Image Styles
     imageContainer: {
         position: 'relative',
         height: 180
@@ -758,7 +744,6 @@ const styles = StyleSheet.create({
         marginLeft: 8
     },
 
-    // Card Content Styles
     cardContent: {
         padding: 16
     },
@@ -852,7 +837,6 @@ const styles = StyleSheet.create({
         marginLeft: 6
     },
 
-    // Modal Styles
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -969,7 +953,6 @@ const styles = StyleSheet.create({
         marginLeft: 6
     },
 
-    // Error & Empty States
     errorContainer: {
         backgroundColor: '#fff',
         borderRadius: 16,

@@ -53,6 +53,12 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/api/version', (req, res) => {
+    res.json({
+        version: config.version
+    });
+});
+
 app.use('/uploads', express.static('uploads'));
 
 const ALLOWED_TYPES = ['profilephoto', 'meal', 'exercise', 'nutrition', 'recipe', 'message'];
