@@ -1520,6 +1520,21 @@ function Danisan() {
         setActiveTab(newValue);
     };
 
+    // addedBy değerine göre renk belirleme fonksiyonu
+    const getTextColorByAddedBy = (addedBy, isEaten) => {
+        if (isEaten) return 'text.secondary';
+
+        switch (addedBy) {
+            case 'dietitian':
+                return 'primary.main'; // mavi
+            case 'client':
+                return 'warning.main'; // turuncu
+            case 'system':
+            default:
+                return 'text.primary'; // varsayılan (siyah)
+        }
+    };
+
     const renderMealItems = (mealItems) => {
         if (!mealItems) return null;
 
@@ -1568,7 +1583,7 @@ function Danisan() {
                                         variant="body2"
                                         sx={{
                                             textDecoration: item.eaten ? 'line-through' : 'none',
-                                            color: item.eaten ? 'text.secondary' : 'text.primary',
+                                            color: getTextColorByAddedBy(item.addedBy, item.eaten),
                                             display: 'flex',
                                             alignItems: 'center'
                                         }}
@@ -1596,7 +1611,7 @@ function Danisan() {
                 variant="body2"
                 sx={{
                     textDecoration: item.yenildi ? 'line-through' : 'none',
-                    color: item.yenildi ? 'text.secondary' : 'text.primary',
+                    color: getTextColorByAddedBy(item.addedBy, item.yenildi),
                     mb: index < mealItems.length - 1 ? 0.5 : 0,
                     display: 'flex',
                     alignItems: 'center'

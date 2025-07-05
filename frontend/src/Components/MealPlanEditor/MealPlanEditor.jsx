@@ -139,7 +139,11 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
                             if (typeof currentMealData === 'string') {
                                 const items = currentMealData.trim() ?
-                                    currentMealData.split(',').map(item => item.trim()) : [];
+                                    currentMealData.split(',').map(item => ({
+                                        name: item.trim(),
+                                        portion: null,
+                                        addedBy: "system"
+                                    })) : [];
                                 normalizedPlan[day][mealName] = {
                                     info: {
                                         image: '',
@@ -148,11 +152,53 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                     [defaultMainMenu]: items
                                 };
                             } else if (Array.isArray(currentMealData)) {
+                                const items = currentMealData.map(item => {
+                                    if (typeof item === 'string') {
+                                        return {
+                                            name: item,
+                                            portion: null,
+                                            addedBy: "system"
+                                        };
+                                    } else if (typeof item === 'object' && item.name) {
+                                        return {
+                                            name: item.name,
+                                            portion: item.portion || null,
+                                            addedBy: item.addedBy || "system"
+                                        };
+                                    }
+                                    return item;
+                                });
                                 normalizedPlan[day][mealName] = {
-                                    [defaultMainMenu]: [...currentMealData]
+                                    info: {
+                                        image: '',
+                                        time: mealTypes.find(m => m.name === mealName)?.time || ''
+                                    },
+                                    [defaultMainMenu]: items
                                 };
                             } else if (currentMealData && typeof currentMealData === 'object') {
                                 normalizedPlan[day][mealName] = { ...currentMealData };
+
+                                // Alternatif menülerdeki yemekleri normalize et
+                                Object.keys(normalizedPlan[day][mealName]).forEach(altKey => {
+                                    if (altKey !== 'info' && altKey !== 'data' && Array.isArray(normalizedPlan[day][mealName][altKey])) {
+                                        normalizedPlan[day][mealName][altKey] = normalizedPlan[day][mealName][altKey].map(item => {
+                                            if (typeof item === 'string') {
+                                                return {
+                                                    name: item,
+                                                    portion: null,
+                                                    addedBy: "system"
+                                                };
+                                            } else if (typeof item === 'object' && item.name) {
+                                                return {
+                                                    name: item.name,
+                                                    portion: item.portion || null,
+                                                    addedBy: item.addedBy || "system"
+                                                };
+                                            }
+                                            return item;
+                                        });
+                                    }
+                                });
 
                                 // Eğer data alt dalı yoksa ekle
                                 if (!normalizedPlan[day][mealName].data) {
@@ -400,7 +446,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
         const mealItem = {
             name: mealText.trim(),
-            portion: mealAmount ? mealAmount.trim() : null
+            portion: mealAmount ? mealAmount.trim() : null,
+            addedBy: "system"
         };
 
         setMealPlan(prev => {
