@@ -26,6 +26,7 @@ interface MealItem {
     name: string;
     eaten: boolean;
     portion: string | null;
+    addedBy?: string;
 }
 
 interface MealInfo {
@@ -192,10 +193,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
         return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
             return total + Object.entries(mealType).reduce((mealTotal, [category, items]) => {
-                // "info" nesnesi olduğunda atla, çünkü bu bir dizi değil
                 if (category === 'info') return mealTotal;
 
-                // Dizi ise öğeleri say
                 return mealTotal + items.length;
             }, 0);
         }, 0);
@@ -219,8 +218,14 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (!mealPlan[currentDay] || !mealPlan[currentDay][mealType]) return;
 
         const updatedMealPlan = {...mealPlan};
-        updatedMealPlan[currentDay][mealType][category][index].eaten =
-            !updatedMealPlan[currentDay][mealType][category][index].eaten;
+        const mealItem = updatedMealPlan[currentDay][mealType][category][index];
+
+        // Eğer addedBy alanı yoksa "client" olarak ekle
+        if (!mealItem.addedBy) {
+            mealItem.addedBy = "client";
+        }
+
+        mealItem.eaten = !mealItem.eaten;
 
         setMealPlan(updatedMealPlan);
 
@@ -247,7 +252,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         updatedMealPlan[currentDay][selectedMealType][selectedMealCategory].push({
             name: newMeal,
             eaten: false,
-            portion: newPortion || null
+            portion: newPortion || null,
+            addedBy: "client"
         });
 
         setMealPlan(updatedMealPlan);
@@ -279,7 +285,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         updatedMealPlan[currentDay][mealType][category].push({
             name: tempMeals[`${mealType}-${category}`],
             eaten: true, // Yeni eklenen öğün direkt onaylı olarak geliyor
-            portion: tempPortions[`${mealType}-${category}`] || null
+            portion: tempPortions[`${mealType}-${category}`] || null,
+            addedBy: "client"
         });
 
         setMealPlan(updatedMealPlan);

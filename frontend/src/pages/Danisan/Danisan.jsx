@@ -1522,7 +1522,18 @@ function Danisan() {
 
     // addedBy değerine göre renk belirleme fonksiyonu
     const getTextColorByAddedBy = (addedBy, isEaten) => {
-        if (isEaten) return 'text.secondary';
+        if (isEaten) {
+            // Yenilen öğelerde de rengi koru, ancak daha soluk yap
+            switch (addedBy) {
+                case 'dietitian':
+                    return 'primary.light';
+                case 'client':
+                    return 'warning.light';
+                case 'system':
+                default:
+                    return 'text.secondary';
+            }
+        }
 
         switch (addedBy) {
             case 'dietitian':
@@ -3342,7 +3353,10 @@ function Danisan() {
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
-                                        py: 4
+                                        py: 4,
+                                        borderRadius: 2,
+                                        border: '1px dashed #bdbdbd',
+                                        bgcolor: '#f8f9fa'
                                     }}>
                                         <FitnessCenterIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
                                         <Typography color="text.secondary" align="center">
