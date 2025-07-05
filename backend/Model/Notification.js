@@ -10,6 +10,15 @@ const Notification = sequelize.define('Notification', {
             allowNull: false,
             primaryKey: true
         },
+        client_id: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            validate: {
+                notNull: {
+                    msg: 'Danışan ID belirtilmelidir'
+                }
+            }
+        },
         isRead: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

@@ -97,13 +97,14 @@ class ClientController {
                 });
             }
 
-            const result = await ClientService.getMyNotifications(client_id);
+            const { limit } = req.query;
 
+            const result = await ClientService.getMyNotifications(client_id, limit);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
+                message: error.message || "Bir hata oluştu."
             });
         }
     }

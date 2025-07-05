@@ -123,26 +123,6 @@ class ClientService {
         }
     }
 
-    static async getMyNotifications(client_id) {
-        try {
-            if (!client_id) {
-                throw new Exception("Yetkisiz Erişim.");
-            }
-
-            const notifications = await Notification.findAll({
-                where: {client_id: client_id}
-            });
-
-            if (!notifications || notifications.length === 0) {
-                throw new Exception("Bildiriminiz yok.");
-            }
-
-            return notifications;
-        } catch (error) {
-            throw new Exception(error.message, 400);
-        }
-    }
-
     static async readMyAllNotifications(client_id) {
         try {
             if (!client_id) {
@@ -477,6 +457,24 @@ class ClientService {
             };
         } catch (error) {
             throw new Exception(error.message, error.status || 400);
+        }
+    }
+
+    static async getMyNotifications(client_id, limit = 5) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 400, true);
+            }
+
+            const notifications = await Notification.findAll({
+                where: { client_id: client_id },
+                order: [['createdAt', 'DESC']],
+                limit: limit
+            });
+
+            return notifications;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 500, error.showOnScreen || true);
         }
     }
 

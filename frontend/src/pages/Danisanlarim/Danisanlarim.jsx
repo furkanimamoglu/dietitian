@@ -499,8 +499,8 @@ export default function Danisanlarim() {
             showSuccessToast("Bildirim başarıyla gönderildi");
             closeNotificationDialog();
         } catch (error) {
-            console.error("Bildirim gönderme hatası:", error);
-            showErrorToast("Bildirim gönderilirken bir hata oluştu");
+            console.error("Bildirim gönderme hatası:", error.response.data.message);
+            showErrorToast(error.response.data.message);
         }
     };
 
@@ -543,7 +543,7 @@ export default function Danisanlarim() {
             closeBulkNotificationDialog();
         } catch (error) {
             console.error("Toplu bildirim gönderme hatası:", error);
-            showErrorToast("Bildirimler gönderilirken bir hata oluştu");
+            showErrorToast(error.response.data.message);
         }
     };
 

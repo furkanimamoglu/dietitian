@@ -180,7 +180,7 @@ export default function Header({navigation}: Props) {
         return () => clearInterval(interval);
     }, []);
 
-    const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+    const unreadNotificationsCount = (notifications || []).filter(n => !n.isRead).length;
 
     const openDrawer = () => {
         setDrawerOpen(true);
@@ -376,20 +376,8 @@ export default function Header({navigation}: Props) {
                             <View style={styles.drawerContent}>
                                 {notifications.length > 0 ? (
                                     notifications.map((notification, index) => (
-                                        <Animated.View
+                                        <View
                                             key={notification.id}
-                                            entering={Animated.stagger(
-                                                50,
-                                                Animated.spring({
-                                                    damping: 12,
-                                                    stiffness: 100,
-                                                }).withCallback((finished) => {
-                                                    'worklet';
-                                                    if (finished) {
-                                                        console.log('Animation finished');
-                                                    }
-                                                })
-                                            )}
                                             style={[
                                                 styles.notificationBox,
                                                 !notification.isRead && styles.unreadNotification
@@ -412,7 +400,7 @@ export default function Header({navigation}: Props) {
                                                     {formatNotificationDate(notification.createdAt)}
                                                 </Text>
                                             </View>
-                                        </Animated.View>
+                                        </View>
                                     ))
                                 ) : (
                                     <EmptyNotifications />

@@ -284,6 +284,14 @@ Water.belongsTo(Client, {
     foreignKey: 'client_id',
 });
 
+Client.hasMany(Notification, {
+    foreignKey: 'client_id',
+    onDelete: 'CASCADE',
+});
+Notification.belongsTo(Client, {
+    foreignKey: 'client_id',
+});
+
 DietitianSubPackage.hasMany(Dietitian, {
     foreignKey: {
         name: 'subscription_type',
