@@ -2489,10 +2489,35 @@ function Danisan() {
                                     borderBottom: '1px solid #e0e0e0'
                                 }}>
                                     <CheckCircleIcon sx={{fontSize: 16, color: 'success.main', mr: 1}}/>
-                                    <Typography variant="body2" sx={{fontStyle: 'italic'}}>
+                                    <Typography variant="body2" sx={{fontStyle: 'italic', mr: 3}}>
                                         İşaretli ve üzeri çizili öğeler, danışanın mobil uygulamada yedim olarak
                                         işaretlediği öğünlerdir.
                                     </Typography>
+
+                                    {/* Renk açıklaması */}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 'auto' }}>
+                                        <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1 }}>
+                                            Renk Haritası:
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <Box sx={{
+                                                width: 12,
+                                                height: 12,
+                                                borderRadius: '50%',
+                                                bgcolor: 'primary.main'
+                                            }} />
+                                            <Typography variant="caption">Diyetisyen</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <Box sx={{
+                                                width: 12,
+                                                height: 12,
+                                                borderRadius: '50%',
+                                                bgcolor: 'warning.main'
+                                            }} />
+                                            <Typography variant="caption">Danışan</Typography>
+                                        </Box>
+                                    </Box>
                                 </Box>
 
                                 <Divider/>
