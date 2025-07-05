@@ -460,7 +460,7 @@ class ClientService {
         }
     }
 
-    static async getMyNotifications(client_id, limit = 10) {
+    static async getMyNotifications(client_id, limit = 7) {
         try {
             if (!client_id) {
                 throw new Exception("Yetkisiz Erişim.", 400, true);
