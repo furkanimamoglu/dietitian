@@ -1520,10 +1520,8 @@ function Danisan() {
         setActiveTab(newValue);
     };
 
-    // addedBy değerine göre renk belirleme fonksiyonu
     const getTextColorByAddedBy = (addedBy, isEaten) => {
         if (isEaten) {
-            // Yenilen öğelerde de rengi koru, ancak daha soluk yap
             switch (addedBy) {
                 case 'dietitian':
                     return 'primary.light';
@@ -1537,12 +1535,13 @@ function Danisan() {
 
         switch (addedBy) {
             case 'dietitian':
-                return 'primary.main'; // mavi
+                return 'primary.main';
             case 'client':
-                return 'warning.main'; // turuncu
+                return 'warning.main';
             case 'system':
+                return 'text.primary';
             default:
-                return 'text.primary'; // varsayılan (siyah)
+                return 'text.primary';
         }
     };
 
