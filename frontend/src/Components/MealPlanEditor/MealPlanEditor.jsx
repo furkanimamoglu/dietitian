@@ -12,6 +12,13 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
     const [planImage, setPlanImage] = useState(existingPlan?.image && !existingPlan.image.includes('placeholder.png') ? existingPlan.image : null);
     const [imagePreview, setImagePreview] = useState(existingPlan?.image && !existingPlan.image.includes('placeholder.png') ? existingPlan.image : '')
 
+    // Tarif ekleme için yeni state'ler
+    const [recipes, setRecipes] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showRecipeDropdown, setShowRecipeDropdown] = useState(false);
+    const [filteredRecipes, setFilteredRecipes] = useState([]);
+    const [loadingRecipes, setLoadingRecipes] = useState(false);
+
     useEffect(() => {
         if (!existingPlan) {
             setTitle(editTitle);
@@ -267,6 +274,80 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 showErrorToast("Kategoriler yüklenirken bir hata oluştu.");
             });
     }, [existingPlan]);
+
+    // Tarifleri yüklemek için useEffect
+    useEffect(() => {
+        const fetchRecipes = async () => {
+            try {
+                setLoadingRecipes(true);
+                const response = await axios.get(`${config[config.environment].apiUrl}/recipe/getMyRecipes`, {
+                    headers: {Authorization: localStorage.getItem("token")}
+                });
+                setRecipes(response.data || []);
+            } catch (error) {
+                console.error("Tarifler yüklenirken hata oluştu:", error);
+                showErrorToast("Tarifler yüklenirken bir hata oluştu.");
+            } finally {
+                setLoadingRecipes(false);
+            }
+        };
+
+        fetchRecipes();
+    }, []);
+
+    // Arama terimi değiştiğinde filtreleme
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredRecipes([]);
+            setShowRecipeDropdown(false);
+        } else {
+            const filtered = recipes.filter(recipe =>
+                recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredRecipes(filtered);
+            setShowRecipeDropdown(filtered.length > 0);
+        }
+    }, [searchTerm, recipes]);
+
+    // Tarif seçimi için fonksiyon
+    const selectRecipe = (recipe, day, mealType, alternative) => {
+        const recipeItem = {
+            name: recipe.name,
+            portion: '1 porsiyon',
+            addedBy: "recipe",
+            recipeId: recipe.id
+        };
+
+        setMealPlan(prev => {
+            const updated = {...prev};
+            if (!updated[day][mealType][alternative]) {
+                updated[day][mealType][alternative] = [];
+            }
+            updated[day][mealType][alternative] = [...updated[day][mealType][alternative], recipeItem];
+            return updated;
+        });
+
+        // Input'ları temizle
+        setNewMealInput('');
+        setNewMealAmount('1 porsiyon');
+        setSearchTerm('');
+        setShowRecipeDropdown(false);
+        setEditingCell(null);
+
+        showSuccessToast(`${recipe.name} tarifi eklendi!`);
+    };
+
+    // Arama input'u için özel handle fonksiyonu
+    const handleRecipeSearchChange = (e, day, mealType, alternative) => {
+        const value = e.target.value;
+        setNewMealInput(value);
+        setSearchTerm(value);
+
+        // Eğer değer boşsa dropdown'u kapat
+        if (value.trim() === '') {
+            setShowRecipeDropdown(false);
+        }
+    };
 
     const getAlternativesForCell = (day, mealType) => {
         if (mealPlan[day] && mealPlan[day][mealType]) {
@@ -962,7 +1043,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                             </div>
 
                                             <div className="mui-meal-form-field">
-                                                <label htmlFor="meal-time-input" className="mui-time-picker-label">Öğün Saati</label>
+                                                <label htmlFor="meal-time-input" className="mui-time-picker-label">Öğun Saati</label>
                                                 <div className="mui-time-picker-container">
                                                     <span className="mui-time-picker-icon">🕒</span>
                                                     <input
@@ -1097,15 +1178,45 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                     {/* Add meal section */}
                                                     {editingCell === `${day}-${mealType.name}-${alternative}` ? (
                                                         <div className="mui-add-meal-form">
-                                                            <input
-                                                                type="text"
-                                                                value={newMealInput}
-                                                                onChange={(e) => setNewMealInput(e.target.value)}
-                                                                onKeyDown={(e) => handleKeyPress(e, day, mealType.name, alternative)}
-                                                                placeholder="Yemek adını giriniz..."
-                                                                className="mui-meal-input"
-                                                                autoFocus
-                                                            />
+                                                            <div className="mui-recipe-search-container">
+                                                                <input
+                                                                    type="text"
+                                                                    value={newMealInput}
+                                                                    onChange={(e) => handleRecipeSearchChange(e, day, mealType.name, alternative)}
+                                                                    onKeyDown={(e) => handleKeyPress(e, day, mealType.name, alternative)}
+                                                                    placeholder="Tarif ara veya yemek adını giriniz..."
+                                                                    className="mui-meal-input"
+                                                                    autoFocus
+                                                                />
+                                                                {showRecipeDropdown && filteredRecipes.length > 0 && (
+                                                                    <div className="mui-recipe-dropdown">
+                                                                        <div className="mui-recipe-dropdown-header">
+                                                                            <span>🍽️ Tariflerim</span>
+                                                                        </div>
+                                                                        {filteredRecipes.slice(0, 5).map(recipe => (
+                                                                            <div
+                                                                                key={recipe.id}
+                                                                                className="mui-recipe-option"
+                                                                                onClick={() => selectRecipe(recipe, day, mealType.name, alternative)}
+                                                                            >
+                                                                                <div className="mui-recipe-info">
+                                                                                    <span className="mui-recipe-name">{recipe.name}</span>
+                                                                                    <div className="mui-recipe-details">
+                                                                                        {recipe.kcal > 0 && <span className="mui-recipe-kcal">{recipe.kcal} kcal</span>}
+                                                                                        {recipe.protein > 0 && <span className="mui-recipe-protein">{recipe.protein}g protein</span>}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <span className="mui-recipe-add-icon">+</span>
+                                                                            </div>
+                                                                        ))}
+                                                                        {filteredRecipes.length > 5 && (
+                                                                            <div className="mui-recipe-more">
+                                                                                +{filteredRecipes.length - 5} tarif daha...
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                             <input
                                                                 type="text"
                                                                 value={newMealAmount}

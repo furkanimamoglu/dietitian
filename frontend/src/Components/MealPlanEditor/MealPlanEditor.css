@@ -1468,3 +1468,113 @@ select.mui-form-control option {
     min-width: 24px;
     height: 24px;
 }
+
+/* Tarif Autocomplete Dropdown Stilleri */
+.mui-recipe-search-container {
+    position: relative;
+    width: 100%;
+}
+
+.mui-recipe-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.mui-recipe-dropdown-header {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    border-radius: 8px 8px 0 0;
+}
+
+.mui-recipe-option {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mui-recipe-option:hover {
+    background-color: #f8f9fa;
+}
+
+.mui-recipe-option:last-child {
+    border-bottom: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.mui-recipe-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mui-recipe-name {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.mui-recipe-details {
+    display: flex;
+    gap: 8px;
+    font-size: 0.75rem;
+}
+
+.mui-recipe-kcal {
+    color: #ff6b35;
+    background: #fff0ed;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.mui-recipe-protein {
+    color: #28a745;
+    background: #f0f8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.mui-recipe-add-icon {
+    color: #ff9e25;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 4px 8px;
+    border-radius: 50%;
+    background: #fff5e6;
+    transition: all 0.2s ease;
+}
+
+.mui-recipe-option:hover .mui-recipe-add-icon {
+    background: #ff9e25;
+    color: white;
+}
+
+.mui-recipe-more {
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+}
