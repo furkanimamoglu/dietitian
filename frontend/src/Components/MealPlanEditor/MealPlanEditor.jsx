@@ -1,10 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './MealPlanEditor.css';
-import { showErrorToast, showSuccessToast } from '../../utils/toastUtil';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 import axios from 'axios';
 import config from '../../config';
 
-const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescription = '', editCategoryId = '', existingPlan = null }) => {
+const MealPlanEditor = ({
+                            onSave,
+                            onCancel,
+                            isSaving,
+                            editTitle = '',
+                            editDescription = '',
+                            editCategoryId = '',
+                            existingPlan = null
+                        }) => {
     const [title, setTitle] = useState(existingPlan?.title || editTitle);
     const [description, setDescription] = useState(existingPlan?.description || editDescription);
     const [categoryId, setCategoryId] = useState(existingPlan?.category_id || editCategoryId);
@@ -29,10 +37,10 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
-        { id: '1', name: 'Kahvaltı', color: '#FFC107', order: 0, time: '08:00' },
-        { id: '2', name: 'Öğle Yemeği', color: '#FF9800', order: 1, time: '13:00' },
-        { id: '3', name: 'Akşam Yemeği', color: '#9C27B0', order: 2, time: '19:00' },
-        { id: '4', name: 'Aparatif', color: '#E91E63', order: 3, time: '16:00' }
+        {id: '1', name: 'Kahvaltı', color: '#FFC107', order: 0, time: '08:00'},
+        {id: '2', name: 'Öğle Yemeği', color: '#FF9800', order: 1, time: '13:00'},
+        {id: '3', name: 'Akşam Yemeği', color: '#9C27B0', order: 2, time: '19:00'},
+        {id: '4', name: 'Aparatif', color: '#E91E63', order: 3, time: '16:00'}
     ];
 
     const defaultMainMenu = 'Alternatif';
@@ -73,7 +81,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                 .map((mealName, index) => ({
                     id: `existing-${index}`,
                     name: mealName,
-                    color: '#' + Math.floor(Math.random()*16777215).toString(16),
+                    color: '#' + Math.floor(Math.random() * 16777215).toString(16),
                     order: defaultMealTypes.length + index,
                     time: existingMealTimes[mealName] || '' // Kaydedilmiş saat bilgisini kullan
                 }));
@@ -183,7 +191,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                     [defaultMainMenu]: items
                                 };
                             } else if (currentMealData && typeof currentMealData === 'object') {
-                                normalizedPlan[day][mealName] = { ...currentMealData };
+                                normalizedPlan[day][mealName] = {...currentMealData};
 
                                 // Alternatif menülerdeki yemekleri normalize et
                                 Object.keys(normalizedPlan[day][mealName]).forEach(altKey => {
@@ -216,7 +224,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                 }
                                 // Eğer data varsa info'ya kopyala ve data'yı sil
                                 else {
-                                    normalizedPlan[day][mealName].info = { ...normalizedPlan[day][mealName].data };
+                                    normalizedPlan[day][mealName].info = {...normalizedPlan[day][mealName].data};
                                     delete normalizedPlan[day][mealName].data;
                                 }
                             } else {
@@ -250,7 +258,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             initialPlan[day] = {};
             defaultMealTypes.forEach(meal => {
                 initialPlan[day][meal.name] = {
-                    info: { image: '', time: meal.time || '' },
+                    info: {image: '', time: meal.time || ''},
                     [defaultMainMenu]: []
                 };
             });
@@ -408,7 +416,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             updated[dayToAdd] = {};
             mealTypes.forEach(meal => {
                 updated[dayToAdd][meal.name] = {
-                    info: { image: '', time: meal.time || '' },
+                    info: {image: '', time: meal.time || ''},
                     [defaultMainMenu]: []
                 };
             });
@@ -427,7 +435,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
             days.forEach(day => {
                 if (!updated[day]) updated[day] = {};
                 updated[day][mealTypeToAdd.name] = {
-                    info: { image: '', time: mealTypeToAdd.time || '' },
+                    info: {image: '', time: mealTypeToAdd.time || ''},
                     [defaultMainMenu]: []
                 };
             });
@@ -449,7 +457,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
         setMealTypes(mealTypes.map(meal =>
             meal.id === editingMealType.id
-                ? { ...meal, name: newName, time: editedMealTime }
+                ? {...meal, name: newName, time: editedMealTime}
                 : meal
         ));
 
@@ -506,7 +514,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
         setMealPlan(prev => {
             const updated = {...prev};
             if (updated[day]?.[mealType]) {
-                const { [alternativeToRemove]: removed, ...rest } = updated[day][mealType];
+                const {[alternativeToRemove]: removed, ...rest} = updated[day][mealType];
                 updated[day][mealType] = rest;
             }
             return updated;
@@ -635,7 +643,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
 
             updated[day][mealType][newName] = [...updated[day][mealType][oldName]];
 
-            const { [oldName]: removed, ...rest } = updated[day][mealType];
+            const {[oldName]: removed, ...rest} = updated[day][mealType];
             updated[day][mealType] = rest;
 
             updated[day][mealType] = {
@@ -887,7 +895,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                     reader.readAsDataURL(file);
                                 }
                             }}
-                            style={{ display: 'none' }}
+                            style={{display: 'none'}}
                         />
                         <label htmlFor="plan-image" className="file-upload-label">
                             <span className="file-upload-icon">📷</span>
@@ -895,7 +903,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                         </label>
                         {imagePreview && (
                             <div className="image-preview-container">
-                                <img src={imagePreview} alt="Plan önizleme" className="image-preview" />
+                                <img src={imagePreview} alt="Plan önizleme" className="image-preview"/>
                                 <button
                                     type="button"
                                     className="remove-image-btn"
@@ -951,8 +959,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                             disabled={!copiedDay || copiedDay === day}
                                             title={
                                                 !copiedDay ? "Önce bir gün kopyalamalısınız" :
-                                                copiedDay === day ? "Aynı güne yapıştıramazsınız" :
-                                                `${copiedDay} gününü buraya yapıştır`
+                                                    copiedDay === day ? "Aynı güne yapıştıramazsınız" :
+                                                        `${copiedDay} gününü buraya yapıştır`
                                             }
                                             style={{
                                                 backgroundColor: '#4CAF50',
@@ -1020,13 +1028,15 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                     </thead>
                     <tbody>
                     {mealTypes.map((mealType, index) => (
-                        <tr key={mealType.name} className={`mui-meal-row ${index % 2 === 0 ? 'mui-even-row' : 'mui-odd-row'}`}>
+                        <tr key={mealType.name}
+                            className={`mui-meal-row ${index % 2 === 0 ? 'mui-even-row' : 'mui-odd-row'}`}>
                             <td className="mui-meal-type-cell mui-sticky-cell">
                                 <div className="mui-meal-type-content">
                                     {editingMealType && editingMealType.id === mealType.id ? (
                                         <div className="mui-edit-meal-name-form">
                                             <div className="mui-meal-form-field">
-                                                <label htmlFor="meal-name-input" className="mui-time-picker-label">Öğün Adı</label>
+                                                <label htmlFor="meal-name-input" className="mui-time-picker-label">Öğün
+                                                    Adı</label>
                                                 <input
                                                     id="meal-name-input"
                                                     type="text"
@@ -1043,7 +1053,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                             </div>
 
                                             <div className="mui-meal-form-field">
-                                                <label htmlFor="meal-time-input" className="mui-time-picker-label">Öğun Saati</label>
+                                                <label htmlFor="meal-time-input" className="mui-time-picker-label">Öğun
+                                                    Saati</label>
                                                 <div className="mui-time-picker-container">
                                                     <span className="mui-time-picker-icon">🕒</span>
                                                     <input
@@ -1060,7 +1071,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                 <button
                                                     className="mui-btn mui-btn-contained mui-btn-small"
                                                     onClick={saveMealName}
-                                                    style={{ backgroundColor: mealType.color }}
+                                                    style={{backgroundColor: mealType.color}}
                                                 >
                                                     ✓ Kaydet
                                                 </button>
@@ -1080,7 +1091,8 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                 title="Öğun adını ve saatini düzenlemek için tıklayın"
                                             >
                                                 {mealType.name}
-                                                {mealType.time && <span className="mui-meal-time"> ({mealType.time})</span>}
+                                                {mealType.time &&
+                                                    <span className="mui-meal-time"> ({mealType.time})</span>}
                                             </span>
                                             <button
                                                 className="mui-remove-btn"
@@ -1115,7 +1127,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                                     <button
                                                                         className="mui-btn mui-btn-contained mui-btn-small"
                                                                         onClick={() => saveAlternativeName(day, mealType.name, alternative)}
-                                                                        style={{ backgroundColor: mealType.color }}
+                                                                        style={{backgroundColor: mealType.color}}
                                                                     >
                                                                         ✓
                                                                     </button>
@@ -1163,11 +1175,12 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                                     borderColor: mealType.color,
                                                                 }}
                                                             >
-                                                                <span className="mui-chip-label">{meal.name}{meal.portion ? `: ${meal.portion}` : ''}</span>
+                                                                <span
+                                                                    className="mui-chip-label">{meal.name}{meal.portion ? `: ${meal.portion}` : ''}</span>
                                                                 <button
                                                                     className="mui-chip-delete"
                                                                     onClick={() => removeMeal(day, mealType.name, alternative, mealIndex)}
-                                                                    style={{ color: mealType.color }}
+                                                                    style={{color: mealType.color}}
                                                                 >
                                                                     ×
                                                                 </button>
@@ -1200,18 +1213,23 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                                                 onClick={() => selectRecipe(recipe, day, mealType.name, alternative)}
                                                                             >
                                                                                 <div className="mui-recipe-info">
-                                                                                    <span className="mui-recipe-name">{recipe.name}</span>
+                                                                                    <span
+                                                                                        className="mui-recipe-name">{recipe.name}</span>
                                                                                     <div className="mui-recipe-details">
-                                                                                        {recipe.kcal > 0 && <span className="mui-recipe-kcal">{recipe.kcal} kcal</span>}
-                                                                                        {recipe.protein > 0 && <span className="mui-recipe-protein">{recipe.protein}g protein</span>}
+                                                                                        {recipe.kcal > 0 && <span
+                                                                                            className="mui-recipe-kcal">{recipe.kcal} kcal</span>}
+                                                                                        {recipe.protein > 0 && <span
+                                                                                            className="mui-recipe-protein">{recipe.protein}g protein</span>}
                                                                                     </div>
                                                                                 </div>
-                                                                                <span className="mui-recipe-add-icon">+</span>
+                                                                                <span
+                                                                                    className="mui-recipe-add-icon">+</span>
                                                                             </div>
                                                                         ))}
                                                                         {filteredRecipes.length > 5 && (
                                                                             <div className="mui-recipe-more">
-                                                                                +{filteredRecipes.length - 5} tarif daha...
+                                                                                +{filteredRecipes.length - 5} tarif
+                                                                                daha...
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -1229,7 +1247,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                                 <button
                                                                     className="mui-btn mui-btn-contained"
                                                                     onClick={() => addMeal(day, mealType.name, alternative, newMealInput, newMealAmount)}
-                                                                    style={{ backgroundColor: mealType.color }}
+                                                                    style={{backgroundColor: mealType.color}}
                                                                 >
                                                                     💾 Ekle
                                                                 </button>
@@ -1273,7 +1291,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                                     <button
                                                         className="mui-btn mui-btn-contained"
                                                         onClick={() => addCellAlternative(day, mealType.name)}
-                                                        style={{ backgroundColor: mealType.color }}
+                                                        style={{backgroundColor: mealType.color}}
                                                     >
                                                         ✓ Ekle
                                                     </button>
@@ -1372,7 +1390,7 @@ const MealPlanEditor = ({ onSave, onCancel, isSaving, editTitle = '', editDescri
                                     className="mui-btn mui-btn-contained mui-btn-primary"
                                     onClick={() => {
                                         if (editedMealName.trim()) {
-                                            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                                            const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
                                             const newMealType = {
                                                 id: `new-${Date.now()}`,
                                                 name: editedMealName.trim(),

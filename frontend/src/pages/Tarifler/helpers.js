@@ -27,34 +27,34 @@ export const saveRecipe = (requestData, callbacks) => {
             'Content-Type': 'application/json'
         },
     })
-    .then(response => {
-        fetchRecipes();
+        .then(response => {
+            fetchRecipes();
 
-        // Show success message
-        setSuccessMessage("Tarif başarıyla eklendi.");
-        setShowSuccessPopup(true);
+            // Show success message
+            setSuccessMessage("Tarif başarıyla eklendi.");
+            setShowSuccessPopup(true);
 
-        setNewRecipe({
-            title: '',
-            description: '',
-            ingredients: '',
-            instructions: '',
-            category_id: '',
-            image: null,
-            nutritional_info: {
-                calories: '', protein: '', carbs: '', fat: ''
-            }
+            setNewRecipe({
+                title: '',
+                description: '',
+                ingredients: '',
+                instructions: '',
+                category_id: '',
+                image: null,
+                nutritional_info: {
+                    calories: '', protein: '', carbs: '', fat: ''
+                }
+            });
+            setImagePreview('');
+            setAddRecipeModal(false);
+            setIsSaving(false);
+        })
+        .catch(error => {
+            console.error("Error adding recipe:", error);
+            setErrorMessage("Tarif eklenirken bir hata oluştu.");
+            setShowErrorPopup(true);
+            setIsSaving(false);
         });
-        setImagePreview('');
-        setAddRecipeModal(false);
-        setIsSaving(false);
-    })
-    .catch(error => {
-        console.error("Error adding recipe:", error);
-        setErrorMessage("Tarif eklenirken bir hata oluştu.");
-        setShowErrorPopup(true);
-        setIsSaving(false);
-    });
 };
 
 export const updateRecipe = (recipeData, callbacks) => {
@@ -81,36 +81,36 @@ export const updateRecipe = (recipeData, callbacks) => {
             'Content-Type': 'application/json'
         },
     })
-    .then(response => {
-        const updatedRecipe = {
-            id: response.data.id,
-            title: response.data.name,
-            description: response.data.description || "",
-            category_id: response.data.category_id,
-            image: recipeData.image || "/placeholder.png",
-            video_url: response.data.hasVideo ? response.data.video : "",
-            ingredients: response.data.malzemeler,
-            instructions: response.data.hazirlanis,
-            nutritional_info: {
-                calories: response.data.kcal,
-                protein: response.data.protein,
-                carbs: response.data.karbonhidrat,
-                fat: response.data.yag
-            }
-        };
+        .then(response => {
+            const updatedRecipe = {
+                id: response.data.id,
+                title: response.data.name,
+                description: response.data.description || "",
+                category_id: response.data.category_id,
+                image: recipeData.image || "/placeholder.png",
+                video_url: response.data.hasVideo ? response.data.video : "",
+                ingredients: response.data.malzemeler,
+                instructions: response.data.hazirlanis,
+                nutritional_info: {
+                    calories: response.data.kcal,
+                    protein: response.data.protein,
+                    carbs: response.data.karbonhidrat,
+                    fat: response.data.yag
+                }
+            };
 
-        setRecipeData(prev => prev.map(recipe => recipe.id === recipeData.recipe_id ? updatedRecipe : recipe));
+            setRecipeData(prev => prev.map(recipe => recipe.id === recipeData.recipe_id ? updatedRecipe : recipe));
 
-        setSuccessMessage(`"${recipeData.name}" tarifi başarıyla güncellendi.`);
-        setShowSuccessPopup(true);
+            setSuccessMessage(`"${recipeData.name}" tarifi başarıyla güncellendi.`);
+            setShowSuccessPopup(true);
 
-        setIsSaving(false);
-        setEditRecipeModal(false);
-    })
-    .catch(error => {
-        console.error("Error updating recipe:", error);
-        setErrorMessage("Tarif güncellenirken bir hata oluştu.");
-        setShowErrorPopup(true);
-        setIsSaving(false);
-    });
+            setIsSaving(false);
+            setEditRecipeModal(false);
+        })
+        .catch(error => {
+            console.error("Error updating recipe:", error);
+            setErrorMessage("Tarif güncellenirken bir hata oluştu.");
+            setShowErrorPopup(true);
+            setIsSaving(false);
+        });
 };

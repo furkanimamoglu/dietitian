@@ -689,8 +689,17 @@ export default function Danisanlarim() {
                     <img
                         src={params.value || "/placeholder_client.jpg"}
                         alt="Profil"
-                        style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: "2px solid #eee" }}
-                        onError={e => { e.target.onerror = null; e.target.src = "/placeholder_client.jpg"; }}
+                        style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #eee"
+                        }}
+                        onError={e => {
+                            e.target.onerror = null;
+                            e.target.src = "/placeholder_client.jpg";
+                        }}
                     />
                 </Box>
             ),

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import './Dashboard.css';
 import Default from "../../Components/Layouts/Default.jsx";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {
     Avatar,
@@ -593,7 +593,7 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Bugünkü Randevular"
-                                sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                             />
                             <Divider/>
                             <CardContent sx={{p: 0, '&:last-child': {pb: 0}, maxHeight: 360, overflow: 'auto'}}>
@@ -670,7 +670,7 @@ export default function Dashboard() {
                         >
                             <CardHeader
                                 title="Randevu Talepleri"
-                                sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                             />
                             <Divider/>
                             <CardContent sx={{p: 0, '&:last-child': {pb: 0}, maxHeight: 360, overflow: 'auto'}}>

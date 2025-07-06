@@ -12,6 +12,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import Default from "../../Components/Layouts/Default.jsx";
 
 import {
+    Alert,
     Autocomplete,
     Box,
     Button,
@@ -22,18 +23,17 @@ import {
     FormControl,
     Grid2,
     IconButton,
+    InputAdornment,
     InputLabel,
     MenuItem,
     Select,
-    TextField,
-    InputAdornment,
-    Alert
+    TextField
 } from '@mui/material';
 
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
-import { tr } from 'date-fns/locale';
+import {tr} from 'date-fns/locale';
 
 import config from "../../config.js";
 import Close from "@mui/icons-material/Close";
@@ -1052,7 +1052,7 @@ export default function Randevularim() {
                                     startAdornment: (
                                         <>
                                             <InputAdornment position="start">
-                                                <Person color="primary" />
+                                                <Person color="primary"/>
                                             </InputAdornment>
                                             {params.InputProps.startAdornment}
                                         </>
@@ -1190,7 +1190,7 @@ export default function Randevularim() {
                                     startAdornment: (
                                         <>
                                             <InputAdornment position="start">
-                                                <Person color="primary" />
+                                                <Person color="primary"/>
                                             </InputAdornment>
                                             {params.InputProps.startAdornment}
                                         </>
@@ -1253,7 +1253,7 @@ export default function Randevularim() {
                         onClick={sendReminderNotification}
                         color="info"
                         disabled={reminderButtonDisabled}
-                        startIcon={<Notifications />}
+                        startIcon={<Notifications/>}
                     >
                         Randevu Hatırlat
                     </Button>
@@ -1298,13 +1298,29 @@ export default function Randevularim() {
                 </DialogTitle>
                 <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, fontWeight: 'medium', fontSize: '16px'}}>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1.5,
+                            fontWeight: 'medium',
+                            fontSize: '16px'
+                        }}>
                             <Box>
                                 <strong>Tarih/Saat:</strong> {eventData.start ?
-                                    `${new Date(eventData.start).toLocaleDateString('tr-TR', {day: '2-digit', month: '2-digit', year: 'numeric'})} - 
-                                    ${new Date(eventData.start).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} / 
-                                    ${new Date(eventData.end).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}`
-                                    : ''}
+                                `${new Date(eventData.start).toLocaleDateString('tr-TR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                })} - 
+                                    ${new Date(eventData.start).toLocaleTimeString('tr-TR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })} / 
+                                    ${new Date(eventData.end).toLocaleTimeString('tr-TR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}`
+                                : ''}
                             </Box>
                             <Box>
                                 <strong>Danışan:</strong> {clients.find(client => String(client.id) === String(eventData.client_id))?.name || 'Belirtilmemiş'}
@@ -1374,53 +1390,98 @@ export default function Randevularim() {
                 </DialogTitle>
                 <DialogContent sx={{padding: '24px', paddingTop: '24px !important'}}>
                     <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                        <Box sx={{ fontWeight: 'medium', fontSize: '16px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Box sx={{
+                            fontWeight: 'medium',
+                            fontSize: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1
+                        }}>
                             {originalAppointmentData?.start && originalAppointmentData?.end ? (
                                 <>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
-                                        <span style={{ fontWeight: 'bold', color: '#f44336', marginRight: '8px' }}>Eski:</span>
-                                        {new Date(originalAppointmentData.start).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    <Box sx={{display: 'flex', alignItems: 'center', color: 'text.secondary'}}>
+                                        <span style={{
+                                            fontWeight: 'bold',
+                                            color: '#f44336',
+                                            marginRight: '8px'
+                                        }}>Eski:</span>
+                                        {new Date(originalAppointmentData.start).toLocaleDateString('tr-TR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        })}
                                         {' '} - {' '}
-                                        <span style={{ fontWeight: 'bold' }}>
-                                            {new Date(originalAppointmentData.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                        <span style={{fontWeight: 'bold'}}>
+                                            {new Date(originalAppointmentData.start).toLocaleTimeString('tr-TR', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
                                             {' '} - {' '}
-                                            {new Date(originalAppointmentData.end).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(originalAppointmentData.end).toLocaleTimeString('tr-TR', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
                                         </span>
                                     </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.main' }}>
-                                        <span style={{ fontWeight: 'bold', color: '#4caf50', marginRight: '8px' }}>Yeni:</span>
+                                    <Box sx={{display: 'flex', alignItems: 'center', color: 'primary.main'}}>
+                                        <span style={{
+                                            fontWeight: 'bold',
+                                            color: '#4caf50',
+                                            marginRight: '8px'
+                                        }}>Yeni:</span>
                                         {dragDropEventData ?
                                             <>
-                                                {new Date(dragDropEventData.start).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                {new Date(dragDropEventData.start).toLocaleDateString('tr-TR', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric'
+                                                })}
                                                 {' '} - {' '}
-                                                <span style={{ fontWeight: 'bold' }}>
-                                                    {new Date(dragDropEventData.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                <span style={{fontWeight: 'bold'}}>
+                                                    {new Date(dragDropEventData.start).toLocaleTimeString('tr-TR', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
                                                     {' '} - {' '}
                                                     {dragDropEventData.end ?
-                                                        new Date(dragDropEventData.end).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) :
+                                                        new Date(dragDropEventData.end).toLocaleTimeString('tr-TR', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        }) :
                                                         ''
                                                     }
                                                 </span>
                                             </> :
                                             <>
-                                                {new Date(eventData.start).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                {new Date(eventData.start).toLocaleDateString('tr-TR', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric'
+                                                })}
                                                 {' '} - {' '}
-                                                <span style={{ fontWeight: 'bold' }}>
-                                                    {new Date(eventData.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                <span style={{fontWeight: 'bold'}}>
+                                                    {new Date(eventData.start).toLocaleTimeString('tr-TR', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
                                                     {' '} - {' '}
-                                                    {new Date(eventData.end).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                    {new Date(eventData.end).toLocaleTimeString('tr-TR', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
                                                 </span>
                                             </>
                                         }
                                     </Box>
-                                    <Box sx={{ mt: 1 }}>Bu değişikliği onaylıyor musunuz?</Box>
+                                    <Box sx={{mt: 1}}>Bu değişikliği onaylıyor musunuz?</Box>
                                 </>
                             ) : (
                                 'Tarih bilgisi bulunamadı'
                             )}
                         </Box>
                         <Box sx={{color: 'text.secondary', fontSize: '14px'}}>
-                            Değişiklikleri onaylamak için "Onayla" butonuna tıklayın. İptal etmek için "Vazgeç" butonuna tıklayın.
+                            Değişiklikleri onaylamak için "Onayla" butonuna tıklayın. İptal etmek için "Vazgeç" butonuna
+                            tıklayın.
                         </Box>
                     </Box>
                 </DialogContent>

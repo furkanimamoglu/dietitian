@@ -285,7 +285,7 @@ const pdfStyles = StyleSheet.create({
     }
 });
 
-const NutritionPlanDocument = ({ dietitian, program }) => {
+const NutritionPlanDocument = ({dietitian, program}) => {
     console.log("Rendering NutritionPlanDocument with program:", program);
     console.log("Rendering NutritionPlanDocument with dietitian:", dietitian);
     const today = new Date();
@@ -317,7 +317,7 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
             if (dayHasMeals) totalDays++;
         });
 
-        return { totalDays, totalMeals, totalItems };
+        return {totalDays, totalMeals, totalItems};
     };
 
     const stats = calculateStats();
@@ -425,7 +425,8 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                                                             }
 
                                                             return (
-                                                                <View style={pdfStyles.alternativeGroup} key={`alt-${altIndex}`}>
+                                                                <View style={pdfStyles.alternativeGroup}
+                                                                      key={`alt-${altIndex}`}>
                                                                     {Object.keys(mealData).length > 1 && (
                                                                         <Text style={pdfStyles.alternativeTitle}>
                                                                             {alternativeGroup}
@@ -687,7 +688,7 @@ export default function Beslenme() {
     const [editImage, setEditImage] = useState(null);
     const [dietitianInfo, setDietitianInfo] = useState({});
 
-    useEffect( () => {
+    useEffect(() => {
         axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
@@ -1001,8 +1002,8 @@ export default function Beslenme() {
                 try {
                     axios.post(
                         `${config[config.environment].apiUrl}/notification/sendNutritionPlanAssignedNotification`,
-                        { client_id: response.data.client_id },
-                        { headers: { Authorization: localStorage.getItem("token") } }
+                        {client_id: response.data.client_id},
+                        {headers: {Authorization: localStorage.getItem("token")}}
                     );
                     console.log(`Bildirim gönderildi: client_id=${response.data.client_id}`);
                 } catch (notificationError) {
@@ -1229,33 +1230,40 @@ export default function Beslenme() {
 
                 {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
-                    <div className="search-filter-bar" style={{ width: '100%', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 16, background: '#fff' }}>
-                            <TextField
-                                variant="outlined"
-                                size="small"
-                                    placeholder="Plan Adına Göre Ara"
-                                    value={planSearchTerm}
-                                    onChange={(e) => setPlanSearchTerm(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon color="action" />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: planSearchTerm && (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                size="small"
-                                        onClick={() => setPlanSearchTerm('')}
-                                                edge="end"
-                                    >
-                                        <CloseIcon fontSize="small" />
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )
-                                }}
-                            style={{ maxWidth: 300, flex: 1, background: '#fff' }}
-                            />
+                    <div className="search-filter-bar" style={{
+                        width: '100%',
+                        marginBottom: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 16,
+                        background: '#fff'
+                    }}>
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            placeholder="Plan Adına Göre Ara"
+                            value={planSearchTerm}
+                            onChange={(e) => setPlanSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon color="action"/>
+                                    </InputAdornment>
+                                ),
+                                endAdornment: planSearchTerm && (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => setPlanSearchTerm('')}
+                                            edge="end"
+                                        >
+                                            <CloseIcon fontSize="small"/>
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
+                            style={{maxWidth: 300, flex: 1, background: '#fff'}}
+                        />
                         {/* Buraya ek filtreler eklenebilir */}
                     </div>
                     <div className="nutrition-cards-grid">
@@ -1458,31 +1466,32 @@ export default function Beslenme() {
                         </select>
                     </div>
                     <div className="input-container">
-                        <label htmlFor="nutritionImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                        <label htmlFor="nutritionImage"
+                               className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
                             <span className="file-upload-icon">📷</span>
                             {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
-                        <input
-                            type="file"
-                            id="nutritionImage"
-                            className="text-input"
-                            accept="image/*"
-                                style={{ display: 'none' }}
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        setPlanImage(file);
-                                        setImagePreview(reader.result);
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            }}
-                        />
+                            <input
+                                type="file"
+                                id="nutritionImage"
+                                className="text-input"
+                                accept="image/*"
+                                style={{display: 'none'}}
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setPlanImage(file);
+                                            setImagePreview(reader.result);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                            />
                         </label>
                         {imagePreview && (
                             <div className="image-preview-container">
-                                <img src={imagePreview} alt="Program önizleme" className="image-preview" />
+                                <img src={imagePreview} alt="Program önizleme" className="image-preview"/>
                                 <button
                                     type="button"
                                     className="remove-image-btn"
@@ -1700,7 +1709,7 @@ export default function Beslenme() {
                 title="Beslenme Programı Düzenle"
                 onClose={() => setEditProgramModal(false)}
                 fullWidth={true}
-                sx={{ width: '100%' }}
+                sx={{width: '100%'}}
             >
                 <div className="modal-body">
                     <MealPlanEditor
@@ -2095,7 +2104,7 @@ export default function Beslenme() {
                                                             </Typography>
                                                         }
                                                         action={
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                                                 <Chip
                                                                     label={status.status}
                                                                     color={status.chipColor}
@@ -2113,26 +2122,31 @@ export default function Beslenme() {
                                                                                 axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionAssignment?assignment_id=${program.id}`, {
                                                                                     headers: {Authorization: localStorage.getItem("token")}
                                                                                 })
-                                                                                .then(response => {
-                                                                                    setSuccessMessage("Plan başarıyla kaldırıldı.");
-                                                                                    setShowSuccessPopup(true);
-                                                                                    // Planları yeniden yükle
-                                                                                    axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${selectedClientInfo.id}`, {
-                                                                                        headers: {Authorization: localStorage.getItem("token")}
-                                                                                    })
                                                                                     .then(response => {
-                                                                                        setSelectedClientPrograms(response.data || []);
+                                                                                        setSuccessMessage("Plan başarıyla kaldırıldı.");
+                                                                                        setShowSuccessPopup(true);
+                                                                                        // Planları yeniden yükle
+                                                                                        axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${selectedClientInfo.id}`, {
+                                                                                            headers: {Authorization: localStorage.getItem("token")}
+                                                                                        })
+                                                                                            .then(response => {
+                                                                                                setSelectedClientPrograms(response.data || []);
+                                                                                            })
+                                                                                            .catch(error => {
+                                                                                                console.error("Error refreshing client programs:", error);
+                                                                                            });
                                                                                     })
                                                                                     .catch(error => {
-                                                                                        console.error("Error refreshing client programs:", error);
+                                                                                        console.error("Error removing assignment:", error);
+                                                                                        setErrorMessage("Plan kaldırılırken bir hata oluştu.");
+                                                                                        setShowErrorPopup(true);
                                                                                     });
-                                                                                })
-                                                                                .catch(error => {
-                                                                                    console.error("Error removing assignment:", error);
-                                                                                    setErrorMessage("Plan kaldırılırken bir hata oluştu.");
-                                                                                    setShowErrorPopup(true);
+                                                                                setConfirmDialog({
+                                                                                    open: false,
+                                                                                    title: '',
+                                                                                    message: '',
+                                                                                    onConfirm: null
                                                                                 });
-                                                                                setConfirmDialog({ open: false, title: '', message: '', onConfirm: null });
                                                                             }
                                                                         });
                                                                     }}
@@ -2144,7 +2158,7 @@ export default function Beslenme() {
                                                                     }}
                                                                     title="Atanmış Planı Kaldır"
                                                                 >
-                                                                    <RemoveCircleIcon fontSize="small" />
+                                                                    <RemoveCircleIcon fontSize="small"/>
                                                                 </IconButton>
                                                             </Box>
                                                         }
@@ -2316,7 +2330,9 @@ export default function Beslenme() {
                                                             if (programDetails) {
                                                                 return (
                                                                     <ConditionalPDFLink
-                                                                        document={<NutritionPlanDocument dietitian={dietitianInfo} program={programDetails}/>}
+                                                                        document={<NutritionPlanDocument
+                                                                            dietitian={dietitianInfo}
+                                                                            program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                                                                         buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
                                                                         buttonTitle="PDF İndir"
@@ -2389,7 +2405,7 @@ export default function Beslenme() {
             {confirmDialog.open && (
                 <Dialog
                     open={confirmDialog.open}
-                    onClose={() => setConfirmDialog({ open: false, title: '', message: '', onConfirm: null })}
+                    onClose={() => setConfirmDialog({open: false, title: '', message: '', onConfirm: null})}
                     aria-labelledby="confirm-dialog-title"
                     aria-describedby="confirm-dialog-description"
                 >
@@ -2400,7 +2416,8 @@ export default function Beslenme() {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => setConfirmDialog({ open: false, title: '', message: '', onConfirm: null })} color="primary">
+                        <Button onClick={() => setConfirmDialog({open: false, title: '', message: '', onConfirm: null})}
+                                color="primary">
                             Vazgeç
                         </Button>
                         <Button

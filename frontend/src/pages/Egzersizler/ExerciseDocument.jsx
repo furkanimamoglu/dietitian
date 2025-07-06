@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import {Document, Font, Page, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 Font.register({
     family: 'Open Sans',

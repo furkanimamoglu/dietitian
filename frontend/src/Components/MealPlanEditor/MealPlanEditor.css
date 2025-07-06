@@ -126,7 +126,7 @@ select.mui-form-control option {
 
 /* Table Header */
 .mui-table-header-cell {
-    background: linear-gradient(135deg, #2d4149  0%, #2d4149  100%);
+    background: linear-gradient(135deg, #2d4149 0%, #2d4149 100%);
     color: white;
     padding: 16px;
     text-align: center;
@@ -1380,8 +1380,14 @@ select.mui-form-control option {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* MealPlanEditor.css dosyasına eklenecek stiller */

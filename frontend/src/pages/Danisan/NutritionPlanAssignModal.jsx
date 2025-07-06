@@ -1,34 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    MenuItem,
-    Grid,
-    Stack,
-    Typography,
-    CircularProgress,
     Box,
-    InputAdornment
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    InputAdornment,
+    MenuItem,
+    Stack,
+    TextField,
+    Typography
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { tr } from 'date-fns/locale';
+import {DatePicker} from '@mui/x-date-pickers/DatePicker';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from 'date-fns/locale';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import axios from 'axios';
 import config from '../../config.js';
-import { showErrorToast, showSuccessToast } from '../../utils/toastUtil';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 
 const NutritionPlanAssignModal = ({
-    open,
-    onClose,
-    clientId,
-    onSuccess
-}) => {
+                                      open,
+                                      onClose,
+                                      clientId,
+                                      onSuccess
+                                  }) => {
     const [availableNutritionPlans, setAvailableNutritionPlans] = useState([]);
     const [availableNutritionPlansLoading, setAvailableNutritionPlansLoading] = useState(false);
     const [nutritionAssignForm, setNutritionAssignForm] = useState({
@@ -86,8 +86,8 @@ const NutritionPlanAssignModal = ({
     };
 
     const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setNutritionAssignForm(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setNutritionAssignForm(prev => ({...prev, [name]: value}));
     };
 
     const setDateRange = (weeks) => {
@@ -142,8 +142,8 @@ const NutritionPlanAssignModal = ({
             try {
                 await axios.post(
                     `${config[config.environment].apiUrl}/notification/sendNutritionPlanAssignedNotification`,
-                    { client_id: clientId },
-                    { headers: { Authorization: localStorage.getItem("token") } }
+                    {client_id: clientId},
+                    {headers: {Authorization: localStorage.getItem("token")}}
                 );
             } catch (notificationError) {
                 console.error("Bildirim gönderilirken hata oluştu:", notificationError);
@@ -174,8 +174,8 @@ const NutritionPlanAssignModal = ({
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogTitle>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <RestaurantIcon sx={{ mr: 1, color: 'primary.main' }} />
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <RestaurantIcon sx={{mr: 1, color: 'primary.main'}}/>
                     Beslenme Planı Ata
                 </Box>
             </DialogTitle>
@@ -187,8 +187,8 @@ const NutritionPlanAssignModal = ({
                                 Beslenme Planı Seçin
                             </Typography>
                             {availableNutritionPlansLoading ? (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                                    <CircularProgress size={24} />
+                                <Box sx={{display: 'flex', justifyContent: 'center', py: 2}}>
+                                    <CircularProgress size={24}/>
                                 </Box>
                             ) : (
                                 <TextField
@@ -203,11 +203,11 @@ const NutritionPlanAssignModal = ({
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <RestaurantIcon fontSize="small" />
+                                                <RestaurantIcon fontSize="small"/>
                                             </InputAdornment>
                                         ),
                                     }}
-                                    sx={{ mb: 2 }}
+                                    sx={{mb: 2}}
                                 >
                                     <MenuItem value="" disabled>
                                         Beslenme planı seçin
@@ -222,10 +222,10 @@ const NutritionPlanAssignModal = ({
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Typography variant="h6" sx={{ mb: 1, mt: 2 }}>
+                            <Typography variant="h6" sx={{mb: 1, mt: 2}}>
                                 Hızlı Süre Seç:
                             </Typography>
-                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 2}}>
                                 <Button
                                     variant="outlined"
                                     size="small"
@@ -264,7 +264,7 @@ const NutritionPlanAssignModal = ({
                                     value={nutritionAssignForm.start_date ? new Date(nutritionAssignForm.start_date) : null}
                                     onChange={(newValue) => {
                                         const formatted = newValue ? newValue.toISOString().split('T')[0] : '';
-                                        setNutritionAssignForm(prev => ({ ...prev, start_date: formatted }));
+                                        setNutritionAssignForm(prev => ({...prev, start_date: formatted}));
                                     }}
                                     slotProps={{
                                         textField: {
@@ -284,7 +284,7 @@ const NutritionPlanAssignModal = ({
                                     value={nutritionAssignForm.end_date ? new Date(nutritionAssignForm.end_date) : null}
                                     onChange={(newValue) => {
                                         const formatted = newValue ? newValue.toISOString().split('T')[0] : '';
-                                        setNutritionAssignForm(prev => ({ ...prev, end_date: formatted }));
+                                        setNutritionAssignForm(prev => ({...prev, end_date: formatted}));
                                     }}
                                     slotProps={{
                                         textField: {
@@ -322,7 +322,7 @@ const NutritionPlanAssignModal = ({
                         color="primary"
                         disabled={nutritionAssignLoading || !nutritionAssignForm.nutrition_plan_id}
                     >
-                        {nutritionAssignLoading ? <CircularProgress size={24} /> : "Plan Ata"}
+                        {nutritionAssignLoading ? <CircularProgress size={24}/> : "Plan Ata"}
                     </Button>
                 </DialogActions>
             </Box>

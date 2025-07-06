@@ -5,16 +5,16 @@ import {
     Avatar,
     Box,
     Button,
+    Card,
+    CardContent,
     CircularProgress,
     Container,
     InputAdornment,
     Link,
     TextField,
     Typography,
-    Card,
-    CardContent,
-    useTheme,
-    useMediaQuery
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 
 import LockResetIcon from "@mui/icons-material/LockReset";
@@ -111,7 +111,8 @@ function ForgotPassword() {
                     </Typography>
                 </Box>
 
-                <Container component="main" maxWidth="sm" className="forgot-password-container" sx={{ zIndex: 10, position: 'relative' }}>
+                <Container component="main" maxWidth="sm" className="forgot-password-container"
+                           sx={{zIndex: 10, position: 'relative'}}>
                     <Card
                         elevation={10}
                         sx={{
@@ -135,7 +136,7 @@ function ForgotPassword() {
                             boxShadow: "0 4px 10px rgba(252, 158, 33, 0.5)",
                             border: "4px solid white"
                         }}>
-                            <LockResetIcon sx={{ fontSize: 40 }}/>
+                            <LockResetIcon sx={{fontSize: 40}}/>
                         </Avatar>
 
                         <CardContent sx={{
@@ -170,7 +171,7 @@ function ForgotPassword() {
                             </Typography>
 
                             <form onSubmit={handleSubmit} style={{width: '100%'}}>
-                                <Box sx={{ mb: 3 }}>
+                                <Box sx={{mb: 3}}>
                                     <Typography
                                         variant="subtitle1"
                                         gutterBottom
@@ -207,8 +208,9 @@ function ForgotPassword() {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <PhoneIcon sx={{ color: '#ff7355' }} />
-                                                    <Typography variant="body2" sx={{ ml: 1, fontWeight: 500, color: '#666' }}>
+                                                    <PhoneIcon sx={{color: '#ff7355'}}/>
+                                                    <Typography variant="body2"
+                                                                sx={{ml: 1, fontWeight: 500, color: '#666'}}>
                                                         +90
                                                     </Typography>
                                                 </InputAdornment>

@@ -52,7 +52,8 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Paper, Stack,
+    Paper,
+    Stack,
     Tab,
     Tabs,
     TextField,
@@ -149,7 +150,7 @@ const ExerciseCard = ({item, onAddToUser, onPrint, onEdit, onDelete, onView, die
                         <PersonAddIcon/>
                     </button>
                     <PDFDownloadLink
-                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitian={dietitianInfo} />}
+                        document={<ExerciseDocument exercise={item} assignmentData={null} dietitian={dietitianInfo}/>}
                         fileName={`${item.exercise_name.replace(/\s+/g, '_')}_egzersiz_programi.pdf`}
                         style={{textDecoration: 'none'}}
                     >
@@ -685,7 +686,7 @@ export default function Egzersizler() {
                     };
 
                     return axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, exerciseDataToSend, {
-                        headers: { Authorization: localStorage.getItem("token") }
+                        headers: {Authorization: localStorage.getItem("token")}
                     });
                 })
                 .then(addResponse => {
@@ -693,7 +694,17 @@ export default function Egzersizler() {
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${addResponse.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', video: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setNewExercise({
+                        exercise_name: '',
+                        exercise_description: '',
+                        category_id: '',
+                        video: '',
+                        image: '',
+                        duration: 30,
+                        difficulty: 3,
+                        equipment: '',
+                        calories_burned: 0
+                    });
                     setImagePreview('');
                 })
                 .catch(error => {
@@ -707,14 +718,24 @@ export default function Egzersizler() {
 
         } else {
             axios.post(`${config[config.environment].apiUrl}/exercise/addExercise`, newExercise, {
-                headers: { Authorization: localStorage.getItem("token") }
+                headers: {Authorization: localStorage.getItem("token")}
             })
                 .then(response => {
                     setEgzersizData(prevData => [...prevData, response.data]);
                     setAddExerciseModal(false);
                     setSuccessMessage(`"${response.data.exercise_name}" egzersizi başarıyla oluşturuldu.`);
                     setShowSuccessPopup(true);
-                    setNewExercise({ exercise_name: '', exercise_description: '', category_id: '', video: '', image: '', duration: 30, difficulty: 3, equipment: '', calories_burned: 0 });
+                    setNewExercise({
+                        exercise_name: '',
+                        exercise_description: '',
+                        category_id: '',
+                        video: '',
+                        image: '',
+                        duration: 30,
+                        difficulty: 3,
+                        equipment: '',
+                        calories_burned: 0
+                    });
                     setImagePreview('');
                 })
                 .catch(error => {
@@ -864,12 +885,12 @@ export default function Egzersizler() {
         })
             .then(response => {
                 axios.post(`${config[config.environment].apiUrl}/notification/sendExerciseAssignedNotification`,
-                    { client_id: selectedUser.id },
-                    { headers: {Authorization: localStorage.getItem("token")} }
+                    {client_id: selectedUser.id},
+                    {headers: {Authorization: localStorage.getItem("token")}}
                 )
-                .catch(notificationError => {
-                    console.error("Bildirim gönderilirken hata oluştu:", notificationError);
-                });
+                    .catch(notificationError => {
+                        console.error("Bildirim gönderilirken hata oluştu:", notificationError);
+                    });
 
                 setAddToUserModal(false);
                 setSelectedExercise(null);
@@ -1013,7 +1034,7 @@ export default function Egzersizler() {
                         <div className="filter-group search-filter">
                             <h3 className="filter-title">Egzersiz Ara:</h3>
                             <div className="search-input-container">
-                                <SearchIcon className="search-icon" />
+                                <SearchIcon className="search-icon"/>
                                 <input
                                     type="text"
                                     className="exercise-search-input"
@@ -1027,7 +1048,7 @@ export default function Egzersizler() {
                                         onClick={() => setExerciseSearchTerm('')}
                                         title="Aramayı temizle"
                                     >
-                                        <CloseIcon />
+                                        <CloseIcon/>
                                     </button>
                                 )}
                             </div>
@@ -1307,7 +1328,7 @@ export default function Egzersizler() {
 
                     {detailItem?.video && (
                         <div className="video-link">
-                            <ReactPlayer url={detailItem.video} controls width="100%" height="240px" />
+                            <ReactPlayer url={detailItem.video} controls width="100%" height="240px"/>
                         </div>
                     )}
 
@@ -1600,14 +1621,14 @@ export default function Egzersizler() {
                             size="small"
                             className="text-input"
                             value={newExercise.video || ''}
-                            onChange={(e) => setNewExercise({ ...newExercise, video: e.target.value })}
+                            onChange={(e) => setNewExercise({...newExercise, video: e.target.value})}
                             placeholder="Egzersiz video URL'si giriniz"
                             fullWidth
                         />
                     </div>
                     {newExercise.video && (
-                        <div style={{ marginTop: 16 }}>
-                            <ReactPlayer url={newExercise.video} controls width="100%" height="240px" />
+                        <div style={{marginTop: 16}}>
+                            <ReactPlayer url={newExercise.video} controls width="100%" height="240px"/>
                         </div>
                     )}
                     <div className="input-container">
@@ -1629,13 +1650,14 @@ export default function Egzersizler() {
                                 }
                             }}
                         />
-                        <label htmlFor="exerciseImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                        <label htmlFor="exerciseImage"
+                               className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
                             <span className="file-upload-icon">📷</span>
                             {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
                         </label>
                         {imagePreview && (
                             <div className="image-preview-container">
-                                <img src={imagePreview} alt="Egzersiz önizleme" className="image-preview" />
+                                <img src={imagePreview} alt="Egzersiz önizleme" className="image-preview"/>
                                 <button
                                     type="button"
                                     className="remove-image-btn"
@@ -1832,14 +1854,14 @@ export default function Egzersizler() {
                             size="small"
                             className="text-input"
                             value={editExerciseData.video || ''}
-                            onChange={(e) => setEditExerciseData({ ...editExerciseData, video: e.target.value })}
+                            onChange={(e) => setEditExerciseData({...editExerciseData, video: e.target.value})}
                             placeholder="Egzersiz video URL'si giriniz"
                             fullWidth
                         />
                     </div>
                     {editExerciseData.video && (
-                        <div style={{ marginTop: 16 }}>
-                            <ReactPlayer url={editExerciseData.video} controls width="100%" height="240px" />
+                        <div style={{marginTop: 16}}>
+                            <ReactPlayer url={editExerciseData.video} controls width="100%" height="240px"/>
                         </div>
                     )}
                     <div className="input-container">
@@ -1861,13 +1883,14 @@ export default function Egzersizler() {
                                 }
                             }}
                         />
-                        <label htmlFor="editExerciseImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                        <label htmlFor="editExerciseImage"
+                               className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
                             <span className="file-upload-icon">📷</span>
                             {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
                         </label>
                         {imagePreview && (
                             <div className="image-preview-container">
-                                <img src={imagePreview} alt="Egzersiz önizleme" className="image-preview" />
+                                <img src={imagePreview} alt="Egzersiz önizleme" className="image-preview"/>
                                 <button
                                     type="button"
                                     className="remove-image-btn"

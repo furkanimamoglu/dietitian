@@ -722,7 +722,10 @@ export default function Mesaj() {
                                                                         {message.timestamp}
                                                                     </Typography>
                                                                     {message.sender === "DIETITIAN" && (
-                                                                        <CheckCircleIcon sx={{fontSize: 12, color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary'}}/>
+                                                                        <CheckCircleIcon sx={{
+                                                                            fontSize: 12,
+                                                                            color: message.sender === "DIETITIAN" ? 'rgba(255, 255, 255, 0.8)' : 'text.secondary'
+                                                                        }}/>
                                                                     )}
                                                                 </Box>
                                                             </Box>
@@ -899,8 +902,12 @@ export default function Mesaj() {
                                         {/* Ölçüm verileri bölümü */}
                                         {measurements && (
                                             <>
-                                                <Divider sx={{my: 2}} />
-                                                <Typography variant="subtitle1" sx={{px: 2, fontWeight: 'bold', color: theme.palette.primary.main}}>
+                                                <Divider sx={{my: 2}}/>
+                                                <Typography variant="subtitle1" sx={{
+                                                    px: 2,
+                                                    fontWeight: 'bold',
+                                                    color: theme.palette.primary.main
+                                                }}>
                                                     Son Ölçüm Bilgileri
                                                 </Typography>
                                                 <Box sx={{px: 2, mt: 1}}>
@@ -919,9 +926,11 @@ export default function Mesaj() {
                                                                     alignItems: 'center'
                                                                 }}
                                                             >
-                                                                <HeightIcon />
-                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Boy</Typography>
-                                                                <Typography variant="body2">{measurements.boy} cm</Typography>
+                                                                <HeightIcon/>
+                                                                <Typography variant="caption"
+                                                                            sx={{fontWeight: 'bold'}}>Boy</Typography>
+                                                                <Typography
+                                                                    variant="body2">{measurements.boy} cm</Typography>
                                                             </Paper>
                                                         </Grid>
                                                         <Grid item xs={6}>
@@ -938,15 +947,21 @@ export default function Mesaj() {
                                                                     alignItems: 'center'
                                                                 }}
                                                             >
-                                                                <MonitorWeightIcon />
-                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kilo</Typography>
-                                                                <Typography variant="body2">{measurements.kilo} kg</Typography>
+                                                                <MonitorWeightIcon/>
+                                                                <Typography variant="caption"
+                                                                            sx={{fontWeight: 'bold'}}>Kilo</Typography>
+                                                                <Typography
+                                                                    variant="body2">{measurements.kilo} kg</Typography>
                                                             </Paper>
                                                         </Grid>
 
                                                         {/* Diğer ölçüm değerleri - 4 kutu ile ayrı satırda gösterilecek */}
                                                         <Grid item xs={12}>
-                                                            <Typography variant="caption" sx={{mt: 1, display: 'block', color: theme.palette.text.secondary}}>
+                                                            <Typography variant="caption" sx={{
+                                                                mt: 1,
+                                                                display: 'block',
+                                                                color: theme.palette.text.secondary
+                                                            }}>
                                                                 Diğer Ölçümler
                                                             </Typography>
                                                         </Grid>
@@ -966,9 +981,11 @@ export default function Mesaj() {
                                                                     alignItems: 'center'
                                                                 }}
                                                             >
-                                                                <StraightenIcon fontSize="small" />
-                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Bel</Typography>
-                                                                <Typography variant="body2">{measurements.bel} cm</Typography>
+                                                                <StraightenIcon fontSize="small"/>
+                                                                <Typography variant="caption"
+                                                                            sx={{fontWeight: 'bold'}}>Bel</Typography>
+                                                                <Typography
+                                                                    variant="body2">{measurements.bel} cm</Typography>
                                                             </Paper>
                                                         </Grid>
                                                         <Grid item xs={3}>
@@ -986,9 +1003,11 @@ export default function Mesaj() {
                                                                     alignItems: 'center'
                                                                 }}
                                                             >
-                                                                <StraightenIcon fontSize="small" />
-                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kalça</Typography>
-                                                                <Typography variant="body2">{measurements.kalca} cm</Typography>
+                                                                <StraightenIcon fontSize="small"/>
+                                                                <Typography variant="caption"
+                                                                            sx={{fontWeight: 'bold'}}>Kalça</Typography>
+                                                                <Typography
+                                                                    variant="body2">{measurements.kalca} cm</Typography>
                                                             </Paper>
                                                         </Grid>
                                                         <Grid item xs={3}>
@@ -1006,9 +1025,11 @@ export default function Mesaj() {
                                                                     alignItems: 'center'
                                                                 }}
                                                             >
-                                                                <StraightenIcon fontSize="small" />
-                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Göğüs</Typography>
-                                                                <Typography variant="body2">{measurements.gogus} cm</Typography>
+                                                                <StraightenIcon fontSize="small"/>
+                                                                <Typography variant="caption"
+                                                                            sx={{fontWeight: 'bold'}}>Göğüs</Typography>
+                                                                <Typography
+                                                                    variant="body2">{measurements.gogus} cm</Typography>
                                                             </Paper>
                                                         </Grid>
                                                         <Grid item xs={3}>
@@ -1026,9 +1047,11 @@ export default function Mesaj() {
                                                                     alignItems: 'center'
                                                                 }}
                                                             >
-                                                                <StraightenIcon fontSize="small" />
-                                                                <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kol</Typography>
-                                                                <Typography variant="body2">{measurements.kol} cm</Typography>
+                                                                <StraightenIcon fontSize="small"/>
+                                                                <Typography variant="caption"
+                                                                            sx={{fontWeight: 'bold'}}>Kol</Typography>
+                                                                <Typography
+                                                                    variant="body2">{measurements.kol} cm</Typography>
                                                             </Paper>
                                                         </Grid>
 
@@ -1049,9 +1072,11 @@ export default function Mesaj() {
                                                                                 alignItems: 'center'
                                                                             }}
                                                                         >
-                                                                            <ScaleIcon fontSize="small" />
-                                                                            <Typography variant="caption" sx={{fontWeight: 'bold'}}>Yağ</Typography>
-                                                                            <Typography variant="body2">%{measurements.yag}</Typography>
+                                                                            <ScaleIcon fontSize="small"/>
+                                                                            <Typography variant="caption"
+                                                                                        sx={{fontWeight: 'bold'}}>Yağ</Typography>
+                                                                            <Typography
+                                                                                variant="body2">%{measurements.yag}</Typography>
                                                                         </Paper>
                                                                     </Grid>
                                                                     <Grid item xs={4}>
@@ -1068,9 +1093,11 @@ export default function Mesaj() {
                                                                                 alignItems: 'center'
                                                                             }}
                                                                         >
-                                                                            <FitnessCenterIcon fontSize="small" />
-                                                                            <Typography variant="caption" sx={{fontWeight: 'bold'}}>Kas</Typography>
-                                                                            <Typography variant="body2">%{measurements.kas}</Typography>
+                                                                            <FitnessCenterIcon fontSize="small"/>
+                                                                            <Typography variant="caption"
+                                                                                        sx={{fontWeight: 'bold'}}>Kas</Typography>
+                                                                            <Typography
+                                                                                variant="body2">%{measurements.kas}</Typography>
                                                                         </Paper>
                                                                     </Grid>
                                                                     <Grid item xs={4}>
@@ -1087,9 +1114,11 @@ export default function Mesaj() {
                                                                                 alignItems: 'center'
                                                                             }}
                                                                         >
-                                                                            <WaterDropIcon fontSize="small" />
-                                                                            <Typography variant="caption" sx={{fontWeight: 'bold'}}>Su</Typography>
-                                                                            <Typography variant="body2">%{measurements.su}</Typography>
+                                                                            <WaterDropIcon fontSize="small"/>
+                                                                            <Typography variant="caption"
+                                                                                        sx={{fontWeight: 'bold'}}>Su</Typography>
+                                                                            <Typography
+                                                                                variant="body2">%{measurements.su}</Typography>
                                                                         </Paper>
                                                                     </Grid>
                                                                 </Grid>
@@ -1099,7 +1128,8 @@ export default function Mesaj() {
 
                                                     <Box sx={{mt: 1, textAlign: 'center'}}>
                                                         <Typography variant="caption" color="text.secondary">
-                                                            Son ölçüm tarihi: {new Date(measurements.createdAt).toLocaleDateString('tr-TR')}
+                                                            Son ölçüm
+                                                            tarihi: {new Date(measurements.createdAt).toLocaleDateString('tr-TR')}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
