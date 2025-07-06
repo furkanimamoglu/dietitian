@@ -751,16 +751,13 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Hangi öğün için resim yüklendiğinin kontrolü
             if (!selectedMealType || !mealPlan[currentDay] || !mealPlan[currentDay][selectedMealType]) {
                 Alert.alert("Hata", "Lütfen önce bir öğün seçiniz.");
                 return;
             }
 
-            // Yüklenme durumu için loading göster
             setLoading(true);
 
-            // FormData oluştur
             const formData = new FormData();
             formData.append('image', {
                 uri: asset.uri,
@@ -768,7 +765,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 name: asset.fileName || 'photo.jpg',
             } as any);
 
-            // Token al
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
@@ -776,11 +772,10 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Resmi yükle
             const response = await fetch(`${config[config.environment].apiUrl}/upload?type=nutrition`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': token,
                     'Content-Type': 'multipart/form-data',
                 },
                 body: formData,
