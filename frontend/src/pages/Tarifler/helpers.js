@@ -1,8 +1,6 @@
-// Tarif ekleme ve güncelleme işlemleri için yardımcı fonksiyonlar
 import axios from "axios";
 import config from "../../config.js";
 
-// Tarif ekleme fonksiyonu - Kaydet butonuna tıklandığında çağrılır
 export const saveRecipe = (requestData, callbacks) => {
     const {
         setSuccessMessage,
@@ -16,7 +14,6 @@ export const saveRecipe = (requestData, callbacks) => {
         fetchRecipes
     } = callbacks;
 
-    // Resim alanı kontrol edilir - Eğer bir nesne veya dizi ise hata döndür
     if (typeof requestData.image === 'object' || Array.isArray(requestData.image)) {
         setErrorMessage("Resim yükleme hatası: Lütfen önce resmi yükleyin.");
         setShowErrorPopup(true);
@@ -24,7 +21,6 @@ export const saveRecipe = (requestData, callbacks) => {
         return;
     }
 
-    // Send POST request to API
     axios.post(`${config[config.environment].apiUrl}/recipe/addRecipe`, requestData, {
         headers: {
             Authorization: localStorage.getItem("token"),
@@ -32,14 +28,12 @@ export const saveRecipe = (requestData, callbacks) => {
         },
     })
     .then(response => {
-        // Refresh recipes list
         fetchRecipes();
 
         // Show success message
         setSuccessMessage("Tarif başarıyla eklendi.");
         setShowSuccessPopup(true);
 
-        // Reset form and close modal
         setNewRecipe({
             title: '',
             description: '',
@@ -51,19 +45,18 @@ export const saveRecipe = (requestData, callbacks) => {
                 calories: '', protein: '', carbs: '', fat: ''
             }
         });
-        setImagePreview(''); // Resim önizlemeyi temizle
+        setImagePreview('');
         setAddRecipeModal(false);
-        setIsSaving(false); // Yükleme durumunu kapat
+        setIsSaving(false);
     })
     .catch(error => {
         console.error("Error adding recipe:", error);
         setErrorMessage("Tarif eklenirken bir hata oluştu.");
         setShowErrorPopup(true);
-        setIsSaving(false); // Yükleme durumunu kapat
+        setIsSaving(false);
     });
 };
 
-// Tarif güncelleme fonksiyonu - Kaydet butonuna tıklandığında çağrılır
 export const updateRecipe = (recipeData, callbacks) => {
     const {
         setRecipeData,
@@ -75,7 +68,6 @@ export const updateRecipe = (recipeData, callbacks) => {
         setShowErrorPopup
     } = callbacks;
 
-    // Resim alanı kontrol edilir - Eğer bir nesne veya dizi ise hata döndür
     if (typeof recipeData.image === 'object' || Array.isArray(recipeData.image)) {
         setErrorMessage("Resim yükleme hatası: Lütfen önce resmi yükleyin.");
         setShowErrorPopup(true);
@@ -83,7 +75,6 @@ export const updateRecipe = (recipeData, callbacks) => {
         return;
     }
 
-    // Send PUT request to API
     axios.put(`${config[config.environment].apiUrl}/recipe/updateRecipe`, recipeData, {
         headers: {
             Authorization: localStorage.getItem("token"),
@@ -91,13 +82,12 @@ export const updateRecipe = (recipeData, callbacks) => {
         },
     })
     .then(response => {
-        // Map the updated recipe to our component's data structure
         const updatedRecipe = {
             id: response.data.id,
             title: response.data.name,
             description: response.data.description || "",
             category_id: response.data.category_id,
-            image: recipeData.image || "/placeholder.png", // Güncellenmiş resim URL'sini kullan
+            image: recipeData.image || "/placeholder.png",
             video_url: response.data.hasVideo ? response.data.video : "",
             ingredients: response.data.malzemeler,
             instructions: response.data.hazirlanis,
@@ -109,14 +99,11 @@ export const updateRecipe = (recipeData, callbacks) => {
             }
         };
 
-        // Update recipeData state
         setRecipeData(prev => prev.map(recipe => recipe.id === recipeData.recipe_id ? updatedRecipe : recipe));
 
-        // Show success message
         setSuccessMessage(`"${recipeData.name}" tarifi başarıyla güncellendi.`);
         setShowSuccessPopup(true);
 
-        // Reset saving state and close modal
         setIsSaving(false);
         setEditRecipeModal(false);
     })
