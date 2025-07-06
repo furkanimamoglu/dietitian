@@ -1,19 +1,18 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
     ActivityIndicator,
+    Animated,
+    Dimensions,
+    Image,
+    Linking,
     Modal,
+    RefreshControl,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
-    Image,
-    Dimensions,
-    ScrollView,
-    Animated,
-    RefreshControl,
-    Linking,
-    Alert
+    View
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Header from '../Components/Header';

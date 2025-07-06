@@ -1,5 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+    ActivityIndicator,
+    Image,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -133,12 +144,12 @@ const Tarif = ({navigation}) => {
             >
                 {loading ? (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#fc9e21" />
+                        <ActivityIndicator size="large" color="#fc9e21"/>
                         <Text style={styles.loadingText}>Tarifler yükleniyor...</Text>
                     </View>
                 ) : error ? (
                     <View style={styles.errorContainer}>
-                        <Icon name="alert-circle-outline" size={60} color="#ff6b6b" />
+                        <Icon name="alert-circle-outline" size={60} color="#ff6b6b"/>
                         <Text style={styles.errorText}>{error}</Text>
                     </View>
                 ) : !activeRecipe ? (
@@ -147,7 +158,7 @@ const Tarif = ({navigation}) => {
 
                         {/* Arama çubuğu */}
                         <View style={styles.searchBar}>
-                            <Icon name="magnify" size={20} color="#666" />
+                            <Icon name="magnify" size={20} color="#666"/>
                             <TextInput
                                 style={styles.searchInput}
                                 placeholder="Tarif ara..."
@@ -196,7 +207,7 @@ const Tarif = ({navigation}) => {
                                     >
                                         {recipe.image ? (
                                             <Image
-                                                source={{ uri: recipe.image }}
+                                                source={{uri: recipe.image}}
                                                 style={styles.recipeImage}
                                                 defaultSource={PLACEHOLDER_IMAGE}
                                             />
@@ -222,7 +233,7 @@ const Tarif = ({navigation}) => {
 
                                             {recipe.note && (
                                                 <View style={styles.noteContainer}>
-                                                    <Icon name="note-text-outline" size={14} color="#666" />
+                                                    <Icon name="note-text-outline" size={14} color="#666"/>
                                                     <Text style={styles.noteText}>Diyetisyen Notu: {recipe.note}</Text>
                                                 </View>
                                             )}
@@ -232,7 +243,7 @@ const Tarif = ({navigation}) => {
                             </View>
                         ) : (
                             <View style={styles.emptyState}>
-                                <Icon name="food-variant-off" size={60} color="#ccc" />
+                                <Icon name="food-variant-off" size={60} color="#ccc"/>
                                 <Text style={styles.emptyStateText}>
                                     {myRecipes.length === 0
                                         ? "Size atanmış tarif bulunamadı. Diyetisyeninizden sizinle tarifler paylaşmasını isteyebilirsiniz."
@@ -245,20 +256,20 @@ const Tarif = ({navigation}) => {
                     // Tarif detay sayfası
                     <View style={styles.recipeDetailContainer}>
                         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                            <Icon name="arrow-left" size={24} color="#fc9e21" />
+                            <Icon name="arrow-left" size={24} color="#fc9e21"/>
                             <Text style={styles.backButtonText}>Tariflere Dön</Text>
                         </TouchableOpacity>
 
                         {activeRecipe.image ? (
                             Platform.OS === 'ios' ? (
                                 <Image
-                                    source={{ uri: activeRecipe.image }}
+                                    source={{uri: activeRecipe.image}}
                                     style={styles.recipeDetailImage}
                                     defaultSource={PLACEHOLDER_IMAGE}
                                 />
                             ) : (
                                 <Image
-                                    source={activeRecipe.image ? { uri: activeRecipe.image } : PLACEHOLDER_IMAGE}
+                                    source={activeRecipe.image ? {uri: activeRecipe.image} : PLACEHOLDER_IMAGE}
                                     style={styles.recipeDetailImage}
                                 />
                             )
@@ -277,7 +288,7 @@ const Tarif = ({navigation}) => {
 
                             <View style={styles.recipeDetailInfo}>
                                 <View style={styles.recipeDetail}>
-                                    <Icon name="clock-outline" size={18} color="#fc9e21" />
+                                    <Icon name="clock-outline" size={18} color="#fc9e21"/>
                                     <Text style={styles.recipeDetailInfoText}>{activeRecipe.prepTime}</Text>
                                 </View>
                             </View>
@@ -303,7 +314,7 @@ const Tarif = ({navigation}) => {
                             <View style={styles.ingredientsList}>
                                 {activeRecipe.ingredients.map((ingredient, index) => (
                                     <View key={index} style={styles.ingredient}>
-                                        <Icon name="circle-small" size={20} color="#fc9e21" />
+                                        <Icon name="circle-small" size={20} color="#fc9e21"/>
                                         <Text style={styles.ingredientText}>{ingredient}</Text>
                                     </View>
                                 ))}
@@ -350,7 +361,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         height: 50,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 1,
@@ -395,7 +406,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         elevation: 2,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 4,
     },
@@ -497,7 +508,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         elevation: 1,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.05,
         shadowRadius: 2,
     },
@@ -571,7 +582,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderRadius: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,

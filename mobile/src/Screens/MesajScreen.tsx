@@ -1,8 +1,10 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
+    ImageBackground,
     KeyboardAvoidingView,
     Modal,
     PermissionsAndroid,
@@ -14,8 +16,6 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    ImageBackground,
-    Alert,
 } from 'react-native';
 
 import Header from '../Components/Header';
@@ -363,7 +363,8 @@ const Mesaj = ({navigation}) => {
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
                     {!isImage && !isResimFormat && item.message && (
-                        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.diyetisyenMessageText]}>
+                        <Text
+                            style={[styles.messageText, isUser ? styles.userMessageText : styles.diyetisyenMessageText]}>
                             {item.message}
                         </Text>
                     )}

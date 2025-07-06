@@ -164,10 +164,10 @@ const BottomNav = ({navigation}: Props) => {
     // Varsayılan öğün tiplerini kullanan yardımcı fonksiyon
     const useDefaultMealTypes = () => {
         const defaultMealTypes: MealType[] = [
-            { id: 'breakfast', name: 'Kahvaltı', apiName: 'Kahvaltı' },
-            { id: 'lunch', name: 'Öğle', apiName: 'Öğle Yemeği' },
-            { id: 'dinner', name: 'Akşam', apiName: 'Akşam Yemeği' },
-            { id: 'snacks', name: 'Aperatifler', apiName: 'Aparatif' }
+            {id: 'breakfast', name: 'Kahvaltı', apiName: 'Kahvaltı'},
+            {id: 'lunch', name: 'Öğle', apiName: 'Öğle Yemeği'},
+            {id: 'dinner', name: 'Akşam', apiName: 'Akşam Yemeği'},
+            {id: 'snacks', name: 'Aperatifler', apiName: 'Aparatif'}
         ];
 
         setMealTypes(defaultMealTypes);
@@ -448,7 +448,7 @@ const BottomNav = ({navigation}: Props) => {
 
             // Eğer beslenme planı yoksa yeni oluştur
             if (!mealPlanData) {
-                mealPlanData = { [todayTurkish]: {} };
+                mealPlanData = {[todayTurkish]: {}};
                 mealTypes.forEach(type => {
                     mealPlanData[todayTurkish][type.apiName] = [];
                 });
@@ -476,9 +476,9 @@ const BottomNav = ({navigation}: Props) => {
                     }]
                 };
             } else if (typeof todayPlan[apiMealType] === 'object' &&
-                      !Array.isArray(todayPlan[apiMealType]) &&
-                      todayPlan[apiMealType] &&
-                      todayPlan[apiMealType]["Ana Menü"]) {
+                !Array.isArray(todayPlan[apiMealType]) &&
+                todayPlan[apiMealType] &&
+                todayPlan[apiMealType]["Ana Menü"]) {
                 // "Ana Menü" formatında
                 if (!todayPlan[apiMealType]["Ana Menü"]) {
                     todayPlan[apiMealType]["Ana Menü"] = [];
@@ -505,11 +505,11 @@ const BottomNav = ({navigation}: Props) => {
                     "Ana Menü": [
                         ...existingMeals.map(item => {
                             if (typeof item === 'string') {
-                                return { name: item, portion: "1 porsiyon", eaten: false };
+                                return {name: item, portion: "1 porsiyon", eaten: false};
                             }
                             return item;
                         }),
-                        { name: newMeal, portion: newPortion, eaten: false, timestamp: new Date().toISOString() }
+                        {name: newMeal, portion: newPortion, eaten: false, timestamp: new Date().toISOString()}
                     ]
                 };
             }
