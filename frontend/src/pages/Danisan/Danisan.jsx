@@ -615,17 +615,7 @@ function Danisan() {
     const [appointments, setAppointments] = useState([]);
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
 
-    // Beslenme planı atama modal state'leri
     const [isAssignNutritionPlanDialogOpen, setIsAssignNutritionPlanDialogOpen] = useState(false);
-    const [availableNutritionPlans, setAvailableNutritionPlans] = useState([]);
-    const [availableNutritionPlansLoading, setAvailableNutritionPlansLoading] = useState(false);
-    const [nutritionAssignForm, setNutritionAssignForm] = useState({
-        nutrition_plan_id: '',
-        start_date: '',
-        end_date: '',
-        note: ''
-    });
-    const [nutritionAssignLoading, setNutritionAssignLoading] = useState(false);
 
     const [anamnezData, setAnamnezData] = useState(null);
     const [anamnezLoading, setAnamnezLoading] = useState(false);
@@ -674,7 +664,6 @@ function Danisan() {
     };
 
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
