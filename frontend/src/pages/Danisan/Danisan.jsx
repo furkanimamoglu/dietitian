@@ -2448,19 +2448,22 @@ function Danisan() {
                                     Düzenle
                                 </Button> */}
                             </Box>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<AddIcon/>}
+                                    onClick={handleOpenAssignNutritionPlanDialog}
+                                    sx={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
+                                >
+                                    Danışana Ata
+                                </Button>
+                            </Box>
                         </Box>
 
                         {nutritionPlanLoading ? (
                             <Box sx={{display: 'flex', justifyContent: 'center', my: 4}}>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={2}>
-                                        <Skeleton variant="rectangular" height={400} animation="wave"/>
-                                    </Grid>
-                                    <Grid item xs={12} md={10}>
-                                        <Skeleton variant="rectangular" height={80} animation="wave" sx={{mb: 2}}/>
-                                        <Skeleton variant="rectangular" height={320} animation="wave"/>
-                                    </Grid>
-                                </Grid>
+                                <CircularProgress/>
                             </Box>
                         ) : (
                             <Paper elevation={3} sx={{mb: 3}}>
@@ -2494,7 +2497,7 @@ function Danisan() {
                                     </Typography>
 
                                     {/* Renk açıklaması */}
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 'auto' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto' }}>
                                         <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1 }}>
                                             Renk Haritası:
                                         </Typography>
