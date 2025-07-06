@@ -2450,11 +2450,11 @@ function Danisan() {
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1 }}>
                                 <Button
-                                    variant="outlined"
+                                    variant="contained"
                                     size="small"
                                     startIcon={<AddIcon/>}
                                     onClick={handleOpenAssignNutritionPlanDialog}
-                                    sx={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
+                                    sx={{color: "white", borderColor: theme.palette.primary.main}}
                                 >
                                     Plan Ata
                                 </Button>
