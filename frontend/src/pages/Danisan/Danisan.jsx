@@ -2456,7 +2456,7 @@ function Danisan() {
                                     onClick={handleOpenAssignNutritionPlanDialog}
                                     sx={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
                                 >
-                                    Danışana Ata
+                                    Plan Ata
                                 </Button>
                             </Box>
                         </Box>
