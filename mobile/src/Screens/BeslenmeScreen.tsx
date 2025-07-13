@@ -1,5 +1,14 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, FlatList, StyleSheet, TextInput, View, Platform, PermissionsAndroid} from 'react-native';
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    PermissionsAndroid,
+    Platform,
+    StyleSheet,
+    TextInput,
+    View
+} from 'react-native';
 import {
     Avatar,
     Button,
@@ -19,13 +28,14 @@ import {
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavbar from '../Components/BottomNavbar';
-import {launchCamera, launchImageLibrary, ImagePickerResponse, Asset} from 'react-native-image-picker';
+import {Asset, ImagePickerResponse, launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import config from '../../config.js';
 
 interface MealItem {
     name: string;
     eaten: boolean;
     portion: string | null;
+    addedBy?: string;
 }
 
 interface MealInfo {
@@ -34,8 +44,9 @@ interface MealInfo {
 }
 
 interface MealCategory {
-    [category: string]: MealItem[];
     info?: MealInfo;
+
+    [category: string]: MealItem[];
 }
 
 interface DailyMeal {
@@ -66,11 +77,17 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isEmpty, setIsEmpty] = useState(false);
-    const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
+    const [nutritionAssignmentId, setNutritionAssignmentId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-    const [mealToDelete, setMealToDelete] = useState<{mealType: string, category: string, index: number} | null>(null);
-    const [imageResponse, setImageResponse] = useState<Asset | null>(null);
+    const [mealToDelete, setMealToDelete] = useState<{
+        mealType: string,
+        category: string,
+        index: number
+    } | null>(null);
+    // Her kategori için ayrı temp değerler
+    const [tempMeals, setTempMeals] = useState<{ [key: string]: string }>({});
+    const [tempPortions, setTempPortions] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
         fetchTodayMeal();
@@ -103,10 +120,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            if (data.nutrition_plan_id) {
-                setNutritionPlanId(parseInt(data.nutrition_plan_id));
-            } else if (data.NutritionPlan && data.NutritionPlan.id) {
-                setNutritionPlanId(parseInt(data.NutritionPlan.id));
+            if (data.id) {
+                setNutritionAssignmentId(parseInt(data.id));
             }
 
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
@@ -147,7 +162,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
     const updateMealPlanOnServerFromNewFormat = async (updatedMealPlan: WeeklyMealPlan) => {
         try {
-            if (nutritionPlanId === null) {
+            if (nutritionAssignmentId === null) {
                 console.error('Nutrition plan ID is missing, cannot update meal plan');
                 Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
                 return;
@@ -160,7 +175,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
 
             const mealPlanUpdate = {
-                nutrition_plan_id: nutritionPlanId,
+                nutrition_assignment_id: nutritionAssignmentId,
                 mealPlan: updatedMealPlan
             };
 
@@ -174,7 +189,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             });
 
             const data = await response.json();
-            console.log('Meal plan update response:', data);
 
             if (!response.ok) {
                 Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
@@ -190,10 +204,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
         return Object.values(mealPlan[currentDay]).reduce((total, mealType) => {
             return total + Object.entries(mealType).reduce((mealTotal, [category, items]) => {
-                // "info" nesnesi olduğunda atla, çünkü bu bir dizi değil
                 if (category === 'info') return mealTotal;
 
-                // Dizi ise öğeleri say
                 return mealTotal + items.length;
             }, 0);
         }, 0);
@@ -217,8 +229,14 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         if (!mealPlan[currentDay] || !mealPlan[currentDay][mealType]) return;
 
         const updatedMealPlan = {...mealPlan};
-        updatedMealPlan[currentDay][mealType][category][index].eaten =
-            !updatedMealPlan[currentDay][mealType][category][index].eaten;
+        const mealItem = updatedMealPlan[currentDay][mealType][category][index];
+
+        // Eğer addedBy alanı yoksa "client" olarak ekle
+        if (!mealItem.addedBy) {
+            mealItem.addedBy = "client";
+        }
+
+        mealItem.eaten = !mealItem.eaten;
 
         setMealPlan(updatedMealPlan);
 
@@ -245,13 +263,46 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         updatedMealPlan[currentDay][selectedMealType][selectedMealCategory].push({
             name: newMeal,
             eaten: false,
-            portion: newPortion || null
+            portion: newPortion || null,
+            addedBy: "client"
         });
 
         setMealPlan(updatedMealPlan);
         setModalVisible(false);
         setNewMeal('');
         setNewPortion('');
+
+        updateMealPlanOnServerFromNewFormat(updatedMealPlan);
+    };
+
+    // Inline yeni öğün ekleme fonksiyonu
+    const addInlineMealItem = (mealType: string, category: string) => {
+        if (!tempMeals[`${mealType}-${category}`]?.trim()) return;
+
+        const updatedMealPlan = {...mealPlan};
+
+        if (!updatedMealPlan[currentDay]) {
+            updatedMealPlan[currentDay] = {};
+        }
+
+        if (!updatedMealPlan[currentDay][mealType]) {
+            updatedMealPlan[currentDay][mealType] = {};
+        }
+
+        if (!updatedMealPlan[currentDay][mealType][category]) {
+            updatedMealPlan[currentDay][mealType][category] = [];
+        }
+
+        updatedMealPlan[currentDay][mealType][category].push({
+            name: tempMeals[`${mealType}-${category}`],
+            eaten: true, // Yeni eklenen öğün direkt onaylı olarak geliyor
+            portion: tempPortions[`${mealType}-${category}`] || null,
+            addedBy: "client"
+        });
+
+        setMealPlan(updatedMealPlan);
+        setTempMeals(prev => ({...prev, [`${mealType}-${category}`]: ''}));
+        setTempPortions(prev => ({...prev, [`${mealType}-${category}`]: ''}));
 
         updateMealPlanOnServerFromNewFormat(updatedMealPlan);
     };
@@ -401,7 +452,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 </View>
                             }
                             titleStyle={styles.mealTitleText}
-                            left={(props) => (
+                            left={() => (
                                 <Avatar.Icon
                                     size={48}
                                     icon={mealIcons[mealType] || 'food'}
@@ -409,7 +460,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                     style={styles.mealIcon}
                                 />
                             )}
-                            right={(props) => (
+                            right={() => (
                                 <View style={styles.headerButtonsContainer}>
                                     <IconButton
                                         icon="camera"
@@ -438,7 +489,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                         {/* Yemek resmi alanı */}
                         {mealCategories.info?.image ? (
                             <Card.Cover
-                                source={{ uri: mealCategories.info.image }}
+                                source={{uri: mealCategories.info.image}}
                                 style={styles.mealImage}
                             />
                         ) : (
@@ -465,90 +516,110 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                             // "info" nesnesi ise bu kategoriyi atla
                             if (category === 'info') return null;
 
-                            return (
-                            <View key={`${mealType}-${category}`}>
-                                {/* Eğer birden fazla kategori varsa kategori başlığını göster */}
-                                {Object.keys(mealCategories).filter(cat => cat !== 'info').length > 1 && (
-                                    <View style={styles.categoryHeader}>
-                                        <Text style={styles.categoryTitle}>{category}</Text>
-                                        <IconButton
-                                            icon="plus"
-                                            size={16}
-                                            onPress={() => {
-                                                setSelectedMealType(mealType);
-                                                setSelectedMealCategory(category);
-                                                setModalVisible(true);
-                                            }}
-                                            style={styles.smallAddButton}
-                                        />
-                                    </View>
-                                )}
+                            const categoryKey = `${mealType}-${category}`;
 
-                                <Card.Content style={styles.cardContent}>
-                                    {Array.isArray(meals) && meals.length === 0 ? (
-                                        <Text style={styles.emptyMealText}>
-                                            Bu öğün için henüz yemek eklenmemiş
-                                        </Text>
-                                    ) : Array.isArray(meals) ? (
-                                        meals.map((meal, index) => (
-                                            <View key={index} style={styles.mealItemContainer}>
-                                                <View style={styles.mealItem}>
-                                                    <Checkbox.Android
-                                                        status={meal.eaten ? 'checked' : 'unchecked'}
-                                                        onPress={() => toggleMealItemEaten(mealType, category, index)}
-                                                        color="#4caf50"
-                                                    />
-                                                    <View style={styles.mealInfo}>
-                                                        <Text style={[
-                                                            styles.mealName,
-                                                            meal.eaten && styles.mealChecked
-                                                        ]}>
-                                                            {meal.name}
-                                                        </Text>
-                                                        {meal.portion && (
-                                                            <Text style={styles.portionText}>
-                                                                {meal.portion}
+                            return (
+                                <View key={categoryKey}>
+                                    {/* Eğer birden fazla kategori varsa kategori başlığını göster */}
+                                    {Object.keys(mealCategories).filter(cat => cat !== 'info').length > 1 && (
+                                        <View style={styles.categoryHeader}>
+                                            <Text style={styles.categoryTitle}>{category}</Text>
+                                        </View>
+                                    )}
+
+                                    <Card.Content style={styles.cardContent}>
+                                        {Array.isArray(meals) && meals.length === 0 ? (
+                                            <Text style={styles.emptyMealText}>
+                                                Bu öğün için henüz yemek eklenmemiş
+                                            </Text>
+                                        ) : Array.isArray(meals) ? (
+                                            meals.map((meal, index) => (
+                                                <View key={index} style={styles.mealItemContainer}>
+                                                    <View style={styles.mealItem}>
+                                                        <Checkbox.Android
+                                                            status={meal.eaten ? 'checked' : 'unchecked'}
+                                                            onPress={() => toggleMealItemEaten(mealType, category, index)}
+                                                            color="#4caf50"
+                                                        />
+                                                        <View style={styles.mealInfo}>
+                                                            <Text style={[
+                                                                styles.mealName,
+                                                                meal.eaten && styles.mealChecked
+                                                            ]}>
+                                                                {meal.name}
                                                             </Text>
-                                                        )}
+                                                            {meal.portion && (
+                                                                <Text style={styles.portionText}>
+                                                                    {meal.portion}
+                                                                </Text>
+                                                            )}
+                                                        </View>
+                                                        <IconButton
+                                                            icon="delete"
+                                                            iconColor="#e53935"
+                                                            size={20}
+                                                            onPress={() => {
+                                                                setMealToDelete({mealType, category, index});
+                                                                setDeleteModalVisible(true);
+                                                            }}
+                                                            style={styles.deleteButton}
+                                                        />
                                                     </View>
-                                                    <IconButton
-                                                        icon="delete"
-                                                        iconColor="#e53935"
-                                                        size={20}
-                                                        onPress={() => {
-                                                            setMealToDelete({mealType, category, index});
-                                                            setDeleteModalVisible(true);
-                                                        }}
-                                                        style={styles.deleteButton}
+                                                </View>
+                                            ))
+                                        ) : (
+                                            <Text style={styles.emptyMealText}>
+                                                Bu öğün için henüz yemek eklenmemiş
+                                            </Text>
+                                        )}
+
+                                        {/* Her zaman görünür yeni öğun ekleme alanı */}
+                                        <View style={styles.inlineAddContainer}>
+                                            <View style={styles.inlineInputRow}>
+                                                <Checkbox.Android
+                                                    status="checked"
+                                                    color="#4caf50"
+                                                    disabled
+                                                />
+                                                <View style={styles.inlineInputs}>
+                                                    <TextInput
+                                                        style={styles.inlineInput}
+                                                        placeholder="Yemek adı..."
+                                                        value={tempMeals[categoryKey] || ''}
+                                                        onChangeText={text => setTempMeals(prev => ({
+                                                            ...prev,
+                                                            [categoryKey]: text
+                                                        }))}
+                                                        onSubmitEditing={() => addInlineMealItem(mealType, category)}
+                                                        blurOnSubmit={false}
+                                                    />
+                                                    <TextInput
+                                                        style={[styles.inlineInput, styles.portionInput]}
+                                                        placeholder="Porsiyon..."
+                                                        value={tempPortions[categoryKey] || ''}
+                                                        onChangeText={text => setTempPortions(prev => ({
+                                                            ...prev,
+                                                            [categoryKey]: text
+                                                        }))}
+                                                        onSubmitEditing={() => addInlineMealItem(mealType, category)}
                                                     />
                                                 </View>
+                                                {(tempMeals[categoryKey]?.trim()) && (
+                                                    <IconButton
+                                                        icon="check"
+                                                        iconColor="#4caf50"
+                                                        size={20}
+                                                        onPress={() => addInlineMealItem(mealType, category)}
+                                                        style={styles.inlineActionButton}
+                                                    />
+                                                )}
                                             </View>
-                                        ))
-                                    ) : (
-                                        <Text style={styles.emptyMealText}>
-                                            Bu öğün için henüz yemek eklenmemiş
-                                        </Text>
-                                    )}
-                                </Card.Content>
-                            </View>
+                                        </View>
+                                    </Card.Content>
+                                </View>
                             );
                         })}
 
-                        {/* Yeni Öğün Ekle butonu */}
-                        <View style={styles.addMealButtonContainer}>
-                            <Button
-                                mode="contained"
-                                icon="plus"
-                                onPress={() => {
-                                    setSelectedMealType(mealType);
-                                    setSelectedMealCategory('Alternatif');
-                                    setModalVisible(true);
-                                }}
-                                style={styles.addMealButton}
-                            >
-                                Yeni Öğün Ekle
-                            </Button>
-                        </View>
                     </Card>
                 ))}
 
@@ -638,7 +709,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         }
 
         const options = {
-            mediaType: 'photo',
+            mediaType: 'photo' as const,
             includeBase64: false,
             maxHeight: 1200,
             maxWidth: 1200,
@@ -654,7 +725,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 Alert.alert('Hata', response.errorMessage || 'Kamera açılırken bir hata oluştu');
             } else if (response.assets && response.assets.length > 0) {
                 console.log('Çekilen fotoğraf: ', response.assets[0]);
-                setImageResponse(response.assets[0]);
                 handleImageSelected(response.assets[0]);
             }
         });
@@ -670,7 +740,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
         }
 
         const options = {
-            mediaType: 'photo',
+            mediaType: 'photo' as const,
             includeBase64: false,
             maxHeight: 1200,
             maxWidth: 1200,
@@ -685,7 +755,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 Alert.alert('Hata', response.errorMessage || 'Galeri açılırken bir hata oluştu');
             } else if (response.assets && response.assets.length > 0) {
                 console.log('Seçilen fotoğraf: ', response.assets[0]);
-                setImageResponse(response.assets[0]);
                 handleImageSelected(response.assets[0]);
             }
         });
@@ -699,16 +768,13 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Hangi öğün için resim yüklendiğinin kontrolü
             if (!selectedMealType || !mealPlan[currentDay] || !mealPlan[currentDay][selectedMealType]) {
                 Alert.alert("Hata", "Lütfen önce bir öğün seçiniz.");
                 return;
             }
 
-            // Yüklenme durumu için loading göster
             setLoading(true);
 
-            // FormData oluştur
             const formData = new FormData();
             formData.append('image', {
                 uri: asset.uri,
@@ -716,7 +782,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 name: asset.fileName || 'photo.jpg',
             } as any);
 
-            // Token al
             const token = await AsyncStorage.getItem('token');
             if (!token) {
                 console.error('Token Bulunamadı');
@@ -724,11 +789,10 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            // Resmi yükle
             const response = await fetch(`${config[config.environment].apiUrl}/upload?type=nutrition`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': token,
                     'Content-Type': 'multipart/form-data',
                 },
                 body: formData,
@@ -778,7 +842,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                             <Text style={styles.dialogLabel}>Öğün Türü</Text>
                             {mealPlan[currentDay] && (
                                 <RadioButton.Group onValueChange={value => setSelectedMealType(value)}
-                                                value={selectedMealType}>
+                                                   value={selectedMealType}>
                                     <View style={styles.radioButtonsContainer}>
                                         {Object.keys(mealPlan[currentDay]).map(type => (
                                             <View key={type} style={styles.radioOption}>
@@ -794,16 +858,16 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                                 <>
                                     <Text style={styles.dialogLabel}>Kategori</Text>
                                     <RadioButton.Group onValueChange={value => setSelectedMealCategory(value)}
-                                                    value={selectedMealCategory}>
+                                                       value={selectedMealCategory}>
                                         <View style={styles.radioButtonsContainer}>
                                             {Object.keys(mealPlan[currentDay][selectedMealType])
                                                 .filter(category => category !== 'info')
                                                 .map(category => (
-                                                <View key={category} style={styles.radioOption}>
-                                                    <RadioButton.Android value={category} color="#4caf50"/>
-                                                    <Text>{category}</Text>
-                                                </View>
-                                            ))}
+                                                    <View key={category} style={styles.radioOption}>
+                                                        <RadioButton.Android value={category} color="#4caf50"/>
+                                                        <Text>{category}</Text>
+                                                    </View>
+                                                ))}
                                         </View>
                                     </RadioButton.Group>
                                 </>
@@ -832,7 +896,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                     </Dialog>
 
                     {/* Silme onayı için modal */}
-                    <Dialog visible={deleteModalVisible} onDismiss={() => setDeleteModalVisible(false)} style={styles.dialog}>
+                    <Dialog visible={deleteModalVisible} onDismiss={() => setDeleteModalVisible(false)}
+                            style={styles.dialog}>
                         <Dialog.Title>Yemek Sil</Dialog.Title>
                         <Dialog.Content>
                             <Text>Bu öğünü silmek istediğinize emin misiniz?</Text>
@@ -1119,7 +1184,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderRadius: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,
@@ -1149,7 +1214,7 @@ const styles = StyleSheet.create({
         elevation: 4,
         backgroundColor: '#ffffff',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.15,
         shadowRadius: 8,
     },
@@ -1158,7 +1223,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
         elevation: 2,
         shadowColor: '#4caf50',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.2,
         shadowRadius: 2,
     },
@@ -1200,7 +1265,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#e8f5e9',
         elevation: 1,
         shadowColor: '#4caf50',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.15,
         shadowRadius: 2,
     },
@@ -1216,7 +1281,7 @@ const styles = StyleSheet.create({
         padding: 12,
         elevation: 1,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.08,
         shadowRadius: 4,
     },
@@ -1257,7 +1322,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#4caf50',
         elevation: 2,
         shadowColor: '#4caf50',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.25,
         shadowRadius: 4,
     },
@@ -1269,7 +1334,7 @@ const styles = StyleSheet.create({
         elevation: 4,
         backgroundColor: '#ffffff',
         shadowColor: '#4caf50',
-        shadowOffset: { width: 0, height: 3 },
+        shadowOffset: {width: 0, height: 3},
         shadowOpacity: 0.15,
         shadowRadius: 8,
         borderLeftWidth: 4,
@@ -1316,7 +1381,81 @@ const styles = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
         lineHeight: 20
-    }
+    },
+    inlineAddContainer: {
+        marginTop: 8,
+        marginBottom: 16,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 12,
+        padding: 12,
+        elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+    },
+    inlineInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    inlineInputs: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 8,
+    },
+    inlineInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        borderRadius: 8,
+        padding: 10,
+        backgroundColor: '#ffffff',
+        marginRight: 8,
+    },
+    portionInput: {
+        width: 80,
+    },
+    inlineActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    inlineActionButton: {
+        marginLeft: 4,
+        backgroundColor: '#e8f5e9',
+        elevation: 1,
+        shadowColor: '#4caf50',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: 0.15,
+        shadowRadius: 2,
+    },
+    addInlineButtonContainer: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+    },
+    addInlineButton: {
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderColor: '#4caf50',
+        borderWidth: 1,
+        backgroundColor: 'transparent',
+    },
+    addInlineButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        height: 32,
+    },
+    addInlineButtonLabel: {
+        color: '#4caf50',
+        fontWeight: '500',
+        fontSize: 14,
+        marginLeft: 4,
+    },
 });
 
 export default Beslenme;

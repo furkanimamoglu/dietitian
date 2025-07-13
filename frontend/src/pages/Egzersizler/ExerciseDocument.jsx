@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import {Document, Font, Page, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 Font.register({
     family: 'Open Sans',
@@ -312,13 +312,6 @@ const ExerciseDocument = ({exercise, assignmentData, dietitian}) => {
                         <Text style={pdfStyles.exerciseDetailsTitle}>Egzersiz Özellikleri</Text>
                     </View>
                     <View style={pdfStyles.exerciseDetailsContent}>
-                        <View style={pdfStyles.exerciseDetailRow}>
-                            <Text style={pdfStyles.exerciseDetailLabel}>Kategori:</Text>
-                            <Text style={pdfStyles.exerciseDetailValue}>
-                                {exercise?.category?.name || "Belirtilmemiş"}
-                            </Text>
-                        </View>
-
                         <View style={pdfStyles.exerciseDetailRow}>
                             <Text style={pdfStyles.exerciseDetailLabel}>Zorluk Seviyesi:</Text>
                             <View style={[pdfStyles.difficultyBadge, {

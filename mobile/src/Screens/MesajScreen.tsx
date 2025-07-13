@@ -1,8 +1,10 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
+    ImageBackground,
     KeyboardAvoidingView,
     Modal,
     PermissionsAndroid,
@@ -14,8 +16,6 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    ImageBackground,
-    Alert,
 } from 'react-native';
 
 import Header from '../Components/Header';
@@ -120,22 +120,24 @@ const Mesaj = ({navigation}) => {
     }, [messages]);
 
     const requestCameraPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-                {
-                    title: 'Kamera Erişim İzni',
-                    message: 'Uygulamanın kameraya erişmesi gerekiyor',
-                    buttonNeutral: 'Daha Sonra Sor',
-                    buttonNegative: 'İptal',
-                    buttonPositive: 'Tamam'
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: 'Kamera Erişim İzni',
+                        message: 'Uygulamanın kameraya erişmesi gerekiyor',
+                        buttonNeutral: 'Daha Sonra Sor',
+                        buttonNegative: 'İptal',
+                        buttonPositive: 'Tamam'
+                    }
+                );
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                    console.log('Kamera izni reddedildi');
                 }
-            );
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('Kamera izni reddedildi');
+            } catch (err) {
+                console.warn(err);
             }
-        } catch (err) {
-            console.warn(err);
         }
     };
 
@@ -361,7 +363,8 @@ const Mesaj = ({navigation}) => {
             <View style={[styles.messageRow, isUser ? styles.userRow : styles.diyetisyenRow]}>
                 <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.diyetisyenBubble]}>
                     {!isImage && !isResimFormat && item.message && (
-                        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.diyetisyenMessageText]}>
+                        <Text
+                            style={[styles.messageText, isUser ? styles.userMessageText : styles.diyetisyenMessageText]}>
                             {item.message}
                         </Text>
                     )}
@@ -461,7 +464,7 @@ const Mesaj = ({navigation}) => {
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={90}
+                style={{flex: 1}}
             >
                 <View style={styles.inputWrapper}>
                     <View style={styles.inputContainer}>
@@ -741,3 +744,4 @@ const styles = StyleSheet.create({
 });
 
 export default Mesaj;
+

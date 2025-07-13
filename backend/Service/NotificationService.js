@@ -8,7 +8,8 @@ admin.initializeApp({
 });
 
 const {
-    Client
+    Client,
+    Notification
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 
@@ -33,7 +34,7 @@ class NotificationService {
         }
 
         if (!clientToken) {
-            throw new Exception("Client için bildirim token'ı bulunamadı");
+            throw new Exception("Danışanınız mobil uygulamayı henüz kullanmamış veya indirmemiş, bildirim gönderilemez.", 400, true);
         }
 
         const message = {
@@ -46,6 +47,15 @@ class NotificationService {
         };
 
         const response = await admin.messaging().send(message);
+
+        if (response) {
+            try {
+                await this.saveNotification(client_id, notificationData.body);
+            } catch (saveError) {
+                console.error("Bildirim kaydedilirken hata oluştu:", saveError.message);
+            }
+        }
+
         return response;
     }
 
@@ -82,7 +92,53 @@ class NotificationService {
         const successCount = response.responses.filter(r => r.success).length;
         const failureCount = response.responses.length - successCount;
 
+        if (successCount > 0) {
+            const clientsWithTokens = clients.filter(client => client.fcmToken);
+
+            for (let i = 0; i < response.responses.length; i++) {
+                if (response.responses[i].success) {
+                    try {
+                        const client = clientsWithTokens[i];
+                        await this.saveNotification(client.id, notificationData.body);
+                    } catch (saveError) {
+                        console.error(`Client ${clientsWithTokens[i]?.id} için bildirim kaydedilirken hata oluştu:`, saveError.message);
+                    }
+                }
+            }
+        }
+
         return response;
+    }
+
+    static async saveNotification(client_id, message) {
+        try {
+            if (!client_id) {
+                throw new Exception("Müşteri ID gereklidir.", 400, true);
+            }
+
+            if (!message || message.trim() === '') {
+                throw new Exception("Bildirim mesajı gereklidir.", 400, true);
+            }
+
+            const client = await Client.findByPk(client_id);
+            if (!client) {
+                throw new Exception("Müşteri bulunamadı.", 404, true);
+            }
+
+            const notification = await Notification.create({
+                client_id: client_id,
+                message: message.trim(),
+                isRead: false
+            });
+
+            return {
+                showOnScreen: false,
+                notification: notification,
+                message: "Bildirim başarıyla kaydedildi."
+            };
+        } catch (error) {
+            throw new Exception(error.message, error.status || 500, error.showOnScreen || true);
+        }
     }
 
 }

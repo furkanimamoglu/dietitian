@@ -499,8 +499,8 @@ export default function Danisanlarim() {
             showSuccessToast("Bildirim başarıyla gönderildi");
             closeNotificationDialog();
         } catch (error) {
-            console.error("Bildirim gönderme hatası:", error);
-            showErrorToast("Bildirim gönderilirken bir hata oluştu");
+            console.error("Bildirim gönderme hatası:", error.response.data.message);
+            showErrorToast(error.response.data.message);
         }
     };
 
@@ -543,7 +543,7 @@ export default function Danisanlarim() {
             closeBulkNotificationDialog();
         } catch (error) {
             console.error("Toplu bildirim gönderme hatası:", error);
-            showErrorToast("Bildirimler gönderilirken bir hata oluştu");
+            showErrorToast(error.response.data.message);
         }
     };
 
@@ -689,8 +689,17 @@ export default function Danisanlarim() {
                     <img
                         src={params.value || "/placeholder_client.jpg"}
                         alt="Profil"
-                        style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", border: "2px solid #eee" }}
-                        onError={e => { e.target.onerror = null; e.target.src = "/placeholder_client.jpg"; }}
+                        style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #eee"
+                        }}
+                        onError={e => {
+                            e.target.onerror = null;
+                            e.target.src = "/placeholder_client.jpg";
+                        }}
                     />
                 </Box>
             ),
@@ -1406,6 +1415,7 @@ export default function Danisanlarim() {
                         disableSelectionOnClick
                         processRowUpdate={handleRowUpdate}
                         onProcessRowUpdateError={(error) => console.error(error)}
+                        onRowDoubleClick={(params) => navigate(`/danisan/${params.row.id}`)}
                         slots={{toolbar: QuickSearchToolbar}}
                         getRowId={(row) => row.id}
                         sx={{

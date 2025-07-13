@@ -35,9 +35,7 @@ import CurrencyLira from "@mui/icons-material/CurrencyLira";
 import Download from "@mui/icons-material/Download";
 import AccountBalance from "@mui/icons-material/AccountBalance";
 import Compare from "@mui/icons-material/Compare";
-import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
-import Diamond from "@mui/icons-material/Diamond";
 import Cancel from "@mui/icons-material/Cancel";
 import WarningIcon from "@mui/icons-material/Warning";
 
@@ -130,29 +128,29 @@ export default function Odeme() {
 
     useEffect(() => {
         const fetchDietitianInfo = async () => {
-                setLoading(true);
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 const response = await axios.get(
                     `${config[config.environment].apiUrl}/dietitian/getDietitianInfo`,
                     {
-                    headers: {
-                        Authorization: token,
-                        'Content-Type': 'application/json',
-                    },
+                        headers: {
+                            Authorization: token,
+                            'Content-Type': 'application/json',
+                        },
                     }
                 );
 
-                const { data } = response;
+                const {data} = response;
                 setDietitianInfo(data);
 
                 const defaultSubscription = {
-                        currentPlan: "Aktif paketiniz bulunmamaktadır.",
-                        price: 0,
-                        billingCycle: "N/A",
-                        nextPaymentDate: "N/A",
-                        autoRenew: false,
-                        features: []
+                    currentPlan: "Aktif paketiniz bulunmamaktadır.",
+                    price: 0,
+                    billingCycle: "N/A",
+                    nextPaymentDate: "N/A",
+                    autoRenew: false,
+                    features: []
                 };
 
                 if (data?.subscription_type) {
@@ -178,8 +176,8 @@ export default function Odeme() {
 
                     const planFeatures = isPaidPlan
                         ? plans.find(p => p.type === subscriptionType)?.features
-                              .filter(f => f.included)
-                              .map(f => f.name) || []
+                        .filter(f => f.included)
+                        .map(f => f.name) || []
                         : ["Diyetia'yı kullanmak için, paket satın almanız gerekmektedir."];
 
                     setSubscriptionInfo({
@@ -316,7 +314,7 @@ export default function Odeme() {
                         severity="success"
                         sx={{mb: 2}}
                         className="success-alert"
-                        icon={<CheckCircle fontSize="inherit" />}
+                        icon={<CheckCircle fontSize="inherit"/>}
                         action={
                             <Button color="inherit" size="small" onClick={() => setSaveSuccess(false)}>
                                 KAPAT
@@ -391,7 +389,7 @@ export default function Odeme() {
                                                                 fontSize: 24,
                                                                 mr: 1.5,
                                                                 filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.2))'
-                                                            }} />
+                                                            }}/>
                                                             <Typography
                                                                 variant="subtitle1"
                                                                 fontWeight="medium"
@@ -401,7 +399,8 @@ export default function Odeme() {
                                                                     textShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                                                 }}
                                                             >
-                                                                Diyetia'yı kullanmak için, paket satın almanız gerekmektedir.
+                                                                Diyetia'yı kullanmak için, paket satın almanız
+                                                                gerekmektedir.
                                                             </Typography>
                                                         </Box>
                                                     </Box>
@@ -877,16 +876,16 @@ export default function Odeme() {
                                                         fontWeight: 'bold',
                                                         borderBottom: '2px solid #e0e0e0'
                                                     }}>
-                                                        <Box sx={{ width: '25%' }}>
+                                                        <Box sx={{width: '25%'}}>
                                                             <Typography variant="subtitle2">Tarih</Typography>
                                                         </Box>
-                                                        <Box sx={{ width: '25%' }}>
+                                                        <Box sx={{width: '25%'}}>
                                                             <Typography variant="subtitle2">Tutar</Typography>
                                                         </Box>
-                                                        <Box sx={{ width: '25%' }}>
+                                                        <Box sx={{width: '25%'}}>
                                                             <Typography variant="subtitle2">Durum</Typography>
                                                         </Box>
-                                                        <Box sx={{ width: '25%' }}>
+                                                        <Box sx={{width: '25%'}}>
                                                             <Typography variant="subtitle2">İşlemler</Typography>
                                                         </Box>
                                                     </Box>
@@ -909,10 +908,18 @@ export default function Odeme() {
                                                             }}
                                                             className="invoice-item"
                                                         >
-                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
+                                                            <Box sx={{
+                                                                width: '25%',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}>
                                                                 <Typography variant="body2">{invoice.date}</Typography>
                                                             </Box>
-                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
+                                                            <Box sx={{
+                                                                width: '25%',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}>
                                                                 <Typography
                                                                     variant="body2"
                                                                     sx={{
@@ -923,7 +930,11 @@ export default function Odeme() {
                                                                     {invoice.amount}
                                                                 </Typography>
                                                             </Box>
-                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
+                                                            <Box sx={{
+                                                                width: '25%',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}>
                                                                 <Chip
                                                                     label={invoice.status}
                                                                     size="small"
@@ -935,7 +946,11 @@ export default function Odeme() {
                                                                     }}
                                                                 />
                                                             </Box>
-                                                            <Box sx={{ width: '25%', display: 'flex', alignItems: 'center' }}>
+                                                            <Box sx={{
+                                                                width: '25%',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}>
                                                                 <Button
                                                                     size="small"
                                                                     variant="outlined"
@@ -986,12 +1001,20 @@ export default function Odeme() {
                                                         borderRadius: 1,
                                                         bgcolor: 'rgba(0,0,0,0.02)'
                                                     }}>
-                                                        <Typography variant="body2" color="text.secondary">Toplam Fatura</Typography>
-                                                        <Typography variant="body1" fontWeight="500">{invoiceHistory.length}</Typography>
+                                                        <Typography variant="body2" color="text.secondary">Toplam
+                                                            Fatura</Typography>
+                                                        <Typography variant="body1"
+                                                                    fontWeight="500">{invoiceHistory.length}</Typography>
                                                     </Box>
 
-                                                    <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2, p: 1.5}}>
-                                                        <Typography variant="body2" color="text.secondary">Toplam Ödenen</Typography>
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        mb: 2,
+                                                        p: 1.5
+                                                    }}>
+                                                        <Typography variant="body2" color="text.secondary">Toplam
+                                                            Ödenen</Typography>
                                                         <Typography variant="body1" fontWeight="500" color="primary">
                                                             ₺{invoiceHistory.reduce((sum, item) => sum + parseFloat(item.amount.replace('₺', '')), 0)}
                                                         </Typography>
@@ -1005,8 +1028,10 @@ export default function Odeme() {
                                                         borderRadius: 1,
                                                         bgcolor: 'rgba(0,0,0,0.02)'
                                                     }}>
-                                                        <Typography variant="body2" color="text.secondary">Son Ödeme</Typography>
-                                                        <Typography variant="body1" fontWeight="500">{invoiceHistory[0]?.date || 'N/A'}</Typography>
+                                                        <Typography variant="body2" color="text.secondary">Son
+                                                            Ödeme</Typography>
+                                                        <Typography variant="body1"
+                                                                    fontWeight="500">{invoiceHistory[0]?.date || 'N/A'}</Typography>
                                                     </Box>
 
                                                     <Box sx={{
@@ -1017,7 +1042,8 @@ export default function Odeme() {
                                                         border: '1px dashed #1976d2'
                                                     }}>
                                                         <Typography variant="body2" color="primary" fontWeight="medium">
-                                                            Faturalarınızı buradan indirebilir ve muhasebe işlemleriniz için kullanabilirsiniz.
+                                                            Faturalarınızı buradan indirebilir ve muhasebe işlemleriniz
+                                                            için kullanabilirsiniz.
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -1412,19 +1438,19 @@ export default function Odeme() {
                 >
                     <Box className="payment-modal">
                         <Typography id="billing-address-modal" variant="h6" component="h2" gutterBottom
-                            sx={{
-                                position: 'relative',
-                                '&:after': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    bottom: '-8px',
-                                    left: 0,
-                                    width: '40px',
-                                    height: '3px',
-                                    backgroundColor: '#1976d2',
-                                    borderRadius: '2px'
-                                }
-                            }}
+                                    sx={{
+                                        position: 'relative',
+                                        '&:after': {
+                                            content: '""',
+                                            position: 'absolute',
+                                            bottom: '-8px',
+                                            left: 0,
+                                            width: '40px',
+                                            height: '3px',
+                                            backgroundColor: '#1976d2',
+                                            borderRadius: '2px'
+                                        }
+                                    }}
                         >
                             Fatura Bilgilerini Düzenle
                         </Typography>
@@ -1441,7 +1467,7 @@ export default function Odeme() {
                                     variant="outlined"
                                     autoComplete="name"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1455,7 +1481,7 @@ export default function Odeme() {
                                     variant="outlined"
                                     autoComplete="organization"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1471,7 +1497,7 @@ export default function Odeme() {
                                     rows={2}
                                     autoComplete="street-address"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1485,7 +1511,7 @@ export default function Odeme() {
                                     variant="outlined"
                                     autoComplete="address-level2"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1499,7 +1525,7 @@ export default function Odeme() {
                                     variant="outlined"
                                     autoComplete="address-level1"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1513,7 +1539,7 @@ export default function Odeme() {
                                     variant="outlined"
                                     autoComplete="postal-code"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1527,7 +1553,7 @@ export default function Odeme() {
                                     variant="outlined"
                                     autoComplete="country-name"
                                     InputProps={{
-                                        sx: { borderRadius: 2 }
+                                        sx: {borderRadius: 2}
                                     }}
                                 />
                             </Grid>
@@ -1540,8 +1566,8 @@ export default function Odeme() {
                             gap: 2,
                             mt: 4
                         }}>
-                            <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
-                                <EditIcon fontSize="small" sx={{ mr: 1 }} />
+                            <Box sx={{color: 'text.secondary', display: 'flex', alignItems: 'center'}}>
+                                <EditIcon fontSize="small" sx={{mr: 1}}/>
                                 <Typography variant="caption">
                                     Fatura bilgileriniz faturalandırma amaçlı kullanılacaktır
                                 </Typography>
@@ -1554,7 +1580,7 @@ export default function Odeme() {
                                 <Button
                                     variant="outlined"
                                     onClick={handleCloseBillingAddressModal}
-                                    sx={{ borderRadius: 2 }}
+                                    sx={{borderRadius: 2}}
                                 >
                                     İptal
                                 </Button>

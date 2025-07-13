@@ -1,16 +1,16 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Alert,
+    Animated,
+    Dimensions,
     KeyboardAvoidingView,
     Platform,
     StatusBar,
     StyleSheet,
     TouchableOpacity,
-    View,
-    Animated,
-    Dimensions
+    View
 } from 'react-native';
-import {ActivityIndicator, Button, Card, RadioButton, Text, TextInput, useTheme, Surface} from 'react-native-paper';
+import {ActivityIndicator, Button, Card, RadioButton, Surface, Text, TextInput, useTheme} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -253,7 +253,6 @@ const KayitolScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#FF6B00" barStyle="light-content"/>
-
             {/* Gradient Arka Plan */}
             <LinearGradient
                 colors={['#FF8E53', '#FF6B00']}
@@ -261,12 +260,10 @@ const KayitolScreen: React.FC = () => {
                 end={{x: 1, y: 1}}
                 style={styles.gradient}
             />
-
             {/* Arka Plan Desen Efekti */}
-            <View style={styles.patternOverlay} />
-
+            <View style={styles.patternOverlay}/>
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={styles.keyboardAvoidingView}
             >
                 <Animated.ScrollView
@@ -323,7 +320,7 @@ const KayitolScreen: React.FC = () => {
                                     outlineColor={nameError ? "#FF0000" : "#DDD"}
                                     activeOutlineColor={nameError ? "#FF0000" : "#FF6B00"}
                                     left={<TextInput.Icon icon="account" color="#AAA"/>}
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
                                 {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 
@@ -343,7 +340,7 @@ const KayitolScreen: React.FC = () => {
                                     outlineColor={mailError ? "#FF0000" : "#DDD"}
                                     activeOutlineColor={mailError ? "#FF0000" : "#FF6B00"}
                                     left={<TextInput.Icon icon="email" color="#AAA"/>}
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
                                 {mailError ? <Text style={styles.errorText}>{mailError}</Text> : null}
 
@@ -359,7 +356,7 @@ const KayitolScreen: React.FC = () => {
                                     style={styles.input}
                                     outlineColor={phoneError ? "#FF0000" : "#DDD"}
                                     activeOutlineColor={phoneError ? "#FF0000" : "#FF6B00"}
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
                                 {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
 
@@ -394,7 +391,7 @@ const KayitolScreen: React.FC = () => {
                                     outlineColor={ageError ? "#FF0000" : "#DDD"}
                                     activeOutlineColor={ageError ? "#FF0000" : "#FF6B00"}
                                     left={<TextInput.Icon icon="cake-variant" color="#AAA"/>}
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
                                 {ageError ? <Text style={styles.errorText}>{ageError}</Text> : null}
 
@@ -416,7 +413,7 @@ const KayitolScreen: React.FC = () => {
                                             color="#FF6B00"
                                         />
                                     }
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
                                 {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
@@ -436,9 +433,10 @@ const KayitolScreen: React.FC = () => {
                                             color="#FF6B00"
                                         />
                                     }
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
-                                {confirmPasswordError ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
+                                {confirmPasswordError ?
+                                    <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
 
                                 <View style={styles.dietitianSection}>
                                     <Text style={styles.formTitle}>Diyetisyen Bilgisi</Text>

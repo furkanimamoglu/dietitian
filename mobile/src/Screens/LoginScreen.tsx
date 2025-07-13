@@ -1,16 +1,15 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Animated,
     Dimensions,
     KeyboardAvoidingView,
+    Modal,
     Platform,
     ScrollView,
     StatusBar,
     StyleSheet,
     TouchableOpacity,
-    View,
-    Image,
-    Modal
+    View
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Button, Card, Surface, Text, TextInput, useTheme} from 'react-native-paper';
@@ -202,21 +201,15 @@ const LoginScreen = ({navigation}: Props) => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#FF6B00" barStyle="light-content"/>
-
-            {/* Gradient Arka Plan */}
             <LinearGradient
                 colors={['#FF8E53', '#FF6B00']}
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
                 style={styles.gradient}
             />
-
-            {/* Arka Plan Desen Efekti */}
-            <View style={styles.patternOverlay} />
-
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.keyboardAvoidingView}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{flex: 1}}
             >
                 <ScrollView
                     contentContainerStyle={styles.scrollView}
@@ -258,7 +251,7 @@ const LoginScreen = ({navigation}: Props) => {
                                     activeOutlineColor="#FF6B00"
                                     textContentType="telephoneNumber"
                                     autoComplete="tel"
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
 
                                 <TextInput
@@ -279,7 +272,7 @@ const LoginScreen = ({navigation}: Props) => {
                                     activeOutlineColor="#FF6B00"
                                     textContentType="password"
                                     autoComplete="password"
-                                    theme={{ roundness: 12 }}
+                                    theme={{roundness: 12}}
                                 />
 
                                 <TouchableOpacity
@@ -353,8 +346,10 @@ const LoginScreen = ({navigation}: Props) => {
                         <Text style={styles.modalTitle}>Gizlilik Politikası</Text>
                         <ScrollView showsVerticalScrollIndicator={false}>
                             <Text style={styles.modalText}>
-                                6698 sayılı Kişisel Verilerin Korunması Kanunu (“Kanun”) uyarınca, kişisel verilerinizin korunması
-                                ve işlenmesi hususunda bilgilendirilmektesiniz. Diyetia olarak, kişisel verilerinizi koruma
+                                6698 sayılı Kişisel Verilerin Korunması Kanunu (“Kanun”) uyarınca, kişisel verilerinizin
+                                korunması
+                                ve işlenmesi hususunda bilgilendirilmektesiniz. Diyetia olarak, kişisel verilerinizi
+                                koruma
                                 ve gizliliğinizi sağlama konusuna büyük önem vermekteyiz.
                             </Text>
                             <Text style={styles.modalText}>

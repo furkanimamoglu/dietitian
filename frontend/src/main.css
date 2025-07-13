@@ -19,6 +19,11 @@ body {
     width: 100%;
 }
 
+.modal-container.half-width {
+    max-width: 45%;
+    width: 100%;
+}
+
 /* Özel Dosya Yükleme Stilleri */
 .input-container input[type="file"] {
     display: none;

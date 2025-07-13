@@ -6,19 +6,18 @@ import {
     Avatar,
     Box,
     Button,
+    Card,
+    CardContent,
     CircularProgress,
     Container,
     Divider,
     IconButton,
     InputAdornment,
     Link,
-    Paper,
     TextField,
     Typography,
-    Card,
-    CardContent,
-    useTheme,
-    useMediaQuery
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -94,30 +93,30 @@ function Login() {
                 position: 'relative'
             }}>
                 <Box className="header-banner"
-                    sx={{
-                        background: 'linear-gradient(135deg, #ff7355 0%, #fc9e21 100%)',
-                        borderBottomLeftRadius: '15%',
-                        borderBottomRightRadius: '15%',
-                        boxShadow: '0 4px 20px rgba(252, 158, 33, 0.3)',
-                        height: '35vh',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        '&::after': {
-                            content: '""',
-                            position: 'absolute',
-                            bottom: '-10px',
-                            left: 0,
-                            width: '100%',
-                            height: '50px',
-                            background: 'white',
-                            borderRadius: '50%',
-                            transform: 'scale(2)',
-                            boxShadow: '0px -15px 20px rgba(0,0,0,0.1)'
-                        }
-                    }}
+                     sx={{
+                         background: 'linear-gradient(135deg, #ff7355 0%, #fc9e21 100%)',
+                         borderBottomLeftRadius: '15%',
+                         borderBottomRightRadius: '15%',
+                         boxShadow: '0 4px 20px rgba(252, 158, 33, 0.3)',
+                         height: '35vh',
+                         display: 'flex',
+                         flexDirection: 'column',
+                         justifyContent: 'center',
+                         position: 'relative',
+                         overflow: 'hidden',
+                         '&::after': {
+                             content: '""',
+                             position: 'absolute',
+                             bottom: '-10px',
+                             left: 0,
+                             width: '100%',
+                             height: '50px',
+                             background: 'white',
+                             borderRadius: '50%',
+                             transform: 'scale(2)',
+                             boxShadow: '0px -15px 20px rgba(0,0,0,0.1)'
+                         }
+                     }}
                 >
                     <Typography
                         variant={isMobile ? "h4" : "h3"}
@@ -144,7 +143,8 @@ function Login() {
                     </Typography>
                 </Box>
 
-                <Container component="main" maxWidth="sm" className="login-container" sx={{ zIndex: 10, position: 'relative' }}>
+                <Container component="main" maxWidth="sm" className="login-container"
+                           sx={{zIndex: 10, position: 'relative'}}>
                     <Card
                         elevation={10}
                         sx={{
@@ -168,7 +168,7 @@ function Login() {
                             boxShadow: "0 4px 10px rgba(252, 158, 33, 0.5)",
                             border: "4px solid white"
                         }}>
-                            <LockOutlinedIcon sx={{ fontSize: 40 }}/>
+                            <LockOutlinedIcon sx={{fontSize: 40}}/>
                         </Avatar>
 
                         <CardContent sx={{
@@ -203,7 +203,7 @@ function Login() {
                             </Typography>
 
                             <form onSubmit={handleSubmit} style={{width: '100%'}}>
-                                <Box sx={{ mb: 3 }}>
+                                <Box sx={{mb: 3}}>
                                     <Typography
                                         variant="subtitle1"
                                         gutterBottom
@@ -240,8 +240,9 @@ function Login() {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <PhoneIcon sx={{ color: '#ff7355' }} />
-                                                    <Typography variant="body2" sx={{ ml: 1, fontWeight: 500, color: '#666' }}>
+                                                    <PhoneIcon sx={{color: '#ff7355'}}/>
+                                                    <Typography variant="body2"
+                                                                sx={{ml: 1, fontWeight: 500, color: '#666'}}>
                                                         +90
                                                     </Typography>
                                                 </InputAdornment>
@@ -253,7 +254,7 @@ function Login() {
                                     />
                                 </Box>
 
-                                <Box sx={{ mb: 4 }}>
+                                <Box sx={{mb: 4}}>
                                     <Typography
                                         variant="subtitle1"
                                         gutterBottom
@@ -293,7 +294,7 @@ function Login() {
                                                     <IconButton
                                                         onClick={toggleShowPassword}
                                                         edge="end"
-                                                        sx={{ color: '#666' }}
+                                                        sx={{color: '#666'}}
                                                     >
                                                         {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
                                                     </IconButton>
@@ -353,7 +354,7 @@ function Login() {
                                 </Typography>
                             )}
 
-                            <Divider sx={{ my: 3, opacity: 0.6 }} />
+                            <Divider sx={{my: 3, opacity: 0.6}}/>
 
                             <Box
                                 sx={{

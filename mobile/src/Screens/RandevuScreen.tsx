@@ -23,7 +23,7 @@ import config from '../../config';
 
 interface Appointment {
     id: number;
-    title: string;
+    note?: string; // title yerine note, ve opsiyonel
     status: 'pending' | 'approved' | 'denied';
     start: string;
     end: string;
@@ -178,7 +178,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
     };
 
     const addAppointment = async () => {
-        if (description.trim() && selectedTime) {
+        if (selectedTime) { // note zorunlu değil, sadece time kontrolü
             try {
                 const token = await AsyncStorage.getItem('token');
                 if (!token) {
@@ -204,7 +204,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        title: description,
+                        note: description, // boş da olabilir
                         start: startDateTime,
                         end: endDateTime
                     })
@@ -291,7 +291,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                         <Divider style={styles.divider}/>
 
                         <View style={styles.detailsContainer}>
-                            <Text style={styles.description}>{item.title}</Text>
+                            <Text style={styles.description}>{item.note}</Text>
                         </View>
 
                         <View style={styles.statusContainer}>
@@ -458,7 +458,7 @@ const RandevuScreen = ({navigation}: NavigationProps) => {
                             <Button
                                 mode="contained"
                                 onPress={addAppointment}
-                                disabled={!selectedTime || !description.trim()}
+                                disabled={!selectedTime} // sadece time kontrolü, description zorunlu değil
                                 color="#fc9e21"
                             >
                                 Randevu Oluştur
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderRadius: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,
@@ -676,4 +676,3 @@ const styles = StyleSheet.create({
 });
 
 export default RandevuScreen;
-

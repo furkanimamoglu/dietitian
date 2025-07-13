@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
     Animated,
     Modal,
+    Platform,
     StyleSheet,
     Text,
     TextInput,
@@ -97,7 +98,7 @@ const BottomNav = ({navigation}: Props) => {
             const responseText = await response.text();
             console.log('API Response:', responseText.substring(0, 100) + '...'); // Çok uzun olmaması için kısaltıyoruz
 
-            // HTML yanıtı başlıyor mu diye kontrol et (JSON sanılıp HTML dönüyorsa)
+            // HTML yanıtı başlıyor mı diye kontrol et (JSON sanılıp HTML dönüyorsa)
             if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
                 console.error('API HTML yanıtı döndürüyor, JSON değil');
                 // Varsayılan değerleri kullan
@@ -163,10 +164,10 @@ const BottomNav = ({navigation}: Props) => {
     // Varsayılan öğün tiplerini kullanan yardımcı fonksiyon
     const useDefaultMealTypes = () => {
         const defaultMealTypes: MealType[] = [
-            { id: 'breakfast', name: 'Kahvaltı', apiName: 'Kahvaltı' },
-            { id: 'lunch', name: 'Öğle', apiName: 'Öğle Yemeği' },
-            { id: 'dinner', name: 'Akşam', apiName: 'Akşam Yemeği' },
-            { id: 'snacks', name: 'Aperatifler', apiName: 'Aparatif' }
+            {id: 'breakfast', name: 'Kahvaltı', apiName: 'Kahvaltı'},
+            {id: 'lunch', name: 'Öğle', apiName: 'Öğle Yemeği'},
+            {id: 'dinner', name: 'Akşam', apiName: 'Akşam Yemeği'},
+            {id: 'snacks', name: 'Aperatifler', apiName: 'Aparatif'}
         ];
 
         setMealTypes(defaultMealTypes);
@@ -447,7 +448,7 @@ const BottomNav = ({navigation}: Props) => {
 
             // Eğer beslenme planı yoksa yeni oluştur
             if (!mealPlanData) {
-                mealPlanData = { [todayTurkish]: {} };
+                mealPlanData = {[todayTurkish]: {}};
                 mealTypes.forEach(type => {
                     mealPlanData[todayTurkish][type.apiName] = [];
                 });
@@ -475,9 +476,9 @@ const BottomNav = ({navigation}: Props) => {
                     }]
                 };
             } else if (typeof todayPlan[apiMealType] === 'object' &&
-                      !Array.isArray(todayPlan[apiMealType]) &&
-                      todayPlan[apiMealType] &&
-                      todayPlan[apiMealType]["Ana Menü"]) {
+                !Array.isArray(todayPlan[apiMealType]) &&
+                todayPlan[apiMealType] &&
+                todayPlan[apiMealType]["Ana Menü"]) {
                 // "Ana Menü" formatında
                 if (!todayPlan[apiMealType]["Ana Menü"]) {
                     todayPlan[apiMealType]["Ana Menü"] = [];
@@ -504,11 +505,11 @@ const BottomNav = ({navigation}: Props) => {
                     "Ana Menü": [
                         ...existingMeals.map(item => {
                             if (typeof item === 'string') {
-                                return { name: item, portion: "1 porsiyon", eaten: false };
+                                return {name: item, portion: "1 porsiyon", eaten: false};
                             }
                             return item;
                         }),
-                        { name: newMeal, portion: newPortion, eaten: false, timestamp: new Date().toISOString() }
+                        {name: newMeal, portion: newPortion, eaten: false, timestamp: new Date().toISOString()}
                     ]
                 };
             }
@@ -923,14 +924,20 @@ const styles = StyleSheet.create({
         height: 60,
         backgroundColor: '#fc9e21',
         borderTopWidth: 1,
-        borderTopColor: '#cccccc',  // Turuncu çizgiyi (#ff7355) gri gölgelendirme (#cccccc) olarak değiştirdim
+        borderTopColor: '#cccccc',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        shadowColor: '#000',
-        shadowOpacity: 0.25,
-        shadowOffset: {width: 0, height: -3},
-        shadowRadius: 6,
-        elevation: 12,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOpacity: 0.25,
+                shadowOffset: {width: 0, height: -3},
+                shadowRadius: 6,
+            },
+            android: {
+                elevation: 12,
+            },
+        }),
     },
     navItem: {
         alignItems: 'center',
@@ -949,11 +956,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 28,
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowOffset: {width: 0, height: 4},
-        shadowRadius: 6,
-        elevation: 14,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOpacity: 0.3,
+                shadowOffset: {width: 0, height: 4},
+                shadowRadius: 6,
+            },
+            android: {
+                elevation: 14,
+            },
+        }),
     },
     plusText: {
         fontSize: 38,
@@ -978,12 +991,18 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: {width: 0, height: 2},
-        shadowRadius: 4,
-        elevation: 6,
         zIndex: 11,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOpacity: 0.2,
+                shadowOffset: {width: 0, height: 2},
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 6,
+            },
+        }),
     },
     overlay: {
         position: 'absolute',
@@ -1056,12 +1075,18 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         flexDirection: 'row',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowOffset: {width: 0, height: 2},
-        shadowRadius: 4,
-        elevation: 5,
         zIndex: 9999,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOpacity: 0.3,
+                shadowOffset: {width: 0, height: 2},
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 5,
+            },
+        }),
     },
     successToast: {
         backgroundColor: '#4caf50',

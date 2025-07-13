@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './HesabimiSil.css';
 import {
+    Alert,
     Box,
-    Container,
-    Typography,
+    Button,
     Card,
     CardContent,
-    TextField,
-    Button,
-    FormControlLabel,
     Checkbox,
-    Alert,
-    useTheme,
+    CircularProgress,
+    Container,
+    FormControlLabel,
+    TextField,
+    Typography,
     useMediaQuery,
-    CircularProgress
+    useTheme
 } from "@mui/material";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import InfoIcon from '@mui/icons-material/Info';
@@ -40,7 +40,7 @@ export default function HesabimiSil() {
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -126,30 +126,30 @@ export default function HesabimiSil() {
                 position: 'relative'
             }}>
                 <Box className="header-banner"
-                    sx={{
-                        background: 'linear-gradient(135deg, #ff7355 0%, #fc9e21 100%)',
-                        borderBottomLeftRadius: '15%',
-                        borderBottomRightRadius: '15%',
-                        boxShadow: '0 4px 20px rgba(252, 158, 33, 0.3)',
-                        height: '25vh',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        '&::after': {
-                            content: '""',
-                            position: 'absolute',
-                            bottom: '-10px',
-                            left: 0,
-                            width: '100%',
-                            height: '50px',
-                            background: 'white',
-                            borderRadius: '50%',
-                            transform: 'scale(2)',
-                            boxShadow: '0px -15px 20px rgba(0,0,0,0.1)'
-                        }
-                    }}
+                     sx={{
+                         background: 'linear-gradient(135deg, #ff7355 0%, #fc9e21 100%)',
+                         borderBottomLeftRadius: '15%',
+                         borderBottomRightRadius: '15%',
+                         boxShadow: '0 4px 20px rgba(252, 158, 33, 0.3)',
+                         height: '25vh',
+                         display: 'flex',
+                         flexDirection: 'column',
+                         justifyContent: 'center',
+                         position: 'relative',
+                         overflow: 'hidden',
+                         '&::after': {
+                             content: '""',
+                             position: 'absolute',
+                             bottom: '-10px',
+                             left: 0,
+                             width: '100%',
+                             height: '50px',
+                             background: 'white',
+                             borderRadius: '50%',
+                             transform: 'scale(2)',
+                             boxShadow: '0px -15px 20px rgba(0,0,0,0.1)'
+                         }
+                     }}
                 >
                     <Typography
                         variant={isMobile ? "h4" : "h3"}
@@ -176,7 +176,8 @@ export default function HesabimiSil() {
                     </Typography>
                 </Box>
 
-                <Container component="main" maxWidth="md" className="hesabimi-sil-container" sx={{ zIndex: 10, position: 'relative' }}>
+                <Container component="main" maxWidth="md" className="hesabimi-sil-container"
+                           sx={{zIndex: 10, position: 'relative'}}>
                     <Card
                         elevation={10}
                         sx={{
@@ -208,11 +209,11 @@ export default function HesabimiSil() {
                                     gap: 1
                                 }}
                             >
-                                <DeleteForeverIcon color="error" fontSize="large" />
+                                <DeleteForeverIcon color="error" fontSize="large"/>
                                 Hesap Silme Talebi
                             </Typography>
 
-                            <Box className="form-info" sx={{ mb: 4 }}>
+                            <Box className="form-info" sx={{mb: 4}}>
                                 <Typography
                                     variant="body1"
                                     paragraph
@@ -222,18 +223,21 @@ export default function HesabimiSil() {
                                         gap: 1
                                     }}
                                 >
-                                    <InfoIcon color="warning" sx={{ mt: 0.3 }} />
-                                    Hesabınızı silme işlemi geri alınamaz ve tüm verileriniz kalıcı olarak silinir. Bu işlemi gerçekleştirmek istediğinizden emin misiniz?
+                                    <InfoIcon color="warning" sx={{mt: 0.3}}/>
+                                    Hesabınızı silme işlemi geri alınamaz ve tüm verileriniz kalıcı olarak silinir. Bu
+                                    işlemi gerçekleştirmek istediğinizden emin misiniz?
                                 </Typography>
-                                <Typography variant="body2" sx={{ pl: 4 }}>
-                                    Hesap silme talebiniz alındıktan sonra, ekibimiz tarafından incelenecek ve en kısa sürede işleme alınacaktır. İşlem ile ilgili size bilgilendirme e-postası gönderilecektir.
+                                <Typography variant="body2" sx={{pl: 4}}>
+                                    Hesap silme talebiniz alındıktan sonra, ekibimiz tarafından incelenecek ve en kısa
+                                    sürede işleme alınacaktır. İşlem ile ilgili size bilgilendirme e-postası
+                                    gönderilecektir.
                                 </Typography>
                             </Box>
 
                             {(submitStatus.success || submitStatus.error) && (
                                 <Alert
                                     severity={submitStatus.success ? "success" : "error"}
-                                    sx={{ mb: 3 }}
+                                    sx={{mb: 3}}
                                 >
                                     {submitStatus.message}
                                 </Alert>
@@ -307,7 +311,8 @@ export default function HesabimiSil() {
                                         size="large"
                                         disabled={loading || !formData.confirmDelete}
                                         className="submit-btn"
-                                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <DeleteForeverIcon />}
+                                        startIcon={loading ? <CircularProgress size={20} color="inherit"/> :
+                                            <DeleteForeverIcon/>}
                                         sx={{
                                             mt: 2,
                                             py: 1.5,
@@ -323,8 +328,12 @@ export default function HesabimiSil() {
                                         {loading ? 'İşleniyor...' : 'Hesabımı Sil'}
                                     </Button>
 
-                                    <Typography variant="body2" sx={{ mt: 3, color: 'text.secondary', textAlign: 'center' }}>
-                                        Hesap silme işlemiyle ilgili herhangi bir sorunuz varsa, lütfen bizimle <a href="mailto:info@diyetia.com" style={{ color: theme.palette.primary.main }}>info@diyetia.com</a> adresinden iletişime geçin.
+                                    <Typography variant="body2"
+                                                sx={{mt: 3, color: 'text.secondary', textAlign: 'center'}}>
+                                        Hesap silme işlemiyle ilgili herhangi bir sorunuz varsa, lütfen bizimle <a
+                                        href="mailto:info@diyetia.com"
+                                        style={{color: theme.palette.primary.main}}>info@diyetia.com</a> adresinden
+                                        iletişime geçin.
                                     </Typography>
                                 </Box>
                             </form>

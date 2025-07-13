@@ -1,15 +1,15 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     Animated,
     Dimensions,
+    Easing,
+    Platform,
     StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
-    Platform,
-    Easing,
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
@@ -67,7 +67,7 @@ export default function Header({navigation}: Props) {
                         easing: Easing.linear,
                     }),
                 ]),
-                { iterations: 2 }
+                {iterations: 2}
             ).start();
         }
     }, [unreadNotificationsCount]);
@@ -180,7 +180,7 @@ export default function Header({navigation}: Props) {
         return () => clearInterval(interval);
     }, []);
 
-    const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+    const unreadNotificationsCount = (notifications || []).filter(n => !n.isRead).length;
 
     const openDrawer = () => {
         setDrawerOpen(true);
@@ -234,7 +234,7 @@ export default function Header({navigation}: Props) {
 
     const EmptyNotifications = () => (
         <View style={styles.emptyNotificationsContainer}>
-            <Icon name="bell-off-outline" size={50} color="#ddd" />
+            <Icon name="bell-off-outline" size={50} color="#ddd"/>
             <Text style={styles.emptyNotificationsText}>Henüz bildiriminiz yok</Text>
         </View>
     );
@@ -258,10 +258,14 @@ export default function Header({navigation}: Props) {
 
     return (
         <>
-            <StatusBar backgroundColor="#ff8c00" barStyle="light-content"/>
+            {Platform.OS === 'android' ? (
+                <StatusBar backgroundColor="#ff8c00" barStyle="light-content"/>
+            ) : (
+                <StatusBar barStyle="light-content"/>
+            )}
             <Animated.View style={{
                 opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }]
+                transform: [{scale: scaleAnim}]
             }}>
                 <LinearGradient
                     colors={['#ff8c00', '#fc9e21', '#ffb347']}
@@ -302,13 +306,13 @@ export default function Header({navigation}: Props) {
                                     style={styles.iconButton}
                                     activeOpacity={0.7}>
                                     <View style={styles.iconBackground}>
-                                        <Icon name="message-outline" size={22} color="#ffffff" />
+                                        <Icon name="message-outline" size={22} color="#ffffff"/>
                                     </View>
                                     {messageCount > 0 && (
                                         <Animated.View
                                             style={[
                                                 styles.notificationBadge,
-                                                { transform: [{ scale: messageCount > 0 ? 1.1 : 1 }] }
+                                                {transform: [{scale: messageCount > 0 ? 1.1 : 1}]}
                                             ]}>
                                             <Text style={styles.notificationText}>{messageCount}</Text>
                                         </Animated.View>
@@ -321,19 +325,21 @@ export default function Header({navigation}: Props) {
                                     activeOpacity={0.7}>
                                     <View style={styles.iconBackground}>
                                         <Animated.View style={{
-                                            transform: [{ rotate: bellShakeAnim.interpolate({
-                                                inputRange: [-1, 1],
-                                                outputRange: ['-20deg', '20deg']
-                                            }) }]
+                                            transform: [{
+                                                rotate: bellShakeAnim.interpolate({
+                                                    inputRange: [-1, 1],
+                                                    outputRange: ['-20deg', '20deg']
+                                                })
+                                            }]
                                         }}>
-                                            <Icon name="bell-outline" size={22} color="#ffffff" />
+                                            <Icon name="bell-outline" size={22} color="#ffffff"/>
                                         </Animated.View>
                                     </View>
                                     {unreadNotificationsCount > 0 && (
                                         <Animated.View
                                             style={[
                                                 styles.notificationBadge,
-                                                { transform: [{ scale: unreadNotificationsCount > 0 ? 1.1 : 1 }] }
+                                                {transform: [{scale: unreadNotificationsCount > 0 ? 1.1 : 1}]}
                                             ]}>
                                             <Text style={styles.notificationText}>{unreadNotificationsCount}</Text>
                                         </Animated.View>
@@ -350,11 +356,13 @@ export default function Header({navigation}: Props) {
                     <View style={styles.fullScreen}>
                         <Animated.View style={[
                             styles.overlay,
-                            {opacity: drawerAnim.interpolate({
-                                inputRange: [0, screenWidth],
-                                outputRange: [0.5, 0]
-                            })}
-                        ]} />
+                            {
+                                opacity: drawerAnim.interpolate({
+                                    inputRange: [0, screenWidth],
+                                    outputRange: [0.5, 0]
+                                })
+                            }
+                        ]}/>
                         <Animated.View
                             style={[
                                 styles.drawer,
@@ -365,27 +373,15 @@ export default function Header({navigation}: Props) {
                                 <TouchableOpacity
                                     onPress={closeDrawer}
                                     style={styles.closeButton}>
-                                    <Icon name="close" size={22} color="#666" />
+                                    <Icon name="close" size={22} color="#666"/>
                                 </TouchableOpacity>
                             </View>
 
                             <View style={styles.drawerContent}>
                                 {notifications.length > 0 ? (
                                     notifications.map((notification, index) => (
-                                        <Animated.View
+                                        <View
                                             key={notification.id}
-                                            entering={Animated.stagger(
-                                                50,
-                                                Animated.spring({
-                                                    damping: 12,
-                                                    stiffness: 100,
-                                                }).withCallback((finished) => {
-                                                    'worklet';
-                                                    if (finished) {
-                                                        console.log('Animation finished');
-                                                    }
-                                                })
-                                            )}
                                             style={[
                                                 styles.notificationBox,
                                                 !notification.isRead && styles.unreadNotification
@@ -408,10 +404,10 @@ export default function Header({navigation}: Props) {
                                                     {formatNotificationDate(notification.createdAt)}
                                                 </Text>
                                             </View>
-                                        </Animated.View>
+                                        </View>
                                     ))
                                 ) : (
-                                    <EmptyNotifications />
+                                    <EmptyNotifications/>
                                 )}
                             </View>
                         </Animated.View>
@@ -424,14 +420,20 @@ export default function Header({navigation}: Props) {
 
 const styles = StyleSheet.create({
     appbarContainer: {
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 8,
+            },
+        }),
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-        overflow: 'hidden',
+        overflow: Platform.OS === 'ios' ? 'hidden' : 'visible',
     },
     appbarInner: {
         flexDirection: 'row',
@@ -504,7 +506,7 @@ const styles = StyleSheet.create({
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
+                shadowOffset: {width: 0, height: 2},
                 shadowOpacity: 0.3,
                 shadowRadius: 2,
             },
@@ -540,7 +542,7 @@ const styles = StyleSheet.create({
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: -2, height: 0 },
+                shadowOffset: {width: -2, height: 0},
                 shadowOpacity: 0.2,
                 shadowRadius: 5,
             },
@@ -583,7 +585,7 @@ const styles = StyleSheet.create({
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
+                shadowOffset: {width: 0, height: 1},
                 shadowOpacity: 0.1,
                 shadowRadius: 2,
             },

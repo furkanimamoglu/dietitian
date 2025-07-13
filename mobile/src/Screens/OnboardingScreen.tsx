@@ -1,20 +1,12 @@
 import React, {useMemo, useRef, useState} from 'react';
-import {
-  Dimensions,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Image,
-  Animated
-} from 'react-native';
+import {Animated, Dimensions, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Swiper from 'react-native-swiper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../App';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
 const {width, height} = Dimensions.get('window');

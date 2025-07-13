@@ -60,7 +60,7 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
-import { tr } from 'date-fns/locale';
+import {tr} from 'date-fns/locale';
 
 import {DataGrid} from '@mui/x-data-grid';
 import Papa from 'papaparse';
@@ -332,7 +332,7 @@ export default function Finans() {
             console.error("Ödeme hatırlatma bildirimi gönderilirken hata oluştu:", error);
             showErrorToast("Ödeme hatırlatma bildirimi gönderilirken bir hata oluştu.");
             return false;
-    }
+        }
     };
 
     const fetchInvoices = async () => {
@@ -354,9 +354,9 @@ export default function Finans() {
                 paid_amount: Number(inv.paid_amount),
                 status:
                     inv.status === 'paid' ? 'Ödendi' :
-                    inv.status === 'partiallypaid' ? 'Kısmi Ödeme' :
-                    inv.status === 'unpaid' ? 'Beklemede' :
-                    inv.status === 'cancelled' ? 'Ödenmedi' : inv.status,
+                        inv.status === 'partiallypaid' ? 'Kısmi Ödeme' :
+                            inv.status === 'unpaid' ? 'Beklemede' :
+                                inv.status === 'cancelled' ? 'Ödenmedi' : inv.status,
                 issueDate: inv.issueDate ? inv.issueDate.split('T')[0] : '',
                 dueDate: inv.dueDate ? inv.dueDate.split('T')[0] : '',
                 description: inv.description || '',
@@ -437,8 +437,8 @@ export default function Finans() {
                     label={params.value}
                     color={
                         params.value === "Ödendi" ? "success" :
-                        params.value === "Beklemede" ? "warning" :
-                        params.value === "Kısmi Ödeme" ? "info" : "error"
+                            params.value === "Beklemede" ? "warning" :
+                                params.value === "Kısmi Ödeme" ? "info" : "error"
                     }
                     size="small"
                 />
@@ -1135,8 +1135,7 @@ export default function Finans() {
 
             if (value === "Ödendi") {
                 updatedInvoice.paid_amount = updatedInvoice.amount;
-            }
-            else if (value === "Beklemede" || value === "Ödenmedi") {
+            } else if (value === "Beklemede" || value === "Ödenmedi") {
                 updatedInvoice.paid_amount = 0;
             }
 
@@ -1964,9 +1963,11 @@ export default function Finans() {
                                         overflowX: 'auto'
                                     }}>
                                         danisan,paket,tutar,durum,fatura_tarihi,son_odeme,aciklama<br/>
-                                        "Furkan İmamoğlu","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs ayı
+                                        "Furkan İmamoğlu","Aylık Paket","500","Ödendi","2023-05-01","2023-05-31","Mayıs
+                                        ayı
                                         ödemesi"<br/>
-                                        "Furkan İmamoğlu","Seanslık","250","Beklemede","2023-05-15","2023-05-22","İlk seans"
+                                        "Furkan İmamoğlu","Seanslık","250","Beklemede","2023-05-15","2023-05-22","İlk
+                                        seans"
                                     </code>
                                 </Stack>
                             </DialogContent>
@@ -2691,7 +2692,8 @@ export default function Finans() {
                                             className={formErrors.paid_amount ? "error-input" : ""}
                                         />
                                     </div>
-                                    {formErrors.paid_amount && <div className="error-message">{formErrors.paid_amount}</div>}
+                                    {formErrors.paid_amount &&
+                                        <div className="error-message">{formErrors.paid_amount}</div>}
                                 </div>
                             )}
 
