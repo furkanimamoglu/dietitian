@@ -100,7 +100,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
             throw new Exception('Geçersiz yükleme türü.');
         }
 
-        const folderPath = `${role === DIETITIAN ? 'Dietitian' : 'Client'}/${sanitize(userId)}/${clientId}/${type}`;
+        const folderPath = `${role === DIETITIAN ? 'Dietitian' : 'Client'}/${sanitize(userId)}${clientId ? '/' + clientId : ''}/${type}`;
         const uniqueSuffix = `${new Date().toISOString().split('T')[0]}`;
         const sanitizedFileName = sanitize(req.file.originalname).toLowerCase().replace(/\s+/g, '-');
         const fileName = `${folderPath}/${uniqueSuffix}.${sanitizedFileName}`;
