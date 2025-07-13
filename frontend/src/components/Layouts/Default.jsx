@@ -1,25 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {
-    Alert,
-    AlertTitle,
     Backdrop,
     Box,
     Button,
+    Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
     FormControlLabel,
-    Checkbox,
     IconButton,
     Typography
 } from '@mui/material';
 
 import CloseIcon from '@mui/icons-material/Close';
-import RocketIcon from '@mui/icons-material/Rocket';
-import LockIcon from '@mui/icons-material/Lock';
 import SecurityIcon from '@mui/icons-material/Security';
 
 import Header from "../Header/Header.jsx";
@@ -29,7 +25,7 @@ import axios from "axios";
 import config from "../../config.js";
 
 // KVKK onayı için modal bileşeni
-const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
+const KvkkApprovalModal = ({open, onClose, onApprove}) => {
     const [kvkkAccepted, setKvkkAccepted] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [communicationAccepted, setCommunicationAccepted] = useState(false);
@@ -82,7 +78,7 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                     color: '#757575'
                 }}
             >
-                <CloseIcon />
+                <CloseIcon/>
             </IconButton>
 
             <DialogTitle
@@ -95,12 +91,12 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                     pr: 4
                 }}
             >
-                <SecurityIcon />
+                <SecurityIcon/>
                 KVKK ve Kullanıcı Sözleşmesi
             </DialogTitle>
 
-            <DialogContent sx={{ mt: 2 }}>
-                <DialogContentText sx={{ mb: 2 }}>
+            <DialogContent sx={{mt: 2}}>
+                <DialogContentText sx={{mb: 2}}>
                     Lütfen aşağıdaki KVKK Aydınlatma Metni ve Kullanıcı Sözleşmesini okuyup onaylayın.
                 </DialogContentText>
 
@@ -121,15 +117,22 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                     }}
                 >
                     <Typography variant="body2">
-                        Kişisel Verilerin Korunması Kanunu kapsamında sizden aldığımız bilgiler, sadece hizmetimizi sunmak ve
-                        geliştirmek amacıyla kullanılmaktadır. Hizmetlerimizi kullanmak için verdiğiniz kişisel bilgiler (adınız, soyadınız, e-posta adresiniz, telefon numaranız ve diğer iletişim bilgileri) güvenli bir şekilde saklanmakta ve
+                        Kişisel Verilerin Korunması Kanunu kapsamında sizden aldığımız bilgiler, sadece hizmetimizi
+                        sunmak ve
+                        geliştirmek amacıyla kullanılmaktadır. Hizmetlerimizi kullanmak için verdiğiniz kişisel bilgiler
+                        (adınız, soyadınız, e-posta adresiniz, telefon numaranız ve diğer iletişim bilgileri) güvenli
+                        bir şekilde saklanmakta ve
                         izniniz olmadan üçüncü kişilerle paylaşılmamaktadır.
                         <br/><br/>
-                        Kişisel verileriniz, size daha iyi hizmet verebilmemiz, yasal yükümlülüklerimizi yerine getirmek ve sizinle iletişimde kalmak amacıyla kullanılmaktadır.
+                        Kişisel verileriniz, size daha iyi hizmet verebilmemiz, yasal yükümlülüklerimizi yerine getirmek
+                        ve sizinle iletişimde kalmak amacıyla kullanılmaktadır.
                         <br/><br/>
-                        6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında, kişisel verilerinizin güvenliği bizim için önemlidir. Verilerinize kimlerin erişebildiği, nasıl kullanıldığı, nasıl korunduğu ve hangi haklara sahip olduğunuz konusunda sizi bilgilendirmek isteriz.
+                        6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında, kişisel verilerinizin güvenliği bizim
+                        için önemlidir. Verilerinize kimlerin erişebildiği, nasıl kullanıldığı, nasıl korunduğu ve hangi
+                        haklara sahip olduğunuz konusunda sizi bilgilendirmek isteriz.
                         <br/><br/>
-                        Kişisel verileriniz hakkında her zaman bilgi talep edebilir, verilerinizin düzeltilmesini veya silinmesini isteyebilirsiniz.
+                        Kişisel verileriniz hakkında her zaman bilgi talep edebilir, verilerinizin düzeltilmesini veya
+                        silinmesini isteyebilirsiniz.
                     </Typography>
                 </Box>
 
@@ -142,7 +145,7 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                         />
                     }
                     label="KVKK aydınlatma metnini okudum ve kabul ediyorum"
-                    sx={{ mb: 3 }}
+                    sx={{mb: 3}}
                 />
 
                 {/* Kullanıcı Sözleşmesi */}
@@ -162,21 +165,30 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                     }}
                 >
                     <Typography variant="body2">
-                        Bu Kullanıcı Sözleşmesi, dietitian platformunu kullanırken uymanız gereken kuralları ve koşulları belirtir.
+                        Bu Kullanıcı Sözleşmesi, dietitian platformunu kullanırken uymanız gereken kuralları ve
+                        koşulları belirtir.
                         <br/><br/>
-                        1. Hizmet Kullanımı: Platformumuz, diyetisyenlerin müşterileri ile etkileşimde bulunmasına olanak tanır. Platformu kötüye kullanmak, yasadışı faaliyetlerde bulunmak veya başkalarına zarar vermek için kullanamazsınız.
+                        1. Hizmet Kullanımı: Platformumuz, diyetisyenlerin müşterileri ile etkileşimde bulunmasına
+                        olanak tanır. Platformu kötüye kullanmak, yasadışı faaliyetlerde bulunmak veya başkalarına zarar
+                        vermek için kullanamazsınız.
                         <br/><br/>
-                        2. Hesap Güvenliği: Hesabınızın güvenliğinden siz sorumlusunuz. Güçlü bir şifre kullanın ve şifrenizi başkalarıyla paylaşmayın.
+                        2. Hesap Güvenliği: Hesabınızın güvenliğinden siz sorumlusunuz. Güçlü bir şifre kullanın ve
+                        şifrenizi başkalarıyla paylaşmayın.
                         <br/><br/>
-                        3. İçerik Sorumluluğu: Platformda paylaştığınız tüm içeriklerden siz sorumlusunuz. Yasa dışı, zararlı, tehditkar, taciz edici, iftira niteliğinde veya başka şekilde uygunsuz içerik paylaşmayın.
+                        3. İçerik Sorumluluğu: Platformda paylaştığınız tüm içeriklerden siz sorumlusunuz. Yasa dışı,
+                        zararlı, tehditkar, taciz edici, iftira niteliğinde veya başka şekilde uygunsuz içerik
+                        paylaşmayın.
                         <br/><br/>
                         4. Telif Hakları: Başkalarının telif haklarını ihlal eden içerik paylaşmayın.
                         <br/><br/>
-                        5. Servis Değişiklikleri: Hizmetimizi herhangi bir zamanda değiştirme veya sonlandırma hakkını saklı tutarız.
+                        5. Servis Değişiklikleri: Hizmetimizi herhangi bir zamanda değiştirme veya sonlandırma hakkını
+                        saklı tutarız.
                         <br/><br/>
-                        6. Hesap İptali: Kullanım koşullarını ihlal ettiğinizde hesabınızı askıya alma veya sonlandırma hakkımız vardır.
+                        6. Hesap İptali: Kullanım koşullarını ihlal ettiğinizde hesabınızı askıya alma veya sonlandırma
+                        hakkımız vardır.
                         <br/><br/>
-                        7. Sorumluluk Sınırlaması: Platformumuzun kullanımı sırasında oluşabilecek doğrudan, dolaylı, özel, arızi veya sonuçsal zararlardan sorumlu değiliz.
+                        7. Sorumluluk Sınırlaması: Platformumuzun kullanımı sırasında oluşabilecek doğrudan, dolaylı,
+                        özel, arızi veya sonuçsal zararlardan sorumlu değiliz.
                     </Typography>
                 </Box>
 
@@ -189,11 +201,11 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                         />
                     }
                     label="Kullanıcı sözleşmesini okudum ve kabul ediyorum"
-                    sx={{ mb: 3 }}
+                    sx={{mb: 3}}
                 />
 
                 {/* İletişim İzinleri - Kullanıcı Sözleşmesinin altında, belirgin bir şekilde */}
-                <Box sx={{ pt: 1, pb: 1, borderTop: '1px solid #f0f0f0', mt: 1 }}>
+                <Box sx={{pt: 1, pb: 1, borderTop: '1px solid #f0f0f0', mt: 1}}>
                     <FormControlLabel
                         control={
                             <Checkbox
@@ -203,12 +215,12 @@ const KvkkApprovalModal = ({ open, onClose, onApprove }) => {
                             />
                         }
                         label="SMS, e-posta ve bildirim almayı kabul ediyorum"
-                        sx={{ mb: 2 }}
+                        sx={{mb: 2}}
                     />
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
+            <DialogActions sx={{p: 2, display: 'flex', justifyContent: 'space-between'}}>
                 <Button
                     onClick={onClose}
                     variant="outlined"
@@ -416,13 +428,18 @@ export default function Default(props) {
             <Navbar/>
 
             {/* Ana içerik alanı */}
-            <Box sx={{ p: 3, mt: 3, bgcolor: isContentBlocked ? '#f9f9f9' : 'inherit', minHeight: 'calc(100vh - 64px - 56px)' }}>
+            <Box sx={{
+                p: 3,
+                mt: 3,
+                bgcolor: isContentBlocked ? '#f9f9f9' : 'inherit',
+                minHeight: 'calc(100vh - 64px - 56px)'
+            }}>
                 {isContentBlocked ? (
-                    <Box sx={{ textAlign: 'center', py: 5 }}>
+                    <Box sx={{textAlign: 'center', py: 5}}>
                         <Typography variant="h6" gutterBottom>
                             İçerik Erişimi Engellendi
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{mb: 3}}>
                             Bu içeriği görüntülemek için lütfen bir paket satın alın.
                         </Typography>
                         <Button

@@ -577,7 +577,8 @@ const AnaSayfa = ({navigation}: Props) => {
                 visible={showKVKKModal}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => {}}
+                onRequestClose={() => {
+                }}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
@@ -592,23 +593,34 @@ const AnaSayfa = ({navigation}: Props) => {
                                         <Text style={styles.modalText}>
                                             Kullanıcı Sözleşmesi
                                             {'\n\n'}
-                                            Bu Kullanıcı Sözleşmesi ("Sözleşme"), uygulamamızı kullanımınızı düzenleyen koşulları içermektedir. Uygulamayı kullanarak bu sözleşmeyi kabul etmiş sayılırsınız.
+                                            Bu Kullanıcı Sözleşmesi ("Sözleşme"), uygulamamızı kullanımınızı düzenleyen
+                                            koşulları içermektedir. Uygulamayı kullanarak bu sözleşmeyi kabul etmiş
+                                            sayılırsınız.
                                             {'\n\n'}
                                             1. Hizmet Kullanımı
                                             {'\n'}
-                                            Uygulamamız, beslenme ve diyet hizmetleri kapsamında danışmanlık, takip ve bilgilendirme amaçlarıyla sağlanmaktadır. Hizmetlerimizi yalnızca yasal amaçlar için ve bu sözleşmede belirtilen koşullara uygun olarak kullanmayı kabul ediyorsunuz.
+                                            Uygulamamız, beslenme ve diyet hizmetleri kapsamında danışmanlık, takip ve
+                                            bilgilendirme amaçlarıyla sağlanmaktadır. Hizmetlerimizi yalnızca yasal
+                                            amaçlar için ve bu sözleşmede belirtilen koşullara uygun olarak kullanmayı
+                                            kabul ediyorsunuz.
                                             {'\n\n'}
                                             2. Hesap Güvenliği
                                             {'\n'}
-                                            Hesabınızın güvenliğinden ve hesabınız altında gerçekleşen tüm etkinliklerden siz sorumlusunuz. Şifrenizi güvende tutmak ve herhangi bir güvenlik ihlali durumunda derhal bize bildirmek sizin sorumluluğunuzdadır.
+                                            Hesabınızın güvenliğinden ve hesabınız altında gerçekleşen tüm
+                                            etkinliklerden siz sorumlusunuz. Şifrenizi güvende tutmak ve herhangi bir
+                                            güvenlik ihlali durumunda derhal bize bildirmek sizin sorumluluğunuzdadır.
                                             {'\n\n'}
                                             3. Kullanıcı İçeriği
                                             {'\n'}
-                                            Uygulama içerisinde paylaştığınız tüm içeriklerden (veriler, bilgiler, dosyalar vb.) siz sorumlusunuz. Telif hakkı, ticari marka veya başkalarının haklarını ihlal eden içerikler paylaşmamayı kabul ediyorsunuz.
+                                            Uygulama içerisinde paylaştığınız tüm içeriklerden (veriler, bilgiler,
+                                            dosyalar vb.) siz sorumlusunuz. Telif hakkı, ticari marka veya başkalarının
+                                            haklarını ihlal eden içerikler paylaşmamayı kabul ediyorsunuz.
                                             {'\n\n'}
                                             4. Ücretlendirme ve Ödemeler
                                             {'\n'}
-                                            Uygulama içerisindeki bazı özellikler ve hizmetler ücretli olabilir. Ücretli hizmetlerden yararlanabilmek için ilgili ücretin tam ve zamanında ödenmesi gerekmektedir.
+                                            Uygulama içerisindeki bazı özellikler ve hizmetler ücretli olabilir. Ücretli
+                                            hizmetlerden yararlanabilmek için ilgili ücretin tam ve zamanında ödenmesi
+                                            gerekmektedir.
                                         </Text>
                                     </ScrollView>
                                 </View>
@@ -621,18 +633,24 @@ const AnaSayfa = ({navigation}: Props) => {
                                     <ScrollView style={styles.agreementScrollView}>
                                         <Text style={styles.modalText}>
                                             Gizlilik Politikası kapsamında, kişisel verilerinizin işlenmesi,
-                                            saklanması ve kullanılması hakkında aşağıdaki bilgileri siz değerli kullanıcılarımızla
+                                            saklanması ve kullanılması hakkında aşağıdaki bilgileri siz değerli
+                                            kullanıcılarımızla
                                             paylaşmak isteriz.
                                             {'\n\n'}
-                                            Uygulamamız, sağlık verilerinizi, beslenme alışkanlıklarınızı, fiziksel aktivitelerinizi
-                                            ve sizinle ilgili diğer kişisel bilgileri, size özel hizmet sunabilmek amacıyla
+                                            Uygulamamız, sağlık verilerinizi, beslenme alışkanlıklarınızı, fiziksel
+                                            aktivitelerinizi
+                                            ve sizinle ilgili diğer kişisel bilgileri, size özel hizmet sunabilmek
+                                            amacıyla
                                             toplamakta ve işlemektedir.
                                             {'\n\n'}
-                                            Kişisel verileriniz, sadece uygulama içerisindeki hizmetlerin sunulması, iyileştirilmesi
-                                            ve kişiselleştirilmesi amacıyla kullanılacak olup, açık rızanız olmadan üçüncü kişilerle
+                                            Kişisel verileriniz, sadece uygulama içerisindeki hizmetlerin sunulması,
+                                            iyileştirilmesi
+                                            ve kişiselleştirilmesi amacıyla kullanılacak olup, açık rızanız olmadan
+                                            üçüncü kişilerle
                                             paylaşılmayacaktır.
                                             {'\n\n'}
-                                            Kişisel verilerinizin güvenliği için gerekli tüm teknik ve idari tedbirler alınmıştır.
+                                            Kişisel verilerinizin güvenliği için gerekli tüm teknik ve idari tedbirler
+                                            alınmıştır.
                                             Sahip olduğunuz haklar:
                                             {'\n\n'}
                                             - Kişisel verilerinizin işlenip işlenmediğini öğrenme
@@ -1006,7 +1024,7 @@ const styles = StyleSheet.create({
         padding: 20,
         elevation: 5,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.2,
         shadowRadius: 4
     },
@@ -1124,7 +1142,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         borderRadius: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,

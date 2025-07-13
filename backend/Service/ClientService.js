@@ -123,26 +123,6 @@ class ClientService {
         }
     }
 
-    static async getMyNotifications(client_id) {
-        try {
-            if (!client_id) {
-                throw new Exception("Yetkisiz Erişim.");
-            }
-
-            const notifications = await Notification.findAll({
-                where: {client_id: client_id}
-            });
-
-            if (!notifications || notifications.length === 0) {
-                throw new Exception("Bildiriminiz yok.");
-            }
-
-            return notifications;
-        } catch (error) {
-            throw new Exception(error.message, 400);
-        }
-    }
-
     static async readMyAllNotifications(client_id) {
         try {
             if (!client_id) {
@@ -240,11 +220,11 @@ class ClientService {
         return recipes;
     }
 
-    static async updateMealPlan(client_id, nutrition_plan_id, newMealPlan) {
+    static async updateMealPlan(client_id, nutrition_assignment_id, newMealPlan) {
         const assignment = await NutritionAssignment.findOne({
             where: {
                 client_id: client_id,
-                nutrition_plan_id: nutrition_plan_id
+                id: nutrition_assignment_id
             }
         });
 
@@ -252,7 +232,6 @@ class ClientService {
             throw new Exception("Belirtilen kullanıcıya ait beslenme ataması bulunamadı.", 404, true);
         }
 
-        // Validate the new meal plan structure
         if (newMealPlan) {
             Object.keys(newMealPlan).forEach(day => {
                 if (!newMealPlan[day]) return;
@@ -260,15 +239,12 @@ class ClientService {
                 Object.keys(newMealPlan[day]).forEach(mealType => {
                     const meals = newMealPlan[day][mealType];
 
-                    // Check if it's using the new format with 'isim' and 'yenildi' fields
                     if (Array.isArray(meals) && meals.length > 0) {
                         if (!meals.every(meal => meal.hasOwnProperty('isim') && meal.hasOwnProperty('yenildi'))) {
-                            // Transform to new format if using old format
                             newMealPlan[day][mealType] = meals.map(meal => {
                                 if (typeof meal === 'string') {
                                     return {isim: meal, yenildi: false};
                                 } else if (typeof meal === 'object' && !meal.hasOwnProperty('isim')) {
-                                    // If it's an object but doesn't have the right structure
                                     const key = Object.keys(meal)[0] || '';
                                     return {isim: key || meal.toString(), yenildi: false};
                                 }
@@ -477,6 +453,24 @@ class ClientService {
             };
         } catch (error) {
             throw new Exception(error.message, error.status || 400);
+        }
+    }
+
+    static async getMyNotifications(client_id, limit = 7) {
+        try {
+            if (!client_id) {
+                throw new Exception("Yetkisiz Erişim.", 400, true);
+            }
+
+            const notifications = await Notification.findAll({
+                where: { client_id: client_id },
+                order: [['createdAt', 'DESC']],
+                limit: limit
+            });
+
+            return notifications;
+        } catch (error) {
+            throw new Exception(error.message, error.status || 500, error.showOnScreen || true);
         }
     }
 

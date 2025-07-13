@@ -137,7 +137,7 @@
 
 /* Sol şeritteki saat hücrelerinin çerçevesi */
 .fc-timegrid-slot-label-frame {
-    background-color: #2d4149  !important; /* Yeşil arka plan */
+    background-color: #2d4149 !important; /* Yeşil arka plan */
     color: #fff; /* Beyaz yazı rengi */
     font-weight: bold; /* Kalın yazı */
     border: 1px solid #253237; /* Yeşil çerçeve */

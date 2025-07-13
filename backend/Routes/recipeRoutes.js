@@ -17,5 +17,6 @@ router.delete('/deleteRecipeCategory', recipeController.deleteRecipeCategory);
 
 router.post('/assignRecipeToClient', recipeController.assignRecipeToClient);
 router.get('/getAssignedRecipesByClient', recipeController.getAssignedRecipesByClient);
+router.delete('/deleteAssignedRecipe', recipeController.deleteAssignedRecipe);
 
 module.exports = router;

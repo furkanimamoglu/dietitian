@@ -25,6 +25,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NoteIcon from '@mui/icons-material/Note';
 import DescriptionIcon from '@mui/icons-material/Description';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 import MealPlanViewer from "../../Components/MealPlanEditor/MealPlanViewer.jsx";
 import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalPDFLink.jsx";
@@ -32,7 +33,6 @@ import ConditionalPDFLink from "../../Components/ConditionalPDFLink/ConditionalP
 import {Document, Font, Page, StyleSheet, Text, View} from '@react-pdf/renderer';
 
 import {
-    Autocomplete,
     Avatar,
     Box,
     Button,
@@ -43,7 +43,9 @@ import {
     Chip,
     CircularProgress,
     Dialog,
+    DialogActions,
     DialogContent,
+    DialogContentText,
     DialogTitle,
     Divider,
     Grid,
@@ -74,148 +76,137 @@ const pdfStyles = StyleSheet.create({
     page: {
         flexDirection: 'column',
         backgroundColor: '#fff',
-        padding: 15,
+        padding: 8,
         fontFamily: 'Open Sans'
     },
     header: {
         backgroundColor: '#2E7D32',
-        padding: 12,
-        marginBottom: 15,
-        borderRadius: 8,
+        padding: 6,
+        marginBottom: 8,
+        borderRadius: 4,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4
+        alignItems: 'center'
     },
     headerContent: {
         flex: 1
     },
     headerTitle: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 12,
         fontWeight: 'bold',
-        marginBottom: 6
+        marginBottom: 2
     },
     headerSubtitle: {
         color: '#E8F5E8',
-        fontSize: 10,
-        marginBottom: 4
+        fontSize: 6,
+        marginBottom: 1
     },
     headerInfo: {
         color: '#E8F5E8',
-        fontSize: 9,
+        fontSize: 6,
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
     logoContainer: {
-        width: 60,
-        height: 60,
+        width: 40,
+        height: 40,
         backgroundColor: 'white',
-        borderRadius: 8,
+        borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2
+        marginLeft: 8
     },
     logo: {
-        fontSize: 14,
+        fontSize: 10,
         fontWeight: 'bold',
         color: '#fd9200'
     },
     infoSection: {
         flexDirection: 'row',
-        marginBottom: 15,
-        gap: 8
+        marginBottom: 6,
+        gap: 4
     },
     infoBox: {
         flex: 1,
-        padding: 12,
+        padding: 6,
         backgroundColor: '#F8F9FA',
-        borderRadius: 6,
-        borderLeft: '3px solid #4CAF50'
+        borderRadius: 3,
+        borderLeft: '1px solid #4CAF50'
     },
     infoTitle: {
-        fontSize: 10,
+        fontSize: 6,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: 1,
         color: '#2E7D32'
     },
     infoContent: {
-        fontSize: 9,
+        fontSize: 5,
         color: '#424242',
-        lineHeight: 1.3
+        lineHeight: 1.1
     },
     daysContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        gap: 8
+        gap: 2,
+        marginBottom: 6
     },
     dayCard: {
-        width: '48%',
-        marginBottom: 12,
+        width: '13.5%',
         backgroundColor: 'white',
-        borderRadius: 8,
+        borderRadius: 3,
         overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        border: '1px solid #E0E0E0'
+        border: '0.3px solid #E0E0E0',
+        marginBottom: 2
     },
     dayHeader: {
         backgroundColor: '#FF6B35',
-        padding: 8,
+        padding: 2,
         alignItems: 'center'
     },
     dayHeaderText: {
         color: 'white',
-        fontSize: 11,
+        fontSize: 6,
         fontWeight: 'bold',
-        letterSpacing: 0.5
+        letterSpacing: 0.2
     },
     dayContent: {
-        padding: 10
+        padding: 3
     },
     mealSection: {
-        marginBottom: 8
+        marginBottom: 2
     },
     mealTitle: {
-        fontSize: 9,
+        fontSize: 5,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: 1,
         color: '#2E7D32',
         backgroundColor: '#E8F5E8',
-        padding: 3,
-        borderRadius: 3,
+        padding: 1,
+        borderRadius: 1,
         textAlign: 'center'
     },
     alternativeGroup: {
-        marginBottom: 6,
-        paddingLeft: 4
+        marginBottom: 1,
+        paddingLeft: 1
     },
     alternativeTitle: {
-        fontSize: 8,
+        fontSize: 4,
         fontWeight: 'bold',
         color: '#FF6B35',
-        marginBottom: 2
+        marginBottom: 0.5
     },
     mealItem: {
-        fontSize: 8,
-        marginBottom: 2,
-        paddingLeft: 8,
+        fontSize: 4,
+        marginBottom: 0.5,
+        paddingLeft: 2,
         flexDirection: 'row',
         alignItems: 'flex-start'
     },
     mealItemBullet: {
-        fontSize: 8,
-        marginRight: 4,
+        fontSize: 4,
+        marginRight: 1,
         color: '#4CAF50',
         fontWeight: 'bold'
     },
@@ -223,77 +214,78 @@ const pdfStyles = StyleSheet.create({
         flex: 1
     },
     mealItemName: {
-        fontSize: 8,
-        color: '#424242'
+        fontSize: 4,
+        color: '#424242',
+        lineHeight: 1.1
     },
     mealItemPortion: {
-        fontSize: 7,
+        fontSize: 3,
         color: '#757575',
-        marginTop: 1
+        marginTop: 0.2
     },
     noMealText: {
-        fontSize: 8,
+        fontSize: 4,
         color: '#9E9E9E',
-        paddingLeft: 8,
+        paddingLeft: 2,
         textAlign: 'center',
-        marginTop: 5
+        marginTop: 1
     },
     emptyDay: {
         width: '100%',
         backgroundColor: '#F5F5F5',
-        borderRadius: 8,
-        padding: 20,
+        borderRadius: 3,
+        padding: 8,
         alignItems: 'center',
-        marginBottom: 10
+        marginBottom: 4
     },
     emptyDayText: {
-        fontSize: 10,
+        fontSize: 6,
         color: '#757575',
         textAlign: 'center'
     },
     footer: {
         position: 'absolute',
-        bottom: 15,
+        bottom: 8,
         left: 0,
         right: 0,
         alignItems: 'center',
-        paddingHorizontal: 15
+        paddingHorizontal: 8
     },
     footerText: {
-        fontSize: 8,
+        fontSize: 5,
         color: '#2E7D32',
         textAlign: 'center',
-        marginBottom: 3
+        marginBottom: 1
     },
     footerWebsite: {
-        fontSize: 8,
+        fontSize: 5,
         color: '#FF6B35',
         fontWeight: 'bold'
     },
     statsSection: {
         flexDirection: 'row',
-        marginBottom: 10,
+        marginBottom: 6,
         backgroundColor: '#F0F4FF',
-        padding: 8,
-        borderRadius: 6,
+        padding: 4,
+        borderRadius: 3,
         justifyContent: 'space-around'
     },
     statItem: {
         alignItems: 'center'
     },
     statNumber: {
-        fontSize: 12,
+        fontSize: 8,
         fontWeight: 'bold',
         color: '#2E7D32'
     },
     statLabel: {
-        fontSize: 7,
+        fontSize: 5,
         color: '#757575',
-        marginTop: 2
+        marginTop: 0.5
     }
 });
 
-const NutritionPlanDocument = ({ dietitian, program }) => {
+const NutritionPlanDocument = ({dietitian, program}) => {
     console.log("Rendering NutritionPlanDocument with program:", program);
     console.log("Rendering NutritionPlanDocument with dietitian:", dietitian);
     const today = new Date();
@@ -325,7 +317,7 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
             if (dayHasMeals) totalDays++;
         });
 
-        return { totalDays, totalMeals, totalItems };
+        return {totalDays, totalMeals, totalItems};
     };
 
     const stats = calculateStats();
@@ -348,7 +340,7 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
 
     return (
         <Document>
-            <Page size="A4" style={pdfStyles.page} wrap>
+            <Page size={[842, 595]} orientation="landscape" style={pdfStyles.page} wrap>
                 {/* Başlık ve Logo */}
                 <View style={pdfStyles.header}>
                     <View style={pdfStyles.headerContent}>
@@ -368,10 +360,6 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                     <View style={pdfStyles.infoBox}>
                         <Text style={pdfStyles.infoTitle}>Program Adı</Text>
                         <Text style={pdfStyles.infoContent}>{program?.title || 'İsimsiz Program'}</Text>
-                    </View>
-                    <View style={pdfStyles.infoBox}>
-                        <Text style={pdfStyles.infoTitle}>Kategori</Text>
-                        <Text style={pdfStyles.infoContent}>{program?.category_name || 'Genel'}</Text>
                     </View>
                     <View style={pdfStyles.infoBox}>
                         <Text style={pdfStyles.infoTitle}>Açıklama</Text>
@@ -398,10 +386,9 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                 )}
 
                 {/* Günler ve Yemekler */}
-                    {hasMealPlan ? (
-                        (() => {
-                            const days = Object.keys(mealPlanData);
-                        const dayCards = days.map((day, dayIndex) => {
+                {hasMealPlan ? (
+                    <View style={pdfStyles.daysContainer}>
+                        {Object.keys(mealPlanData).map((day, dayIndex) => {
                             const dayData = mealPlanData[day] || {};
                             const dayHasMeals = Object.keys(dayData).some(meal => {
                                 const mealData = dayData[meal] || {};
@@ -412,12 +399,7 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                             });
 
                             return (
-                                <View
-                                    style={{ ...pdfStyles.dayCard, width: '32%', minHeight: 120 }}
-                                    key={`day-${dayIndex}`}
-                                    wrap={false}
-                                    break={dayIndex % 3 === 0 && dayIndex !== 0}
-                                >
+                                <View style={pdfStyles.dayCard} key={`day-${dayIndex}`}>
                                     <View style={pdfStyles.dayHeader}>
                                         <Text style={pdfStyles.dayHeaderText}>{day}</Text>
                                     </View>
@@ -443,7 +425,8 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                                                             }
 
                                                             return (
-                                                                <View style={pdfStyles.alternativeGroup} key={`alt-${altIndex}`}>
+                                                                <View style={pdfStyles.alternativeGroup}
+                                                                      key={`alt-${altIndex}`}>
                                                                     {Object.keys(mealData).length > 1 && (
                                                                         <Text style={pdfStyles.alternativeTitle}>
                                                                             {alternativeGroup}
@@ -464,26 +447,15 @@ const NutritionPlanDocument = ({ dietitian, program }) => {
                                     </View>
                                 </View>
                             );
-                        });
-
-                        // 3'lü satırlara böl ve her satırı bir View ile sar
-                        const rows = [];
-                        for (let i = 0; i < dayCards.length; i += 3) {
-                            rows.push(
-                                <View style={{ flexDirection: 'row', gap: 8, width: '100%' }} key={`row-${i}`} wrap={false}>
-                                    {dayCards.slice(i, i + 3)}
-                                    </View>
-                                );
-                            }
-                            return rows;
-                        })()
-                    ) : (
-                        <View style={pdfStyles.emptyDay}>
-                            <Text style={pdfStyles.emptyDayText}>
-                                Bu beslenme programında günlük öğün planı bulunmuyor
-                            </Text>
-                        </View>
-                    )}
+                        })}
+                    </View>
+                ) : (
+                    <View style={pdfStyles.emptyDay}>
+                        <Text style={pdfStyles.emptyDayText}>
+                            Bu beslenme programında günlük öğün planı bulunmuyor
+                        </Text>
+                    </View>
+                )}
 
                 {/* Altbilgi */}
                 <View style={pdfStyles.footer}>
@@ -654,6 +626,14 @@ export default function Beslenme() {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    // Confirm dialog için state'ler
+    const [confirmDialog, setConfirmDialog] = useState({
+        open: false,
+        title: '',
+        message: '',
+        onConfirm: null
+    });
+
     useEffect(() => {
         if (showSuccessPopup) {
             const timer = setTimeout(() => {
@@ -708,7 +688,7 @@ export default function Beslenme() {
     const [editImage, setEditImage] = useState(null);
     const [dietitianInfo, setDietitianInfo] = useState({});
 
-    useEffect( () => {
+    useEffect(() => {
         axios.get(`${config[config.environment].apiUrl}/dietitian/getDietitianInfo`, {
             headers: {Authorization: localStorage.getItem("token")}
         })
@@ -1022,8 +1002,8 @@ export default function Beslenme() {
                 try {
                     axios.post(
                         `${config[config.environment].apiUrl}/notification/sendNutritionPlanAssignedNotification`,
-                        { client_id: response.data.client_id },
-                        { headers: { Authorization: localStorage.getItem("token") } }
+                        {client_id: response.data.client_id},
+                        {headers: {Authorization: localStorage.getItem("token")}}
                     );
                     console.log(`Bildirim gönderildi: client_id=${response.data.client_id}`);
                 } catch (notificationError) {
@@ -1250,33 +1230,40 @@ export default function Beslenme() {
 
                 {/* Middle Panel - Nutrition Programs */}
                 <div className="programs-panel">
-                    <div className="search-filter-bar" style={{ width: '100%', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 16, background: '#fff' }}>
-                            <TextField
-                                variant="outlined"
-                                size="small"
-                                    placeholder="Plan Adına Göre Ara"
-                                    value={planSearchTerm}
-                                    onChange={(e) => setPlanSearchTerm(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon color="action" />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: planSearchTerm && (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                size="small"
-                                        onClick={() => setPlanSearchTerm('')}
-                                                edge="end"
-                                    >
-                                        <CloseIcon fontSize="small" />
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )
-                                }}
-                            style={{ maxWidth: 300, flex: 1, background: '#fff' }}
-                            />
+                    <div className="search-filter-bar" style={{
+                        width: '100%',
+                        marginBottom: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 16,
+                        background: '#fff'
+                    }}>
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            placeholder="Plan Adına Göre Ara"
+                            value={planSearchTerm}
+                            onChange={(e) => setPlanSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon color="action"/>
+                                    </InputAdornment>
+                                ),
+                                endAdornment: planSearchTerm && (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => setPlanSearchTerm('')}
+                                            edge="end"
+                                        >
+                                            <CloseIcon fontSize="small"/>
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
+                            style={{maxWidth: 300, flex: 1, background: '#fff'}}
+                        />
                         {/* Buraya ek filtreler eklenebilir */}
                     </div>
                     <div className="nutrition-cards-grid">
@@ -1452,13 +1439,13 @@ export default function Beslenme() {
                         />
                     </div>
                     <div className="input-container">
-                        <label htmlFor="planDescription">Açıklama</label>
+                        <label htmlFor="planDescription">Açıklama (Opsiyonel)</label>
                         <textarea
                             id="planDescription"
                             className="text-input textarea"
                             value={newPlan.description}
                             onChange={(e) => setNewPlan({...newPlan, description: e.target.value})}
-                            placeholder="Plan açıklaması giriniz"
+                            placeholder="Plan açıklaması giriniz (Opsiyonel)"
                             rows={3}
                         />
                     </div>
@@ -1479,31 +1466,32 @@ export default function Beslenme() {
                         </select>
                     </div>
                     <div className="input-container">
-                        <label htmlFor="nutritionImage" className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
+                        <label htmlFor="nutritionImage"
+                               className={`file-upload-label ${imagePreview ? 'has-file' : ''}`}>
                             <span className="file-upload-icon">📷</span>
                             {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
-                        <input
-                            type="file"
-                            id="nutritionImage"
-                            className="text-input"
-                            accept="image/*"
-                                style={{ display: 'none' }}
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        setPlanImage(file);
-                                        setImagePreview(reader.result);
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            }}
-                        />
+                            <input
+                                type="file"
+                                id="nutritionImage"
+                                className="text-input"
+                                accept="image/*"
+                                style={{display: 'none'}}
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setPlanImage(file);
+                                            setImagePreview(reader.result);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                            />
                         </label>
                         {imagePreview && (
                             <div className="image-preview-container">
-                                <img src={imagePreview} alt="Program önizleme" className="image-preview" />
+                                <img src={imagePreview} alt="Program önizleme" className="image-preview"/>
                                 <button
                                     type="button"
                                     className="remove-image-btn"
@@ -1721,7 +1709,7 @@ export default function Beslenme() {
                 title="Beslenme Programı Düzenle"
                 onClose={() => setEditProgramModal(false)}
                 fullWidth={true}
-                sx={{ width: '100%' }}
+                sx={{width: '100%'}}
             >
                 <div className="modal-body">
                     <MealPlanEditor
@@ -2105,7 +2093,8 @@ export default function Beslenme() {
                                                     elevation={2}
                                                     sx={{
                                                         borderRadius: '10px',
-                                                        overflow: 'visible'
+                                                        overflow: 'visible',
+                                                        position: 'relative'
                                                     }}
                                                 >
                                                     <CardHeader
@@ -2115,12 +2104,63 @@ export default function Beslenme() {
                                                             </Typography>
                                                         }
                                                         action={
-                                                            <Chip
-                                                                label={status.status}
-                                                                color={status.chipColor}
-                                                                size="small"
-                                                                sx={{fontWeight: 'medium'}}
-                                                            />
+                                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                                <Chip
+                                                                    label={status.status}
+                                                                    color={status.chipColor}
+                                                                    size="small"
+                                                                    sx={{fontWeight: 'medium'}}
+                                                                />
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => {
+                                                                        setConfirmDialog({
+                                                                            open: true,
+                                                                            title: 'Plan Atamasını Kaldır',
+                                                                            message: `Plan atamasını ${selectedClientInfo?.name} danışanından kaldırmak istediğinizden emin misiniz?`,
+                                                                            onConfirm: () => {
+                                                                                axios.delete(`${config[config.environment].apiUrl}/nutrition/deleteNutritionAssignment?assignment_id=${program.id}`, {
+                                                                                    headers: {Authorization: localStorage.getItem("token")}
+                                                                                })
+                                                                                    .then(response => {
+                                                                                        setSuccessMessage("Plan başarıyla kaldırıldı.");
+                                                                                        setShowSuccessPopup(true);
+                                                                                        // Planları yeniden yükle
+                                                                                        axios.get(`${config[config.environment].apiUrl}/nutrition/getClientNutritionPlans?client_id=${selectedClientInfo.id}`, {
+                                                                                            headers: {Authorization: localStorage.getItem("token")}
+                                                                                        })
+                                                                                            .then(response => {
+                                                                                                setSelectedClientPrograms(response.data || []);
+                                                                                            })
+                                                                                            .catch(error => {
+                                                                                                console.error("Error refreshing client programs:", error);
+                                                                                            });
+                                                                                    })
+                                                                                    .catch(error => {
+                                                                                        console.error("Error removing assignment:", error);
+                                                                                        setErrorMessage("Plan kaldırılırken bir hata oluştu.");
+                                                                                        setShowErrorPopup(true);
+                                                                                    });
+                                                                                setConfirmDialog({
+                                                                                    open: false,
+                                                                                    title: '',
+                                                                                    message: '',
+                                                                                    onConfirm: null
+                                                                                });
+                                                                            }
+                                                                        });
+                                                                    }}
+                                                                    sx={{
+                                                                        color: '#d32f2f',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'rgba(211, 47, 47, 0.08)'
+                                                                        }
+                                                                    }}
+                                                                    title="Atanmış Planı Kaldır"
+                                                                >
+                                                                    <RemoveCircleIcon fontSize="small"/>
+                                                                </IconButton>
+                                                            </Box>
                                                         }
                                                     />
                                                     <CardContent sx={{pt: 0}}>
@@ -2290,7 +2330,9 @@ export default function Beslenme() {
                                                             if (programDetails) {
                                                                 return (
                                                                     <ConditionalPDFLink
-                                                                        document={<NutritionPlanDocument dietitian={dietitianInfo} program={programDetails}/>}
+                                                                        document={<NutritionPlanDocument
+                                                                            dietitian={dietitianInfo}
+                                                                            program={programDetails}/>}
                                                                         fileName={`${programDetails.title.replace(/\s+/g, '_')}_beslenme_programi.pdf`}
                                                                         buttonClass="MuiButtonBase-root MuiButton-root MuiButton-outlined"
                                                                         buttonTitle="PDF İndir"
@@ -2358,6 +2400,38 @@ export default function Beslenme() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Confirm Dialog */}
+            {confirmDialog.open && (
+                <Dialog
+                    open={confirmDialog.open}
+                    onClose={() => setConfirmDialog({open: false, title: '', message: '', onConfirm: null})}
+                    aria-labelledby="confirm-dialog-title"
+                    aria-describedby="confirm-dialog-description"
+                >
+                    <DialogTitle id="confirm-dialog-title">{confirmDialog.title}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="confirm-dialog-description">
+                            {confirmDialog.message}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setConfirmDialog({open: false, title: '', message: '', onConfirm: null})}
+                                color="primary">
+                            Vazgeç
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (confirmDialog.onConfirm) confirmDialog.onConfirm();
+                            }}
+                            color="error"
+                            autoFocus
+                        >
+                            Kaldır
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
         </Default>
     );
 }

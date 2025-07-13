@@ -16,7 +16,7 @@ export default function Footer() {
                     </Typography>
                 </Box>
             </Container>
-            <ChatBot />
+            <ChatBot/>
         </Box>
     );
 };

@@ -97,13 +97,14 @@ class ClientController {
                 });
             }
 
-            const result = await ClientService.getMyNotifications(client_id);
+            const { limit } = req.query;
 
+            const result = await ClientService.getMyNotifications(client_id, limit);
             res.status(200).json(result);
         } catch (error) {
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
-                message: error.message || "Bir hata oluştu.",
+                message: error.message || "Bir hata oluştu."
             });
         }
     }
@@ -219,16 +220,16 @@ class ClientController {
                 });
             }
 
-            const {nutrition_plan_id, mealPlan} = req.body;
+            const {nutrition_assignment_id, mealPlan} = req.body;
 
-            if (!nutrition_plan_id || !mealPlan) {
+            if (!nutrition_assignment_id || !mealPlan) {
                 return res.status(400).json({
                     success: false,
                     message: "clientId, nutritionPlanId ve mealPlan alanları zorunludur."
                 });
             }
 
-            const result = await ClientService.updateMealPlan(client_id, nutrition_plan_id, mealPlan);
+            const result = await ClientService.updateMealPlan(client_id, nutrition_assignment_id, mealPlan);
 
             return res.status(200).json(result);
         } catch (error) {
