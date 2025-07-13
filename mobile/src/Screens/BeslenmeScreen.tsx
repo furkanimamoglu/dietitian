@@ -189,7 +189,6 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             });
 
             const data = await response.json();
-            console.log('Meal plan update response:', data);
 
             if (!response.ok) {
                 Alert.alert('Hata', 'Beslenme planı güncellenirken bir hata oluştu.');
