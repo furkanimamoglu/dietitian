@@ -3,6 +3,11 @@ import './MealPlanEditor.css';
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
 import axios from 'axios';
 import config from '../../config';
+import {DatePicker} from "@mui/x-date-pickers/DatePicker";
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {tr} from "date-fns/locale";
+import {Button, Stack, Typography, Grid} from '@mui/material';
 
 const MealPlanEditor = ({
                             onSave,
@@ -11,7 +16,9 @@ const MealPlanEditor = ({
                             editTitle = '',
                             editDescription = '',
                             editCategoryId = '',
-                            existingPlan = null
+                            existingPlan = null,
+                            mode = 'plan',
+                            clientId
                         }) => {
     const [title, setTitle] = useState(existingPlan?.title || editTitle);
     const [description, setDescription] = useState(existingPlan?.description || editDescription);
@@ -20,20 +27,56 @@ const MealPlanEditor = ({
     const [planImage, setPlanImage] = useState(existingPlan?.image && !existingPlan.image.includes('placeholder.png') ? existingPlan.image : null);
     const [imagePreview, setImagePreview] = useState(existingPlan?.image && !existingPlan.image.includes('placeholder.png') ? existingPlan.image : '')
 
-    // Tarif ekleme için yeni state'ler
     const [recipes, setRecipes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showRecipeDropdown, setShowRecipeDropdown] = useState(false);
     const [filteredRecipes, setFilteredRecipes] = useState([]);
     const [loadingRecipes, setLoadingRecipes] = useState(false);
 
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [assignmentNote, setAssignmentNote] = useState('');
+
     useEffect(() => {
-        if (!existingPlan) {
-            setTitle(editTitle);
-            setDescription(editDescription);
-            setCategoryId(editCategoryId);
+        if (mode === 'custom') {
+            const today = new Date();
+            const nextWeek = new Date();
+            nextWeek.setDate(today.getDate() + 7);
+
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            setStartDate(formatDate(today));
+            setEndDate(formatDate(nextWeek));
         }
-    }, [editTitle, editDescription, editCategoryId, existingPlan]);
+    }, [mode]);
+
+    // Hızlı tarih seçimi fonksiyonu
+    const setDateRange = (weeks) => {
+        const today = new Date();
+        const start = new Date(today);
+        const end = new Date(today);
+
+        if (weeks === 'month') {
+            end.setMonth(end.getMonth() + 1);
+        } else {
+            end.setDate(end.getDate() + (7 * weeks));
+        }
+
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
+    };
 
     const defaultDays = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
     const defaultMealTypes = [
@@ -705,14 +748,17 @@ const MealPlanEditor = ({
 
     const saveMealPlan = async () => {
         try {
-            if (!title || title.trim() === "") {
-                showErrorToast("Lütfen bir plan başlığı giriniz.");
-                return;
-            }
+            // Mode'a göre farklı validasyonlar
+            if (mode === 'plan') {
+                if (!title || title.trim() === "") {
+                    showErrorToast("Lütfen bir plan başlığı giriniz.");
+                    return;
+                }
 
-            if (!categoryId) {
-                showErrorToast("Lütfen bir kategori seçiniz.");
-                return;
+                if (!categoryId) {
+                    showErrorToast("Lütfen bir kategori seçiniz.");
+                    return;
+                }
             }
 
             let isEmpty = true;
@@ -730,6 +776,47 @@ const MealPlanEditor = ({
 
             if (isSaving) return;
 
+            if (mode === 'custom') {
+                // Custom plan için validasyonlar
+                if (!startDate || !endDate) {
+                    showErrorToast("Lütfen başlangıç ve bitiş tarihlerini seçiniz.");
+                    return;
+                }
+
+                const startDateObj = new Date(startDate);
+                const endDateObj = new Date(endDate);
+                
+                if (endDateObj <= startDateObj) {
+                    showErrorToast("Bitiş tarihi başlangıç tarihinden sonra olmalıdır.");
+                    return;
+                }
+
+                const planData = {
+                    client_id: clientId,
+                    mealPlan: mealPlan,
+                    start_date: startDate,
+                    end_date: endDate,
+                    note: assignmentNote
+                };
+
+                console.log('Saving custom meal plan:', planData);
+
+                const response = await axios({
+                    method: 'post',
+                    url: `${config[config.environment].apiUrl}/nutrition/assignCustomPlanToClient`,
+                    data: planData,
+                    headers: {
+                        'Authorization': localStorage.getItem("token")
+                    }
+                });
+
+                if (response.status === 200) {
+                    onSave(response.data);
+                }
+                return;
+            }
+
+            // Plan mode için mevcut kodlar
             let imageUrl = existingPlan?.image || "/placeholder.png";
 
             if (planImage && planImage instanceof File) {
@@ -813,113 +900,224 @@ const MealPlanEditor = ({
             {/* Header */}
             <div className="mui-meal-plan-header">
                 <h2 className="mui-meal-plan-title">
-                    Haftalık Beslenme Programı
+                    {mode === 'custom' ? 'Özel Beslenme Şablonu' : 'Haftalık Beslenme Programı'}
                 </h2>
                 <p className="mui-meal-plan-subtitle">
-                    Her gün için öğün planınızı düzenleyin
+                    {mode === 'custom'
+                        ? 'Danışanlarınıza özel şablon oluşturun'
+                        : 'Her gün için öğün planınızı düzenleyin'
+                    }
                 </p>
             </div>
 
             {/* Plan Detayları Formu */}
-            <div className="mui-plan-details-form">
-                <div className="mui-form-row">
-                    <div className="mui-form-group">
-                        <label htmlFor="plan-title">Plan Başlığı <span className="required">*</span></label>
-                        <input
-                            type="text"
-                            id="plan-title"
-                            className="mui-form-control"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            placeholder="Beslenme planı başlığı"
-                            required
-                        />
+            {mode === 'plan' && (
+                <div className="mui-plan-details-form">
+                    <div className="mui-form-row">
+                        <div className="mui-form-group">
+                            <label htmlFor="plan-title">Plan Başlığı <span className="required">*</span></label>
+                            <input
+                                type="text"
+                                id="plan-title"
+                                className="mui-form-control"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                placeholder="Beslenme planı başlığı"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mui-form-row">
+                        <div className="mui-form-group">
+                            <label htmlFor="plan-description">Açıklama</label>
+                            <textarea
+                                id="plan-description"
+                                className="mui-form-control"
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                placeholder="Beslenme planı hakkında açıklama"
+                                rows={2}
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div className="mui-form-row">
+                        <div className="mui-form-group">
+                            <label htmlFor="plan-category">Kategori <span className="required">*</span></label>
+                            <select
+                                id="plan-category"
+                                className="mui-form-control"
+                                value={categoryId}
+                                onChange={e => setCategoryId(e.target.value)}
+                                required
+                            >
+                                <option value="">Kategori Seçin</option>
+                                {categories.map(category => (
+                                    <option
+                                        key={category.category_id || category.id}
+                                        value={category.category_id || category.id}
+                                    >
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="mui-form-row">
+                        <div className="mui-form-group">
+                            <label htmlFor="plan-image">Plan Görseli</label>
+                            {/* Gerçek dosya input'unu gizle */}
+                            <input
+                                type="file"
+                                id="plan-image"
+                                className="mui-form-control"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        // Resmi önizleme için URL'e dönüştür
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            setPlanImage(file);
+                                            setImagePreview(reader.result);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                                style={{display: 'none'}}
+                            />
+                            <label htmlFor="plan-image" className="file-upload-label">
+                                <span className="file-upload-icon">📷</span>
+                                {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
+                            </label>
+                            {imagePreview && (
+                                <div className="image-preview-container">
+                                    <img src={imagePreview} alt="Plan önizleme" className="image-preview"/>
+                                    <button
+                                        type="button"
+                                        className="remove-image-btn"
+                                        onClick={() => {
+                                            setPlanImage(null);
+                                            setImagePreview('');
+                                            document.getElementById('plan-image').value = '';
+                                        }}
+                                    >
+                                        ✖
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
+            )}
 
-                <div className="mui-form-row">
-                    <div className="mui-form-group">
-                        <label htmlFor="plan-description">Açıklama</label>
-                        <textarea
-                            id="plan-description"
-                            className="mui-form-control"
-                            value={description}
-                            onChange={e => setDescription(e.target.value)}
-                            placeholder="Beslenme planı hakkında açıklama"
-                            rows={2}
-                        ></textarea>
-                    </div>
-                </div>
+            {/* Tarih ve Not Alanı - Custom plan için */}
+            {mode === 'custom' && (
+                <div className="mui-custom-plan-details">
 
-                <div className="mui-form-row">
-                    <div className="mui-form-group">
-                        <label htmlFor="plan-category">Kategori <span className="required">*</span></label>
-                        <select
-                            id="plan-category"
-                            className="mui-form-control"
-                            value={categoryId}
-                            onChange={e => setCategoryId(e.target.value)}
-                            required
-                        >
-                            <option value="">Kategori Seçin</option>
-                            {categories.map(category => (
-                                <option
-                                    key={category.category_id || category.id}
-                                    value={category.category_id || category.id}
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" gutterBottom>
+                                Hızlı Tarih Seçimi
+                            </Typography>
+                            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(1)}
                                 >
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                                    1 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(2)}
+                                >
+                                    2 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange(3)}
+                                >
+                                    3 Hafta
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => setDateRange('month')}
+                                >
+                                    1 Ay
+                                </Button>
+                            </Stack>
+                        </Grid>
 
-                <div className="mui-form-row">
-                    <div className="mui-form-group">
-                        <label htmlFor="plan-image">Plan Görseli</label>
-                        {/* Gerçek dosya input'unu gizle */}
-                        <input
-                            type="file"
-                            id="plan-image"
-                            className="mui-form-control"
-                            accept="image/*"
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    // Resmi önizleme için URL'e dönüştür
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                        setPlanImage(file);
-                                        setImagePreview(reader.result);
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            }}
-                            style={{display: 'none'}}
-                        />
-                        <label htmlFor="plan-image" className="file-upload-label">
-                            <span className="file-upload-icon">📷</span>
-                            {imagePreview ? 'Resim seçildi - Değiştirmek için tıklayın' : 'Resim seçmek için tıklayın'}
-                        </label>
-                        {imagePreview && (
-                            <div className="image-preview-container">
-                                <img src={imagePreview} alt="Plan önizleme" className="image-preview"/>
-                                <button
-                                    type="button"
-                                    className="remove-image-btn"
-                                    onClick={() => {
-                                        setPlanImage(null);
-                                        setImagePreview('');
-                                        document.getElementById('plan-image').value = '';
+                        <Grid item xs={12} sm={6}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
+                                <DatePicker
+                                    label="Başlangıç Tarihi"
+                                    value={startDate ? new Date(startDate) : null}
+                                    onChange={(newValue) => {
+                                        const formatted = newValue ? newValue.toISOString().split('T')[0] : '';
+                                        setStartDate(formatted);
                                     }}
-                                >
-                                    ✖
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            required: true,
+                                            size: "small"
+                                        }
+                                    }}
+                                />
+                            </LocalizationProvider>
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
+                                <DatePicker
+                                    label="Bitiş Tarihi"
+                                    value={endDate ? new Date(endDate) : null}
+                                    onChange={(newValue) => {
+                                        const formatted = newValue ? newValue.toISOString().split('T')[0] : '';
+                                        setEndDate(formatted);
+                                    }}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            required: true,
+                                            size: "small"
+                                        }
+                                    }}
+                                />
+                            </LocalizationProvider>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" gutterBottom>
+                                Notlar
+                            </Typography>
+                            <textarea
+                                className="mui-form-control"
+                                value={assignmentNote}
+                                onChange={e => setAssignmentNote(e.target.value)}
+                                placeholder="Bu plan ile ilgili notlarınızı buraya yazın"
+                                rows={3}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    fontSize: '14px',
+                                    fontFamily: 'inherit',
+                                    resize: 'vertical'
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
                 </div>
-            </div>
+            )}
 
             {/* Main Table */}
             <div className="mui-table-container">
