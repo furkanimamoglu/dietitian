@@ -77,7 +77,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isEmpty, setIsEmpty] = useState(false);
-    const [nutritionPlanId, setNutritionPlanId] = useState<number | null>(null);
+    const [nutritionAssignmentId, setNutritionAssignmentId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [mealToDelete, setMealToDelete] = useState<{
@@ -120,10 +120,8 @@ const Beslenme = ({navigation}: { navigation: any }) => {
                 return;
             }
 
-            if (data.nutrition_plan_id) {
-                setNutritionPlanId(parseInt(data.nutrition_plan_id));
-            } else if (data.NutritionPlan && data.NutritionPlan.id) {
-                setNutritionPlanId(parseInt(data.NutritionPlan.id));
+            if (data.id) {
+                setNutritionAssignmentId(parseInt(data.id));
             }
 
             const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
@@ -164,7 +162,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
 
     const updateMealPlanOnServerFromNewFormat = async (updatedMealPlan: WeeklyMealPlan) => {
         try {
-            if (nutritionPlanId === null) {
+            if (nutritionAssignmentId === null) {
                 console.error('Nutrition plan ID is missing, cannot update meal plan');
                 Alert.alert('Hata', 'Beslenme planı güncellenemiyor. Plan ID bulunamadı.');
                 return;
@@ -177,7 +175,7 @@ const Beslenme = ({navigation}: { navigation: any }) => {
             }
 
             const mealPlanUpdate = {
-                nutrition_plan_id: nutritionPlanId,
+                nutrition_assignment_id: nutritionAssignmentId,
                 mealPlan: updatedMealPlan
             };
 
