@@ -4740,7 +4740,6 @@ function Danisan() {
                 <DialogTitle>
                     Anamnez Bilgilerini Düzenle
                     <IconButton
-                        style={{position: 'absolute', right: 8, top: 8}}
                         onClick={() => setIsAnamnezDialogOpen(false)}
                         sx={{ color: 'red' }}
                     >
@@ -4982,12 +4981,14 @@ function Danisan() {
             <Dialog
                 open={isCustomPlanDialogOpen}
                 onClose={handleCloseCustomPlanDialog}
-                maxWidth="lg"
+                maxWidth="xl"
                 fullWidth
                 PaperProps={{
                     sx: {
                         minHeight: '80vh',
-                        maxHeight: '90vh'
+                        maxHeight: '90vh',
+                        width: '95vw',
+                        maxWidth: '95vw'
                     }
                 }}
             >
