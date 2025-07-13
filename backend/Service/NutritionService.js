@@ -8,6 +8,7 @@ const {
     NutritionPlan,
     Water
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+
 const {Op} = require("sequelize");
 
 class NutritionService {
@@ -130,6 +131,41 @@ class NutritionService {
         }
     }
 
+    static async assignCustomPlanToClient(client_id, mealPlan, start_date, end_date, note) {
+        if (!client_id || !mealPlan || !start_date || !end_date) {
+            throw new Exception("Eksik parametreler.", 400, true);
+        }
+
+        const client = await Client.findByPk(client_id);
+
+        if (!client) {
+            throw new Exception("Bu danışan bulunamadı.", 404, true);
+        }
+
+        const existingAssignment = await NutritionAssignment.findOne({
+            where: {
+                client_id: client_id,
+                [Op.or]: [
+                    { start_date: { [Op.between]: [start_date, end_date] } },
+                    { end_date: { [Op.between]: [start_date, end_date] } },
+                    { start_date: { [Op.lte]: start_date }, end_date: { [Op.gte]: end_date } }
+                ]
+            }
+        });
+
+        if (existingAssignment) {
+            throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
+        }
+
+        return await NutritionAssignment.create({
+            client_id,
+            mealPlan,
+            start_date,
+            end_date,
+            note
+        });
+    }
+
     static async getNutritionPlans(dietitian_id) {
         if (!dietitian_id) {
             throw new Exception("Yetkisiz Erişim.", 401, true);
@@ -195,7 +231,7 @@ class NutritionService {
     }
 
     static async addNutritionPlan(dietitian_id, {title, description, image, category_id, mealPlan}) {
-        if (!dietitian_id || !title || !description || !category_id) {
+        if (!dietitian_id || !title || !category_id) {
             throw new Exception("Başlık, açıklama ve kategori zorunludur.", 400, true);
         }
 
@@ -291,6 +327,32 @@ class NutritionService {
         return await NutritionAssignment.findAll({
             where: {client_id},
         });
+    }
+
+    static async deleteNutritionAssignment(dietitian_id, assignment_id) {
+        if (!dietitian_id || !assignment_id) {
+            throw new Exception("Eksik parametreler.", 400, true);
+        }
+
+        const assignment = await NutritionAssignment.findOne({
+            where: {
+                id: assignment_id
+            },
+            include: [{
+                model: Client,
+                where: {
+                    dietitian_id: dietitian_id
+            }
+            }]
+        });
+
+        if (!assignment) {
+            throw new Exception("Bu atama size ait değil veya bulunamadı.", 403, true);
+        }
+
+        await assignment.destroy();
+
+        return {success: true, message: "Beslenme ataması başarıyla silindi."};
     }
 
     static async getClientWater(client_id, start_date = null, end_date = null) {

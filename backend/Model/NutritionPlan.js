@@ -44,12 +44,7 @@ const NutritionPlan = sequelize.define('NutritionPlan', {
     },
     description: {
         type: DataTypes.TEXT,
-        validate: {
-            len: {
-                args: [0, 2000],
-                msg: 'Açıklama en fazla 2000 karakter olabilir'
-            }
-        }
+        allowNull: true
     },
     image: {
         type: DataTypes.STRING,

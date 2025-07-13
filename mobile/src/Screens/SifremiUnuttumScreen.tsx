@@ -254,11 +254,10 @@ const SifremiUnuttumScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <StatusBar backgroundColor="#F57C00" barStyle="light-content"/>
-
+            <StatusBar backgroundColor="#FF6B00" barStyle="light-content"/>
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
-                style={styles.keyboardAvoidingView}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{flex: 1}}
             >
                 <ScrollView
                     contentContainerStyle={styles.scrollView}

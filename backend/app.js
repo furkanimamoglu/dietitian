@@ -53,6 +53,12 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/api/version', (req, res) => {
+    res.json({
+        version: config.version
+    });
+});
+
 app.use('/uploads', express.static('uploads'));
 
 const ALLOWED_TYPES = ['profilephoto', 'meal', 'exercise', 'nutrition', 'recipe', 'message'];
@@ -94,7 +100,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
             throw new Exception('Geçersiz yükleme türü.');
         }
 
-        const folderPath = `${role === DIETITIAN ? 'Dietitian' : 'Client'}/${sanitize(userId)}/${clientId}/${type}`;
+        const folderPath = `${role === DIETITIAN ? 'Dietitian' : 'Client'}/${sanitize(userId)}${clientId ? '/' + clientId : ''}/${type}`;
         const uniqueSuffix = `${new Date().toISOString().split('T')[0]}`;
         const sanitizedFileName = sanitize(req.file.originalname).toLowerCase().replace(/\s+/g, '-');
         const fileName = `${folderPath}/${uniqueSuffix}.${sanitizedFileName}`;

@@ -1,25 +1,35 @@
 {
   "base_url": "http://localhost:3000",
   "image_url": "http://localhost:3000/uploads/",
+
+  "version": "1.1.0",
+
   "app_scheme": "diyetia",
+
   "database_connection": {
     "host": "localhost",
     "database": "dietitian_db",
     "user": "postgres",
     "password": "12345678"
   },
+
   "database_options": {
     "logging": false
   },
+
   "server": {
     "port": 3000
   },
+
   "mailAuth": {
     "emailAddress": "diyetia.app@gmail.com",
     "emailAppPassword": "lgit zzvy qhuo zwxw"
   },
+
   "ddl": "update",
+
   "secretkey": "furkantopsecret",
+
   "s3": {
     "accessKeyId": "AKIAW3MD7OZZXZOYIYXO",
     "secretAccessKey": "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",

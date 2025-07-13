@@ -1,17 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    Linking,
+    PermissionsAndroid,
+    Platform,
     ScrollView,
     StyleSheet,
-    View,
-    Linking,
-    Image,
     TouchableOpacity,
-    Platform,
-    ActivityIndicator,
-    PermissionsAndroid,
-    Alert
+    View
 } from 'react-native';
-import {Button, Card, Text, Modal, Portal, TextInput, Provider as PaperProvider, Icon} from 'react-native-paper';
+import {Button, Card, Icon, Modal, Portal, Provider as PaperProvider, Text, TextInput} from 'react-native-paper';
 import * as ImagePicker from 'react-native-image-picker';
 
 import Header from '../Components/Header';
@@ -58,7 +58,7 @@ const Profil = ({navigation}) => {
                 } else {
                     console.log('Kullanıcı bilgisi alınamadı:', data.message);
                     if (response.status === 401 || response.status === 403) {
-                       await handleLogout();
+                        await handleLogout();
                     }
                 }
             } catch (error) {
@@ -102,7 +102,7 @@ const Profil = ({navigation}) => {
             } else {
                 let imageAsset = response.assets && response.assets[0];
                 if (imageAsset) {
-                     handleUploadPhoto(imageAsset);
+                    handleUploadPhoto(imageAsset);
                 }
             }
         });
@@ -148,14 +148,14 @@ const Profil = ({navigation}) => {
                             'Content-Type': 'application/json',
                             'Authorization': token,
                         },
-                        body: JSON.stringify({ profilePhoto: newImageUrl })
+                        body: JSON.stringify({profilePhoto: newImageUrl})
                     });
                     if (!updateRes.ok) {
                         const updateText = await updateRes.text();
                         console.error('Profil fotoğrafı güncellenemedi:', updateText);
                         Alert.alert('Hata', 'Profil fotoğrafı güncellenemedi.');
                     } else {
-                        setUser(prevUser => ({ ...prevUser, profileImageUrl: newImageUrl }));
+                        setUser(prevUser => ({...prevUser, profileImageUrl: newImageUrl}));
                     }
                 } catch (err) {
                     console.error('Profil fotoğrafı güncelleme hatası:', err);
@@ -199,7 +199,7 @@ const Profil = ({navigation}) => {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#2e7d32" />
+                <ActivityIndicator size="large" color="#2e7d32"/>
             </View>
         );
     }
@@ -211,9 +211,10 @@ const Profil = ({navigation}) => {
 
                 <ScrollView style={styles.content}>
                     <View style={styles.profileSection}>
-                        <TouchableOpacity onPress={handleChoosePhoto} disabled={isUploading} style={styles.avatarContainer}>
+                        <TouchableOpacity onPress={handleChoosePhoto} disabled={isUploading}
+                                          style={styles.avatarContainer}>
                             {user.profileImageUrl ? (
-                                <Image source={{ uri: user.profileImageUrl }} style={styles.avatarImage} />
+                                <Image source={{uri: user.profileImageUrl}} style={styles.avatarImage}/>
                             ) : (
                                 <View style={styles.avatarPlaceholder}>
                                     <Text style={styles.avatarInitial}>{user.name?.charAt(0).toUpperCase()}</Text>
@@ -222,7 +223,7 @@ const Profil = ({navigation}) => {
                             <View style={styles.cameraIconContainer}>
                                 {isUploading ?
                                     <ActivityIndicator color="#fff" size="small"/>
-                                    : <Icon source="camera" size={20} color="#fff" />
+                                    : <Icon source="camera" size={20} color="#fff"/>
                                 }
                             </View>
                         </TouchableOpacity>
@@ -234,7 +235,7 @@ const Profil = ({navigation}) => {
 
                     <Card style={styles.card}>
                         <Card.Content>
-                             <Button
+                            <Button
                                 onPress={() => navigation.navigate('Odeme')}
                                 mode="contained"
                                 icon="credit-card"
@@ -322,10 +323,10 @@ const Profil = ({navigation}) => {
 const styles = StyleSheet.create({
     container: {flex: 1, backgroundColor: '#f8f9fa'},
     loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#f8f9fa',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
     },
     content: {flex: 1, padding: 16},
     profileSection: {

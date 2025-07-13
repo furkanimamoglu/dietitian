@@ -4,6 +4,8 @@ import Default from "../../Components/Layouts/Default.jsx";
 import axios from "axios";
 import config from "../../config.js";
 import {useNavigate, useParams} from "react-router-dom";
+import NutritionPlanAssignModal from "./NutritionPlanAssignModal.jsx";
+import MealPlanEditor from '../../Components/MealPlanEditor/MealPlanEditor';
 
 import {
     Accordion,
@@ -68,6 +70,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import Person from '@mui/icons-material/Person';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import Email from '@mui/icons-material/Email';
 import Phone from '@mui/icons-material/Phone';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
@@ -81,6 +84,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import Cake from '@mui/icons-material/Cake';
 
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtil';
+import RestaurantIcon from "@mui/icons-material/Restaurant";
 
 const initialWaterTrackingData = {
     dailyGoal: 2500,
@@ -513,7 +517,7 @@ const WaterTrackingCard = ({data, clientId}) => {
                                 }}
                                 onClick={handleOpenEditGoalDialog}
                             >
-                                <EditIcon fontSize="small" />
+                                <EditIcon fontSize="small"/>
                             </IconButton>
                         </Tooltip>
                     </Box>
@@ -550,7 +554,7 @@ const WaterTrackingCard = ({data, clientId}) => {
                                 endAdornment: <InputAdornment position="end">ml</InputAdornment>,
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <LocalDrinkIcon color="primary" />
+                                        <LocalDrinkIcon color="primary"/>
                                     </InputAdornment>
                                 ),
                             }}
@@ -565,7 +569,7 @@ const WaterTrackingCard = ({data, clientId}) => {
                         <Box sx={{mt: 2, display: 'flex', alignItems: 'center'}}>
                             <Typography variant="body2" color="text.secondary" sx={{mr: 1}}>
                                 ≈ <strong>{(newDailyGoal / 1000).toFixed(1)}</strong> litre
-                        </Typography>
+                            </Typography>
                             <LinearProgress
                                 variant="determinate"
                                 value={Math.min(newDailyGoal / 50, 100)}
@@ -583,7 +587,7 @@ const WaterTrackingCard = ({data, clientId}) => {
                         onClick={handleUpdateDailyGoal}
                         disabled={updateGoalLoading}
                     >
-                        {updateGoalLoading ? <CircularProgress size={24} /> : "Kaydet"}
+                        {updateGoalLoading ? <CircularProgress size={24}/> : "Kaydet"}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -612,6 +616,31 @@ function Danisan() {
 
     const [appointments, setAppointments] = useState([]);
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+
+    const [isAssignNutritionPlanDialogOpen, setIsAssignNutritionPlanDialogOpen] = useState(false);
+
+
+    // State'lere ekle
+    const [isCustomPlanDialogOpen, setIsCustomPlanDialogOpen] = useState(false);
+
+    // Handler'ları ekle
+    const handleOpenCustomPlanDialog = () => {
+        setIsCustomPlanDialogOpen(true);
+    };
+
+    const handleCloseCustomPlanDialog = () => {
+        setIsCustomPlanDialogOpen(false);
+    };
+
+    const handleCustomPlanSave = async () => {
+        // Plan kaydedildikten sonra dialog'u kapat ve beslenme planlarını yenile
+        setIsCustomPlanDialogOpen(false);
+        await handleNutritionPlanAssignSuccess();
+    };
+
+    // MealPlanEditor için yeni state'ler
+    const [isCustomPlanEditorOpen, setIsCustomPlanEditorOpen] = useState(false);
+    const [customPlanSaving, setCustomPlanSaving] = useState(false);
 
     const [anamnezData, setAnamnezData] = useState(null);
     const [anamnezLoading, setAnamnezLoading] = useState(false);
@@ -660,7 +689,6 @@ function Danisan() {
     };
 
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
 
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -1032,7 +1060,7 @@ function Danisan() {
         try {
             await axios.put(
                 `${config[config.environment].apiUrl}/dietitian/updateClientNote`,
-                { note },
+                {note},
                 {
                     headers: {
                         Authorization: localStorage.getItem('token'),
@@ -1506,6 +1534,31 @@ function Danisan() {
         setActiveTab(newValue);
     };
 
+    const getTextColorByAddedBy = (addedBy, isEaten) => {
+        if (isEaten) {
+            switch (addedBy) {
+                case 'dietitian':
+                    return 'primary.light';
+                case 'client':
+                    return 'warning.light';
+                case 'system':
+                default:
+                    return 'text.secondary';
+            }
+        }
+
+        switch (addedBy) {
+            case 'dietitian':
+                return 'primary.main';
+            case 'client':
+                return 'warning.main';
+            case 'system':
+                return 'text.primary';
+            default:
+                return 'text.primary';
+        }
+    };
+
     const renderMealItems = (mealItems) => {
         if (!mealItems) return null;
 
@@ -1517,7 +1570,7 @@ function Danisan() {
                 <Box>
                     {/* Görsel varsa göster */}
                     {info.image && info.image !== "" && (
-                        <Box sx={{ mb: 1 }}>
+                        <Box sx={{mb: 1}}>
                             <Box
                                 component="img"
                                 src={info.image}
@@ -1541,9 +1594,10 @@ function Danisan() {
                         if (!Array.isArray(items) || items.length === 0) return null;
 
                         return (
-                            <Box key={`alt-${altIndex}`} sx={{ mb: altIndex < alternativeKeys.length - 1 ? 1 : 0 }}>
+                            <Box key={`alt-${altIndex}`} sx={{mb: altIndex < alternativeKeys.length - 1 ? 1 : 0}}>
                                 {alternativeKeys.length > 1 && (
-                                    <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', color: 'text.secondary' }}>
+                                    <Typography variant="caption"
+                                                sx={{fontWeight: 'bold', display: 'block', color: 'text.secondary'}}>
                                         {altKey}:
                                     </Typography>
                                 )}
@@ -1554,15 +1608,16 @@ function Danisan() {
                                         variant="body2"
                                         sx={{
                                             textDecoration: item.eaten ? 'line-through' : 'none',
-                                            color: item.eaten ? 'text.secondary' : 'text.primary',
+                                            color: getTextColorByAddedBy(item.addedBy, item.eaten),
                                             display: 'flex',
                                             alignItems: 'center'
                                         }}
                                     >
                                         {item.eaten ? (
-                                            <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5, color: 'success.main' }} />
+                                            <CheckCircleIcon sx={{fontSize: 14, mr: 0.5, color: 'success.main'}}/>
                                         ) : (
-                                            <RadioButtonUncheckedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
+                                            <RadioButtonUncheckedIcon
+                                                sx={{fontSize: 14, mr: 0.5, color: 'text.secondary'}}/>
                                         )}
                                         {item.name}
                                         {item.portion && ` (${item.portion})`}
@@ -1573,34 +1628,34 @@ function Danisan() {
                     })}
                 </Box>
             );
-    }
+        }
 
-    if (Array.isArray(mealItems)) {
-        return mealItems.map((item, index) => (
-            <Typography
-                key={index}
-                variant="body2"
-                sx={{
-                    textDecoration: item.yenildi ? 'line-through' : 'none',
-                    color: item.yenildi ? 'text.secondary' : 'text.primary',
-                    mb: index < mealItems.length - 1 ? 0.5 : 0,
-                    display: 'flex',
-                    alignItems: 'center'
-                }}
-            >
-                {item.yenildi ? (
-                    <CheckCircleIcon sx={{ fontSize: 14, mr: 0.5, color: 'success.main' }} />
-                ) : (
-                    <RadioButtonUncheckedIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.secondary' }} />
-                )}
-                {item.isim || item.name}
-                {(item.porsiyon || item.portion) && ` (${item.porsiyon || item.portion})`}
-            </Typography>
-        ));
-    }
+        if (Array.isArray(mealItems)) {
+            return mealItems.map((item, index) => (
+                <Typography
+                    key={index}
+                    variant="body2"
+                    sx={{
+                        textDecoration: item.yenildi ? 'line-through' : 'none',
+                        color: getTextColorByAddedBy(item.addedBy, item.yenildi),
+                        mb: index < mealItems.length - 1 ? 0.5 : 0,
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}
+                >
+                    {item.yenildi ? (
+                        <CheckCircleIcon sx={{fontSize: 14, mr: 0.5, color: 'success.main'}}/>
+                    ) : (
+                        <RadioButtonUncheckedIcon sx={{fontSize: 14, mr: 0.5, color: 'text.secondary'}}/>
+                    )}
+                    {item.isim || item.name}
+                    {(item.porsiyon || item.portion) && ` (${item.porsiyon || item.portion})`}
+                </Typography>
+            ));
+        }
 
-    return <Typography variant="body2">Öğün girilmemiş.</Typography>;
-};
+        return <Typography variant="body2">Öğün girilmemiş.</Typography>;
+    };
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -1659,7 +1714,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1677,7 +1732,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1695,7 +1750,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1713,7 +1768,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1731,7 +1786,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1749,7 +1804,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1792,7 +1847,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1810,7 +1865,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2" sx={{whiteSpace: 'pre-line'}}>
@@ -1828,7 +1883,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1846,7 +1901,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1864,7 +1919,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1882,7 +1937,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1925,7 +1980,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1943,7 +1998,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1961,7 +2016,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -1979,7 +2034,7 @@ function Danisan() {
                                                             variant: 'subtitle1',
                                                             fontWeight: 'bold'
                                                         }}
-                                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white'}}
+                                                        sx={{pb: 1, bgcolor: '#2d4149', color: 'white'}}
                                                     />
                                                     <CardContent>
                                                         <Typography variant="body2">
@@ -2143,7 +2198,7 @@ function Danisan() {
                         ) : (
                             <Box sx={{textAlign: 'center', mt: 4}}>
                                 <Typography variant="h6" color="text.secondary">
-                                    Bu danışan için anamnez verisi bulunamadı.
+                                    Bu danışan için anamnez verisi bulunmadı.
                                 </Typography>
                                 <Button
                                     variant="contained"
@@ -2175,15 +2230,21 @@ function Danisan() {
                                                     variant="contained"
                                                     size="small"
                                                     color="secondary"
-                                                    startIcon={<AddIcon />}
+                                                    startIcon={<AddIcon/>}
                                                     onClick={handleOpenMeasurementDialog}
-                                                    sx={{ color: "#fff", fontWeight: "bold" }}
+                                                    sx={{color: "#fff", fontWeight: "bold"}}
                                                 >
                                                     Yeni Ölçüm
                                                 </Button>
                                             </Box>
                                         }
-                                        sx={{ pb: 1, bgcolor: '#2d4149', color: 'white', borderBottom: '1px solid', borderColor: 'divider'}}
+                                        sx={{
+                                            pb: 1,
+                                            bgcolor: '#2d4149',
+                                            color: 'white',
+                                            borderBottom: '1px solid',
+                                            borderColor: 'divider'
+                                        }}
                                     />
                                     <CardContent>
                                         <Box sx={{
@@ -2420,19 +2481,31 @@ function Danisan() {
                                     Düzenle
                                 </Button> */}
                             </Box>
+                            <Box sx={{display: 'flex', gap: 1}}>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    startIcon={<RestaurantMenuIcon/>}
+                                    onClick={handleOpenCustomPlanDialog}
+                                    sx={{ml: 1}}
+                                >
+                                    Özel Plan Ata
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<AddIcon/>}
+                                    onClick={handleOpenAssignNutritionPlanDialog}
+                                    sx={{color: "white", borderColor: theme.palette.primary.main}}
+                                >
+                                    Plan Ata
+                                </Button>
+                            </Box>
                         </Box>
 
                         {nutritionPlanLoading ? (
                             <Box sx={{display: 'flex', justifyContent: 'center', my: 4}}>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={2}>
-                                        <Skeleton variant="rectangular" height={400} animation="wave"/>
-                                    </Grid>
-                                    <Grid item xs={12} md={10}>
-                                        <Skeleton variant="rectangular" height={80} animation="wave" sx={{mb: 2}}/>
-                                        <Skeleton variant="rectangular" height={320} animation="wave"/>
-                                    </Grid>
-                                </Grid>
+                                <CircularProgress/>
                             </Box>
                         ) : (
                             <Paper elevation={3} sx={{mb: 3}}>
@@ -2460,10 +2533,35 @@ function Danisan() {
                                     borderBottom: '1px solid #e0e0e0'
                                 }}>
                                     <CheckCircleIcon sx={{fontSize: 16, color: 'success.main', mr: 1}}/>
-                                    <Typography variant="body2" sx={{fontStyle: 'italic'}}>
+                                    <Typography variant="body2" sx={{fontStyle: 'italic', mr: 3}}>
                                         İşaretli ve üzeri çizili öğeler, danışanın mobil uygulamada yedim olarak
                                         işaretlediği öğünlerdir.
                                     </Typography>
+
+                                    {/* Renk açıklaması */}
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto'}}>
+                                        <Typography variant="caption" sx={{fontWeight: 'bold', mr: 1}}>
+                                            Renk Haritası:
+                                        </Typography>
+                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                            <Box sx={{
+                                                width: 12,
+                                                height: 12,
+                                                borderRadius: '50%',
+                                                bgcolor: 'primary.main'
+                                            }}/>
+                                            <Typography variant="caption">Diyetisyen</Typography>
+                                        </Box>
+                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                            <Box sx={{
+                                                width: 12,
+                                                height: 12,
+                                                borderRadius: '50%',
+                                                bgcolor: 'warning.main'
+                                            }}/>
+                                            <Typography variant="caption">Danışan</Typography>
+                                        </Box>
+                                    </Box>
                                 </Box>
 
                                 <Divider/>
@@ -2473,122 +2571,145 @@ function Danisan() {
                                         {nutritionPlan && nutritionPlan.length > 0 && (
                                             <>
                                                 {/* Gün başlıkları satırı */}
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
-                                                <Box sx={{textAlign: 'center', p: 1}}>
-                                                            <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>Öğün</Typography>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container>
-                                                            {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, index) => (
-                                                                <Grid item xs={1.7} key={`day-${index}`}>
+                                                <Grid container spacing={1}>
+                                                    <Grid item xs={2}>
                                                         <Box sx={{textAlign: 'center', p: 1}}>
-                                                                        <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
-                                                                            {day.substr(0, 3)}
-                                                                        </Typography>
+                                                            <Typography variant="subtitle1"
+                                                                        sx={{fontWeight: 'bold'}}>Öğün</Typography>
                                                         </Box>
                                                     </Grid>
+                                                    <Grid item xs={10}>
+                                                        <Grid container>
+                                                            {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, index) => (
+                                                                <Grid item xs={1.7} key={`day-${index}`}>
+                                                                    <Box sx={{textAlign: 'center', p: 1}}>
+                                                                        <Typography variant="subtitle1"
+                                                                                    sx={{fontWeight: 'bold'}}>
+                                                                            {day.substr(0, 3)}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Grid>
                                                             ))}
+                                                        </Grid>
+                                                    </Grid>
                                                 </Grid>
-                                            </Grid>
-                                        </Grid>
 
-                                        <Divider sx={{my: 1}}/>
+                                                <Divider sx={{my: 1}}/>
 
                                                 {/* Öğün satırları - dinamik olarak mealPlan'den alınıyor */}
                                                 {nutritionPlan[selectedPlanIndex]?.mealPlan &&
-                                                  Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).length > 0 &&
-                                                  (() => {
-                                                    const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
-                                                    const meals = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay] || {});
-
-                                                    const mealColors = {
-                                                        'Kahvaltı': 'primary.light',
-                                                        'Öğle Yemeği': 'warning.light',
-                                                        'Akşam Yemeği': 'error.light',
-                                                        'Aparatif': 'info.light',
-                                                        'default': 'secondary.light'
-                                                    };
-
-                                                    const mealDisplayNames = {
-                                                        'Kahvaltı': 'Kahvaltı',
-                                                        'Öğle Yemeği': 'Öğle',
-                                                        'Akşam Yemeği': 'Akşam',
-                                                        'Aparatif': 'Ara Öğün'
-                                                    };
-
-                                                    return meals.map((meal, mealIndex) => {
+                                                    Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).length > 0 &&
+                                                    (() => {
                                                         const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
-                                                        const mealInfo = nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay]?.[meal]?.info || {};
-                                                        const mealTime = mealInfo.time;
+                                                        const meals = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay] || {});
 
-                                                        return (
-                                                        <React.Fragment key={`meal-row-${mealIndex}`}>
-                                        <Grid container spacing={1}>
-                                            <Grid item xs={2}>
-                                                <Box sx={{
-                                                                        bgcolor: mealColors[meal] || mealColors.default,
-                                                                        color: meal === 'Aparatif' ? 'info.contrastText' :
-                                                                               meal === 'Akşam Yemeği' ? 'error.contrastText' :
-                                                                               meal === 'Öğle Yemeği' ? 'warning.contrastText' : 'primary.contrastText',
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                                        <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
-                                                                            {mealDisplayNames[meal] || meal}
-                                                                        </Typography>
-                                                                        {mealTime && (
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                                                                                <AccessTimeIcon sx={{ fontSize: 14, mr: 0.5, color: 'inherit', opacity: 0.9 }} />
-                                                                                <Typography variant="caption" sx={{ fontWeight: 'medium', color: 'inherit' }}>
-                                                                                    {mealTime}
+                                                        const mealColors = {
+                                                            'Kahvaltı': 'primary.light',
+                                                            'Öğle Yemeği': 'warning.light',
+                                                            'Akşam Yemeği': 'error.light',
+                                                            'Aparatif': 'info.light',
+                                                            'default': 'secondary.light'
+                                                        };
+
+                                                        const mealDisplayNames = {
+                                                            'Kahvaltı': 'Kahvaltı',
+                                                            'Öğle Yemeği': 'Öğle',
+                                                            'Akşam Yemeği': 'Akşam',
+                                                            'Aparatif': 'Ara Öğün'
+                                                        };
+
+                                                        return meals.map((meal, mealIndex) => {
+                                                            const firstDay = Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan)[0];
+                                                            const mealInfo = nutritionPlan[selectedPlanIndex]?.mealPlan[firstDay]?.[meal]?.info || {};
+                                                            const mealTime = mealInfo.time;
+
+                                                            return (
+                                                                <React.Fragment key={`meal-row-${mealIndex}`}>
+                                                                    <Grid container spacing={1}>
+                                                                        <Grid item xs={2}>
+                                                                            <Box sx={{
+                                                                                bgcolor: mealColors[meal] || mealColors.default,
+                                                                                color: meal === 'Aparatif' ? 'info.contrastText' :
+                                                                                    meal === 'Akşam Yemeği' ? 'error.contrastText' :
+                                                                                        meal === 'Öğle Yemeği' ? 'warning.contrastText' : 'primary.contrastText',
+                                                                                p: 1,
+                                                                                borderRadius: 1,
+                                                                                height: '100%',
+                                                                                display: 'flex',
+                                                                                flexDirection: 'column',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center'
+                                                                            }}>
+                                                                                <Typography variant="subtitle1"
+                                                                                            sx={{fontWeight: 'bold'}}>
+                                                                                    {mealDisplayNames[meal] || meal}
                                                                                 </Typography>
+                                                                                {mealTime && (
+                                                                                    <Box sx={{
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        mt: 1
+                                                                                    }}>
+                                                                                        <AccessTimeIcon sx={{
+                                                                                            fontSize: 14,
+                                                                                            mr: 0.5,
+                                                                                            color: 'inherit',
+                                                                                            opacity: 0.9
+                                                                                        }}/>
+                                                                                        <Typography variant="caption"
+                                                                                                    sx={{
+                                                                                                        fontWeight: 'medium',
+                                                                                                        color: 'inherit'
+                                                                                                    }}>
+                                                                                            {mealTime}
+                                                                                        </Typography>
+                                                                                    </Box>
+                                                                                )}
                                                                             </Box>
-                                                                        )}
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={10}>
-                                                <Grid container spacing={1}>
-                                                                        {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, dayIndex) => (
-                                                                            <Grid item xs={1.7} key={`${meal}-${day}-${dayIndex}`}>
-                                                        <Paper elevation={1} sx={{p: 1, height: '100%'}}>
-                                                                                    {renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.[day]?.[meal]) ||
-                                                                                     <Typography variant="body2">Öğün girilmemiş.</Typography>}
-                                                        </Paper>
-                                                    </Grid>
-                                                                        ))}
-                                                    </Grid>
-                                                    </Grid>
-                                                </Grid>
-                                                            {mealIndex < meals.length - 1 && <Divider sx={{my: 1}} />}
-                                                        </React.Fragment>
-                                                        );
-                                                    });
-                                                  })()
+                                                                        </Grid>
+                                                                        <Grid item xs={10}>
+                                                                            <Grid container spacing={1}>
+                                                                                {Object.keys(nutritionPlan[selectedPlanIndex]?.mealPlan || {}).map((day, dayIndex) => (
+                                                                                    <Grid item xs={1.7}
+                                                                                          key={`${meal}-${day}-${dayIndex}`}>
+                                                                                        <Paper elevation={1} sx={{
+                                                                                            p: 1,
+                                                                                            height: '100%'
+                                                                                        }}>
+                                                                                            {renderMealItems(nutritionPlan[selectedPlanIndex]?.mealPlan?.[day]?.[meal]) ||
+                                                                                                <Typography
+                                                                                                    variant="body2">Öğün
+                                                                                                    girilmemiş.</Typography>}
+                                                                                        </Paper>
+                                                                                    </Grid>
+                                                                                ))}
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                    {mealIndex < meals.length - 1 &&
+                                                                        <Divider sx={{my: 1}}/>}
+                                                                </React.Fragment>
+                                                            );
+                                                        });
+                                                    })()
                                                 }
                                             </>
                                         )}
 
                                         {(!nutritionPlan || nutritionPlan.length === 0) && (
-                                                <Box sx={{
-                                                    display: 'flex',
+                                            <Box sx={{
+                                                display: 'flex',
                                                 justifyContent: 'center',
-                                                    alignItems: 'center',
+                                                alignItems: 'center',
                                                 height: 200,
                                                 border: '1px dashed',
                                                 borderColor: 'grey.400',
                                                 borderRadius: 1
-                                                }}>
+                                            }}>
                                                 <Typography color="text.secondary">
                                                     Beslenme planı bulunamadı.
                                                 </Typography>
-                                                </Box>
+                                            </Box>
                                         )}
                                     </Box>
                                 </Box>
@@ -2601,6 +2722,17 @@ function Danisan() {
                             <CardHeader
                                 title="Atanmış Planlar"
                                 titleTypographyProps={{variant: 'h5', fontWeight: 'bold'}}
+                                action={
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        startIcon={<AddIcon/>}
+                                        onClick={handleOpenAssignNutritionPlanDialog}
+                                        sx={{bgcolor: theme.palette.primary.main, color: 'white'}}
+                                    >
+                                        Plan Ata
+                                    </Button>
+                                }
                                 sx={{
                                     bgcolor: '#2d4149',
                                     color: 'white',
@@ -2608,107 +2740,101 @@ function Danisan() {
                                     borderColor: 'divider'
                                 }}
                             />
-                            <List>
+                            <CardContent>
                                 {nutritionPlanLoading ? (
                                     <Box sx={{display: 'flex', justifyContent: 'center', my: 4}}>
                                         <CircularProgress/>
                                     </Box>
                                 ) : nutritionPlan && nutritionPlan.length > 0 ? (
-                                    nutritionPlan.map((plan, index) => {
-                                        let totalMeals = 0;
-                                        let eatenMeals = 0;
+                                    <Grid container spacing={2}>
+                                        {nutritionPlan.map((plan, index) => {
+                                            let totalMeals = 0;
+                                            let eatenMeals = 0;
 
-                                        if (plan.mealPlan) {
-                                            Object.keys(plan.mealPlan).forEach(day => {
-                                                if (plan.mealPlan[day]) {
-                                                    Object.keys(plan.mealPlan[day]).forEach(mealType => {
-                                                        const meals = plan.mealPlan[day][mealType];
-                                                        if (Array.isArray(meals) && meals.length > 0) {
-                                                            if (meals[0].hasOwnProperty('isim')) {
-                                                                totalMeals += meals.length;
-                                                                eatenMeals += meals.filter(meal => meal.yenildi).length;
-                                                            } else {
-                                                                totalMeals += meals.length;
+                                            if (plan.mealPlan) {
+                                                Object.keys(plan.mealPlan).forEach(day => {
+                                                    if (plan.mealPlan[day]) {
+                                                        Object.keys(plan.mealPlan[day]).forEach(mealType => {
+                                                            const meals = plan.mealPlan[day][mealType];
+                                                            if (Array.isArray(meals) && meals.length > 0) {
+                                                                if (meals[0].hasOwnProperty('isim')) {
+                                                                    totalMeals += meals.length;
+                                                                    eatenMeals += meals.filter(meal => meal.yenildi).length;
+                                                                } else {
+                                                                    totalMeals += meals.length;
+                                                                }
                                                             }
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }
+                                                        });
+                                                    }
+                                                });
+                                            }
 
-                                        return (
-                                            <React.Fragment key={plan.id || index}>
-                                                <ListItem
-                                                    onClick={() => setSelectedPlanIndex(index)}
-                                                    sx={{
-                                                        cursor: 'pointer',
-                                                        bgcolor: selectedPlanIndex === index ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-                                                        '&:hover': {
-                                                            bgcolor: 'rgba(0, 0, 0, 0.08)'
-                                                        }
-                                                    }}
-                                                >
-                                                    <ListItemAvatar>
-                                                        <Avatar sx={{bgcolor: 'primary.main'}}>
-                                                            <EventIcon/>
-                                                        </Avatar>
-                                                    </ListItemAvatar>
-                                                    <ListItemText
-                                                        primary={
-                                                            <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
-                                                                {plan.note || "Beslenme Planı"}
-                                                                {isActivePlan(plan) && (
-                                                                    <Chip
-                                                                        label="Aktif Plan"
-                                                                        size="small"
-                                                                        color="success"
-                                                                        sx={{ml: 1}}
-                                                                    />
-                                                                )}
+                                            return (
+                                                <Grid item xs={12} md={6} key={plan.id}>
+                                                    <Card elevation={3}>
+                                                        <CardHeader
+                                                            avatar={<Avatar
+                                                                sx={{bgcolor: 'primary.main'}}><RestaurantIcon/></Avatar>}
+                                                            title={<Typography variant="subtitle1"
+                                                                               sx={{fontWeight: 'bold'}}>{plan.note || 'Beslenme Planı'}</Typography>}
+                                                            action={<Chip
+                                                                label={isActivePlan(plan) ? "Aktif Plan" : "Pasif Plan"}
+                                                                color={isActivePlan(plan) ? "success" : "default"}
+                                                                size="small"/>}
+                                                            sx={{
+                                                                bgcolor: '#2d4149',
+                                                                color: 'white',
+                                                                borderBottom: '1px solid',
+                                                                borderColor: 'divider'
+                                                            }}
+                                                        />
+                                                        <CardContent>
+                                                            <Typography variant="body2" sx={{mb: 1}}>
+                                                                <strong>Başlangıç
+                                                                    Tarihi:</strong> {plan.startDate ? new Date(plan.startDate).toLocaleDateString('tr-TR') : '-'}
                                                             </Typography>
-                                                        }
-                                                        secondary={
-                                                            <>
-                                                                <Typography variant="body2" component="span">
-                                                                    {plan.start_date && plan.end_date
-                                                                        ? `${new Date(plan.start_date).toLocaleDateString('tr-TR')} - ${new Date(plan.end_date).toLocaleDateString('tr-TR')}`
-                                                                        : "Tarih belirtilmemiş"}
-                                                                </Typography>
-                                                                <Typography variant="body2" color="text.secondary"
-                                                                            display="block">
-                                                                    Not: {plan.note || "Not eklenmemiş"}
-                                                                </Typography>
-                                                                {totalMeals > 0 && (
-                                                                    <Typography variant="body2" color="text.secondary"
-                                                                                display="flex" alignItems="center"
-                                                                                sx={{mt: 0.5}}>
-                                                                        <CheckCircleIcon sx={{
-                                                                            fontSize: 16,
-                                                                            color: 'success.main',
-                                                                            mr: 0.5
-                                                                        }}/>
-                                                                        {eatenMeals} / {totalMeals} öğün tüketildi
-                                                                    </Typography>
-                                                                )}
-                                                            </>
-                                                        }
-                                                    />
-                                                </ListItem>
-                                                {index < nutritionPlan.length - 1 && (
-                                                    <Divider variant="inset" component="li"/>
-                                                )}
-                                            </React.Fragment>
-                                        );
-                                    })
+                                                            <Typography variant="body2" sx={{mb: 1}}>
+                                                                <strong>Bitiş
+                                                                    Tarihi:</strong> {plan.endDate ? new Date(plan.endDate).toLocaleDateString('tr-TR') : '-'}
+                                                            </Typography>
+                                                            <Typography variant="body2" sx={{mb: 1}}>
+                                                                <strong>Oluşturulma
+                                                                    Tarihi:</strong> {plan.createdAt ? new Date(plan.createdAt).toLocaleDateString('tr-TR') : '-'}
+                                                            </Typography>
+                                                            <Box sx={{
+                                                                mt: 2,
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between'
+                                                            }}>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    onClick={() => setSelectedPlanIndex(index)}
+                                                                    disabled={selectedPlanIndex === index}
+                                                                >
+                                                                    {selectedPlanIndex === index ? 'Seçili Plan' : 'Planı Görüntüle'}
+                                                                </Button>
+                                                            </Box>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Grid>
+                                            );
+                                        })}
+                                    </Grid>
                                 ) : (
-                                    <ListItem>
-                                        <ListItemText
-                                            primary="Atanmış beslenme planı bulunamadı"
-                                            secondary="Danışana henüz bir beslenme planı atanmamış"
-                                        />
-                                    </ListItem>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        py: 4
+                                    }}>
+                                        <FitnessCenterIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
+                                        <Typography color="text.secondary" align="center">
+                                            Bu danışana atanmış beslenme planı bulunmamaktadır.
+                                        </Typography>
+                                    </Box>
                                 )}
-                            </List>
+                            </CardContent>
                         </Card>
 
                         {/* Water Tracking Card */}
@@ -3293,7 +3419,10 @@ function Danisan() {
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
-                                        py: 4
+                                        py: 4,
+                                        borderRadius: 2,
+                                        border: '1px dashed #bdbdbd',
+                                        bgcolor: '#f8f9fa'
                                     }}>
                                         <FitnessCenterIcon sx={{fontSize: 40, color: 'text.disabled', mb: 1}}/>
                                         <Typography color="text.secondary" align="center">
@@ -3689,8 +3818,10 @@ function Danisan() {
                                         Fatura: {activeInvoice.description || 'Açıklama yok'}</Typography>}
                                     subheader={<Typography variant="body2" color="text.secondary">Fatura
                                         No: {activeInvoice.id}</Typography>}
-                                    sx={{borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#2d4149',
-                                        color: 'white',}}
+                                    sx={{
+                                        borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#2d4149',
+                                        color: 'white',
+                                    }}
                                 />
                                 <CardContent>
                                     <Typography variant="body2" sx={{mb: 1}}>
@@ -3740,8 +3871,9 @@ function Danisan() {
                                                                            sx={{fontWeight: 'bold'}}>{invoice.description || 'Açıklama yok'}</Typography>}
                                                         subheader={<Typography variant="body2" color="text.secondary">Fatura
                                                             No: {invoice.id}</Typography>}
-                                                        action={<Chip label={statusLabel} color={statusColor}
-                                                                      size="small"/>}
+                                                        action={<Chip
+                                                                label={statusLabel} color={statusColor}
+                                                                size="small"/>}
                                                         sx={{
                                                             bgcolor: '#2d4149',
                                                             color: 'white',
@@ -3860,6 +3992,44 @@ function Danisan() {
     const handleCloseAssignExerciseDialog = () => {
         setIsAssignExerciseDialogOpen(false);
         setAssignForm({exercise_id: '', start_date: '', end_date: '', note: ''});
+    };
+
+    const handleOpenAssignNutritionPlanDialog = () => {
+        setIsAssignNutritionPlanDialogOpen(true);
+    };
+
+    const handleCloseAssignNutritionPlanDialog = () => {
+        setIsAssignNutritionPlanDialogOpen(false);
+    };
+
+    const handleNutritionPlanAssignSuccess = async () => {
+        // Beslenme planlarını yeniden yükle
+        setNutritionPlanLoading(true);
+        try {
+            const response = await axios.post(
+                config[config.environment].apiUrl + "/nutrition/getNutritionAssignmentPlanByClient",
+                {
+                    client_id: id,
+                    range: "all"
+                },
+                {
+                    headers: {
+                        Authorization: localStorage.getItem('token'),
+                    }
+                }
+            );
+
+            setNutritionPlan(response.data);
+
+            if (response.data && response.data.length > 0) {
+                const currentPlanIndex = findCurrentPlan(response.data);
+                setSelectedPlanIndex(currentPlanIndex);
+            }
+        } catch (err) {
+            console.error("Beslenme planı yüklenirken hata:", err.message);
+        } finally {
+            setNutritionPlanLoading(false);
+        }
     };
 
     const handleAddAppointment = async () => {
@@ -4103,7 +4273,11 @@ function Danisan() {
                                         placeholder="Danışan için notlarınızı buraya yazabilirsiniz..."
                                         InputProps={{
                                             disableUnderline: true,
-                                            sx: {fontFamily: 'Caveat, "Comic Sans MS", cursive', fontSize: 18, bgcolor: 'transparent'}
+                                            sx: {
+                                                fontFamily: 'Caveat, "Comic Sans MS", cursive',
+                                                fontSize: 18,
+                                                bgcolor: 'transparent'
+                                            }
                                         }}
                                     />
                                     <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 1}}>
@@ -4170,7 +4344,7 @@ function Danisan() {
             >
                 <DialogTitle>Yeni Ölçüm Ekle</DialogTitle>
                 <Box component="form" onSubmit={handleCreateMeasurement}>
-                    <DialogContent dividers sx={{ overflowY: 'auto', maxHeight: '70vh' }}>
+                    <DialogContent dividers sx={{overflowY: 'auto', maxHeight: '70vh'}}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
@@ -4495,7 +4669,7 @@ function Danisan() {
                             color="primary"
                             disabled={updateMeasurementLoading}
                         >
-                            {updateMeasurementLoading ? <CircularProgress size={24} /> : "Güncelle"}
+                            {updateMeasurementLoading ? <CircularProgress size={24}/> : "Güncelle"}
                         </Button>
                     </DialogActions>
                 </Box>
@@ -4566,8 +4740,8 @@ function Danisan() {
                 <DialogTitle>
                     Anamnez Bilgilerini Düzenle
                     <IconButton
-                        style={{position: 'absolute', right: 8, top: 8}}
                         onClick={() => setIsAnamnezDialogOpen(false)}
+                        sx={{ color: 'red' }}
                     >
                         <CloseIcon/>
                     </IconButton>
@@ -4783,7 +4957,7 @@ function Danisan() {
                 maxWidth="md"
                 fullWidth
             >
-                <DialogContent sx={{ p: 1, textAlign: 'center' }}>
+                <DialogContent sx={{p: 1, textAlign: 'center'}}>
                     {selectedImage && (
                         <Box
                             component="img"
@@ -4803,6 +4977,53 @@ function Danisan() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                open={isCustomPlanDialogOpen}
+                onClose={handleCloseCustomPlanDialog}
+                maxWidth="xl"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        minHeight: '80vh',
+                        maxHeight: '90vh',
+                        width: '95vw',
+                        maxWidth: '95vw'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <Typography variant="h6">Özel Beslenme Planı Oluştur</Typography>
+                    <IconButton
+                        onClick={handleCloseCustomPlanDialog}
+                        sx={{ color: 'red' }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 0, height: '100%' }}>
+                    <MealPlanEditor
+                        clientId={id}
+                        onSave={handleCustomPlanSave}
+                        onCancel={handleCloseCustomPlanDialog}
+                        mode="custom"
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Beslenme Planı Atama Modal */}
+            <NutritionPlanAssignModal
+                open={isAssignNutritionPlanDialogOpen}
+                onClose={handleCloseAssignNutritionPlanDialog}
+                clientId={id}
+                onSuccess={handleNutritionPlanAssignSuccess}
+            />
         </Default>
     );
 }

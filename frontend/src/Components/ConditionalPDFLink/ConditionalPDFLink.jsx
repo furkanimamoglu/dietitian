@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import React, {useEffect, useRef, useState} from 'react';
+import {PDFDownloadLink} from '@react-pdf/renderer';
 
 /**
  * Koşullu PDF oluşturan bileşen
  * PDF sadece kullanıcı butona tıkladığında oluşturulur ve otomatik indirilir
  */
-const ConditionalPDFLink = ({ document, fileName, buttonClass, buttonTitle, children }) => {
+const ConditionalPDFLink = ({document, fileName, buttonClass, buttonTitle, children}) => {
     const [showPDF, setShowPDF] = useState(false);
     const downloadLinkRef = useRef(null);
 
@@ -29,7 +29,7 @@ const ConditionalPDFLink = ({ document, fileName, buttonClass, buttonTitle, chil
     }, [showPDF]);
 
     return showPDF ? (
-        <div ref={downloadLinkRef} style={{ display: 'inline-block' }}>
+        <div ref={downloadLinkRef} style={{display: 'inline-block'}}>
             <PDFDownloadLink
                 document={document}
                 fileName={fileName}

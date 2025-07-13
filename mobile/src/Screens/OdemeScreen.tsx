@@ -1,5 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, StyleSheet, View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, FlatList } from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import Header from '../Components/Header';
 import BottomNavbar from '../Components/BottomNavbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -155,7 +164,7 @@ const OdemeScreen = ({navigation}) => {
                 onPress={() => changePage(currentPage - 1)}
                 disabled={currentPage === 1}
             >
-                <Icon name="chevron-left" size={20} color={currentPage === 1 ? "#999" : "#333"} />
+                <Icon name="chevron-left" size={20} color={currentPage === 1 ? "#999" : "#333"}/>
             </TouchableOpacity>
         );
 
@@ -202,7 +211,8 @@ const OdemeScreen = ({navigation}) => {
                     style={[styles.pageButton, totalPages === currentPage && styles.activePageButton]}
                     onPress={() => changePage(totalPages)}
                 >
-                    <Text style={[styles.pageButtonText, totalPages === currentPage && styles.activePageText]}>{totalPages}</Text>
+                    <Text
+                        style={[styles.pageButtonText, totalPages === currentPage && styles.activePageText]}>{totalPages}</Text>
                 </TouchableOpacity>
             );
         }
@@ -214,7 +224,7 @@ const OdemeScreen = ({navigation}) => {
                 onPress={() => changePage(currentPage + 1)}
                 disabled={currentPage === totalPages}
             >
-                <Icon name="chevron-right" size={20} color={currentPage === totalPages ? "#999" : "#333"} />
+                <Icon name="chevron-right" size={20} color={currentPage === totalPages ? "#999" : "#333"}/>
             </TouchableOpacity>
         );
 
@@ -230,35 +240,35 @@ const OdemeScreen = ({navigation}) => {
             case 'paid':
                 return (
                     <View style={styles.statusTag}>
-                        <Icon name="check-circle" size={16} color="#4CAF50" />
+                        <Icon name="check-circle" size={16} color="#4CAF50"/>
                         <Text style={[styles.statusText, {color: '#4CAF50'}]}> Ödendi</Text>
                     </View>
                 );
             case 'partiallypaid':
                 return (
                     <View style={styles.statusTag}>
-                        <Icon name="clock-outline" size={16} color="#FF9800" />
+                        <Icon name="clock-outline" size={16} color="#FF9800"/>
                         <Text style={[styles.statusText, {color: '#0085ae'}]}> Kısmi Ödendi</Text>
                     </View>
                 );
             case 'unpaid':
                 return (
                     <View style={styles.statusTag}>
-                        <Icon name="alert-circle-outline" size={16} color="#F44336" />
+                        <Icon name="alert-circle-outline" size={16} color="#F44336"/>
                         <Text style={[styles.statusText, {color: '#FF9800'}]}>Beklemede</Text>
                     </View>
                 );
             case 'cancelled':
                 return (
                     <View style={styles.statusTag}>
-                        <Icon name="close-circle" size={16} color="#F44336" />
+                        <Icon name="close-circle" size={16} color="#F44336"/>
                         <Text style={[styles.statusText, {color: '#F44336'}]}>Ödenmedi</Text>
                     </View>
                 );
             default:
                 return (
                     <View style={styles.statusTag}>
-                        <Icon name="help-circle-outline" size={16} color="#999" />
+                        <Icon name="help-circle-outline" size={16} color="#999"/>
                         <Text style={[styles.statusText, {color: '#999'}]}> Bilinmiyor</Text>
                     </View>
                 );
@@ -298,7 +308,7 @@ const OdemeScreen = ({navigation}) => {
         </View>
     );
 
-    const renderInvoiceItem = ({ item }) => (
+    const renderInvoiceItem = ({item}) => (
         <View style={styles.paymentCard}>
             <View style={styles.cardHeader}>
                 <Text style={styles.invoiceNumber}>Fatura #{item.id}</Text>
@@ -344,7 +354,7 @@ const OdemeScreen = ({navigation}) => {
         if (loading && !refreshing) {
             return (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#fc9e21" />
+                    <ActivityIndicator size="large" color="#fc9e21"/>
                     <Text style={styles.loadingText}>Ödeme geçmişiniz yükleniyor...</Text>
                 </View>
             );
@@ -353,7 +363,7 @@ const OdemeScreen = ({navigation}) => {
         if (error) {
             return (
                 <View style={styles.noticeContainer}>
-                    <Icon name="alert-circle" size={60} color="#fc9e21" />
+                    <Icon name="alert-circle" size={60} color="#fc9e21"/>
                     <Text style={styles.noticeText}>{error}</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={fetchInvoices}>
                         <Text style={styles.retryButtonText}>Tekrar Dene</Text>
@@ -365,7 +375,7 @@ const OdemeScreen = ({navigation}) => {
         if (allInvoices.length === 0) {
             return (
                 <View style={styles.emptyContainer}>
-                    <Icon name="cash-remove" size={70} color="#fc9e21" />
+                    <Icon name="cash-remove" size={70} color="#fc9e21"/>
                     <Text style={styles.emptyTitle}>Ödeme Geçmişi Bulunamadı</Text>
                     <Text style={styles.emptyText}>
                         Henüz hiç ödeme işlemi gerçekleştirmediniz veya ödeme geçmişiniz bulunmamaktadır.
@@ -377,7 +387,7 @@ const OdemeScreen = ({navigation}) => {
         if (filteredInvoices.length === 0) {
             return (
                 <View style={styles.emptyContainer}>
-                    <Icon name="filter-remove" size={70} color="#fc9e21" />
+                    <Icon name="filter-remove" size={70} color="#fc9e21"/>
                     <Text style={styles.emptyTitle}>Filtreye Uygun Fatura Bulunamadı</Text>
                     <Text style={styles.emptyText}>
                         Arama kriterlerinize uygun fatura bulunamadı. Lütfen filtreleri değiştirin.
@@ -394,7 +404,7 @@ const OdemeScreen = ({navigation}) => {
                     keyExtractor={(item, index) => `invoice-${item.id || index}`}
                     contentContainerStyle={styles.listContainer}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#fc9e21']} />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#fc9e21']}/>
                     }
                 />
                 {renderPagination()}
@@ -410,7 +420,7 @@ const OdemeScreen = ({navigation}) => {
                 <Text style={styles.sectionTitle}>Ödeme Geçmişim</Text>
 
                 <View style={styles.searchContainer}>
-                    <Icon name="magnify" size={20} color="#666" style={styles.searchIcon} />
+                    <Icon name="magnify" size={20} color="#666" style={styles.searchIcon}/>
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Fatura no veya hizmet adı ile ara..."
@@ -424,7 +434,8 @@ const OdemeScreen = ({navigation}) => {
 
                 <View style={styles.resultsContainer}>
                     <Text style={styles.resultsText}>
-                        {filteredInvoices.length} fatura bulundu {totalPages > 1 ? `(${currentPage}/${totalPages} sayfa)` : ''}
+                        {filteredInvoices.length} fatura
+                        bulundu {totalPages > 1 ? `(${currentPage}/${totalPages} sayfa)` : ''}
                     </Text>
                 </View>
 
@@ -523,7 +534,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 16,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
@@ -641,7 +652,7 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 16,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
