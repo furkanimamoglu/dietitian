@@ -8,6 +8,7 @@ const {
     NutritionPlan,
     Water
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
+
 const {Op} = require("sequelize");
 
 class NutritionService {
@@ -128,6 +129,41 @@ class NutritionService {
                 mealPlan: updatedMealPlan
             });
         }
+    }
+
+    static async assignCustomPlanToClient(client_id, mealPlan, start_date, end_date, note) {
+        if (!client_id || !mealPlan || !start_date || !end_date) {
+            throw new Exception("Eksik parametreler.", 400, true);
+        }
+
+        const client = await Client.findByPk(client_id);
+
+        if (!client) {
+            throw new Exception("Bu danışan bulunamadı.", 404, true);
+        }
+
+        const existingAssignment = await NutritionAssignment.findOne({
+            where: {
+                client_id: client_id,
+                [Op.or]: [
+                    { start_date: { [Op.between]: [start_date, end_date] } },
+                    { end_date: { [Op.between]: [start_date, end_date] } },
+                    { start_date: { [Op.lte]: start_date }, end_date: { [Op.gte]: end_date } }
+                ]
+            }
+        });
+
+        if (existingAssignment) {
+            throw new Exception("Bu tarih aralığında danışana atanmış başka bir plan zaten var.", 409, true);
+        }
+
+        return await NutritionAssignment.create({
+            client_id,
+            mealPlan,
+            start_date,
+            end_date,
+            note
+        });
     }
 
     static async getNutritionPlans(dietitian_id) {

@@ -930,7 +930,7 @@ export default function Tarifler() {
                         onAssign={handleOpenAddToUserModal}
                         dietitianInfo={dietitianInfo}
                     />))) : (<div className="no-recipes">
-                        <p>Bu kategoriya ait tarif bulunamadı.</p>
+                        <p>Bu kategoriye ait tarif bulunamadı.</p>
                     </div>)}
                 </div>
             </div>

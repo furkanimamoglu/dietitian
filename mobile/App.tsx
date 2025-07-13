@@ -79,7 +79,6 @@ const App = () => {
     useEffect(() => {
         const checkUserSession = async () => {
             try {
-                // Önce version kontrolü yap
                 await checkAppVersion();
 
                 const token = await AsyncStorage.getItem('token');

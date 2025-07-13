@@ -8,7 +8,10 @@ const nutritionController = require(path.join(__dirname, '..', 'Controller', 'nu
 router.post('/addNutritionCategory', nutritionController.addNutritionCategory);
 router.get('/getNutritionCategories', nutritionController.getNutritionCategories);
 router.delete('/deleteNutritionCategory', nutritionController.deleteNutritionCategory);
+
 router.post('/assignNutritionPlanToClient', nutritionController.assignNutritionPlanToClient);
+router.post('/assignCustomPlanToClient', nutritionController.assignCustomPlanToClient);
+
 router.get('/getNutritionPlans', nutritionController.getNutritionPlans);
 router.delete('/deleteNutritionPlan', nutritionController.deleteNutritionPlan);
 router.post('/addNutritionPlan', nutritionController.addNutritionPlan);

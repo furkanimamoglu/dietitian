@@ -28,15 +28,12 @@ const NutritionAssignment = sequelize.define('NutritionAssignment', {
     },
     nutrition_plan_id: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: 'NutritionPlans',
             key: 'id'
         },
         validate: {
-            notNull: {
-                msg: 'Beslenme planı ID gereklidir'
-            },
             isInt: {
                 msg: 'Beslenme planı ID geçerli bir sayı olmalıdır'
             }

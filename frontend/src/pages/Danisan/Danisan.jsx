@@ -5,6 +5,7 @@ import axios from "axios";
 import config from "../../config.js";
 import {useNavigate, useParams} from "react-router-dom";
 import NutritionPlanAssignModal from "./NutritionPlanAssignModal.jsx";
+import MealPlanEditor from '../../Components/MealPlanEditor/MealPlanEditor';
 
 import {
     Accordion,
@@ -69,6 +70,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import CloseIcon from "@mui/icons-material/Close";
 import Visibility from "@mui/icons-material/Visibility";
 import Person from '@mui/icons-material/Person';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import Email from '@mui/icons-material/Email';
 import Phone from '@mui/icons-material/Phone';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
@@ -616,6 +618,29 @@ function Danisan() {
     const [appointmentsLoading, setAppointmentsLoading] = useState(false);
 
     const [isAssignNutritionPlanDialogOpen, setIsAssignNutritionPlanDialogOpen] = useState(false);
+
+
+    // State'lere ekle
+    const [isCustomPlanDialogOpen, setIsCustomPlanDialogOpen] = useState(false);
+
+    // Handler'ları ekle
+    const handleOpenCustomPlanDialog = () => {
+        setIsCustomPlanDialogOpen(true);
+    };
+
+    const handleCloseCustomPlanDialog = () => {
+        setIsCustomPlanDialogOpen(false);
+    };
+
+    const handleCustomPlanSave = async () => {
+        // Plan kaydedildikten sonra dialog'u kapat ve beslenme planlarını yenile
+        setIsCustomPlanDialogOpen(false);
+        await handleNutritionPlanAssignSuccess();
+    };
+
+    // MealPlanEditor için yeni state'ler
+    const [isCustomPlanEditorOpen, setIsCustomPlanEditorOpen] = useState(false);
+    const [customPlanSaving, setCustomPlanSaving] = useState(false);
 
     const [anamnezData, setAnamnezData] = useState(null);
     const [anamnezLoading, setAnamnezLoading] = useState(false);
@@ -2458,6 +2483,15 @@ function Danisan() {
                             </Box>
                             <Box sx={{display: 'flex', gap: 1}}>
                                 <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    startIcon={<RestaurantMenuIcon/>}
+                                    onClick={handleOpenCustomPlanDialog}
+                                    sx={{ml: 1}}
+                                >
+                                    Özel Plan Ata
+                                </Button>
+                                <Button
                                     variant="contained"
                                     size="small"
                                     startIcon={<AddIcon/>}
@@ -3837,8 +3871,9 @@ function Danisan() {
                                                                            sx={{fontWeight: 'bold'}}>{invoice.description || 'Açıklama yok'}</Typography>}
                                                         subheader={<Typography variant="body2" color="text.secondary">Fatura
                                                             No: {invoice.id}</Typography>}
-                                                        action={<Chip label={statusLabel} color={statusColor}
-                                                                      size="small"/>}
+                                                        action={<Chip
+                                                                label={statusLabel} color={statusColor}
+                                                                size="small"/>}
                                                         sx={{
                                                             bgcolor: '#2d4149',
                                                             color: 'white',
@@ -4707,6 +4742,7 @@ function Danisan() {
                     <IconButton
                         style={{position: 'absolute', right: 8, top: 8}}
                         onClick={() => setIsAnamnezDialogOpen(false)}
+                        sx={{ color: 'red' }}
                     >
                         <CloseIcon/>
                     </IconButton>
@@ -4941,6 +4977,43 @@ function Danisan() {
                         Kapat
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={isCustomPlanDialogOpen}
+                onClose={handleCloseCustomPlanDialog}
+                maxWidth="lg"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        minHeight: '80vh',
+                        maxHeight: '90vh'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <Typography variant="h6">Özel Beslenme Planı Oluştur</Typography>
+                    <IconButton
+                        onClick={handleCloseCustomPlanDialog}
+                        sx={{ color: 'red' }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent sx={{ p: 0, height: '100%' }}>
+                    <MealPlanEditor
+                        clientId={id}
+                        onSave={handleCustomPlanSave}
+                        onCancel={handleCloseCustomPlanDialog}
+                        mode="custom"
+                    />
+                </DialogContent>
             </Dialog>
 
             {/* Beslenme Planı Atama Modal */}

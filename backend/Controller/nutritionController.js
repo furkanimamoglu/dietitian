@@ -136,6 +136,45 @@ class nutritionController {
         }
     }
 
+    static async assignCustomPlanToClient(req, res) {
+        try {
+            const token = req.headers.authorization;
+            const dietitian_id = Security.getUserIdFromToken(token);
+            const permission = Security.checkUserPermission(token, DIETITIAN);
+
+            if (!token || !dietitian_id || !permission) {
+                return res.status(401).json({
+                    showOnScreen: true,
+                    message: "Yetkisiz erişim."
+                });
+            }
+
+            const {client_id, mealPlan, start_date, end_date, note} = req.body;
+
+            if (!client_id || !mealPlan || !start_date || !end_date) {
+                return res.status(400).json({
+                    showOnScreen: true,
+                    message: "Tüm alanlar zorunludur."
+                });
+            }
+
+            const result = await NutritionService.assignCustomPlanToClient(
+                client_id,
+                mealPlan,
+                start_date,
+                end_date,
+                note
+            );
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(error.status || 500).json({
+                showOnScreen: error.showOnScreen ?? true,
+                message: error.message || "Bir hata oluştu."
+            });
+        }
+    }
+
     static async deleteNutritionAssignment(req, res) {
         try {
             const token = req.headers.authorization;
