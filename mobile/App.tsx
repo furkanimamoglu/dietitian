@@ -270,9 +270,15 @@ const App = () => {
 
     const getFcmToken = async () => {
         try {
+            // iOS için cihazı uzak mesajlar için kaydet
+            if (Platform.OS === 'ios') {
+                await messaging().registerDeviceForRemoteMessages();
+            }
+
             const fcmToken = await messaging().getToken();
             if (fcmToken) {
                 await AsyncStorage.setItem('fcmToken', fcmToken);
+                console.log('FCM Token:', fcmToken);
             } else {
                 console.log('Failed to get FCM token');
             }
