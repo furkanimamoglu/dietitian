@@ -18,6 +18,7 @@ import Odeme from "../pages/Odeme/Odeme.jsx";
 import LandingPage from "../pages/LandingPage/LandingPage.jsx";
 import GizlilikSozlesmesi from "../pages/GizlilikSozlesmesi/GizlilikSozlesmesi.jsx";
 import HesabimiSil from "../pages/HesabimiSil/HesabimiSil.jsx";
+import Destek from "../pages/Destek/Destek.jsx";
 
 export default function Routing() {
     return (
@@ -41,6 +42,7 @@ export default function Routing() {
             <Route path="/odeme/*" element={<Odeme/>}/>
             <Route path="/privacy/*" element={<GizlilikSozlesmesi/>}/>
             <Route path="/hesabimisil/*" element={<HesabimiSil/>}/>
+            <Route path="/destek/*" element={<Destek/>}/>
 
             {/* Error Routes */}
             <Route path="/*" element={ExceptionPage(404)}/>

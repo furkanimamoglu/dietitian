@@ -1,0 +1,278 @@
+.destek-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header-banner {
+    background: linear-gradient(135deg, #ff7355 0%, #fc9e21 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-banner::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+    background-size: 100% 100%;
+}
+
+.header-title {
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.header-subtitle {
+    font-weight: 400 !important;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.destek-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 2rem;
+    position: relative;
+    margin-top: -2rem;
+}
+
+/* Form stilleri */
+.contact-form {
+    transition: all 0.3s ease;
+}
+
+.contact-form:hover {
+    transform: translateY(-2px);
+}
+
+/* FAQ Accordion stilleri */
+.MuiAccordion-root {
+    border-radius: 12px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+    transition: all 0.3s ease !important;
+}
+
+.MuiAccordion-root:hover {
+    box-shadow: 0 4px 20px rgba(252, 158, 33, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+.MuiAccordion-root.Mui-expanded {
+    box-shadow: 0 6px 25px rgba(252, 158, 33, 0.25) !important;
+}
+
+.MuiAccordionSummary-root {
+    border-radius: 12px 12px 0 0 !important;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%) !important;
+}
+
+.MuiAccordionSummary-root:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+.MuiAccordionDetails-root {
+    background: #fff !important;
+    border-radius: 0 0 12px 12px !important;
+    padding: 20px 24px !important;
+}
+
+/* İletişim kartları */
+.contact-info-card {
+    transition: all 0.3s ease;
+}
+
+.contact-info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(252, 158, 33, 0.2) !important;
+}
+
+/* Buton stilleri */
+.submit-button {
+    background: linear-gradient(135deg, #ff7355 0%, #fc9e21 100%) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    transition: all 0.3s ease !important;
+    text-transform: none !important;
+}
+
+.submit-button:hover {
+    background: linear-gradient(135deg, #e85a3f 0%, #e8930e 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(252, 158, 33, 0.3) !important;
+}
+
+/* Input alanları */
+.MuiTextField-root {
+    margin-bottom: 24px !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root:hover {
+    box-shadow: 0 2px 8px rgba(252, 158, 33, 0.1);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 4px 12px rgba(252, 158, 33, 0.2);
+}
+
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #ff7355 !important;
+    border-width: 2px !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root.Mui-focused {
+    color: #ff7355 !important;
+}
+
+/* Alert stilleri */
+.MuiAlert-root {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2) !important;
+}
+
+/* Responsive tasarım */
+@media (max-width: 600px) {
+    .destek-container {
+        padding: 16px;
+    }
+
+    .header-banner {
+        padding: 2rem 1rem;
+    }
+
+    .header-title {
+        font-size: 2rem !important;
+    }
+
+    .header-subtitle {
+        font-size: 1.5rem !important;
+    }
+
+    .MuiCard-root {
+        margin: 0 8px !important;
+    }
+
+    .MuiCardContent-root {
+        padding: 20px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .contact-cards-container {
+        flex-direction: column;
+    }
+
+    .contact-cards-container .MuiGrid-item {
+        margin-bottom: 24px;
+    }
+}
+
+/* Animasyonlar */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 0.9;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Kart hover efektleri */
+.card-hover-effect {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-effect:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(252, 158, 33, 0.2) !important;
+}
+
+/* Gradient text efekti */
+.gradient-text {
+    background: linear-gradient(135deg, #ff7355 0%, #fc9e21 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Icon hover efektleri */
+.contact-icon {
+    transition: all 0.3s ease;
+}
+
+.contact-icon:hover {
+    transform: scale(1.1) rotate(5deg);
+    color: #fc9e21 !important;
+}
+
+/* Loading animasyonu */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 115, 85, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 115, 85, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 115, 85, 0);
+    }
+}
+
+.pulse-effect {
+    animation: pulse 2s infinite;
+}
