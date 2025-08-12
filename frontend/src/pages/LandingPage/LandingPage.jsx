@@ -420,6 +420,12 @@ const LandingPage = () => {
                                 href="https://wa.me/905075280653"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                            >
+                                İletişime Geç
+                            </a>
+                            <a
+                                href="/girisyap"
                                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
                             >
                                 Başla
