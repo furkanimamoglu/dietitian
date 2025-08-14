@@ -409,7 +409,7 @@ const LandingPage = () => {
                             <span className="text-xl font-bold text-gray-900">Diyetia</span>
                         </div>
 
-                        <div className="hidden md:flex items-center space-x-8">
+                        <div className="hidden md:flex items-center space-x-4">
                             <a href="#features"
                                className="text-gray-600 hover:text-orange-500 transition-colors">Özellikler</a>
                             <a href="#pricing"
@@ -420,7 +420,7 @@ const LandingPage = () => {
                                 href="https://wa.me/905075280653"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
                             >
                                 İletişime Geç
                             </a>
@@ -428,7 +428,13 @@ const LandingPage = () => {
                                 href="/girisyap"
                                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
                             >
-                                Başla
+                                Giriş Yap
+                            </a>
+                            <a
+                                href="/kayitol"
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                            >
+                                Kayıt Ol
                             </a>
                         </div>
                     </div>
@@ -461,11 +467,15 @@ const LandingPage = () => {
                                     <Download className="w-5 h-5 "/>
                                     <span>Google Play'den İndir</span>
                                 </a>
-                                <button
-                                    className="flex items-center justify-center space-x-2 t text-gray-900 transition-colors bg-orange-300 px-8 py-4 rounded-full text-lg font-semibold transform hover:scale-105">
-                                    <Play className="w-5 h-5"/>
-                                    <span className="text-lg font-semibold">Demo İzle</span>
-                                </button>
+                                <a
+                                    href="https://apps.apple.com/tr/app/diyetia/id6748645561?l=tr"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="glow-box bg-white hover:bg-gray text-gray px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+                                >
+                                    <Download className="w-5 h-5 "/>
+                                    <span>App Store'dan İndir</span>
+                                </a>
                             </div>
 
                             <div className="flex items-center space-x-8 text-sm text-gray-500">
@@ -473,7 +483,7 @@ const LandingPage = () => {
                                     {[...Array(5)].map((_, i) => (
                                         <Star key={i} className="w-4 h-4  text-white-200"/>
                                     ))}
-                                    <span className="ml-2">4.9/5 (10,000+ değerlendirme)</span>
+                                    <span className="ml-2">4.9/5 (100+ değerlendirme)</span>
                                 </div>
                             </div>
                         </div>
@@ -686,19 +696,19 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         <div className="space-y-2">
-                            <div className="text-4xl md:text-5xl font-bold text-orange-500">50K+</div>
+                            <div className="text-4xl md:text-5xl font-bold text-orange-500">5+</div>
                             <div className="text-gray-600">Aktif Kullanıcı</div>
                         </div>
                         <div className="space-y-2">
-                            <div className="text-4xl md:text-5xl font-bold text-orange-500">1,200+</div>
+                            <div className="text-4xl md:text-5xl font-bold text-orange-500">5+</div>
                             <div className="text-gray-600">Uzman Diyetisyen</div>
                         </div>
                         <div className="space-y-2">
-                            <div className="text-4xl md:text-5xl font-bold text-orange-500">98%</div>
+                            <div className="text-4xl md:text-5xl font-bold text-orange-500">100%</div>
                             <div className="text-gray-600">Memnuniyet Oranı</div>
                         </div>
                         <div className="space-y-2">
-                            <div className="text-4xl md:text-5xl font-bold text-orange-500">4.9</div>
+                            <div className="text-4xl md:text-5xl font-bold text-orange-500">5</div>
                             <div className="text-gray-600">App Store Puanı</div>
                         </div>
                     </div>
@@ -716,16 +726,23 @@ const LandingPage = () => {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="flex justify-center">
                         <div
-                            className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-200">
+                            className="bg-white rounded-3xl p-8 shadow-2xl border-2 border-orange-500 relative max-w-md w-full">
+                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                <span
+                                    className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                                    En Popüler
+                                </span>
+                            </div>
+
                             <div className="text-center mb-8">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Öğrenci</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Premium Plan</h3>
                                 <div className="mb-4">
-                                    <span className="text-4xl font-bold text-gray-900">₺-</span>
+                                    <span className="text-4xl font-bold text-orange-600">₺1000</span>
                                     <span className="text-gray-600">/ay</span>
                                 </div>
-                                <p className="text-gray-600">Öğrenciler için özel fiyat</p>
+                                <p className="text-gray-600">Tüm özellikleri içeren kapsamlı plan</p>
                             </div>
 
                             <ul className="space-y-4 mb-8">
@@ -743,45 +760,6 @@ const LandingPage = () => {
                                 </li>
                                 <li className="flex items-center">
                                     <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">Haftalık raporlar</span>
-                                </li>
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">E-posta desteği</span>
-                                </li>
-                            </ul>
-
-                            <button
-                                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-full font-semibold transition-colors">
-                                Başla
-                            </button>
-                        </div>
-
-                        <div
-                            className="bg-white rounded-3xl p-8 shadow-2xl border-2 border-orange-500 transform scale-105 relative">
-                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-full text-sm font-semibold">
-                  En Popüler
-                </span>
-                            </div>
-
-                            <div className="text-center mb-8">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Premium</h3>
-                                <div className="mb-4">
-                                    <span className="text-4xl font-bold text-orange-600">₺-</span>
-                                    <span className="text-gray-600">/ay</span>
-                                </div>
-                                <p className="text-gray-600">Bireysel kullanıcılar için</p>
-                            </div>
-
-                            <ul className="space-y-4 mb-8">
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">Öğrenci planının tüm özellikleri</span>
-                                </li>
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
                                     <span className="text-gray-700">Uzman diyetisyen danışmanlığı</span>
                                 </li>
                                 <li className="flex items-center">
@@ -796,6 +774,10 @@ const LandingPage = () => {
                                     <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
                                     <span className="text-gray-700">7/24 chat desteği</span>
                                 </li>
+                                <li className="flex items-center">
+                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
+                                    <span className="text-gray-700">Haftalık raporlar</span>
+                                </li>
                             </ul>
 
                             <button
@@ -803,51 +785,11 @@ const LandingPage = () => {
                                 Başla
                             </button>
                         </div>
-
-                        <div
-                            className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-200">
-                            <div className="text-center mb-8">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Kurumsal</h3>
-                                <div className="mb-4">
-                                    <span className="text-4xl font-bold text-gray-900">₺-</span>
-                                    <span className="text-gray-600">/ay</span>
-                                </div>
-                                <p className="text-gray-600">Şirketler için özel çözüm</p>
-                            </div>
-
-                            <ul className="space-y-4 mb-8">
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">Premium planının tüm özellikleri</span>
-                                </li>
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">50 kullanıcıya kadar</span>
-                                </li>
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">Yönetici paneli</span>
-                                </li>
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">Toplu raporlama</span>
-                                </li>
-                                <li className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-orange-500 mr-3"/>
-                                    <span className="text-gray-700">Öncelikli destek</span>
-                                </li>
-                            </ul>
-
-                            <button
-                                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-full font-semibold transition-colors">
-                                İletişime Geç
-                            </button>
-                        </div>
                     </div>
 
                     <div className="text-center mt-12">
                         <p className="text-gray-600 mb-4">
-                            Tüm planlar 14 günlük ücretsiz deneme ile birlikte gelir
+                            Tüm planlar 30 günlük ücretsiz deneme ile birlikte gelir
                         </p>
                         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
                             <div className="flex items-center">
@@ -1014,16 +956,21 @@ const LandingPage = () => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        {/*<button className="bg-white text-orange-500 hover:bg-gray-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 pulse-box">*/}
-                        {/*    App Store'dan İndir*/}
-                        {/*</button>*/}
                         <a
                             href="https://play.google.com/store/apps/details?id=com.diyetia"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-orange-500 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300"
+                            className="bg-white text-orange-500 hover:bg-gray-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 pulse-box"
                         >
                             Google Play'den İndir
+                        </a>
+                        <a
+                            href="https://apps.apple.com/tr/app/diyetia/id6748645561?l=tr"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-white text-orange-500 hover:bg-gray-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                        >
+                            App Store'dan İndir
                         </a>
                     </div>
                 </div>
