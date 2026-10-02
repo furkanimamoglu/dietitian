@@ -47,18 +47,14 @@ const multerS3 = require('multer-s3');
 app.use(requestContext);
 app.use(bodyParser.json());
 
+// CORS tek yerden yapılandırılır. Kimlik doğrulama Authorization header'ındaki Bearer token ile yapıldığı için
+// cookie/credentials gerekmez.
 app.use(cors({
     origin: true,
-    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'User-Agent'],
     exposedHeaders: ['X-Request-Id']
 }));
-
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, User-Agent');
-    next();
-});
 
 app.get('/api/version', (req, res) => {
     res.json({
