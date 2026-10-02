@@ -1,11 +1,12 @@
 const path = require('path');
 const {logger, serializeError} = require(path.join(__dirname, '..', 'Utils', 'Logger'));
 
-const admin = require("firebase-admin");
+const {initializeApp, cert} = require("firebase-admin/app");
+const {getMessaging} = require("firebase-admin/messaging");
 const serviceAccount = require("../diyetiacom-firebase-adminsdk-fbsvc-bfd2868823.json");
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+initializeApp({
+    credential: cert(serviceAccount)
 });
 
 const {
@@ -47,7 +48,7 @@ class NotificationService {
             token: clientToken
         };
 
-        const response = await admin.messaging().send(message);
+        const response = await getMessaging().send(message);
 
         if (response) {
             try {
@@ -88,7 +89,7 @@ class NotificationService {
             tokens: tokens
         };
         // INFO: 500 danışana kadar destekler, sistemde birisinin bundan daha fazla danışan varsa, foreache dön.
-        const response = await admin.messaging().sendEachForMulticast(multicastMessage);
+        const response = await getMessaging().sendEachForMulticast(multicastMessage);
 
         const successCount = response.responses.filter(r => r.success).length;
         const failureCount = response.responses.length - successCount;

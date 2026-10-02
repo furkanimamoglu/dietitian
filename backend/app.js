@@ -142,7 +142,7 @@ app.post('/api/upload', authorize(), upload.single('image'), async (req, res) =>
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 500,
+    limit: 500,
     message: { showOnScreen: true, message: 'Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin.' },
     standardHeaders: true,
     legacyHeaders: false,
