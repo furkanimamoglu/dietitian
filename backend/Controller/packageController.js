@@ -1,6 +1,7 @@
 const path = require("path");
 
 const PackageService = require(path.join(__dirname, "..", "Service", "PackageService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 
 class packageController {
 
@@ -11,6 +12,7 @@ class packageController {
             const result = await PackageService.getMyPackages(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -28,6 +30,7 @@ class packageController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -49,6 +52,7 @@ class packageController {
             });
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -65,6 +69,7 @@ class packageController {
             const result = await PackageService.deletePackage(dietitian_id, package_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -81,6 +86,7 @@ class packageController {
             const result = await PackageService.getPackageItemsFromPackage(dietitian_id, package_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -98,6 +104,7 @@ class packageController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -114,6 +121,7 @@ class packageController {
             const result = await PackageService.updatePackageItem(dietitian_id, item_id, {name});
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -130,6 +138,7 @@ class packageController {
             const result = await PackageService.deletePackageItem(dietitian_id, item_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message

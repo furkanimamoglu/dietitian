@@ -1,6 +1,7 @@
 const path = require("path");
 
 const DietitianService = require(path.join(__dirname, "..", "Service", "DietitianService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 const {Notes} = require(path.join(__dirname, "..", "Model", "MainModel"));
 
 class DietitianController {
@@ -22,6 +23,7 @@ class DietitianController {
                 role: result.role
             });
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -48,6 +50,7 @@ class DietitianController {
                 role: result.role
             });
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -70,6 +73,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -94,6 +98,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -117,6 +122,7 @@ class DietitianController {
             const result = await DietitianService.updatePhoneNumber(dietitian_id, phoneNumber);
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen || true,
                 message: err.message || "Bir hata oluştu."
@@ -149,6 +155,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen || true,
                 message: err.message || "Bir hata oluştu."
@@ -173,6 +180,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -197,6 +205,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -221,6 +230,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -246,6 +256,7 @@ class DietitianController {
             const result = await DietitianService.updateClient(dietitian_id, id, updateData);
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen || false,
                 message: err.message || "Bir hata oluştu.",
@@ -263,6 +274,7 @@ class DietitianController {
                 qrData
             });
         } catch (error) {
+            logError(req, error);
             return res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -279,6 +291,7 @@ class DietitianController {
             const result = await DietitianService.getMyClient(dietitian_id, client_id)
             res.status(200).json(result)
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -294,6 +307,7 @@ class DietitianController {
 
             res.status(200).json(result)
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -311,6 +325,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -326,6 +341,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -339,6 +355,7 @@ class DietitianController {
             const result = await DietitianService.getDietitianNameById(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -354,6 +371,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -368,6 +386,7 @@ class DietitianController {
             const result = await DietitianService.getMyNotes(dietitian_id);
             return res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             return res.status(error.status || 500).json({
                 message: error.message || "Bir hata oluştu.",
                 showOnScreen: error.showOnScreen ?? true
@@ -392,6 +411,7 @@ class DietitianController {
 
             return res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             return res.status(error.status || 500).json({
                 message: error.message || "Bir hata oluştu.",
                 showOnScreen: error.showOnScreen ?? true
@@ -428,7 +448,7 @@ class DietitianController {
                 message: "Not başarıyla silindi."
             });
         } catch (error) {
-            console.error("deleteNote error:", error);
+            logError(req, error);
             return res.status(500).json({
                 success: false,
                 message: "Bir hata oluştu.",
@@ -455,6 +475,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -470,6 +491,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -485,6 +507,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -509,6 +532,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen,
                 message: err.message
@@ -548,6 +572,7 @@ class DietitianController {
 
             res.status(200).json(result);
         } catch (err) {
+            logError(req, err);
             res.status(err.status || 500).json({
                 showOnScreen: err.showOnScreen || true,
                 message: err.message || "Onay ayarları güncellenirken bir hata oluştu."

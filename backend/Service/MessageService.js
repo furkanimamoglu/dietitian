@@ -22,7 +22,7 @@ class MessageService {
                 order: [['createdAt', 'ASC']]
             });
         } else {
-            throw Exception("Yetkisiz Erişim", 401, true);
+            throw new Exception("Yetkisiz Erişim", 401, true);
         }
     }
 
@@ -45,7 +45,7 @@ class MessageService {
                 order: [['createdAt', 'ASC']]
             });
         } else {
-            throw Exception("Yetkisiz Erişim", 401, true);
+            throw new Exception("Yetkisiz Erişim", 401, true);
         }
     }
 
@@ -70,7 +70,7 @@ class MessageService {
                 message
             });
         } catch (err) {
-            throw Exception("Message Sending failed.", 401, true);
+            throw new Exception("Message Sending failed.", 401, true);
         }
     }
 
@@ -103,7 +103,7 @@ class MessageService {
 
             return {updated: updatedCount};
         } catch (err) {
-            throw Exception("Message Reading Notify failed.", 401, true);
+            throw new Exception("Message Reading Notify failed.", 401, true);
         }
     }
 

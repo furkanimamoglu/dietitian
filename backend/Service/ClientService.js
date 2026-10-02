@@ -1,4 +1,5 @@
 const path = require('path');
+const {logger, serializeError} = require(path.join(__dirname, '..', 'Utils', 'Logger'));
 
 const {
     Client,
@@ -281,7 +282,7 @@ class ClientService {
                 NotificationApproval: client.NotificationApproval
             };
         } catch (error) {
-            console.error("Onay durumları alınırken hata:", error.message);
+            logger.error({err: serializeError(error)}, 'Onay durumları alınırken hata.');
             throw new Exception(error.message, 400);
         }
     }

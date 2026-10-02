@@ -1,6 +1,7 @@
 const path = require("path");
 
 const NutritionService = require(path.join(__dirname, "..", "Service", "NutritionService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 const moment = require("moment/moment");
 
 class nutritionController {
@@ -15,6 +16,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -32,6 +34,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -53,6 +56,7 @@ class nutritionController {
             const result = await NutritionService.deleteNutritionCategory(dietitian_id, category_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen || true,
                 message: error.message || "Bir hata oluştu.",
@@ -85,6 +89,7 @@ class nutritionController {
             res.status(200).json(result);
 
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -115,6 +120,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -138,6 +144,7 @@ class nutritionController {
             const result = await NutritionService.deleteNutritionAssignment(dietitian_id, assignment_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -152,6 +159,7 @@ class nutritionController {
             const result = await NutritionService.getNutritionPlans(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -168,6 +176,7 @@ class nutritionController {
             const result = await NutritionService.deleteNutritionPlan(dietitian_id, nutrition_plan_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -191,6 +200,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -212,6 +222,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -262,6 +273,7 @@ class nutritionController {
 
             return res.status(200).json(plans);
         } catch (error) {
+            logError(req, error);
             return res.status(error.status || 500).json({
                 message: error.message || "Bir hata oluştu.",
                 showOnScreen: error.showOnScreen ?? true
@@ -279,6 +291,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -317,6 +330,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -342,6 +356,7 @@ class nutritionController {
 
             res.status(201).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -359,6 +374,7 @@ class nutritionController {
 
             res.status(201).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -390,6 +406,7 @@ class nutritionController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message

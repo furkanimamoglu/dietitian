@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
+const {logger, serializeError} = require(path.join(__dirname, '..', 'Utils', 'Logger'));
 const config = require(path.join(__dirname, '..', 'Utils', 'Config'));
 
 /**
@@ -37,7 +38,7 @@ class Mailer {
             await Mailer.transporter.sendMail(mailOptions);
             return true;
         } catch (err) {
-            console.error('❌ Email send error:', err.message);
+            logger.error({err: serializeError(err)}, 'Email send error.');
             return false;
         }
     }

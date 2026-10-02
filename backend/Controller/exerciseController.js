@@ -1,6 +1,7 @@
 const path = require("path");
 
 const ExerciseService = require(path.join(__dirname, "..", "Service", "ExerciseService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 
 class exerciseController {
 
@@ -11,6 +12,7 @@ class exerciseController {
             const result = await ExerciseService.getMyExercises(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -27,6 +29,7 @@ class exerciseController {
             const result = await ExerciseService.getClientExercises(dietitian_id, client_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -64,6 +67,7 @@ class exerciseController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -101,6 +105,7 @@ class exerciseController {
             });
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -117,6 +122,7 @@ class exerciseController {
             const result = await ExerciseService.deleteExercise(dietitian_id, exercise_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -133,6 +139,7 @@ class exerciseController {
             const result = await ExerciseService.getAssignedExercisesByClient(dietitian_id, client_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -149,6 +156,7 @@ class exerciseController {
             const result = await ExerciseService.deleteExerciseAssignment(dietitian_id, exercise_assignment_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -165,6 +173,7 @@ class exerciseController {
             const result = await ExerciseService.assignExercise(dietitian_id, exercise_id, client_id, start_date, end_date, note);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -180,6 +189,7 @@ class exerciseController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -196,6 +206,7 @@ class exerciseController {
             const result = await ExerciseService.addExerciseCategory(dietitian_id, exercise_category_name);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -212,6 +223,7 @@ class exerciseController {
             const result = await ExerciseService.updateExerciseCategory(dietitian_id, exercise_category_id, exercise_category_name);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -228,6 +240,7 @@ class exerciseController {
             const result = await ExerciseService.deleteExerciseCategory(dietitian_id, exercise_category_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -244,6 +257,7 @@ class exerciseController {
             const result = await ExerciseService.getClientExerciseHistory(dietitian_id, client_id, start_date, end_date);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message

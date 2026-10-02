@@ -1,4 +1,5 @@
 const path = require('path');
+const {logger, serializeError} = require(path.join(__dirname, '..', 'Utils', 'Logger'));
 
 const admin = require("firebase-admin");
 const serviceAccount = require("../diyetiacom-firebase-adminsdk-fbsvc-bfd2868823.json");
@@ -52,7 +53,7 @@ class NotificationService {
             try {
                 await this.saveNotification(client_id, notificationData.body);
             } catch (saveError) {
-                console.error("Bildirim kaydedilirken hata oluştu:", saveError.message);
+                logger.error({err: serializeError(saveError), clientId: client_id}, 'Bildirim kaydedilirken hata oluştu.');
             }
         }
 
@@ -101,7 +102,7 @@ class NotificationService {
                         const client = clientsWithTokens[i];
                         await this.saveNotification(client.id, notificationData.body);
                     } catch (saveError) {
-                        console.error(`Client ${clientsWithTokens[i]?.id} için bildirim kaydedilirken hata oluştu:`, saveError.message);
+                        logger.error({err: serializeError(saveError), clientId: clientsWithTokens[i]?.id}, 'Bildirim kaydedilirken hata oluştu.');
                     }
                 }
             }

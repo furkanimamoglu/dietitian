@@ -1,6 +1,7 @@
 const path = require("path");
 
 const MessageService = require(path.join(__dirname, "..", "Service", "MessageService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 
 class messageController {
 
@@ -15,6 +16,7 @@ class messageController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -35,6 +37,7 @@ class messageController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -53,6 +56,7 @@ class messageController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -71,6 +75,7 @@ class messageController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message

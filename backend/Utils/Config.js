@@ -23,6 +23,8 @@ function required(key) {
  */
 const config = {
     ...file,
+    nodeEnv: process.env.NODE_ENV || 'production',
+    logLevel: process.env.LOG_LEVEL || 'info',
     ddl: required('DDL'),
     secretkey: required('JWT_SECRET'),
     server: {

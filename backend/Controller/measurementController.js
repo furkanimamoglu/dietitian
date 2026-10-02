@@ -1,6 +1,7 @@
 const path = require("path");
 
 const measurementService = require(path.join(__dirname, "..", "Service", "MeasurementService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 
 class measurementController {
 
@@ -20,6 +21,7 @@ class measurementController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -55,6 +57,7 @@ class measurementController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -87,6 +90,7 @@ class measurementController {
             });
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -110,6 +114,7 @@ class measurementController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."

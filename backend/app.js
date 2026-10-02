@@ -14,8 +14,11 @@ const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
 const Exception = require(path.join(__dirname, 'Exception', 'Exception'));
 // Models
 require(path.join(__dirname, 'Model', 'MainModel'));
+// Logger
+const {logger, logError, serializeError} = require(path.join(__dirname, 'Utils', 'Logger'));
 // Middleware
 const {authorize} = require(path.join(__dirname, 'Middleware', 'Auth'));
+const {requestContext, notFound, errorHandler} = require(path.join(__dirname, 'Middleware', 'ErrorHandler'));
 // Enum
 const {DIETITIAN, CLIENT} = require(path.join(__dirname, "Enum", "Role"));
 
@@ -39,11 +42,13 @@ const notificationRoutes = require(path.join(__dirname, "Routes", "notificationR
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
+app.use(requestContext);
 app.use(bodyParser.json());
 
 app.use(cors({
     origin: true,
-    credentials: true
+    credentials: true,
+    exposedHeaders: ['X-Request-Id']
 }));
 
 app.use((req, res, next) => {
@@ -124,11 +129,11 @@ app.post('/api/upload', authorize(), upload.single('image'), async (req, res) =>
             const imageUrl = `https://${config.s3.bucketName}.s3.${config.s3.region}.amazonaws.com/${fileName}`;
             res.json({ imageUrl });
         } catch (err) {
-            console.error('Dosya yükleme hatası:', err);
+            logError(req, err);
             res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
         }
     } catch (err) {
-        console.error('Dosya yükleme hatası:', err);
+        logError(req, err);
         res.status(500).json({ showOnScreen: true, message: 'Dosya yüklenirken bir hata oluştu.' });
     }
 });
@@ -157,19 +162,33 @@ app.use('/api/package', packageRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/notification', notificationRoutes);
 
+// Hata Yönetimi (tüm route'lardan sonra olmalı)
+app.use(notFound);
+app.use(errorHandler);
+
+process.on('unhandledRejection', (reason) => {
+    logger.error({err: serializeError(reason)}, 'Unhandled promise rejection');
+});
+
+process.on('uncaughtException', (error) => {
+    logger.fatal({err: serializeError(error)}, 'Uncaught exception');
+    process.exit(1);
+});
+
 try {
     process.chdir('../');
-    console.log('INFO - Çalışma Dizini: ' + process.cwd());
+    logger.info('Çalışma Dizini: ' + process.cwd());
 } catch (error) {
-    console.error('ERROR - ' + error);
+    logger.error({err: serializeError(error)}, 'Çalışma dizini değiştirilemedi.');
 }
 
 // Database Connection
 try {
-    sequelize.authenticate().then(() => console.log("INFO - Sequelize Authenticated to Database."));
-    console.log('INFO - Veritabanı bağlantısı başarıyla kuruldu.');
+    sequelize.authenticate()
+        .then(() => logger.info('Veritabanı bağlantısı başarıyla kuruldu.'))
+        .catch(error => logger.error({err: serializeError(error)}, 'Veritabanına bağlanılamadı.'));
 } catch (error) {
-    console.error('ERROR - Veritabanına bağlanılamadı:', error);
+    logger.error({err: serializeError(error)}, 'Veritabanına bağlanılamadı.');
 }
 
 // Server
@@ -177,17 +196,17 @@ if (config.ddl === "create-drop") {
     sequelize.sync({force: true}).then(() => {
         app.listen(config.server.port);
     }).catch(err => {
-        console.log(err)
+        logger.fatal({err: serializeError(err)}, 'Veritabanı senkronizasyonu başarısız.');
     });
-    console.log('INFO - Sequelize, create-drop yöntemiyle veritabanı ile senkronize edildi. Tüm tablolar yeniden oluşturuldu, eski veriler silindi.');
+    logger.warn('Sequelize, create-drop yöntemiyle veritabanı ile senkronize edildi. Tüm tablolar yeniden oluşturuldu, eski veriler silindi.');
 } else if (config.ddl === "update") {
     sequelize.sync().then(() => {
         app.listen(config.server.port);
-        console.log(`INFO - Sunucu http://localhost:${config.server.port} portunda çalışıyor.`);
+        logger.info(`Sunucu http://localhost:${config.server.port} portunda çalışıyor.`);
     }).catch(err => {
-        console.log(err)
+        logger.fatal({err: serializeError(err)}, 'Veritabanı senkronizasyonu başarısız.');
     });
-    console.log('INFO - Sequelize, update yöntemiyle veritabanı ile senkronize edildi. Veriler değişmedi.');
+    logger.info('Sequelize, update yöntemiyle veritabanı ile senkronize edildi. Veriler değişmedi.');
 } else {
-    console.log("ERROR - .env dosyasındaki DDL değerini kontrol edin.");
+    logger.fatal(".env dosyasındaki DDL değerini kontrol edin.");
 }

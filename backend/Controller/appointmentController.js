@@ -1,6 +1,7 @@
 const path = require("path");
 
 const AppointmentService = require(path.join(__dirname, "..", "Service", "AppointmentService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 
 class AppointmentController {
 
@@ -11,6 +12,7 @@ class AppointmentController {
             const result = await AppointmentService.fetchDietitianAppointments(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -27,6 +29,7 @@ class AppointmentController {
             const result = await AppointmentService.fetchClientAppointmentAsDietitian(dietitian_id, client_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -56,6 +59,7 @@ class AppointmentController {
 
             res.status(201).json(newAppointment);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: true,
                 message: error.message,
@@ -88,6 +92,7 @@ class AppointmentController {
                 appointment: updatedAppointment,
             });
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: true,
                 message: error.message,
@@ -102,6 +107,7 @@ class AppointmentController {
             const result = await AppointmentService.fetchClientAppointments(client_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -128,6 +134,7 @@ class AppointmentController {
             });
 
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: true,
                 message: error.message,
@@ -154,6 +161,7 @@ class AppointmentController {
             });
 
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: true,
                 message: error.message,
@@ -184,6 +192,7 @@ class AppointmentController {
                 appointment: newAppointment,
             });
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: true,
                 message: error.message,
@@ -198,6 +207,7 @@ class AppointmentController {
             const result = await AppointmentService.getTodayAppointmentCount(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -212,6 +222,7 @@ class AppointmentController {
             const result = await AppointmentService.getRemainingTodayAppointmentCount(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -226,6 +237,7 @@ class AppointmentController {
             const result = await AppointmentService.getPendingAppointmentCount(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -250,6 +262,7 @@ class AppointmentController {
 
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -264,6 +277,7 @@ class AppointmentController {
             const result = await AppointmentService.getPendingAppointments(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."
@@ -278,6 +292,7 @@ class AppointmentController {
             const result = await AppointmentService.getTodayApprovedAppointments(dietitian_id);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen ?? true,
                 message: error.message || "Bir hata oluştu."

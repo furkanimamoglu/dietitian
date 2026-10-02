@@ -1,6 +1,7 @@
 const path = require("path");
 
 const NotificationService = require(path.join(__dirname, "..", "Service", "NotificationService"));
+const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
 
 class notificationController {
 
@@ -34,6 +35,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -64,6 +66,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToAllMyClients(dietitian_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -99,6 +102,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -127,6 +131,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -155,6 +160,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -200,6 +206,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -228,6 +235,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -263,6 +271,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -298,6 +307,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message
@@ -333,6 +343,7 @@ class notificationController {
             const result = await NotificationService.sendNotificationToClient(dietitian_id, client_id, notificationData);
             res.status(200).json(result);
         } catch (error) {
+            logError(req, error);
             res.status(error.status || 500).json({
                 showOnScreen: error.showOnScreen,
                 message: error.message

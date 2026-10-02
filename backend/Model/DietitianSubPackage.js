@@ -1,4 +1,5 @@
 const path = require('path');
+const {logger, serializeError} = require(path.join(__dirname, '..', 'Utils', 'Logger'));
 const {DataTypes} = require('sequelize');
 const sequelize = require(path.join(__dirname, '..', 'Utils', 'Database'));
 
@@ -177,7 +178,7 @@ DietitianSubPackage.afterSync(async () => {
             ]);
         }
     } catch (error) {
-        console.error("Error creating default subscription packages:", error);
+        logger.error({err: serializeError(error)}, 'Error creating default subscription packages.');
     }
 });
 
