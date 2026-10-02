@@ -1,4 +1,5 @@
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const {Dietitian} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {DIETITIAN} = require(path.join(__dirname, '..', 'Enum', 'Role'));
@@ -23,6 +24,7 @@ module.exports = {
     async run(ctx) {
         ctx.dietitian = await Dietitian.create({
             ...DEMO_DIETITIAN,
+            password: await bcrypt.hash(DEMO_DIETITIAN.password, 10),
             role: DIETITIAN,
             gender: 'Kadın',
             status: true,

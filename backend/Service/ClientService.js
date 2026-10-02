@@ -14,6 +14,7 @@ const {
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const config = require(path.join(__dirname, '..', 'Utils', 'Config'));
 const {CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 const {Op} = require('sequelize');
@@ -23,12 +24,11 @@ class ClientService {
         try {
             const client = await Client.findOne({
                 where: {
-                    phoneNumber: phoneNumber,
-                    password: password
+                    phoneNumber: phoneNumber
                 }
             });
 
-            if (!client) {
+            if (!client || !(await bcrypt.compare(password, client.password))) {
                 throw new Exception('Hatalı giriş bilgileri.', 400, true);
             }
 
@@ -68,12 +68,16 @@ class ClientService {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
+            if (password.length < 4 || password.length > 21) {
+                throw new Exception('Şifre 4 ile 21 karakter arasında olmak zorundadır.', 400, true);
+            }
+
             const client = await Client.create({
                 dietitian_id: dietitian_id,
                 name: name,
                 gender: gender,
                 phoneNumber: phoneNumber,
-                password: password,
+                password: await bcrypt.hash(password, 10),
                 role: CLIENT,
                 status: 'Pasif',
                 ipAddress: ipAddress

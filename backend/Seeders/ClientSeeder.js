@@ -1,4 +1,5 @@
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const {Client} = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const {CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
@@ -44,6 +45,7 @@ module.exports = {
     async run(ctx) {
         ctx.clients = [];
         ctx.clientProfiles = new Map();
+        const hashedPassword = await bcrypt.hash(DEMO_CLIENT_PASSWORD, 10);
 
         for (const [index, profile] of CLIENTS.entries()) {
             const client = await Client.create({
@@ -51,7 +53,7 @@ module.exports = {
                 name: profile.name,
                 email: `${profile.email}@example.com`,
                 phoneNumber: 5550000101 + index,
-                password: DEMO_CLIENT_PASSWORD,
+                password: hashedPassword,
                 role: CLIENT,
                 gender: profile.gender,
                 age: profile.age,

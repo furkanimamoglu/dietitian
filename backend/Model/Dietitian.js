@@ -84,10 +84,6 @@ const Dietitian = sequelize.define('Dietitian', {
         validate: {
             notNull: {
                 msg: 'Şifre alanı boş bırakılamaz.'
-            },
-            len: {
-                args: [4, 21],
-                msg: 'Şifre 4 ile 21 karakter arasında olmak zorundadır.'
             }
         }
     },

@@ -5,6 +5,7 @@ const mailer = require(path.join(__dirname, '..', 'Utils', 'Mailer.js'));
 const getDogrulamaEmailTemplate = require(path.join(__dirname, '..', 'MailTemplates', 'Dogrulama.html'));
 
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const QRCode = require('qrcode');
 
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
@@ -27,12 +28,11 @@ class DietitianService {
         try {
             const dietitianInfo = await Dietitian.findOne({
                 where: {
-                    phoneNumber: phoneNumber,
-                    password: password
+                    phoneNumber: phoneNumber
                 }
             });
 
-            if (!dietitianInfo) {
+            if (!dietitianInfo || !(await bcrypt.compare(password, dietitianInfo.password))) {
                 throw new Exception('Hatalı giriş bilgileri.', 400, true);
             }
 
@@ -63,6 +63,10 @@ class DietitianService {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
+            if (password.length < 4 || password.length > 21) {
+                throw new Exception('Şifre 4 ile 21 karakter arasında olmak zorundadır.', 400, true);
+            }
+
             // const verificationCode = Math.floor(100000 + Math.random() * 900000);
             // const verificationCodeExpires = moment().add(10, 'minutes').toDate();
             //
@@ -81,7 +85,7 @@ class DietitianService {
                 name,
                 phoneNumber,
                 email,
-                password,
+                password: await bcrypt.hash(password, 10),
                 role: DIETITIAN,
                 ipAddress
             });
@@ -158,11 +162,15 @@ class DietitianService {
                 throw new Exception('Diyetisyen bulunamadı.', 404, true);
             }
 
-            if (dietitian.password !== oldPassword) {
+            if (!(await bcrypt.compare(oldPassword, dietitian.password))) {
                 throw new Exception('Eski şifre yanlış.', 400, true);
             }
 
-            await dietitian.update({password: newPassword});
+            if (newPassword.length < 4 || newPassword.length > 21) {
+                throw new Exception('Şifre 4 ile 21 karakter arasında olmak zorundadır.', 400, true);
+            }
+
+            await dietitian.update({password: await bcrypt.hash(newPassword, 10)});
 
             return {message: 'Şifre başarıyla değiştirildi.'};
         } catch (error) {
@@ -266,6 +274,10 @@ class DietitianService {
                 throw new Exception('Tüm parametreler doldurulmalıdır.', 400, true);
             }
 
+            if (password.length < 4 || password.length > 21) {
+                throw new Exception('Şifre 4 ile 21 karakter arasında olmak zorundadır.', 400, true);
+            }
+
             const token = jwt.sign(
                 {
                     email: email,
@@ -280,7 +292,7 @@ class DietitianService {
                 name: name,
                 gender: gender,
                 email: email,
-                password: password,
+                password: await bcrypt.hash(password, 10),
                 phoneNumber: phoneNumber,
                 status: 'Aktif',
                 role: CLIENT,
