@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "seed": "node Seeders/masterSeeder.js",
-    "seed:fresh": "node Seeders/masterSeeder.js --fresh"
+    "seed:fresh": "node Seeders/masterSeeder.js --fresh",
+    "test:unit": "jest Tests/unit",
+    "test:integration": "jest Tests/integration",
+    "test:regression": "jest Tests/regression"
   },
   "keywords": [],
   "author": "",
@@ -33,9 +36,21 @@
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
-    "pino-pretty": "^13.1.3"
+    "jest": "^30.5.2",
+    "pino-pretty": "^13.1.3",
+    "supertest": "^7.3.1"
   },
   "overrides": {
     "uuid": "^11.1.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/Tests/helpers/setupEnv.js"
+    ],
+    "testMatch": [
+      "<rootDir>/Tests/**/*.test.js"
+    ],
+    "clearMocks": true
   }
 }
