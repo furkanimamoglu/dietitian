@@ -1,24 +1,13 @@
 const path = require("path");
 
 const AnamnesService = require(path.join(__dirname, "..", "Service", "AnamnesService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 
 class anamnesController {
 
     static async getAnamnes(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id} = req.query;
 
@@ -34,16 +23,7 @@ class anamnesController {
 
     static async updateAnamnes(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id} = req.query;
 

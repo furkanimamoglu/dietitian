@@ -4,31 +4,33 @@ const express = require('express');
 const router = express.Router();
 
 const clientController = require(path.join(__dirname, '..', 'Controller', 'clientController'));
+const {authorize} = require(path.join(__dirname, '..', 'Middleware', 'Auth'));
+const {CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 
 //Routes
 router.post('/login', clientController.login);
 router.post('/register', clientController.register);
 
-router.get('/getClientInfo', clientController.getClientInfo);
+router.get('/getClientInfo', authorize(CLIENT), clientController.getClientInfo);
 
-router.get('/getMyNotifications', clientController.getMyNotifications);
-router.get('/readMyAllNotifications', clientController.readMyAllNotifications);
+router.get('/getMyNotifications', authorize(CLIENT), clientController.getMyNotifications);
+router.get('/readMyAllNotifications', authorize(CLIENT), clientController.readMyAllNotifications);
 
-router.put('/approveKVKK', clientController.approveKVKK);
+router.put('/approveKVKK', authorize(CLIENT), clientController.approveKVKK);
 
-router.put('/updateApprovalSettings', clientController.updateApprovalSettings);
+router.put('/updateApprovalSettings', authorize(CLIENT), clientController.updateApprovalSettings);
 
-router.get('/getTodayMealPlan', clientController.getTodayMealPlan);
-router.get('/getMyRecipes', clientController.getMyRecipes);
-router.get('/getMyLatestMeasurement', clientController.getMyLatestMeasurement);
+router.get('/getTodayMealPlan', authorize(CLIENT), clientController.getTodayMealPlan);
+router.get('/getMyRecipes', authorize(CLIENT), clientController.getMyRecipes);
+router.get('/getMyLatestMeasurement', authorize(CLIENT), clientController.getMyLatestMeasurement);
 
-router.post('/updateMealPlan', clientController.updateMealPlan);
+router.post('/updateMealPlan', authorize(CLIENT), clientController.updateMealPlan);
 
-router.get('/getMyDailyExercises', clientController.getMyDailyExercises);
-router.put('/updateMyExercise', clientController.updateMyExercise);
+router.get('/getMyDailyExercises', authorize(CLIENT), clientController.getMyDailyExercises);
+router.put('/updateMyExercise', authorize(CLIENT), clientController.updateMyExercise);
 
-router.put('/updateFCMToken', clientController.updateFCMToken);
+router.put('/updateFCMToken', authorize(CLIENT), clientController.updateFCMToken);
 
-router.put('/updateProfilePhoto', clientController.updateProfilePhoto);
+router.put('/updateProfilePhoto', authorize(CLIENT), clientController.updateProfilePhoto);
 
 module.exports = router;

@@ -1,23 +1,12 @@
 const path = require("path");
 
 const measurementService = require(path.join(__dirname, "..", "Service", "MeasurementService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class measurementController {
 
     static async getClientMeasurement(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id} = req.query;
 
@@ -40,16 +29,7 @@ class measurementController {
 
     static async createMeasurement(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id, boy, kilo, bel, digerbel, kalca, gogus, kol, bacak, yag, kas, su} = req.body;
 
@@ -84,16 +64,7 @@ class measurementController {
 
     static async updateMeasurement(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {measurement_id, client_id, boy, kilo, bel, kalca, gogus, yag, kas, su} = req.body;
 
@@ -125,16 +96,7 @@ class measurementController {
 
     static async deleteMeasurement(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {measurement_id} = req.query;
 

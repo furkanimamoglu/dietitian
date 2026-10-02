@@ -4,27 +4,29 @@ const express = require('express');
 const router = express.Router();
 
 const nutritionController = require(path.join(__dirname, '..', 'Controller', 'nutritionController'));
+const {authorize} = require(path.join(__dirname, '..', 'Middleware', 'Auth'));
+const {CLIENT, DIETITIAN} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 
-router.post('/addNutritionCategory', nutritionController.addNutritionCategory);
-router.get('/getNutritionCategories', nutritionController.getNutritionCategories);
-router.delete('/deleteNutritionCategory', nutritionController.deleteNutritionCategory);
+router.post('/addNutritionCategory', authorize(DIETITIAN), nutritionController.addNutritionCategory);
+router.get('/getNutritionCategories', authorize(DIETITIAN), nutritionController.getNutritionCategories);
+router.delete('/deleteNutritionCategory', authorize(DIETITIAN), nutritionController.deleteNutritionCategory);
 
-router.post('/assignNutritionPlanToClient', nutritionController.assignNutritionPlanToClient);
-router.post('/assignCustomPlanToClient', nutritionController.assignCustomPlanToClient);
+router.post('/assignNutritionPlanToClient', authorize(DIETITIAN), nutritionController.assignNutritionPlanToClient);
+router.post('/assignCustomPlanToClient', authorize(DIETITIAN), nutritionController.assignCustomPlanToClient);
 
-router.get('/getNutritionPlans', nutritionController.getNutritionPlans);
-router.delete('/deleteNutritionPlan', nutritionController.deleteNutritionPlan);
-router.post('/addNutritionPlan', nutritionController.addNutritionPlan);
-router.put('/updateNutritionPlan', nutritionController.updateNutritionPlan);
-router.post('/getNutritionAssignmentPlanByClient', nutritionController.getNutritionAssignmentPlanByClient);
-router.delete('/deleteNutritionAssignment', nutritionController.deleteNutritionAssignment);
+router.get('/getNutritionPlans', authorize(DIETITIAN), nutritionController.getNutritionPlans);
+router.delete('/deleteNutritionPlan', authorize(DIETITIAN), nutritionController.deleteNutritionPlan);
+router.post('/addNutritionPlan', authorize(DIETITIAN), nutritionController.addNutritionPlan);
+router.put('/updateNutritionPlan', authorize(DIETITIAN), nutritionController.updateNutritionPlan);
+router.post('/getNutritionAssignmentPlanByClient', authorize(DIETITIAN), nutritionController.getNutritionAssignmentPlanByClient);
+router.delete('/deleteNutritionAssignment', authorize(DIETITIAN), nutritionController.deleteNutritionAssignment);
 
-router.get('/getClientNutritionPlans', nutritionController.getClientNutritionPlans);
+router.get('/getClientNutritionPlans', authorize(DIETITIAN), nutritionController.getClientNutritionPlans);
 
-router.delete('/deleteClientWater', nutritionController.deleteClientWater);
-router.post('/addClientWater', nutritionController.addClientWater);
-router.get('/getClientWater', nutritionController.getClientWater);
+router.delete('/deleteClientWater', authorize(CLIENT), nutritionController.deleteClientWater);
+router.post('/addClientWater', authorize(CLIENT), nutritionController.addClientWater);
+router.get('/getClientWater', authorize(CLIENT, DIETITIAN), nutritionController.getClientWater);
 
-router.put('/updateClientWaterGoal', nutritionController.updateClientWaterGoal);
+router.put('/updateClientWaterGoal', authorize(DIETITIAN), nutritionController.updateClientWaterGoal);
 
 module.exports = router;

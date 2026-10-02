@@ -1,24 +1,13 @@
 const path = require("path");
 
 const NutritionService = require(path.join(__dirname, "..", "Service", "NutritionService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN, CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 const moment = require("moment/moment");
 
 class nutritionController {
 
     static async addNutritionCategory(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {category_name} = req.body;
 
@@ -35,24 +24,9 @@ class nutritionController {
 
     static async getNutritionCategories(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {category_name} = req.body;
-
-            if (!token || !dietitian_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
 
             const result = await NutritionService.getNutritionCategories(dietitian_id, category_name);
 
@@ -67,16 +41,7 @@ class nutritionController {
 
     static async deleteNutritionCategory(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {category_id} = req.query;
 
@@ -97,16 +62,7 @@ class nutritionController {
 
     static async assignNutritionPlanToClient(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id, nutrition_plan_id, start_date, end_date, note} = req.body;
 
@@ -138,16 +94,7 @@ class nutritionController {
 
     static async assignCustomPlanToClient(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id, mealPlan, start_date, end_date, note} = req.body;
 
@@ -177,16 +124,7 @@ class nutritionController {
 
     static async deleteNutritionAssignment(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {assignment_id} = req.query;
 
@@ -209,16 +147,7 @@ class nutritionController {
 
     static async getNutritionPlans(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const result = await NutritionService.getNutritionPlans(dietitian_id);
             res.status(200).json(result);
@@ -232,24 +161,9 @@ class nutritionController {
 
     static async deleteNutritionPlan(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {nutrition_plan_id} = req.query;
-
-            if (!token || !dietitian_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
 
             const result = await NutritionService.deleteNutritionPlan(dietitian_id, nutrition_plan_id);
             res.status(200).json(result);
@@ -263,16 +177,7 @@ class nutritionController {
 
     static async addNutritionPlan(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {title, description, image, category_id, mealPlan} = req.body;
 
@@ -295,16 +200,7 @@ class nutritionController {
 
     static async updateNutritionPlan(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {nutrition_plan_id, title, description, image, category_id, mealPlan} = req.body;
 
@@ -325,16 +221,7 @@ class nutritionController {
 
     static async getNutritionAssignmentPlanByClient(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id, range} = req.body;
 
@@ -384,16 +271,7 @@ class nutritionController {
 
     static async getClientNutritionPlans(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id} = req.query;
 
@@ -410,17 +288,9 @@ class nutritionController {
 
     static async getClientWater(req, res) {
         try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            const isClient = Security.checkUserPermission(token, CLIENT);
-            const isDietitian = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const user_id = req.user.id;
+            const isClient = req.user.role === CLIENT;
+            const isDietitian = req.user.role === DIETITIAN;
 
             let client_id;
 
@@ -456,16 +326,7 @@ class nutritionController {
 
     static async addClientWater(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {amount} = req.body;
             const date = moment().format('YYYY-MM-DD');
@@ -490,16 +351,7 @@ class nutritionController {
 
     static async deleteClientWater(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {water_id} = req.query;
 
@@ -516,16 +368,7 @@ class nutritionController {
 
     static async updateClientWaterGoal(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id, daily_goal} = req.body;
 

@@ -1,22 +1,11 @@
 const path = require("path");
 
 const NotificationService = require(path.join(__dirname, "..", "Service", "NotificationService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class notificationController {
 
     static async sendNotificationToClient(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id, notificationData} = req.body;
 
@@ -53,16 +42,7 @@ class notificationController {
     }
 
     static async sendNotificationToAllMyClients(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {notificationData} = req.body;
 
@@ -92,16 +72,7 @@ class notificationController {
     }
 
     static async sendAppointmentReminder(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id, appointmentDetails} = req.body;
 
@@ -136,16 +107,7 @@ class notificationController {
     }
 
     static async sendNutritionPlanAssignedNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id} = req.body;
 
@@ -173,16 +135,7 @@ class notificationController {
     }
 
     static async sendExerciseAssignedNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id} = req.body;
 
@@ -210,16 +163,7 @@ class notificationController {
     }
 
     static async sendPaymentReminderNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id, due_date, amount} = req.body;
 
@@ -264,16 +208,7 @@ class notificationController {
     }
 
     static async sendRecipeAssignedNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id} = req.body;
 
@@ -301,16 +236,7 @@ class notificationController {
     }
 
     static async sendAppointmentChangeNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id, appointmentDetails} = req.body;
 
@@ -345,16 +271,7 @@ class notificationController {
     }
 
     static async sendAppointmentNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id, appointmentDetails} = req.body;
 
@@ -389,16 +306,7 @@ class notificationController {
     }
 
     static async sendAppointmentCancellationNotification(req, res) {
-        const token = req.headers.authorization;
-        const dietitian_id = Security.getUserIdFromToken(token);
-        const permission = Security.checkUserPermission(token, DIETITIAN);
-
-        if (!token || !dietitian_id || !permission) {
-            return res.status(401).json({
-                showOnScreen: true,
-                message: "Yetkisiz erişim."
-            });
-        }
+        const dietitian_id = req.user.id;
 
         const {client_id, appointmentDetails} = req.body;
 

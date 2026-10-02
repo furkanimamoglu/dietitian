@@ -14,8 +14,8 @@ const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
 const Exception = require(path.join(__dirname, 'Exception', 'Exception'));
 // Models
 require(path.join(__dirname, 'Model', 'MainModel'));
-// Utils
-const Security = require(path.join(__dirname, 'Utils','Security'));
+// Middleware
+const {authorize} = require(path.join(__dirname, 'Middleware', 'Auth'));
 // Enum
 const {DIETITIAN, CLIENT} = require(path.join(__dirname, "Enum", "Role"));
 
@@ -71,7 +71,7 @@ const upload = multer({
     storage: multer.memoryStorage()
 });
 
-app.post('/api/upload', upload.single('image'), async (req, res) => {
+app.post('/api/upload', authorize(), upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ showOnScreen: true, message: 'Yüklenecek dosya eklenmedi.' });
     }
@@ -88,11 +88,8 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     }
 
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) throw new Exception('Token eksik.');
-
-        const userId = Security.getUserIdFromToken(token);
-        const role = Security.getPermissionFromToken(token);
+        const userId = req.user.id;
+        const role = req.user.role;
         const clientId = sanitize(req.query.client_id);
         const type = sanitize(req.query.type);
 

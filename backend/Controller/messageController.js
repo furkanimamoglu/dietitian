@@ -1,21 +1,13 @@
 const path = require("path");
 
 const MessageService = require(path.join(__dirname, "..", "Service", "MessageService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
 
 class messageController {
 
     static async getMyMessages(req, res) {
         try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            const user_role = Security.getPermissionFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const user_id = req.user.id;
+            const user_role = req.user.role;
 
             const {partner_id} = req.query;
 
@@ -32,15 +24,8 @@ class messageController {
 
     static async getMyUnreadMessageCount(req, res) {
         try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            const user_role = Security.getPermissionFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const user_id = req.user.id;
+            const user_role = req.user.role;
 
             const {partner_id} = req.query;
 
@@ -59,15 +44,8 @@ class messageController {
 
     static async changeMessageStatusToReaded(req, res) {
         try {
-            const token = req.headers.authorization;
-            const user_id = Security.getUserIdFromToken(token);
-            const user_role = Security.getPermissionFromToken(token);
-
-            if (!token || !user_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const user_id = req.user.id;
+            const user_role = req.user.role;
 
             const {partner_id} = req.query;
 
@@ -84,9 +62,8 @@ class messageController {
 
     static async sendMessage(req, res) {
         try {
-            const token = req.headers.authorization;
-            const sender_id = Security.getUserIdFromToken(token);
-            const sender_role = Security.getPermissionFromToken(token);
+            const sender_id = req.user.id;
+            const sender_role = req.user.role;
 
             const {receiver_id, message} = req.body;
 

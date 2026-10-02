@@ -3,42 +3,44 @@ const express = require('express');
 const router = express.Router();
 
 const dietitianController = require(path.join(__dirname, '..', 'Controller', 'dietitianController'));
+const {authorize} = require(path.join(__dirname, '..', 'Middleware', 'Auth'));
+const {DIETITIAN} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 
 router.post('/login', dietitianController.login);
 router.post('/register', dietitianController.register);
 
-router.put('/changePassword', dietitianController.changePassword);
-router.put('/updatePhoneNumber', dietitianController.updatePhoneNumber);
-router.put('/changeMail', dietitianController.changeMail);
+router.put('/changePassword', authorize(DIETITIAN), dietitianController.changePassword);
+router.put('/updatePhoneNumber', authorize(DIETITIAN), dietitianController.updatePhoneNumber);
+router.put('/changeMail', authorize(DIETITIAN), dietitianController.changeMail);
 router.post('/verifyEmail', dietitianController.verifyEmail);
-router.post('/changeClientStatus', dietitianController.changeClientStatus);
+router.post('/changeClientStatus', authorize(DIETITIAN), dietitianController.changeClientStatus);
 
-router.get('/getDietitianInfo', dietitianController.getDietitianInfo);
+router.get('/getDietitianInfo', authorize(DIETITIAN), dietitianController.getDietitianInfo);
 
 router.get('/getDietitianSubscriptionDetails', dietitianController.getDietitianSubscriptionDetails);
 
-router.post('/registerClient', dietitianController.registerClient);
-router.delete('/deleteClient', dietitianController.deleteClient);
-router.put('/updateClient', dietitianController.updateClient);
-router.get('/getMyClient', dietitianController.getMyClient);
-router.get('/getAllMyClients', dietitianController.getAllMyClients);
-router.get('/getMyActiveClientCount', dietitianController.getMyActiveClientCount);
+router.post('/registerClient', authorize(DIETITIAN), dietitianController.registerClient);
+router.delete('/deleteClient', authorize(DIETITIAN), dietitianController.deleteClient);
+router.put('/updateClient', authorize(DIETITIAN), dietitianController.updateClient);
+router.get('/getMyClient', authorize(DIETITIAN), dietitianController.getMyClient);
+router.get('/getAllMyClients', authorize(DIETITIAN), dietitianController.getAllMyClients);
+router.get('/getMyActiveClientCount', authorize(DIETITIAN), dietitianController.getMyActiveClientCount);
 
-router.post('/changeDietitianSubscriptionToFree', dietitianController.changeDietitianSubscriptionToFree);
+router.post('/changeDietitianSubscriptionToFree', authorize(DIETITIAN), dietitianController.changeDietitianSubscriptionToFree);
 
-router.put('/updateApprovalSettings', dietitianController.updateApprovalSettings);
+router.put('/updateApprovalSettings', authorize(DIETITIAN), dietitianController.updateApprovalSettings);
 
-router.post('/updateClientWaterLimit', dietitianController.updateClientWaterLimit);
+router.post('/updateClientWaterLimit', authorize(DIETITIAN), dietitianController.updateClientWaterLimit);
 
-router.get('/globalSearchbar', dietitianController.globalSearchbar);
+router.get('/globalSearchbar', authorize(DIETITIAN), dietitianController.globalSearchbar);
 
-router.get('/getDietitianQR', dietitianController.createMyQR);
+router.get('/getDietitianQR', authorize(DIETITIAN), dietitianController.createMyQR);
 router.get('/getDietitianNameById', dietitianController.getDietitianNameById);
 
-router.get('/getMyNotes', dietitianController.getMyNotes);
-router.post('/addNote', dietitianController.addNote);
-router.delete('/deleteNote', dietitianController.deleteNote);
+router.get('/getMyNotes', authorize(DIETITIAN), dietitianController.getMyNotes);
+router.post('/addNote', authorize(DIETITIAN), dietitianController.addNote);
+router.delete('/deleteNote', authorize(DIETITIAN), dietitianController.deleteNote);
 
-router.put('/updateClientNote', dietitianController.updateClientNote);
+router.put('/updateClientNote', authorize(DIETITIAN), dietitianController.updateClientNote);
 
 module.exports = router;

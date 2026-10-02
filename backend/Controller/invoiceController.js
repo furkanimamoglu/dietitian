@@ -1,21 +1,12 @@
 const path = require("path");
 
 const InvoiceService = require(path.join(__dirname, "..", "Service", "InvoiceService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {DIETITIAN, CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class invoiceController {
 
     static async getMyInvoices(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-
-            if (!token || !dietitian_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const result = await InvoiceService.getMyInvoices(dietitian_id);
             res.status(200).json(result);
@@ -29,14 +20,7 @@ class invoiceController {
 
     static async getClientInvoices(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-
-            if (!token || !dietitian_id) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id} = req.query;
 
@@ -52,15 +36,7 @@ class invoiceController {
 
     static async getClientInvoicesAsClient(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await InvoiceService.getClientInvoicesAsClient(client_id);
             res.status(200).json(result);
@@ -74,16 +50,7 @@ class invoiceController {
 
     static async deleteInvoice(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {invoice_id} = req.query;
 
@@ -99,16 +66,7 @@ class invoiceController {
 
     static async updateInvoice(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {invoice_id, client_id, amount, paid_amount, status, package_id, issueDate, dueDate, description} = req.body;
 
@@ -138,16 +96,7 @@ class invoiceController {
 
     static async addInvoice(req, res) {
         try {
-            const token = req.headers.authorization;
-            const dietitian_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, DIETITIAN);
-
-            if (!token || !dietitian_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const dietitian_id = req.user.id;
 
             const {client_id, amount, status, package_id, issueDate, dueDate, description} = req.body;
 

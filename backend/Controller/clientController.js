@@ -2,8 +2,6 @@ const moment = require('moment');
 const path = require("path");
 
 const ClientService = require(path.join(__dirname, "..", "Service", "ClientService"));
-const Security = require(path.join(__dirname, "..", "Utils", "Security"));
-const {CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 
 class ClientController {
 
@@ -62,16 +60,7 @@ class ClientController {
 
     static async getClientInfo(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.getClientInfo(client_id);
 
@@ -86,16 +75,7 @@ class ClientController {
 
     static async getMyNotifications(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const { limit } = req.query;
 
@@ -111,16 +91,7 @@ class ClientController {
 
     static async readMyAllNotifications(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.readMyAllNotifications(client_id);
 
@@ -135,16 +106,7 @@ class ClientController {
 
     static async getTodayMealPlan(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const today = moment().format('YYYY-MM-DD');
             const dayName = moment().locale('tr').format('dddd');
@@ -161,16 +123,7 @@ class ClientController {
 
     static async getMyRecipes(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.getMyRecipes(client_id);
 
@@ -185,16 +138,7 @@ class ClientController {
 
     static async getMyLatestMeasurement(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.getMyLatestMeasurement(client_id);
 
@@ -209,16 +153,7 @@ class ClientController {
 
     static async updateMealPlan(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {nutrition_assignment_id, mealPlan} = req.body;
 
@@ -242,16 +177,7 @@ class ClientController {
 
     static async getMyApprovalStatus(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.getMyApprovalStatus(client_id);
 
@@ -266,16 +192,7 @@ class ClientController {
 
     static async approveKVKK(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.approveKVKK(client_id);
 
@@ -290,16 +207,7 @@ class ClientController {
 
     static async getMyDailyExercises(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const result = await ClientService.getMyDailyExercises(client_id);
 
@@ -314,16 +222,7 @@ class ClientController {
 
     static async updateMyExercise(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {exercise_id, status, duration} = req.body;
 
@@ -340,16 +239,7 @@ class ClientController {
 
     static async updateApprovalSettings(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {
                 kvkkApproval,
@@ -388,16 +278,7 @@ class ClientController {
 
     static async updateFCMToken(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {fcmToken} = req.body;
 
@@ -421,16 +302,7 @@ class ClientController {
 
     static async updateProfilePhoto(req, res) {
         try {
-            const token = req.headers.authorization;
-            const client_id = Security.getUserIdFromToken(token);
-            const permission = Security.checkUserPermission(token, CLIENT);
-
-            if (!token || !client_id || !permission) {
-                return res.status(401).json({
-                    showOnScreen: true,
-                    message: "Yetkisiz erişim."
-                });
-            }
+            const client_id = req.user.id;
 
             const {profilePhoto} = req.body;
 
