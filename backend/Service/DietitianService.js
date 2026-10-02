@@ -1,6 +1,6 @@
 const path = require('path');
 
-const config = require(path.join(__dirname, '..', 'config.json'));
+const config = require(path.join(__dirname, '..', 'Utils', 'Config'));
 const mailer = require(path.join(__dirname, '..', 'Utils', 'Mailer.js'));
 const getDogrulamaEmailTemplate = require(path.join(__dirname, '..', 'MailTemplates', 'Dogrulama.html'));
 

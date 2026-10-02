@@ -7,7 +7,7 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const rateLimit = require('express-rate-limit');
 
 // Config
-const config = require(path.join(__dirname, 'config.json'));
+const config = require(path.join(__dirname, 'Utils', 'Config'));
 // Database
 const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
 // Exception
@@ -189,5 +189,5 @@ if (config.ddl === "create-drop") {
     });
     console.log('INFO - Sequelize, update yöntemiyle veritabanı ile senkronize edildi. Veriler değişmedi.');
 } else {
-    console.log("ERROR - config.js dosyasını kontrol edin.");
+    console.log("ERROR - .env dosyasındaki DDL değerini kontrol edin.");
 }

@@ -13,7 +13,7 @@ const {
 } = require(path.join(__dirname, '..', 'Model', 'MainModel'));
 const Exception = require(path.join(__dirname, '..', 'Exception', 'Exception'));
 const jwt = require('jsonwebtoken');
-const config = require(path.join(__dirname, '..', 'config.json'));
+const config = require(path.join(__dirname, '..', 'Utils', 'Config'));
 const {CLIENT} = require(path.join(__dirname, '..', 'Enum', 'Role'));
 const {Op} = require('sequelize');
 

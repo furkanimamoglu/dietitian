@@ -1,7 +1,7 @@
 const path = require('path');
 const jwt = require('jsonwebtoken');
 
-const config = require(path.join(__dirname, '..', 'config.json'));
+const config = require(path.join(__dirname, '..', 'Utils', 'Config'));
 
 /**
  * Auth Middleware - Resolves the Bearer token from Authorization header and puts the user on req.user.
