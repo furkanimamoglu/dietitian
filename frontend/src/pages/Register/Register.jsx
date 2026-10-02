@@ -375,7 +375,7 @@ function Register() {
 
                             <Typography variant="body2" sx={{mt: 1}}>
                                 Zaten hesabınız var mı?{' '}
-                                <Link href="/girisyap"
+                                <Link href="/login"
                                       sx={{textDecoration: "none", color: "primary.main", fontWeight: "medium"}}>
                                     Giriş Yap
                                 </Link>

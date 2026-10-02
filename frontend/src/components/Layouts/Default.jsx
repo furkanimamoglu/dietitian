@@ -333,8 +333,8 @@ export default function Default(props) {
             setIsLoading(false); // Yükleme tamamlandı
         } catch (error) {
             console.error('Diyetisyen bilgisi alınamadı.', error);
-            if (error.response?.data?.message === "jwt expired") {
-                navigate('/girisyap');
+            if (error.response?.status === 401) {
+                navigate('/login');
             }
             setIsLoading(false); // Hata olsa bile yükleme durumunu sonlandır
         }

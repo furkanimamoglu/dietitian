@@ -121,7 +121,7 @@ export default function Header() {
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
-            window.location.href = '/girisyap';
+            window.location.href = '/login';
         }
     }, []);
 
@@ -144,7 +144,7 @@ export default function Header() {
         if (value === 'cikisyap') {
             localStorage.removeItem('token');
             localStorage.removeItem('role');
-            navigate('/girisyap');
+            navigate('/login');
         } else if (value === 'ayarlar') {
             navigate('/ayarlar');
         } else if (value === 'odeme') {

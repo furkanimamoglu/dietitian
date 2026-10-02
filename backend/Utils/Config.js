@@ -25,6 +25,8 @@ const config = {
     ...file,
     nodeEnv: process.env.NODE_ENV || 'production',
     logLevel: process.env.LOG_LEVEL || 'info',
+    // Sadece development'ta, kapatılmadıysa açılışta demo veri oluşturulur.
+    seedOnStart: (process.env.NODE_ENV || 'production') === 'development' && process.env.SEED_ON_START !== 'false',
     ddl: required('DDL'),
     secretkey: required('JWT_SECRET'),
     server: {

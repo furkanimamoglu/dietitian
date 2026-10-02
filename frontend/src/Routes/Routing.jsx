@@ -1,5 +1,5 @@
 import React from 'react';
-import {Route, Routes} from 'react-router-dom';
+import {Navigate, Route, Routes} from 'react-router-dom';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
@@ -35,7 +35,8 @@ export default function Routing() {
             <Route path="/egzersiz/*" element={<Egzersizler/>}/>
             <Route path="/finans/*" element={<Egzersizler/>}/>
             <Route path="/tarif/*" element={<Tarifler/>}/>
-            <Route path="/girisyap/*" element={<Login/>}/>
+            <Route path="/login/*" element={<Login/>}/>
+            <Route path="/girisyap/*" element={<Navigate to="/login" replace/>}/>
             <Route path="/kayitol/*" element={<Register/>}/>
             <Route path="/sifremiunuttum/*" element={<ForgotPassword/>}/>
             <Route path="/odeme/*" element={<Odeme/>}/>

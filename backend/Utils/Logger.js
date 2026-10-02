@@ -31,6 +31,13 @@ const SCRUB_PATTERNS = [
     /\+?\d(?:[\s-]?\d){9,}/g
 ];
 
+// Çıktı process.stdout üzerinden yazılır: pino'nun varsayılan hedefi (fd 1'e ham byte) Windows konsolunda
+// aktif kod sayfasına (857, 437...) göre yorumlanıp Türkçe karakterleri bozar; process.stdout UTF-8'i doğru aktarır.
+// Development'ta pino-pretty worker thread yerine ana thread'de stream olarak çalışır, aynı sebeple.
+const destination = config.nodeEnv === 'development'
+    ? require('pino-pretty')({translateTime: 'SYS:standard', destination: process.stdout})
+    : process.stdout;
+
 const logger = pino({
     level: config.logLevel,
     base: undefined,
@@ -43,11 +50,8 @@ const logger = pino({
         // err.name / err.message serializeError tarafından serialize edilip maskelendiği için burada redact edilmez.
         paths: SENSITIVE_KEYS.filter(key => key !== 'name' && key !== 'message').flatMap(key => [key, `*.${key}`]),
         censor: REDACTED
-    },
-    ...(config.nodeEnv === 'development' && {
-        transport: {target: 'pino-pretty', options: {translateTime: 'SYS:standard'}}
-    })
-});
+    }
+}, destination);
 
 /**
  * Metindeki email, telefon numarası ve token'ları maskeler.

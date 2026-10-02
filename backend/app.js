@@ -14,6 +14,8 @@ const sequelize = require(path.join(__dirname, 'Utils', 'Database'));
 const Exception = require(path.join(__dirname, 'Exception', 'Exception'));
 // Models
 require(path.join(__dirname, 'Model', 'MainModel'));
+// Seeder
+const {seed} = require(path.join(__dirname, 'Seeders', 'masterSeeder'));
 // Logger
 const {logger, logError, serializeError} = require(path.join(__dirname, 'Utils', 'Logger'));
 // Middleware
@@ -192,21 +194,33 @@ try {
 }
 
 // Server
-if (config.ddl === "create-drop") {
-    sequelize.sync({force: true}).then(() => {
-        app.listen(config.server.port);
-    }).catch(err => {
-        logger.fatal({err: serializeError(err)}, 'Veritabanı senkronizasyonu başarısız.');
-    });
-    logger.warn('Sequelize, create-drop yöntemiyle veritabanı ile senkronize edildi. Tüm tablolar yeniden oluşturuldu, eski veriler silindi.');
-} else if (config.ddl === "update") {
-    sequelize.sync().then(() => {
-        app.listen(config.server.port);
+async function start() {
+    if (config.ddl === "create-drop") {
+        await sequelize.sync({force: true});
+        logger.warn('Sequelize, create-drop yöntemiyle veritabanı ile senkronize edildi. Tüm tablolar yeniden oluşturuldu, eski veriler silindi.');
+    } else if (config.ddl === "update") {
+        await sequelize.sync();
+        logger.info('Sequelize, update yöntemiyle veritabanı ile senkronize edildi. Veriler değişmedi.');
+    } else {
+        logger.fatal(".env dosyasındaki DDL değerini kontrol edin.");
+        return;
+    }
+
+    // Development'ta demo veri yoksa oluşturulur (SEED_ON_START=false ile kapatılabilir).
+    // Seeder hata verirse sunucu yine de açılır.
+    if (config.seedOnStart) {
+        try {
+            await seed({sync: false});
+        } catch (error) {
+            logger.error({err: serializeError(error)}, 'Demo veri oluşturulamadı.');
+        }
+    }
+
+    app.listen(config.server.port, () => {
         logger.info(`Sunucu http://localhost:${config.server.port} portunda çalışıyor.`);
-    }).catch(err => {
-        logger.fatal({err: serializeError(err)}, 'Veritabanı senkronizasyonu başarısız.');
     });
-    logger.info('Sequelize, update yöntemiyle veritabanı ile senkronize edildi. Veriler değişmedi.');
-} else {
-    logger.fatal(".env dosyasındaki DDL değerini kontrol edin.");
 }
+
+start().catch(err => {
+    logger.fatal({err: serializeError(err)}, 'Veritabanı senkronizasyonu başarısız.');
+});
