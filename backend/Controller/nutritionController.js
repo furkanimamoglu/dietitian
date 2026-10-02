@@ -2,6 +2,7 @@ const path = require("path");
 
 const NutritionService = require(path.join(__dirname, "..", "Service", "NutritionService"));
 const {logError} = require(path.join(__dirname, "..", "Utils", "Logger"));
+const {DIETITIAN, CLIENT} = require(path.join(__dirname, "..", "Enum", "Role"));
 const moment = require("moment/moment");
 
 class nutritionController {
